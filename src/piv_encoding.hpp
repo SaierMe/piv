@@ -1,0 +1,1428 @@
+﻿/*********************************************\
+ * 火山视窗PIV模块 - 文本编码辅助            *
+ * 作者: Xelloss                             *
+ * 网站: https://piv.ink                     *
+ * 邮箱: xelloss@vip.qq.com                  *
+ * 版本: 2023/01/31                          *
+\*********************************************/
+
+#ifndef _PIV_ENCODING_HPP
+#define _PIV_ENCODING_HPP
+
+// 包含火山视窗基本类,它在火山里的包含顺序比较靠前(全局-110)
+#ifndef __VOL_BASE_H__
+#include <sys/base/libs/win_base/vol_base.h>
+#endif
+
+#include <algorithm>
+#include <string>
+#if _MSVC_LANG < 201703L
+#include "string_view.hpp"
+#else
+#include <string_view>
+#endif
+
+// 判断是否开启了simdutf
+#ifdef SIMDUTF_H
+#define PIV_ENABLE_SIMDUTF
+#endif
+
+namespace piv
+{
+#if _MSVC_LANG < 201703L
+    using nonstd::basic_string_view;
+    using nonstd::string_view;
+    using nonstd::wstring_view;
+#else
+    using std::basic_string_view;
+    using std::string_view;
+    using std::wstring_view;
+#endif
+
+    namespace encoding
+    {
+        /**
+         * @brief ANSI转UTF-16LE
+         * @param utf16str 转换后的字符串在此参数中返回
+         * @param mbstr 转换前的字符串
+         * @param mbslen 转换前的字符串字符长度,0为自动获取
+         */
+        static void A2Wex(std::wstring &utf16str, const char *mbstr, const size_t mbslen = 0)
+        {
+            int utf16len = ::MultiByteToWideChar(CP_ACP, 0, mbstr, (mbslen > 0) ? static_cast<int>(mbslen) : -1, NULL, 0);
+            if (utf16len > 0)
+            {
+                if (mbslen == 0)
+                {
+                    utf16len -= 1;
+                }
+                utf16str.resize(utf16len, '\0');
+                ::MultiByteToWideChar(CP_ACP, 0, mbstr, (mbslen > 0) ? static_cast<int>(mbslen) : -1, const_cast<wchar_t *>(utf16str.data()), utf16len);
+            }
+            else
+            {
+                utf16str = L"";
+            }
+        }
+
+        /**
+         * @brief UTF-16LE转ANSI
+         * @param mbstr 转换后的字符串在此参数中返回
+         * @param utf16str 转换前的字符串
+         * @param utf16len 转换前的字符串字符长度,0为自动获取
+         */
+        static void W2Aex(std::string &mbstr, const wchar_t *utf16str, const size_t utf16len = 0)
+        {
+            int mbslen = ::WideCharToMultiByte(CP_ACP, 0, utf16str, (utf16len > 0) ? static_cast<int>(utf16len) : -1, NULL, 0, NULL, NULL);
+            if (mbslen > 0)
+            {
+                if (utf16len == 0)
+                {
+                    mbslen -= 1;
+                }
+                mbstr.resize(mbslen, '\0');
+                ::WideCharToMultiByte(CP_ACP, 0, utf16str, (utf16len > 0) ? static_cast<int>(utf16len) : -1, const_cast<char *>(mbstr.data()), mbslen, NULL, NULL);
+            }
+            else
+            {
+                mbstr = "";
+            }
+        }
+
+        /**
+         * @brief UTF-16LE转UTF-8
+         * @param utf8str 转换后的字符串在此参数中返回
+         * @param utf16str 转换前的字符串
+         * @param utf16len 转换前的字符串字符长度,0为自动获取
+         */
+        static void W2Uex(std::string &utf8str, const wchar_t *utf16str, const size_t utf16len = 0)
+        {
+#ifdef PIV_ENABLE_SIMDUTF
+            size_t utf16words = (utf16len > 0) ? utf16len : wcslen(utf16str);
+            size_t utf8words = simdutf::utf8_length_from_utf16le(reinterpret_cast<const char16_t *>(utf16str), utf16words);
+            if (utf8words == 0)
+            {
+                utf8str = "";
+            }
+            else
+            {
+                utf8str.resize(utf8words, '\0');
+                simdutf::convert_valid_utf16le_to_utf8(reinterpret_cast<const char16_t *>(utf16str), utf16words, const_cast<char *>(reinterpret_cast<const char *>(utf8str.data())));
+            }
+#else
+            int utf8len = ::WideCharToMultiByte(CP_UTF8, 0, utf16str, (utf16len > 0) ? static_cast<int>(utf16len) : -1, NULL, 0, NULL, NULL);
+            if (utf8len > 0)
+            {
+                if (utf16len == 0)
+                {
+                    utf8len -= 1;
+                }
+                utf8str.resize(utf8len, '\0');
+                ::WideCharToMultiByte(CP_UTF8, 0, utf16str, (utf16len > 0) ? static_cast<int>(utf16len) : -1, const_cast<char *>(utf8str.data()), utf8len, NULL, NULL);
+            }
+            else
+            {
+                utf8str = "";
+            }
+#endif
+        }
+
+        /**
+         * @brief UTF-8转UTF-16LE
+         * @param utf16str 转换后的字符串在此参数中返回
+         * @param utf8str 转换前的字符串
+         * @param utf8len 转换前的字符串字符长度,0为自动获取
+         */
+        static void U2Wex(std::wstring &utf16str, const char *utf8str, const size_t utf8len = 0)
+        {
+#ifdef PIV_ENABLE_SIMDUTF
+            size_t utf8words = (utf8len > 0) ? utf8len : strlen(utf8str);
+            size_t utf16words = simdutf::utf16_length_from_utf8(utf8str, utf8words);
+            if (utf16words == 0)
+            {
+                utf16str = L"";
+            }
+            else
+            {
+                utf16str.resize(utf16words, '\0');
+                utf16words = simdutf::convert_valid_utf8_to_utf16le(utf8str, utf8words, reinterpret_cast<char16_t *>(const_cast<wchar_t *>(utf16str.data())));
+            }
+#else
+            int utf16len = ::MultiByteToWideChar(CP_UTF8, 0, utf8str, (utf8len > 0) ? static_cast<int>(utf8len) : -1, NULL, 0);
+            if (utf16len > 0)
+            {
+                if (utf8len == 0)
+                {
+                    utf16len -= 1;
+                }
+                utf16str.resize(utf16len, '\0');
+                ::MultiByteToWideChar(CP_UTF8, 0, utf8str, (utf8len > 0) ? static_cast<int>(utf8len) : -1, const_cast<wchar_t *>(utf16str.data()), utf16len);
+            }
+            else
+            {
+                utf16str = L"";
+            }
+#endif
+        }
+
+        /**
+         * @brief UTF-8转ANSI
+         * @param mbstr 转换后的字符串在此参数中返回
+         * @param utf8str 转换前的字符串
+         * @param utf8len 转换前的字符串字符长度,0为自动获取
+         */
+        static void U2Aex(std::string &mbstr, const char *utf8str, const size_t utf8len = 0)
+        {
+            std::wstring utf16str;
+            piv::encoding::U2Wex(utf16str, utf8str, utf8len);
+            piv::encoding::W2Aex(mbstr, utf16str.c_str(), 0);
+        }
+
+        /**
+         * @brief ANSI转UTF-8
+         * @param utf8str 转换后的字符串在此参数中返回
+         * @param mbstr 转换前的字符串
+         * @param mbslen 转换前的字符串字符长度,0为自动获取
+         */
+        static void A2Uex(std::string &utf8str, const char *mbstr, const size_t mbslen = 0)
+        {
+            std::wstring utf16str;
+            piv::encoding::A2Wex(utf16str, mbstr, mbslen);
+            piv::encoding::W2Uex(utf8str, utf16str.c_str(), 0);
+        }
+
+        /**
+         * @brief 获取URL编码后的长度
+         * @param lpszSrc 所欲编码的数据指针
+         * @param SrcLen 所欲编码的数据长度
+         * @return
+         */
+        static ptrdiff_t GuessUrlEncodeBound(const BYTE *lpszSrc, const ptrdiff_t SrcLen)
+        {
+            ptrdiff_t Add = 0;
+            for (ptrdiff_t i = 0; i < SrcLen; i++)
+            {
+                BYTE c = lpszSrc[i];
+                if (!(isalnum(c) || c == ' ' || c == '.' || c == '-' || c == '_' || c == '*'))
+                    Add += 2;
+            }
+            return SrcLen + Add;
+        }
+
+        /**
+         * @brief 获取URL解码后的长度
+         * @param lpszSrc 所欲解码的数据指针
+         * @param SrcLen 所欲解码的数据长度
+         * @return
+         */
+        static ptrdiff_t GuessUrlDecodeBound(const BYTE *lpszSrc, const ptrdiff_t SrcLen)
+        {
+            ptrdiff_t Percent = 0;
+            for (ptrdiff_t i = 0; i < SrcLen; i++)
+            {
+                if (lpszSrc[i] == '%')
+                {
+                    ++Percent;
+                    i += 2;
+                }
+            }
+            return (SrcLen < Percent * 2) ? 0 : (SrcLen - Percent * 2);
+        }
+
+        /**
+         * @brief URL编码
+         * @param lpszSrc 所欲编码的数据指针
+         * @param SrcLen 所欲编码的数据长度
+         * @param lpszDest 保存编码后数据的指针
+         * @param DestLen 编码后数据的长度
+         * @return
+         */
+        static int32_t UrlEncode(const BYTE *lpszSrc, const ptrdiff_t SrcLen, BYTE *lpszDest, ptrdiff_t &DestLen)
+        {
+            if (lpszDest == nullptr || DestLen == 0)
+                goto ERROR_DEST_LEN;
+            BYTE c, n;
+            ptrdiff_t j = 0;
+            for (ptrdiff_t i = 0; i < SrcLen; i++)
+            {
+                if (j >= DestLen)
+                    goto ERROR_DEST_LEN;
+                c = lpszSrc[i];
+                if (isalnum(c) || c == '.' || c == '-' || c == '_' || c == '*')
+                    lpszDest[j++] = c;
+                else if (c == ' ')
+                    lpszDest[j++] = '+';
+                else
+                {
+                    if (j + 3 > DestLen)
+                        goto ERROR_DEST_LEN;
+                    lpszDest[j++] = '%';
+                    n = c >> 4;
+                    *(lpszDest + j) = n <= 9 ? n + '0' : (n <= 'F' ? n + 'A' - 0X0A : n + 'a' - 0X0A);
+                    n = c & 0X0F;
+                    *((lpszDest + j) + 1) = n <= 9 ? n + '0' : (n <= 'F' ? n + 'A' - 0X0A : n + 'a' - 0X0A);
+                    j += 2;
+                }
+            }
+            if (DestLen > j)
+            {
+                lpszDest[j] = 0;
+                DestLen = j;
+            }
+            return 0;
+        ERROR_DEST_LEN:
+            DestLen = GuessUrlEncodeBound(lpszSrc, SrcLen);
+            return -5;
+        }
+
+        /**
+         * @brief URL解码
+         * @param lpszSrc 所欲解码的数据指针
+         * @param SrcLen 所欲解码的数据长度
+         * @param lpszDest 保存解码后数据的指针
+         * @param DestLen 解码后数据的长度
+         * @return
+         */
+        static int32_t UrlDecode(const BYTE *lpszSrc, const ptrdiff_t SrcLen, BYTE *lpszDest, ptrdiff_t &DestLen)
+        {
+            if (lpszDest == nullptr || DestLen == 0)
+                goto ERROR_DEST_LEN;
+            BYTE c, n;
+            ptrdiff_t j = 0;
+            for (ptrdiff_t i = 0; i < SrcLen; i++)
+            {
+                if (j >= DestLen)
+                    goto ERROR_DEST_LEN;
+                c = lpszSrc[i];
+                if (c == '+')
+                    lpszDest[j++] = ' ';
+                else if (c != '%')
+                    lpszDest[j++] = c;
+                else
+                {
+                    if (i + 2 >= SrcLen)
+                        goto ERROR_SRC_DATA;
+                    c = *(lpszSrc + i + 1);
+                    n = *(lpszSrc + i + 2);
+                    c = c <= '9' ? c - '0' : (c <= 'F' ? c - 'A' + 0x0A : c - 'a' + 0X0A);
+                    n = n <= '9' ? n - '0' : (n <= 'F' ? n - 'A' + 0x0A : n - 'a' + 0X0A);
+                    lpszDest[j++] = (c << 4) | n;
+                    i += 2;
+                }
+            }
+            if (DestLen > j)
+            {
+                lpszDest[j] = 0;
+                DestLen = j;
+            }
+            return 0;
+        ERROR_SRC_DATA:
+            DestLen = 0;
+            return -3;
+        ERROR_DEST_LEN:
+            DestLen = GuessUrlDecodeBound(lpszSrc, SrcLen);
+            return -5;
+        }
+    } // namespace encoding
+
+} // namespace piv
+
+/**
+ * @brief ANSI编码转UTF-16LE编码的封装类
+ */
+class PivA2W
+{
+private:
+    std::wstring utf16str;
+
+public:
+    /**
+     * @brief 默认构造与析构函数
+     */
+    PivA2W() {}
+    ~PivA2W() {}
+
+    /**
+     * @brief 默认复制构造函数
+     * @param s 所欲复制的对象
+     */
+    PivA2W(const PivA2W &s)
+    {
+        utf16str = s.utf16str;
+    }
+    PivA2W(PivA2W &&s)
+    {
+        utf16str = std::move(s.utf16str);
+    }
+
+    /**
+     * @brief 构造的同时将提供的文本转换
+     * @param mbstr 所欲转换的ANSI文本,必须带结尾0字符
+     */
+    PivA2W(const char *mbstr)
+    {
+        Convert(mbstr);
+    }
+
+    /**
+     * @brief 构造的同时将提供的文本转换
+     * @param mbstr 所欲转换的文本
+     * @param mbslen 文本的字符长度,为0时文本必须带结尾0字符
+     */
+    PivA2W(const char *mbstr, const size_t mbslen)
+    {
+        Convert(mbstr, mbslen);
+    }
+
+    /**
+     * @brief 构造的同时将提供的std::string文本转换
+     * @param mbstr 所欲转换的文本
+     */
+    PivA2W(const std::string &mbstr)
+    {
+        Convert(mbstr.c_str());
+    }
+
+    operator const wchar_t *()
+    {
+        return utf16str.c_str();
+    }
+    operator const std::wstring &()
+    {
+        return utf16str;
+    }
+    operator std::wstring &()
+    {
+        return utf16str;
+    }
+    operator CVolString()
+    {
+        return CVolString(utf16str.c_str());
+    }
+    operator CVolMem()
+    {
+        return CVolMem(utf16str.c_str(), utf16str.size() * 2);
+    }
+    PivA2W &operator=(const PivA2W &_PivA2W)
+    {
+        utf16str = _PivA2W.utf16str;
+        return (*this);
+    }
+    PivA2W &operator=(PivA2W &&_PivA2W)
+    {
+        utf16str = std::move(_PivA2W.utf16str);
+        return (*this);
+    }
+    PivA2W &operator=(const char *mbstr)
+    {
+        Convert(mbstr);
+        return (*this);
+    }
+    bool operator==(const PivA2W &_PivA2W)
+    {
+        return utf16str == _PivA2W.utf16str;
+    }
+    std::wstring *operator->()
+    {
+        return &utf16str;
+    }
+    std::wstring &operator*()
+    {
+        return utf16str;
+    }
+
+    /**
+     * @brief 编码转换函数
+     * @param mbstr 所欲转换的文本
+     * @param mbslen 文本的字符长度,为0时文本必须带结尾0字符
+     */
+    void Convert(const char *mbstr, const size_t mbslen = 0)
+    {
+        piv::encoding::A2Wex(utf16str, mbstr, mbslen);
+    }
+
+    /**
+     * @brief 获取转换后的文本指针
+     * @return 字符串指针
+     */
+    const wchar_t *GetText()
+    {
+        return utf16str.c_str();
+    }
+
+    /**
+     * @brief 获取转换后的文本长度
+     * @return 文本的字符长度
+     */
+    size_t GetSize() const
+    {
+        return utf16str.size();
+    }
+
+    /**
+     * @brief 获取转换的文本首字符指针
+     * @return 文本的首字符指针
+     */
+    wchar_t *GetPtr()
+    {
+        return const_cast<wchar_t *>(utf16str.data());
+    }
+
+    /**
+     * @brief 判断转换后的文本是否为空
+     * @return 为空时返回真,未执行转换前始终为真
+     */
+    bool IsEmpty()
+    {
+        return utf16str.empty();
+    }
+
+    /**
+     * @brief 返回内部文本(转换后)的参考
+     * @return 转换后的std::basic_string参考
+     */
+    std::wstring &String()
+    {
+        return utf16str;
+    }
+
+    /**
+     * @brief 生成一个火山的文本型,其中包含了转换后的文本数据
+     * @return 返回所转换的文本型
+     */
+    CVolString ToStr()
+    {
+        return CVolString(utf16str.c_str());
+    }
+
+    /**
+     * @brief 将转换后的文本数据复制火山的文本型
+     * @param str 文本数据将复制到此文本型变量中
+     */
+    void GetStr(CVolString &str)
+    {
+        str.SetText(utf16str.c_str());
+    }
+
+    /**
+     * @brief 生成一个字节集类,其中包含了转换后的文本数据
+     * @param null_char 字节集是否带结尾0字符
+     * @return 返回所转换的字节集
+     */
+    CVolMem ToMem(const bool null_char = false)
+    {
+        return CVolMem(utf16str.c_str(), (utf16str.size() + null_char ? 1 : 0) * 2);
+    }
+
+    /**
+     * @brief 将转换后的文本数据复制火山的字节集类
+     * @param mem 文本数据将复制到此字节集中
+     * @param null_char 字节集是否带结尾0字符
+     */
+    void GetMem(CVolMem &mem, const bool null_char = false)
+    {
+        mem.Empty();
+        mem.Append(utf16str.c_str(), (utf16str.size() + null_char ? 1 : 0) * 2);
+    }
+}; // PivA2W
+
+/**
+ * @brief UTF-16LE编码转ANSI编码的封装类
+ */
+class PivW2A
+{
+private:
+    std::string mbstr;
+
+public:
+    /**
+     * @brief 默认构造与析构函数
+     */
+    PivW2A() {}
+    ~PivW2A() {}
+
+    /**
+     * @brief 默认复制构造函数
+     * @param s 所欲复制的对象
+     */
+    PivW2A(const PivW2A &s)
+    {
+        mbstr = s.mbstr;
+    }
+    PivW2A(PivW2A &&s)
+    {
+        mbstr = std::move(s.mbstr);
+    }
+
+    /**
+     * @brief 构造的同时将提供的文本转换
+     * @param utf16str 所欲转换的ANSI文本,必须带结尾0字符
+     */
+    PivW2A(const wchar_t *utf16str)
+    {
+        Convert(utf16str);
+    }
+
+    /**
+     * @brief 构造的同时将提供的文本转换
+     * @param utf16str 所欲转换的文本
+     * @param utf16len 文本的字符长度,为0时文本必须带结尾0字符
+     */
+    PivW2A(const wchar_t *utf16str, const size_t utf16len)
+    {
+        Convert(utf16str, utf16len);
+    }
+
+    /**
+     * @brief 构造的同时将提供的std::wstring文本转换
+     * @param utf16str 所欲转换的文本
+     */
+    PivW2A(const std::wstring &utf16str)
+    {
+        Convert(utf16str.c_str());
+    }
+
+    operator const char *()
+    {
+        return mbstr.c_str();
+    }
+    operator const std::string &()
+    {
+        return mbstr;
+    }
+    operator std::string &()
+    {
+        return mbstr;
+    }
+    operator CVolMem()
+    {
+        return CVolMem(mbstr.c_str(), mbstr.size());
+    }
+    PivW2A &operator=(const PivW2A &_PivW2A)
+    {
+        mbstr = _PivW2A.mbstr;
+        return (*this);
+    }
+    PivW2A &operator=(PivW2A &&_PivW2A)
+    {
+        mbstr = std::move(_PivW2A.mbstr);
+        return (*this);
+    }
+    PivW2A &operator=(const wchar_t *utf16str)
+    {
+        Convert(utf16str);
+        return (*this);
+    }
+    bool operator==(const PivW2A &_PivW2A)
+    {
+        return mbstr == _PivW2A.mbstr;
+    }
+    std::string *operator->()
+    {
+        return &mbstr;
+    }
+    std::string &operator*()
+    {
+        return mbstr;
+    }
+
+    /**
+     * @brief 编码转换函数
+     * @param mbstr 所欲转换的文本
+     * @param mbslen 文本的字符长度,为0时文本必须带结尾0字符
+     */
+    void Convert(const wchar_t *utf16str, const size_t utf16len = 0)
+    {
+        piv::encoding::W2Aex(mbstr, utf16str, utf16len);
+    }
+
+    /**
+     * @brief 获取转换后的文本指针
+     * @return 字符串指针
+     */
+    const char *GetText()
+    {
+        return mbstr.c_str();
+    }
+
+    /**
+     * @brief 获取转换后的文本长度
+     * @return 文本的字符长度
+     */
+    size_t GetSize() const
+    {
+        return mbstr.size();
+    }
+
+    /**
+     * @brief 获取转换的文本首字符指针
+     * @return 文本的首字符指针
+     */
+    char *GetPtr()
+    {
+        return const_cast<char *>(mbstr.data());
+    }
+
+    /**
+     * @brief 判断转换后的文本是否为空
+     * @return 为空时返回真,未执行转换前始终为真
+     */
+    bool IsEmpty()
+    {
+        return mbstr.empty();
+    }
+
+    /**
+     * @brief 返回内部文本(转换后)的参考
+     * @return 转换后的std::basic_string参考
+     */
+    std::string &String()
+    {
+        return mbstr;
+    }
+
+    /**
+     * @brief 生成一个字节集类,其中包含了转换后的文本数据
+     * @param null_char 字节集是否带结尾0字符
+     * @return 返回所转换的字节集
+     */
+    CVolMem ToMem(const bool null_char = false)
+    {
+        return CVolMem(mbstr.c_str(), mbstr.size() + null_char ? 1 : 0);
+    }
+
+    /**
+     * @brief 将转换后的文本数据复制火山的字节集类
+     * @param mem 文本数据将复制到此字节集中
+     * @param null_char 字节集是否带结尾0字符
+     */
+    void GetMem(CVolMem &mem, const bool null_char = false)
+    {
+        mem.Empty();
+        mem.Append(mbstr.c_str(), mbstr.size() + null_char ? 1 : 0);
+    }
+}; // PivW2A
+
+/**
+ * @brief UTF-16LE编码转UTF-8编码的封装类
+ */
+class PivW2U
+{
+private:
+    std::string utf8str;
+
+public:
+    /**
+     * @brief 默认构造与析构函数
+     */
+    PivW2U() {}
+    ~PivW2U() {}
+
+    /**
+     * @brief 默认复制构造函数
+     * @param s 所欲复制的对象
+     */
+    PivW2U(const PivW2U &s)
+    {
+        utf8str = s.utf8str;
+    }
+    PivW2U(PivW2U &&s)
+    {
+        utf8str = std::move(s.utf8str);
+    }
+
+    /**
+     * @brief 构造的同时将提供的文本转换
+     * @param utf16str 所欲转换的ANSI文本,必须带结尾0字符
+     */
+    PivW2U(const wchar_t *utf16str)
+    {
+        Convert(utf16str);
+    }
+
+    /**
+     * @brief 构造的同时将提供的文本转换
+     * @param utf16str 所欲转换的文本
+     * @param utf16len 文本的字符长度,为0时文本必须带结尾0字符
+     */
+    PivW2U(const wchar_t *utf16str, const size_t utf16len)
+    {
+        Convert(utf16str, utf16len);
+    }
+
+    /**
+     * @brief 构造的同时将提供的std::wstring文本转换
+     * @param utf16str 所欲转换的文本
+     */
+    PivW2U(const std::wstring &utf16str)
+    {
+        Convert(utf16str.c_str());
+    }
+
+    operator CVolMem()
+    {
+        return CVolMem(utf8str.c_str(), utf8str.size());
+    }
+    operator const char *()
+    {
+        return utf8str.c_str();
+    }
+    operator const std::string &()
+    {
+        return utf8str;
+    }
+    operator std::string &()
+    {
+        return utf8str;
+    }
+    PivW2U &operator=(const PivW2U &_PivW2U)
+    {
+        utf8str = _PivW2U.utf8str;
+        return (*this);
+    }
+    PivW2U &operator=(PivW2U &&_PivW2U)
+    {
+        utf8str = std::move(_PivW2U.utf8str);
+        return (*this);
+    }
+    PivW2U &operator=(const wchar_t *utf16str)
+    {
+        Convert(utf16str);
+        return (*this);
+    }
+    bool operator==(const PivW2U &_PivW2U)
+    {
+        return utf8str == _PivW2U.utf8str;
+    }
+    std::string *operator->()
+    {
+        return &utf8str;
+    }
+    std::string &operator*()
+    {
+        return utf8str;
+    }
+
+    /**
+     * @brief 编码转换函数
+     * @param mbstr 所欲转换的文本
+     * @param mbslen 文本的字符长度,为0时文本必须带结尾0字符
+     */
+    void Convert(const wchar_t *utf16str, const size_t utf16len = 0)
+    {
+        piv::encoding::W2Uex(utf8str, utf16str, utf16len);
+    }
+
+    /**
+     * @brief 获取转换后的文本指针
+     * @return 字符串指针
+     */
+    const char *GetText()
+    {
+        return utf8str.c_str();
+    }
+
+    /**
+     * @brief 获取转换后的文本长度
+     * @return 文本的字符长度
+     */
+    size_t GetSize() const
+    {
+        return utf8str.size();
+    }
+
+    /**
+     * @brief 获取转换的文本首字符指针
+     * @return 文本的首字符指针
+     */
+    char *GetPtr()
+    {
+        return const_cast<char *>(utf8str.data());
+    }
+
+    /**
+     * @brief 判断转换后的文本是否为空
+     * @return 为空时返回真,未执行转换前始终为真
+     */
+    bool IsEmpty()
+    {
+        return utf8str.empty();
+    }
+
+    /**
+     * @brief 返回内部文本(转换后)的参考
+     * @return 转换后的std::basic_string参考
+     */
+    std::string &String()
+    {
+        return utf8str;
+    }
+
+    /**
+     * @brief 生成一个字节集类,其中包含了转换后的文本数据
+     * @param null_char 字节集是否带结尾0字符
+     * @return 返回所转换的字节集
+     */
+    CVolMem ToMem(const bool null_char = false)
+    {
+        return CVolMem(utf8str.c_str(), utf8str.size() + null_char ? 1 : 0);
+    }
+
+    /**
+     * @brief 将转换后的文本数据复制火山的字节集类
+     * @param mem 文本数据将复制到此字节集中
+     * @param null_char 字节集是否带结尾0字符
+     */
+    void GetMem(CVolMem &mem, const bool null_char = false)
+    {
+        mem.Empty();
+        mem.Append(utf8str.c_str(), utf8str.size() + null_char ? 1 : 0);
+    }
+}; // PivW2U
+
+/**
+ * @brief UTF-8编码转UTF-16LE编码的封装类
+ */
+class PivU2W
+{
+private:
+    std::wstring utf16str;
+
+public:
+    /**
+     * @brief 默认构造与析构函数
+     */
+    PivU2W() {}
+    ~PivU2W() {}
+
+    /**
+     * @brief 默认复制构造函数
+     * @param s 所欲复制的对象
+     */
+    PivU2W(const PivU2W &s)
+    {
+        utf16str = s.utf16str;
+    }
+    PivU2W(PivU2W &&s)
+    {
+        utf16str = std::move(s.utf16str);
+    }
+
+    /**
+     * @brief 构造的同时将提供的文本转换
+     * @param utf8str 所欲转换的ANSI文本,必须带结尾0字符
+     */
+    PivU2W(const char *utf8str)
+    {
+        Convert(utf8str);
+    }
+
+    /**
+     * @brief 构造的同时将提供的文本转换
+     * @param utf8str 所欲转换的文本
+     * @param utf8len 文本的字符长度,为0时文本必须带结尾0字符
+     */
+    PivU2W(const char *utf8str, const size_t utf8len)
+    {
+        Convert(utf8str, utf8len);
+    }
+
+    /**
+     * @brief 构造的同时将提供的std::string文本转换
+     * @param utf8str 所欲转换的文本
+     */
+    PivU2W(const std::string &utf8str)
+    {
+        Convert(utf8str.c_str());
+    }
+
+    operator const wchar_t *()
+    {
+        return utf16str.c_str();
+    }
+    operator const std::wstring &()
+    {
+        return utf16str;
+    }
+    operator std::wstring &()
+    {
+        return utf16str;
+    }
+    operator CVolString()
+    {
+        return CVolString(utf16str.c_str());
+    }
+    operator CVolMem()
+    {
+        return CVolMem(utf16str.c_str(), utf16str.size() * 2);
+    }
+    PivU2W &operator=(const PivU2W &_PivU2W)
+    {
+        utf16str = _PivU2W.utf16str;
+        return (*this);
+    }
+    PivU2W &operator=(PivU2W &&_PivU2W)
+    {
+        utf16str = std::move(_PivU2W.utf16str);
+        return (*this);
+    }
+    PivU2W &operator=(const char *utf8str)
+    {
+        Convert(utf8str);
+        return (*this);
+    }
+    bool operator==(const PivU2W &_PivU2W)
+    {
+        return utf16str == _PivU2W.utf16str;
+    }
+    std::wstring *operator->()
+    {
+        return &utf16str;
+    }
+    std::wstring &operator*()
+    {
+        return utf16str;
+    }
+
+    /**
+     * @brief 编码转换函数
+     * @param mbstr 所欲转换的文本
+     * @param mbslen 文本的字符长度,为0时文本必须带结尾0字符
+     */
+    void Convert(const char *utf8str, const size_t utf8len = 0)
+    {
+        piv::encoding::U2Wex(utf16str, utf8str, utf8len);
+    }
+
+    /**
+     * @brief 获取转换后的文本指针
+     * @return 字符串指针
+     */
+    const wchar_t *GetText()
+    {
+        return utf16str.c_str();
+    }
+
+    /**
+     * @brief 获取转换后的文本长度
+     * @return 文本的字符长度
+     */
+    size_t GetSize() const
+    {
+        return utf16str.size();
+    }
+
+    /**
+     * @brief 获取转换的文本首字符指针
+     * @return 文本的首字符指针
+     */
+    wchar_t *GetPtr()
+    {
+        return const_cast<wchar_t *>(utf16str.data());
+    }
+
+    /**
+     * @brief 判断转换后的文本是否为空
+     * @return 为空时返回真,未执行转换前始终为真
+     */
+    bool IsEmpty()
+    {
+        return utf16str.empty();
+    }
+
+    /**
+     * @brief 返回内部文本(转换后)的参考
+     * @return 转换后的std::basic_string参考
+     */
+    std::wstring &String()
+    {
+        return utf16str;
+    }
+
+    /**
+     * @brief 生成一个火山的文本型,其中包含了转换后的文本数据
+     * @return 返回所转换的文本型
+     */
+    CVolString ToStr()
+    {
+        return CVolString(utf16str.c_str());
+    }
+
+    /**
+     * @brief 将转换后的文本数据复制火山的文本型
+     * @param str 文本数据将复制到此文本型变量中
+     */
+    void GetStr(CVolString &str)
+    {
+        str.SetText(utf16str.c_str());
+    }
+
+    /**
+     * @brief 生成一个字节集类,其中包含了转换后的文本数据
+     * @param null_char 字节集是否带结尾0字符
+     * @return 返回所转换的字节集
+     */
+    CVolMem ToMem(const bool null_char = false)
+    {
+        return CVolMem(utf16str.c_str(), (utf16str.size() + null_char ? 1 : 0) * 2);
+    }
+
+    /**
+     * @brief 将转换后的文本数据复制火山的字节集类
+     * @param mem 文本数据将复制到此字节集中
+     * @param null_char 字节集是否带结尾0字符
+     */
+    void GetMem(CVolMem &mem, const bool null_char = false)
+    {
+        mem.Empty();
+        mem.Append(utf16str.c_str(), (utf16str.size() + null_char ? 1 : 0) * 2);
+    }
+}; // PivU2W
+
+/**
+ * @brief UTF-8编码转ANSI编码的封装类
+ */
+class PivU2A
+{
+private:
+    std::string mbstr;
+
+public:
+    /**
+     * @brief 默认构造与析构函数
+     */
+    PivU2A() {}
+    ~PivU2A() {}
+
+    /**
+     * @brief 默认复制构造函数
+     * @param s 所欲复制的对象
+     */
+    PivU2A(const PivU2A &s)
+    {
+        mbstr = s.mbstr;
+    }
+    PivU2A(PivU2A &&s)
+    {
+        mbstr = std::move(s.mbstr);
+    }
+
+    /**
+     * @brief 构造的同时将提供的文本转换
+     * @param utf8str 所欲转换的ANSI文本,必须带结尾0字符
+     */
+    PivU2A(const char *utf8str)
+    {
+        Convert(utf8str);
+    }
+
+    /**
+     * @brief 构造的同时将提供的文本转换
+     * @param utf8str 所欲转换的文本
+     * @param utf8len 文本的字符长度,为0时文本必须带结尾0字符
+     */
+    PivU2A(const char *utf8str, const size_t utf8len)
+    {
+        Convert(utf8str, utf8len);
+    }
+
+    /**
+     * @brief 构造的同时将提供的std::string文本转换
+     * @param utf8str 所欲转换的文本
+     */
+    PivU2A(const std::string &utf8str)
+    {
+        Convert(utf8str.c_str());
+    }
+
+    operator const char *()
+    {
+        return mbstr.c_str();
+    }
+    operator const std::string &()
+    {
+        return mbstr;
+    }
+    operator CVolMem()
+    {
+        return CVolMem(mbstr.c_str(), mbstr.size());
+    }
+    PivU2A &operator=(const PivU2A &_PivU2A)
+    {
+        mbstr = _PivU2A.mbstr;
+        return (*this);
+    }
+    PivU2A &operator=(PivU2A &&_PivU2A)
+    {
+        mbstr = std::move(_PivU2A.mbstr);
+        return (*this);
+    }
+    PivU2A &operator=(const char *utf8str)
+    {
+        Convert(utf8str);
+        return (*this);
+    }
+    bool operator==(const PivU2A &_PivU2A)
+    {
+        return mbstr == _PivU2A.mbstr;
+    }
+    std::string *operator->()
+    {
+        return &mbstr;
+    }
+    std::string &operator*()
+    {
+        return mbstr;
+    }
+
+    /**
+     * @brief 编码转换函数
+     * @param mbstr 所欲转换的文本
+     * @param mbslen 文本的字符长度,为0时文本必须带结尾0字符
+     */
+    void Convert(const char *utf8str, const size_t utf8len = 0)
+    {
+        piv::encoding::U2Aex(mbstr, utf8str, utf8len);
+    }
+
+    /**
+     * @brief 获取转换后的文本指针
+     * @return 字符串指针
+     */
+    const char *GetText()
+    {
+        return mbstr.c_str();
+    }
+
+    /**
+     * @brief 获取转换后的文本长度
+     * @return 文本的字符长度
+     */
+    size_t GetSize() const
+    {
+        return mbstr.size();
+    }
+
+    /**
+     * @brief 获取转换的文本首字符指针
+     * @return 文本的首字符指针
+     */
+    char *GetPtr()
+    {
+        return const_cast<char *>(mbstr.data());
+    }
+
+    /**
+     * @brief 判断转换后的文本是否为空
+     * @return 为空时返回真,未执行转换前始终为真
+     */
+    bool IsEmpty()
+    {
+        return mbstr.empty();
+    }
+
+    /**
+     * @brief 返回内部文本(转换后)的参考
+     * @return 转换后的std::basic_string参考
+     */
+    std::string &string()
+    {
+        return mbstr;
+    }
+
+    /**
+     * @brief 生成一个字节集类,其中包含了转换后的文本数据
+     * @param null_char 字节集是否带结尾0字符
+     * @return 返回所转换的字节集
+     */
+    CVolMem ToMem(const bool null_char = false)
+    {
+        return CVolMem(mbstr.c_str(), mbstr.size() + null_char ? 1 : 0);
+    }
+
+    /**
+     * @brief 将转换后的文本数据复制火山的字节集类
+     * @param mem 文本数据将复制到此字节集中
+     * @param null_char 字节集是否带结尾0字符
+     */
+    void GetMem(CVolMem &mem, const bool null_char = false)
+    {
+        mem.Empty();
+        mem.Append(mbstr.c_str(), mbstr.size() + null_char ? 1 : 0);
+    }
+}; // PivU2A
+
+/**
+ * @brief ANSI编码转UTF-8编码的封装类
+ */
+class PivA2U
+{
+private:
+    std::string utf8str;
+
+public:
+    /**
+     * @brief 默认构造与析构函数
+     */
+    PivA2U() {}
+    ~PivA2U() {}
+
+    /**
+     * @brief 默认复制构造函数
+     * @param s 所欲复制的对象
+     */
+    PivA2U(const PivA2U &s)
+    {
+        utf8str = s.utf8str;
+    }
+    PivA2U(PivA2U &&s)
+    {
+        utf8str = std::move(s.utf8str);
+    }
+
+    /**
+     * @brief 构造的同时将提供的文本转换
+     * @param mbstr 所欲转换的ANSI文本,必须带结尾0字符
+     */
+    PivA2U(const char *mbstr)
+    {
+        Convert(mbstr);
+    }
+
+    /**
+     * @brief 构造的同时将提供的文本转换
+     * @param mbstr 所欲转换的文本
+     * @param mbslen 文本的字符长度,为0时文本必须带结尾0字符
+     */
+    PivA2U(const char *mbstr, const size_t mbslen)
+    {
+        Convert(mbstr, mbslen);
+    }
+
+    /**
+     * @brief 构造的同时将提供的std::string文本转换
+     * @param mbstr 所欲转换的文本
+     */
+    PivA2U(const std::string &mbstr)
+    {
+        Convert(mbstr.c_str());
+    }
+
+    operator const char *()
+    {
+        return utf8str.c_str();
+    }
+    operator const std::string &()
+    {
+        return utf8str;
+    }
+    operator CVolMem()
+    {
+        return CVolMem(utf8str.c_str(), utf8str.size());
+    }
+    PivA2U &operator=(const PivA2U &_PivA2U)
+    {
+        utf8str = _PivA2U.utf8str;
+        return (*this);
+    }
+    PivA2U &operator=(PivA2U &&_PivA2U)
+    {
+        utf8str = std::move(_PivA2U.utf8str);
+        return (*this);
+    }
+    PivA2U &operator=(const char *mbstr)
+    {
+        Convert(mbstr);
+        return (*this);
+    }
+    bool operator==(const PivA2U &_PivA2U)
+    {
+        return utf8str == _PivA2U.utf8str;
+    }
+    std::string *operator->()
+    {
+        return &utf8str;
+    }
+    std::string &operator*()
+    {
+        return utf8str;
+    }
+
+    /**
+     * @brief 编码转换函数
+     * @param mbstr 所欲转换的文本
+     * @param mbslen 文本的字符长度,为0时文本必须带结尾0字符
+     */
+    void Convert(const char *mbstr, const size_t mbslen = 0)
+    {
+        piv::encoding::A2Uex(utf8str, mbstr, mbslen);
+    }
+
+    /**
+     * @brief 获取转换后的文本指针
+     * @return 字符串指针
+     */
+    const char *GetText()
+    {
+        return utf8str.c_str();
+    }
+
+    /**
+     * @brief 获取转换后的文本长度
+     * @return 文本的字符长度
+     */
+    size_t GetSize() const
+    {
+        return utf8str.size();
+    }
+
+    /**
+     * @brief 获取转换的文本首字符指针
+     * @return 文本的首字符指针
+     */
+    char *GetPtr()
+    {
+        return const_cast<char *>(utf8str.data());
+    }
+
+    /**
+     * @brief 判断转换后的文本是否为空
+     * @return 为空时返回真,未执行转换前始终为真
+     */
+    bool IsEmpty()
+    {
+        return utf8str.empty();
+    }
+
+    /**
+     * @brief 返回内部文本(转换后)的参考
+     * @return 转换后的std::basic_string参考
+     */
+    std::string &String()
+    {
+        return utf8str;
+    }
+
+    /**
+     * @brief 生成一个字节集类,其中包含了转换后的文本数据
+     * @param null_char 字节集是否带结尾0字符
+     * @return 返回所转换的字节集
+     */
+    CVolMem ToMem(const bool null_char = false)
+    {
+        return CVolMem(utf8str.c_str(), utf8str.size() + null_char ? 1 : 0);
+    }
+
+    /**
+     * @brief 将转换后的文本数据复制火山的字节集类
+     * @param mem 文本数据将复制到此字节集中
+     * @param null_char 字节集是否带结尾0字符
+     */
+    void GetMem(CVolMem &mem, const bool null_char = false)
+    {
+        mem.Empty();
+        mem.Append(utf8str.c_str(), utf8str.size() + null_char ? 1 : 0);
+    }
+}; // PivA2U
+
+#endif // _PIV_ENCODING_HPP
