@@ -30,13 +30,37 @@ SOFTWARE.
 #ifndef FMTLOG_UNICODE_STRING
 #define FMTLOG_UNICODE_STRING 0
 #endif
-#if FMTLOG_UNICODE_STRING
-#include "fmt/xchar.h"
-#define FMTLOG_CHAR wchar_t
-#define FMTLOG_DWORD uint32_t
+#if FMTLOG_UNICODE_STRING == 1
+  #include "fmt/xchar.h"
+  #define FMTLOG_CHAR wchar_t
+  #define FMTLOG_DWORD uint32_t
+  #ifndef FMTLOG_T
+  #define FMTLOG_T(t) L ## t
+  #endif
+  #ifndef FMTLOG_tcslen
+  #define FMTLOG_tcslen wcslen
+  #endif
+  #ifndef FMTLOG_tcsftime
+  #define FMTLOG_tcsftime wcsftime
+  #endif
+  #ifndef FMTLOG_tfopen
+  #define FMTLOG_tfopen _wfopen
+  #endif
 #else
-#define FMTLOG_CHAR char
-#define FMTLOG_DWORD uint16_t
+  #define FMTLOG_CHAR char
+  #define FMTLOG_DWORD uint16_t
+  #ifndef FMTLOG_T
+  #define FMTLOG_T(t) t
+  #endif
+  #ifndef FMTLOG_tcslen
+  #define FMTLOG_tcslen strlen
+  #endif
+  #ifndef FMTLOG_tcsftime
+  #define FMTLOG_tcsftime strftime
+  #endif
+  #ifndef FMTLOG_tfopen
+  #define FMTLOG_tfopen fopen
+  #endif
 #endif
 #include <type_traits>
 #include <vector>
@@ -53,33 +77,6 @@ SOFTWARE.
 #define FAST_THREAD_LOCAL thread_local
 #else
 #define FAST_THREAD_LOCAL __thread
-#ifdef FMTLOG_UNICODE_STRING
-  #ifndef _T
-  #define _T(t) L ## t
-  #endif
-  #ifndef _tcslen
-  #define _tcslen wcslen
-  #endif
-  #ifndef _tcsftime
-  #define _tcsftime wcsftime
-  #endif
-  #ifndef _tfopen
-  #define _tfopen wfopen
-  #endif
-#else
-  #ifndef _T
-  #define _T(t) t
-  #endif
-  #ifndef _tcslen
-  #define _tcslen wcslen
-  #endif
-  #ifndef _tcsftime
-  #define _tcsftime strftime
-  #endif
-  #ifndef _tfopen
-  #define _tfopen fopen
-  #endif
-#endif
 #endif
 
 // define FMTLOG_BLOCK=1 if log statment should be blocked when queue is full, instead of discarding the msg
@@ -148,7 +145,7 @@ public:
   // and will not close the FILE*
   static void setLogFile(FILE* fp, bool manageFp = false);
 
-  static bool setDailyLogFile(const FMTLOG_CHAR* filename, bool truncate = false, int32_t hour = 0, int32_t second = 0, const FMTLOG_CHAR* DateFormat = _T("_%F")) noexcept;
+  static bool setDailyLogFile(const FMTLOG_CHAR* filename, bool truncate = false, int32_t hour = 0, int32_t second = 0, const FMTLOG_CHAR* DateFormat = FMTLOG_T("_%F")) noexcept;
 
   static void closeDailyLogFile() noexcept;
 
@@ -486,7 +483,7 @@ public:
       return getArgSizes<CstringIdx>(cstringSize, arg.value, args...);
     }
     else if constexpr (isCstring<Arg>()) {
-      size_t len = _tcslen(arg) + 1;
+      size_t len = FMTLOG_tcslen(arg) + 1;
       cstringSize[CstringIdx] = len;
       return len + getArgSizes<CstringIdx + 1>(cstringSize, args...);
     }
@@ -567,7 +564,7 @@ public:
         in, args, destruct_args);
     }
     else if constexpr (isCstring<Arg>() || isString<Arg>()) {
-      size_t size = _tcslen(in);
+      size_t size = FMTLOG_tcslen(in);
       fmt::basic_string_view<FMTLOG_CHAR> v(in, size);
       if constexpr (ValueOnly) {
         fmt::detail::value<Context>& value_ = *(fmt::detail::value<Context>*)(args + Idx);
@@ -696,7 +693,7 @@ public:
           reorderIdx[id] = arg_idx++;
         }
         else {
-          out = fmt::format_to(out, _T("{}"), id);
+          out = fmt::format_to(out, FMTLOG_T("{}"), id);
         }
       }
       else {
@@ -761,7 +758,7 @@ public:
   }
 
   inline void logOnceText(const FMTLOG_CHAR* location, LogLevel level, const FMTLOG_CHAR* logText) {
-    uint32_t fmt_size = (uint32_t)_tcslen(logText) * sizeof(FMTLOG_CHAR);
+    uint32_t fmt_size = (uint32_t)FMTLOG_tcslen(logText) * sizeof(FMTLOG_CHAR);
     uint32_t alloc_size = 8 + 8 + fmt_size;
     bool q_full_cb = true;
     do {
@@ -815,7 +812,8 @@ inline bool fmtlogT<_>::checkLogLevel(LogLevel logLevel) noexcept {
 
 #define __FMTLOG_S1(x) #x
 #define __FMTLOG_S2(x) __FMTLOG_S1(x)
-#define __FMTLOG_LOCATION _T(__FILE__ ":" __FMTLOG_S2(__LINE__))
+#define __FMTLOG_LOCATION FMTLOG_T(__FILE__ ":" __FMTLOG_S2(__LINE__))
+#define __FMTLOG_SOURCE(F, L) FMTLOG_T(##F##":"##L)
 
 #define FMTLOG(level, format, ...)                                                                 \
   do {                                                                                             \
