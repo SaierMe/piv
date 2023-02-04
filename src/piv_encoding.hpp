@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/01/31                          *
+ * 版本: 2023/02/04                          *
 \*********************************************/
 
 #ifndef _PIV_ENCODING_HPP
@@ -45,19 +45,17 @@ namespace piv
          * @brief ANSI转UTF-16LE
          * @param utf16str 转换后的字符串在此参数中返回
          * @param mbstr 转换前的字符串
-         * @param mbslen 转换前的字符串字符长度,0为自动获取
+         * @param mbslen 转换前的字符串字符长度,-1为自动获取
          */
-        static void A2Wex(std::wstring &utf16str, const char *mbstr, const size_t mbslen = 0)
+        static void A2Wex(std::wstring &utf16str, const char *mbstr, const size_t mbslen = static_cast<size_t>(-1))
         {
-            int utf16len = ::MultiByteToWideChar(CP_ACP, 0, mbstr, (mbslen > 0) ? static_cast<int>(mbslen) : -1, NULL, 0);
+            int utf16len = ::MultiByteToWideChar(CP_ACP, 0, mbstr, (mbslen == static_cast<size_t>(-1)) ? -1 : static_cast<int>(mbslen), NULL, 0);
             if (utf16len > 0)
             {
-                if (mbslen == 0)
-                {
+                if (mbslen == static_cast<size_t>(-1))
                     utf16len -= 1;
-                }
                 utf16str.resize(utf16len, '\0');
-                ::MultiByteToWideChar(CP_ACP, 0, mbstr, (mbslen > 0) ? static_cast<int>(mbslen) : -1, const_cast<wchar_t *>(utf16str.data()), utf16len);
+                ::MultiByteToWideChar(CP_ACP, 0, mbstr, (mbslen == static_cast<size_t>(-1)) ? -1 : static_cast<int>(mbslen), const_cast<wchar_t *>(utf16str.data()), utf16len);
             }
             else
             {
@@ -69,19 +67,17 @@ namespace piv
          * @brief UTF-16LE转ANSI
          * @param mbstr 转换后的字符串在此参数中返回
          * @param utf16str 转换前的字符串
-         * @param utf16len 转换前的字符串字符长度,0为自动获取
+         * @param utf16len 转换前的字符串字符长度,-1为自动获取
          */
-        static void W2Aex(std::string &mbstr, const wchar_t *utf16str, const size_t utf16len = 0)
+        static void W2Aex(std::string &mbstr, const wchar_t *utf16str, const size_t utf16len = static_cast<size_t>(-1))
         {
-            int mbslen = ::WideCharToMultiByte(CP_ACP, 0, utf16str, (utf16len > 0) ? static_cast<int>(utf16len) : -1, NULL, 0, NULL, NULL);
+            int mbslen = ::WideCharToMultiByte(CP_ACP, 0, utf16str, (utf16len == static_cast<size_t>(-1)) ? -1 : static_cast<int>(utf16len), NULL, 0, NULL, NULL);
             if (mbslen > 0)
             {
-                if (utf16len == 0)
-                {
+                if (utf16len == static_cast<size_t>(-1))
                     mbslen -= 1;
-                }
                 mbstr.resize(mbslen, '\0');
-                ::WideCharToMultiByte(CP_ACP, 0, utf16str, (utf16len > 0) ? static_cast<int>(utf16len) : -1, const_cast<char *>(mbstr.data()), mbslen, NULL, NULL);
+                ::WideCharToMultiByte(CP_ACP, 0, utf16str, (utf16len == static_cast<size_t>(-1)) ? -1 : static_cast<int>(utf16len), const_cast<char *>(mbstr.data()), mbslen, NULL, NULL);
             }
             else
             {
@@ -93,12 +89,12 @@ namespace piv
          * @brief UTF-16LE转UTF-8
          * @param utf8str 转换后的字符串在此参数中返回
          * @param utf16str 转换前的字符串
-         * @param utf16len 转换前的字符串字符长度,0为自动获取
+         * @param utf16len 转换前的字符串字符长度,-1为自动获取
          */
-        static void W2Uex(std::string &utf8str, const wchar_t *utf16str, const size_t utf16len = 0)
+        static void W2Uex(std::string &utf8str, const wchar_t *utf16str, const size_t utf16len = static_cast<size_t>(-1))
         {
 #ifdef PIV_ENABLE_SIMDUTF
-            size_t utf16words = (utf16len > 0) ? utf16len : wcslen(utf16str);
+            size_t utf16words = (utf16len == static_cast<size_t>(-1)) ? wcslen(utf16str) : utf16len;
             size_t utf8words = simdutf::utf8_length_from_utf16le(reinterpret_cast<const char16_t *>(utf16str), utf16words);
             if (utf8words == 0)
             {
@@ -110,15 +106,13 @@ namespace piv
                 simdutf::convert_valid_utf16le_to_utf8(reinterpret_cast<const char16_t *>(utf16str), utf16words, const_cast<char *>(reinterpret_cast<const char *>(utf8str.data())));
             }
 #else
-            int utf8len = ::WideCharToMultiByte(CP_UTF8, 0, utf16str, (utf16len > 0) ? static_cast<int>(utf16len) : -1, NULL, 0, NULL, NULL);
+            int utf8len = ::WideCharToMultiByte(CP_UTF8, 0, utf16str, (utf16len == static_cast<size_t>(-1)) ? -1 : static_cast<int>(utf16len), NULL, 0, NULL, NULL);
             if (utf8len > 0)
             {
-                if (utf16len == 0)
-                {
+                if (utf16len == static_cast<size_t>(-1))
                     utf8len -= 1;
-                }
                 utf8str.resize(utf8len, '\0');
-                ::WideCharToMultiByte(CP_UTF8, 0, utf16str, (utf16len > 0) ? static_cast<int>(utf16len) : -1, const_cast<char *>(utf8str.data()), utf8len, NULL, NULL);
+                ::WideCharToMultiByte(CP_UTF8, 0, utf16str, (utf16len == static_cast<size_t>(-1)) ? -1 : static_cast<int>(utf16len), const_cast<char *>(utf8str.data()), utf8len, NULL, NULL);
             }
             else
             {
@@ -131,12 +125,12 @@ namespace piv
          * @brief UTF-8转UTF-16LE
          * @param utf16str 转换后的字符串在此参数中返回
          * @param utf8str 转换前的字符串
-         * @param utf8len 转换前的字符串字符长度,0为自动获取
+         * @param utf8len 转换前的字符串字符长度,-1为自动获取
          */
-        static void U2Wex(std::wstring &utf16str, const char *utf8str, const size_t utf8len = 0)
+        static void U2Wex(std::wstring &utf16str, const char *utf8str, const size_t utf8len = static_cast<size_t>(-1))
         {
 #ifdef PIV_ENABLE_SIMDUTF
-            size_t utf8words = (utf8len > 0) ? utf8len : strlen(utf8str);
+            size_t utf8words = (utf8len == static_cast<size_t>(-1)) ? strlen(utf8str) : utf8len;
             size_t utf16words = simdutf::utf16_length_from_utf8(utf8str, utf8words);
             if (utf16words == 0)
             {
@@ -148,15 +142,13 @@ namespace piv
                 utf16words = simdutf::convert_valid_utf8_to_utf16le(utf8str, utf8words, reinterpret_cast<char16_t *>(const_cast<wchar_t *>(utf16str.data())));
             }
 #else
-            int utf16len = ::MultiByteToWideChar(CP_UTF8, 0, utf8str, (utf8len > 0) ? static_cast<int>(utf8len) : -1, NULL, 0);
+            int utf16len = ::MultiByteToWideChar(CP_UTF8, 0, utf8str, (utf8len == static_cast<size_t>(-1)) ? -1 : static_cast<int>(utf8len), NULL, 0);
             if (utf16len > 0)
             {
-                if (utf8len == 0)
-                {
+                if (utf8len == static_cast<size_t>(-1))
                     utf16len -= 1;
-                }
                 utf16str.resize(utf16len, '\0');
-                ::MultiByteToWideChar(CP_UTF8, 0, utf8str, (utf8len > 0) ? static_cast<int>(utf8len) : -1, const_cast<wchar_t *>(utf16str.data()), utf16len);
+                ::MultiByteToWideChar(CP_UTF8, 0, utf8str, (utf8len == static_cast<size_t>(-1)) ? -1 : static_cast<int>(utf8len), const_cast<wchar_t *>(utf16str.data()), utf16len);
             }
             else
             {
@@ -169,9 +161,9 @@ namespace piv
          * @brief UTF-8转ANSI
          * @param mbstr 转换后的字符串在此参数中返回
          * @param utf8str 转换前的字符串
-         * @param utf8len 转换前的字符串字符长度,0为自动获取
+         * @param utf8len 转换前的字符串字符长度,-1为自动获取
          */
-        static void U2Aex(std::string &mbstr, const char *utf8str, const size_t utf8len = 0)
+        static void U2Aex(std::string &mbstr, const char *utf8str, const size_t utf8len = static_cast<size_t>(-1))
         {
             std::wstring utf16str;
             piv::encoding::U2Wex(utf16str, utf8str, utf8len);
@@ -182,9 +174,9 @@ namespace piv
          * @brief ANSI转UTF-8
          * @param utf8str 转换后的字符串在此参数中返回
          * @param mbstr 转换前的字符串
-         * @param mbslen 转换前的字符串字符长度,0为自动获取
+         * @param mbslen 转换前的字符串字符长度,-1为自动获取
          */
-        static void A2Uex(std::string &utf8str, const char *mbstr, const size_t mbslen = 0)
+        static void A2Uex(std::string &utf8str, const char *mbstr, const size_t mbslen = static_cast<size_t>(-1))
         {
             std::wstring utf16str;
             piv::encoding::A2Wex(utf16str, mbstr, mbslen);
@@ -357,19 +349,10 @@ public:
 
     /**
      * @brief 构造的同时将提供的文本转换
-     * @param mbstr 所欲转换的ANSI文本,必须带结尾0字符
-     */
-    PivA2W(const char *mbstr)
-    {
-        Convert(mbstr);
-    }
-
-    /**
-     * @brief 构造的同时将提供的文本转换
      * @param mbstr 所欲转换的文本
-     * @param mbslen 文本的字符长度,为0时文本必须带结尾0字符
+     * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    PivA2W(const char *mbstr, const size_t mbslen)
+    PivA2W(const char *mbstr, const size_t mbslen = static_cast<size_t>(-1))
     {
         Convert(mbstr, mbslen);
     }
@@ -406,17 +389,17 @@ public:
     PivA2W &operator=(const PivA2W &_PivA2W)
     {
         utf16str = _PivA2W.utf16str;
-        return (*this);
+        return *this;
     }
     PivA2W &operator=(PivA2W &&_PivA2W)
     {
         utf16str = std::move(_PivA2W.utf16str);
-        return (*this);
+        return *this;
     }
     PivA2W &operator=(const char *mbstr)
     {
         Convert(mbstr);
-        return (*this);
+        return *this;
     }
     bool operator==(const PivA2W &_PivA2W)
     {
@@ -433,10 +416,10 @@ public:
 
     /**
      * @brief 编码转换函数
-     * @param mbstr 所欲转换的文本
-     * @param mbslen 文本的字符长度,为0时文本必须带结尾0字符
+     * @param mbstr 所欲转换的ANSI文本
+     * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    void Convert(const char *mbstr, const size_t mbslen = 0)
+    void Convert(const char *mbstr, const size_t mbslen = static_cast<size_t>(-1))
     {
         piv::encoding::A2Wex(utf16str, mbstr, mbslen);
     }
@@ -556,30 +539,20 @@ public:
 
     /**
      * @brief 构造的同时将提供的文本转换
-     * @param utf16str 所欲转换的ANSI文本,必须带结尾0字符
+     * @param utf16str 所欲转换的UTF-16LE文本
+     * @param utf16len 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    PivW2A(const wchar_t *utf16str)
-    {
-        Convert(utf16str);
-    }
-
-    /**
-     * @brief 构造的同时将提供的文本转换
-     * @param utf16str 所欲转换的文本
-     * @param utf16len 文本的字符长度,为0时文本必须带结尾0字符
-     */
-    PivW2A(const wchar_t *utf16str, const size_t utf16len)
+    PivW2A(const wchar_t *utf16str, const size_t utf16len = static_cast<size_t>(-1))
     {
         Convert(utf16str, utf16len);
     }
-
-    /**
-     * @brief 构造的同时将提供的std::wstring文本转换
-     * @param utf16str 所欲转换的文本
-     */
     PivW2A(const std::wstring &utf16str)
     {
         Convert(utf16str.c_str());
+    }
+    PivW2A(const CVolString &utf16str)
+    {
+        Convert(utf16str.GetText());
     }
 
     operator const char *()
@@ -601,17 +574,17 @@ public:
     PivW2A &operator=(const PivW2A &_PivW2A)
     {
         mbstr = _PivW2A.mbstr;
-        return (*this);
+        return *this;
     }
     PivW2A &operator=(PivW2A &&_PivW2A)
     {
         mbstr = std::move(_PivW2A.mbstr);
-        return (*this);
+        return *this;
     }
     PivW2A &operator=(const wchar_t *utf16str)
     {
         Convert(utf16str);
-        return (*this);
+        return *this;
     }
     bool operator==(const PivW2A &_PivW2A)
     {
@@ -629,9 +602,9 @@ public:
     /**
      * @brief 编码转换函数
      * @param mbstr 所欲转换的文本
-     * @param mbslen 文本的字符长度,为0时文本必须带结尾0字符
+     * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    void Convert(const wchar_t *utf16str, const size_t utf16len = 0)
+    void Convert(const wchar_t *utf16str, const size_t utf16len = static_cast<size_t>(-1))
     {
         piv::encoding::W2Aex(mbstr, utf16str, utf16len);
     }
@@ -733,30 +706,20 @@ public:
 
     /**
      * @brief 构造的同时将提供的文本转换
-     * @param utf16str 所欲转换的ANSI文本,必须带结尾0字符
+     * @param utf16str 所欲转换的UTF-16LE文本
+     * @param utf16len 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    PivW2U(const wchar_t *utf16str)
-    {
-        Convert(utf16str);
-    }
-
-    /**
-     * @brief 构造的同时将提供的文本转换
-     * @param utf16str 所欲转换的文本
-     * @param utf16len 文本的字符长度,为0时文本必须带结尾0字符
-     */
-    PivW2U(const wchar_t *utf16str, const size_t utf16len)
+    PivW2U(const wchar_t *utf16str, const size_t utf16len = static_cast<size_t>(-1))
     {
         Convert(utf16str, utf16len);
     }
-
-    /**
-     * @brief 构造的同时将提供的std::wstring文本转换
-     * @param utf16str 所欲转换的文本
-     */
     PivW2U(const std::wstring &utf16str)
     {
         Convert(utf16str.c_str());
+    }
+    PivW2U(const CVolString &utf16str)
+    {
+        Convert(utf16str.GetText());
     }
 
     operator CVolMem()
@@ -778,17 +741,17 @@ public:
     PivW2U &operator=(const PivW2U &_PivW2U)
     {
         utf8str = _PivW2U.utf8str;
-        return (*this);
+        return *this;
     }
     PivW2U &operator=(PivW2U &&_PivW2U)
     {
         utf8str = std::move(_PivW2U.utf8str);
-        return (*this);
+        return *this;
     }
     PivW2U &operator=(const wchar_t *utf16str)
     {
         Convert(utf16str);
-        return (*this);
+        return *this;
     }
     bool operator==(const PivW2U &_PivW2U)
     {
@@ -806,9 +769,9 @@ public:
     /**
      * @brief 编码转换函数
      * @param mbstr 所欲转换的文本
-     * @param mbslen 文本的字符长度,为0时文本必须带结尾0字符
+     * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    void Convert(const wchar_t *utf16str, const size_t utf16len = 0)
+    void Convert(const wchar_t *utf16str, const size_t utf16len = static_cast<size_t>(-1))
     {
         piv::encoding::W2Uex(utf8str, utf16str, utf16len);
     }
@@ -910,19 +873,10 @@ public:
 
     /**
      * @brief 构造的同时将提供的文本转换
-     * @param utf8str 所欲转换的ANSI文本,必须带结尾0字符
+     * @param utf8str 所欲转换的UTF-8文本
+     * @param utf8len 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    PivU2W(const char *utf8str)
-    {
-        Convert(utf8str);
-    }
-
-    /**
-     * @brief 构造的同时将提供的文本转换
-     * @param utf8str 所欲转换的文本
-     * @param utf8len 文本的字符长度,为0时文本必须带结尾0字符
-     */
-    PivU2W(const char *utf8str, const size_t utf8len)
+    PivU2W(const char *utf8str, const size_t utf8len = static_cast<size_t>(-1))
     {
         Convert(utf8str, utf8len);
     }
@@ -959,17 +913,17 @@ public:
     PivU2W &operator=(const PivU2W &_PivU2W)
     {
         utf16str = _PivU2W.utf16str;
-        return (*this);
+        return *this;
     }
     PivU2W &operator=(PivU2W &&_PivU2W)
     {
         utf16str = std::move(_PivU2W.utf16str);
-        return (*this);
+        return *this;
     }
     PivU2W &operator=(const char *utf8str)
     {
         Convert(utf8str);
-        return (*this);
+        return *this;
     }
     bool operator==(const PivU2W &_PivU2W)
     {
@@ -987,9 +941,9 @@ public:
     /**
      * @brief 编码转换函数
      * @param mbstr 所欲转换的文本
-     * @param mbslen 文本的字符长度,为0时文本必须带结尾0字符
+     * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    void Convert(const char *utf8str, const size_t utf8len = 0)
+    void Convert(const char *utf8str, const size_t utf8len = static_cast<size_t>(-1))
     {
         piv::encoding::U2Wex(utf16str, utf8str, utf8len);
     }
@@ -1109,19 +1063,10 @@ public:
 
     /**
      * @brief 构造的同时将提供的文本转换
-     * @param utf8str 所欲转换的ANSI文本,必须带结尾0字符
+     * @param utf8str 所欲转换的UTF-8文本
+     * @param utf8len 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    PivU2A(const char *utf8str)
-    {
-        Convert(utf8str);
-    }
-
-    /**
-     * @brief 构造的同时将提供的文本转换
-     * @param utf8str 所欲转换的文本
-     * @param utf8len 文本的字符长度,为0时文本必须带结尾0字符
-     */
-    PivU2A(const char *utf8str, const size_t utf8len)
+    PivU2A(const char *utf8str, const size_t utf8len = static_cast<size_t>(-1))
     {
         Convert(utf8str, utf8len);
     }
@@ -1150,17 +1095,17 @@ public:
     PivU2A &operator=(const PivU2A &_PivU2A)
     {
         mbstr = _PivU2A.mbstr;
-        return (*this);
+        return *this;
     }
     PivU2A &operator=(PivU2A &&_PivU2A)
     {
         mbstr = std::move(_PivU2A.mbstr);
-        return (*this);
+        return *this;
     }
     PivU2A &operator=(const char *utf8str)
     {
         Convert(utf8str);
-        return (*this);
+        return *this;
     }
     bool operator==(const PivU2A &_PivU2A)
     {
@@ -1178,9 +1123,9 @@ public:
     /**
      * @brief 编码转换函数
      * @param mbstr 所欲转换的文本
-     * @param mbslen 文本的字符长度,为0时文本必须带结尾0字符
+     * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    void Convert(const char *utf8str, const size_t utf8len = 0)
+    void Convert(const char *utf8str, const size_t utf8len = static_cast<size_t>(-1))
     {
         piv::encoding::U2Aex(mbstr, utf8str, utf8len);
     }
@@ -1282,19 +1227,10 @@ public:
 
     /**
      * @brief 构造的同时将提供的文本转换
-     * @param mbstr 所欲转换的ANSI文本,必须带结尾0字符
+     * @param mbstr 所欲转换的ANSI文本
+     * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    PivA2U(const char *mbstr)
-    {
-        Convert(mbstr);
-    }
-
-    /**
-     * @brief 构造的同时将提供的文本转换
-     * @param mbstr 所欲转换的文本
-     * @param mbslen 文本的字符长度,为0时文本必须带结尾0字符
-     */
-    PivA2U(const char *mbstr, const size_t mbslen)
+    PivA2U(const char *mbstr, const size_t mbslen = static_cast<size_t>(-1))
     {
         Convert(mbstr, mbslen);
     }
@@ -1323,17 +1259,17 @@ public:
     PivA2U &operator=(const PivA2U &_PivA2U)
     {
         utf8str = _PivA2U.utf8str;
-        return (*this);
+        return *this;
     }
     PivA2U &operator=(PivA2U &&_PivA2U)
     {
         utf8str = std::move(_PivA2U.utf8str);
-        return (*this);
+        return *this;
     }
     PivA2U &operator=(const char *mbstr)
     {
         Convert(mbstr);
-        return (*this);
+        return *this;
     }
     bool operator==(const PivA2U &_PivA2U)
     {
@@ -1351,9 +1287,9 @@ public:
     /**
      * @brief 编码转换函数
      * @param mbstr 所欲转换的文本
-     * @param mbslen 文本的字符长度,为0时文本必须带结尾0字符
+     * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    void Convert(const char *mbstr, const size_t mbslen = 0)
+    void Convert(const char *mbstr, const size_t mbslen = static_cast<size_t>(-1))
     {
         piv::encoding::A2Uex(utf8str, mbstr, mbslen);
     }

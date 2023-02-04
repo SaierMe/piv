@@ -95,6 +95,7 @@
         "ranges": "cpp",
         "span": "cpp",
         "stop_token": "cpp",
-        "*.in": "cpp"
+        "*.in": "cpp",
+        "xthread": "cpp"
     }
 }
