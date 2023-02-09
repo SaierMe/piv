@@ -96,6 +96,11 @@
         "span": "cpp",
         "stop_token": "cpp",
         "*.in": "cpp",
-        "xthread": "cpp"
+        "xthread": "cpp",
+        "resumable": "cpp",
+        "*.ipp": "cpp",
+        "csignal": "cpp",
+        "random": "cpp",
+        "typeindex": "cpp"
     }
 }

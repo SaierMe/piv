@@ -4,7 +4,9 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:\\App\\win_android_chs_person\\plugins\\vprj_win\\classlib"
+                "C:\\App\\win_android_chs_person\\plugins\\vprj_win\\classlib",
+                "D:\\Documents\\GitHub\\asio2\\include",
+                "D:\\Documents\\GitHub\\asio2\\3rd"
             ],
             "defines": [
                 "_DEBUG",

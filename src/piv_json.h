@@ -202,7 +202,7 @@ namespace piv
         inline R dump_utf16(J &json, const int32_t indent, const char indent_char, const bool ensure_ascii, const int32_t error_handler)
         {
             std::string str = json.dump(indent, indent_char, ensure_ascii, static_cast<PivJSON::error_handler_t>(error_handler));
-            return PivU2W(str);
+            return PivU2W{str};
         }
 
         // 到UTF8
@@ -280,7 +280,7 @@ namespace piv
         inline void set_obj_args(J &json, const char *typeNames, K key)
         {
             PivJSON j;
-            json[*PivW2U(key)] = nullptr;
+            json[*PivW2U{key}] = nullptr;
         }
 
         // 变参模板: 对象添加文本值键值对
@@ -288,7 +288,7 @@ namespace piv
         inline void set_obj_args(J &json, const char *typeNames, const wchar_t *key, const wchar_t *val, Args... args)
         {
             ++typeNames;
-            json[*PivW2U(key)] = *PivW2U(val);
+            json[*PivW2U{key}] = *PivW2U{val};
             set_obj_args(json, ++typeNames, args...);
         }
 
@@ -299,11 +299,11 @@ namespace piv
             ++typeNames;
             if (*typeNames == 'B')
             {
-                json[*PivW2U(key)] = static_cast<bool>(val);
+                json[*PivW2U{key}] = static_cast<bool>(val);
             }
             else
             {
-                json[*PivW2U(key)] = val;
+                json[*PivW2U{key}] = val;
             }
             set_obj_args(json, ++typeNames, args...);
         }
@@ -336,7 +336,7 @@ namespace piv
         template <typename J, typename... Args>
         inline void push_back_args(J &json, const char *typeNames, const wchar_t *head, Args... args)
         {
-            json.push_back(*PivW2U(head));
+            json.push_back(*PivW2U{head});
             push_back_args(json, ++typeNames, args...);
         }
 
@@ -390,7 +390,7 @@ namespace piv
             {
                 json = J::object();
             }
-            return json[*PivW2U(key)];
+            return json[*PivW2U{key}];
         }
 
         // 取成员
@@ -402,14 +402,14 @@ namespace piv
         template <typename J>
         inline J &at(J &json, const wchar_t *key)
         {
-            return json.at(*PivW2U(key));
+            return json.at(*PivW2U{key});
         }
 
         // 加入成员
         template <typename J>
         inline J &push_back(J &json, char tName, const wchar_t *val)
         {
-            json.push_back(*PivW2U(val));
+            json.push_back(*PivW2U{val});
             return json;
         }
         template <typename J, typename T>
@@ -430,7 +430,7 @@ namespace piv
         template <typename J>
         inline J &insert(J &json, char tName, int32_t pos, const wchar_t *val)
         {
-            json.insert(json.begin() + pos, *PivW2U(val));
+            json.insert(json.begin() + pos, *PivW2U{val});
             return json;
         }
         template <typename J, typename T>
@@ -468,7 +468,7 @@ namespace piv
             }
             case PivJSON::value_t::string:
             {
-                return PivU2W(json.get<std::string>());
+                return PivU2W{json.get<std::string>()};
             }
             case PivJSON::value_t::boolean:
             {
@@ -509,7 +509,7 @@ namespace piv
         template <typename J>
         inline size_t erase(J &json, const wchar_t *key)
         {
-            return json.erase(*PivW2U(key));
+            return json.erase(*PivW2U{key});
         }
 
         // 取路径文本值
@@ -518,7 +518,7 @@ namespace piv
         {
             try
             {
-                return PivU2W(json.at(J::json_pointer(*PivW2U(json_pointer))).get<std::string>());
+                return PivU2W{json.at(J::json_pointer(*PivW2U{json_pointer})).get<std::string>()};
             }
             catch (PivJSON_exception &)
             {
@@ -532,7 +532,7 @@ namespace piv
         {
             try
             {
-                return json.at(J::json_pointer(*PivW2U(json_pointer))).get<ReturnType>();
+                return json.at(J::json_pointer(*PivW2U{json_pointer})).get<ReturnType>();
             }
             catch (PivJSON_exception &)
             {
@@ -546,7 +546,7 @@ namespace piv
         {
             try
             {
-                J::json_pointer ptr(*PivW2U(json_pointer));
+                J::json_pointer ptr(*PivW2U{json_pointer});
                 if (json.at(ptr).is_object())
                 {
                     return json.at(ptr);
@@ -564,7 +564,7 @@ namespace piv
         {
             try
             {
-                J::json_pointer ptr(*PivW2U(json_pointer));
+                J::json_pointer ptr(*PivW2U{json_pointer});
                 if (json.at(ptr).is_array())
                 {
                     return json.at(ptr);
@@ -582,7 +582,7 @@ namespace piv
         {
             try
             {
-                return PivU2W(json.at(*PivW2U(key)).get<std::string>());
+                return PivU2W{json.at(*PivW2U{key}).get<std::string>()};
             }
             catch (PivJSON_exception &)
             {
@@ -594,7 +594,7 @@ namespace piv
         {
             try
             {
-                return PivU2W(json.at(idx).get<std::string>());
+                return PivU2W{json.at(idx).get<std::string>()};
             }
             catch (PivJSON_exception &)
             {
@@ -608,7 +608,7 @@ namespace piv
         {
             try
             {
-                return json.at(*PivW2U(key)).get<ReturnType>();
+                return json.at(*PivW2U{key}).get<ReturnType>();
             }
             catch (PivJSON_exception &)
             {
@@ -700,9 +700,9 @@ namespace piv
         {
             try
             {
-                if (path[0] == L'/')
+                if (path[0] == '/')
                 {
-                    json[J::json_pointer(*PivW2U(path))] = *PivW2U(value);
+                    json[J::json_pointer(*PivW2U{path})] = *PivW2U{value};
                 }
                 else
                 {
@@ -713,7 +713,7 @@ namespace piv
                         else
                             return false;
                     }
-                    json[*PivW2U(path)] = *PivW2U(value);
+                    json[*PivW2U{path}] = *PivW2U{value};
                     return true;
                 }
             }
@@ -734,7 +734,7 @@ namespace piv
                     else
                         return false;
                 }
-                json[idx] = *PivW2U(value);
+                json[idx] = *PivW2U{value};
                 return true;
             }
             catch (PivJSON_exception &)
@@ -750,7 +750,7 @@ namespace piv
             {
                 if (path[0] == L'/')
                 {
-                    json[J::json_pointer(*PivW2U(path))] = static_cast<V>(value);
+                    json[J::json_pointer(*PivW2U{path})] = static_cast<V>(value);
                 }
                 else
                 {
@@ -761,7 +761,7 @@ namespace piv
                         else
                             return false;
                     }
-                    json[*PivW2U(path)] = static_cast<V>(value);
+                    json[*PivW2U{path}] = static_cast<V>(value);
                     return true;
                 }
             }
@@ -803,7 +803,7 @@ namespace piv
             {
                 if (path[0] == L'/')
                 {
-                    json[J::json_pointer(*PivW2U(path))] = value;
+                    json[J::json_pointer(*PivW2U{path})] = value;
                 }
                 else
                 {
@@ -814,7 +814,7 @@ namespace piv
                         else
                             return false;
                     }
-                    json[*PivW2U(path)] = value;
+                    json[*PivW2U{path}] = value;
                     return true;
                 }
             }
@@ -860,7 +860,7 @@ namespace piv
             {
                 if (path[0] == L'/')
                 {
-                    json[J::json_pointer(*PivW2U(path))] = value;
+                    json[J::json_pointer(*PivW2U{path})] = value;
                 }
                 else
                 {
@@ -871,7 +871,7 @@ namespace piv
                         else
                             return false;
                     }
-                    json[*PivW2U(path)] = value;
+                    json[*PivW2U{path}] = value;
                     return true;
                 }
             }
@@ -914,7 +914,7 @@ namespace piv
             {
                 for (auto &el : json.items())
                 {
-                    keyArray.Add(PivU2W(el.key()).GetText());
+                    keyArray.Add(PivU2W{el.key()}.GetText());
                 }
                 return static_cast<int32_t>(keyArray.GetCount());
             }

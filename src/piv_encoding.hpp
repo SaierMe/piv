@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/04                          *
+ * 版本: 2023/02/08                          *
 \*********************************************/
 
 #ifndef _PIV_ENCODING_HPP
@@ -1360,5 +1360,310 @@ public:
         mem.Append(utf8str.c_str(), utf8str.size() + null_char ? 1 : 0);
     }
 }; // PivA2U
+
+namespace piv
+{
+    namespace encoding
+    {
+        /**
+         * @brief URL文本解码
+         * @param str 所欲解码的文本
+         * @param decoded 返回解码后的文本
+         * @param urlDecode 是否进行URL解码
+         * @param utf8 是否为UTF-8编码
+         */
+        template <typename CharT>
+        void UrlStrDecode(const basic_string_view<CharT> &str, std::basic_string<CharT> &decoded, const bool urlDecode = true, const bool utf8 = true)
+        {
+            if (str.size() == 0)
+            {
+                decoded.clear();
+                return;
+            }
+            if (urlDecode)
+            {
+                ptrdiff_t buffer_len;
+                if (sizeof(CharT) == 2)
+                {
+                    if (utf8)
+                    {
+                        PivW2U urlstr(reinterpret_cast<const wchar_t *>(str.data()), str.size());
+                        buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const BYTE *>(urlstr.GetPtr()), urlstr.GetSize());
+                        if (buffer_len > 0 && buffer_len < static_cast<ptrdiff_t>(urlstr.GetSize()))
+                        {
+                            std::string buffer;
+                            buffer.resize(static_cast<size_t>(buffer_len));
+                            piv::encoding::UrlDecode(reinterpret_cast<const BYTE *>(urlstr.GetPtr()), urlstr.GetSize(), const_cast<BYTE *>(reinterpret_cast<const BYTE *>(buffer.data())), buffer_len);
+                            decoded.assign(reinterpret_cast<const CharT *>(PivU2W{buffer.c_str()}.GetText()));
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        PivW2A urlstr(reinterpret_cast<const wchar_t *>(str.data()), str.size());
+                        buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const BYTE *>(urlstr.GetPtr()), urlstr.GetSize());
+                        if (buffer_len > 0 && buffer_len < static_cast<ptrdiff_t>(urlstr.GetSize()))
+                        {
+                            std::string buffer;
+                            buffer.resize(static_cast<size_t>(buffer_len));
+                            piv::encoding::UrlDecode(reinterpret_cast<const BYTE *>(urlstr.GetPtr()), urlstr.GetSize(), const_cast<BYTE *>(reinterpret_cast<const BYTE *>(buffer.data())), buffer_len);
+                            decoded.assign(reinterpret_cast<const CharT *>(PivA2W{buffer.c_str()}.GetText()));
+                            return;
+                        }
+                    }
+                }
+                else
+                {
+                    buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const BYTE *>(str.data()), str.size());
+                    if (buffer_len > 0 && buffer_len < static_cast<ptrdiff_t>(str.size()))
+                    {
+                        decoded.resize(static_cast<size_t>(buffer_len));
+                        piv::encoding::UrlDecode(reinterpret_cast<const BYTE *>(str.data()), str.size(), const_cast<BYTE *>(reinterpret_cast<const BYTE *>(decoded.data())), buffer_len);
+                        return;
+                    }
+                }
+            }
+            decoded.assign(str.data(), str.size());
+        }
+        template <typename CharT>
+        void UrlStrDecode(const std::basic_string<CharT> &str, std::basic_string<CharT> &decoded, const bool urlDecode = true, const bool utf8 = true)
+        {
+            piv::encoding::UrlStrDecode(basic_string_view<CharT>{str}, decoded, urlDecode, utf8);
+        }
+        template <typename CharT>
+        std::basic_string<CharT> UrlStrDecode(const basic_string_view<CharT> &str, const bool urlDecode = true, const bool utf8 = true)
+        {
+            std::basic_string<CharT> decoded;
+            piv::encoding::UrlStrDecode(str, decoded, urlDecode, utf8);
+            return decoded;
+        }
+        template <typename CharT>
+        std::basic_string<CharT> UrlStrDecode(const std::basic_string<CharT> &str, const bool urlDecode = true, const bool utf8 = true)
+        {
+            return piv::encoding::UrlStrDecode(basic_string_view<CharT>{str}, urlDecode, utf8);
+        }
+
+        template <typename CharT>
+        void UrlStrDecode(const basic_string_view<CharT> &str, CVolMem &decoded, const bool utf8 = true)
+        {
+            decoded.Empty();
+            if (str.size() == 0)
+            {
+                return;
+            }
+            ptrdiff_t buffer_len;
+            if (sizeof(CharT) == 2)
+            {
+                if (utf8)
+                {
+                    PivW2U urlstr(reinterpret_cast<const wchar_t *>(str.data()), str.size());
+                    buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const BYTE *>(urlstr.GetPtr()), urlstr.GetSize());
+                    if (buffer_len > 0 && buffer_len < static_cast<ptrdiff_t>(urlstr.GetSize()))
+                    {
+                        std::string buffer;
+                        buffer.resize(static_cast<size_t>(buffer_len));
+                        piv::encoding::UrlDecode(reinterpret_cast<const BYTE *>(urlstr.GetPtr()), urlstr.GetSize(), const_cast<BYTE *>(reinterpret_cast<const BYTE *>(buffer.data())), buffer_len);
+                        PivU2W{buffer.c_str()}.GetMem(decoded);
+                        return;
+                    }
+                }
+                else
+                {
+                    PivW2A urlstr(reinterpret_cast<const wchar_t *>(str.data()), str.size());
+                    buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const BYTE *>(urlstr.GetPtr()), urlstr.GetSize());
+                    if (buffer_len > 0 && buffer_len < static_cast<ptrdiff_t>(urlstr.GetSize()))
+                    {
+                        std::string buffer;
+                        buffer.resize(static_cast<size_t>(buffer_len));
+                        piv::encoding::UrlDecode(reinterpret_cast<const BYTE *>(urlstr.GetPtr()), urlstr.GetSize(), const_cast<BYTE *>(reinterpret_cast<const BYTE *>(buffer.data())), buffer_len);
+                        PivA2W{buffer.c_str()}.GetMem(decoded);
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const BYTE *>(str.data()), str.size());
+                if (buffer_len > 0 && buffer_len < static_cast<ptrdiff_t>(str.size()))
+                {
+                    piv::encoding::UrlDecode(reinterpret_cast<const BYTE *>(str.data()), str.size(), decoded.Alloc(buffer_len, TRUE), buffer_len);
+                    return;
+                }
+            }
+            decoded.Append(reinterpret_cast<const void *>(str.data()), str.size() * sizeof(CharT));
+        }
+        template <typename CharT>
+        void UrlStrDecode(const std::basic_string<CharT> &str, CVolMem &decoded, const bool utf8 = true)
+        {
+            piv::encoding::UrlStrDecode(basic_string_view<CharT>{str.c_str()}, decoded, utf8);
+        }
+        void UrlStrDecode(const CVolMem &str, CVolMem &decoded, const bool utf8 = true)
+        {
+            piv::encoding::UrlStrDecode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), decoded, utf8);
+        }
+        void UrlStrDecode(const CVolMem &str, CVolString &decoded, const bool utf8 = true)
+        {
+            CVolMem buffer;
+            piv::encoding::UrlStrDecode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), buffer, utf8);
+            if (utf8)
+                PivU2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.GetStr(decoded);
+            else
+                PivA2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.GetStr(decoded);
+        }
+        CVolString UrlStrDecode(const CVolMem &str, const bool utf8 = true)
+        {
+            CVolMem buffer;
+            piv::encoding::UrlStrDecode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), buffer, utf8);
+            if (utf8)
+                return PivU2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.ToStr();
+            else
+                return PivA2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.ToStr();
+        }
+
+        /**
+         * @brief URL文本编码
+         * @param str 所欲编码的文本
+         * @param encoded 返回编码后的文本
+         * @param utf8 是否为UTF-8编码
+         */
+        template <typename CharT>
+        void UrlStrEncode(const basic_string_view<CharT> &str, std::basic_string<CharT> &encoded, const bool utf8 = true)
+        {
+            ptrdiff_t buffer_len;
+            if (sizeof(CharT) == 2)
+            {
+                if (utf8)
+                {
+                    PivW2U text{reinterpret_cast<const wchar_t *>(str.data()), str.size()};
+                    buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const BYTE *>(text.GetPtr()), static_cast<ptrdiff_t>(text.GetSize()));
+                    if (buffer_len > static_cast<ptrdiff_t>(text.GetSize()))
+                    {
+                        CVolMem buffer;
+                        piv::encoding::UrlEncode(reinterpret_cast<const BYTE *>(text.GetPtr()), static_cast<ptrdiff_t>(text.GetSize()), buffer.Alloc(buffer_len, TRUE), buffer_len);
+                        PivU2W urled{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer_len)};
+                        encoded.assign(reinterpret_cast<const CharT *>(urled.GetText()), urled.GetSize());
+                        return;
+                    }
+                }
+                else
+                {
+                    PivW2A text{reinterpret_cast<const wchar_t *>(str.data()), str.size()};
+                    buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const BYTE *>(text.GetPtr()), static_cast<ptrdiff_t>(text.GetSize()));
+                    if (buffer_len > static_cast<ptrdiff_t>(text.GetSize()))
+                    {
+                        CVolMem buffer;
+                        piv::encoding::UrlEncode(reinterpret_cast<const BYTE *>(text.GetPtr()), static_cast<ptrdiff_t>(text.GetSize()), buffer.Alloc(buffer_len, TRUE), buffer_len);
+                        PivA2W urled{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer_len)};
+                        encoded.assign(reinterpret_cast<const CharT *>(urled.GetText()), urled.GetSize());
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const BYTE *>(str.data()), static_cast<ptrdiff_t>(str.size()));
+                if (buffer_len > static_cast<ptrdiff_t>(str.size()))
+                {
+                    encoded.resize(static_cast<size_t>(buffer_len));
+                    piv::encoding::UrlEncode(reinterpret_cast<const BYTE *>(str.data()), static_cast<ptrdiff_t>(str.size()), const_cast<BYTE *>(reinterpret_cast<const BYTE *>(encoded.data())), buffer_len);
+                    return;
+                }
+            }
+            encoded.assign(str.data(), str.size());
+        }
+        template <typename CharT>
+        void UrlStrEncode(const std::basic_string<CharT> &str, std::basic_string<CharT> &encoded, const bool utf8 = true)
+        {
+            piv::encoding::UrlStrEncode(basic_string_view<CharT>{str.c_str()}, encoded, utf8);
+        }
+        template <typename CharT>
+        std::basic_string<CharT> UrlStrEncode(const basic_string_view<CharT> &str, const bool utf8 = true)
+        {
+            std::basic_string<CharT> encoded;
+            piv::encoding::UrlStrEncode(str, encoded, utf8);
+            return encoded;
+        }
+        template <typename CharT>
+        std::basic_string<CharT> UrlStrEncode(const std::basic_string<CharT> &str, const bool utf8 = true)
+        {
+            std::basic_string<CharT> encoded;
+            piv::encoding::UrlStrEncode(basic_string_view<CharT>{str.c_str()}, encoded, utf8);
+            return encoded;
+        }
+
+        template <typename CharT>
+        void UrlStrEncode(const basic_string_view<CharT> &str, CVolMem &encoded, const bool utf8 = true)
+        {
+            ptrdiff_t buffer_len;
+            if (sizeof(CharT) == 2)
+                if (utf8)
+                {
+                    PivW2U text{reinterpret_cast<const wchar_t *>(str.data()), str.size()};
+                    buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const BYTE *>(text.GetPtr()), static_cast<ptrdiff_t>(text.GetSize()));
+                    if (buffer_len > static_cast<ptrdiff_t>(text.GetSize()))
+                    {
+                        CVolMem buffer;
+                        piv::encoding::UrlEncode(reinterpret_cast<const BYTE *>(text.GetPtr()), static_cast<ptrdiff_t>(text.GetSize()), buffer.Alloc(buffer_len, TRUE), buffer_len);
+                        PivU2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer_len)}.GetMem(encoded);
+                        return;
+                    }
+                }
+                else
+                {
+                    PivW2A text{reinterpret_cast<const wchar_t *>(str.data()), str.size()};
+                    buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const BYTE *>(text.GetPtr()), static_cast<ptrdiff_t>(text.GetSize()));
+                    if (buffer_len > static_cast<ptrdiff_t>(text.GetSize()))
+                    {
+                        CVolMem buffer;
+                        piv::encoding::UrlEncode(reinterpret_cast<const BYTE *>(text.GetPtr()), static_cast<ptrdiff_t>(text.GetSize()), buffer.Alloc(buffer_len, TRUE), buffer_len);
+                        PivA2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer_len)}.GetMem(encoded);
+                        return;
+                    }
+                }
+            else
+            {
+                buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const BYTE *>(str.data()), static_cast<ptrdiff_t>(str.size()));
+                if (buffer_len > static_cast<ptrdiff_t>(str.size()))
+                {
+                    piv::encoding::UrlEncode(reinterpret_cast<const BYTE *>(str.data()), static_cast<ptrdiff_t>(str.size()), encoded.Alloc(buffer_len, TRUE), buffer_len);
+                    return;
+                }
+            }
+            encoded.Empty();
+            encoded.Append(reinterpret_cast<const void *>(str.data()), str.size());
+        }
+        template <typename CharT>
+        void UrlStrEncode(const std::basic_string<CharT> &str, CVolMem &encoded, const bool utf8 = true)
+        {
+            piv::encoding::UrlStrEncode(std::basic_string<CharT>{str.c_str()}, encoded, utf8);
+        }
+        void UrlStrEncode(const CVolString &str, CVolMem &encoded, const bool utf8 = true)
+        {
+            piv::encoding::UrlStrEncode(wstring_view(str.GetText()), encoded, utf8);
+        }
+        void UrlStrEncode(const CVolMem &str, CVolMem &encoded)
+        {
+            piv::encoding::UrlStrEncode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), encoded);
+        }
+        void UrlStrEncode(const CVolMem &str, CVolString &encoded, const bool utf8 = true)
+        {
+            CVolMem buffer;
+            piv::encoding::UrlStrEncode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), buffer);
+            if (utf8)
+                PivU2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.GetStr(encoded);
+            else
+                PivA2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.GetStr(encoded);
+        }
+        CVolString UrlStrEncode(const CVolMem &str, const bool utf8 = true)
+        {
+            CVolMem buffer;
+            piv::encoding::UrlStrEncode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), buffer);
+            if (utf8)
+                return PivU2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.ToStr();
+            else
+                return PivA2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.ToStr();
+        }
+    } // namespace encoding
+} // namespace piv
 
 #endif // _PIV_ENCODING_HPP

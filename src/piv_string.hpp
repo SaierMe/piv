@@ -3,13 +3,14 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/04                          *
+ * 版本: 2023/02/09                          *
 \*********************************************/
 
 #ifndef _PIV_STRING_HPP
 #define _PIV_STRING_HPP
 
 #include "piv_encoding.hpp"
+#include "piv_base.hpp"
 #include <algorithm>
 #include <vector>
 #include <memory>
@@ -400,9 +401,9 @@ public:
         if (sizeof(EncodeType) == 2)
             strDump.SetText(reinterpret_cast<const wchar_t *>(sv.data()), sv.length());
         else if (sizeof(EncodeType) == 4)
-            PivU2W(reinterpret_cast<const char *>(sv.data()), sv.length()).GetStr(strDump);
+            PivU2W{reinterpret_cast<const char *>(sv.data()), sv.length()}.GetStr(strDump);
         else
-            PivA2W(reinterpret_cast<const char *>(sv.data()), sv.length()).GetStr(strDump);
+            PivA2W{reinterpret_cast<const char *>(sv.data()), sv.length()}.GetStr(strDump);
         // strDump.SetText(L"文本视图类");
         // CVolMem(reinterpret_cast<const void *>(sv.data()), sv.size()).GetDumpString(strDump, nMaxDumpSize);
     }
@@ -820,9 +821,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return FindFirstOf(reinterpret_cast<const CharT *>(chars.GetText()), pos);
         else if (sizeof(EncodeType) == 4)
-            return FindFirstOf(reinterpret_cast<const CharT *>(PivW2U(chars).GetText()), pos);
+            return FindFirstOf(reinterpret_cast<const CharT *>(PivW2U{chars}.GetText()), pos);
         else
-            return FindFirstOf(reinterpret_cast<const CharT *>(PivW2A(chars).GetText()), pos);
+            return FindFirstOf(reinterpret_cast<const CharT *>(PivW2A{chars}.GetText()), pos);
     }
 
     /**
@@ -854,9 +855,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return FindLastOf(reinterpret_cast<const CharT *>(chars.GetText()), pos);
         else if (sizeof(EncodeType) == 4)
-            return FindLastOf(reinterpret_cast<const CharT *>(PivW2U(chars).GetText()), pos);
+            return FindLastOf(reinterpret_cast<const CharT *>(PivW2U{chars}.GetText()), pos);
         else
-            return FindLastOf(reinterpret_cast<const CharT *>(PivW2A(chars).GetText()), pos);
+            return FindLastOf(reinterpret_cast<const CharT *>(PivW2A{chars}.GetText()), pos);
     }
 
     /**
@@ -887,9 +888,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return FindFirstNotOf(reinterpret_cast<const CharT *>(chars.GetText()), pos);
         else if (sizeof(EncodeType) == 4)
-            return FindFirstNotOf(reinterpret_cast<const CharT *>(PivW2U(chars).GetText()), pos);
+            return FindFirstNotOf(reinterpret_cast<const CharT *>(PivW2U{chars}.GetText()), pos);
         else
-            return FindFirstNotOf(reinterpret_cast<const CharT *>(PivW2A(chars).GetText()), pos);
+            return FindFirstNotOf(reinterpret_cast<const CharT *>(PivW2A{chars}.GetText()), pos);
     }
 
     /**
@@ -921,9 +922,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return FindLastNotOf(reinterpret_cast<const CharT *>(chars.GetText()), pos);
         else if (sizeof(EncodeType) == 4)
-            return FindLastNotOf(reinterpret_cast<const CharT *>(PivW2U(chars).GetText()), pos);
+            return FindLastNotOf(reinterpret_cast<const CharT *>(PivW2U{chars}.GetText()), pos);
         else
-            return FindLastNotOf(reinterpret_cast<const CharT *>(PivW2A(chars).GetText()), pos);
+            return FindLastNotOf(reinterpret_cast<const CharT *>(PivW2A{chars}.GetText()), pos);
     }
 
     /**
@@ -961,9 +962,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return SearchText(reinterpret_cast<const CharT *>(text.GetText()), pos, case_insensitive);
         else if (sizeof(EncodeType) == 4)
-            return SearchText(reinterpret_cast<const CharT *>(PivW2U(text).GetText()), pos, case_insensitive);
+            return SearchText(reinterpret_cast<const CharT *>(PivW2U{text}.GetText()), pos, case_insensitive);
         else
-            return SearchText(reinterpret_cast<const CharT *>(PivW2A(text).GetText()), pos, case_insensitive);
+            return SearchText(reinterpret_cast<const CharT *>(PivW2A{text}.GetText()), pos, case_insensitive);
     }
     size_t SearchText(const PivStringView &text, const ptrdiff_t pos = 0, const bool case_insensitive = false)
     {
@@ -1003,9 +1004,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return ReverseSearchText(reinterpret_cast<const CharT *>(text.GetText()), pos, case_insensitive);
         else if (sizeof(EncodeType) == 4)
-            return ReverseSearchText(reinterpret_cast<const CharT *>(PivW2U(text).GetText()), pos, case_insensitive);
+            return ReverseSearchText(reinterpret_cast<const CharT *>(PivW2U{text}.GetText()), pos, case_insensitive);
         else
-            return ReverseSearchText(reinterpret_cast<const CharT *>(PivW2A(text).GetText()), pos, case_insensitive);
+            return ReverseSearchText(reinterpret_cast<const CharT *>(PivW2A{text}.GetText()), pos, case_insensitive);
     }
     size_t ReverseSearchText(const PivStringView &text, const ptrdiff_t pos = -1, const bool case_insensitive = false)
     {
@@ -1096,9 +1097,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return EndOf(reinterpret_cast<const CharT *>(s.GetText()), case_sensitive);
         else if (sizeof(EncodeType) == 4)
-            return EndOf(reinterpret_cast<const CharT *>(PivW2U(s).GetText()), case_sensitive);
+            return EndOf(reinterpret_cast<const CharT *>(PivW2U{s}.GetText()), case_sensitive);
         else
-            return EndOf(reinterpret_cast<const CharT *>(PivW2A(s).GetText()), case_sensitive);
+            return EndOf(reinterpret_cast<const CharT *>(PivW2A{s}.GetText()), case_sensitive);
     }
 
     /**
@@ -1208,9 +1209,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return SplitStrings(reinterpret_cast<const CharT *>(delimit.GetText()), svArray, trimAll, ignoreEmptyStr);
         else if (sizeof(EncodeType) == 4)
-            return SplitStrings(reinterpret_cast<const CharT *>(PivW2U(delimit).GetText()), svArray, trimAll, ignoreEmptyStr);
+            return SplitStrings(reinterpret_cast<const CharT *>(PivW2U{delimit}.GetText()), svArray, trimAll, ignoreEmptyStr);
         else
-            return SplitStrings(reinterpret_cast<const CharT *>(PivW2A(delimit).GetText()), svArray, trimAll, ignoreEmptyStr);
+            return SplitStrings(reinterpret_cast<const CharT *>(PivW2A{delimit}.GetText()), svArray, trimAll, ignoreEmptyStr);
     }
 
     /**
@@ -1291,9 +1292,116 @@ public:
         if (sizeof(EncodeType) == 2)
             return SplitSubStrings(reinterpret_cast<const CharT *>(delimit.GetText()), svArray, trimAll, ignoreEmptyStr);
         else if (sizeof(EncodeType) == 4)
-            return SplitSubStrings(reinterpret_cast<const CharT *>(PivW2U(delimit).GetText()), svArray, trimAll, ignoreEmptyStr);
+            return SplitSubStrings(reinterpret_cast<const CharT *>(PivW2U{delimit}.GetText()), svArray, trimAll, ignoreEmptyStr);
         else
-            return SplitSubStrings(reinterpret_cast<const CharT *>(PivW2A(delimit).GetText()), svArray, trimAll, ignoreEmptyStr);
+            return SplitSubStrings(reinterpret_cast<const CharT *>(PivW2A{delimit}.GetText()), svArray, trimAll, ignoreEmptyStr);
+    }
+
+    /**
+     * @brief URL编码
+     * @param utf8
+     * @return
+     */
+    std::basic_string<CharT> UrlEncode(const bool utf8 = true)
+    {
+        return piv::encoding::UrlStrEncode(str, utf8);
+    }
+
+    /**
+     * @brief URL解码
+     * @param utf8 是否为UTF-8编码
+     * @return
+     */
+    std::basic_string<CharT> UrlDecode(const bool utf8 = true)
+    {
+        return piv::encoding::UrlStrDecode(str, true, utf8);
+    }
+
+    /**
+     * @brief BASE64编码
+     * @return
+     */
+    std::basic_string<CharT> EncodeBase64(const int32_t line_len = 0)
+    {
+        return piv::base64<CharT>{}.encode(sv, line_len);
+    }
+
+    /**
+     * @brief BASE64解码
+     * @return
+     */
+    std::basic_string<CharT> DecodeBase64()
+    {
+        return piv::base64<CharT>{}.decode(sv);
+    }
+
+    /**
+     * @brief BASE64到字节集
+     * @return
+     */
+    CVolMem DecodeBase64Bin()
+    {
+        CVolMem buffer;
+        piv::base64<CharT>{}.decode(sv, buffer);
+        return buffer;
+    }
+
+    /**
+     * @brief BASE85编码
+     * @return
+     */
+    std::basic_string<CharT> EncodeBase85(const bool padding = false)
+    {
+        return piv::base85<CharT>{}.encode(sv, padding);
+    }
+
+    /**
+     * @brief BASE85解码
+     * @return
+     */
+    std::basic_string<CharT> DecodeBase85()
+    {
+        return piv::base85<CharT>{}.decode(sv);
+    }
+
+    /**
+     * @brief BASE85到字节集
+     * @return
+     */
+    CVolMem DecodeBase85Bin()
+    {
+        CVolMem buffer;
+        piv::base85<CharT>{}.decode(sv, buffer);
+        return buffer;
+    }
+
+    /**
+     * @brief BASE91编码
+     * @return
+     */
+    std::basic_string<CharT> EncodeBase91()
+    {
+        return piv::base91<CharT>{}.encode(sv);
+    }
+
+    /**
+     * @brief BASE91解码
+     * @return
+     */
+    std::basic_string<CharT> DecodeBase91()
+    {
+        return piv::base91<CharT>{}.decode(sv);
+    }
+
+    /**
+     * @brief BASE64到字节集
+     * @return
+     */
+    CVolMem DecodeBase91Bin()
+    {
+        CVolMem buffer;
+        piv::base91<CharT>{}.decode(sv, buffer);
+        return buffer;
     }
 
 }; // PivStringView
@@ -1357,9 +1465,9 @@ public:
         if (sizeof(EncodeType) == 2)
             str.assign(reinterpret_cast<const CharT *>(s.GetText()));
         else if (sizeof(EncodeType) == 4)
-            str.assign(reinterpret_cast<const CharT *>(PivW2U(s).GetText()));
+            str.assign(reinterpret_cast<const CharT *>(PivW2U{s}.GetText()));
         else if (sizeof(EncodeType) == 1)
-            str.assign(reinterpret_cast<const CharT *>(PivW2A(s).GetText()));
+            str.assign(reinterpret_cast<const CharT *>(PivW2A{s}.GetText()));
     }
     PivString(const CVolMem &s)
     {
@@ -1447,9 +1555,9 @@ public:
         if (sizeof(EncodeType) == 2)
             strDump.SetText(reinterpret_cast<const wchar_t *>(str.c_str()));
         else if (sizeof(EncodeType) == 4)
-            PivU2W(reinterpret_cast<const char *>(str.c_str())).GetStr(strDump);
+            PivU2W{reinterpret_cast<const char *>(str.c_str())}.GetStr(strDump);
         else
-            PivA2W(reinterpret_cast<const char *>(str.c_str())).GetStr(strDump);
+            PivA2W{reinterpret_cast<const char *>(str.c_str())}.GetStr(strDump);
         // strDump.SetText(L"标准文本类");
         // CVolMem(reinterpret_cast<const void *>(str.data()), str.size()).GetDumpString(strDump, nMaxDumpSize);
     }
@@ -1544,9 +1652,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return str.compare(0, str.size(), reinterpret_cast<const CharT *>(s.GetText()));
         else if (sizeof(EncodeType) == 4)
-            return str.compare(reinterpret_cast<const CharT *>(PivW2U(s).GetText()));
+            return str.compare(reinterpret_cast<const CharT *>(PivW2U{s}.GetText()));
         else
-            return str.compare(reinterpret_cast<const CharT *>(PivW2A(s).GetText()));
+            return str.compare(reinterpret_cast<const CharT *>(PivW2A{s}.GetText()));
     }
 
     /**
@@ -2160,9 +2268,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return AddManyText(reinterpret_cast<const CharT *>(s.GetText()), times);
         else if (sizeof(EncodeType) == 4)
-            return AddManyText(reinterpret_cast<const CharT *>(PivW2U(s).GetText()), times);
+            return AddManyText(reinterpret_cast<const CharT *>(PivW2U{s}.GetText()), times);
         else
-            return AddManyText(reinterpret_cast<const CharT *>(PivW2A(s).GetText()), times);
+            return AddManyText(reinterpret_cast<const CharT *>(PivW2A{s}.GetText()), times);
     }
 
     /**
@@ -2170,7 +2278,7 @@ public:
      * @tparam ...Ts 扩展参数
      * @param format 格式
      * @param ...args 扩展参数
-     * @return 
+     * @return
      */
     template <typename... Ts>
     PivString &AddFormatText(const CharT *format, Ts... args)
@@ -2184,9 +2292,9 @@ public:
         if (sizeof(EncodeType) == 2)
             str.append(piv::format(reinterpret_cast<const CharT *>(format.GetText()), args...));
         else if (sizeof(EncodeType) == 4)
-            str.append(piv::format(reinterpret_cast<const CharT *>(PivW2U(format).GetText()), args...));
+            str.append(piv::format(reinterpret_cast<const CharT *>(PivW2U{format}.GetText()), args...));
         else
-            str.append(piv::format(reinterpret_cast<const CharT *>(PivW2A(format).GetText()), args...));
+            str.append(piv::format(reinterpret_cast<const CharT *>(PivW2A{format}.GetText()), args...));
         return *this;
     }
     template <typename... Ts>
@@ -2195,9 +2303,9 @@ public:
         if (sizeof(EncodeType) == 2)
             str.append(piv::format(reinterpret_cast<const CharT *>(format.GetText()), args...));
         else if (sizeof(EncodeType) == 4)
-            str.append(piv::format(reinterpret_cast<const CharT *>(PivW2U(format).GetText()), args...));
+            str.append(piv::format(reinterpret_cast<const CharT *>(PivW2U{format}.GetText()), args...));
         else
-            str.append(piv::format(reinterpret_cast<const CharT *>(PivW2A(format).GetText()), args...));
+            str.append(piv::format(reinterpret_cast<const CharT *>(PivW2A{format}.GetText()), args...));
         return *this;
     }
 
@@ -2252,9 +2360,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return InsertText(index, reinterpret_cast<const CharT *>(s.GetText()), (count == -1) ? s.GetLength() : count);
         else if (sizeof(EncodeType) == 4)
-            return InsertText(index, reinterpret_cast<const CharT *>(PivW2U(s).GetText()), count);
+            return InsertText(index, reinterpret_cast<const CharT *>(PivW2U{s}.GetText()), count);
         else
-            return InsertText(index, reinterpret_cast<const CharT *>(PivW2A(s).GetText()), count);
+            return InsertText(index, reinterpret_cast<const CharT *>(PivW2A{s}.GetText()), count);
     }
 
     /**
@@ -2432,9 +2540,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return FindFirstOf(reinterpret_cast<const CharT *>(chars.GetText()), pos);
         else if (sizeof(EncodeType) == 4)
-            return FindFirstOf(reinterpret_cast<const CharT *>(PivW2U(chars).GetText()), pos);
+            return FindFirstOf(reinterpret_cast<const CharT *>(PivW2U{chars}.GetText()), pos);
         else
-            return FindFirstOf(reinterpret_cast<const CharT *>(PivW2A(chars).GetText()), pos);
+            return FindFirstOf(reinterpret_cast<const CharT *>(PivW2A{chars}.GetText()), pos);
     }
 
     /**
@@ -2471,9 +2579,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return FindLastOf(reinterpret_cast<const CharT *>(chars.GetText()), pos);
         else if (sizeof(EncodeType) == 4)
-            return FindLastOf(reinterpret_cast<const CharT *>(PivW2U(chars).GetText()), pos);
+            return FindLastOf(reinterpret_cast<const CharT *>(PivW2U{chars}.GetText()), pos);
         else
-            return FindLastOf(reinterpret_cast<const CharT *>(PivW2A(chars).GetText()), pos);
+            return FindLastOf(reinterpret_cast<const CharT *>(PivW2A{chars}.GetText()), pos);
     }
 
     /**
@@ -2508,9 +2616,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return FindFirstNotOf(reinterpret_cast<const CharT *>(chars.GetText()), pos);
         else if (sizeof(EncodeType) == 4)
-            return FindFirstNotOf(reinterpret_cast<const CharT *>(PivW2U(chars).GetText()), pos);
+            return FindFirstNotOf(reinterpret_cast<const CharT *>(PivW2U{chars}.GetText()), pos);
         else
-            return FindFirstNotOf(reinterpret_cast<const CharT *>(PivW2A(chars).GetText()), pos);
+            return FindFirstNotOf(reinterpret_cast<const CharT *>(PivW2A{chars}.GetText()), pos);
     }
 
     /**
@@ -2547,9 +2655,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return FindLastNotOf(reinterpret_cast<const CharT *>(chars.GetText()), pos);
         else if (sizeof(EncodeType) == 4)
-            return FindLastNotOf(reinterpret_cast<const CharT *>(PivW2U(chars).GetText()), pos);
+            return FindLastNotOf(reinterpret_cast<const CharT *>(PivW2U{chars}.GetText()), pos);
         else
-            return FindLastNotOf(reinterpret_cast<const CharT *>(PivW2A(chars).GetText()), pos);
+            return FindLastNotOf(reinterpret_cast<const CharT *>(PivW2A{chars}.GetText()), pos);
     }
 
     /**
@@ -2591,9 +2699,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return SearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(text.GetText())}, pos, case_insensitive);
         else if (sizeof(EncodeType) == 4)
-            return SearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U(text).GetText())}, pos, case_insensitive);
+            return SearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{text}.GetText())}, pos, case_insensitive);
         else
-            return SearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A(text).GetText())}, pos, case_insensitive);
+            return SearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{text}.GetText())}, pos, case_insensitive);
     }
 
     /**
@@ -2633,9 +2741,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return ReverseSearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(text.GetText())}, pos, case_insensitive);
         else if (sizeof(EncodeType) == 4)
-            return ReverseSearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U(text).GetText())}, pos, case_insensitive);
+            return ReverseSearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{text}.GetText())}, pos, case_insensitive);
         else
-            return ReverseSearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A(text).GetText())}, pos, case_insensitive);
+            return ReverseSearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{text}.GetText())}, pos, case_insensitive);
     }
 
     /**
@@ -2722,9 +2830,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return EndOf(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(text.GetText())}, case_sensitive);
         else if (sizeof(EncodeType) == 4)
-            return EndOf(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U(text).GetText())}, case_sensitive);
+            return EndOf(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{text}.GetText())}, case_sensitive);
         else
-            return EndOf(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A(text).GetText())}, case_sensitive);
+            return EndOf(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{text}.GetText())}, case_sensitive);
     }
 
     /**
@@ -2784,9 +2892,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return Replace(pos, count, reinterpret_cast<const CharT *>(text.GetText()), -1);
         else if (sizeof(EncodeType) == 4)
-            return Replace(pos, count, reinterpret_cast<const CharT *>(PivW2U(text).GetText()), -1);
+            return Replace(pos, count, reinterpret_cast<const CharT *>(PivW2U{text}.GetText()), -1);
         else
-            return Replace(pos, count, reinterpret_cast<const CharT *>(PivW2A(text).GetText()), -1);
+            return Replace(pos, count, reinterpret_cast<const CharT *>(PivW2A{text}.GetText()), -1);
     }
 
     /**
@@ -3119,9 +3227,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return SplitStrings(reinterpret_cast<const CharT *>(delimit.GetText()), strArray, trimAll, ignoreEmptyStr, static_cast<size_t>(delimit.GetLength()));
         else if (sizeof(EncodeType) == 4)
-            return SplitStrings(reinterpret_cast<const CharT *>(PivW2U(delimit).GetText()), strArray, trimAll, ignoreEmptyStr);
+            return SplitStrings(reinterpret_cast<const CharT *>(PivW2U{delimit}.GetText()), strArray, trimAll, ignoreEmptyStr);
         else
-            return SplitStrings(reinterpret_cast<const CharT *>(PivW2A(delimit).GetText()), strArray, trimAll, ignoreEmptyStr);
+            return SplitStrings(reinterpret_cast<const CharT *>(PivW2A{delimit}.GetText()), strArray, trimAll, ignoreEmptyStr);
     }
 
     /**
@@ -3207,9 +3315,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return SplitSubStrings(reinterpret_cast<const CharT *>(delimit.GetText()), strArray, trimAll, ignoreEmptyStr, static_cast<size_t>(delimit.GetLength()));
         else if (sizeof(EncodeType) == 4)
-            return SplitSubStrings(reinterpret_cast<const CharT *>(PivW2U(delimit).GetText()), strArray, trimAll, ignoreEmptyStr);
+            return SplitSubStrings(reinterpret_cast<const CharT *>(PivW2U{delimit}.GetText()), strArray, trimAll, ignoreEmptyStr);
         else
-            return SplitSubStrings(reinterpret_cast<const CharT *>(PivW2A(delimit).GetText()), strArray, trimAll, ignoreEmptyStr);
+            return SplitSubStrings(reinterpret_cast<const CharT *>(PivW2A{delimit}.GetText()), strArray, trimAll, ignoreEmptyStr);
     }
 
     /**
@@ -3277,9 +3385,9 @@ public:
         if (sizeof(EncodeType) == 2)
             return CVolString(reinterpret_cast<const wchar_t *>(str.c_str()));
         else if (sizeof(EncodeType) == 4)
-            return PivU2W(reinterpret_cast<const char *>(str.c_str())).ToStr();
+            return PivU2W{reinterpret_cast<const char *>(str.c_str())}.ToStr();
         else
-            return PivA2W(reinterpret_cast<const char *>(str.c_str())).ToStr();
+            return PivA2W{reinterpret_cast<const char *>(str.c_str())}.ToStr();
     }
 
     /**
@@ -3373,6 +3481,113 @@ public:
     {
         std::transform(str.begin(), str.end(), str.begin(), std::toupper);
         return *this;
+    }
+
+    /**
+     * @brief URL编码
+     * @param utf8
+     * @return
+     */
+    PivString UrlEncode(const bool utf8 = true)
+    {
+        return PivString(piv::encoding::UrlStrEncode(str, utf8));
+    }
+
+    /**
+     * @brief URL解码
+     * @param utf8 是否为UTF-8编码
+     * @return
+     */
+    PivString UrlDecode(const bool utf8 = true)
+    {
+        return PivString(piv::encoding::UrlStrDecode(str, true, utf8));
+    }
+
+    /**
+     * @brief BASE64编码
+     * @return
+     */
+    PivString EncodeBase64(const int32_t line_len = 0)
+    {
+        return PivString(piv::base64<CharT>{}.encode(str, line_len));
+    }
+
+    /**
+     * @brief BASE64解码
+     * @return
+     */
+    PivString DecodeBase64()
+    {
+        return PivString(piv::base64<CharT>{}.decode(str));
+    }
+
+    /**
+     * @brief BASE64到字节集
+     * @return
+     */
+    CVolMem DecodeBase64Bin()
+    {
+        CVolMem buffer;
+        piv::base64<CharT>{}.decode(str, buffer);
+        return buffer;
+    }
+
+    /**
+     * @brief BASE85编码
+     * @return
+     */
+    PivString EncodeBase85(const bool padding = false)
+    {
+        return PivString(piv::base85<CharT>{}.encode(str, padding));
+    }
+
+    /**
+     * @brief BASE85解码
+     * @return
+     */
+    PivString DecodeBase85()
+    {
+        return PivString(piv::base85<CharT>{}.decode(str));
+    }
+
+    /**
+     * @brief BASE85到字节集
+     * @return
+     */
+    CVolMem DecodeBase85Bin()
+    {
+        CVolMem buffer;
+        piv::base85<CharT>{}.decode(str, buffer);
+        return buffer;
+    }
+
+    /**
+     * @brief BASE91编码
+     * @return
+     */
+    PivString EncodeBase91()
+    {
+        return PivString(piv::base91<CharT>{}.encode(str));
+    }
+
+    /**
+     * @brief BASE91解码
+     * @return
+     */
+    PivString DecodeBase91()
+    {
+        return PivString(piv::base91<CharT>{}.decode(str));
+    }
+
+    /**
+     * @brief BASE64到字节集
+     * @return
+     */
+    CVolMem DecodeBase91Bin()
+    {
+        CVolMem buffer;
+        piv::base91<CharT>{}.decode(str, buffer);
+        return buffer;
     }
 
 }; // PivString
