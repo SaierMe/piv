@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/06                          *
+ * 版本: 2023/02/09                          *
 \*********************************************/
 
 #ifndef _PIV_THREAD_POOL_HPP
@@ -260,7 +260,7 @@ public:
         return TRUE;
     }
     // 暂停
-    BOOL SuspendThreadPool()
+    inline BOOL SuspendThreadPool()
     {
         if (!m_ThreadPool || ::InterlockedCompareExchange(&m_ThreadPool->dwState, StateSuspend, StateNormal) != StateNormal)
             return FALSE;
@@ -269,7 +269,7 @@ public:
         return ::ResetEvent(m_ThreadPool->hEvent[2]);
     }
     // 继续
-    BOOL ResumeThreadPool()
+    inline BOOL ResumeThreadPool()
     {
         if (!m_ThreadPool || ::InterlockedCompareExchange(&m_ThreadPool->dwState, StateNormal, StateSuspend) != StateSuspend)
             return FALSE;
@@ -287,7 +287,7 @@ public:
         return TRUE;
     }
     // 投递任务
-    BOOL PostParamTask(void *lpThis, const ULONG_PTR lpThreadProc, const INT nUserMark = 0, const INT64 lUserParam = 0, const INT_P lpUserData = 0)
+    inline BOOL PostParamTask(void *lpThis, const ULONG_PTR lpThreadProc, const INT nUserMark = 0, const INT64 lUserParam = 0, const INT_P lpUserData = 0)
     {
         if (!m_ThreadPool || m_ThreadPool->dwState < StateNormal)
             return FALSE;
@@ -300,7 +300,7 @@ public:
                                             lpThreadProc, reinterpret_cast<LPOVERLAPPED>(lpParam));
     }
     // 投递对象
-    BOOL PostObjectTask(void *lpThis, const ULONG_PTR lpThreadProc, const INT nUserMark = 0, CVolObject &lpUserObj = CVolObject(), const INT_P lpUserData = 0)
+    inline BOOL PostObjectTask(void *lpThis, const ULONG_PTR lpThreadProc, const INT nUserMark = 0, CVolObject &lpUserObj = CVolObject(), const INT_P lpUserData = 0)
     {
         if (!m_ThreadPool || m_ThreadPool->dwState < StateNormal)
             return FALSE;
@@ -313,7 +313,7 @@ public:
                                             lpThreadProc, reinterpret_cast<LPOVERLAPPED>(lpParam));
     }
     // 清空任务
-    BOOL ClearTask()
+    inline BOOL ClearTask()
     {
         if (!m_ThreadPool)
             return FALSE;
@@ -387,7 +387,7 @@ public:
         return TRUE;
     }
     // CPU核心数
-    INT GetProcessorsCount()
+    inline INT GetProcessorsCount()
     {
         if (m_dwProcessors <= 0)
         {
@@ -398,47 +398,47 @@ public:
         return (m_dwProcessors <= 0) ? 1 : static_cast<INT>(m_dwProcessors);
     }
     // 现行线程数
-    INT GetThreadsCount() const
+    inline INT GetThreadsCount() const
     {
         return (!m_ThreadPool) ? 0 : static_cast<INT>(m_ThreadPool->dwThreadsCount);
     }
     // 线程池容量
-    INT GetThreadsCapacity() const
+    inline INT GetThreadsCapacity() const
     {
         return (!m_ThreadPool) ? 0 : static_cast<INT>(m_ThreadPool->dwCapacity);
     }
     // 执行任务数
-    INT GetWorkerTaskCount() const
+    inline INT GetWorkerTaskCount() const
     {
         return (!m_ThreadPool) ? 0 : static_cast<INT>(m_ThreadPool->dwWorkerTask);
     }
     // 队列任务数
-    INT64 GetQueueTaskCount() const
+    inline INT64 GetQueueTaskCount() const
     {
         return (!m_ThreadPool) ? 0 : static_cast<INT64>(static_cast<UINT64>(m_ThreadPool->dwQueueTask));
     }
     // 已完成任务数
-    INT64 GetComplateTaskCount() const
+    inline INT64 GetComplateTaskCount() const
     {
         return (!m_ThreadPool) ? 0 : static_cast<INT64>(static_cast<UINT64>(m_ThreadPool->dwComplateTask));
     }
     // 空闲线程数
-    INT GetFreeThreadsCount() const
+    inline INT GetFreeThreadsCount() const
     {
         return (!m_ThreadPool) ? 0 : static_cast<INT>(m_ThreadPool->dwThreadsCount - m_ThreadPool->dwWorkerTask);
     }
     // 工作状态
-    INT GetThreadPoolState() const
+    inline INT GetThreadPoolState() const
     {
         return (!m_ThreadPool) ? 0 : static_cast<INT>(m_ThreadPool->dwState);
     }
     // 是否空闲
-    BOOL ThreadPoolIsFree() const
+    inline BOOL ThreadPoolIsFree() const
     {
         return (!m_ThreadPool) ? TRUE : (m_ThreadPool->dwQueueTask == 0 && m_ThreadPool->dwWorkerTask == 0);
     }
     // 是否需要退出
-    BOOL IsNeedExit(const INT nMillseconds = 0)
+    inline BOOL IsNeedExit(const INT nMillseconds = 0)
     {
         if (m_hSemaphore)
             return (::WaitForSingleObject(m_hSemaphore, static_cast<DWORD>(nMillseconds)) == WAIT_OBJECT_0);
@@ -547,7 +547,7 @@ protected:
         return 0;
     }
     // (内部)UI线程下自动处理事件,防止窗口卡死
-    void ProcessMessage()
+    inline void ProcessMessage()
     {
         MSG msg;
         while (::PeekMessage(&msg, NULL, NULL, NULL, PM_NOREMOVE) && msg.message != WM_QUIT)
@@ -559,7 +559,7 @@ protected:
         }
     }
     // (内部)重置信号灯
-    void ReSetSemaphore()
+    inline void ReSetSemaphore()
     {
         if (m_hSemaphore)
         {
@@ -568,7 +568,7 @@ protected:
         }
     }
     // (内部)关闭IOCP和释放线程池参数
-    void CloseIOCP()
+    inline void CloseIOCP()
     {
         ::CloseHandle(m_ThreadPool->hCompletionPort);
         ::InterlockedExchange(&m_ThreadPool->dwState, StateClosed);
@@ -679,17 +679,17 @@ public:
         return TRUE;
     }
     // 最小线程数
-    INT GetThreadsMin() const
+    inline INT GetThreadsMin() const
     {
         return (!m_ThreadPool) ? 0 : static_cast<INT>(m_ThreadPool->dwThreadsMin);
     }
     // 获取动态线程周期
-    INT GetCycleMs() const
+    inline INT GetCycleMs() const
     {
         return (!m_ThreadPool) ? 0 : static_cast<INT>(m_ThreadPool->dwCycleMs);
     }
     // 设置动态线程周期
-    void SetCycleMs(INT nCycleMs)
+    inline void SetCycleMs(INT nCycleMs)
     {
         if (m_ThreadPool)
             m_ThreadPool->dwCycleMs = (nCycleMs < 100) ? 100 : static_cast<DWORD>(nCycleMs);

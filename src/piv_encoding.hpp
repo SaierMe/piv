@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/08                          *
+ * 版本: 2023/02/09                          *
 \*********************************************/
 
 #ifndef _PIV_ENCODING_HPP
@@ -342,7 +342,7 @@ public:
     {
         utf16str = s.utf16str;
     }
-    PivA2W(PivA2W &&s)
+    PivA2W(PivA2W &&s) noexcept
     {
         utf16str = std::move(s.utf16str);
     }
@@ -366,11 +366,11 @@ public:
         Convert(mbstr.c_str());
     }
 
-    operator const wchar_t *()
+    operator const wchar_t *() const
     {
         return utf16str.c_str();
     }
-    operator const std::wstring &()
+    operator const std::wstring &() const
     {
         return utf16str;
     }
@@ -378,11 +378,11 @@ public:
     {
         return utf16str;
     }
-    operator CVolString()
+    operator CVolString() const
     {
         return CVolString(utf16str.c_str());
     }
-    operator CVolMem()
+    operator CVolMem() const
     {
         return CVolMem(utf16str.c_str(), utf16str.size() * 2);
     }
@@ -391,7 +391,7 @@ public:
         utf16str = _PivA2W.utf16str;
         return *this;
     }
-    PivA2W &operator=(PivA2W &&_PivA2W)
+    PivA2W &operator=(PivA2W &&_PivA2W) noexcept
     {
         utf16str = std::move(_PivA2W.utf16str);
         return *this;
@@ -401,7 +401,7 @@ public:
         Convert(mbstr);
         return *this;
     }
-    bool operator==(const PivA2W &_PivA2W)
+    bool operator==(const PivA2W &_PivA2W) const
     {
         return utf16str == _PivA2W.utf16str;
     }
@@ -419,7 +419,7 @@ public:
      * @param mbstr 所欲转换的ANSI文本
      * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    void Convert(const char *mbstr, const size_t mbslen = static_cast<size_t>(-1))
+    inline void Convert(const char *mbstr, const size_t mbslen = static_cast<size_t>(-1))
     {
         piv::encoding::A2Wex(utf16str, mbstr, mbslen);
     }
@@ -428,7 +428,7 @@ public:
      * @brief 获取转换后的文本指针
      * @return 字符串指针
      */
-    const wchar_t *GetText()
+    inline const wchar_t *GetText() const
     {
         return utf16str.c_str();
     }
@@ -437,7 +437,7 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
-    size_t GetSize() const
+    inline size_t GetSize() const
     {
         return utf16str.size();
     }
@@ -446,7 +446,7 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    wchar_t *GetPtr()
+    inline wchar_t *GetPtr() const
     {
         return const_cast<wchar_t *>(utf16str.data());
     }
@@ -455,7 +455,7 @@ public:
      * @brief 判断转换后的文本是否为空
      * @return 为空时返回真,未执行转换前始终为真
      */
-    bool IsEmpty()
+    inline bool IsEmpty() const
     {
         return utf16str.empty();
     }
@@ -464,7 +464,7 @@ public:
      * @brief 返回内部文本(转换后)的参考
      * @return 转换后的std::basic_string参考
      */
-    std::wstring &String()
+    inline std::wstring &String()
     {
         return utf16str;
     }
@@ -473,7 +473,7 @@ public:
      * @brief 生成一个火山的文本型,其中包含了转换后的文本数据
      * @return 返回所转换的文本型
      */
-    CVolString ToStr()
+    inline CVolString ToStr() const
     {
         return CVolString(utf16str.c_str());
     }
@@ -482,7 +482,7 @@ public:
      * @brief 将转换后的文本数据复制火山的文本型
      * @param str 文本数据将复制到此文本型变量中
      */
-    void GetStr(CVolString &str)
+    inline void GetStr(CVolString &str) const
     {
         str.SetText(utf16str.c_str());
     }
@@ -492,7 +492,7 @@ public:
      * @param null_char 字节集是否带结尾0字符
      * @return 返回所转换的字节集
      */
-    CVolMem ToMem(const bool null_char = false)
+    inline CVolMem ToMem(const bool null_char = false) const
     {
         return CVolMem(utf16str.c_str(), (utf16str.size() + null_char ? 1 : 0) * 2);
     }
@@ -502,7 +502,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    void GetMem(CVolMem &mem, const bool null_char = false)
+    inline void GetMem(CVolMem &mem, const bool null_char = false) const
     {
         mem.Empty();
         mem.Append(utf16str.c_str(), (utf16str.size() + null_char ? 1 : 0) * 2);
@@ -532,7 +532,7 @@ public:
     {
         mbstr = s.mbstr;
     }
-    PivW2A(PivW2A &&s)
+    PivW2A(PivW2A &&s) noexcept
     {
         mbstr = std::move(s.mbstr);
     }
@@ -555,11 +555,11 @@ public:
         Convert(utf16str.GetText());
     }
 
-    operator const char *()
+    operator const char *() const
     {
         return mbstr.c_str();
     }
-    operator const std::string &()
+    operator const std::string &() const
     {
         return mbstr;
     }
@@ -567,7 +567,7 @@ public:
     {
         return mbstr;
     }
-    operator CVolMem()
+    operator CVolMem() const
     {
         return CVolMem(mbstr.c_str(), mbstr.size());
     }
@@ -576,7 +576,7 @@ public:
         mbstr = _PivW2A.mbstr;
         return *this;
     }
-    PivW2A &operator=(PivW2A &&_PivW2A)
+    PivW2A &operator=(PivW2A &&_PivW2A) noexcept
     {
         mbstr = std::move(_PivW2A.mbstr);
         return *this;
@@ -604,7 +604,7 @@ public:
      * @param mbstr 所欲转换的文本
      * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    void Convert(const wchar_t *utf16str, const size_t utf16len = static_cast<size_t>(-1))
+    inline void Convert(const wchar_t *utf16str, const size_t utf16len = static_cast<size_t>(-1))
     {
         piv::encoding::W2Aex(mbstr, utf16str, utf16len);
     }
@@ -613,7 +613,7 @@ public:
      * @brief 获取转换后的文本指针
      * @return 字符串指针
      */
-    const char *GetText()
+    inline const char *GetText() const
     {
         return mbstr.c_str();
     }
@@ -622,7 +622,7 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
-    size_t GetSize() const
+    inline size_t GetSize() const
     {
         return mbstr.size();
     }
@@ -631,7 +631,7 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    char *GetPtr()
+    inline char *GetPtr()
     {
         return const_cast<char *>(mbstr.data());
     }
@@ -640,7 +640,7 @@ public:
      * @brief 判断转换后的文本是否为空
      * @return 为空时返回真,未执行转换前始终为真
      */
-    bool IsEmpty()
+    inline bool IsEmpty() const
     {
         return mbstr.empty();
     }
@@ -649,7 +649,7 @@ public:
      * @brief 返回内部文本(转换后)的参考
      * @return 转换后的std::basic_string参考
      */
-    std::string &String()
+    inline std::string &String()
     {
         return mbstr;
     }
@@ -659,7 +659,7 @@ public:
      * @param null_char 字节集是否带结尾0字符
      * @return 返回所转换的字节集
      */
-    CVolMem ToMem(const bool null_char = false)
+    inline CVolMem ToMem(const bool null_char = false) const
     {
         return CVolMem(mbstr.c_str(), mbstr.size() + null_char ? 1 : 0);
     }
@@ -669,7 +669,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    void GetMem(CVolMem &mem, const bool null_char = false)
+    inline void GetMem(CVolMem &mem, const bool null_char = false) const
     {
         mem.Empty();
         mem.Append(mbstr.c_str(), mbstr.size() + null_char ? 1 : 0);
@@ -699,7 +699,7 @@ public:
     {
         utf8str = s.utf8str;
     }
-    PivW2U(PivW2U &&s)
+    PivW2U(PivW2U &&s) noexcept
     {
         utf8str = std::move(s.utf8str);
     }
@@ -722,15 +722,15 @@ public:
         Convert(utf16str.GetText());
     }
 
-    operator CVolMem()
+    operator CVolMem() const
     {
         return CVolMem(utf8str.c_str(), utf8str.size());
     }
-    operator const char *()
+    operator const char *() const
     {
         return utf8str.c_str();
     }
-    operator const std::string &()
+    operator const std::string &() const
     {
         return utf8str;
     }
@@ -743,7 +743,7 @@ public:
         utf8str = _PivW2U.utf8str;
         return *this;
     }
-    PivW2U &operator=(PivW2U &&_PivW2U)
+    PivW2U &operator=(PivW2U &&_PivW2U) noexcept
     {
         utf8str = std::move(_PivW2U.utf8str);
         return *this;
@@ -753,7 +753,7 @@ public:
         Convert(utf16str);
         return *this;
     }
-    bool operator==(const PivW2U &_PivW2U)
+    bool operator==(const PivW2U &_PivW2U) const
     {
         return utf8str == _PivW2U.utf8str;
     }
@@ -771,7 +771,7 @@ public:
      * @param mbstr 所欲转换的文本
      * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    void Convert(const wchar_t *utf16str, const size_t utf16len = static_cast<size_t>(-1))
+    inline void Convert(const wchar_t *utf16str, const size_t utf16len = static_cast<size_t>(-1))
     {
         piv::encoding::W2Uex(utf8str, utf16str, utf16len);
     }
@@ -780,7 +780,7 @@ public:
      * @brief 获取转换后的文本指针
      * @return 字符串指针
      */
-    const char *GetText()
+    inline const char *GetText() const
     {
         return utf8str.c_str();
     }
@@ -789,7 +789,7 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
-    size_t GetSize() const
+    inline size_t GetSize() const
     {
         return utf8str.size();
     }
@@ -798,7 +798,7 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    char *GetPtr()
+    inline char *GetPtr()
     {
         return const_cast<char *>(utf8str.data());
     }
@@ -807,7 +807,7 @@ public:
      * @brief 判断转换后的文本是否为空
      * @return 为空时返回真,未执行转换前始终为真
      */
-    bool IsEmpty()
+    inline bool IsEmpty() const
     {
         return utf8str.empty();
     }
@@ -816,7 +816,7 @@ public:
      * @brief 返回内部文本(转换后)的参考
      * @return 转换后的std::basic_string参考
      */
-    std::string &String()
+    inline std::string &String()
     {
         return utf8str;
     }
@@ -826,7 +826,7 @@ public:
      * @param null_char 字节集是否带结尾0字符
      * @return 返回所转换的字节集
      */
-    CVolMem ToMem(const bool null_char = false)
+    inline CVolMem ToMem(const bool null_char = false) const
     {
         return CVolMem(utf8str.c_str(), utf8str.size() + null_char ? 1 : 0);
     }
@@ -836,7 +836,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    void GetMem(CVolMem &mem, const bool null_char = false)
+    inline void GetMem(CVolMem &mem, const bool null_char = false) const
     {
         mem.Empty();
         mem.Append(utf8str.c_str(), utf8str.size() + null_char ? 1 : 0);
@@ -866,7 +866,7 @@ public:
     {
         utf16str = s.utf16str;
     }
-    PivU2W(PivU2W &&s)
+    PivU2W(PivU2W &&s) noexcept
     {
         utf16str = std::move(s.utf16str);
     }
@@ -890,11 +890,11 @@ public:
         Convert(utf8str.c_str());
     }
 
-    operator const wchar_t *()
+    operator const wchar_t *() const
     {
         return utf16str.c_str();
     }
-    operator const std::wstring &()
+    operator const std::wstring &() const
     {
         return utf16str;
     }
@@ -902,11 +902,11 @@ public:
     {
         return utf16str;
     }
-    operator CVolString()
+    operator CVolString() const
     {
         return CVolString(utf16str.c_str());
     }
-    operator CVolMem()
+    operator CVolMem() const
     {
         return CVolMem(utf16str.c_str(), utf16str.size() * 2);
     }
@@ -915,7 +915,7 @@ public:
         utf16str = _PivU2W.utf16str;
         return *this;
     }
-    PivU2W &operator=(PivU2W &&_PivU2W)
+    PivU2W &operator=(PivU2W &&_PivU2W) noexcept
     {
         utf16str = std::move(_PivU2W.utf16str);
         return *this;
@@ -925,7 +925,7 @@ public:
         Convert(utf8str);
         return *this;
     }
-    bool operator==(const PivU2W &_PivU2W)
+    bool operator==(const PivU2W &_PivU2W) const
     {
         return utf16str == _PivU2W.utf16str;
     }
@@ -943,7 +943,7 @@ public:
      * @param mbstr 所欲转换的文本
      * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    void Convert(const char *utf8str, const size_t utf8len = static_cast<size_t>(-1))
+    inline void Convert(const char *utf8str, const size_t utf8len = static_cast<size_t>(-1))
     {
         piv::encoding::U2Wex(utf16str, utf8str, utf8len);
     }
@@ -952,7 +952,7 @@ public:
      * @brief 获取转换后的文本指针
      * @return 字符串指针
      */
-    const wchar_t *GetText()
+    inline const wchar_t *GetText() const
     {
         return utf16str.c_str();
     }
@@ -961,7 +961,7 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
-    size_t GetSize() const
+    inline size_t GetSize() const
     {
         return utf16str.size();
     }
@@ -970,7 +970,7 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    wchar_t *GetPtr()
+    inline wchar_t *GetPtr()
     {
         return const_cast<wchar_t *>(utf16str.data());
     }
@@ -979,7 +979,7 @@ public:
      * @brief 判断转换后的文本是否为空
      * @return 为空时返回真,未执行转换前始终为真
      */
-    bool IsEmpty()
+    inline bool IsEmpty() const
     {
         return utf16str.empty();
     }
@@ -988,7 +988,7 @@ public:
      * @brief 返回内部文本(转换后)的参考
      * @return 转换后的std::basic_string参考
      */
-    std::wstring &String()
+    inline std::wstring &String()
     {
         return utf16str;
     }
@@ -997,7 +997,7 @@ public:
      * @brief 生成一个火山的文本型,其中包含了转换后的文本数据
      * @return 返回所转换的文本型
      */
-    CVolString ToStr()
+    inline CVolString ToStr() const
     {
         return CVolString(utf16str.c_str());
     }
@@ -1006,7 +1006,7 @@ public:
      * @brief 将转换后的文本数据复制火山的文本型
      * @param str 文本数据将复制到此文本型变量中
      */
-    void GetStr(CVolString &str)
+    inline void GetStr(CVolString &str) const
     {
         str.SetText(utf16str.c_str());
     }
@@ -1016,7 +1016,7 @@ public:
      * @param null_char 字节集是否带结尾0字符
      * @return 返回所转换的字节集
      */
-    CVolMem ToMem(const bool null_char = false)
+    inline CVolMem ToMem(const bool null_char = false) const
     {
         return CVolMem(utf16str.c_str(), (utf16str.size() + null_char ? 1 : 0) * 2);
     }
@@ -1026,7 +1026,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    void GetMem(CVolMem &mem, const bool null_char = false)
+    inline void GetMem(CVolMem &mem, const bool null_char = false) const
     {
         mem.Empty();
         mem.Append(utf16str.c_str(), (utf16str.size() + null_char ? 1 : 0) * 2);
@@ -1056,7 +1056,7 @@ public:
     {
         mbstr = s.mbstr;
     }
-    PivU2A(PivU2A &&s)
+    PivU2A(PivU2A &&s) noexcept
     {
         mbstr = std::move(s.mbstr);
     }
@@ -1080,15 +1080,15 @@ public:
         Convert(utf8str.c_str());
     }
 
-    operator const char *()
+    operator const char *() const
     {
         return mbstr.c_str();
     }
-    operator const std::string &()
+    operator const std::string &() const
     {
         return mbstr;
     }
-    operator CVolMem()
+    operator CVolMem() const
     {
         return CVolMem(mbstr.c_str(), mbstr.size());
     }
@@ -1097,7 +1097,7 @@ public:
         mbstr = _PivU2A.mbstr;
         return *this;
     }
-    PivU2A &operator=(PivU2A &&_PivU2A)
+    PivU2A &operator=(PivU2A &&_PivU2A) noexcept
     {
         mbstr = std::move(_PivU2A.mbstr);
         return *this;
@@ -1107,7 +1107,7 @@ public:
         Convert(utf8str);
         return *this;
     }
-    bool operator==(const PivU2A &_PivU2A)
+    bool operator==(const PivU2A &_PivU2A) const
     {
         return mbstr == _PivU2A.mbstr;
     }
@@ -1125,7 +1125,7 @@ public:
      * @param mbstr 所欲转换的文本
      * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    void Convert(const char *utf8str, const size_t utf8len = static_cast<size_t>(-1))
+    inline void Convert(const char *utf8str, const size_t utf8len = static_cast<size_t>(-1))
     {
         piv::encoding::U2Aex(mbstr, utf8str, utf8len);
     }
@@ -1134,7 +1134,7 @@ public:
      * @brief 获取转换后的文本指针
      * @return 字符串指针
      */
-    const char *GetText()
+    inline const char *GetText() const
     {
         return mbstr.c_str();
     }
@@ -1143,7 +1143,7 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
-    size_t GetSize() const
+    inline size_t GetSize() const
     {
         return mbstr.size();
     }
@@ -1152,7 +1152,7 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    char *GetPtr()
+    inline char *GetPtr()
     {
         return const_cast<char *>(mbstr.data());
     }
@@ -1161,7 +1161,7 @@ public:
      * @brief 判断转换后的文本是否为空
      * @return 为空时返回真,未执行转换前始终为真
      */
-    bool IsEmpty()
+    inline bool IsEmpty() const
     {
         return mbstr.empty();
     }
@@ -1170,7 +1170,7 @@ public:
      * @brief 返回内部文本(转换后)的参考
      * @return 转换后的std::basic_string参考
      */
-    std::string &string()
+    inline std::string &string()
     {
         return mbstr;
     }
@@ -1180,7 +1180,7 @@ public:
      * @param null_char 字节集是否带结尾0字符
      * @return 返回所转换的字节集
      */
-    CVolMem ToMem(const bool null_char = false)
+    inline CVolMem ToMem(const bool null_char = false) const
     {
         return CVolMem(mbstr.c_str(), mbstr.size() + null_char ? 1 : 0);
     }
@@ -1190,7 +1190,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    void GetMem(CVolMem &mem, const bool null_char = false)
+    inline void GetMem(CVolMem &mem, const bool null_char = false) const
     {
         mem.Empty();
         mem.Append(mbstr.c_str(), mbstr.size() + null_char ? 1 : 0);
@@ -1220,7 +1220,7 @@ public:
     {
         utf8str = s.utf8str;
     }
-    PivA2U(PivA2U &&s)
+    PivA2U(PivA2U &&s) noexcept
     {
         utf8str = std::move(s.utf8str);
     }
@@ -1244,15 +1244,15 @@ public:
         Convert(mbstr.c_str());
     }
 
-    operator const char *()
+    operator const char *() const
     {
         return utf8str.c_str();
     }
-    operator const std::string &()
+    operator const std::string &() const
     {
         return utf8str;
     }
-    operator CVolMem()
+    operator CVolMem() const
     {
         return CVolMem(utf8str.c_str(), utf8str.size());
     }
@@ -1261,7 +1261,7 @@ public:
         utf8str = _PivA2U.utf8str;
         return *this;
     }
-    PivA2U &operator=(PivA2U &&_PivA2U)
+    PivA2U &operator=(PivA2U &&_PivA2U) noexcept
     {
         utf8str = std::move(_PivA2U.utf8str);
         return *this;
@@ -1271,7 +1271,7 @@ public:
         Convert(mbstr);
         return *this;
     }
-    bool operator==(const PivA2U &_PivA2U)
+    bool operator==(const PivA2U &_PivA2U) const
     {
         return utf8str == _PivA2U.utf8str;
     }
@@ -1289,7 +1289,7 @@ public:
      * @param mbstr 所欲转换的文本
      * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    void Convert(const char *mbstr, const size_t mbslen = static_cast<size_t>(-1))
+    inline void Convert(const char *mbstr, const size_t mbslen = static_cast<size_t>(-1))
     {
         piv::encoding::A2Uex(utf8str, mbstr, mbslen);
     }
@@ -1298,7 +1298,7 @@ public:
      * @brief 获取转换后的文本指针
      * @return 字符串指针
      */
-    const char *GetText()
+    inline const char *GetText() const
     {
         return utf8str.c_str();
     }
@@ -1307,7 +1307,7 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
-    size_t GetSize() const
+    inline size_t GetSize() const
     {
         return utf8str.size();
     }
@@ -1316,7 +1316,7 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    char *GetPtr()
+    inline char *GetPtr()
     {
         return const_cast<char *>(utf8str.data());
     }
@@ -1325,7 +1325,7 @@ public:
      * @brief 判断转换后的文本是否为空
      * @return 为空时返回真,未执行转换前始终为真
      */
-    bool IsEmpty()
+    inline bool IsEmpty() const
     {
         return utf8str.empty();
     }
@@ -1334,7 +1334,7 @@ public:
      * @brief 返回内部文本(转换后)的参考
      * @return 转换后的std::basic_string参考
      */
-    std::string &String()
+    inline std::string &String()
     {
         return utf8str;
     }
@@ -1344,7 +1344,7 @@ public:
      * @param null_char 字节集是否带结尾0字符
      * @return 返回所转换的字节集
      */
-    CVolMem ToMem(const bool null_char = false)
+    inline CVolMem ToMem(const bool null_char = false) const
     {
         return CVolMem(utf8str.c_str(), utf8str.size() + null_char ? 1 : 0);
     }
@@ -1354,7 +1354,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    void GetMem(CVolMem &mem, const bool null_char = false)
+    inline void GetMem(CVolMem &mem, const bool null_char = false) const
     {
         mem.Empty();
         mem.Append(utf8str.c_str(), utf8str.size() + null_char ? 1 : 0);
@@ -1497,10 +1497,12 @@ namespace piv
         {
             piv::encoding::UrlStrDecode(basic_string_view<CharT>{str.c_str()}, decoded, utf8);
         }
+        template <typename = void>
         void UrlStrDecode(const CVolMem &str, CVolMem &decoded, const bool utf8 = true)
         {
             piv::encoding::UrlStrDecode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), decoded, utf8);
         }
+        template <typename = void>
         void UrlStrDecode(const CVolMem &str, CVolString &decoded, const bool utf8 = true)
         {
             CVolMem buffer;
@@ -1510,6 +1512,7 @@ namespace piv
             else
                 PivA2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.GetStr(decoded);
         }
+        template <typename = void>
         CVolString UrlStrDecode(const CVolMem &str, const bool utf8 = true)
         {
             CVolMem buffer;
@@ -1637,14 +1640,17 @@ namespace piv
         {
             piv::encoding::UrlStrEncode(std::basic_string<CharT>{str.c_str()}, encoded, utf8);
         }
+        template <typename = void>
         void UrlStrEncode(const CVolString &str, CVolMem &encoded, const bool utf8 = true)
         {
             piv::encoding::UrlStrEncode(wstring_view(str.GetText()), encoded, utf8);
         }
+        template <typename = void>
         void UrlStrEncode(const CVolMem &str, CVolMem &encoded)
         {
             piv::encoding::UrlStrEncode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), encoded);
         }
+        template <typename = void>
         void UrlStrEncode(const CVolMem &str, CVolString &encoded, const bool utf8 = true)
         {
             CVolMem buffer;
@@ -1654,6 +1660,7 @@ namespace piv
             else
                 PivA2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.GetStr(encoded);
         }
+        template <typename = void>
         CVolString UrlStrEncode(const CVolMem &str, const bool utf8 = true)
         {
             CVolMem buffer;
