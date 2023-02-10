@@ -236,7 +236,7 @@ public:
             {
                 std::basic_string<CharT> scheme_lower;
                 scheme_lower.resize(scheme.size());
-                std::transform(scheme.begin(), scheme.end(), scheme_lower.begin(), std::tolower);
+                std::transform(scheme.begin(), scheme.end(), scheme_lower.begin(), (int (*)(int))std::tolower);
                 if (scheme_lower.size() >= 4 && scheme_lower[0] == 'h' && scheme_lower[1] == 't' && scheme_lower[2] == 't' && scheme_lower[3] == 'p')
                 {
                     if (scheme_lower.size() >= 5 && scheme_lower[4] == 's')
@@ -377,7 +377,7 @@ public:
     inline CVolString GetUser(const bool utf8 = true) const
     {
         std::basic_string<CharT> str;
-        if (piv::encoding::UrlDecodeNeed(user.data(),user.size()))
+        if (piv::encoding::UrlDecodeNeed(user.data(), user.size()))
             piv::encoding::UrlStrDecode(user, str, utf8);
         else
             str.assign(user.data(), user.size());
@@ -402,7 +402,7 @@ public:
     inline CVolString GetPassword(const bool utf8 = true) const
     {
         std::basic_string<CharT> str;
-        if (piv::encoding::UrlDecodeNeed(password.data(),password.size()))
+        if (piv::encoding::UrlDecodeNeed(password.data(), password.size()))
             piv::encoding::UrlStrDecode(password, str, utf8);
         else
             str.assign(password.data(), password.size());

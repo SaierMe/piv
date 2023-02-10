@@ -1585,7 +1585,7 @@ public:
         {
             std::basic_string<CharT> upper;
             upper.resize(str.size());
-            std::transform(str.begin(), str.end(), upper.begin(), std::toupper);
+            std::transform(str.begin(), str.end(), upper.begin(), (int (*)(int))std::toupper);
             return std::hash<std::basic_string<CharT>>{}(upper);
         }
     }
@@ -3435,12 +3435,12 @@ public:
     {
         std::basic_string<CharT> lower;
         lower.resize(str.size());
-        std::transform(str.begin(), str.end(), lower.begin(), std::tolower);
+        std::transform(str.begin(), str.end(), lower.begin(), (int (*)(int))std::tolower);
         return lower;
     }
     inline PivString &ToLower()
     {
-        std::transform(str.begin(), str.end(), str.begin(), std::tolower);
+        std::transform(str.begin(), str.end(), str.begin(), (int (*)(int))std::tolower);
         return *this;
     }
 
@@ -3452,12 +3452,12 @@ public:
     {
         std::basic_string<CharT> upper;
         upper.resize(str.size());
-        std::transform(str.begin(), str.end(), upper.begin(), std::toupper);
+        std::transform(str.begin(), str.end(), upper.begin(), (int (*)(int))std::toupper);
         return upper;
     }
     inline PivString &ToUpper()
     {
-        std::transform(str.begin(), str.end(), str.begin(), std::toupper);
+        std::transform(str.begin(), str.end(), str.begin(), (int (*)(int))std::toupper);
         return *this;
     }
 
