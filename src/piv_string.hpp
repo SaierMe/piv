@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/09                          *
+ * 版本: 2023/02/10                          *
 \*********************************************/
 
 #ifndef _PIV_STRING_HPP
@@ -281,17 +281,13 @@ private:
 
 public:
     /**
-     * @brief 默认构造函数,空文本视窗
+     * @brief 默认构造和析构函数
      */
     PivStringView() {}
-
-    /**
-     * @brief 默认析构函数
-     */
     ~PivStringView() {}
 
     /**
-     * @brief 复制构造函数
+     * @brief 复制和移动构造函数
      * @param s 所欲复制的string_view
      * @param count 文本的字符长度
      * @param ptr 所欲复制的智能指针
@@ -1290,11 +1286,12 @@ public:
     /**
      * @brief URL编码
      * @param utf8
+     * @param ReservedWord 是否不编码保留字符
      * @return
      */
-    inline std::basic_string<CharT> UrlEncode(const bool utf8 = true) const
+    inline std::basic_string<CharT> UrlEncode(const bool utf8 = true, const bool ReservedWord = false) const
     {
-        return piv::encoding::UrlStrEncode(str, utf8);
+        return piv::encoding::UrlStrEncode(str, utf8, ReservedWord);
     }
 
     /**
@@ -1304,7 +1301,7 @@ public:
      */
     inline std::basic_string<CharT> UrlDecode(const bool utf8 = true) const
     {
-        return piv::encoding::UrlStrDecode(str, true, utf8);
+        return piv::encoding::UrlStrDecode(str, utf8);
     }
 
     /**
@@ -1409,17 +1406,13 @@ private:
 
 public:
     /**
-     * @brief 默认构造函数
+     * @brief 默认构造和析构函数
      */
     PivString() {}
-
-    /**
-     * @brief 默认析构函数
-     */
     ~PivString() {}
 
     /**
-     * @brief 复制构造函数
+     * @brief 复制和移动构造函数
      * @param s 所欲复制的文本
      * @param count 所欲复制的字符长度
      */
@@ -3471,11 +3464,12 @@ public:
     /**
      * @brief URL编码
      * @param utf8
+     * @param ReservedWord 是否不编码保留字符
      * @return
      */
-    inline PivString UrlEncode(const bool utf8 = true) const
+    inline PivString UrlEncode(const bool utf8 = true, const bool ReservedWord = false) const
     {
-        return PivString(piv::encoding::UrlStrEncode(str, utf8));
+        return PivString(piv::encoding::UrlStrEncode(str, utf8, ReservedWord));
     }
 
     /**
@@ -3485,7 +3479,7 @@ public:
      */
     inline PivString UrlDecode(const bool utf8 = true) const
     {
-        return PivString(piv::encoding::UrlStrDecode(str, true, utf8));
+        return PivString(piv::encoding::UrlStrDecode(str, utf8));
     }
 
     /**

@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/09                          *
+ * 版本: 2023/02/10                          *
 \*********************************************/
 
 #ifndef _PIV_ENCODING_HPP
@@ -184,18 +184,101 @@ namespace piv
         }
 
         /**
+         * @brief 是否有效URL编码字符
+         * @param c 所欲判断的字符
+         * @param Reserved 是否允许有特殊意义的保留字符
+         * @return 返回字符是否为有效的URL编码字符
+         */
+        static bool IsUrlValidWord(const int c, const bool Reserved = false) noexcept
+        {
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '.' || c == '~') // 安全字符
+                return true;
+            else if (Reserved && (c == ';' || c == '/' || c == '?' || c == ':' || c == '@' || c == '=' || c == '&')) // 保留字符
+                return true;
+            else
+                return false;
+        }
+
+        static bool IsValidAlphaNum(const int c) noexcept
+        {
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
+                return true;
+            else
+                return false;
+        }
+
+        /**
+         * @brief 判断是否需要URL编码
+         * @param lpszSrc 所欲编码的数据指针
+         * @param SrcLen 所欲编码的数据长度
+         * @param ReservedWord 是否不编码保留字符
+         * @return
+         */
+        static bool UrlEncodeNeed(const wchar_t *lpszSrc, const size_t SrcLen, const bool ReservedWord = false) noexcept
+        {
+            for (size_t i = 0; i < SrcLen; i++)
+            {
+                if (!(piv::encoding::IsUrlValidWord(lpszSrc[i], ReservedWord)))
+                {   // 判断是否已经URL编码
+                    if (lpszSrc[i] != '%' && (i + 2) >= SrcLen && !iswxdigit(static_cast<unsigned char>(lpszSrc[i + 1])) && !iswxdigit(static_cast<unsigned char>(lpszSrc[i + 2])))
+                        return true;
+                }
+            }
+            return false;
+        }
+        static bool UrlEncodeNeed(const char *lpszSrc, const size_t SrcLen, const bool ReservedWord = false) noexcept
+        {
+            for (size_t i = 0; i < SrcLen; i++)
+            {
+                if (!(piv::encoding::IsUrlValidWord(lpszSrc[i], ReservedWord)))
+                {   // 判断是否已经URL编码
+                    if (lpszSrc[i] != '%' && (i + 2) >= SrcLen && !isxdigit(static_cast<unsigned char>(lpszSrc[i + 1])) && !isxdigit(static_cast<unsigned char>(lpszSrc[i + 2])))
+                        return true;
+                }
+            }
+            return false;
+        }
+
+        /**
+         * @brief 判断是否需要URL解码
+         * @param lpszSrc 所欲编码的数据指针
+         * @param SrcLen 所欲编码的数据长度
+         * @param ReservedWord 是否不编码保留字符
+         * @return
+         */
+        static bool UrlDecodeNeed(const wchar_t *lpszSrc, const size_t SrcLen) noexcept
+        {
+            for (size_t i = 0; i < SrcLen; i++)
+            {
+                if (lpszSrc[i] == '%' && (i + 2) < SrcLen && iswxdigit(lpszSrc[i + 1]) && iswxdigit(lpszSrc[i + 2]))
+                    return true;
+            }
+            return false;
+        }
+        static bool UrlDecodeNeed(const char *lpszSrc, const size_t SrcLen) noexcept
+        {
+            for (size_t i = 0; i < SrcLen; i++)
+            {
+                if (lpszSrc[i] == '%' && (i + 2) < SrcLen && isxdigit(static_cast<unsigned char>(lpszSrc[i + 1])) && isxdigit(static_cast<unsigned char>(lpszSrc[i + 2])))
+                    return true;
+            }
+            return false;
+        }
+
+        /**
          * @brief 获取URL编码后的长度
          * @param lpszSrc 所欲编码的数据指针
          * @param SrcLen 所欲编码的数据长度
+         * @param ReservedWord 是否不编码保留字符
          * @return
          */
-        static ptrdiff_t GuessUrlEncodeBound(const BYTE *lpszSrc, const ptrdiff_t SrcLen)
+        static size_t GuessUrlEncodeBound(const unsigned char *lpszSrc, const size_t SrcLen, const bool ReservedWord = false) noexcept
         {
-            ptrdiff_t Add = 0;
-            for (ptrdiff_t i = 0; i < SrcLen; i++)
+            size_t Add = 0;
+            for (size_t i = 0; i < SrcLen; i++)
             {
-                BYTE c = lpszSrc[i];
-                if (!(isalnum(c) || c == ' ' || c == '.' || c == '-' || c == '_' || c == '*'))
+                unsigned char c = lpszSrc[i];
+                if (!(piv::encoding::IsUrlValidWord(lpszSrc[i], ReservedWord)) || c != ' ') // 空格需要特别对待
                     Add += 2;
             }
             return SrcLen + Add;
@@ -207,12 +290,12 @@ namespace piv
          * @param SrcLen 所欲解码的数据长度
          * @return
          */
-        static ptrdiff_t GuessUrlDecodeBound(const BYTE *lpszSrc, const ptrdiff_t SrcLen)
+        static ptrdiff_t GuessUrlDecodeBound(const unsigned char *lpszSrc, const size_t SrcLen) noexcept
         {
-            ptrdiff_t Percent = 0;
-            for (ptrdiff_t i = 0; i < SrcLen; i++)
+            size_t Percent = 0;
+            for (size_t i = 0; i < SrcLen; i++)
             {
-                if (lpszSrc[i] == '%')
+                if (lpszSrc[i] == '%' && (i + 2) < SrcLen && isxdigit(lpszSrc[i + 1]) && isxdigit(lpszSrc[i + 2]))
                 {
                     ++Percent;
                     i += 2;
@@ -227,20 +310,21 @@ namespace piv
          * @param SrcLen 所欲编码的数据长度
          * @param lpszDest 保存编码后数据的指针
          * @param DestLen 编码后数据的长度
+         * @param ReservedWord 是否不编码保留字符
          * @return
          */
-        static int32_t UrlEncode(const BYTE *lpszSrc, const ptrdiff_t SrcLen, BYTE *lpszDest, ptrdiff_t &DestLen)
+        static int32_t UrlEncode(const unsigned char *lpszSrc, const size_t SrcLen, unsigned char *lpszDest, size_t &DestLen, const bool ReservedWord = false) noexcept
         {
             if (lpszDest == nullptr || DestLen == 0)
                 goto ERROR_DEST_LEN;
-            BYTE c, n;
-            ptrdiff_t j = 0;
-            for (ptrdiff_t i = 0; i < SrcLen; i++)
+            unsigned char c, n;
+            size_t j = 0;
+            for (size_t i = 0; i < SrcLen; i++)
             {
                 if (j >= DestLen)
                     goto ERROR_DEST_LEN;
                 c = lpszSrc[i];
-                if (isalnum(c) || c == '.' || c == '-' || c == '_' || c == '*')
+                if (piv::encoding::IsUrlValidWord(lpszSrc[i], ReservedWord))
                     lpszDest[j++] = c;
                 else if (c == ' ')
                     lpszDest[j++] = '+';
@@ -275,13 +359,13 @@ namespace piv
          * @param DestLen 解码后数据的长度
          * @return
          */
-        static int32_t UrlDecode(const BYTE *lpszSrc, const ptrdiff_t SrcLen, BYTE *lpszDest, ptrdiff_t &DestLen)
+        static int32_t UrlDecode(const unsigned char *lpszSrc, const size_t SrcLen, unsigned char *lpszDest, size_t &DestLen) noexcept
         {
             if (lpszDest == nullptr || DestLen == 0)
                 goto ERROR_DEST_LEN;
-            BYTE c, n;
-            ptrdiff_t j = 0;
-            for (ptrdiff_t i = 0; i < SrcLen; i++)
+            unsigned char c, n;
+            size_t j = 0;
+            for (size_t i = 0; i < SrcLen; i++)
             {
                 if (j >= DestLen)
                     goto ERROR_DEST_LEN;
@@ -335,7 +419,7 @@ public:
     ~PivA2W() {}
 
     /**
-     * @brief 默认复制构造函数
+     * @brief 复制和移动构造函数
      * @param s 所欲复制的对象
      */
     PivA2W(const PivA2W &s)
@@ -366,15 +450,15 @@ public:
         Convert(mbstr.c_str());
     }
 
-    operator const wchar_t *() const
+    operator const wchar_t *() const noexcept
     {
         return utf16str.c_str();
     }
-    operator const std::wstring &() const
+    operator const std::wstring &() const noexcept
     {
         return utf16str;
     }
-    operator std::wstring &()
+    operator std::wstring &() noexcept
     {
         return utf16str;
     }
@@ -401,7 +485,7 @@ public:
         Convert(mbstr);
         return *this;
     }
-    bool operator==(const PivA2W &_PivA2W) const
+    bool operator==(const PivA2W &_PivA2W) const noexcept
     {
         return utf16str == _PivA2W.utf16str;
     }
@@ -428,7 +512,7 @@ public:
      * @brief 获取转换后的文本指针
      * @return 字符串指针
      */
-    inline const wchar_t *GetText() const
+    inline const wchar_t *GetText() const noexcept
     {
         return utf16str.c_str();
     }
@@ -437,7 +521,7 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
-    inline size_t GetSize() const
+    inline size_t GetSize() const noexcept
     {
         return utf16str.size();
     }
@@ -446,7 +530,7 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline wchar_t *GetPtr() const
+    inline wchar_t *GetPtr() const noexcept
     {
         return const_cast<wchar_t *>(utf16str.data());
     }
@@ -455,7 +539,7 @@ public:
      * @brief 判断转换后的文本是否为空
      * @return 为空时返回真,未执行转换前始终为真
      */
-    inline bool IsEmpty() const
+    inline bool IsEmpty() const noexcept
     {
         return utf16str.empty();
     }
@@ -464,7 +548,7 @@ public:
      * @brief 返回内部文本(转换后)的参考
      * @return 转换后的std::basic_string参考
      */
-    inline std::wstring &String()
+    inline std::wstring &String() noexcept
     {
         return utf16str;
     }
@@ -494,7 +578,7 @@ public:
      */
     inline CVolMem ToMem(const bool null_char = false) const
     {
-        return CVolMem(utf16str.c_str(), (utf16str.size() + null_char ? 1 : 0) * 2);
+        return CVolMem(utf16str.c_str(), (utf16str.size() + (null_char ? 1 : 0)) * 2);
     }
 
     /**
@@ -505,7 +589,7 @@ public:
     inline void GetMem(CVolMem &mem, const bool null_char = false) const
     {
         mem.Empty();
-        mem.Append(utf16str.c_str(), (utf16str.size() + null_char ? 1 : 0) * 2);
+        mem.Append(utf16str.c_str(), (utf16str.size() + (null_char ? 1 : 0)) * 2);
     }
 }; // PivA2W
 
@@ -525,7 +609,7 @@ public:
     ~PivW2A() {}
 
     /**
-     * @brief 默认复制构造函数
+     * @brief 复制和移动构造函数
      * @param s 所欲复制的对象
      */
     PivW2A(const PivW2A &s)
@@ -555,15 +639,15 @@ public:
         Convert(utf16str.GetText());
     }
 
-    operator const char *() const
+    operator const char *() const noexcept
     {
         return mbstr.c_str();
     }
-    operator const std::string &() const
+    operator const std::string &() const noexcept
     {
         return mbstr;
     }
-    operator std::string &()
+    operator std::string &() noexcept
     {
         return mbstr;
     }
@@ -613,7 +697,7 @@ public:
      * @brief 获取转换后的文本指针
      * @return 字符串指针
      */
-    inline const char *GetText() const
+    inline const char *GetText() const noexcept
     {
         return mbstr.c_str();
     }
@@ -622,7 +706,7 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
-    inline size_t GetSize() const
+    inline size_t GetSize() const noexcept
     {
         return mbstr.size();
     }
@@ -631,7 +715,7 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline char *GetPtr()
+    inline char *GetPtr() noexcept
     {
         return const_cast<char *>(mbstr.data());
     }
@@ -640,7 +724,7 @@ public:
      * @brief 判断转换后的文本是否为空
      * @return 为空时返回真,未执行转换前始终为真
      */
-    inline bool IsEmpty() const
+    inline bool IsEmpty() const noexcept
     {
         return mbstr.empty();
     }
@@ -649,7 +733,7 @@ public:
      * @brief 返回内部文本(转换后)的参考
      * @return 转换后的std::basic_string参考
      */
-    inline std::string &String()
+    inline std::string &String() noexcept
     {
         return mbstr;
     }
@@ -661,7 +745,7 @@ public:
      */
     inline CVolMem ToMem(const bool null_char = false) const
     {
-        return CVolMem(mbstr.c_str(), mbstr.size() + null_char ? 1 : 0);
+        return CVolMem(mbstr.c_str(), mbstr.size() + (null_char ? 1 : 0));
     }
 
     /**
@@ -672,7 +756,7 @@ public:
     inline void GetMem(CVolMem &mem, const bool null_char = false) const
     {
         mem.Empty();
-        mem.Append(mbstr.c_str(), mbstr.size() + null_char ? 1 : 0);
+        mem.Append(mbstr.c_str(), mbstr.size() + (null_char ? 1 : 0));
     }
 }; // PivW2A
 
@@ -692,7 +776,7 @@ public:
     ~PivW2U() {}
 
     /**
-     * @brief 默认复制构造函数
+     * @brief 复制和移动构造函数
      * @param s 所欲复制的对象
      */
     PivW2U(const PivW2U &s)
@@ -726,11 +810,11 @@ public:
     {
         return CVolMem(utf8str.c_str(), utf8str.size());
     }
-    operator const char *() const
+    operator const char *() const noexcept
     {
         return utf8str.c_str();
     }
-    operator const std::string &() const
+    operator const std::string &() const noexcept
     {
         return utf8str;
     }
@@ -753,7 +837,7 @@ public:
         Convert(utf16str);
         return *this;
     }
-    bool operator==(const PivW2U &_PivW2U) const
+    bool operator==(const PivW2U &_PivW2U) const noexcept
     {
         return utf8str == _PivW2U.utf8str;
     }
@@ -780,7 +864,7 @@ public:
      * @brief 获取转换后的文本指针
      * @return 字符串指针
      */
-    inline const char *GetText() const
+    inline const char *GetText() const noexcept
     {
         return utf8str.c_str();
     }
@@ -789,7 +873,7 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
-    inline size_t GetSize() const
+    inline size_t GetSize() const noexcept
     {
         return utf8str.size();
     }
@@ -798,7 +882,7 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline char *GetPtr()
+    inline char *GetPtr() noexcept
     {
         return const_cast<char *>(utf8str.data());
     }
@@ -807,7 +891,7 @@ public:
      * @brief 判断转换后的文本是否为空
      * @return 为空时返回真,未执行转换前始终为真
      */
-    inline bool IsEmpty() const
+    inline bool IsEmpty() const noexcept
     {
         return utf8str.empty();
     }
@@ -816,7 +900,7 @@ public:
      * @brief 返回内部文本(转换后)的参考
      * @return 转换后的std::basic_string参考
      */
-    inline std::string &String()
+    inline std::string &String() noexcept
     {
         return utf8str;
     }
@@ -828,7 +912,7 @@ public:
      */
     inline CVolMem ToMem(const bool null_char = false) const
     {
-        return CVolMem(utf8str.c_str(), utf8str.size() + null_char ? 1 : 0);
+        return CVolMem(utf8str.c_str(), utf8str.size() + (null_char ? 1 : 0));
     }
 
     /**
@@ -839,7 +923,7 @@ public:
     inline void GetMem(CVolMem &mem, const bool null_char = false) const
     {
         mem.Empty();
-        mem.Append(utf8str.c_str(), utf8str.size() + null_char ? 1 : 0);
+        mem.Append(utf8str.c_str(), utf8str.size() + (null_char ? 1 : 0));
     }
 }; // PivW2U
 
@@ -859,7 +943,7 @@ public:
     ~PivU2W() {}
 
     /**
-     * @brief 默认复制构造函数
+     * @brief 复制和移动构造函数
      * @param s 所欲复制的对象
      */
     PivU2W(const PivU2W &s)
@@ -890,11 +974,11 @@ public:
         Convert(utf8str.c_str());
     }
 
-    operator const wchar_t *() const
+    operator const wchar_t *() const noexcept
     {
         return utf16str.c_str();
     }
-    operator const std::wstring &() const
+    operator const std::wstring &() const noexcept
     {
         return utf16str;
     }
@@ -925,7 +1009,7 @@ public:
         Convert(utf8str);
         return *this;
     }
-    bool operator==(const PivU2W &_PivU2W) const
+    bool operator==(const PivU2W &_PivU2W) const noexcept
     {
         return utf16str == _PivU2W.utf16str;
     }
@@ -952,7 +1036,7 @@ public:
      * @brief 获取转换后的文本指针
      * @return 字符串指针
      */
-    inline const wchar_t *GetText() const
+    inline const wchar_t *GetText() const noexcept
     {
         return utf16str.c_str();
     }
@@ -961,7 +1045,7 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
-    inline size_t GetSize() const
+    inline size_t GetSize() const noexcept
     {
         return utf16str.size();
     }
@@ -970,7 +1054,7 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline wchar_t *GetPtr()
+    inline wchar_t *GetPtr() noexcept
     {
         return const_cast<wchar_t *>(utf16str.data());
     }
@@ -979,7 +1063,7 @@ public:
      * @brief 判断转换后的文本是否为空
      * @return 为空时返回真,未执行转换前始终为真
      */
-    inline bool IsEmpty() const
+    inline bool IsEmpty() const noexcept
     {
         return utf16str.empty();
     }
@@ -988,7 +1072,7 @@ public:
      * @brief 返回内部文本(转换后)的参考
      * @return 转换后的std::basic_string参考
      */
-    inline std::wstring &String()
+    inline std::wstring &String() noexcept
     {
         return utf16str;
     }
@@ -1018,7 +1102,7 @@ public:
      */
     inline CVolMem ToMem(const bool null_char = false) const
     {
-        return CVolMem(utf16str.c_str(), (utf16str.size() + null_char ? 1 : 0) * 2);
+        return CVolMem(utf16str.c_str(), (utf16str.size() + (null_char ? 1 : 0)) * 2);
     }
 
     /**
@@ -1029,7 +1113,7 @@ public:
     inline void GetMem(CVolMem &mem, const bool null_char = false) const
     {
         mem.Empty();
-        mem.Append(utf16str.c_str(), (utf16str.size() + null_char ? 1 : 0) * 2);
+        mem.Append(utf16str.c_str(), (utf16str.size() + (null_char ? 1 : 0)) * 2);
     }
 }; // PivU2W
 
@@ -1049,7 +1133,7 @@ public:
     ~PivU2A() {}
 
     /**
-     * @brief 默认复制构造函数
+     * @brief 复制和移动构造函数
      * @param s 所欲复制的对象
      */
     PivU2A(const PivU2A &s)
@@ -1080,11 +1164,11 @@ public:
         Convert(utf8str.c_str());
     }
 
-    operator const char *() const
+    operator const char *() const noexcept
     {
         return mbstr.c_str();
     }
-    operator const std::string &() const
+    operator const std::string &() const noexcept
     {
         return mbstr;
     }
@@ -1107,7 +1191,7 @@ public:
         Convert(utf8str);
         return *this;
     }
-    bool operator==(const PivU2A &_PivU2A) const
+    bool operator==(const PivU2A &_PivU2A) const noexcept
     {
         return mbstr == _PivU2A.mbstr;
     }
@@ -1134,7 +1218,7 @@ public:
      * @brief 获取转换后的文本指针
      * @return 字符串指针
      */
-    inline const char *GetText() const
+    inline const char *GetText() const noexcept
     {
         return mbstr.c_str();
     }
@@ -1143,7 +1227,7 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
-    inline size_t GetSize() const
+    inline size_t GetSize() const noexcept
     {
         return mbstr.size();
     }
@@ -1152,7 +1236,7 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline char *GetPtr()
+    inline char *GetPtr() noexcept
     {
         return const_cast<char *>(mbstr.data());
     }
@@ -1161,7 +1245,7 @@ public:
      * @brief 判断转换后的文本是否为空
      * @return 为空时返回真,未执行转换前始终为真
      */
-    inline bool IsEmpty() const
+    inline bool IsEmpty() const noexcept
     {
         return mbstr.empty();
     }
@@ -1170,7 +1254,7 @@ public:
      * @brief 返回内部文本(转换后)的参考
      * @return 转换后的std::basic_string参考
      */
-    inline std::string &string()
+    inline std::string &string() noexcept
     {
         return mbstr;
     }
@@ -1182,7 +1266,7 @@ public:
      */
     inline CVolMem ToMem(const bool null_char = false) const
     {
-        return CVolMem(mbstr.c_str(), mbstr.size() + null_char ? 1 : 0);
+        return CVolMem(mbstr.c_str(), mbstr.size() + (null_char ? 1 : 0));
     }
 
     /**
@@ -1193,7 +1277,7 @@ public:
     inline void GetMem(CVolMem &mem, const bool null_char = false) const
     {
         mem.Empty();
-        mem.Append(mbstr.c_str(), mbstr.size() + null_char ? 1 : 0);
+        mem.Append(mbstr.c_str(), mbstr.size() + (null_char ? 1 : 0));
     }
 }; // PivU2A
 
@@ -1213,7 +1297,7 @@ public:
     ~PivA2U() {}
 
     /**
-     * @brief 默认复制构造函数
+     * @brief 复制和移动构造函数
      * @param s 所欲复制的对象
      */
     PivA2U(const PivA2U &s)
@@ -1244,11 +1328,11 @@ public:
         Convert(mbstr.c_str());
     }
 
-    operator const char *() const
+    operator const char *() const noexcept
     {
         return utf8str.c_str();
     }
-    operator const std::string &() const
+    operator const std::string &() const noexcept
     {
         return utf8str;
     }
@@ -1271,7 +1355,7 @@ public:
         Convert(mbstr);
         return *this;
     }
-    bool operator==(const PivA2U &_PivA2U) const
+    bool operator==(const PivA2U &_PivA2U) const noexcept
     {
         return utf8str == _PivA2U.utf8str;
     }
@@ -1298,7 +1382,7 @@ public:
      * @brief 获取转换后的文本指针
      * @return 字符串指针
      */
-    inline const char *GetText() const
+    inline const char *GetText() const noexcept
     {
         return utf8str.c_str();
     }
@@ -1307,7 +1391,7 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
-    inline size_t GetSize() const
+    inline size_t GetSize() const noexcept
     {
         return utf8str.size();
     }
@@ -1316,7 +1400,7 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline char *GetPtr()
+    inline char *GetPtr() noexcept
     {
         return const_cast<char *>(utf8str.data());
     }
@@ -1325,7 +1409,7 @@ public:
      * @brief 判断转换后的文本是否为空
      * @return 为空时返回真,未执行转换前始终为真
      */
-    inline bool IsEmpty() const
+    inline bool IsEmpty() const noexcept
     {
         return utf8str.empty();
     }
@@ -1334,7 +1418,7 @@ public:
      * @brief 返回内部文本(转换后)的参考
      * @return 转换后的std::basic_string参考
      */
-    inline std::string &String()
+    inline std::string &String() noexcept
     {
         return utf8str;
     }
@@ -1346,7 +1430,7 @@ public:
      */
     inline CVolMem ToMem(const bool null_char = false) const
     {
-        return CVolMem(utf8str.c_str(), utf8str.size() + null_char ? 1 : 0);
+        return CVolMem(utf8str.c_str(), utf8str.size() + (null_char ? 1 : 0));
     }
 
     /**
@@ -1357,7 +1441,7 @@ public:
     inline void GetMem(CVolMem &mem, const bool null_char = false) const
     {
         mem.Empty();
-        mem.Append(utf8str.c_str(), utf8str.size() + null_char ? 1 : 0);
+        mem.Append(utf8str.c_str(), utf8str.size() + (null_char ? 1 : 0));
     }
 }; // PivA2U
 
@@ -1369,72 +1453,61 @@ namespace piv
          * @brief URL文本解码
          * @param str 所欲解码的文本
          * @param decoded 返回解码后的文本
-         * @param urlDecode 是否进行URL解码
          * @param utf8 是否为UTF-8编码
          */
         template <typename CharT>
-        void UrlStrDecode(const basic_string_view<CharT> &str, std::basic_string<CharT> &decoded, const bool urlDecode = true, const bool utf8 = true)
+        void UrlStrDecode(const basic_string_view<CharT> &str, std::basic_string<CharT> &decoded, const bool utf8 = true)
         {
             if (str.size() == 0)
             {
                 decoded.clear();
                 return;
             }
-            if (urlDecode)
+            if (piv::encoding::UrlDecodeNeed(str.data(), str.size()))
             {
-                ptrdiff_t buffer_len;
+                size_t buffer_len;
                 if (sizeof(CharT) == 2)
                 {
+                    std::string buffer;
                     if (utf8)
                     {
                         PivW2U urlstr(reinterpret_cast<const wchar_t *>(str.data()), str.size());
-                        buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const BYTE *>(urlstr.GetPtr()), urlstr.GetSize());
-                        if (buffer_len > 0 && buffer_len < static_cast<ptrdiff_t>(urlstr.GetSize()))
-                        {
-                            std::string buffer;
-                            buffer.resize(static_cast<size_t>(buffer_len));
-                            piv::encoding::UrlDecode(reinterpret_cast<const BYTE *>(urlstr.GetPtr()), urlstr.GetSize(), const_cast<BYTE *>(reinterpret_cast<const BYTE *>(buffer.data())), buffer_len);
-                            decoded.assign(reinterpret_cast<const CharT *>(PivU2W{buffer.c_str()}.GetText()));
-                            return;
-                        }
+                        buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(urlstr.GetPtr()), urlstr.GetSize());
+                        buffer.resize(buffer_len);
+                        piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(urlstr.GetPtr()), urlstr.GetSize(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(buffer.data())), buffer_len);
+                        decoded.assign(reinterpret_cast<const CharT *>(PivU2W{buffer.c_str()}.GetText()));
+                        return;
                     }
                     else
                     {
                         PivW2A urlstr(reinterpret_cast<const wchar_t *>(str.data()), str.size());
-                        buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const BYTE *>(urlstr.GetPtr()), urlstr.GetSize());
-                        if (buffer_len > 0 && buffer_len < static_cast<ptrdiff_t>(urlstr.GetSize()))
-                        {
-                            std::string buffer;
-                            buffer.resize(static_cast<size_t>(buffer_len));
-                            piv::encoding::UrlDecode(reinterpret_cast<const BYTE *>(urlstr.GetPtr()), urlstr.GetSize(), const_cast<BYTE *>(reinterpret_cast<const BYTE *>(buffer.data())), buffer_len);
-                            decoded.assign(reinterpret_cast<const CharT *>(PivA2W{buffer.c_str()}.GetText()));
-                            return;
-                        }
+                        buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(urlstr.GetPtr()), urlstr.GetSize());
+                        buffer.resize(buffer_len);
+                        piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(urlstr.GetPtr()), urlstr.GetSize(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(buffer.data())), buffer_len);
+                        decoded.assign(reinterpret_cast<const CharT *>(PivA2W{buffer.c_str()}.GetText()));
+                        return;
                     }
                 }
                 else
                 {
-                    buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const BYTE *>(str.data()), str.size());
-                    if (buffer_len > 0 && buffer_len < static_cast<ptrdiff_t>(str.size()))
-                    {
-                        decoded.resize(static_cast<size_t>(buffer_len));
-                        piv::encoding::UrlDecode(reinterpret_cast<const BYTE *>(str.data()), str.size(), const_cast<BYTE *>(reinterpret_cast<const BYTE *>(decoded.data())), buffer_len);
-                        return;
-                    }
+                    buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(str.data()), str.size());
+                    decoded.resize(buffer_len);
+                    piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(str.data()), str.size(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(decoded.data())), buffer_len);
+                    return;
                 }
             }
             decoded.assign(str.data(), str.size());
         }
         template <typename CharT>
-        void UrlStrDecode(const std::basic_string<CharT> &str, std::basic_string<CharT> &decoded, const bool urlDecode = true, const bool utf8 = true)
+        void UrlStrDecode(const std::basic_string<CharT> &str, std::basic_string<CharT> &decoded, const bool utf8 = true)
         {
-            piv::encoding::UrlStrDecode(basic_string_view<CharT>{str}, decoded, urlDecode, utf8);
+            piv::encoding::UrlStrDecode(basic_string_view<CharT>{str}, decoded, utf8);
         }
         template <typename CharT>
-        std::basic_string<CharT> UrlStrDecode(const basic_string_view<CharT> &str, const bool urlDecode = true, const bool utf8 = true)
+        std::basic_string<CharT> UrlStrDecode(const basic_string_view<CharT> &str, const bool utf8 = true)
         {
             std::basic_string<CharT> decoded;
-            piv::encoding::UrlStrDecode(str, decoded, urlDecode, utf8);
+            piv::encoding::UrlStrDecode(str, decoded, utf8);
             return decoded;
         }
         template <typename CharT>
@@ -1451,42 +1524,36 @@ namespace piv
             {
                 return;
             }
-            ptrdiff_t buffer_len;
-            if (sizeof(CharT) == 2)
+            size_t buffer_len;
+            if (piv::encoding::UrlDecodeNeed(str.data(), str.size()))
             {
-                if (utf8)
+
+                if (sizeof(CharT) == 2)
                 {
-                    PivW2U urlstr(reinterpret_cast<const wchar_t *>(str.data()), str.size());
-                    buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const BYTE *>(urlstr.GetPtr()), urlstr.GetSize());
-                    if (buffer_len > 0 && buffer_len < static_cast<ptrdiff_t>(urlstr.GetSize()))
+                    std::string buffer;
+                    if (utf8)
                     {
-                        std::string buffer;
-                        buffer.resize(static_cast<size_t>(buffer_len));
-                        piv::encoding::UrlDecode(reinterpret_cast<const BYTE *>(urlstr.GetPtr()), urlstr.GetSize(), const_cast<BYTE *>(reinterpret_cast<const BYTE *>(buffer.data())), buffer_len);
+                        PivW2U urlstr(reinterpret_cast<const wchar_t *>(str.data()), str.size());
+                        buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(urlstr.GetPtr()), urlstr.GetSize());
+                        buffer.resize(buffer_len);
+                        piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(urlstr.GetPtr()), urlstr.GetSize(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(buffer.data())), buffer_len);
                         PivU2W{buffer.c_str()}.GetMem(decoded);
+                        return;
+                    }
+                    else
+                    {
+                        PivW2A urlstr(reinterpret_cast<const wchar_t *>(str.data()), str.size());
+                        buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(urlstr.GetPtr()), urlstr.GetSize());
+                        buffer.resize(buffer_len);
+                        piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(urlstr.GetPtr()), urlstr.GetSize(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(buffer.data())), buffer_len);
+                        PivA2W{buffer.c_str()}.GetMem(decoded);
                         return;
                     }
                 }
                 else
                 {
-                    PivW2A urlstr(reinterpret_cast<const wchar_t *>(str.data()), str.size());
-                    buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const BYTE *>(urlstr.GetPtr()), urlstr.GetSize());
-                    if (buffer_len > 0 && buffer_len < static_cast<ptrdiff_t>(urlstr.GetSize()))
-                    {
-                        std::string buffer;
-                        buffer.resize(static_cast<size_t>(buffer_len));
-                        piv::encoding::UrlDecode(reinterpret_cast<const BYTE *>(urlstr.GetPtr()), urlstr.GetSize(), const_cast<BYTE *>(reinterpret_cast<const BYTE *>(buffer.data())), buffer_len);
-                        PivA2W{buffer.c_str()}.GetMem(decoded);
-                        return;
-                    }
-                }
-            }
-            else
-            {
-                buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const BYTE *>(str.data()), str.size());
-                if (buffer_len > 0 && buffer_len < static_cast<ptrdiff_t>(str.size()))
-                {
-                    piv::encoding::UrlDecode(reinterpret_cast<const BYTE *>(str.data()), str.size(), decoded.Alloc(buffer_len, TRUE), buffer_len);
+                    buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(str.data()), str.size());
+                    piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(str.data()), str.size(), decoded.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len);
                     return;
                 }
             }
@@ -1505,22 +1572,30 @@ namespace piv
         template <typename = void>
         void UrlStrDecode(const CVolMem &str, CVolString &decoded, const bool utf8 = true)
         {
-            CVolMem buffer;
-            piv::encoding::UrlStrDecode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), buffer, utf8);
-            if (utf8)
-                PivU2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.GetStr(decoded);
+            if (piv::encoding::UrlDecodeNeed(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.size())))
+            {
+                CVolMem buffer;
+                piv::encoding::UrlStrDecode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), buffer, utf8);
+                if (utf8)
+                    PivU2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.GetStr(decoded);
+                else
+                    PivA2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.GetStr(decoded);
+            }
             else
-                PivA2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.GetStr(decoded);
+            {
+                if (utf8)
+                    PivU2W{reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())}.GetStr(decoded);
+                else
+                    PivA2W{reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())}.GetStr(decoded);
+            }
         }
         template <typename = void>
         CVolString UrlStrDecode(const CVolMem &str, const bool utf8 = true)
         {
+            CVolString decoded;
+            piv::encoding::UrlStrDecode(str, decoded, utf8);
+            return decoded;
             CVolMem buffer;
-            piv::encoding::UrlStrDecode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), buffer, utf8);
-            if (utf8)
-                return PivU2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.ToStr();
-            else
-                return PivA2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.ToStr();
         }
 
         /**
@@ -1528,147 +1603,145 @@ namespace piv
          * @param str 所欲编码的文本
          * @param encoded 返回编码后的文本
          * @param utf8 是否为UTF-8编码
+         * @param ReservedWord 是否不编码保留字符
          */
         template <typename CharT>
-        void UrlStrEncode(const basic_string_view<CharT> &str, std::basic_string<CharT> &encoded, const bool utf8 = true)
+        void UrlStrEncode(const basic_string_view<CharT> &str, std::basic_string<CharT> &encoded, const bool utf8 = true, const bool ReservedWord = false)
         {
-            ptrdiff_t buffer_len;
-            if (sizeof(CharT) == 2)
+            size_t buffer_len;
+            if (piv::encoding::UrlEncodeNeed(str.data(), str.size(), ReservedWord))
             {
-                if (utf8)
+                if (sizeof(CharT) == 2)
                 {
-                    PivW2U text{reinterpret_cast<const wchar_t *>(str.data()), str.size()};
-                    buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const BYTE *>(text.GetPtr()), static_cast<ptrdiff_t>(text.GetSize()));
-                    if (buffer_len > static_cast<ptrdiff_t>(text.GetSize()))
+                    CVolMem buffer;
+                    if (utf8)
                     {
+                        PivW2U text{reinterpret_cast<const wchar_t *>(str.data()), str.size()};
+                        buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(text.GetPtr()), text.GetSize(), ReservedWord);
                         CVolMem buffer;
-                        piv::encoding::UrlEncode(reinterpret_cast<const BYTE *>(text.GetPtr()), static_cast<ptrdiff_t>(text.GetSize()), buffer.Alloc(buffer_len, TRUE), buffer_len);
-                        PivU2W urled{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer_len)};
+                        piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(text.GetPtr()), text.GetSize(), buffer.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
+                        PivU2W urled{reinterpret_cast<const char *>(buffer.GetPtr()), buffer_len};
+                        encoded.assign(reinterpret_cast<const CharT *>(urled.GetText()), urled.GetSize());
+                        return;
+                    }
+                    else
+                    {
+                        PivW2A text{reinterpret_cast<const wchar_t *>(str.data()), str.size()};
+                        buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(text.GetPtr()), text.GetSize(), ReservedWord);
+                        CVolMem buffer;
+                        piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(text.GetPtr()), text.GetSize(), buffer.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
+                        PivA2W urled{reinterpret_cast<const char *>(buffer.GetPtr()), buffer_len};
                         encoded.assign(reinterpret_cast<const CharT *>(urled.GetText()), urled.GetSize());
                         return;
                     }
                 }
                 else
                 {
-                    PivW2A text{reinterpret_cast<const wchar_t *>(str.data()), str.size()};
-                    buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const BYTE *>(text.GetPtr()), static_cast<ptrdiff_t>(text.GetSize()));
-                    if (buffer_len > static_cast<ptrdiff_t>(text.GetSize()))
-                    {
-                        CVolMem buffer;
-                        piv::encoding::UrlEncode(reinterpret_cast<const BYTE *>(text.GetPtr()), static_cast<ptrdiff_t>(text.GetSize()), buffer.Alloc(buffer_len, TRUE), buffer_len);
-                        PivA2W urled{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer_len)};
-                        encoded.assign(reinterpret_cast<const CharT *>(urled.GetText()), urled.GetSize());
-                        return;
-                    }
-                }
-            }
-            else
-            {
-                buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const BYTE *>(str.data()), static_cast<ptrdiff_t>(str.size()));
-                if (buffer_len > static_cast<ptrdiff_t>(str.size()))
-                {
-                    encoded.resize(static_cast<size_t>(buffer_len));
-                    piv::encoding::UrlEncode(reinterpret_cast<const BYTE *>(str.data()), static_cast<ptrdiff_t>(str.size()), const_cast<BYTE *>(reinterpret_cast<const BYTE *>(encoded.data())), buffer_len);
+                    buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(str.data()), str.size(), ReservedWord);
+                    encoded.resize(buffer_len);
+                    piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(str.data()), str.size(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(encoded.data())), buffer_len, ReservedWord);
                     return;
                 }
             }
             encoded.assign(str.data(), str.size());
         }
         template <typename CharT>
-        void UrlStrEncode(const std::basic_string<CharT> &str, std::basic_string<CharT> &encoded, const bool utf8 = true)
+        void UrlStrEncode(const std::basic_string<CharT> &str, std::basic_string<CharT> &encoded, const bool utf8 = true, const bool ReservedWord = false)
         {
-            piv::encoding::UrlStrEncode(basic_string_view<CharT>{str.c_str()}, encoded, utf8);
+            piv::encoding::UrlStrEncode(basic_string_view<CharT>{str.c_str()}, encoded, utf8, ReservedWord);
         }
         template <typename CharT>
-        std::basic_string<CharT> UrlStrEncode(const basic_string_view<CharT> &str, const bool utf8 = true)
+        std::basic_string<CharT> UrlStrEncode(const basic_string_view<CharT> &str, const bool utf8 = true, const bool ReservedWord = false)
         {
             std::basic_string<CharT> encoded;
-            piv::encoding::UrlStrEncode(str, encoded, utf8);
+            piv::encoding::UrlStrEncode(str, encoded, utf8, ReservedWord);
             return encoded;
         }
         template <typename CharT>
-        std::basic_string<CharT> UrlStrEncode(const std::basic_string<CharT> &str, const bool utf8 = true)
+        std::basic_string<CharT> UrlStrEncode(const std::basic_string<CharT> &str, const bool utf8 = true, const bool ReservedWord = false)
         {
             std::basic_string<CharT> encoded;
-            piv::encoding::UrlStrEncode(basic_string_view<CharT>{str.c_str()}, encoded, utf8);
+            piv::encoding::UrlStrEncode(basic_string_view<CharT>{str.c_str()}, encoded, utf8, ReservedWord);
             return encoded;
         }
 
         template <typename CharT>
-        void UrlStrEncode(const basic_string_view<CharT> &str, CVolMem &encoded, const bool utf8 = true)
+        void UrlStrEncode(const basic_string_view<CharT> &str, CVolMem &encoded, const bool utf8 = true, const bool ReservedWord = false)
         {
-            ptrdiff_t buffer_len;
-            if (sizeof(CharT) == 2)
-                if (utf8)
+            size_t buffer_len;
+            if (piv::encoding::UrlEncodeNeed(str.data(), str.size(), ReservedWord))
+            {
+                if (sizeof(CharT) == 2)
                 {
-                    PivW2U text{reinterpret_cast<const wchar_t *>(str.data()), str.size()};
-                    buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const BYTE *>(text.GetPtr()), static_cast<ptrdiff_t>(text.GetSize()));
-                    if (buffer_len > static_cast<ptrdiff_t>(text.GetSize()))
+                    CVolMem buffer;
+                    if (utf8)
                     {
-                        CVolMem buffer;
-                        piv::encoding::UrlEncode(reinterpret_cast<const BYTE *>(text.GetPtr()), static_cast<ptrdiff_t>(text.GetSize()), buffer.Alloc(buffer_len, TRUE), buffer_len);
-                        PivU2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer_len)}.GetMem(encoded);
+                        PivW2U text{reinterpret_cast<const wchar_t *>(str.data()), str.size()};
+                        buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(text.GetPtr()), text.GetSize(), ReservedWord);
+                        piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(text.GetPtr()), static_cast<ptrdiff_t>(text.GetSize()), buffer.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
+                        PivU2W{reinterpret_cast<const char *>(buffer.GetPtr()), buffer_len}.GetMem(encoded);
+                        return;
+                    }
+                    else
+                    {
+                        PivW2A text{reinterpret_cast<const wchar_t *>(str.data()), str.size()};
+                        buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(text.GetPtr()), text.GetSize(), ReservedWord);
+                        piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(text.GetPtr()), static_cast<ptrdiff_t>(text.GetSize()), buffer.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
+                        PivA2W{reinterpret_cast<const char *>(buffer.GetPtr()), buffer_len}.GetMem(encoded);
                         return;
                     }
                 }
                 else
                 {
-                    PivW2A text{reinterpret_cast<const wchar_t *>(str.data()), str.size()};
-                    buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const BYTE *>(text.GetPtr()), static_cast<ptrdiff_t>(text.GetSize()));
-                    if (buffer_len > static_cast<ptrdiff_t>(text.GetSize()))
-                    {
-                        CVolMem buffer;
-                        piv::encoding::UrlEncode(reinterpret_cast<const BYTE *>(text.GetPtr()), static_cast<ptrdiff_t>(text.GetSize()), buffer.Alloc(buffer_len, TRUE), buffer_len);
-                        PivA2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer_len)}.GetMem(encoded);
-                        return;
-                    }
-                }
-            else
-            {
-                buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const BYTE *>(str.data()), static_cast<ptrdiff_t>(str.size()));
-                if (buffer_len > static_cast<ptrdiff_t>(str.size()))
-                {
-                    piv::encoding::UrlEncode(reinterpret_cast<const BYTE *>(str.data()), static_cast<ptrdiff_t>(str.size()), encoded.Alloc(buffer_len, TRUE), buffer_len);
+                    buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(str.data()), str.size(), ReservedWord);
+                    piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(str.data()), str.size(), encoded.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
                     return;
                 }
             }
             encoded.Empty();
-            encoded.Append(reinterpret_cast<const void *>(str.data()), str.size());
+            encoded.Append(reinterpret_cast<const void *>(str.data()), str.size() * sizeof(CharT));
         }
         template <typename CharT>
-        void UrlStrEncode(const std::basic_string<CharT> &str, CVolMem &encoded, const bool utf8 = true)
+        void UrlStrEncode(const std::basic_string<CharT> &str, CVolMem &encoded, const bool utf8 = true, const bool ReservedWord = false)
         {
-            piv::encoding::UrlStrEncode(std::basic_string<CharT>{str.c_str()}, encoded, utf8);
+            piv::encoding::UrlStrEncode(std::basic_string<CharT>{str.c_str()}, encoded, utf8, ReservedWord);
         }
         template <typename = void>
-        void UrlStrEncode(const CVolString &str, CVolMem &encoded, const bool utf8 = true)
+        void UrlStrEncode(const CVolString &str, CVolMem &encoded, const bool utf8 = true, const bool ReservedWord = false)
         {
-            piv::encoding::UrlStrEncode(wstring_view(str.GetText()), encoded, utf8);
+            piv::encoding::UrlStrEncode(wstring_view(str.GetText()), encoded, utf8, ReservedWord);
         }
         template <typename = void>
-        void UrlStrEncode(const CVolMem &str, CVolMem &encoded)
+        void UrlStrEncode(const CVolMem &str, CVolMem &encoded, const bool ReservedWord = false)
         {
-            piv::encoding::UrlStrEncode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), encoded);
+            piv::encoding::UrlStrEncode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), encoded, ReservedWord);
         }
         template <typename = void>
-        void UrlStrEncode(const CVolMem &str, CVolString &encoded, const bool utf8 = true)
+        void UrlStrEncode(const CVolMem &str, CVolString &encoded, const bool utf8 = true, const bool ReservedWord = false)
         {
-            CVolMem buffer;
-            piv::encoding::UrlStrEncode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), buffer);
-            if (utf8)
-                PivU2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.GetStr(encoded);
+            if (piv::encoding::UrlEncodeNeed(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize()), ReservedWord))
+            {
+                CVolMem buffer;
+                piv::encoding::UrlStrEncode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), buffer, ReservedWord);
+                if (utf8)
+                    PivU2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.GetStr(encoded);
+                else
+                    PivA2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.GetStr(encoded);
+            }
             else
-                PivA2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.GetStr(encoded);
+            {
+                if (utf8)
+                    PivU2W{reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())}.GetStr(encoded);
+                else
+                    PivA2W{reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())}.GetStr(encoded);
+            }
         }
         template <typename = void>
-        CVolString UrlStrEncode(const CVolMem &str, const bool utf8 = true)
+        CVolString UrlStrEncode(const CVolMem &str, const bool utf8 = true, const bool ReservedWord = false)
         {
-            CVolMem buffer;
-            piv::encoding::UrlStrEncode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), buffer);
-            if (utf8)
-                return PivU2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.ToStr();
-            else
-                return PivA2W{reinterpret_cast<const char *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize())}.ToStr();
+            CVolString encoded;
+            piv::encoding::UrlStrEncode(str, encoded, utf8, ReservedWord);
+            return encoded;
         }
     } // namespace encoding
 } // namespace piv
