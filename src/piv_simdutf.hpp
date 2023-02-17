@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/01/31                          *
+ * 版本: 2023/02/14                          *
 \*********************************************/
 
 #ifndef _PIV_SIMDUTF_HPP
@@ -28,7 +28,7 @@ namespace piv
     {
 
         // UTF-8转换到UTF-16LE(多种写法和类型重载)
-        static void simdU2W(std::wstring &utf16str, const char *utf8str, const size_t utf8len = 0)
+        static void simdU2W(std::wstring &utf16str, const char *utf8str, const size_t &utf8len = 0)
         {
             size_t utf8words = (utf8len > 0) ? utf8len : strlen(utf8str);
             size_t utf16words = simdutf::utf16_length_from_utf8(utf8str, utf8words);
@@ -42,7 +42,7 @@ namespace piv
                 utf16words = simdutf::convert_valid_utf8_to_utf16le(utf8str, utf8words, reinterpret_cast<char16_t *>(const_cast<wchar_t *>(utf16str.data())));
             }
         }
-        static wchar_t *simdU2W(const char *utf8str, const size_t utf8len, CVolMem &utf16str)
+        static wchar_t *simdU2W(const char *utf8str, const size_t &utf8len, CVolMem &utf16str)
         {
             size_t utf8words = utf8len ? utf8len : strlen(utf8str);
             size_t utf16words = simdutf::utf16_length_from_utf8(utf8str, utf8words);
@@ -93,7 +93,7 @@ namespace piv
         }
 
         // UTF-16LE转换到UTF-8(多种写法和类型重载)
-        static void simdW2U(std::string &utf8str, const wchar_t *utf16str, const size_t utf16len = 0)
+        static void simdW2U(std::string &utf8str, const wchar_t *utf16str, const size_t &utf16len = 0)
         {
             size_t utf16words = (utf16len > 0) ? utf16len : wcslen(utf16str);
             size_t utf8words = simdutf::utf8_length_from_utf16le(reinterpret_cast<const char16_t *>(utf16str), utf16words);
@@ -107,7 +107,7 @@ namespace piv
                 simdutf::convert_valid_utf16le_to_utf8(reinterpret_cast<const char16_t *>(utf16str), utf16words, const_cast<char *>(reinterpret_cast<const char *>(utf8str.data())));
             }
         }
-        static char *simdW2U(const wchar_t *utf16str, const size_t utf16len, CVolMem &memBuf)
+        static char *simdW2U(const wchar_t *utf16str, const size_t &utf16len, CVolMem &memBuf)
         {
             size_t utf16words = utf16len ? utf16len : wcslen(utf16str);
             size_t utf8words = simdutf::utf8_length_from_utf16le(reinterpret_cast<const char16_t *>(utf16str), utf16words);
@@ -147,7 +147,7 @@ namespace piv
         }
 
         // ANSI转UTF-16LE(多种写法和类型重载)
-        static void simdA2W(std::wstring &utf16str, const char *mbstr, const size_t mbslen = 0)
+        static void simdA2W(std::wstring &utf16str, const char *mbstr, const size_t &mbslen = 0)
         {
             int utf16len = ::MultiByteToWideChar(CP_ACP, 0, mbstr, (mbslen > 0) ? static_cast<int>(mbslen) : -1, NULL, 0);
             if (utf16len > 0)
@@ -207,7 +207,7 @@ namespace piv
         }
 
         // UTF-16LE转ANSI(多种写法和类型重载)
-        static void simdW2A(std::string &mbstr, const wchar_t *utf16str, const size_t utf16len = 0)
+        static void simdW2A(std::string &mbstr, const wchar_t *utf16str, const size_t &utf16len = 0)
         {
             int mbslen = ::WideCharToMultiByte(CP_ACP, 0, utf16str, (utf16len > 0) ? static_cast<int>(utf16len) : -1, NULL, 0, NULL, NULL);
             if (mbslen > 0)
@@ -267,7 +267,7 @@ namespace piv
         }
 
         // ANSI转UTF-8(多种写法和类型重载)
-        static void simdA2U(std::string &utf8str, const char *mbstr, const size_t msblen = 0)
+        static void simdA2U(std::string &utf8str, const char *mbstr, const size_t &msblen = 0)
         {
             std::wstring utf16str;
             simdA2W(utf16str, mbstr, msblen);
@@ -293,7 +293,7 @@ namespace piv
         }
 
         // UTF-8转ANSI(多种写法和类型重载)
-        static void simdU2A(std::string &mbstr, const char *utf8str, const size_t utf8len = 0)
+        static void simdU2A(std::string &mbstr, const char *utf8str, const size_t &utf8len = 0)
         {
             std::wstring utf16str;
             simdU2W(utf16str, utf8str, utf8len);
@@ -309,7 +309,7 @@ namespace piv
         /********************************************************************************/
 
         // 多字节到UTF8
-        static size_t ansi_to_utf8(const CVolMem &input, CVolMem &utf8str, const BOOL null_terminated, const BOOL ValidCheck)
+        static size_t ansi_to_utf8(const CVolMem &input, CVolMem &utf8str, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             CVolMem buffer;
             size_t utf16words;
@@ -326,7 +326,7 @@ namespace piv
             utf8str.Realloc(utf8words ? (utf8words + (null_terminated ? 1 : 0)) : 0);
             return utf8words;
         }
-        static CVolMem ansi_to_utf8(const CVolMem &input, const BOOL null_terminated, const BOOL ValidCheck)
+        static CVolMem ansi_to_utf8(const CVolMem &input, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             CVolMem utf8str;
             ansi_to_utf8(input, utf8str, null_terminated, ValidCheck);
@@ -334,7 +334,7 @@ namespace piv
         }
 
         // UTF8到多字节
-        static size_t utf8_to_ansi(const CVolMem &input, CVolMem &mbs, const BOOL null_terminated, const BOOL ValidCheck)
+        static size_t utf8_to_ansi(const CVolMem &input, CVolMem &mbs, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             const char *pStr = reinterpret_cast<const char *>(input.GetPtr());
             size_t len = static_cast<size_t>(input.GetSize());
@@ -357,7 +357,7 @@ namespace piv
             mbs.Realloc(mbswords + (null_terminated ? 1 : 0));
             return mbswords;
         }
-        static CVolMem utf8_to_ansi(const CVolMem &input, const BOOL null_terminated, const BOOL ValidCheck)
+        static CVolMem utf8_to_ansi(const CVolMem &input, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             CVolMem mbs;
             utf8_to_ansi(input, mbs, null_terminated, ValidCheck);
@@ -379,7 +379,7 @@ namespace piv
         }
 
         // UTF8到文本
-        static size_t utf8_to_utf16le(const CVolMem &input, CVolString &utf16str, const BOOL ValidCheck)
+        static size_t utf8_to_utf16le(const CVolMem &input, CVolString &utf16str, const BOOL &ValidCheck)
         {
             const char *pStr = reinterpret_cast<const char *>(input.GetPtr());
             size_t len = static_cast<size_t>(input.GetSize());
@@ -398,7 +398,7 @@ namespace piv
             }
             return utf16words;
         }
-        static CVolString utf8_to_utf16le(const CVolMem &input, const BOOL ValidCheck)
+        static CVolString utf8_to_utf16le(const CVolMem &input, const BOOL &ValidCheck)
         {
             CVolString utf16str;
             utf8_to_utf16le(input, utf16str, ValidCheck);
@@ -406,7 +406,7 @@ namespace piv
         }
 
         // UTF8到UTF16LE
-        static size_t utf8_to_utf16le(const CVolMem &input, CVolMem &utf16str, const BOOL null_terminated, const BOOL ValidCheck)
+        static size_t utf8_to_utf16le(const CVolMem &input, CVolMem &utf16str, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             const char *pStr = reinterpret_cast<const char *>(input.GetPtr());
             size_t len = static_cast<size_t>(input.GetSize());
@@ -422,7 +422,7 @@ namespace piv
             utf16str.Realloc(utf16words ? ((utf16words + (null_terminated ? 1 : 0)) * 2) : 0);
             return utf16words;
         }
-        static CVolMem utf8_to_utf16le(const CVolMem &input, const BOOL null_terminated, const BOOL ValidCheck)
+        static CVolMem utf8_to_utf16le(const CVolMem &input, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             CVolMem utf16str;
             utf8_to_utf16le(input, utf16str, null_terminated, ValidCheck);
@@ -430,7 +430,7 @@ namespace piv
         }
 
         // UTF8到UTF16BE
-        static size_t utf8_to_utf16Be(const CVolMem &input, CVolMem &utf16str, const BOOL null_terminated, const BOOL ValidCheck)
+        static size_t utf8_to_utf16Be(const CVolMem &input, CVolMem &utf16str, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             const char *pStr = reinterpret_cast<const char *>(input.GetPtr());
             size_t len = static_cast<size_t>(input.GetSize());
@@ -446,7 +446,7 @@ namespace piv
             utf16str.Realloc(utf16words ? ((utf16words + (null_terminated ? 1 : 0)) * 2) : 0);
             return utf16words;
         }
-        static CVolMem utf8_to_utf16Be(const CVolMem &input, const BOOL null_terminated, const BOOL ValidCheck)
+        static CVolMem utf8_to_utf16Be(const CVolMem &input, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             CVolMem utf16str;
             utf8_to_utf16Be(input, utf16str, null_terminated, ValidCheck);
@@ -454,7 +454,7 @@ namespace piv
         }
 
         // UTF8到UTF32
-        static size_t utf8_to_utf32(const CVolMem &input, CVolMem &utf32str, const BOOL null_terminated, const BOOL ValidCheck)
+        static size_t utf8_to_utf32(const CVolMem &input, CVolMem &utf32str, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             const char *pStr = reinterpret_cast<const char *>(input.GetPtr());
             size_t len = static_cast<size_t>(input.GetSize());
@@ -470,7 +470,7 @@ namespace piv
             utf32str.Realloc(utf32words ? ((utf32words + (null_terminated ? 1 : 0)) * 4) : 0);
             return utf32words;
         }
-        static CVolMem utf8_to_utf32(const CVolMem &input, const BOOL null_terminated, const BOOL ValidCheck)
+        static CVolMem utf8_to_utf32(const CVolMem &input, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             CVolMem utf32str;
             utf8_to_utf32(input, utf32str, null_terminated, ValidCheck);
@@ -478,7 +478,7 @@ namespace piv
         }
 
         // 文本到UTF8
-        static size_t utf16le_to_utf8(const CVolString &input, CVolMem &utf8str, const BOOL null_terminated, const BOOL ValidCheck)
+        static size_t utf16le_to_utf8(const CVolString &input, CVolMem &utf8str, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             const char16_t *pStr = reinterpret_cast<const char16_t *>(input.GetText());
             size_t len = static_cast<size_t>(input.GetLength());
@@ -494,7 +494,7 @@ namespace piv
             utf8str.Realloc(utf8words ? (utf8words + (null_terminated ? 1 : 0)) : 0);
             return utf8words;
         }
-        static CVolMem utf16le_to_utf8(const CVolString &input, const BOOL null_terminated, const BOOL ValidCheck)
+        static CVolMem utf16le_to_utf8(const CVolString &input, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             CVolMem utf8str;
             utf16le_to_utf8(input, utf8str, null_terminated, ValidCheck);
@@ -502,7 +502,7 @@ namespace piv
         }
 
         // UTF16LE到UTF8
-        static size_t utf16le_to_utf8(const CVolMem &input, CVolMem &utf8str, const BOOL null_terminated, const BOOL ValidCheck)
+        static size_t utf16le_to_utf8(const CVolMem &input, CVolMem &utf8str, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             const char16_t *pStr = reinterpret_cast<const char16_t *>(input.GetPtr());
             size_t len = static_cast<size_t>(input.GetSize()) / 2;
@@ -518,7 +518,7 @@ namespace piv
             utf8str.Realloc(utf8words ? (utf8words + (null_terminated ? 1 : 0)) : 0);
             return utf8words;
         }
-        static CVolMem utf16le_to_utf8(const CVolMem &input, const BOOL null_terminated, const BOOL ValidCheck)
+        static CVolMem utf16le_to_utf8(const CVolMem &input, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             CVolMem utf8str;
             utf16le_to_utf8(input, utf8str, null_terminated, ValidCheck);
@@ -526,7 +526,7 @@ namespace piv
         }
 
         // UTF16BE到UTF8
-        static size_t utf16be_to_utf8(const CVolMem &input, CVolMem &utf8str, const BOOL null_terminated, const BOOL ValidCheck)
+        static size_t utf16be_to_utf8(const CVolMem &input, CVolMem &utf8str, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             const char16_t *pStr = reinterpret_cast<const char16_t *>(input.GetPtr());
             size_t len = static_cast<size_t>(input.GetSize()) / 2;
@@ -542,7 +542,7 @@ namespace piv
             utf8str.Realloc(utf8words ? (utf8words + (null_terminated ? 1 : 0)) : 0);
             return utf8words;
         }
-        static CVolMem utf16be_to_utf8(const CVolMem &input, const BOOL null_terminated, const BOOL ValidCheck)
+        static CVolMem utf16be_to_utf8(const CVolMem &input, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             CVolMem utf8str;
             utf16be_to_utf8(input, utf8str, null_terminated, ValidCheck);
@@ -550,7 +550,7 @@ namespace piv
         }
 
         // 文本到UTF32
-        static size_t utf16le_to_utf32(const CVolString &input, CVolMem &utf32str, const BOOL null_terminated, const BOOL ValidCheck)
+        static size_t utf16le_to_utf32(const CVolString &input, CVolMem &utf32str, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             const char16_t *pStr = reinterpret_cast<const char16_t *>(input.GetText());
             size_t len = static_cast<size_t>(input.GetLength());
@@ -566,7 +566,7 @@ namespace piv
             utf32str.Realloc(utf32words ? ((utf32words + (null_terminated ? 1 : 0)) * 4) : 0);
             return utf32words;
         }
-        static CVolMem utf16le_to_utf32(const CVolString &input, const BOOL null_terminated, const BOOL ValidCheck)
+        static CVolMem utf16le_to_utf32(const CVolString &input, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             CVolMem utf32str;
             utf16le_to_utf32(input, utf32str, null_terminated, ValidCheck);
@@ -574,7 +574,7 @@ namespace piv
         }
 
         // UTF16LE到UTF32
-        static size_t utf16le_to_utf32(const CVolMem &input, CVolMem &utf32str, const BOOL null_terminated, const BOOL ValidCheck)
+        static size_t utf16le_to_utf32(const CVolMem &input, CVolMem &utf32str, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             const char16_t *pStr = reinterpret_cast<const char16_t *>(input.GetPtr());
             size_t len = static_cast<size_t>(input.GetSize()) / 2;
@@ -590,7 +590,7 @@ namespace piv
             utf32str.Realloc(utf32words ? ((utf32words + (null_terminated ? 1 : 0)) * 4) : 0);
             return utf32words;
         }
-        static CVolMem utf16le_to_utf32(const CVolMem &input, const BOOL null_terminated, const BOOL ValidCheck)
+        static CVolMem utf16le_to_utf32(const CVolMem &input, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             CVolMem utf32str;
             utf16le_to_utf32(input, utf32str, null_terminated, ValidCheck);
@@ -598,7 +598,7 @@ namespace piv
         }
 
         // UTF16BE到UTF32
-        static size_t utf16be_to_utf32(const CVolMem &input, CVolMem &utf32str, const BOOL null_terminated, const BOOL ValidCheck)
+        static size_t utf16be_to_utf32(const CVolMem &input, CVolMem &utf32str, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             const char16_t *pStr = reinterpret_cast<const char16_t *>(input.GetPtr());
             size_t len = static_cast<size_t>(input.GetSize()) / 2;
@@ -614,7 +614,7 @@ namespace piv
             utf32str.Realloc(utf32words ? ((utf32words + (null_terminated ? 1 : 0)) * 4) : 0);
             return utf32words;
         }
-        static CVolMem utf16be_to_utf32(const CVolMem &input, const BOOL null_terminated, const BOOL ValidCheck)
+        static CVolMem utf16be_to_utf32(const CVolMem &input, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             CVolMem utf32str;
             utf16be_to_utf32(input, utf32str, null_terminated, ValidCheck);
@@ -622,7 +622,7 @@ namespace piv
         }
 
         // UTF32到UTF8
-        static size_t utf32_to_utf8(const CVolMem &input, CVolMem &utf8str, const BOOL null_terminated, const BOOL ValidCheck)
+        static size_t utf32_to_utf8(const CVolMem &input, CVolMem &utf8str, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             const char32_t *pStr = reinterpret_cast<const char32_t *>(input.GetPtr());
             size_t len = static_cast<size_t>(input.GetSize()) / 4;
@@ -638,7 +638,7 @@ namespace piv
             utf8str.Realloc(utf8words ? (utf8words + (null_terminated ? 1 : 0)) : 0);
             return utf8words;
         }
-        static CVolMem utf32_to_utf8(const CVolMem &input, const BOOL null_terminated, const BOOL ValidCheck)
+        static CVolMem utf32_to_utf8(const CVolMem &input, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             CVolMem utf8str;
             utf32_to_utf8(input, utf8str, null_terminated, ValidCheck);
@@ -646,7 +646,7 @@ namespace piv
         }
 
         // UTF32到UTF16LE
-        static size_t utf32_to_utf16le(const CVolMem &input, CVolMem &utf16str, const BOOL null_terminated, const BOOL ValidCheck)
+        static size_t utf32_to_utf16le(const CVolMem &input, CVolMem &utf16str, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             const char32_t *pStr = reinterpret_cast<const char32_t *>(input.GetPtr());
             size_t len = static_cast<size_t>(input.GetSize()) / 4;
@@ -662,7 +662,7 @@ namespace piv
             utf16str.Realloc(utf16words ? ((utf16words + (null_terminated ? 1 : 0)) * 2) : 0);
             return utf16words;
         }
-        static CVolMem utf32_to_utf16le(const CVolMem &input, const BOOL null_terminated, const BOOL ValidCheck)
+        static CVolMem utf32_to_utf16le(const CVolMem &input, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             CVolMem utf16str;
             utf32_to_utf16le(input, utf16str, null_terminated, ValidCheck);
@@ -670,7 +670,7 @@ namespace piv
         }
 
         // UTF32到文本
-        static size_t utf32_to_utf16le(const CVolMem &input, CVolString &utf16str, const BOOL ValidCheck)
+        static size_t utf32_to_utf16le(const CVolMem &input, CVolString &utf16str, const BOOL &ValidCheck)
         {
             const char32_t *pStr = reinterpret_cast<const char32_t *>(input.GetPtr());
             size_t len = static_cast<size_t>(input.GetSize()) / 4;
@@ -689,7 +689,7 @@ namespace piv
             }
             return utf16words;
         }
-        static CVolString utf32_to_utf16le(const CVolMem &input, const BOOL ValidCheck)
+        static CVolString utf32_to_utf16le(const CVolMem &input, const BOOL &ValidCheck)
         {
             CVolString utf16str;
             utf32_to_utf16le(input, utf16str, ValidCheck);
@@ -697,7 +697,7 @@ namespace piv
         }
 
         // UTF32到UTF16BE
-        static size_t utf32_to_utf16be(const CVolMem &input, CVolMem &utf16str, const BOOL null_terminated, const BOOL ValidCheck)
+        static size_t utf32_to_utf16be(const CVolMem &input, CVolMem &utf16str, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             const char32_t *pStr = reinterpret_cast<const char32_t *>(input.GetPtr());
             size_t len = static_cast<size_t>(input.GetSize()) / 4;
@@ -713,7 +713,7 @@ namespace piv
             utf16str.Realloc(utf16words ? ((utf16words + (null_terminated ? 1 : 0)) * 2) : 0);
             return utf16words;
         }
-        static CVolMem utf32_to_utf16be(const CVolMem &input, const BOOL null_terminated, const BOOL ValidCheck)
+        static CVolMem utf32_to_utf16be(const CVolMem &input, const BOOL &null_terminated, const BOOL &ValidCheck)
         {
             CVolMem utf16str;
             utf32_to_utf16be(input, utf16str, null_terminated, ValidCheck);

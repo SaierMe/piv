@@ -22,22 +22,39 @@ struct IOutArchive;
 struct GUID;
 #endif
 
-//! \cond IGNORE_BLOCK_IN_DOXYGEN
+//! @cond IGNORE_BLOCK_IN_DOXYGEN
 template< typename T >
 class CMyComPtr;
-//! \endcond
+//! @endcond
 
+/**
+ * @brief The main namespace of the bit7z library.
+ */
 namespace bit7z {
-#ifdef _WIN32
-constexpr auto default_library = BIT7Z_STRING("7z.dll");
+
+/**
+ * @brief The default file path for the 7-zip shared library to be used by bit7z
+ * in case the user doesn't pass a path to the constructor of the Bit7zLibrary class.
+ *
+ * @note On Windows, the default library is "7z.dll", and it is searched following the Win32 API rules
+ * (https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order).
+ *
+ * @note On Linux, the default library is the absolute path to the "7z.so" installed by p7zip.
+ *
+ * @note In all other cases, the value will be the relative path to a "7z.so" in the working directory of the program.
+ */
+#ifdef __DOXYGEN__
+constexpr auto default_library = "<platform-dependent value>";
+#elif defined( _WIN32 )
+constexpr auto default_library = BIT7Z_STRING( "7z.dll" );
 #elif defined( __linux__ )
-constexpr auto default_library = "/usr/lib/p7zip/7z.so"; //default installation path of p7zip shared library
+constexpr auto default_library = "/usr/lib/p7zip/7z.so"; // Default installation path of the p7zip shared library.
 #else
 constexpr auto default_library = "./7z.so";
 #endif
 
 /**
- * @brief The Bit7zLibrary class allows the access to the basic functionalities provided by the 7z DLLs.
+ * @brief The Bit7zLibrary class allows accessing the basic functionalities provided by the 7z DLLs.
  */
 class Bit7zLibrary final {
     public:
@@ -45,9 +62,9 @@ class Bit7zLibrary final {
 
         Bit7zLibrary( Bit7zLibrary&& ) = delete;
 
-        Bit7zLibrary& operator=( const Bit7zLibrary& ) = delete;
+        auto operator=( const Bit7zLibrary& ) -> Bit7zLibrary& = delete;
 
-        Bit7zLibrary& operator=( Bit7zLibrary&& ) = delete;
+        auto operator=( Bit7zLibrary&& ) -> Bit7zLibrary& = delete;
 
         /**
          * @brief Constructs a Bit7zLibrary object by loading the specified 7zip shared library.
@@ -66,10 +83,11 @@ class Bit7zLibrary final {
         /**
          * @brief Initiates the 7-zip object needed to create a new archive or use an old one.
          *
-         * @note Usually this method should not be called directly by users of the bit7z library.
+         * @note Usually, this method should not be called directly by users of the bit7z library.
          *
-         * @param format_ID     GUID of the archive format (see BitInFormat's guid() method).
-         * @param interface_ID  ID of the archive interface to be requested (IID_IInArchive or IID_IOutArchive).
+         * @param format_ID     Pointer to the GUID of the archive format (see BitInFormat's guid() method).
+         * @param interface_ID  Pointer to the GUID of the archive interface to be requested
+         *                      (IID_IInArchive or IID_IOutArchive).
          * @param out_object    Pointer to a CMyComPtr of an object implementing the requested interface.
          */
         void createArchiveObject( const GUID* format_ID, const GUID* interface_ID, void** out_object ) const;
@@ -85,6 +103,7 @@ class Bit7zLibrary final {
         HMODULE mLibrary;
         CreateObjectFunc mCreateObjectFunc;
 };
+
 }  // namespace bit7z
 
 #endif // BIT7ZLIBRARY_HPP

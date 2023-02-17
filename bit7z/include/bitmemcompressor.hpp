@@ -13,13 +13,15 @@
 #include "bitcompressor.hpp"
 
 namespace bit7z {
+
 /**
- * @brief The BitMemCompressor class allows to compress memory buffers to the filesystem, to standard streams,
- *        or to other memory buffers.
+ * @brief The BitMemCompressor alias allows compressing memory buffers.
+ * The compressed archives can be saved to the filesystem, standard streams, or memory buffers.
  *
- * It let decide various properties of the produced archive file, such as the password
+ * It let decide various properties of the produced archive, such as the password
  * protection and the compression level desired.
  */
-using BitMemCompressor BIT7Z_MAYBE_UNUSED = BitCompressor< const buffer_t >;
-}
+using BitMemCompressor BIT7Z_MAYBE_UNUSED = BitCompressor< const std::vector< byte_t >& >;
+
+} // namespace bit7z
 #endif // BITMEMCOMPRESSOR_HPP

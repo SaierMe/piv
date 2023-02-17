@@ -17,23 +17,25 @@
 #include "bitcompressor.hpp"
 
 namespace bit7z {
+
 using std::vector;
 using std::map;
 using std::ostream;
 
 namespace filesystem {
 class FSItem;
-}
+} // namespace filesystem
 
 using namespace filesystem;
 
 /**
- * @brief The BitFileCompressor class allows to compress files and directories into file archives.
+ * @brief The BitFileCompressor class allows compressing files and directories.
+ * The compressed archives can be saved to the filesystem, standard streams, or memory buffers.
  *
- * It let decide various properties of the produced archive file, such as the password
+ * It let decide various properties of the produced archive, such as the password
  * protection and the compression level desired.
  */
-class BitFileCompressor final : public BitCompressor< const tstring > {
+class BitFileCompressor final : public BitCompressor< const tstring& > {
     public:
         /**
          * @brief Constructs a BitFileCompressor object.
@@ -47,7 +49,7 @@ class BitFileCompressor final : public BitCompressor< const tstring > {
          */
         BitFileCompressor( const Bit7zLibrary& lib, const BitInOutFormat& format );
 
-        /* Compression from file system to file system */
+        /* Compression from the file system to the file system. */
 
         /**
          * @brief Compresses the given files or directories.
@@ -58,20 +60,20 @@ class BitFileCompressor final : public BitCompressor< const tstring > {
          * @param in_paths  a vector of paths.
          * @param out_file  the path (relative or absolute) to the output archive file.
          */
-        void compress( const vector< tstring >& in_paths, const tstring& out_file ) const;
+        void compress( const std::vector< tstring >& in_paths, const tstring& out_file ) const;
 
         /**
          * @brief Compresses the given files or directories using the specified aliases.
          *
          * The items in the first argument must be the relative or absolute paths to files or
          * directories existing on the filesystem.
-         * Each pair of the map must follow the following format:
-         *  {L"path to file in the filesystem", L"alias path in the archive"}.
+         * Each pair in the map must follow the following format:
+         *  {"path to file in the filesystem", "alias path in the archive"}.
          *
          * @param in_paths  a map of paths and corresponding aliases.
          * @param out_file  the path (relative or absolute) to the output archive file.
          */
-        void compress( const map< tstring, tstring >& in_paths, const tstring& out_file ) const;
+        void compress( const std::map< tstring, tstring >& in_paths, const tstring& out_file ) const;
 
         /**
          * @brief Compresses a group of files.
@@ -81,7 +83,7 @@ class BitFileCompressor final : public BitCompressor< const tstring > {
          * @param in_files  the path (relative or absolute) to the input files.
          * @param out_file  the path (relative or absolute) to the output archive file.
          */
-        void compressFiles( const vector< tstring >& in_files, const tstring& out_file ) const;
+        void compressFiles( const std::vector< tstring >& in_files, const tstring& out_file ) const;
 
         /**
          * @brief Compresses the files contained in a directory.
@@ -94,7 +96,7 @@ class BitFileCompressor final : public BitCompressor< const tstring > {
         void compressFiles( const tstring& in_dir,
                             const tstring& out_file,
                             bool recursive = true,
-                            const tstring& filter = BIT7Z_STRING( "*.*" ) ) const;
+                            const tstring& filter = BIT7Z_STRING( "*" ) ) const;
 
         /**
          * @brief Compresses an entire directory.
@@ -106,7 +108,7 @@ class BitFileCompressor final : public BitCompressor< const tstring > {
          */
         void compressDirectory( const tstring& in_dir, const tstring& out_file ) const;
 
-        /* Compression from file system to standard stream */
+        /* Compression from the file system to standard streams. */
 
         /**
          * @brief Compresses the given files or directories.
@@ -117,20 +119,21 @@ class BitFileCompressor final : public BitCompressor< const tstring > {
          * @param in_paths      a vector of paths.
          * @param out_stream    the standard ostream where the archive will be output.
          */
-        void compress( const vector< tstring >& in_paths, ostream& out_stream ) const;
+        void compress( const std::vector< tstring >& in_paths, std::ostream& out_stream ) const;
 
         /**
          * @brief Compresses the given files or directories using the specified aliases.
          *
          * The items in the first argument must be the relative or absolute paths to files or
          * directories existing on the filesystem.
-         * Each pair of the map must follow the following format:
-         *  {L"path to file in the filesystem", L"alias path in the archive"}.
+         * Each pair in the map must follow the following format:
+         *  {"path to file in the filesystem", "alias path in the archive"}.
          *
          * @param in_paths      a map of paths and corresponding aliases.
          * @param out_stream    the standard ostream where to output the archive file.
          */
-        void compress( const map< tstring, tstring >& in_paths, ostream& out_stream ) const;
+        void compress( const std::map< tstring, tstring >& in_paths, std::ostream& out_stream ) const;
 };
+
 }  // namespace bit7z
 #endif // BITFILECOMPRESSOR_HPP

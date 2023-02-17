@@ -19,6 +19,7 @@
 #include "bittypes.hpp"
 
 namespace bit7z {
+
 /**
  * @brief The FormatFeatures enum specifies the features supported by an archive file format.
  */
@@ -39,7 +40,7 @@ inline constexpr auto to_underlying( E e ) noexcept -> underlying_type_t< E > {
     return static_cast< underlying_type_t< E > >( e );
 }
 
-inline constexpr FormatFeatures operator|( FormatFeatures lhs, FormatFeatures rhs ) noexcept {
+inline constexpr auto operator|( FormatFeatures lhs, FormatFeatures rhs ) noexcept -> FormatFeatures {
     return static_cast< FormatFeatures >( to_underlying( lhs ) | to_underlying( rhs ) );
 }
 
@@ -60,12 +61,12 @@ class BitInFormat {
         //non-copyable
         BitInFormat( const BitInFormat& other ) = delete;
 
-        BitInFormat& operator=( const BitInFormat& other ) = delete;
+        auto operator=( const BitInFormat& other ) -> BitInFormat& = delete;
 
         //non-movable
         BitInFormat( BitInFormat&& other ) = delete;
 
-        BitInFormat& operator=( BitInFormat&& other ) = delete;
+        auto operator=( BitInFormat&& other ) -> BitInFormat& = delete;
 
         ~BitInFormat() = default;
 
@@ -78,37 +79,37 @@ class BitInFormat {
         /**
          * @return the value of the format in the 7z SDK.
          */
-        BIT7Z_NODISCARD unsigned char value() const noexcept;
+        BIT7Z_NODISCARD auto value() const noexcept -> unsigned char;
 
         /**
          * @param other  the target object to compare to.
-         * @return true if this format is equal to "other".
+         * @return a boolean value indicating whether this format is equal to the "other" or not.
          */
-        bool operator==( BitInFormat const& other ) const noexcept;
+        auto operator==( BitInFormat const& other ) const noexcept -> bool;
 
         /**
          * @param other  the target object to compare to.
-         * @return true if this format is not equal to "other".
+         * @return a boolean value indicating whether this format is different from the "other" or not.
          */
-        bool operator!=( BitInFormat const& other ) const noexcept;
+        auto operator!=( BitInFormat const& other ) const noexcept -> bool;
 
     private:
-        const unsigned char mValue;
+        unsigned char mValue;
 };
 
 /**
  * @brief The BitInOutFormat class specifies a format available for creating new archives and extract old ones.
  *
  * @note Usually, the user of the library should not create new formats and, instead,
- * use the ones provided by the BitFormat namespace
+ * use the ones provided by the BitFormat namespace.
  */
 class BitInOutFormat final : public BitInFormat {
     public:
         /**
          * @brief Constructs a BitInOutFormat object with an ID value, an extension and a set of supported features.
          *
-         * @param value         the value of the format in the 7z SDK
-         * @param ext           the default file extension of the archive format
+         * @param value         the value of the format in the 7z SDK.
+         * @param ext           the default file extension of the archive format.
          * @param defaultMethod the default method used for compressing the archive format.
          * @param features      the set of features supported by the archive format
          */
@@ -121,124 +122,58 @@ class BitInOutFormat final : public BitInFormat {
         //non-copyable
         BitInOutFormat( const BitInOutFormat& other ) = delete;
 
-        BitInOutFormat& operator=( const BitInOutFormat& other ) = delete;
+        auto operator=( const BitInOutFormat& other ) -> BitInOutFormat& = delete;
 
         //non-movable
         BitInOutFormat( BitInOutFormat&& other ) = delete;
 
-        BitInOutFormat& operator=( BitInOutFormat&& other ) = delete;
+        auto operator=( BitInOutFormat&& other ) -> BitInOutFormat& = delete;
 
         ~BitInOutFormat() = default;
 
         /**
-         * @return the default file extension of the archive format
+         * @return the default file extension of the archive format.
          */
-        BIT7Z_NODISCARD const tchar* extension() const noexcept;
+        BIT7Z_NODISCARD
+        auto extension() const noexcept -> const tchar*;
 
         /**
-         * @return the bitset of the features supported by the format
+         * @return the bitset of the features supported by the format.
          */
-        BIT7Z_NODISCARD FormatFeatures features() const noexcept;
+        BIT7Z_NODISCARD
+        auto features() const noexcept -> FormatFeatures;
 
         /**
-         * @brief Checks if the format has a specific feature (see FormatFeatures enum)
-         * @param feature   feature to be checked
-         * @return true if the format has the feature, false otherwise
+         * @brief Checks if the format has a specific feature (see FormatFeatures enum).
+         *
+         * @param feature   feature to be checked.
+         *
+         * @return a boolean value indicating whether the format has the given feature.
          */
-        BIT7Z_NODISCARD bool hasFeature( FormatFeatures feature ) const noexcept;
+        BIT7Z_NODISCARD
+        auto hasFeature( FormatFeatures feature ) const noexcept -> bool;
 
         /**
          * @return the default method used for compressing the archive format.
          */
-        BIT7Z_NODISCARD BitCompressionMethod defaultMethod() const noexcept;
+        BIT7Z_NODISCARD
+        auto defaultMethod() const noexcept -> BitCompressionMethod;
 
     private:
         const tchar* mExtension;
-        const BitCompressionMethod mDefaultMethod;
-        const FormatFeatures mFeatures;
+        BitCompressionMethod mDefaultMethod;
+        FormatFeatures mFeatures;
 };
 
 /**
  * @brief The namespace that contains a set of archive formats usable with bit7z classes.
  */
 namespace BitFormat {
-#ifdef __cpp_inline_variables
 #ifdef BIT7Z_AUTO_FORMAT
-inline constexpr BitInFormat Auto( 0x00 );
-#endif
-
-inline constexpr BitInOutFormat Zip( 0x01, BIT7Z_STRING( ".zip" ), BitCompressionMethod::Deflate,
-                                     FormatFeatures::MultipleFiles | FormatFeatures::CompressionLevel |
-                                     FormatFeatures::Encryption | FormatFeatures::MultipleMethods );
-inline constexpr BitInOutFormat BZip2( 0x02, BIT7Z_STRING( ".bz2" ), BitCompressionMethod::BZip2,
-                                       FormatFeatures::CompressionLevel );
-inline constexpr BitInFormat Rar( 0x03 );
-inline constexpr BitInFormat Arj( 0x04 ); //-V112
-inline constexpr BitInFormat Z( 0x05 );
-inline constexpr BitInFormat Lzh( 0x06 );
-inline constexpr BitInOutFormat SevenZip( 0x07, BIT7Z_STRING( ".7z" ), BitCompressionMethod::Lzma2,
-                                          FormatFeatures::MultipleFiles |
-                                          FormatFeatures::SolidArchive |
-                                          FormatFeatures::CompressionLevel |
-                                          FormatFeatures::Encryption |
-                                          FormatFeatures::HeaderEncryption |
-                                          FormatFeatures::MultipleMethods );
-inline constexpr BitInFormat Cab( 0x08 );
-inline constexpr BitInFormat Nsis( 0x09 );
-inline constexpr BitInFormat Lzma( 0x0A );
-inline constexpr BitInFormat Lzma86( 0x0B );
-inline constexpr BitInOutFormat Xz( 0x0C, BIT7Z_STRING( ".xz" ), BitCompressionMethod::Lzma2,
-                                    FormatFeatures::CompressionLevel );
-inline constexpr BitInFormat Ppmd( 0x0D );
-inline constexpr BitInFormat Vhdx( 0xC4 );
-inline constexpr BitInFormat COFF( 0xC6 );
-inline constexpr BitInFormat Ext( 0xC7 );
-inline constexpr BitInFormat VMDK( 0xC8 );
-inline constexpr BitInFormat VDI( 0xC9 );
-inline constexpr BitInFormat QCow( 0xCA );
-inline constexpr BitInFormat GPT( 0xCB );
-inline constexpr BitInFormat Rar5( 0xCC );
-inline constexpr BitInFormat IHex( 0xCD );
-inline constexpr BitInFormat Hxs( 0xCE );
-inline constexpr BitInFormat TE( 0xCF );
-inline constexpr BitInFormat UEFIc( 0xD0 );
-inline constexpr BitInFormat UEFIs( 0xD1 );
-inline constexpr BitInFormat SquashFS( 0xD2 );
-inline constexpr BitInFormat CramFS( 0xD3 );
-inline constexpr BitInFormat APM( 0xD4 );
-inline constexpr BitInFormat Mslz( 0xD5 );
-inline constexpr BitInFormat Flv( 0xD6 );
-inline constexpr BitInFormat Swf( 0xD7 );
-inline constexpr BitInFormat Swfc( 0xD8 );
-inline constexpr BitInFormat Ntfs( 0xD9 );
-inline constexpr BitInFormat Fat( 0xDA );
-inline constexpr BitInFormat Mbr( 0xDB );
-inline constexpr BitInFormat Vhd( 0xDC );
-inline constexpr BitInFormat Pe( 0xDD );
-inline constexpr BitInFormat Elf( 0xDE );
-inline constexpr BitInFormat Macho( 0xDF );
-inline constexpr BitInFormat Udf( 0xE0 );
-inline constexpr BitInFormat Xar( 0xE1 );
-inline constexpr BitInFormat Mub( 0xE2 );
-inline constexpr BitInFormat Hfs( 0xE3 );
-inline constexpr BitInFormat Dmg( 0xE4 );
-inline constexpr BitInFormat Compound( 0xE5 );
-inline constexpr BitInOutFormat Wim( 0xE6, BIT7Z_STRING( ".wim" ), BitCompressionMethod::Copy,
-                                     FormatFeatures::MultipleFiles );
-inline constexpr BitInFormat Iso( 0xE7 );
-inline constexpr BitInFormat Chm( 0xE9 );
-inline constexpr BitInFormat Split( 0xEA );
-inline constexpr BitInFormat Rpm( 0xEB );
-inline constexpr BitInFormat Deb( 0xEC );
-inline constexpr BitInFormat Cpio( 0xED );
-inline constexpr BitInOutFormat Tar( 0xEE, BIT7Z_STRING( ".tar" ), BitCompressionMethod::Copy,
-                                     FormatFeatures::MultipleFiles );
-inline constexpr BitInOutFormat GZip( 0xEF, BIT7Z_STRING( ".gz" ), BitCompressionMethod::Deflate,
-                                      FormatFeatures::CompressionLevel );
-#else
-#ifdef BIT7Z_AUTO_FORMAT
-// Available only when compiling bit7z using the BIT7Z_AUTO_FORMAT preprocessor define
-extern const BitInFormat Auto;      ///< Automatic Format Detection
+/**
+ * @brief Automatic Format Detection (available only when compiling bit7z using the `BIT7Z_AUTO_FORMAT` option).
+ */
+extern const BitInFormat Auto;
 #endif
 extern const BitInFormat Rar,       ///< RAR Archive Format
                          Arj,       ///< ARJ Archive Format
@@ -296,7 +231,6 @@ extern const BitInOutFormat Zip,        ///< ZIP Archive Format
                             Wim,        ///< WIM Archive Format
                             Tar,        ///< TAR Archive Format
                             GZip;       ///< GZIP Archive Format
-#endif
 }  // namespace BitFormat
 
 
@@ -307,4 +241,5 @@ extern const BitInOutFormat Zip,        ///< ZIP Archive Format
 #endif
 
 }  // namespace bit7z
+
 #endif // BITFORMAT_HPP

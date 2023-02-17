@@ -4169,28 +4169,28 @@ inline std::size_t concat_length()
 }
 
 template<typename... Args>
-inline std::size_t concat_length(const char* cstr, Args&& ... rest);
+inline std::size_t concat_length(const char* cstr, const Args& ... rest);
 
 template<typename StringType, typename... Args>
-inline std::size_t concat_length(const StringType& str, Args&& ... rest);
+inline std::size_t concat_length(const StringType& str, const Args& ... rest);
 
 template<typename... Args>
-inline std::size_t concat_length(const char /*c*/, Args&& ... rest)
+inline std::size_t concat_length(const char /*c*/, const Args& ... rest)
 {
-    return 1 + concat_length(std::forward<Args>(rest)...);
+    return 1 + concat_length(rest...);
 }
 
 template<typename... Args>
-inline std::size_t concat_length(const char* cstr, Args&& ... rest)
+inline std::size_t concat_length(const char* cstr, const Args& ... rest)
 {
     // cppcheck-suppress ignoredReturnValue
-    return ::strlen(cstr) + concat_length(std::forward<Args>(rest)...);
+    return ::strlen(cstr) + concat_length(rest...);
 }
 
 template<typename StringType, typename... Args>
-inline std::size_t concat_length(const StringType& str, Args&& ... rest)
+inline std::size_t concat_length(const StringType& str, const Args& ... rest)
 {
-    return str.size() + concat_length(std::forward<Args>(rest)...);
+    return str.size() + concat_length(rest...);
 }
 
 template<typename OutStringType>
@@ -4281,7 +4281,7 @@ template<typename OutStringType = std::string, typename... Args>
 inline OutStringType concat(Args && ... args)
 {
     OutStringType str;
-    str.reserve(concat_length(std::forward<Args>(args)...));
+    str.reserve(concat_length(args...));
     concat_into(str, std::forward<Args>(args)...);
     return str;
 }
@@ -6745,7 +6745,7 @@ class json_sax_dom_parser
                        parsing
     @param[in] allow_exceptions_  whether parse errors yield exceptions
     */
-    explicit json_sax_dom_parser(BasicJsonType& r, const bool allow_exceptions_ = true)
+    explicit json_sax_dom_parser(BasicJsonType& r, const bool &allow_exceptions_ = true)
         : root(r), allow_exceptions(allow_exceptions_)
     {}
 
@@ -6910,7 +6910,7 @@ class json_sax_dom_parser
     /// whether a syntax error occurred
     bool errored = false;
     /// whether to throw exceptions in case of errors
-    const bool allow_exceptions = true;
+    const bool &allow_exceptions = true;
 };
 
 template<typename BasicJsonType>
@@ -6927,7 +6927,7 @@ class json_sax_dom_callback_parser
 
     json_sax_dom_callback_parser(BasicJsonType& r,
                                  const parser_callback_t cb,
-                                 const bool allow_exceptions_ = true)
+                                 const bool &allow_exceptions_ = true)
         : root(r), callback(cb), allow_exceptions(allow_exceptions_)
     {
         keep_stack.push_back(true);
@@ -7215,7 +7215,7 @@ class json_sax_dom_callback_parser
     /// callback function
     const parser_callback_t callback = nullptr;
     /// whether to throw exceptions in case of errors
-    const bool allow_exceptions = true;
+    const bool &allow_exceptions = true;
     /// a discarded value for the callback
     BasicJsonType discarded = BasicJsonType::value_t::discarded;
 };
@@ -12172,7 +12172,7 @@ class parser
     /// a parser reading from an input adapter
     explicit parser(InputAdapterType&& adapter,
                     const parser_callback_t<BasicJsonType> cb = nullptr,
-                    const bool allow_exceptions_ = true,
+                    const bool &allow_exceptions_ = true,
                     const bool skip_comments = false)
         : callback(cb)
         , m_lexer(std::move(adapter), skip_comments)
@@ -12602,7 +12602,7 @@ class parser
     /// the lexer
     lexer_t m_lexer;
     /// whether to throw exceptions in case of errors
-    const bool allow_exceptions = true;
+    const bool &allow_exceptions = true;
 };
 
 }  // namespace detail
@@ -18849,7 +18849,7 @@ class serializer
                 : (0xFFu >> type) & (byte);
 
         const std::size_t index = 256u + static_cast<size_t>(state) * 16u + static_cast<size_t>(type);
-        JSON_ASSERT(index < 400);
+        JSON_ASSERT(index < utf8d.size());
         state = utf8d[index];
         return state;
     }
@@ -19309,7 +19309,7 @@ The invariants are checked by member function assert_invariant().
 */
 NLOHMANN_BASIC_JSON_TPL_DECLARATION
 class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-special-member-functions)
-    : public CVolObject, ::nlohmann::detail::json_base_class<CustomBaseClass>
+    : public CVolObject, public ::nlohmann::detail::json_base_class<CustomBaseClass>
 {
   public:
     virtual void GetDumpString(CVolString& strDump, INT nMaxDumpSize) override
@@ -19351,7 +19351,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     static ::nlohmann::detail::parser<basic_json, InputAdapterType> parser(
         InputAdapterType adapter,
         detail::parser_callback_t<basic_json>cb = nullptr,
-        const bool allow_exceptions = true,
+        const bool &allow_exceptions = true,
         const bool ignore_comments = false
                                  )
     {
@@ -23234,7 +23234,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     JSON_HEDLEY_WARN_UNUSED_RESULT
     static basic_json parse(InputType&& i,
                             const parser_callback_t cb = nullptr,
-                            const bool allow_exceptions = true,
+                            const bool &allow_exceptions = true,
                             const bool ignore_comments = false)
     {
         basic_json result;
@@ -23249,7 +23249,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     static basic_json parse(IteratorType first,
                             IteratorType last,
                             const parser_callback_t cb = nullptr,
-                            const bool allow_exceptions = true,
+                            const bool &allow_exceptions = true,
                             const bool ignore_comments = false)
     {
         basic_json result;
@@ -23261,7 +23261,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     JSON_HEDLEY_DEPRECATED_FOR(3.8.0, parse(ptr, ptr + len))
     static basic_json parse(detail::span_input_adapter&& i,
                             const parser_callback_t cb = nullptr,
-                            const bool allow_exceptions = true,
+                            const bool &allow_exceptions = true,
                             const bool ignore_comments = false)
     {
         basic_json result;
@@ -23555,7 +23555,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     JSON_HEDLEY_WARN_UNUSED_RESULT
     static basic_json from_cbor(InputType&& i,
                                 const bool strict = true,
-                                const bool allow_exceptions = true,
+                                const bool &allow_exceptions = true,
                                 const cbor_tag_handler_t tag_handler = cbor_tag_handler_t::error)
     {
         basic_json result;
@@ -23571,7 +23571,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     JSON_HEDLEY_WARN_UNUSED_RESULT
     static basic_json from_cbor(IteratorType first, IteratorType last,
                                 const bool strict = true,
-                                const bool allow_exceptions = true,
+                                const bool &allow_exceptions = true,
                                 const cbor_tag_handler_t tag_handler = cbor_tag_handler_t::error)
     {
         basic_json result;
@@ -23586,7 +23586,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     JSON_HEDLEY_DEPRECATED_FOR(3.8.0, from_cbor(ptr, ptr + len))
     static basic_json from_cbor(const T* ptr, std::size_t len,
                                 const bool strict = true,
-                                const bool allow_exceptions = true,
+                                const bool &allow_exceptions = true,
                                 const cbor_tag_handler_t tag_handler = cbor_tag_handler_t::error)
     {
         return from_cbor(ptr, ptr + len, strict, allow_exceptions, tag_handler);
@@ -23597,7 +23597,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     JSON_HEDLEY_DEPRECATED_FOR(3.8.0, from_cbor(ptr, ptr + len))
     static basic_json from_cbor(detail::span_input_adapter&& i,
                                 const bool strict = true,
-                                const bool allow_exceptions = true,
+                                const bool &allow_exceptions = true,
                                 const cbor_tag_handler_t tag_handler = cbor_tag_handler_t::error)
     {
         basic_json result;
@@ -23614,7 +23614,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     JSON_HEDLEY_WARN_UNUSED_RESULT
     static basic_json from_msgpack(InputType&& i,
                                    const bool strict = true,
-                                   const bool allow_exceptions = true)
+                                   const bool &allow_exceptions = true)
     {
         basic_json result;
         detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);
@@ -23629,7 +23629,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     JSON_HEDLEY_WARN_UNUSED_RESULT
     static basic_json from_msgpack(IteratorType first, IteratorType last,
                                    const bool strict = true,
-                                   const bool allow_exceptions = true)
+                                   const bool &allow_exceptions = true)
     {
         basic_json result;
         detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);
@@ -23643,7 +23643,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     JSON_HEDLEY_DEPRECATED_FOR(3.8.0, from_msgpack(ptr, ptr + len))
     static basic_json from_msgpack(const T* ptr, std::size_t len,
                                    const bool strict = true,
-                                   const bool allow_exceptions = true)
+                                   const bool &allow_exceptions = true)
     {
         return from_msgpack(ptr, ptr + len, strict, allow_exceptions);
     }
@@ -23652,7 +23652,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     JSON_HEDLEY_DEPRECATED_FOR(3.8.0, from_msgpack(ptr, ptr + len))
     static basic_json from_msgpack(detail::span_input_adapter&& i,
                                    const bool strict = true,
-                                   const bool allow_exceptions = true)
+                                   const bool &allow_exceptions = true)
     {
         basic_json result;
         detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);
@@ -23668,7 +23668,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     JSON_HEDLEY_WARN_UNUSED_RESULT
     static basic_json from_ubjson(InputType&& i,
                                   const bool strict = true,
-                                  const bool allow_exceptions = true)
+                                  const bool &allow_exceptions = true)
     {
         basic_json result;
         detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);
@@ -23683,7 +23683,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     JSON_HEDLEY_WARN_UNUSED_RESULT
     static basic_json from_ubjson(IteratorType first, IteratorType last,
                                   const bool strict = true,
-                                  const bool allow_exceptions = true)
+                                  const bool &allow_exceptions = true)
     {
         basic_json result;
         detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);
@@ -23697,7 +23697,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     JSON_HEDLEY_DEPRECATED_FOR(3.8.0, from_ubjson(ptr, ptr + len))
     static basic_json from_ubjson(const T* ptr, std::size_t len,
                                   const bool strict = true,
-                                  const bool allow_exceptions = true)
+                                  const bool &allow_exceptions = true)
     {
         return from_ubjson(ptr, ptr + len, strict, allow_exceptions);
     }
@@ -23706,7 +23706,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     JSON_HEDLEY_DEPRECATED_FOR(3.8.0, from_ubjson(ptr, ptr + len))
     static basic_json from_ubjson(detail::span_input_adapter&& i,
                                   const bool strict = true,
-                                  const bool allow_exceptions = true)
+                                  const bool &allow_exceptions = true)
     {
         basic_json result;
         detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);
@@ -23723,7 +23723,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     JSON_HEDLEY_WARN_UNUSED_RESULT
     static basic_json from_bjdata(InputType&& i,
                                   const bool strict = true,
-                                  const bool allow_exceptions = true)
+                                  const bool &allow_exceptions = true)
     {
         basic_json result;
         detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);
@@ -23738,7 +23738,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     JSON_HEDLEY_WARN_UNUSED_RESULT
     static basic_json from_bjdata(IteratorType first, IteratorType last,
                                   const bool strict = true,
-                                  const bool allow_exceptions = true)
+                                  const bool &allow_exceptions = true)
     {
         basic_json result;
         detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);
@@ -23753,7 +23753,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     JSON_HEDLEY_WARN_UNUSED_RESULT
     static basic_json from_bson(InputType&& i,
                                 const bool strict = true,
-                                const bool allow_exceptions = true)
+                                const bool &allow_exceptions = true)
     {
         basic_json result;
         detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);
@@ -23768,7 +23768,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     JSON_HEDLEY_WARN_UNUSED_RESULT
     static basic_json from_bson(IteratorType first, IteratorType last,
                                 const bool strict = true,
-                                const bool allow_exceptions = true)
+                                const bool &allow_exceptions = true)
     {
         basic_json result;
         detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);
@@ -23782,7 +23782,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     JSON_HEDLEY_DEPRECATED_FOR(3.8.0, from_bson(ptr, ptr + len))
     static basic_json from_bson(const T* ptr, std::size_t len,
                                 const bool strict = true,
-                                const bool allow_exceptions = true)
+                                const bool &allow_exceptions = true)
     {
         return from_bson(ptr, ptr + len, strict, allow_exceptions);
     }
@@ -23791,7 +23791,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     JSON_HEDLEY_DEPRECATED_FOR(3.8.0, from_bson(ptr, ptr + len))
     static basic_json from_bson(detail::span_input_adapter&& i,
                                 const bool strict = true,
-                                const bool allow_exceptions = true)
+                                const bool &allow_exceptions = true)
     {
         basic_json result;
         detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);

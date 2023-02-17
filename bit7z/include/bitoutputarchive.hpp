@@ -21,6 +21,7 @@
 struct ISequentialInStream;
 
 namespace bit7z {
+
 using std::istream;
 
 using DeletedItems = std::set< uint32_t >;
@@ -35,7 +36,7 @@ using DeletedItems = std::set< uint32_t >;
  * UpdateCallback uses indices in the range [0, BitOutputArchive::itemsCount() - 1]
  *
  * Now, if the user doesn't delete any item in the input archive, itemsCount()
- * is just equal to <n. of items in the input archive> + <n. of newly added items>.
+ * is just equal to <n° of items in the input archive> + <n° of newly added items>.
  * In this case, an input_index value is just equal to the index used by UpdateCallback.
  *
  * On the contrary, if the user wants to delete an item in the input archive, the value
@@ -54,6 +55,14 @@ class UpdateCallback;
 class BitOutputArchive {
     public:
         /**
+         * @brief Constructs a BitOutputArchive object for a completely new archive.
+         *
+          * @param creator  the reference to the BitAbstractArchiveCreator object containing all the settings to
+         *                  be used for creating the new archive.
+         */
+        explicit BitOutputArchive( const BitAbstractArchiveCreator& creator );
+
+        /**
          * @brief Constructs a BitOutputArchive object, opening an (optional) input file archive.
          *
          * If a non-empty input file path is passed, the corresponding archive will be opened and
@@ -64,8 +73,7 @@ class BitOutputArchive {
          *                be used for creating the new archive and reading the (optional) input archive.
          * @param in_file (optional) the path to an input archive file.
          */
-        explicit BitOutputArchive( const BitAbstractArchiveCreator& creator, tstring in_file = {} );
-
+        explicit BitOutputArchive( const BitAbstractArchiveCreator& creator, const tstring& in_file );
 
         /**
          * @brief Constructs a BitOutputArchive object, opening an input file archive from the given buffer.
@@ -78,8 +86,7 @@ class BitOutputArchive {
          *                  be used for creating the new archive and reading the (optional) input archive.
          * @param in_buffer the buffer containing an input archive file.
          */
-        BitOutputArchive( const BitAbstractArchiveCreator& creator, const vector< byte_t >& in_buffer );
-
+        BitOutputArchive( const BitAbstractArchiveCreator& creator, const std::vector< byte_t >& in_buffer );
 
         /**
          * @brief Constructs a BitOutputArchive object, reading an input file archive from the given std::istream.
@@ -94,16 +101,16 @@ class BitOutputArchive {
 
         BitOutputArchive( BitOutputArchive&& ) = delete;
 
-        BitOutputArchive& operator=( const BitOutputArchive& ) = delete;
+        auto operator=( const BitOutputArchive& ) -> BitOutputArchive& = delete;
 
-        BitOutputArchive& operator=( BitOutputArchive&& ) = delete;
+        auto operator=( BitOutputArchive&& ) -> BitOutputArchive& = delete;
 
         /**
          * @brief Adds all the items that can be found by indexing the given vector of filesystem paths.
          *
          * @param in_paths the vector of filesystem paths.
          */
-        void addItems( const vector< tstring >& in_paths );
+        void addItems( const std::vector< tstring >& in_paths );
 
         /**
          * @brief Adds all the items that can be found by indexing the keys of the given map of filesystem paths;
@@ -112,7 +119,7 @@ class BitOutputArchive {
          * @param in_paths map of filesystem paths with the corresponding user-defined path desired inside the
          *                 output archive.
          */
-        void addItems( const map< tstring, tstring >& in_paths );
+        void addItems( const std::map< tstring, tstring >& in_paths );
 
         /**
          * @brief Adds the given file path, with an optional user-defined path to be used in the output archive.
@@ -125,21 +132,21 @@ class BitOutputArchive {
         void addFile( const tstring& in_file, const tstring& name = {} );
 
         /**
-         * @brief Adds the given buffer file, using the given name as path when compressed in the output archive.
+         * @brief Adds the given buffer file, using the given name as a path when compressed in the output archive.
          *
          * @param in_buffer the buffer containing the file to be added to the output archive.
          * @param name      user-defined path to be used inside the output archive.
          */
-        void addFile( const vector< byte_t >& in_buffer, const tstring& name );
+        void addFile( const std::vector< byte_t >& in_buffer, const tstring& name );
 
         /**
-         * @brief Adds the given standard input stream, using the given name as path when compressed
+         * @brief Adds the given standard input stream, using the given name as a path when compressed
          *        in the output archive.
          *
          * @param in_stream
          * @param name
          */
-        void addFile( istream& in_stream, const tstring& name );
+        void addFile( std::istream& in_stream, const tstring& name );
 
         /**
          * @brief Adds all the files in the given vector of filesystem paths.
@@ -148,7 +155,7 @@ class BitOutputArchive {
          *
          * @param in_files the vector of paths to files.
          */
-        void addFiles( const vector< tstring >& in_files );
+        void addFiles( const std::vector< tstring >& in_files );
 
         /**
          * @brief Adds all the files inside the given directory path that match the given wildcard filter.
@@ -191,22 +198,74 @@ class BitOutputArchive {
          *
          * @param out_stream the output standard stream.
          */
-        void compressTo( ostream& out_stream );
+        void compressTo( std::ostream& out_stream );
 
         /**
-         * @return the total number of item added to the output archive object.
+         * @return the total number of items added to the output archive object.
          */
-        uint32_t itemsCount() const;
+        auto itemsCount() const -> uint32_t;
 
         /**
          * @return a constant reference to the BitAbstractArchiveHandler object containing the
          *         settings for writing the output archive.
          */
-        const BitAbstractArchiveHandler& handler() const noexcept;
+        auto handler() const noexcept -> const BitAbstractArchiveHandler&;
 
+        /**
+         * @brief Default destructor.
+         */
         virtual ~BitOutputArchive() = default;
 
     protected:
+        virtual auto itemProperty( input_index index, BitProperty prop ) const -> BitPropVariant;
+
+        virtual auto itemStream( input_index index, ISequentialInStream** inStream ) const -> HRESULT;
+
+        virtual auto hasNewData( uint32_t index ) const noexcept -> bool;
+
+        virtual auto hasNewProperties( uint32_t index ) const noexcept -> bool;
+
+        auto itemInputIndex( uint32_t new_index ) const noexcept -> input_index;
+
+        auto outputItemProperty( uint32_t index, BitProperty propID ) const -> BitPropVariant;
+
+        auto outputItemStream( uint32_t index, ISequentialInStream** inStream ) const -> HRESULT;
+
+        auto indexInArchive( uint32_t index ) const noexcept -> uint32_t;
+
+        inline auto inputArchive() const -> BitInputArchive* {
+            return mInputArchive.get();
+        }
+
+        inline void setInputArchive( std::unique_ptr< BitInputArchive >&& input_archive ) {
+            mInputArchive = std::move( input_archive );
+        }
+
+        inline auto inputArchiveItemsCount() const -> uint32_t {
+            return mInputArchiveItemsCount;
+        }
+
+        inline void setDeletedIndex( uint32_t index ) {
+            mDeletedItems.insert( index );
+        }
+
+        inline auto isDeletedIndex( uint32_t index ) const -> bool {
+            return mDeletedItems.find( index ) != mDeletedItems.cend();
+        }
+
+        inline auto hasDeletedIndexes() const -> bool {
+            return !mDeletedItems.empty();
+        }
+
+        inline auto hasNewItems() const -> bool {
+            return mNewItemsVector.size() > 0;
+        }
+
+        friend class UpdateCallback;
+
+    private:
+        const BitAbstractArchiveCreator& mArchiveCreator;
+
         unique_ptr< BitInputArchive > mInputArchive;
         uint32_t mInputArchiveItemsCount;
 
@@ -216,44 +275,29 @@ class BitOutputArchive {
         mutable FailedFiles mFailedFiles;
 
         /* mInputIndices:
-         *   Position i = index in range [0, itemsCount() - 1] used by UpdateCallback.
-         *   Value at pos. i = corresponding index in the input archive (type input_index).
+         *  - Position i = index in range [0, itemsCount() - 1] used by UpdateCallback.
+         *  - Value at position i = corresponding index in the input archive (type input_index).
          *
          * If there are some deleted items, then i != mInputIndices[i]
          * (at least for values of i greater than the index of the first deleted item).
          *
-         * Otherwise, if there are no deleted items, mInputIndices is empty, and itemInputIndex(i)
+         * Otherwise, if there are no deleted items, the vector is empty, and itemInputIndex(i)
          * will return input_index with value i.
          *
          * This vector is either empty, or it has size equal to itemsCount() (thanks to updateInputIndices()). */
         std::vector< input_index > mInputIndices;
 
-        virtual BitPropVariant itemProperty( input_index index, BitProperty prop ) const;
+        auto initOutArchive() const -> CMyComPtr< IOutArchive >;
 
-        virtual HRESULT itemStream( input_index index, ISequentialInStream** inStream ) const;
+        auto initOutFileStream( const fs::path& out_archive, bool updating_archive ) const -> CMyComPtr< IOutStream >;
 
-        virtual bool hasNewData( uint32_t index ) const noexcept;
+#if defined( _WIN32 ) && defined( BIT7Z_AUTO_PREFIX_LONG_PATHS )
+        BitOutputArchive( const BitAbstractArchiveCreator& creator, fs::path in_arc );
+#else
+        BitOutputArchive( const BitAbstractArchiveCreator& creator, const fs::path& in_arc );
+#endif
 
-        virtual bool hasNewProperties( uint32_t index ) const noexcept;
-
-        input_index itemInputIndex( uint32_t new_index ) const noexcept;
-
-        BitPropVariant outputItemProperty( uint32_t index, BitProperty propID ) const;
-
-        HRESULT outputItemStream( uint32_t index, ISequentialInStream** inStream ) const;
-
-        uint32_t indexInArchive( uint32_t index ) const noexcept;
-
-        friend class UpdateCallback;
-
-    private:
-        const BitAbstractArchiveCreator& mArchiveCreator;
-
-        CMyComPtr< IOutArchive > initOutArchive() const;
-
-        CMyComPtr< IOutStream > initOutFileStream( const tstring& out_archive, bool updating_archive ) const;
-
-        void compressToFile( const tstring& out_file, UpdateCallback* update_callback );
+        void compressToFile( const fs::path& out_file, UpdateCallback* update_callback );
 
         void compressOut( IOutArchive* out_arc,
                           IOutStream* out_stream,
@@ -263,6 +307,7 @@ class BitOutputArchive {
 
         void updateInputIndices();
 };
+
 }  // namespace bit7z
 
 #endif //BITOUTPUTARCHIVE_HPP

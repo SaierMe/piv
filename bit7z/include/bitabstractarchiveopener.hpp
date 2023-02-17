@@ -17,6 +17,7 @@
 #include "bitformat.hpp"
 
 namespace bit7z {
+
 using std::ostream;
 
 /**
@@ -28,29 +29,31 @@ class BitAbstractArchiveOpener : public BitAbstractArchiveHandler {
 
         BitAbstractArchiveOpener( BitAbstractArchiveOpener&& ) = delete;
 
-        BitAbstractArchiveOpener& operator=( const BitAbstractArchiveOpener& ) = delete;
+        auto operator=( const BitAbstractArchiveOpener& ) -> BitAbstractArchiveOpener& = delete;
 
-        BitAbstractArchiveOpener& operator=( BitAbstractArchiveOpener&& ) = delete;
+        auto operator=( BitAbstractArchiveOpener&& ) -> BitAbstractArchiveOpener& = delete;
 
         ~BitAbstractArchiveOpener() override = default;
 
         /**
          * @return the archive format used by the archive opener.
          */
-        BIT7Z_NODISCARD const BitInFormat& format() const noexcept override;
+        BIT7Z_NODISCARD auto format() const noexcept -> const BitInFormat& override;
 
         /**
          * @return the archive format used by the archive opener.
          */
-        BIT7Z_NODISCARD const BitInFormat& extractionFormat() const noexcept;
+        BIT7Z_NODISCARD auto extractionFormat() const noexcept -> const BitInFormat&;
 
     protected:
-        const BitInFormat& mFormat;
-
         BitAbstractArchiveOpener( const Bit7zLibrary& lib,
                                   const BitInFormat& format,
                                   const tstring& password = {} );
+
+    private:
+        const BitInFormat& mFormat;
 };
+
 }  // namespace bit7z
 
 #endif // BITABSTRACTARCHIVEOPENER_HPP

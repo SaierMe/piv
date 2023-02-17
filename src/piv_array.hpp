@@ -3,7 +3,7 @@
  * 作者: Xelloss
  * 网站: https://piv.ink
  * 邮箱: xelloss@vip.qq.com
- * 版本: 2022/11/23
+ * 版本: 2023/02/14
  */
 
 #ifndef _PIV_ARRAY_HPP
@@ -26,7 +26,7 @@ namespace piv
     {
         // 数组_求和
         template <typename R, typename T>
-        R Sum(T &array)
+        R Sum(const T &array)
         {
             INT_P Count = array.data().GetCount();
             assert(Count > 0);
@@ -55,7 +55,7 @@ namespace piv
 
         // 数组_求最大值
         template <typename R, typename T>
-        R MaxImum(T &array)
+        R MaxImum(const T &array)
         {
             INT_P Count = array.data().GetCount();
             assert(Count > 0);
@@ -86,7 +86,7 @@ namespace piv
 
         // 数组_求最小值
         template <typename R, typename T>
-        R MinImum(T &array)
+        R MinImum(const T &array)
         {
             INT_P Count = array.data().GetCount();
             assert(Count > 0);
@@ -117,7 +117,7 @@ namespace piv
 
         // 展示数组
         template <typename T>
-        CVolString FormatArray(T &arr)
+        CVolString FormatArray(const T &arr)
         {
             using EleType = std::remove_reference_t<decltype(arr.data().GetAt(0))>;
             CVolString result;
@@ -194,7 +194,7 @@ namespace piv
 
         // 取数组前面
         template <typename T>
-        T GetArrayFront(T &array, INT_P num)
+        T GetArrayFront(const T &array, const INT_P &num)
         {
             INT_P Count = 0;
             if constexpr (std::is_same_v<T, CVolObjectArray>)
@@ -231,7 +231,7 @@ namespace piv
 
         // 取数组后面
         template <typename T>
-        T GetArrayBack(T &array, INT_P num)
+        T GetArrayBack(const T &array, const INT_P &num)
         {
             INT_P Count = 0;
             if constexpr (std::is_same_v<T, CVolObjectArray>)
@@ -268,7 +268,7 @@ namespace piv
 
         // 取对象数组数据
         template <typename T>
-        CVolMem SaveObjArrToData(T &array)
+        CVolMem SaveObjArrToData(const T &array)
         {
             if constexpr (std::is_same_v<T, CVolObjectArray>)
             {

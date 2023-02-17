@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/01/09                          *
+ * 版本: 2023/02/16                          *
 \*********************************************/
 
 #ifndef _PIV_NLOHMANN_JSON_H
@@ -14,716 +14,1042 @@
 #include <sys/base/libs/win_base/vol_base.h>
 #endif
 
-// 火山的_CT宏跟chrono冲突,需要临时取消定义
-#ifdef _CT
-#undef _CT
-#endif
-
-// 包含json
-#include "json.hpp"
-
-// 重新定义_CT宏
-#ifndef _CT
-#define _CT(x) CVolConstString(_T(x))
-#endif
-
 #include "piv_string.hpp"
+#include "json.hpp"
 
 using PivJSON = nlohmann::basic_json<>;
 using PivOrderJSON = nlohmann::basic_json<nlohmann::ordered_map>;
-
-using PivJSON_exception = PivJSON::exception;
-using PivJSON_parse_error = PivJSON::parse_error;
-using PivJSON_invalid_iterator = PivJSON::invalid_iterator;
-using PivJSON_type_error = PivJSON::type_error;
-using PivJSON_out_of_range = PivJSON::out_of_range;
-using PivJSON_other_error = PivJSON::other_error;
 
 namespace piv
 {
     namespace json
     {
-        // 是否可解析
-        template <typename J>
-        inline bool accept(const CVolString &input, const CVolMem &json_str, const bool ignore_comments, const int32_t encoding)
+
+        /**
+         * @brief 文本是否可解析
+         * @param input 所欲测试的文本
+         * @param ignore_comments 忽略注释
+         * @return 返回是否为json数据
+         */
+        template <typename J, typename T>
+        inline bool AcceptText(const T &input, const bool &ignore_comments)
         {
-            if (!input.IsEmpty())
-            {
-                CVolString json_test = input;
-                json_test.TrimAll();
-                if (json_test.LeadOf(L'{') || json_test.LeadOf(L'[')) // JSON文本
-                {
-                    return J::accept(json_test.GetText(), json_test.GetText() + json_test.GetLength(), ignore_comments);
-                }
-                else // JSON文件
-                {
-                    FILE *fp = _wfopen(json_test.GetText(), L"r");
-                    if (!fp)
-                    {
-                        return false;
-                    }
-                    bool ret = J::accept(fp, ignore_comments);
-                    fclose(fp);
-                    return ret;
-                }
-            }
-            if (!json_str.IsEmpty())
-            {
-                const char *pstr = reinterpret_cast<const char *>(json_str.GetPtr());
-                size_t len = static_cast<size_t>(json_str.GetSize());
-#ifdef PIV_ENABLE_SIMDUTF
-                int str_encoding = simdutf::detect_encodings(pstr, len);
+            return J::accept(input, ignore_comments);
+        }
+
+        /**
+         * @brief 文件是否可解析
+         * @param input 所欲测试的文件
+         * @param ignore_comments 忽略注释
+         * @return 返回是否为json文件
+         */
+        template <typename J>
+        bool AcceptFile(const wchar_t *file, const bool &ignore_comments)
+        {
+            FILE *fp = _wfopen(file, L"r");
+            if (!fp)
+                return false;
+            bool ret = J::accept(fp, ignore_comments);
+            fclose(fp);
+            return ret;
+        }
+
+        /**
+         * @brief 是否可解析
+         * @param input 所欲测试的数据
+         * @param ignore_comments 忽略注释
+         * @param encoding 字节集编码
+         * @return 返回是否为json数据
+         */
+        template <typename J>
+        bool Accept(const string_view &input, const bool &ignore_comments, const int32_t &encoding = 1)
+        {
+            string_view test{input};
+            piv::edit::trim_left(test);
+            piv::edit::trim_right(test);
+            if (test.empty())
+                return false;
+            if (test.front() == '{' || test.front() == '[')
+                return AcceptText<J>(test, ignore_comments);
+            else
+                return AcceptFile<J>(PivU2W{test.data(), test.size()}.GetText(), ignore_comments);
+        }
+        template <typename J>
+        bool Accept(const wstring_view &input, const bool &ignore_comments, const int32_t &encoding = 1)
+        {
+            wstring_view test{input};
+            piv::edit::trim_left(test);
+            piv::edit::trim_right(test);
+            if (test.empty())
+                return false;
+            if (test.front() == '{' || test.front() == '[')
+                return AcceptText<J>(test, ignore_comments);
+            else
+                return AcceptFile<J>(std::wstring{test.data(), test.size()}.c_str(), ignore_comments);
+        }
+        template <typename J>
+        inline bool Accept(const std::string &input, const bool &ignore_comments, const int32_t &encoding = 1)
+        {
+            return Accept<J>(string_view{input}, ignore_comments, encoding);
+        }
+        template <typename J>
+        bool Accept(const std::wstring &input, const bool &ignore_comments, const int32_t &encoding = 1)
+        {
+            wstring_view test{input};
+            piv::edit::trim_left(test);
+            piv::edit::trim_right(test);
+            if (test.empty())
+                return false;
+            if (test.front() == '{' || test.front() == '[')
+                return AcceptText<J>(test, ignore_comments);
+            else
+                return AcceptFile<J>(input.c_str(), ignore_comments);
+        }
+        template <typename J>
+        inline bool Accept(const wchar_t *input, const bool &ignore_comments, const int32_t &encoding = 1)
+        {
+            return Accept(wstring_view{input}, ignore_comments, encoding);
+        }
+        template <typename J>
+        bool Accept(const CVolString &input, const bool &ignore_comments, const int32_t &encoding = 1)
+        {
+            wstring_view test{input.GetText()};
+            piv::edit::trim_left(test);
+            piv::edit::trim_right(test);
+            if (test.empty())
+                return false;
+            if (test.front() == '{' || test.front() == '[')
+                return AcceptText<J>(test, ignore_comments);
+            else
+                return AcceptFile<J>(input.GetText(), ignore_comments);
+        }
+        template <typename J>
+        bool Accept(const CVolMem &input, const bool &ignore_comments, const int32_t &encoding = 1)
+        {
+            size_t len = static_cast<size_t>(input.GetSize());
+            if (len == 0)
+                return false;
+#ifdef SIMDUTF_H
+            int str_encoding = simdutf::detect_encodings(reinterpret_cast<const char *>(input.GetPtr()), len);
 #else
-                int str_encoding = encoding;
+            int str_encoding = encoding;
 #endif
-                if ((str_encoding & 8) == 8) // UTF-32LE
-                {
-                    return J::accept(reinterpret_cast<const char32_t *>(pstr), reinterpret_cast<const char32_t *>(pstr) + len / 4, ignore_comments);
-                }
-                else if ((str_encoding & 2) == 2) // UTF-16LE
-                {
-                    return J::accept(reinterpret_cast<const wchar_t *>(pstr), reinterpret_cast<const wchar_t *>(pstr) + len / 2, ignore_comments);
-                }
-                else if ((str_encoding & 1) == 1) // UTF-8
-                {
-                    return J::accept(pstr, pstr + len, ignore_comments);
-                }
-                else if (str_encoding == 0) // ANSI
-                {
-                    return J::accept(PivA2U(json_str).String(), ignore_comments);
-                }
-            }
+            if ((str_encoding & 8) == 8) // UTF-32LE
+                return J::accept(reinterpret_cast<const char32_t *>(input.GetPtr()), reinterpret_cast<const char32_t *>(input.GetPtr()) + len / 4, ignore_comments);
+            else if ((str_encoding & 2) == 2) // UTF-16LE
+                return Accept<J>(wstring_view{reinterpret_cast<const wchar_t *>(input.GetPtr()), len / 2}, ignore_comments);
+            else if ((str_encoding & 1) == 1) // UTF-8
+                return Accept<J>(string_view{reinterpret_cast<const char *>(input.GetPtr()), len}, ignore_comments);
+            else if (str_encoding == 0) // ANSI
+                return Accept<J>(PivA2U{reinterpret_cast<const char *>(input.GetPtr()), len}.String(), ignore_comments);
             return false;
         }
 
-        // 解析
-        template <typename J>
-        inline bool parse(J &json, CVolString &input, const bool allow_exceptions, const bool ignore_comments)
+        /**
+         * @brief 解析文本
+         * @param input 所欲解析的文本
+         * @param allow_exceptions 允许异常
+         * @param ignore_comments 忽略注释
+         * @param cb 解析回调
+         * @return 返回是否解析成功
+         */
+        template <typename J, typename T, typename F>
+        inline bool ParseText(J &json, const T &input, const F cb, const bool &allow_exceptions, const bool &ignore_comments)
         {
-            json = J::parse(input.GetText(), input.GetText() + input.GetLength(), nullptr, allow_exceptions, ignore_comments);
+            json = J::parse(input, cb, allow_exceptions, ignore_comments);
             return !json.is_discarded();
         }
 
-        // 解析UTF8
-        template <typename J>
-        inline bool parse(J &json, CVolMem &input, const bool allow_exceptions, const bool ignore_comments)
+        /**
+         * @brief 解析文件
+         * @param input 所欲解析的文件
+         * @param allow_exceptions 允许异常
+         * @param ignore_comments 忽略注释
+         * @param cb 解析回调
+         * @return 返回是否解析成功
+         */
+        template <typename J, typename F>
+        bool ParseFile(J &json, const wchar_t *file, const F cb, const bool &allow_exceptions, const bool &ignore_comments)
         {
-            json = J::parse(reinterpret_cast<const char *>(input.GetPtr()), reinterpret_cast<const char *>(input.GetEndPtr()), nullptr, allow_exceptions, ignore_comments);
+            FILE *fp = _wfopen(file, L"r");
+            if (!fp)
+                return false;
+            json = J::parse(fp, cb, allow_exceptions, ignore_comments);
+            fclose(fp);
             return !json.is_discarded();
         }
 
-        // 解析字节集
-        template <typename J>
-        inline bool parse_detect(J &json, CVolMem &input, const bool allow_exceptions, const bool ignore_comments, const int32_t encoding)
+        /**
+         * @brief 解析
+         * @param json JSON对象
+         * @param input 所欲解析的数据
+         * @param allow_exceptions 允许异常
+         * @param ignore_comments 忽略注释
+         * @param encoding 字节集编码
+         * @param cb 解析回调
+         * @return 返回是否解析成功
+         */
+        template <typename J, typename F>
+        bool Parse(J &json, const string_view &input, const F cb, const bool &allow_exceptions, const bool &ignore_comments, const int32_t &encoding = 1)
         {
-            const char *pstr = reinterpret_cast<const char *>(input.GetPtr());
+            string_view test{input};
+            piv::edit::trim_left(test);
+            piv::edit::trim_right(test);
+            if (test.empty())
+                return false;
+            if (test.front() == '{' || test.front() == '[')
+                return ParseText(json, test, cb, allow_exceptions, ignore_comments);
+            else
+                return ParseFile(json, PivU2W{test.data(), test.size()}.GetText(), cb, allow_exceptions, ignore_comments);
+        }
+        template <typename J, typename F>
+        bool Parse(J &json, const wstring_view &input, const F cb, const bool &allow_exceptions, const bool &ignore_comments, const int32_t &encoding = 1)
+        {
+            wstring_view test{input};
+            piv::edit::trim_left(test);
+            piv::edit::trim_right(test);
+            if (test.empty())
+                return false;
+            if (test.front() == '{' || test.front() == '[')
+                return ParseText(json, test, cb, allow_exceptions, ignore_comments);
+            else
+                return ParseFile(json, std::wstring{test.data(), test.size()}.c_str(), cb, allow_exceptions, ignore_comments);
+        }
+        template <typename J, typename F>
+        inline bool Parse(J &json, const std::string &input, const F cb, const bool &allow_exceptions, const bool &ignore_comments, const int32_t &encoding = 1)
+        {
+            return Parse(json, string_view{input}, cb, allow_exceptions, ignore_comments);
+        }
+        template <typename J, typename F>
+        bool Parse(J &json, const std::wstring &input, const F cb, const bool &allow_exceptions, const bool &ignore_comments, const int32_t &encoding = 1)
+        {
+            wstring_view test{input};
+            piv::edit::trim_left(test);
+            piv::edit::trim_right(test);
+            if (test.empty())
+                return false;
+            if (test.front() == '{' || test.front() == '[')
+                return ParseText(json, test, cb, allow_exceptions, ignore_comments);
+            else
+                return ParseFile(json, input.c_str(), cb, allow_exceptions, ignore_comments);
+        }
+        template <typename J, typename F>
+        bool Parse(J &json, const CVolString &input, const F cb, const bool &allow_exceptions, const bool &ignore_comments, const int32_t &encoding = 1)
+        {
+            wstring_view test{input.GetText()};
+            piv::edit::trim_left(test);
+            piv::edit::trim_right(test);
+            if (test.empty())
+                return false;
+            if (test.front() == '{' || test.front() == '[')
+                return ParseText(json, test, cb, allow_exceptions, ignore_comments);
+            else
+                return ParseFile(json, input.GetText(), cb, allow_exceptions, ignore_comments);
+        }
+        template <typename J, typename F>
+        inline bool Parse(J &json, const wchar_t *input, const F cb, const bool &allow_exceptions, const bool &ignore_comments, const int32_t &encoding = 1)
+        {
+            return Parse(json, wstring_view{input}, cb, allow_exceptions, ignore_comments, encoding);
+        }
+        template <typename J, typename F>
+        inline bool Parse(J &json, const CVolMem &input, const F cb, const bool &allow_exceptions, const bool &ignore_comments, const int32_t &encoding = 1)
+        {
             size_t len = static_cast<size_t>(input.GetSize());
-#ifdef PIV_ENABLE_SIMDUTF
-            int str_encoding = simdutf::detect_encodings(pstr, len);
+            if (len == 0)
+                return false;
+#ifdef SIMDUTF_H
+            int str_encoding = simdutf::detect_encodings(reinterpret_cast<const char *>(input.GetPtr()), len);
 #else
             int str_encoding = encoding;
 #endif
             if ((str_encoding & 8) == 8) // UTF-32LE
             {
-                json = J::parse(reinterpret_cast<const char32_t *>(pstr), reinterpret_cast<const char32_t *>(pstr) + len / 4, nullptr, allow_exceptions, ignore_comments);
+                json = J::parse(reinterpret_cast<const char32_t *>(input.GetPtr()), reinterpret_cast<const char32_t *>(input.GetPtr()) + (len / 4), cb, allow_exceptions, ignore_comments);
+                return !json.is_discarded();
             }
             else if ((str_encoding & 2) == 2) // UTF-16LE
             {
-                json = J::parse(reinterpret_cast<const wchar_t *>(pstr), reinterpret_cast<const wchar_t *>(pstr) + len / 2, nullptr, allow_exceptions, ignore_comments);
+                return Parse(json, wstring_view{reinterpret_cast<const wchar_t *>(input.GetPtr()), len / 2}, (J::parser_callback_t)cb, allow_exceptions, ignore_comments);
             }
             else if ((str_encoding & 1) == 1) // UTF-8
             {
-                json = J::parse(pstr, pstr + len, nullptr, allow_exceptions, ignore_comments);
+                return Parse(json, string_view{reinterpret_cast<const char *>(input.GetPtr()), len}, cb, allow_exceptions, ignore_comments);
             }
             else if (str_encoding == 0) // ANSI
             {
-                json = J::parse(PivA2U(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize())).String(),
-                                nullptr, allow_exceptions, ignore_comments);
+                return Parse(json, PivA2U{reinterpret_cast<const char *>(input.GetPtr()), len}.String(), cb, allow_exceptions, ignore_comments);
             }
-            return !json.is_discarded();
+            return false;
         }
 
-        // 解析文件
-        template <typename J>
-        inline bool parse(J &json, const wchar_t *input, const bool allow_exceptions, const bool ignore_comments)
+        /**
+         * @brief 转换到输入类型的数据
+         * @param input 输入数据
+         * @return 返回输入类型
+         */
+        template <typename = void>
+        inline const string_view input_t(const CVolMem &input)
         {
-            FILE *fp = _wfopen(input, L"r");
-            if (!fp)
-            {
-                return false;
-            }
-            json = J::parse(fp, nullptr, allow_exceptions, ignore_comments);
-            fclose(fp);
-            return !json.is_discarded();
+            return string_view{reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize())};
         }
-
-        // 解析字节集BJDATA
-        template <typename J>
-        inline bool from_bjdata(J &json, const CVolMem &input, const bool strict, const bool allow_exceptions)
+        inline const std::vector<uint8_t> input_t(const std::vector<uint8_t> &input)
         {
-            json = J::from_bjdata(input.GetPtr(), input.GetEndPtr(), strict, allow_exceptions);
-            return !json.is_discarded();
+            return input;
         }
-
-        // 解析字节集BSON
-        template <typename J>
-        inline bool from_bson(J &json, const CVolMem &input, const bool strict, const bool allow_exceptions)
+        inline const string_view input_t(const string_view &input)
         {
-            json = J::from_bson(input.GetPtr(), input.GetEndPtr(), strict, allow_exceptions);
-            return !json.is_discarded();
+            return input;
         }
-
-        // 解析字节集CBOR
-        template <typename J>
-        inline bool from_cbor(J &json, const CVolMem &input, const bool strict, const bool allow_exceptions, const int32_t tag_handler)
+        inline const std::string input_t(const std::string &input)
         {
-            json = J::from_cbor(input.GetPtr(), input.GetEndPtr(), strict, allow_exceptions, static_cast<PivJSON::cbor_tag_handler_t>(tag_handler));
-            return !json.is_discarded();
+            return input;
         }
 
-        // 解析字节集MSGPACK
-        template <typename J>
-        inline bool from_msgpack(J &json, const CVolMem &input, const bool strict, const bool allow_exceptions)
+        /**
+         * @brief 解析BJData
+         * @param json JSON对象
+         * @param input 所欲解析的数据
+         * @param strict 严格模式
+         * @param allow_exceptions 允许异常
+         * @return 返回是否解析成功
+         */
+        template <typename J, typename T>
+        inline bool From_bjdata(J &json, const T &input, const bool &strict, const bool &allow_exceptions)
         {
-            json = J::from_msgpack(input.GetPtr(), input.GetEndPtr(), strict, allow_exceptions);
+            json = J::from_bjdata(input_t(input), strict, allow_exceptions);
             return !json.is_discarded();
         }
 
-        // 解析字节集UBJSON
-        template <typename J>
-        inline bool from_ubjson(J &json, const CVolMem &input, const bool strict, const bool allow_exceptions)
+        /**
+         * @brief 解析BSON
+         * @param json JSON对象
+         * @param input 所欲解析的数据
+         * @param strict 严格模式
+         * @param allow_exceptions 允许异常
+         * @return 返回是否解析成功
+         */
+        template <typename J, typename T>
+        inline bool From_bson(J &json, const T &input, const bool &strict, const bool &allow_exceptions)
         {
-            json = J::from_ubjson(input.GetPtr(), input.GetEndPtr(), strict, allow_exceptions);
+            json = J::from_bson(input_t(input), strict, allow_exceptions);
             return !json.is_discarded();
         }
 
-        // 到文本、到字节集
+        /**
+         * @brief 解析CBOR
+         * @param json JSON对象
+         * @param input 所欲解析的数据
+         * @param strict 严格模式
+         * @param allow_exceptions 允许异常
+         * @param tag_handler 标签处理
+         * @return 返回是否解析成功
+         */
+        template <typename J, typename T>
+        inline bool From_cbor(J &json, const T &input, const bool &strict, const bool &allow_exceptions, const int32_t &tag_handler)
+        {
+            json = J::from_cbor(input_t(input), strict, allow_exceptions, static_cast<J::cbor_tag_handler_t>(tag_handler));
+            return !json.is_discarded();
+        }
+
+        /**
+         * @brief 解析MSGPACK
+         * @param json JSON对象
+         * @param input 所欲解析的数据
+         * @param strict 严格模式
+         * @param allow_exceptions 允许异常
+         * @return 返回是否解析成功
+         */
+        template <typename J, typename T>
+        inline bool From_msgpack(J &json, const T &input, const bool &strict, const bool &allow_exceptions)
+        {
+            json = J::from_msgpack(input_t(input), strict, allow_exceptions);
+            return !json.is_discarded();
+        }
+
+        /**
+         * @brief 解析UBJSON
+         * @param json JSON对象
+         * @param input 所欲解析的数据
+         * @param strict 严格模式
+         * @param allow_exceptions 允许异常
+         * @return 返回是否解析成功
+         */
+        template <typename J, typename T>
+        inline bool From_ubjson(J &json, const T &input, const bool &strict, const bool &allow_exceptions)
+        {
+            json = J::from_ubjson(input_t(input), strict, allow_exceptions);
+            return !json.is_discarded();
+        }
+
+        /**
+         * @brief 缩进宽字符转换为ASCII字符(内部使用)
+         * @param c 所欲转换的宽字符
+         * @return 返回转换的ASCII字符
+         */
+        static char IndentWcharToChar(const wchar_t &c)
+        {
+            if (c < 128)
+                return static_cast<char>(c);
+            return ' '; // 非ASCII字符都返回为空格
+        }
+
+        /**
+         * @brief 到可读文本(序列化)
+         * @param json JSON对象
+         * @param indent 缩进
+         * @param indent_char 缩进字符
+         * @param ensure_ascii 确保ASCII
+         * @param error_handler 错误处理方式
+         * @return 返回序列化文本
+         */
+        template <typename J>
+        inline std::string Dump(J &json, const int32_t indent, const wchar_t &indent_char, const bool &ensure_ascii, const int32_t &error_handler)
+        {
+            return json.dump(indent, IndentWcharToChar(indent_char), ensure_ascii, static_cast<J::error_handler_t>(error_handler));
+        }
         template <typename R, typename J>
-        inline R dump_utf16(J &json, const int32_t indent, const char indent_char, const bool ensure_ascii, const int32_t error_handler)
+        inline R DumpTo(J &json, const int32_t indent, const wchar_t &indent_char, const bool &ensure_ascii, const int32_t &error_handler)
         {
-            std::string str = json.dump(indent, indent_char, ensure_ascii, static_cast<PivJSON::error_handler_t>(error_handler));
-            return PivU2W{str};
+            std::string str = json.dump(indent, IndentWcharToChar(indent_char), ensure_ascii, static_cast<J::error_handler_t>(error_handler));
+            return R(str.data(), str.size());
         }
 
-        // 到UTF8
-        template <typename J>
-        inline CVolMem dump(J &json, const int32_t indent, const char indent_char, const bool ensure_ascii, const int32_t error_handler, const bool null_char)
-        {
-            std::string str = json.dump(indent, indent_char, ensure_ascii, static_cast<PivJSON::error_handler_t>(error_handler));
-            return CVolMem(str.c_str(), str.size() + (null_char ? 1 : 0));
-        }
-
-        // 到多字节
-        template <typename J>
-        inline CVolMem dump_ansi(J &json, const int32_t indent, const char indent_char, const bool ensure_ascii, const int32_t error_handler, const bool null_char)
-        {
-            std::string str = json.dump(indent, indent_char, ensure_ascii, static_cast<PivJSON::error_handler_t>(error_handler));
-            CVolMem mbsmem;
-            PivU2W mbs{str};
-            mbs.GetMem(mbsmem, true);
-            return mbsmem;
-        }
-
-        // 到BJDATA
-        template <typename J>
-        inline CVolMem to_bjdata(J &json, const bool use_size, const bool use_type)
+        /**
+         * @brief 到序列化二进制数据
+         * @param json JSON对象
+         * @param use_size 使用大小注解
+         * @param use_type 使用类型注解
+         * @return 返回字节集
+         */
+        template <typename J> // 到BJData
+        inline CVolMem To_bjdata(J &json, const bool &use_size, const bool &use_type)
         {
             std::vector<std::uint8_t> bin;
             J::to_bjdata(json, bin, use_size, use_type);
             return CVolMem(bin.data(), bin.size());
         }
-
-        // 到BSON
-        template <typename J>
-        inline CVolMem to_bson(J &json)
+        template <typename J> // 到BSON
+        inline CVolMem To_bson(J &json)
         {
             std::vector<std::uint8_t> bin;
             J::to_bson(json, bin);
             return CVolMem(bin.data(), bin.size());
         }
-
-        // 到CBOR
-        template <typename J>
-        inline CVolMem to_cbor(J &json)
+        template <typename J> // 到CBOR
+        inline CVolMem To_cbor(J &json)
         {
             std::vector<std::uint8_t> bin;
             J::to_cbor(json, bin);
             return CVolMem(bin.data(), bin.size());
         }
-
-        // 到MsgPack
-        template <typename J>
-        inline CVolMem to_msgpack(J &json)
+        template <typename J> // 到MsgPack
+        inline CVolMem To_msgpack(J &json)
         {
             std::vector<std::uint8_t> bin;
             J::to_msgpack(json, bin);
             return CVolMem(bin.data(), bin.size());
         }
-
-        // 到UBJSON
-        template <typename J>
-        inline CVolMem to_ubjson(J &json, const bool use_size, const bool use_type)
+        template <typename J> // 到UBJSON
+        inline CVolMem To_ubjson(J &json, const bool &use_size, const bool &use_type)
         {
             std::vector<std::uint8_t> bin;
             J::to_ubjson(json, bin, use_size, use_type);
             return CVolMem(bin.data(), bin.size());
         }
 
-        // 变参模板: 对象添加键值对无效
+        /**
+         * @brief 转换到JSON的值类型
+         * @param num 所欲转换的数值类型
+         * @param str 所欲转换的文本类型
+         * @return 返回兼容的JSON值类型
+         */
+        template <typename = void>
+        const bool &to_value(const bool &num)
+        {
+            return num;
+        }
+        template <typename = void>
+        const int32_t &to_value(const int32_t &num)
+        {
+            return num;
+        }
+        template <typename = void>
+        const int64_t &to_value(const int64_t &num)
+        {
+            return num;
+        }
+        template <typename = void>
+        const double &to_value(const double &num)
+        {
+            return num;
+        }
+        template <typename = void>
+        const std::string to_value(const wchar_t *str)
+        {
+            return PivW2U{str}.String();
+        }
+        template <typename = void>
+        const string_view &to_value(const char *str)
+        {
+            return string_view{str};
+        }
+        template <typename = void>
+        const std::string to_value(const CVolString &str)
+        {
+            return PivW2U{str}.String();
+        }
+        template <typename = void>
+        const std::string &to_value(const std::string &str)
+        {
+            return str;
+        }
+        template <typename = void>
+        const string_view &to_value(const string_view &str)
+        {
+            return str;
+        }
+        template <typename = void>
+        const std::string to_value(const std::wstring &str)
+        {
+            return PivW2U{str}.String();
+        }
+        template <typename = void>
+        const std::string to_value(const wstring_view &str)
+        {
+            return PivW2U{str.data(), str.size()}.String();
+        }
+        template <typename = void>
+        const string_view to_value(const CVolMem &str)
+        {
+            return string_view{reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())};
+        }
+
+        /**
+         * @brief 转换到JSON索引或键名
+         * @param idx 所欲转换的索引
+         * @param key 所欲转换的键名
+         * @return 返回兼容的JSON索引或键名
+         */
+        template <typename = void>
+        const uint32_t to_key(const int32_t &idx)
+        {
+            return static_cast<uint32_t>(idx);
+        }
+        template <typename = void>
+        const uint64_t to_key(const int64_t &idx)
+        {
+            return static_cast<uint64_t>(idx);
+        }
+        template <typename = void>
+        const std::string to_key(const wchar_t *key)
+        {
+            return PivW2U{key}.String();
+        }
+        template <typename = void>
+        const string_view to_key(const char *key)
+        {
+            return string_view{key};
+        }
+        template <typename = void>
+        const std::string to_key(const CVolString &key)
+        {
+            return PivW2U{key}.String();
+        }
+        template <typename = void>
+        const std::string &to_key(const std::string &key)
+        {
+            return key;
+        }
+        template <typename = void>
+        const string_view &to_key(const string_view &key)
+        {
+            return key;
+        }
+        template <typename = void>
+        const std::string to_key(const std::wstring &key)
+        {
+            return PivW2U{key}.String();
+        }
+        template <typename = void>
+        const std::string to_key(const wstring_view &key)
+        {
+            return PivW2U{key.data(), key.size()}.String();
+        }
+        template <typename = void>
+        const string_view to_key(const CVolMem &key)
+        {
+            return string_view{reinterpret_cast<const char *>(key.GetPtr()), static_cast<size_t>(key.GetSize())};
+        }
+
+        /**
+         * @brief 转换到JSON Pointer
+         * @param path 所欲转换的路径
+         * @return 返回JSON Pointer
+         */
         template <typename J>
-        inline void set_obj_args(J &json, const char *typeNames)
+        const auto to_pointer(const wchar_t *path)
         {
+            return J::json_pointer{*PivW2U{path}};
         }
-
-        // 变参模板: 对象添加空值键值对
-        template <typename J, typename K>
-        inline void set_obj_args(J &json, const char *typeNames, K key)
-        {
-            PivJSON j;
-            json[*PivW2U{key}] = nullptr;
-        }
-
-        // 变参模板: 对象添加文本值键值对
-        template <typename J, typename... Args>
-        inline void set_obj_args(J &json, const char *typeNames, const wchar_t *key, const wchar_t *val, Args... args)
-        {
-            ++typeNames;
-            json[*PivW2U{key}] = *PivW2U{val};
-            set_obj_args(json, ++typeNames, args...);
-        }
-
-        // 变参模板: 对象添加数值键值对
-        template <typename J, typename V, typename... Args>
-        inline void set_obj_args(J &json, const char *typeNames, const wchar_t *key, V val, Args... args)
-        {
-            ++typeNames;
-            if (*typeNames == 'B')
-            {
-                json[*PivW2U{key}] = static_cast<bool>(val);
-            }
-            else
-            {
-                json[*PivW2U{key}] = val;
-            }
-            set_obj_args(json, ++typeNames, args...);
-        }
-
-        // 创建对象
-        template <typename J, typename... Args>
-        inline J new_object(const char *typeNames, Args... args)
-        {
-            J json = J::object();
-            set_obj_args(json, typeNames, args...);
-            return json;
-        }
-
-        // 设置对象
-        template <typename J, typename... Args>
-        inline J &set_object(J &json, const char *typeNames, Args... args)
-        {
-            json = J::object();
-            set_obj_args(json, ++typeNames, args...);
-            return json;
-        }
-
-        // 变参模板: 数组加入无效成员
         template <typename J>
-        inline void push_back_args(J &json, const char *typeNames)
+        const auto to_pointer(const char *path)
         {
+            return J::json_pointer{path};
         }
-
-        // 变参模板: 数组加入文本成员
-        template <typename J, typename... Args>
-        inline void push_back_args(J &json, const char *typeNames, const wchar_t *head, Args... args)
-        {
-            json.push_back(*PivW2U{head});
-            push_back_args(json, ++typeNames, args...);
-        }
-
-        // 变参模板: 数组加入数值成员
-        template <typename J, typename T, typename... Args>
-        inline void push_back_args(J &json, const char *typeNames, T head, Args... args)
-        {
-            if (*typeNames == 'B')
-            {
-                json.push_back(static_cast<bool>(head));
-            }
-            else
-            {
-                json.push_back(head);
-            }
-            push_back_args(json, ++typeNames, args...);
-        }
-
-        // 创建数组
-        template <typename J, typename... Args>
-        inline J new_array(const char *typeNames, Args... args)
-        {
-            J jsonArray = J::array();
-            push_back_args(jsonArray, typeNames, args...);
-            return jsonArray;
-        }
-
-        // 设置数组
-        template <typename J, typename... Args>
-        inline J &set_array(J &json, const char *typeNames, Args... args)
-        {
-            json = J::array();
-            push_back_args(json, ++typeNames, args...);
-            return json;
-        }
-
-        // 成员
         template <typename J>
-        inline J &get_at(J &json, const int32_t idx, const bool allow_exceptions)
+        const auto to_pointer(const CVolString &path)
+        {
+            return J::json_pointer{*PivW2U{path}};
+        }
+        template <typename J>
+        const auto to_pointer(const std::string &path)
+        {
+            return J::json_pointer{path};
+        }
+        template <typename J>
+        const auto &to_pointer(const string_view &path)
+        {
+            return J::json_pointer{path};
+        }
+        template <typename J>
+        const auto to_pointer(const std::wstring &path)
+        {
+            return J::json_pointer{*PivW2U{path}};
+        }
+        template <typename J>
+        const std::string to_pointer(const wstring_view &path)
+        {
+            return J::json_pointer{*PivW2U{path.data(), path.size()}};
+        }
+        template <typename J>
+        const string_view to_pointer(const CVolMem &path)
+        {
+            return J::json_pointer{string_view{reinterpret_cast<const char *>(path.GetPtr()), static_cast<size_t>(path.GetSize())}};
+        }
+
+        /**
+         * @brief 取成员
+         * @param json JSON对象
+         * @param idx 数组索引
+         * @param key 对象键名
+         * @param allow_exceptions 允许异常
+         * @return 返回成员值参考
+         */
+        template <typename J>
+        inline J &At(J &json, const int32_t &idx, const bool &allow_exceptions = false)
         {
             if (!allow_exceptions && !json.is_array())
-            {
                 json = J::array();
-            }
-            return json[(std::max)(0, idx)];
+            return json[static_cast<uint32_t>(idx)];
         }
         template <typename J>
-        inline J &get_at(J &json, const wchar_t *key, const bool allow_exceptions)
+        inline J &At(J &json, const int64_t &idx, const bool &allow_exceptions = false)
+        {
+            if (!allow_exceptions && !json.is_array())
+                json = J::array();
+            return json[static_cast<uint64_t>(idx)];
+        }
+        template <typename J, typename T>
+        inline J &At(J &json, const T &key, const bool &allow_exceptions = false)
         {
             if (!allow_exceptions && !json.is_object())
-            {
                 json = J::object();
-            }
-            return json[*PivW2U{key}];
+            return json[to_key(key)];
         }
 
-        // 取成员
+        /**
+         * @brief 数组加入成员
+         * @param json JSON对象
+         * @param val 成员值
+         * @param ...args 可变长成员值
+         */
         template <typename J>
-        inline J &at(J &json, const int32_t idx)
+        inline void PushBack(J &json)
         {
-            return json.at((std::max)(0, idx));
         }
-        template <typename J>
-        inline J &at(J &json, const wchar_t *key)
+        template <typename J, typename T, typename... Args>
+        inline void PushBack(J &json, const T &val, const Args... args)
         {
-            return json.at(*PivW2U{key});
+            json.push_back(to_value(val));
+            PushBack(json, args...);
+        }
+        template <typename J, typename... Args>
+        inline void PushBack(J &json, const J &val, const Args... args)
+        {
+            json.push_back(val);
+            PushBack(json, args...);
         }
 
-        // 加入成员
+        /**
+         * @brief 对象加入键值对
+         * @param json JSON对象
+         * @param key 键名
+         * @param val 键置
+         */
         template <typename J>
-        inline J &push_back(J &json, char tName, const wchar_t *val)
+        inline void Emplace(J &json)
         {
-            json.push_back(*PivW2U{val});
+        }
+        template <typename J>
+        inline void Emplace(J &json, const J &val)
+        {
+        }
+        template <typename J, typename K>
+        inline void Emplace(J &json, const K &key)
+        {
+            json[to_key(key)] = nullptr;
+        }
+        template <typename J, typename K, typename V, typename... Args>
+        inline void Emplace(J &json, const K &key, const V &val, const Args... args)
+        {
+            json[to_key(key)] = to_value(val);
+            Emplace(json, args...);
+        }
+        template <typename J, typename K, typename... Args>
+        inline void Emplace(J &json, const K &key, const J &val, const Args... args)
+        {
+            json[to_key(key)] = val;
+            Emplace(json, args...);
+        }
+
+        /**
+         * @brief 创建数组
+         * @param ...args 可变长参数
+         * @return 返回创建的数组
+         */
+        template <typename J, typename... Args>
+        inline J CreateArray(const Args... args)
+        {
+            J array = J::array();
+            PushBack(array, args...);
+            return array;
+        }
+
+        /**
+         * @brief 设置数组
+         * @param json JSON数组
+         * @param ...args 可变长成员值
+         * @return 返回自身
+         */
+        template <typename J, typename... Args>
+        inline J &SetArray(J &json, const Args... args)
+        {
+            json = J::array();
+            PushBack(json, args...);
+            return json;
+        }
+
+        /**
+         * @brief 数组加入多个成员
+         * @param json JSON对象
+         * @param ...args 可变长成员值
+         * @return 返回自身
+         */
+        template <typename J, typename... Args>
+        inline J &PushBackArgs(J &json, const Args... args)
+        {
+            PushBack(json, args...);
+            return json;
+        }
+
+        /**
+         * @brief 数组插入成员
+         * @param json JSON对象
+         * @param pos 插入位置
+         * @param val 成员值
+         * @param cnt 插入次数
+         * @return 返回自身
+         */
+        template <typename J>
+        inline J &Insert(J &json, const ptrdiff_t &pos, const J &val, const size_t &cnt = 1)
+        {
+            json.insert(json.begin() + pos, cnt, val);
             return json;
         }
         template <typename J, typename T>
-        inline J &push_back(J &json, char tName, const T &val)
+        inline J &Insert(J &json, const ptrdiff_t &pos, const T &val, const size_t &cnt = 1)
         {
-            if (tName == 'B')
-            {
-                json.push_back(static_cast<bool>(val));
-            }
-            else
-            {
-                json.push_back(val);
-            }
+            json.insert(json.begin() + pos, cnt, to_value(val));
             return json;
         }
 
-        // 插入成员
-        template <typename J>
-        inline J &insert(J &json, char tName, int32_t pos, const wchar_t *val)
+        /**
+         * @brief 创建对象
+         * @param ...args 可变长键值对
+         * @return 返回所创建的JSON对象
+         */
+        template <typename J, typename... Args>
+        inline J CreateObject(Args... args)
         {
-            json.insert(json.begin() + pos, *PivW2U{val});
-            return json;
-        }
-        template <typename J, typename T>
-        inline J &insert(J &json, char tName, int32_t pos, const T &val)
-        {
-            if (tName == 'B')
-            {
-                json.insert(json.begin() + pos, static_cast<bool>(val));
-            }
-            else
-            {
-                json.insert(json.begin() + pos, val);
-            }
+            J json = J::object();
+            Emplace(json, args...);
             return json;
         }
 
-        // 取文本Ex
-        template <typename J>
-        inline CVolString get_string(const J &json)
+        /**
+         * @brief 置对象
+         * @param json JSON对象
+         * @param ...args 可变长键值对
+         * @return 返回自身
+         */
+        template <typename J, typename... Args>
+        inline J &SetObject(J &json, Args... args)
         {
-            PivJSON::value_t type = json.type();
-            switch (type)
+            json = J::object();
+            Emplace(json, args...);
+            return json;
+        }
+
+        /**
+         * @brief 取成员Ex
+         * @param json JSON对象
+         * @return 返回成员的文本值
+         */
+        template <typename J>
+        std::string GetString(const J &json)
+        {
+            switch (json.type())
             {
-            case PivJSON::value_t::null:
+            case J::value_t::null:
             {
-                return _CT("null");
+                return "null";
             }
-            case PivJSON::value_t::object:
+            case J::value_t::object:
             {
-                return dump_utf16<CVolString>(json, -1, ' ', false, 1);
+                return json.dump(-1, ' ', false, J::error_handler_t::replace);
             }
-            case PivJSON::value_t::array:
+            case J::value_t::array:
             {
-                return dump_utf16<CVolString>(json, -1, ' ', false, 1);
+                return json.dump(-1, ' ', false, J::error_handler_t::replace);
             }
-            case PivJSON::value_t::string:
+            case J::value_t::string:
             {
-                return PivU2W{json.get<std::string>()};
+                return json.get_ref<const std::string &>();
             }
-            case PivJSON::value_t::boolean:
+            case J::value_t::boolean:
             {
-                return json.get<bool>() ? _CT("true") : _CT("false");
+                return json.get<bool>() ? "true" : "false";
             }
-            case PivJSON::value_t::number_integer:
+            case J::value_t::number_integer:
             {
-                return CVolString(json.get<std::int64_t>());
+                return std::to_string(json.get<int64_t>());
             }
-            case PivJSON::value_t::number_unsigned:
+            case J::value_t::number_unsigned:
             {
-                return CVolString(static_cast<INT64>(json.get<std::uint64_t>()));
+                return std::to_string(static_cast<int64_t>(json.get<uint64_t>()));
             }
-            case PivJSON::value_t::number_float:
+            case J::value_t::number_float:
             {
-                return CVolString(json.get<double>());
+                return std::to_string(json.get<double>());
             }
-            case PivJSON::value_t::binary:
+            case J::value_t::binary:
             {
-                return dump_utf16<CVolString>(json, -1, ' ', false, 1);
+                return json.dump(-1, ' ', false, J::error_handler_t::replace);
             }
-            case PivJSON::value_t::discarded:
+            case J::value_t::discarded:
             {
-                return _CT("<discarded>");
+                return "<discarded>";
             }
             default:
-                return _CT("");
+                return "";
             }
         }
 
-        // 删除成员
-        template <typename J>
-        inline size_t erase(J &json, const int32_t idx)
-        {
-            json.erase((std::max)(0, idx));
-            return 0;
-        }
-        template <typename J>
-        inline size_t erase(J &json, const wchar_t *key)
-        {
-            return json.erase(*PivW2U{key});
-        }
-
-        // 取路径文本值
-        template <typename J>
-        inline CVolString str_value_path(const J &json, const wchar_t *json_pointer, const wchar_t *default_value)
+        /**
+         * @brief 取路径基本值
+         * @param json JSON对象
+         * @param path 路径
+         * @param default_value 默认值(失败时返回)
+         * @return 返回成员值
+         */
+        template <typename R, typename J, typename P>
+        R ValuePath(const J &json, const P &path, const R &default_value)
         {
             try
             {
-                return PivU2W{json.at(J::json_pointer(*PivW2U{json_pointer})).get<std::string>()};
+                return json.at(to_pointer<J>(path)).get<R>();
             }
-            catch (PivJSON_exception &)
+            catch (J::exception &)
             {
-                return CVolString(default_value);
             }
+            return default_value;
         }
 
-        // 取路径基本值
-        template <typename ReturnType, typename J>
-        inline ReturnType value_path(const J &json, const wchar_t *json_pointer, const ReturnType &default_value)
+        /**
+         * @brief 取路径文本
+         * @param json JSON对象
+         * @param path 路径
+         * @param default_value 默认值(失败时返回)
+         * @return 返回成员值
+         */
+        template <typename J, typename K>
+        CVolString ValuePathStr(const J &json, const K &path, const CVolString &default_value)
         {
             try
             {
-                return json.at(J::json_pointer(*PivW2U{json_pointer})).get<ReturnType>();
+                return *PivU2Ws{json.at(to_pointer<J>(path)).get_ref<const std::string &>()};
             }
-            catch (PivJSON_exception &)
+            catch (J::exception &)
             {
-                return default_value;
             }
+            return default_value;
         }
 
-        // 取路径对象
-        template <typename J>
-        inline J obj_value_path(J &json, const wchar_t *json_pointer)
+        /**
+         * @brief 取路径文本视图
+         * @param json JSON对象
+         * @param path 路径
+         * @param default_value 默认值(失败时返回)
+         * @return 返回成员值
+         */
+        template <typename J, typename K>
+        string_view ValuePathView(const J &json, const K &path, const std::string &default_value)
         {
             try
             {
-                J::json_pointer ptr(*PivW2U{json_pointer});
-                if (json.at(ptr).is_object())
-                {
-                    return json.at(ptr);
-                }
+                return string_view{json.at(to_pointer<J>(path)).get_ref<const J::string_t &>()};
             }
-            catch (PivJSON_exception &)
+            catch (J::exception &)
+            {
+            }
+            return string_view{default_value};
+        }
+
+        /**
+         * @brief 取路径对象
+         * @param json JSON对象
+         * @param path 路径
+         * @return 返回JSON对象
+         */
+        template <typename J, typename P>
+        J ValuePathObj(J &json, const P &path)
+        {
+            try
+            {
+                auto ret = json.at(to_pointer<J>(path));
+                if (ret.is_object())
+                    return ret;
+            }
+            catch (J::exception &)
             {
             }
             return J::object();
         }
 
-        // 取路径数组
-        template <typename J>
-        inline J arr_value_path(J &json, const wchar_t *json_pointer)
+        /**
+         * @brief 取路径数组
+         * @param json JSON对象
+         * @param path 路径
+         * @return 返回JSON数组
+         */
+        template <typename J, typename P>
+        J ValuePathArray(J &json, const P &path)
         {
             try
             {
-                J::json_pointer ptr(*PivW2U{json_pointer});
-                if (json.at(ptr).is_array())
-                {
-                    return json.at(ptr);
-                }
+                auto ret = json.at(to_pointer<J>(path));
+                if (ret.is_array())
+                    return ret;
             }
-            catch (PivJSON_exception &)
+            catch (J::exception &)
             {
             }
             return J::array();
         }
 
-        // 取成员文本值
-        template <typename J>
-        inline CVolString str_value(const J &json, const wchar_t *key, const wchar_t *default_value)
+        /**
+         * @brief 取成员值
+         * @tparam R 返回类型
+         * @param json JSON对象
+         * @param key 键名或索引
+         * @param default_value 默认值(失败时返回)
+         * @return 返回成员值
+         */
+        template <typename R, typename J, typename K>
+        R Value(const J &json, const K &key, const R &default_value)
         {
             try
             {
-                return PivU2W{json.at(*PivW2U{key}).get<std::string>()};
+                return json.at(to_key(key)).get<R>();
             }
-            catch (PivJSON_exception &)
+            catch (J::exception &)
             {
-                return CVolString(default_value);
             }
-        }
-        template <typename J>
-        inline CVolString str_value(const J &json, const int32_t idx, const wchar_t *default_value)
-        {
-            try
-            {
-                return PivU2W{json.at(idx).get<std::string>()};
-            }
-            catch (PivJSON_exception &)
-            {
-                return CVolString(default_value);
-            }
+            return default_value;
         }
 
-        // 取成员基本值
-        template <typename ReturnType, typename J>
-        inline ReturnType value(const J &json, const wchar_t *key, const ReturnType &default_value)
+        /**
+         * @brief 取成员文本
+         * @param json JSON对象
+         * @param key 键名或索引
+         * @param default_value 默认值(失败时返回)
+         * @return 返回成员值
+         */
+        template <typename J, typename K>
+        std::string ValueStr(const J &json, const K &key, const std::string &default_value)
         {
             try
             {
-                return json.at(*PivW2U{key}).get<ReturnType>();
+                return json.at(to_key(key)).get_ref<const std::string &>();
             }
-            catch (PivJSON_exception &)
+            catch (J::exception &)
             {
-                return default_value;
             }
-        }
-        template <typename ReturnType, typename J>
-        inline ReturnType value(const J &json, const int32_t idx, const ReturnType &default_value)
-        {
-            try
-            {
-                return json.at(idx).get<ReturnType>();
-            }
-            catch (PivJSON_exception &)
-            {
-                return default_value;
-            }
+            return default_value;
         }
 
-        // 取成员对象
-        template <typename J>
-        inline J obj_value(J &json, const wchar_t *key)
+        /**
+         * @brief 取成员对象
+         * @param json JSON对象
+         * @param key 键名或索引
+         * @return 返回JSON对象
+         */
+        template <typename J, typename K>
+        J ValueObj(const J &json, const K &key)
         {
             try
             {
-                PivW2U utf8key(key);
-                if (json.at(*utf8key).is_object())
-                {
-                    return json.at(*utf8key);
-                }
+                J ret = json.at(to_key(key));
+                if (ret.is_object())
+                    return ret;
             }
-            catch (PivJSON_exception &)
-            {
-            }
-            return J::object();
-        }
-        template <typename J>
-        inline J obj_value(J &json, const int32_t idx)
-        {
-            try
-            {
-                if (json.at(idx).is_object())
-                {
-                    return json.at(idx);
-                }
-            }
-            catch (PivJSON_exception &)
+            catch (J::exception &)
             {
             }
             return J::object();
         }
 
-        // 取成员数组
-        template <typename J>
-        inline J arr_value(J &json, const wchar_t *key)
+        /**
+         * @brief 取成员数组
+         * @param json JSON对象
+         * @param key 键名或索引
+         * @return 返回JSON数组
+         */
+        template <typename J, typename K>
+        J ValueArray(const J &json, const K &key)
         {
             try
             {
-                PivW2U utf8key{key};
-                if (json.at(*utf8key).is_array())
-                {
-                    return json.at(*utf8key);
-                }
+                J ret = json.at(to_key(key));
+                if (ret.is_array())
+                    return ret;
             }
-            catch (PivJSON_exception &)
-            {
-            }
-            return J::array();
-        }
-        template <typename J>
-        inline J arr_value(J &json, const int32_t idx)
-        {
-            try
-            {
-                if (json.at(idx).is_array())
-                {
-                    return json.at(idx);
-                }
-            }
-            catch (PivJSON_exception &)
+            catch (J::exception &)
             {
             }
             return J::array();
         }
 
-        // 置入文本值
-        template <typename J>
-        inline bool emplace_str(J &json, const wchar_t *path, const wchar_t *value, const bool replace)
-        {
-            try
-            {
-                if (path[0] == '/')
-                {
-                    json[J::json_pointer(*PivW2U{path})] = *PivW2U{value};
-                }
-                else
-                {
-                    if (!json.is_object() && !json.is_null())
-                    {
-                        if (replace)
-                            json = J::object();
-                        else
-                            return false;
-                    }
-                    json[*PivW2U{path}] = *PivW2U{value};
-                    return true;
-                }
-            }
-            catch (PivJSON_exception &)
-            {
-                return false;
-            }
-        }
-        template <typename J>
-        inline bool emplace_str(J &json, const int32_t idx, const wchar_t *value, const bool replace)
+        /**
+         * @brief 数组索引置入成员值
+         * @param json JSON对象
+         * @param idx 数组索引
+         * @param val 成员值
+         * @param replace 强制置入
+         * @return 返回是否置入成功
+         */
+        template <typename J, typename I, typename V>
+        bool EmplaceAtIdx(J &json, const I &idx, const V &val, const bool &replace = false)
         {
             try
             {
@@ -734,180 +1060,257 @@ namespace piv
                     else
                         return false;
                 }
-                json[idx] = *PivW2U{value};
+                json[idx] = val;
                 return true;
             }
-            catch (PivJSON_exception &)
-            {
-                return false;
-            }
-        }
-        // 置入基本值
-        template <typename V, typename J>
-        inline bool emplace(J &json, const wchar_t *path, const V &value, const bool replace)
-        {
-            try
-            {
-                if (path[0] == L'/')
-                {
-                    json[J::json_pointer(*PivW2U{path})] = static_cast<V>(value);
-                }
-                else
-                {
-                    if (!json.is_object() && !json.is_null())
-                    {
-                        if (replace)
-                            json = J::object();
-                        else
-                            return false;
-                    }
-                    json[*PivW2U{path}] = static_cast<V>(value);
-                    return true;
-                }
-            }
-            catch (PivJSON_exception &)
-            {
-                return false;
-            }
-        }
-        template <typename V, typename J>
-        inline bool emplace(J &json, const int32_t idx, const V &value, const bool replace)
-        {
-            try
-            {
-                if (!json.is_array() && !json.is_null())
-                {
-                    if (replace)
-                        json = J::array();
-                    else
-                        return false;
-                }
-                json[idx] = static_cast<V>(value);
-                return true;
-            }
-            catch (PivJSON_exception &)
+            catch (const J::exception &)
             {
                 return false;
             }
         }
 
-        // 置入对象值
-        template <typename J>
-        inline bool emplace_obj(J &json, const wchar_t *path, const J &value, const bool replace)
+        /**
+         * @brief 对象键名置入成员值
+         * @param json JSON对象
+         * @param key 对象键名
+         * @param val 成员值
+         * @param replace 强制置入
+         * @return 返回是否置入成功
+         */
+        template <typename J, typename K, typename V>
+        bool EmplaceAtKey(J &json, const K &key, const V &val, const bool &replace = false)
         {
-            if (!value.is_object())
-            {
-                return false;
-            }
             try
             {
-                if (path[0] == L'/')
-                {
-                    json[J::json_pointer(*PivW2U{path})] = value;
-                }
-                else
-                {
-                    if (!json.is_object() && !json.is_null())
-                    {
-                        if (replace)
-                            json = J::object();
-                        else
-                            return false;
-                    }
-                    json[*PivW2U{path}] = value;
-                    return true;
-                }
-            }
-            catch (PivJSON_exception &)
-            {
-                return false;
-            }
-        }
-        template <typename V, typename J>
-        inline bool emplace_obj(J &json, const int32_t idx, const V &value, const bool replace)
-        {
-            if (!value.is_object())
-            {
-                return false;
-            }
-            try
-            {
-                if (!json.is_array() && !json.is_null())
+                if (!json.is_object() && !json.is_null())
                 {
                     if (replace)
-                        json = J::array();
+                        json = J::object();
                     else
                         return false;
                 }
-                json[idx] = value;
+                json[key] = val;
                 return true;
             }
-            catch (PivJSON_exception &)
+            catch (const J::exception &)
             {
                 return false;
             }
         }
 
-        // 置入数组值
-        template <typename J>
-        inline bool emplace_arr(J &json, const wchar_t *path, const J &value, const bool replace)
+        /**
+         * @brief 路径置入成员值
+         * @param json JSON对象
+         * @param path JSON路径
+         * @param val 成员值
+         * @return 返回是否置入成功
+         */
+        template <typename J, typename P, typename V>
+        bool EmplaceAtPath(J &json, const P &path, const V &val)
         {
-            if (!value.is_array)
-            {
-                return false;
-            }
             try
             {
-                if (path[0] == L'/')
-                {
-                    json[J::json_pointer(*PivW2U{path})] = value;
-                }
-                else
-                {
-                    if (!json.is_object() && !json.is_null())
-                    {
-                        if (replace)
-                            json = J::object();
-                        else
-                            return false;
-                    }
-                    json[*PivW2U{path}] = value;
-                    return true;
-                }
-            }
-            catch (PivJSON_exception &)
-            {
-                return false;
-            }
-        }
-        template <typename V, typename J>
-        inline bool emplace_arr(J &json, const int32_t idx, const V &value, const bool replace)
-        {
-            if (!value.is_array)
-            {
-                return false;
-            }
-            try
-            {
-                if (!json.is_array() && !json.is_null())
-                {
-                    if (replace)
-                        json = J::array();
-                    else
-                        return false;
-                }
-                json[idx] = value;
+                json[path] = val;
                 return true;
             }
-            catch (PivJSON_exception &)
+            catch (const J::exception &)
             {
                 return false;
             }
         }
 
-        // 取所有键
+        /**
+         * @brief 置入成员值(通用)
+         * @param json JSON对象
+         * @param idx 数组索引
+         * @param key 对象键名
+         * @param path JSON路径
+         * @param val 成员值
+         * @param replace 强制置入
+         * @return 返回是否置入成功
+         */
+        template <typename J, typename V>
+        inline bool EmplaceAt(J &json, const int32_t &idx, const V &val, const bool &replace = false)
+        {
+            return EmplaceAtIdx(json, static_cast<uint32_t>(idx), to_value(val), replace);
+        }
+        template <typename J, typename V>
+        inline bool EmplaceAt(J &json, const int64_t &idx, const V &val, const bool &replace = false)
+        {
+            return EmplaceAtIdx(json, static_cast<uint64_t>(idx), to_value(val), replace);
+        }
+        template <typename J, typename V>
+        inline bool EmplaceAt(J &json, const wchar_t *path, const V &val, const bool &replace = false)
+        {
+            if (path[0] == '/')
+                return EmplaceAtPath(json, J::json_pointer{*PivW2U{path}}, to_value(val));
+            else
+                return EmplaceAtKey(json, to_key(path), to_value(val), replace);
+        }
+        template <typename J, typename V>
+        inline bool EmplaceAt(J &json, const char *path, const V &val, const bool &replace = false)
+        {
+            if (path[0] == '/')
+                return EmplaceAtPath(json, J::json_pointer{path}, to_value(val));
+            else
+                return EmplaceAtKey(json, to_key(path), to_value(val), replace);
+        }
+        template <typename J, typename V>
+        inline bool EmplaceAt(J &json, const CVolString &path, const V &val, const bool &replace = false)
+        {
+            if (path.IsEmpty())
+                return false;
+            if (path.GetCharAt(0) == '/')
+                return EmplaceAtPath(json, J::json_pointer{*PivW2U{path}}, to_value(val));
+            else
+                return EmplaceAtKey(json, to_key(path), to_value(val), replace);
+        }
+        template <typename J, typename V>
+        inline bool EmplaceAt(J &json, const std::string &path, const V &val, const bool &replace = false)
+        {
+            if (path.empty())
+                return false;
+            if (path.front() == '/')
+                return EmplaceAtPath(json, J::json_pointer{path}, to_value(val));
+            else
+                return EmplaceAtKey(json, to_key(path), to_value(val), replace);
+        }
+        template <typename J, typename V>
+        inline bool EmplaceAt(J &json, const std::wstring &path, const V &val, const bool &replace = false)
+        {
+            if (path.empty())
+                return false;
+            if (path.front() == '/')
+                return EmplaceAtPath(json, J::json_pointer{*PivW2U{path}}, to_value(val));
+            else
+                return EmplaceAtKey(json, to_key(path), to_value(val), replace);
+        }
+        template <typename J, typename V>
+        inline bool EmplaceAt(J &json, const string_view &path, const V &val, const bool &replace = false)
+        {
+            if (path.empty())
+                return false;
+            if (path.front() == '/')
+                return EmplaceAtPath(json, J::json_pointer{path.data()}, to_value(val));
+            else
+                return EmplaceAtKey(json, to_key(path), to_value(val), replace);
+        }
+        template <typename J, typename V>
+        inline bool EmplaceAt(J &json, const wstring_view &path, const V &val, const bool &replace = false)
+        {
+            if (path.empty())
+                return false;
+            if (path.front() == '/')
+                return EmplaceAtPath(json, J::json_pointer{*PivW2U{path}}, to_value(val));
+            else
+                return EmplaceAtKey(json, to_key(path), to_value(val), replace);
+        }
+        template <typename J, typename V>
+        inline bool EmplaceAt(J &json, const CVolMem &path, const V &val, const bool &replace = false)
+        {
+            if (path.IsEmpty())
+                return false;
+            if (path.Get_S_BYTE(0) == '/')
+                return EmplaceAtPath(json, J::json_pointer{*PivW2U{path}}, to_value(val));
+            else
+                return EmplaceAtKey(json, to_key(path), to_value(val), replace);
+        }
+
         template <typename J>
-        int32_t enum_key(const J &json, CMStringArray &keyArray)
+        inline bool EmplaceAt(J &json, const int32_t &idx, const J &val, const bool &replace = false)
+        {
+            return EmplaceAtIdx(json, static_cast<uint32_t>(idx), val, replace);
+        }
+        template <typename J>
+        inline bool EmplaceAt(J &json, const int64_t &idx, const J &val, const bool &replace = false)
+        {
+            return EmplaceAtIdx(json, static_cast<uint64_t>(idx), val, replace);
+        }
+        template <typename J>
+        inline bool EmplaceAt(J &json, const wchar_t *path, const J &val, const bool &replace = false)
+        {
+            if (path[0] == '/')
+                return EmplaceAtPath(json, J::json_pointer{*PivW2U{path}}, val);
+            else
+                return EmplaceAtKey(json, to_key(path), val, replace);
+        }
+        template <typename J>
+        inline bool EmplaceAt(J &json, const char *path, const J &val, const bool &replace = false)
+        {
+            if (path[0] == '/')
+                return EmplaceAtPath(json, J::json_pointer{path}, val);
+            else
+                return EmplaceAtKey(json, to_key(path), val, replace);
+        }
+        template <typename J>
+        inline bool EmplaceAt(J &json, const CVolString &path, const J &val, const bool &replace = false)
+        {
+            if (path.IsEmpty())
+                return false;
+            if (path.GetCharAt(0) == '/')
+                return EmplaceAtPath(json, J::json_pointer{*PivW2U{path}}, val);
+            else
+                return EmplaceAtKey(json, to_key(path), val, replace);
+        }
+        template <typename J>
+        inline bool EmplaceAt(J &json, const std::string &path, const J &val, const bool &replace = false)
+        {
+            if (path.empty())
+                return false;
+            if (path.front() == '/')
+                return EmplaceAtPath(json, J::json_pointer{path}, val);
+            else
+                return EmplaceAtKey(json, to_key(path), val, replace);
+        }
+        template <typename J>
+        inline bool EmplaceAt(J &json, const std::wstring &path, const J &val, const bool &replace = false)
+        {
+            if (path.empty())
+                return false;
+            if (path.front() == '/')
+                return EmplaceAtPath(json, J::json_pointer{*PivW2U{path}}, val);
+            else
+                return EmplaceAtKey(json, to_key(path), val, replace);
+        }
+        template <typename J>
+        inline bool EmplaceAt(J &json, const string_view &path, const J &val, const bool &replace = false)
+        {
+            if (path.empty())
+                return false;
+            if (path.front() == '/')
+                return EmplaceAtPath(json, J::json_pointer{path}, val);
+            else
+                return EmplaceAtKey(json, to_key(path), val, replace);
+        }
+        template <typename J>
+        inline bool EmplaceAt(J &json, const wstring_view &path, const J &val, const bool &replace = false)
+        {
+            if (path.empty())
+                return false;
+            if (path.front() == '/')
+                return EmplaceAtPath(json, J::json_pointer{*PivW2U{path}}, val);
+            else
+                return EmplaceAtKey(json, to_key(path), val, replace);
+        }
+        template <typename J>
+        inline bool EmplaceAt(J &json, const CVolMem &path, const J &val, const bool &replace = false)
+        {
+            if (path.IsEmpty())
+                return false;
+            if (path.Get_S_BYTE(0) == '/')
+                return EmplaceAtPath(json, J::json_pointer{*PivW2U{path}}, val);
+            else
+                return EmplaceAtKey(json, to_key(path), val, replace);
+        }
+
+        /**
+         * @brief 取所有键名
+         * @param json JSON对象
+         * @param keyArray 键名数组
+         * @return 键数量
+         */
+        template <typename J>
+        int32_t EnumKey(const J &json, CMStringArray &keyArray)
         {
             keyArray.RemoveAll();
             if (json.is_object())
@@ -916,9 +1319,21 @@ namespace piv
                 {
                     keyArray.Add(PivU2W{el.key()}.GetText());
                 }
-                return static_cast<int32_t>(keyArray.GetCount());
             }
-            return 0;
+            return static_cast<int32_t>(keyArray.size());
+        }
+        template <typename J>
+        int32_t EnumKey(const J &json, std::vector<string_view> &keyArray)
+        {
+            keyArray.clear();
+            if (json.is_object())
+            {
+                for (auto &el : json.items())
+                {
+                    keyArray.push_back(string_view{el.key()});
+                }
+            }
+            return static_cast<int32_t>(keyArray.size());
         }
 
     } // namespace json

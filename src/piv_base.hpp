@@ -6,7 +6,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/09                          *
+ * 版本: 2023/02/14                          *
 \*********************************************/
 
 #ifndef _PIV_BASE_ENCODING_HPP
@@ -42,7 +42,7 @@ namespace piv
     class base64
     {
     private:
-        inline bool is_base64(unsigned char c) noexcept
+        inline bool is_base64(const unsigned char &c) noexcept
         {
             return (c == 43 ||               // +
                     (c >= 47 && c <= 57) ||  // /-9
@@ -50,7 +50,7 @@ namespace piv
                     (c >= 97 && c <= 122) || // a-z
                     (c == 10) || (c == 13)); // \r\n
         }
-        inline void AddChar(std::basic_string<CharT> &s, unsigned char c, uint32_t &count, const uint32_t max_line_len) noexcept
+        inline void AddChar(std::basic_string<CharT> &s, const unsigned char &c, uint32_t &count, const uint32_t &max_line_len) noexcept
         {
             if (count < max_line_len)
             {
@@ -65,7 +65,7 @@ namespace piv
                 count = 1;
             }
         }
-        inline void AddChar(CVolString &s, unsigned char c, uint32_t &count, const uint32_t max_line_len) noexcept
+        inline void AddChar(CVolString &s, const unsigned char &c, uint32_t &count, const uint32_t &max_line_len) noexcept
         {
             if (count < max_line_len)
             {
@@ -88,7 +88,7 @@ namespace piv
          * @return 返回编码后的BASE64文本
          */
         template <typename T>
-        inline T encode(const unsigned char *input, size_t len, const int line_len = 0)
+        inline T encode(const unsigned char *input, size_t len, const int &line_len = 0)
         {
             T ret;
             int i = 0;
@@ -142,19 +142,19 @@ namespace piv
             }
             return ret;
         }
-        inline std::basic_string<CharT> encode(const basic_string_view<CharT> &input, const int line_len = 0)
+        inline std::basic_string<CharT> encode(const basic_string_view<CharT> &input, const int &line_len = 0)
         {
             return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), line_len);
         }
-        inline std::basic_string<CharT> encode(const std::basic_string<CharT> &input, const int line_len = 0)
+        inline std::basic_string<CharT> encode(const std::basic_string<CharT> &input, const int &line_len = 0)
         {
             return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), line_len);
         }
-        inline std::basic_string<CharT> encode(const CVolMem &input, const int line_len = 0)
+        inline std::basic_string<CharT> encode(const CVolMem &input, const int &line_len = 0)
         {
             return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()), line_len);
         }
-        inline CVolString Encode(const CVolMem &input, const int line_len = 0)
+        inline CVolString Encode(const CVolMem &input, const int &line_len = 0)
         {
             return encode<CVolString>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()), line_len);
         }
@@ -223,7 +223,7 @@ namespace piv
         {
             decode(basic_string_view<CharT>{input}, output);
         }
-        inline void decode(const CharT *input, CVolMem &output, const size_t count = static_cast<size_t>(-1))
+        inline void decode(const CharT *input, CVolMem &output, const size_t &count = static_cast<size_t>(-1))
         {
             decode((count == static_cast<size_t>(-1)) ? basic_string_view<CharT>{input} : basic_string_view<CharT>{input, count}, output);
         }
@@ -236,14 +236,14 @@ namespace piv
             decode(basic_string_view<CharT>{reinterpret_cast<const CharT *>(input.GetText())}, output);
         }
         template <typename T>
-        inline std::basic_string<CharT> decode(T &input)
+        inline std::basic_string<CharT> decode(const T &input)
         {
             CVolMem buffer;
             decode(input, buffer);
             return std::basic_string<CharT>{reinterpret_cast<const CharT *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize()) / sizeof(CharT)};
         }
         template <typename T>
-        inline CVolMem Decode(CVolString &input)
+        inline CVolMem Decode(const CVolString &input)
         {
             CVolMem output;
             decode(basic_string_view<CharT>{reinterpret_cast<const CharT *>(input.GetText())}, output);
@@ -260,11 +260,11 @@ namespace piv
     class base85
     {
     private:
-        inline void AddChar(std::basic_string<CharT> &s, unsigned char c) noexcept
+        inline void AddChar(std::basic_string<CharT> &s, const unsigned char &c) noexcept
         {
             s.push_back(c);
         }
-        inline void AddChar(CVolString &s, unsigned char c) noexcept
+        inline void AddChar(CVolString &s, const unsigned char &c) noexcept
         {
             s.AddChar(c);
         }
@@ -286,7 +286,7 @@ namespace piv
          * @return 是否成功
          */
         template <typename T>
-        inline bool encode(const unsigned char *input, size_t len, T &output)
+        inline bool encode(const unsigned char *input, const size_t &len, T &output)
         {
             ClearStr(output);
             if (len % 4)
@@ -305,7 +305,7 @@ namespace piv
             }
             return true;
         }
-        inline std::basic_string<CharT> encode(const basic_string_view<CharT> &input, const bool padding = false)
+        inline std::basic_string<CharT> encode(const basic_string_view<CharT> &input, const bool &padding = false)
         {
             std::basic_string<CharT> output;
             size_t remainder = input.size() * sizeof(CharT) % 4;
@@ -324,15 +324,15 @@ namespace piv
             }
             return output;
         }
-        inline std::basic_string<CharT> encode(const std::basic_string<CharT> &input, const bool padding = false)
+        inline std::basic_string<CharT> encode(const std::basic_string<CharT> &input, const bool &padding = false)
         {
             return encode(basic_string_view<CharT>{input}, padding);
         }
-        inline std::basic_string<CharT> encode(const CVolMem &input, const bool padding = false)
+        inline std::basic_string<CharT> encode(const CVolMem &input, const bool &padding = false)
         {
             return encode(basic_string_view<CharT>{reinterpret_cast<const CharT *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / sizeof(CharT)}, padding);
         }
-        inline CVolString Encode(const CVolMem &input, const bool padding = false)
+        inline CVolString Encode(const CVolMem &input, const bool &padding = false)
         {
             CVolString output;
             if (input.GetSize() % 4 == 0)
@@ -388,7 +388,7 @@ namespace piv
         {
             return decode(basic_string_view<CharT>{input}, output);
         }
-        inline bool decode(const CharT *input, CVolMem &output, const size_t count = static_cast<size_t>(-1))
+        inline bool decode(const CharT *input, CVolMem &output, const size_t &count = static_cast<size_t>(-1))
         {
             return decode((count == static_cast<size_t>(-1)) ? basic_string_view<CharT>{input} : basic_string_view<CharT>{input, count}, output);
         }
@@ -401,7 +401,7 @@ namespace piv
             return decode(basic_string_view<CharT>{reinterpret_cast<const CharT *>(input.GetText())}, output);
         }
         template <typename T>
-        inline std::basic_string<CharT> decode(T &input)
+        inline std::basic_string<CharT> decode(const T &input)
         {
             CVolMem buffer;
             decode(input, buffer);
@@ -425,7 +425,7 @@ namespace piv
     class base91
     {
     private:
-        inline void AddChar(std::basic_string<CharT> &s, unsigned char c) noexcept
+        inline void AddChar(std::basic_string<CharT> &s, const unsigned char &c) noexcept
         {
             s.push_back(c);
         }
@@ -442,7 +442,7 @@ namespace piv
          * @return 返回编码后的BASE91文本
          */
         template <typename T>
-        inline T encode(const unsigned char *input, size_t len)
+        inline T encode(const unsigned char *input, const size_t &len)
         {
             T ret;
             unsigned long queue = 0;
@@ -558,7 +558,7 @@ namespace piv
         {
             decode(basic_string_view<CharT>{input}, output);
         }
-        inline void decode(const CharT *input, CVolMem &output, const size_t count = static_cast<size_t>(-1))
+        inline void decode(const CharT *input, CVolMem &output, const size_t &count = static_cast<size_t>(-1))
         {
             decode((count == static_cast<size_t>(-1)) ? basic_string_view<CharT>{input} : basic_string_view<CharT>{input, count}, output);
         }
@@ -571,7 +571,7 @@ namespace piv
             decode(basic_string_view<CharT>{reinterpret_cast<const CharT *>(input.GetText())}, output);
         }
         template <typename T>
-        inline std::basic_string<CharT> decode(T &input)
+        inline std::basic_string<CharT> decode(const T &input)
         {
             CVolMem buffer;
             decode(input, buffer);

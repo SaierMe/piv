@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2022/11/28                          *
+ * 版本: 2023/02/14                          *
 \*********************************************/
 
 #ifndef _PIV_MMKV_HPP
@@ -29,7 +29,7 @@ namespace piv
     namespace mmkv
     {
         // 全局初始化
-        static void InitializeMMKV(const wchar_t *rootDir = L"", int32_t MMKVLogInfo = 2)
+        static void InitializeMMKV(const wchar_t *rootDir = L"", const int32_t &MMKVLogInfo = 2)
         {
             std::wstring _rootDir(rootDir);
             if (_rootDir.empty())
@@ -61,14 +61,14 @@ namespace piv
         static bool BackupOneToDirectory(const wchar_t *mmapID, const wchar_t *dstDir, const wchar_t *srcDir)
         {
             std::wstring _srcDir{srcDir};
-            return MMKV::backupOneToDirectory(PivW2U(mmapID), dstDir, _srcDir.empty() ? nullptr : &_srcDir);
+            return MMKV::backupOneToDirectory(PivW2U{mmapID}, dstDir, _srcDir.empty() ? nullptr : &_srcDir);
         }
         // 恢复表
         static bool RestoreOneFromDirectory(const wchar_t *mmapID, const wchar_t *srcDir, const wchar_t *dstDir)
         {
 
             std::wstring _dstDir{dstDir};
-            return MMKV::restoreOneFromDirectory(PivW2U(mmapID), srcDir, _dstDir.empty() ? nullptr : &_dstDir);
+            return MMKV::restoreOneFromDirectory(PivW2U{mmapID}, srcDir, _dstDir.empty() ? nullptr : &_dstDir);
         }
         // 备份所有表
         static int32_t BackupAllToDirectory(const wchar_t *dstDir, const wchar_t *srcDir)
@@ -86,10 +86,10 @@ namespace piv
         static bool IsFileValid(const wchar_t *mmapID, const wchar_t *relatePath)
         {
             std::wstring _relatePath{relatePath};
-            return MMKV::isFileValid(PivW2U(mmapID), _relatePath.empty() ? nullptr : &_relatePath);
+            return MMKV::isFileValid(PivW2U{mmapID}, _relatePath.empty() ? nullptr : &_relatePath);
         }
         // 置日志级别
-        static void SetLogLevel(int32_t level)
+        static void SetLogLevel(const int32_t &level)
         {
             MMKV::setLogLevel(static_cast<MMKVLogLevel>(level));
         }
@@ -121,7 +121,7 @@ public:
         Close();
     }
     // 打开
-    int32_t OpenMMKV(const wchar_t *mmapID, int32_t mode, const wchar_t *cryptKey, const wchar_t *rootPath)
+    int32_t OpenMMKV(const wchar_t *mmapID, const int32_t &mode, const wchar_t *cryptKey, const wchar_t *rootPath)
     {
         Close();
         if (MMKV::getRootDir().empty() == true)
@@ -166,19 +166,19 @@ public:
     // 取表名称
     CVolString GetMmapID()
     {
-        return m_MMKV ? CVolString(PivU2W(m_MMKV->mmapID())) : _CT("");
+        return m_MMKV ? *PivU2Ws{m_MMKV->mmapID()} : _CT("");
     }
     // 取加密密钥
     CVolString GetCryptKey()
     {
-        return m_MMKV ? CVolString(PivU2W(m_MMKV->cryptKey())) : _CT("");
+        return m_MMKV ? *PivU2Ws{m_MMKV->cryptKey()} : _CT("");
     }
     // 更改密钥
     bool ReKey(const wchar_t *cryptKey)
     {
         if (m_MMKV)
         {
-            return m_MMKV->reKey(PivW2U(cryptKey));
+            return m_MMKV->reKey(PivW2U{cryptKey});
         }
         return false;
     }
@@ -203,24 +203,24 @@ public:
     }
 
     // 置入逻辑值
-    bool SetValue(bool value, const wchar_t *key)
+    bool SetValue(const bool &value, const wchar_t *key)
     {
-        return m_MMKV ? m_MMKV->set(value, PivW2U(key)) : false;
+        return m_MMKV ? m_MMKV->set(value, PivW2U{key}) : false;
     }
     // 置入整数值
-    bool SetValue(int32_t value, const wchar_t *key)
+    bool SetValue(const int32_t &value, const wchar_t *key)
     {
-        return m_MMKV ? m_MMKV->set(value, PivW2U(key)) : false;
+        return m_MMKV ? m_MMKV->set(value, PivW2U{key}) : false;
     }
     // 置入长整数值
-    bool SetValue(int64_t value, const wchar_t *key)
+    bool SetValue(const int64_t &value, const wchar_t *key)
     {
-        return m_MMKV ? m_MMKV->set(value, PivW2U(key)) : false;
+        return m_MMKV ? m_MMKV->set(value, PivW2U{key}) : false;
     }
     // 置入小数值
-    bool SetValue(double value, const wchar_t *key)
+    bool SetValue(const double &value, const wchar_t *key)
     {
-        return m_MMKV ? m_MMKV->set(value, PivW2U(key)) : false;
+        return m_MMKV ? m_MMKV->set(value, PivW2U{key}) : false;
     }
     // 置入文本值
     bool SetValue(const wchar_t *value, const wchar_t *key)
@@ -229,7 +229,7 @@ public:
         {
             mmkv::MMBuffer buffer{reinterpret_cast<void *>(const_cast<wchar_t *>(value)),
                                   (wcslen(value) + 1) * 2, mmkv::MMBufferNoCopy};
-            return m_MMKV->set(buffer, PivW2U(key));
+            return m_MMKV->set(buffer, PivW2U{key});
         }
         return false;
     }
@@ -239,12 +239,12 @@ public:
         if (m_MMKV)
         {
             mmkv::MMBuffer buffer{value.GetPtr(), static_cast<size_t>(value.GetSize()), mmkv::MMBufferNoCopy};
-            return m_MMKV->set(buffer, PivW2U(key));
+            return m_MMKV->set(buffer, PivW2U{key});
         }
         return false;
     }
     // 置入对象值
-    bool SetObject(CVolObject &object, const wchar_t *key)
+    bool SetObject(const CVolObject &object, const wchar_t *key)
     {
         if (m_MMKV)
         {
@@ -252,47 +252,47 @@ public:
             object.VolSaveIntoStream(memStream);
             CVolMem bin = memStream.GetBin(CVolMem());
             mmkv::MMBuffer buffer{bin.GetPtr(), static_cast<size_t>(bin.GetSize()), mmkv::MMBufferNoCopy};
-            return m_MMKV->set(buffer, PivW2U(key));
+            return m_MMKV->set(buffer, PivW2U{key});
         }
         return false;
     }
     // 取逻辑值
-    BOOL GetBool(const wchar_t *key, BOOL defaultValue, BOOL &hasValue)
+    BOOL GetBool(const wchar_t *key, const BOOL &defaultValue, BOOL &hasValue)
     {
         hasValue = false;
         if (m_MMKV)
         {
-            return m_MMKV->getBool(PivW2U(key), defaultValue ? true : false, reinterpret_cast<bool *>(&hasValue));
+            return m_MMKV->getBool(PivW2U{key}, defaultValue ? true : false, reinterpret_cast<bool *>(&hasValue));
         }
         return defaultValue;
     }
     // 取整数值
-    int32_t GetInt32(const wchar_t *key, int32_t defaultValue, BOOL &hasValue)
+    int32_t GetInt32(const wchar_t *key, const int32_t &defaultValue, BOOL &hasValue)
     {
         hasValue = false;
         if (m_MMKV)
         {
-            return m_MMKV->getInt32(PivW2U(key), defaultValue, reinterpret_cast<bool *>(&hasValue));
+            return m_MMKV->getInt32(PivW2U{key}, defaultValue, reinterpret_cast<bool *>(&hasValue));
         }
         return defaultValue;
     }
     // 取长整数值
-    int64_t GetInt64(const wchar_t *key, int64_t defaultValue, BOOL &hasValue)
+    int64_t GetInt64(const wchar_t *key, const int64_t &defaultValue, BOOL &hasValue)
     {
         hasValue = false;
         if (m_MMKV)
         {
-            return m_MMKV->getInt64(PivW2U(key), defaultValue, reinterpret_cast<bool *>(&hasValue));
+            return m_MMKV->getInt64(PivW2U{key}, defaultValue, reinterpret_cast<bool *>(&hasValue));
         }
         return defaultValue;
     }
     // 取小数值
-    double GetDouble(const wchar_t *key, double defaultValue, BOOL &hasValue)
+    double GetDouble(const wchar_t *key, const double &defaultValue, BOOL &hasValue)
     {
         hasValue = false;
         if (m_MMKV)
         {
-            return m_MMKV->getDouble(PivW2U(key), defaultValue, reinterpret_cast<bool *>(&hasValue));
+            return m_MMKV->getDouble(PivW2U{key}, defaultValue, reinterpret_cast<bool *>(&hasValue));
         }
         return defaultValue;
     }
@@ -303,7 +303,7 @@ public:
         if (m_MMKV)
         {
             mmkv::MMBuffer buffer;
-            if (m_MMKV->getBytes(PivW2U(key), buffer))
+            if (m_MMKV->getBytes(PivW2U{key}, buffer))
             {
                 value.SetText(reinterpret_cast<const wchar_t *>(buffer.getPtr()), buffer.length() / 2);
                 return true;
@@ -328,7 +328,7 @@ public:
         if (m_MMKV)
         {
             mmkv::MMBuffer buffer;
-            if (m_MMKV->getBytes(PivW2U(key), buffer))
+            if (m_MMKV->getBytes(PivW2U{key}, buffer))
             {
                 value.Append(buffer.getPtr(), buffer.length());
                 return true;
@@ -353,7 +353,7 @@ public:
         if (m_MMKV)
         {
             mmkv::MMBuffer buffer;
-            if (m_MMKV->getBytes(PivW2U(key), buffer))
+            if (m_MMKV->getBytes(PivW2U{key}, buffer))
             {
                 CVolMemoryInputStream memStream;
                 memStream.ResetMemory(buffer.getPtr(), buffer.length());
@@ -364,11 +364,11 @@ public:
         return false;
     }
     // 取键值对大小
-    ptrdiff_t GetValueSize(const wchar_t *key, bool actualSize)
+    ptrdiff_t GetValueSize(const wchar_t *key, const bool &actualSize)
     {
         if (m_MMKV)
         {
-            return static_cast<ptrdiff_t>(m_MMKV->getValueSize(PivW2U(key), actualSize));
+            return static_cast<ptrdiff_t>(m_MMKV->getValueSize(PivW2U{key}, actualSize));
         }
         return 0;
     }
@@ -377,7 +377,7 @@ public:
     {
         if (m_MMKV)
         {
-            return m_MMKV->containsKey(PivW2U(key));
+            return m_MMKV->containsKey(PivW2U{key});
         }
         return false;
     }
@@ -395,7 +395,7 @@ public:
             std::vector<std::string> keys = m_MMKV->allKeys();
             for (auto iter = keys.cbegin(); iter != keys.cend(); ++iter)
             {
-                keysArray.Add(PivU2W(*iter));
+                keysArray.Add(PivU2W(*iter).GetText());
             }
             return keysArray.GetCount();
         }
@@ -410,7 +410,7 @@ public:
             CVolMem buf;
             for (INT_P i = 0; i < keysArray.GetCount(); ++i)
             {
-                keys.push_back(PivW2U(keysArray.GetAt(i)));
+                keys.push_back(PivW2U{keysArray.GetAt(i)});
             }
             m_MMKV->removeValuesForKeys(keys);
         }
@@ -420,7 +420,7 @@ public:
     {
         if (m_MMKV)
         {
-            m_MMKV->removeValueForKey(PivW2U(key));
+            m_MMKV->removeValueForKey(PivW2U{key});
         }
     }
     // 清空

@@ -15,18 +15,19 @@
 #include "bitarchivewriter.hpp"
 
 namespace bit7z {
+
 using std::vector;
 
 using EditedItems = std::unordered_map< uint32_t, BitItemsVector::value_type >;
 
 /**
- * @brief The BitArchiveEditor class allows to create new file archives or update old ones.
+ * @brief The BitArchiveEditor class allows creating new file archives or updating old ones.
  *        Update operations supported are the addition of new items,
  *        as well as renaming/updating/deleting old items;
  *
  * @note  Changes are applied to the archive only after calling the applyChanges() method.
  */
-class BitArchiveEditor final : public BitArchiveWriter {
+class BIT7Z_MAYBE_UNUSED BitArchiveEditor final : public BitArchiveWriter {
     public:
         /**
          * @brief Constructs a BitArchiveEditor object, reading the given archive file path.
@@ -45,9 +46,9 @@ class BitArchiveEditor final : public BitArchiveWriter {
 
         BitArchiveEditor( BitArchiveEditor&& ) = delete;
 
-        BitArchiveEditor& operator=( const BitArchiveEditor& ) = delete;
+        auto operator=( const BitArchiveEditor& ) -> BitArchiveEditor& = delete;
 
-        BitArchiveEditor& operator=( BitArchiveEditor&& ) = delete;
+        auto operator=( BitArchiveEditor&& ) -> BitArchiveEditor& = delete;
 
         ~BitArchiveEditor() override;
 
@@ -69,7 +70,7 @@ class BitArchiveEditor final : public BitArchiveWriter {
         void renameItem( uint32_t index, const tstring& new_path );
 
         /**
-         * @brief Requests to change the path of the item from old_path to new_path.
+         * @brief Requests to change the path of the item from old_path to the new_path.
          *
          * @param old_path the old path (in the archive) of the item to be renamed.
          * @param new_path the new path (in the archive) desired for the item.
@@ -92,7 +93,7 @@ class BitArchiveEditor final : public BitArchiveWriter {
          * @param index     the index of the item to be updated.
          * @param in_buffer the buffer containing the new data for the item.
          */
-        void updateItem( uint32_t index, const vector< byte_t >& in_buffer );
+        void updateItem( uint32_t index, const std::vector< byte_t >& in_buffer );
 
         /**
          * @brief Requests to update the content of the item at the specified index
@@ -101,7 +102,7 @@ class BitArchiveEditor final : public BitArchiveWriter {
          * @param index     the index of the item to be updated.
          * @param in_stream the stream of new data for the item.
          */
-        void updateItem( uint32_t index, istream& in_stream );
+        void updateItem( uint32_t index, std::istream& in_stream );
 
         /**
          * @brief Requests to update the content of the item at the specified path
@@ -119,7 +120,7 @@ class BitArchiveEditor final : public BitArchiveWriter {
          * @param item_path the path (in the archive) of the item to be updated.
          * @param in_buffer the buffer containing the new data for the item.
          */
-        void updateItem( const tstring& item_path, const vector< byte_t >& in_buffer );
+        void updateItem( const tstring& item_path, const std::vector< byte_t >& in_buffer );
 
         /**
          * @brief Requests to update the content of the item at the specified path
@@ -152,18 +153,19 @@ class BitArchiveEditor final : public BitArchiveWriter {
     private:
         EditedItems mEditedItems;
 
-        uint32_t findItem( const tstring& item_path );
+        auto findItem( const tstring& item_path ) -> uint32_t;
 
         void checkIndex( uint32_t index );
 
-        BitPropVariant itemProperty( input_index index, BitProperty propID ) const override;
+        auto itemProperty( input_index index, BitProperty propID ) const -> BitPropVariant override;
 
-        HRESULT itemStream( input_index index, ISequentialInStream** inStream ) const override;
+        auto itemStream( input_index index, ISequentialInStream** inStream ) const -> HRESULT override;
 
-        bool hasNewData( uint32_t index ) const noexcept override;
+        auto hasNewData( uint32_t index ) const noexcept -> bool override;
 
-        bool hasNewProperties( uint32_t index ) const noexcept override;
+        auto hasNewProperties( uint32_t index ) const noexcept -> bool override;
 };
+
 }  // namespace bit7z
 
 #endif //BITARCHIVEEDITOR_HPP

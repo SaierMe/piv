@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2022/12/13                          *
+ * 版本: 2023/02/14                          *
 \*********************************************/
 
 #ifndef _PIV_PROCESS_HPP
@@ -39,7 +39,7 @@ private:
                                                   IN SIZE_T StackZeroBits, IN SIZE_T SizeOfStackCommit, IN SIZE_T SizeOfStackReserve, OUT PVOID lpBytesBuffer);
 
     // 取首模块信息
-    void get_base_module_info(DWORD pid)
+    void get_base_module_info(const DWORD &pid)
     {
         HANDLE hModuleSnap = ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pid);
         if (hModuleSnap != INVALID_HANDLE_VALUE)
@@ -67,7 +67,7 @@ private:
 
 public:
     PivProcess() {}
-    PivProcess(int32_t process_id, int32_t desired_access)
+    PivProcess(const int32_t &process_id, const int32_t &desired_access)
     {
         open_process(process_id, desired_access);
     }
@@ -77,15 +77,13 @@ public:
     }
 
     // 打开进程
-    BOOL open_process(int32_t process_id, int32_t desired_access)
+    BOOL open_process(const int32_t &process_id, const int32_t &desired_access)
     {
         close_process();
         PID = process_id ? static_cast<DWORD>(process_id) : ::GetCurrentProcessId();
         hProcess = ::OpenProcess(static_cast<DWORD>(desired_access), FALSE, PID);
         if (hProcess == NULL)
-        {
             return false;
-        }
         get_base_module_info(PID);
         return true;
     }
@@ -104,30 +102,28 @@ public:
     }
 
     // 取进程句柄
-    ptrdiff_t get_process_handle()
+    ptrdiff_t get_process_handle() const noexcept
     {
         return reinterpret_cast<ptrdiff_t>(hProcess);
     }
 
     // 取进程ID
-    int32_t get_process_id()
+    int32_t get_process_id() const noexcept
     {
         return static_cast<int32_t>(PID);
     }
 
     // 取句柄数量
-    int32_t get_handle_count()
+    int32_t get_handle_count() const noexcept
     {
         DWORD dwHandleCount = 0;
         if (hProcess != NULL)
-        {
             ::GetProcessHandleCount(hProcess, &dwHandleCount);
-        }
         return static_cast<int32_t>(dwHandleCount);
     }
 
     // 取创建时间
-    double get_creation_time(int32_t time_zoon)
+    double get_creation_time(const int32_t &time_zoon) const
     {
         double dtime = 0.0;
         if (hProcess != NULL)
@@ -148,9 +144,7 @@ public:
     BOOL get_memory_info(PROCESS_MEMORY_COUNTERS *pMemCounters)
     {
         if (hProcess != NULL)
-        {
             return ::GetProcessMemoryInfo(hProcess, pMemCounters, sizeof(PROCESS_MEMORY_COUNTERS));
-        }
         return false;
     }
 
@@ -161,7 +155,7 @@ public:
     }
 
     // 置优先级
-    BOOL set_priority_class(int32_t priority)
+    BOOL set_priority_class(const int32_t &priority)
     {
         return ::SetPriorityClass(hProcess, static_cast<DWORD>(priority));
     }
@@ -271,7 +265,7 @@ public:
     }
 
     // 取模块基址
-    ptrdiff_t get_module_base(ptrdiff_t hMoudle)
+    ptrdiff_t get_module_base(const ptrdiff_t &hMoudle)
     {
         if (hProcess != NULL)
         {
@@ -285,7 +279,7 @@ public:
     }
 
     // 枚举模块句柄
-    int32_t enum_modules(CMArray<INT_P> &module_array, int32_t filter_flag)
+    int32_t enum_modules(CMArray<INT_P> &module_array, const int32_t &filter_flag)
     {
         module_array.RemoveAll();
         if (hProcess != NULL)
@@ -309,7 +303,7 @@ public:
     }
 
     // 枚举模块名称
-    int32_t enum_modules(CMArray<INT_P> &module_array, CMStringArray &name_array, BOOL is_fullpath, int32_t filter_flag)
+    int32_t enum_modules(CMArray<INT_P> &module_array, CMStringArray &name_array, const BOOL &is_fullpath, const int32_t &filter_flag)
     {
         module_array.RemoveAll();
         name_array.RemoveAll();
@@ -344,7 +338,7 @@ public:
     }
 
     // 取模块信息
-    BOOL get_module_info(ptrdiff_t hModule, MODULEINFO *pModuleInfo)
+    BOOL get_module_info(const ptrdiff_t &hModule, MODULEINFO *pModuleInfo)
     {
         if (hProcess != NULL)
         {
@@ -354,7 +348,7 @@ public:
     }
 
     // 取模块名称
-    CVolString get_module_name(ptrdiff_t hModule)
+    CVolString get_module_name(const ptrdiff_t &hModule)
     {
         if (hProcess != NULL)
         {
@@ -368,7 +362,7 @@ public:
     }
 
     // 取模块文件名
-    CVolString get_module_filename(ptrdiff_t hModule)
+    CVolString get_module_filename(const ptrdiff_t &hModule)
     {
         if (hProcess != NULL)
         {
@@ -382,7 +376,7 @@ public:
     }
 
     // 取内存映射文件
-    CVolString get_mapped_filename(ptrdiff_t mem_ptr)
+    CVolString get_mapped_filename(const ptrdiff_t &mem_ptr)
     {
         if (hProcess != NULL)
         {
@@ -410,7 +404,7 @@ public:
     }
 
     // 创建远程线程
-    BOOL create_remote_thread(ptrdiff_t func_ptr, ptrdiff_t parm_ptr, BOOL is_wait)
+    BOOL create_remote_thread(const ptrdiff_t &func_ptr, const ptrdiff_t &parm_ptr, const BOOL &is_wait)
     {
         BOOL result = false;
         if (hProcess != NULL)
@@ -442,7 +436,7 @@ public:
     }
 
     // 分配虚拟内存
-    ptrdiff_t virtual_alloc(ptrdiff_t address, ptrdiff_t men_size, int32_t allocation_type, int32_t protect)
+    ptrdiff_t virtual_alloc(const ptrdiff_t &address, const ptrdiff_t &men_size, const int32_t &allocation_type, const int32_t &protect)
     {
         return reinterpret_cast<ptrdiff_t>(::VirtualAllocEx(hProcess, reinterpret_cast<LPVOID>(address),
                                                             static_cast<SIZE_T>(men_size), static_cast<DWORD>(allocation_type),
@@ -450,13 +444,13 @@ public:
     }
 
     // 释放虚拟内存
-    BOOL virtual_free(ptrdiff_t address, ptrdiff_t men_size, int32_t free_type)
+    BOOL virtual_free(const ptrdiff_t &address, const ptrdiff_t &men_size, const int32_t &free_type)
     {
         return ::VirtualFreeEx(hProcess, reinterpret_cast<LPVOID>(address),
                                static_cast<SIZE_T>(men_size), static_cast<DWORD>(free_type));
     }
     // 修改内存保护
-    int32_t modify_memory_protect(ptrdiff_t address, ptrdiff_t mem_size, int32_t new_protect)
+    int32_t modify_memory_protect(const ptrdiff_t &address, const ptrdiff_t &mem_size, const int32_t &new_protect)
     {
         if (hProcess != NULL)
         {
@@ -471,7 +465,7 @@ public:
     }
 
     // 寻找所有内存特征码
-    int32_t find_signatures(const wchar_t *signatures, CMArray<INT_P> &address_array, ptrdiff_t start_ptr, ptrdiff_t end_ptr, ptrdiff_t max_count = PTRDIFF_MAX)
+    int32_t find_signatures(const wchar_t *signatures, CMArray<INT_P> &address_array, const ptrdiff_t &start_ptr, const ptrdiff_t &end_ptr, const ptrdiff_t &max_count = PTRDIFF_MAX)
     {
         address_array.RemoveAll();
         if (hProcess == NULL)
@@ -604,7 +598,7 @@ public:
     }
 
     // 寻找内存特征码
-    ptrdiff_t find_signatures(const wchar_t *signatures, ptrdiff_t start_ptr = 0, ptrdiff_t end_ptr = PTRDIFF_MAX)
+    ptrdiff_t find_signatures(const wchar_t *signatures, const ptrdiff_t &start_ptr = 0, const ptrdiff_t &end_ptr = PTRDIFF_MAX)
     {
         if (hProcess != NULL)
         {
@@ -618,7 +612,7 @@ public:
     }
 
     // 寻找所有内存字节集
-    int32_t find_memory(CVolMem &mem_data, CMArray<INT_P> &address_array, ptrdiff_t start_ptr = 0, ptrdiff_t end_ptr = PTRDIFF_MAX, ptrdiff_t max_count = PTRDIFF_MAX)
+    int32_t find_memory(const CVolMem &mem_data, CMArray<INT_P> &address_array, const ptrdiff_t &start_ptr = 0, const ptrdiff_t &end_ptr = PTRDIFF_MAX, const ptrdiff_t &max_count = PTRDIFF_MAX)
     {
         address_array.RemoveAll();
         if (hProcess == NULL)
@@ -672,7 +666,7 @@ public:
     }
 
     // 寻找内存字节集
-    ptrdiff_t find_memory(CVolMem &mem_data, ptrdiff_t start_ptr = 0, ptrdiff_t end_ptr = PTRDIFF_MAX)
+    ptrdiff_t find_memory(const CVolMem &mem_data, const ptrdiff_t &start_ptr = 0, const ptrdiff_t &end_ptr = PTRDIFF_MAX)
     {
         if (hProcess != NULL)
         {
@@ -686,7 +680,7 @@ public:
     }
 
     // 读内存数据
-    BOOL read_memory(ptrdiff_t write_address, ptrdiff_t read_address, ptrdiff_t read_size)
+    BOOL read_memory(const ptrdiff_t &write_address, const ptrdiff_t &read_address, const ptrdiff_t &read_size)
     {
         if (hProcess != NULL)
         {
@@ -697,7 +691,7 @@ public:
     }
 
     // 读内存字节集
-    CVolMem read_memory(ptrdiff_t read_address, ptrdiff_t read_size)
+    CVolMem read_memory(const ptrdiff_t &read_address, const ptrdiff_t &read_size)
     {
         if (hProcess != NULL)
         {
@@ -714,7 +708,7 @@ public:
 
     // 读内存值
     template <typename R>
-    R read_memory_value(ptrdiff_t read_address)
+    R read_memory_value(const ptrdiff_t &read_address)
     {
         R value;
         if (hProcess != NULL)
@@ -729,7 +723,7 @@ public:
     }
 
     // 写内存数据
-    BOOL write_memory(ptrdiff_t write_address, ptrdiff_t data_address, ptrdiff_t data_size)
+    BOOL write_memory(const ptrdiff_t &write_address, const ptrdiff_t &data_address, const ptrdiff_t &data_size)
     {
         BOOL result = false;
         if (hProcess != NULL)
@@ -746,7 +740,7 @@ public:
     }
 
     // 写内存字节集
-    BOOL write_memory(ptrdiff_t write_address, CVolMem &data)
+    BOOL write_memory(const ptrdiff_t &write_address, const CVolMem &data)
     {
         BOOL result = false;
         if (hProcess != NULL)
@@ -764,7 +758,7 @@ public:
 
     // 写内存值
     template <typename T>
-    BOOL write_memory_value(ptrdiff_t write_address, T value)
+    BOOL write_memory_value(const ptrdiff_t &write_address, const T &value)
     {
         BOOL result = false;
         if (hProcess != NULL)
@@ -781,7 +775,7 @@ public:
     }
 
     // 寻找模块特征码
-    ptrdiff_t find_module_signatures(ptrdiff_t hModule, const wchar_t *signatures, ptrdiff_t start_off, ptrdiff_t end_off)
+    ptrdiff_t find_module_signatures(const ptrdiff_t &hModule, const wchar_t *signatures, const ptrdiff_t &start_off, const ptrdiff_t &end_off)
     {
         ptrdiff_t result = 0;
         if (hProcess != NULL)
@@ -798,7 +792,7 @@ public:
     }
 
     // 寻找所有模块特征码
-    ptrdiff_t find_module_signatures(ptrdiff_t hModule, const wchar_t *signatures, CMArray<INT_P> &address_array, ptrdiff_t start_off, ptrdiff_t end_off)
+    ptrdiff_t find_module_signatures(const ptrdiff_t &hModule, const wchar_t *signatures, CMArray<INT_P> &address_array, const ptrdiff_t &start_off, const ptrdiff_t &end_off)
     {
         ptrdiff_t result = 0;
         if (hProcess != NULL)
@@ -815,7 +809,7 @@ public:
     }
 
     // 寻找模块字节集
-    ptrdiff_t find_module_memory(ptrdiff_t hModule, CVolMem &mem_data, ptrdiff_t start_off, ptrdiff_t end_off)
+    ptrdiff_t find_module_memory(const ptrdiff_t &hModule, const CVolMem &mem_data, const ptrdiff_t &start_off, const ptrdiff_t &end_off)
     {
         ptrdiff_t result = 0;
         if (hProcess != NULL)
@@ -832,7 +826,7 @@ public:
     }
 
     // 寻找模块字节集
-    ptrdiff_t find_module_memory(ptrdiff_t hModule, CVolMem &mem_data, CMArray<INT_P> &address_array, ptrdiff_t start_off, ptrdiff_t end_off)
+    ptrdiff_t find_module_memory(const ptrdiff_t &hModule, const CVolMem &mem_data, CMArray<INT_P> &address_array, const ptrdiff_t &start_off, const ptrdiff_t &end_off)
     {
         ptrdiff_t result = 0;
         if (hProcess != NULL)
@@ -849,7 +843,7 @@ public:
     }
 
     // 读内存数据
-    BOOL read_module_memory(ptrdiff_t hModule, ptrdiff_t write_address, ptrdiff_t read_off, ptrdiff_t read_size)
+    BOOL read_module_memory(const ptrdiff_t &hModule, const ptrdiff_t &write_address, const ptrdiff_t &read_off, const ptrdiff_t &read_size)
     {
         if (hProcess != NULL)
         {
@@ -867,7 +861,7 @@ public:
     }
 
     // 读内存字节集
-    CVolMem read_module_memory(ptrdiff_t hModule, ptrdiff_t read_off, ptrdiff_t read_size)
+    CVolMem read_module_memory(const ptrdiff_t &hModule, const ptrdiff_t &read_off, const ptrdiff_t &read_size)
     {
         if (hProcess != NULL)
         {
@@ -891,7 +885,7 @@ public:
 
     // 读模块内存值
     template <typename R>
-    R read_module_value(ptrdiff_t hModule, ptrdiff_t read_off)
+    R read_module_value(const ptrdiff_t &hModule, const ptrdiff_t &read_off)
     {
         R value;
         if (hProcess != NULL)
@@ -912,7 +906,7 @@ public:
         return value;
     }
     // 写模块数据
-    BOOL write_module_memory(ptrdiff_t hModule, ptrdiff_t write_off, ptrdiff_t data_address, ptrdiff_t data_size)
+    BOOL write_module_memory(const ptrdiff_t &hModule, const ptrdiff_t &write_off, const ptrdiff_t &data_address, const ptrdiff_t &data_size)
     {
         BOOL result = false;
         if (hProcess != NULL)
@@ -933,7 +927,7 @@ public:
     }
 
     // 写模块字节集
-    BOOL write_module_memory(ptrdiff_t hModule, ptrdiff_t write_off, CVolMem &data)
+    BOOL write_module_memory(const ptrdiff_t &hModule, const ptrdiff_t &write_off, const CVolMem &data)
     {
         BOOL result = false;
         if (hProcess != NULL)
@@ -955,7 +949,7 @@ public:
 
     // 写模块值
     template <typename T>
-    BOOL write_module_value(ptrdiff_t hModule, ptrdiff_t write_off, T value)
+    BOOL write_module_value(const ptrdiff_t &hModule, const ptrdiff_t &write_off, const T &value)
     {
         BOOL result = false;
         if (hProcess != NULL)
@@ -981,7 +975,7 @@ namespace piv
     namespace process
     {
         // 创建进程
-        static int32_t create_process(const wchar_t *app_name, const wchar_t *commandline, BOOL waitend, ptrdiff_t show_window)
+        static int32_t create_process(const wchar_t *app_name, const wchar_t *commandline, const BOOL &waitend, const ptrdiff_t &show_window)
         {
             STARTUPINFO infStartup{0};
             infStartup.cb = sizeof(infStartup);
@@ -1033,7 +1027,7 @@ namespace piv
         }
 
         // 调整当前权限
-        static int32_t Rtl_adjust_privilege(int32_t privilege, bool enbale, bool currentThread, BOOL *enabled)
+        static int32_t Rtl_adjust_privilege(const int32_t &privilege, const BOOL &enbale, const BOOL &currentThread, BOOL *enabled)
         {
             typedef DWORD(WINAPI * NT_RtlAdjustPrivilege)(ULONG Privilege, BOOLEAN Enable, BOOLEAN CurrentThread, PBOOLEAN Enabled);
             NT_RtlAdjustPrivilege pfn = reinterpret_cast<NT_RtlAdjustPrivilege>(::GetProcAddress(::GetModuleHandle(L"Ntdll.dll"), "RtlAdjustPrivilege"));
@@ -1045,7 +1039,7 @@ namespace piv
         }
 
         // 置进程DEP策略
-        static BOOL set_dep_policy(int32_t dep)
+        static BOOL set_dep_policy(const int32_t &dep)
         {
             typedef BOOL(WINAPI * Typedef_SetProcessDEPPolicy)(DWORD);
             Typedef_SetProcessDEPPolicy pfn = reinterpret_cast<Typedef_SetProcessDEPPolicy>(::GetProcAddress(::GetModuleHandleW(L"Kernel32.dll"), "SetProcessDEPPolicy"));
@@ -1057,7 +1051,7 @@ namespace piv
         }
 
         // 进程ID取窗口句柄
-        static ptrdiff_t get_hwnd_from_pid(int32_t pid)
+        static ptrdiff_t get_hwnd_from_pid(const int32_t &pid)
         {
             HWND hWnd = ::GetTopWindow(NULL);
             DWORD dwFindPID = pid ? static_cast<DWORD>(pid) : ::GetCurrentProcessId();

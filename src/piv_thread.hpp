@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/09                          *
+ * 版本: 2023/02/14                          *
 \*********************************************/
 
 #ifndef _PIV_THREAD_POOL_HPP
@@ -80,7 +80,7 @@ public:
             ::CloseHandle(m_hSemaphore);
     }
     // 启动线程
-    BOOL StartThread(void *lpThis, const ULONG_PTR lpThreadProc, const INT nUserMark = 0, CVolObject &cUserObj = CVolObject(), const INT_P lpUserData = 0, const BOOL bWaitThread = FALSE, const INT nStackSize = 0, const INT nPriority = THREAD_PRIORITY_NORMAL)
+    BOOL StartThread(void *lpThis, const ULONG_PTR &lpThreadProc, const INT &nUserMark = 0, const CVolObject &cUserObj = CVolObject(), const INT_P &lpUserData = 0, const BOOL &bWaitThread = FALSE, const INT &nStackSize = 0, const INT &nPriority = THREAD_PRIORITY_NORMAL)
     {
         // 设置回调参数
         THREADPOOL_PARAM *lpParam = new THREADPOOL_PARAM{lpThis, nUserMark, 0, lpUserData, cUserObj.MakeCloneObject()};
@@ -98,7 +98,7 @@ public:
         return TRUE;
     }
     // 创建
-    virtual BOOL CreateThreadPool(const INT nCapacity = 0, const INT nStackSize = 0, const INT nPriority = THREAD_PRIORITY_NORMAL)
+    virtual BOOL CreateThreadPool(const INT &nCapacity = 0, const INT &nStackSize = 0, const INT &nPriority = THREAD_PRIORITY_NORMAL)
     {
         // 线程池已创建则直接返回真,其他情况返回假
         if (m_ThreadPool)
@@ -168,7 +168,7 @@ public:
         return TRUE;
     }
     // 销毁
-    BOOL DestroyThreadPool(const BOOL bForceDestroy = TRUE, const INT nWaitTime = -1)
+    BOOL DestroyThreadPool(const BOOL &bForceDestroy = TRUE, const INT &nWaitTime = -1)
     {
         if (!m_ThreadPool)
             return TRUE;
@@ -287,7 +287,7 @@ public:
         return TRUE;
     }
     // 投递任务
-    inline BOOL PostParamTask(void *lpThis, const ULONG_PTR lpThreadProc, const INT nUserMark = 0, const INT64 lUserParam = 0, const INT_P lpUserData = 0)
+    inline BOOL PostParamTask(void *lpThis, const ULONG_PTR &lpThreadProc, const INT &nUserMark = 0, const INT64 &lUserParam = 0, const INT_P &lpUserData = 0)
     {
         if (!m_ThreadPool || m_ThreadPool->dwState < StateNormal)
             return FALSE;
@@ -300,7 +300,7 @@ public:
                                             lpThreadProc, reinterpret_cast<LPOVERLAPPED>(lpParam));
     }
     // 投递对象
-    inline BOOL PostObjectTask(void *lpThis, const ULONG_PTR lpThreadProc, const INT nUserMark = 0, CVolObject &lpUserObj = CVolObject(), const INT_P lpUserData = 0)
+    inline BOOL PostObjectTask(void *lpThis, const ULONG_PTR &lpThreadProc, const INT &nUserMark = 0, const CVolObject &lpUserObj = CVolObject(), const INT_P &lpUserData = 0)
     {
         if (!m_ThreadPool || m_ThreadPool->dwState < StateNormal)
             return FALSE;
@@ -341,7 +341,7 @@ public:
         return TRUE;
     }
     // 调整线程池
-    BOOL SetThreadPoolCapacity(const INT nNewThreadNum)
+    BOOL SetThreadPoolCapacity(const INT &nNewThreadNum)
     {
         // 非正常状态时返回假
         if (!m_ThreadPool || m_ThreadPool->dwState < StateNormal)
@@ -438,7 +438,7 @@ public:
         return (!m_ThreadPool) ? TRUE : (m_ThreadPool->dwQueueTask == 0 && m_ThreadPool->dwWorkerTask == 0);
     }
     // 是否需要退出
-    inline BOOL IsNeedExit(const INT nMillseconds = 0)
+    inline BOOL IsNeedExit(const INT &nMillseconds = 0)
     {
         if (m_hSemaphore)
             return (::WaitForSingleObject(m_hSemaphore, static_cast<DWORD>(nMillseconds)) == WAIT_OBJECT_0);
@@ -590,7 +590,7 @@ public:
     PivThreadPoolEx() {}
     ~PivThreadPoolEx() {}
     // 创建
-    BOOL CreateThreadPool(const INT nThreadsMin = 5, const INT nThreadsMax = 20, const INT nCycleMs = 5000, const INT nStackSize = 0, const INT nPriority = THREAD_PRIORITY_NORMAL)
+    BOOL CreateThreadPool(const INT &nThreadsMin = 5, const INT &nThreadsMax = 20, const INT &nCycleMs = 5000, const INT &nStackSize = 0, const INT &nPriority = THREAD_PRIORITY_NORMAL)
     {
         // 线程池已创建则直接返回真,其他情况返回假
         if (m_ThreadPool)
@@ -689,7 +689,7 @@ public:
         return (!m_ThreadPool) ? 0 : static_cast<INT>(m_ThreadPool->dwCycleMs);
     }
     // 设置动态线程周期
-    inline void SetCycleMs(INT nCycleMs)
+    inline void SetCycleMs(INT &nCycleMs)
     {
         if (m_ThreadPool)
             m_ThreadPool->dwCycleMs = (nCycleMs < 100) ? 100 : static_cast<DWORD>(nCycleMs);

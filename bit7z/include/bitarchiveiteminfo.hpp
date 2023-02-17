@@ -15,6 +15,7 @@
 #include "bitarchiveitem.hpp"
 
 namespace bit7z {
+
 using std::wstring;
 using std::map;
 
@@ -30,12 +31,12 @@ class BitArchiveItemInfo final : public BitArchiveItem {
          *
          * @return the value of the item property, if available, or an empty BitPropVariant.
          */
-        BIT7Z_NODISCARD BitPropVariant itemProperty( BitProperty property ) const override;
+        BIT7Z_NODISCARD auto itemProperty( BitProperty property ) const -> BitPropVariant override;
 
         /**
          * @return a map of all the available (i.e., non-empty) item properties and their respective values.
          */
-        BIT7Z_NODISCARD map< BitProperty, BitPropVariant > itemProperties() const;
+        BIT7Z_NODISCARD auto itemProperties() const -> map< BitProperty, BitPropVariant >;
 
     private:
         map< BitProperty, BitPropVariant > mItemProperties;
@@ -47,6 +48,7 @@ class BitArchiveItemInfo final : public BitArchiveItem {
 
         friend class BitArchiveReader;
 };
+
 }  // namespace bit7z
 
 #endif // BITARCHIVEITEMINFO_HPP
