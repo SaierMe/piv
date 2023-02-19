@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/14                          *
+ * 版本: 2023/02/18                          *
 \*********************************************/
 
 #ifndef _PIV_ENCODING_HPP
@@ -599,28 +599,10 @@ public:
      * @brief 生成一个火山的文本型,其中包含了转换后的文本数据
      * @return 返回所转换的文本型
      */
-    inline CVolString ToStr() const
-    {
-        return CVolString(utf16str.c_str());
-    }
-
-    /**
-     * @brief 将转换后的文本数据复制火山的文本型
-     * @param str 文本数据将复制到此文本型变量中
-     */
-    inline void GetStr(CVolString &str) const
+    inline CVolString &GetStr(CVolString &str = CVolString{}) const
     {
         str.SetText(utf16str.c_str());
-    }
-
-    /**
-     * @brief 生成一个字节集类,其中包含了转换后的文本数据
-     * @param null_char 字节集是否带结尾0字符
-     * @return 返回所转换的字节集
-     */
-    inline CVolMem ToMem(const bool &null_char = false) const
-    {
-        return CVolMem(utf16str.c_str(), (utf16str.size() + (null_char ? 1 : 0)) * 2);
+        return str;
     }
 
     /**
@@ -628,10 +610,11 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline void GetMem(CVolMem &mem, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem = CVolMem{}, const bool &null_char = false) const
     {
         mem.Empty();
         mem.Append(utf16str.c_str(), (utf16str.size() + (null_char ? 1 : 0)) * 2);
+        return mem;
     }
 }; // PivA2W
 
@@ -789,24 +772,15 @@ public:
     }
 
     /**
-     * @brief 生成一个字节集类,其中包含了转换后的文本数据
-     * @param null_char 字节集是否带结尾0字符
-     * @return 返回所转换的字节集
-     */
-    inline CVolMem ToMem(const bool &null_char = false) const
-    {
-        return CVolMem(mbstr.c_str(), mbstr.size() + (null_char ? 1 : 0));
-    }
-
-    /**
      * @brief 将转换后的文本数据复制火山的字节集类
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline void GetMem(CVolMem &mem, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem = CVolMem{}, const bool &null_char = false) const
     {
         mem.Empty();
         mem.Append(mbstr.c_str(), mbstr.size() + (null_char ? 1 : 0));
+        return mem;
     }
 }; // PivW2A
 
@@ -964,24 +938,15 @@ public:
     }
 
     /**
-     * @brief 生成一个字节集类,其中包含了转换后的文本数据
-     * @param null_char 字节集是否带结尾0字符
-     * @return 返回所转换的字节集
-     */
-    inline CVolMem ToMem(const bool &null_char = false) const
-    {
-        return CVolMem(utf8str.c_str(), utf8str.size() + (null_char ? 1 : 0));
-    }
-
-    /**
      * @brief 将转换后的文本数据复制火山的字节集类
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline void GetMem(CVolMem &mem, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem = CVolMem{}, const bool &null_char = false) const
     {
         mem.Empty();
         mem.Append(utf8str.c_str(), utf8str.size() + (null_char ? 1 : 0));
+        return mem;
     }
 }; // PivW2U
 
@@ -1142,28 +1107,10 @@ public:
      * @brief 生成一个火山的文本型,其中包含了转换后的文本数据
      * @return 返回所转换的文本型
      */
-    inline CVolString ToStr() const
-    {
-        return CVolString(utf16str.c_str());
-    }
-
-    /**
-     * @brief 将转换后的文本数据复制火山的文本型
-     * @param str 文本数据将复制到此文本型变量中
-     */
-    inline void GetStr(CVolString &str) const
+    inline CVolString &GetStr(CVolString &str = CVolString{}) const
     {
         str.SetText(utf16str.c_str());
-    }
-
-    /**
-     * @brief 生成一个字节集类,其中包含了转换后的文本数据
-     * @param null_char 字节集是否带结尾0字符
-     * @return 返回所转换的字节集
-     */
-    inline CVolMem ToMem(const bool &null_char = false) const
-    {
-        return CVolMem(utf16str.c_str(), (utf16str.size() + (null_char ? 1 : 0)) * 2);
+        return str;
     }
 
     /**
@@ -1171,10 +1118,11 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline void GetMem(CVolMem &mem, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem = CVolMem{}, const bool &null_char = false) const
     {
         mem.Empty();
         mem.Append(utf16str.c_str(), (utf16str.size() + (null_char ? 1 : 0)) * 2);
+        return mem;
     }
 }; // PivU2W
 
@@ -1324,24 +1272,15 @@ public:
     }
 
     /**
-     * @brief 生成一个字节集类,其中包含了转换后的文本数据
-     * @param null_char 字节集是否带结尾0字符
-     * @return 返回所转换的字节集
-     */
-    inline CVolMem ToMem(const bool &null_char = false) const
-    {
-        return CVolMem(mbstr.c_str(), mbstr.size() + (null_char ? 1 : 0));
-    }
-
-    /**
      * @brief 将转换后的文本数据复制火山的字节集类
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline void GetMem(CVolMem &mem, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem = CVolMem{}, const bool &null_char = false) const
     {
         mem.Empty();
         mem.Append(mbstr.c_str(), mbstr.size() + (null_char ? 1 : 0));
+        return mem;
     }
 }; // PivU2A
 
@@ -1491,24 +1430,15 @@ public:
     }
 
     /**
-     * @brief 生成一个字节集类,其中包含了转换后的文本数据
-     * @param null_char 字节集是否带结尾0字符
-     * @return 返回所转换的字节集
-     */
-    inline CVolMem ToMem(const bool &null_char = false) const
-    {
-        return CVolMem(utf8str.c_str(), utf8str.size() + (null_char ? 1 : 0));
-    }
-
-    /**
      * @brief 将转换后的文本数据复制火山的字节集类
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline void GetMem(CVolMem &mem, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem = CVolMem{}, const bool &null_char = false) const
     {
         mem.Empty();
         mem.Append(utf8str.c_str(), utf8str.size() + (null_char ? 1 : 0));
+        return mem;
     }
 }; // PivA2U
 
@@ -1665,28 +1595,19 @@ public:
      * @brief 生成一个火山的文本型,其中包含了转换后的文本数据
      * @return 返回所转换的文本型
      */
-    inline CVolString &ToStr() noexcept
+    inline CVolString &ToStr()
     {
         return utf16str;
     }
 
     /**
-     * @brief 将转换后的文本数据复制火山的文本型
-     * @param str 文本数据将复制到此文本型变量中
+     * @brief 生成一个火山的文本型,其中包含了转换后的文本数据
+     * @return 返回所转换的文本型
      */
-    inline void GetStr(CVolString &str) const
+    inline CVolString &GetStr(CVolString &str = CVolString{}) const
     {
         str.SetText(utf16str.GetText());
-    }
-
-    /**
-     * @brief 生成一个字节集类,其中包含了转换后的文本数据
-     * @param null_char 字节集是否带结尾0字符
-     * @return 返回所转换的字节集
-     */
-    inline CVolMem ToMem(const bool &null_char = false) const
-    {
-        return CVolMem(utf16str.GetText(), (utf16str.GetLength() + (null_char ? 1 : 0)) * 2);
+        return str;
     }
 
     /**
@@ -1694,10 +1615,11 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline void GetMem(CVolMem &mem, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem = CVolMem{}, const bool &null_char = false) const
     {
         mem.Empty();
         mem.Append(utf16str.GetText(), (utf16str.GetLength() + (null_char ? 1 : 0)) * 2);
+        return mem;
     }
 }; // PivA2Ws
 
@@ -1854,28 +1776,19 @@ public:
      * @brief 生成一个火山的文本型,其中包含了转换后的文本数据
      * @return 返回所转换的文本型
      */
-    inline CVolString &ToStr() noexcept
+    inline CVolString &ToStr()
     {
         return utf16str;
     }
 
     /**
-     * @brief 将转换后的文本数据复制火山的文本型
-     * @param str 文本数据将复制到此文本型变量中
+     * @brief 生成一个火山的文本型,其中包含了转换后的文本数据
+     * @return 返回所转换的文本型
      */
-    inline void GetStr(CVolString &str) const
+    inline CVolString &GetStr(CVolString &str = CVolString{}) const
     {
         str.SetText(utf16str.GetText());
-    }
-
-    /**
-     * @brief 生成一个字节集类,其中包含了转换后的文本数据
-     * @param null_char 字节集是否带结尾0字符
-     * @return 返回所转换的字节集
-     */
-    inline CVolMem ToMem(const bool &null_char = false) const
-    {
-        return CVolMem(utf16str.GetText(), (utf16str.GetLength() + (null_char ? 1 : 0)) * 2);
+        return str;
     }
 
     /**
@@ -1883,10 +1796,11 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline void GetMem(CVolMem &mem, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem = CVolMem{}, const bool &null_char = false) const
     {
         mem.Empty();
         mem.Append(utf16str.GetText(), (utf16str.GetLength() + (null_char ? 1 : 0)) * 2);
+        return mem;
     }
 }; // PivU2Ws
 

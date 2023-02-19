@@ -101,6 +101,10 @@
         "*.ipp": "cpp",
         "csignal": "cpp",
         "random": "cpp",
-        "typeindex": "cpp"
+        "typeindex": "cpp",
+        "trampoline.h": "c",
+        "buffer.h": "c",
+        "minhook.h": "c",
+        "limits.h": "c"
     }
 }

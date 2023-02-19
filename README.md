@@ -20,6 +20,8 @@
 
 ## 💽 安装
 
+下载地址：https://saier.lanzoul.com/b016cwvle
+
 安装本模块前，必须将 [火山软件开发平台](http://www.voldp.com/) 更新到最新版本，**及时安装论坛的更新包才是最新版**。
 
 现在提供两种形式的安装包：
@@ -100,6 +102,11 @@
 ## 📝 更新日志
 
 ※我经常反复修改已封装好的代码，比如修正bug、优化效率、规范格式、修订备注等，但如果功能和用法没有改变，一般不会写在更新日志里，所以每次更新改动的地方其实还是有不少的。
+
+### 📅 2023/02/19
+
+1. 「简易HOOK类/多重HOOK类」改为使用源码编译。
+2. 修正部分代码错误，主要影响 PivJSON
 
 ### 📅 2023/02/17
 
@@ -344,14 +351,14 @@
 
 ## 💌 开源项目
 
-- [nlohmann **JSON**](https://github.com/nlohmann/json) `3.11.2` `MIT license`  一个现代 C++ 的 JSON 库，该库修改自 kyozy 封装的版本
+- [nlohmann **JSON**](https://github.com/nlohmann/json) `3.11.2` `MIT license`  一个现代 C++ 的 JSON 库
 - **[fmtlog](https://github.com/MengRao/fmtlog)**  `2.2.1`  `MIT license` 一个纳秒级精度的高性能异步日志记录库
 - **[{fmt}](https://github.com/fmtlib/fmt)**  `9.1.0`  `MIT license` 格式化文本库，std::format 的实现 
 - **[md4c](https://github.com/mity/md4c)** `0.4.8`  `MIT license` 一个 CommonMark 0.30 规范 + GFM 的 Markdown 解析库
 - **[simpleini](https://github.com/brofield/simpleini)** `4.19` `MIT license` 简易的 INI 配置文件读写库
-- **[simdutf](https://github.com/simdutf/simdutf)** `3.0.0` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
+- **[simdutf](https://github.com/simdutf/simdutf)** `3.3.0` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
 - **[OpenCC](https://github.com/BYVoid/OpenCC)** `1.1.4` `Apache-2.0 license` 中文简繁转换开源项目，支持词汇级别的转换、异体字转换和地区习惯用词转换
-- **[bit7z](https://github.com/rikyoz/bit7z)** `4.0.0-beta` `Mozilla Public License v2.0` 7-zip的封装类
+- **[bit7z](https://github.com/rikyoz/bit7z)** `4.0.0-RC` `Mozilla Public License v2.0` 7-zip的封装类
 - **[7-zip](https://www.7-zip.org/)** `22.01` `GNU LGPL license` 完全免费而且开源的压缩软件（采用GNU LGPL协议，只使用它的 dll 文件不会传染）
 - **[MinHook](https://github.com/TsudaKageyu/minhook)** `1.3.3` `BSD-2-Clause License` 一个简约的 x86/x64 API Hook 库
 - **[MMKV](https://github.com/Tencent/MMKV)** `1.2.14` `BSD-3-Clause License` 腾讯的高性能键值表

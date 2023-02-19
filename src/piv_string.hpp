@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/15                          *
+ * 版本: 2023/02/19                          *
 \*********************************************/
 
 #ifndef _PIV_STRING_HPP
@@ -2041,7 +2041,7 @@ public:
      * @param WriteEncodeType 所欲写出文本编码
      * @return
      */
-    bool WriteIntoFile(const wchar_t *FileName, const int32_t &WriteDataSize = -1, const VOL_STRING_ENCODE_TYPE &WriteEncodeType = VSET_UTF_16)
+    bool WriteIntoFile(const wchar_t *FileName, const int32_t &WriteDataSize = -1, const VOL_STRING_ENCODE_TYPE &WriteEncodeType = VSET_UTF_16, const bool &with_bom = true)
     {
         ASSERT(WriteDataSize >= -1);
         ASSERT_R_STR(FileName);
@@ -2053,8 +2053,11 @@ public:
         size_t count = (WriteDataSize == -1) ? str.size() : ((static_cast<size_t>(WriteDataSize) > str.size()) ? str.size() : static_cast<size_t>(WriteDataSize));
         if (WriteEncodeType == VSET_UTF_16)
         {
-            const byte bom[] = {0xFF, 0xFE};
-            fwrite(bom, 1, 2, out);
+            if (with_bom)
+            {
+                const byte bom[] = {0xFF, 0xFE};
+                fwrite(bom, 1, 2, out);
+            }
             if (sizeof(EncodeType) == 2)
             {
                 Succeeded = (fwrite(str.data(), sizeof(CharT), count, out) == count);
@@ -2072,8 +2075,11 @@ public:
         }
         else if (WriteEncodeType == VSET_UTF_8)
         {
-            const byte bom[] = {0xEF, 0xBB, 0xBF};
-            fwrite(bom, 1, 3, out);
+            if (with_bom)
+            {
+                const byte bom[] = {0xEF, 0xBB, 0xBF};
+                fwrite(bom, 1, 3, out);
+            }
             if (sizeof(EncodeType) == 2)
             {
                 PivW2U utf{reinterpret_cast<const wchar_t *>(str.c_str()), count};

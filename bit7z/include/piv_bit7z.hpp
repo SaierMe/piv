@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/17                          *
+ * 版本: 2023/02/18                          *
 \*********************************************/
 
 #ifndef _PIV_BIT7Z_HPP
@@ -35,10 +35,10 @@
 #endif
 #include "bit7z.hpp"
 #include "bitarchiveeditor.hpp"
+
 // 包含C++标准库
 #include <mutex>
 #include <memory>
-#include "..\..\src\piv_string.hpp"
 
 namespace piv
 {

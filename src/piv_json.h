@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/16                          *
+ * 版本: 2023/02/19                          *
 \*********************************************/
 
 #ifndef _PIV_NLOHMANN_JSON_H
@@ -135,13 +135,30 @@ namespace piv
             int str_encoding = encoding;
 #endif
             if ((str_encoding & 8) == 8) // UTF-32LE
-                return J::accept(reinterpret_cast<const char32_t *>(input.GetPtr()), reinterpret_cast<const char32_t *>(input.GetPtr()) + len / 4, ignore_comments);
+            {
+                if (static_cast<uint8_t>(input.Get_S_BYTE(0)) == 0xFF && len > 4 && static_cast<uint8_t>(input.Get_S_BYTE(1)) == 0xFE)
+                    return J::accept(reinterpret_cast<const char32_t *>(input.GetPtr()) + 1, reinterpret_cast<const char32_t *>(input.GetPtr()) + len / 4, ignore_comments);
+                else
+                    return J::accept(reinterpret_cast<const char32_t *>(input.GetPtr()), reinterpret_cast<const char32_t *>(input.GetPtr()) + len / 4, ignore_comments);
+            }
             else if ((str_encoding & 2) == 2) // UTF-16LE
-                return Accept<J>(wstring_view{reinterpret_cast<const wchar_t *>(input.GetPtr()), len / 2}, ignore_comments);
+            {
+                if (static_cast<uint8_t>(input.Get_S_BYTE(0)) == 0xFF && len > 2 && static_cast<uint8_t>(input.Get_S_BYTE(1)) == 0xFE)
+                    return Accept<J>(wstring_view{reinterpret_cast<const wchar_t *>(input.GetPtr()) + 1, (len / 2) - 1}, ignore_comments);
+                else
+                    return Accept<J>(wstring_view{reinterpret_cast<const wchar_t *>(input.GetPtr()), len / 2}, ignore_comments);
+            }
             else if ((str_encoding & 1) == 1) // UTF-8
-                return Accept<J>(string_view{reinterpret_cast<const char *>(input.GetPtr()), len}, ignore_comments);
+            {
+                if (static_cast<uint8_t>(input.Get_S_BYTE(0)) == 0xEF && len > 3 && static_cast<uint8_t>(input.Get_S_BYTE(1)) == 0xBB && static_cast<uint8_t>(input.Get_S_BYTE(2)) == 0xBF)
+                    return Accept<J>(string_view{reinterpret_cast<const char *>(input.GetPtr()) + 3, len - 3}, ignore_comments);
+                else
+                    return Accept<J>(string_view{reinterpret_cast<const char *>(input.GetPtr()), len}, ignore_comments);
+            }
             else if (str_encoding == 0) // ANSI
+            {
                 return Accept<J>(PivA2U{reinterpret_cast<const char *>(input.GetPtr()), len}.String(), ignore_comments);
+            }
             return false;
         }
 
@@ -264,16 +281,25 @@ namespace piv
 #endif
             if ((str_encoding & 8) == 8) // UTF-32LE
             {
-                json = J::parse(reinterpret_cast<const char32_t *>(input.GetPtr()), reinterpret_cast<const char32_t *>(input.GetPtr()) + (len / 4), cb, allow_exceptions, ignore_comments);
+                if (static_cast<uint8_t>(input.Get_S_BYTE(0)) == 0xFF && len > 4 && static_cast<uint8_t>(input.Get_S_BYTE(1)) == 0xFE)
+                    json = J::parse(reinterpret_cast<const char32_t *>(input.GetPtr()) + 1, reinterpret_cast<const char32_t *>(input.GetPtr()) + (len / 4), cb, allow_exceptions, ignore_comments);
+                else
+                    json = J::parse(reinterpret_cast<const char32_t *>(input.GetPtr()), reinterpret_cast<const char32_t *>(input.GetPtr()) + (len / 4), cb, allow_exceptions, ignore_comments);
                 return !json.is_discarded();
             }
             else if ((str_encoding & 2) == 2) // UTF-16LE
             {
-                return Parse(json, wstring_view{reinterpret_cast<const wchar_t *>(input.GetPtr()), len / 2}, (J::parser_callback_t)cb, allow_exceptions, ignore_comments);
+                if (static_cast<uint8_t>(input.Get_S_BYTE(0)) == 0xFF && len > 2 && static_cast<uint8_t>(input.Get_S_BYTE(1)) == 0xFE)
+                    return Parse(json, wstring_view{reinterpret_cast<const wchar_t *>(input.GetPtr()) + 1, (len / 2) - 1}, cb, allow_exceptions, ignore_comments);
+                else
+                    return Parse(json, wstring_view{reinterpret_cast<const wchar_t *>(input.GetPtr()), len / 2}, cb, allow_exceptions, ignore_comments);
             }
             else if ((str_encoding & 1) == 1) // UTF-8
             {
-                return Parse(json, string_view{reinterpret_cast<const char *>(input.GetPtr()), len}, cb, allow_exceptions, ignore_comments);
+                if (static_cast<uint8_t>(input.Get_S_BYTE(0)) == 0xEF && len > 3 && static_cast<uint8_t>(input.Get_S_BYTE(1)) == 0xBB && static_cast<uint8_t>(input.Get_S_BYTE(2)) == 0xBF)
+                    return Parse(json, string_view{reinterpret_cast<const char *>(input.GetPtr()) + 3, len - 3}, cb, allow_exceptions, ignore_comments);
+                else
+                    return Parse(json, string_view{reinterpret_cast<const char *>(input.GetPtr()), len}, cb, allow_exceptions, ignore_comments);
             }
             else if (str_encoding == 0) // ANSI
             {
@@ -292,15 +318,15 @@ namespace piv
         {
             return string_view{reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize())};
         }
-        inline const std::vector<uint8_t> input_t(const std::vector<uint8_t> &input)
+        inline const std::vector<uint8_t> &input_t(const std::vector<uint8_t> &input)
         {
             return input;
         }
-        inline const string_view input_t(const string_view &input)
+        inline const string_view &input_t(const string_view &input)
         {
             return input;
         }
-        inline const std::string input_t(const std::string &input)
+        inline const std::string &input_t(const std::string &input)
         {
             return input;
         }
@@ -587,42 +613,42 @@ namespace piv
          * @return 返回JSON Pointer
          */
         template <typename J>
-        const auto to_pointer(const wchar_t *path)
+        auto to_pointer(const wchar_t *path)
         {
             return J::json_pointer{*PivW2U{path}};
         }
         template <typename J>
-        const auto to_pointer(const char *path)
+        auto to_pointer(const char *path)
         {
             return J::json_pointer{path};
         }
         template <typename J>
-        const auto to_pointer(const CVolString &path)
+        auto to_pointer(const CVolString &path)
         {
             return J::json_pointer{*PivW2U{path}};
         }
         template <typename J>
-        const auto to_pointer(const std::string &path)
+        auto to_pointer(const std::string &path)
         {
             return J::json_pointer{path};
         }
         template <typename J>
-        const auto &to_pointer(const string_view &path)
+        auto &to_pointer(const string_view &path)
         {
             return J::json_pointer{path};
         }
         template <typename J>
-        const auto to_pointer(const std::wstring &path)
+        auto to_pointer(const std::wstring &path)
         {
             return J::json_pointer{*PivW2U{path}};
         }
         template <typename J>
-        const std::string to_pointer(const wstring_view &path)
+        auto to_pointer(const wstring_view &path)
         {
             return J::json_pointer{*PivW2U{path.data(), path.size()}};
         }
         template <typename J>
-        const string_view to_pointer(const CVolMem &path)
+        auto to_pointer(const CVolMem &path)
         {
             return J::json_pointer{string_view{reinterpret_cast<const char *>(path.GetPtr()), static_cast<size_t>(path.GetSize())}};
         }
