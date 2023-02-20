@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/14                          *
+ * 版本: 2023/02/19                          *
 \*********************************************/
 
 #ifndef _PIV_THREAD_POOL_HPP
@@ -104,7 +104,7 @@ public:
         if (m_ThreadPool)
             return (m_ThreadPool->dwState >= StateNormal) ? TRUE : FALSE;
         // 给线程池参数变量分配内存
-        m_ThreadPool.reset(new THREADPOOL_INFO{});
+        m_ThreadPool.reset(new THREADPOOL_INFO());
         if (!m_ThreadPool)
             return FALSE;
         // 工作状态设置为正在创建
@@ -596,7 +596,7 @@ public:
         if (m_ThreadPool)
             return (m_ThreadPool->dwState >= StateNormal) ? TRUE : FALSE;
         // 给线程池参数变量分配内存
-        m_ThreadPool.reset(new THREADPOOL_INFO{});
+        m_ThreadPool.reset(new THREADPOOL_INFO());
         if (!m_ThreadPool)
             return FALSE;
         // 工作状态设置为正在创建

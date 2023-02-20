@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v3.2.0
+// toml++ v3.3.0
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -70,8 +70,11 @@
 #endif
 #endif
 
+#define TOML_MAKE_VERSION(major, minor, patch) (((major)*10000) + ((minor)*100) + ((patch)))
+
 #ifdef __clang__
-#define TOML_CLANG __clang_major__
+#define TOML_CLANG		   __clang_major__
+#define TOML_CLANG_VERSION TOML_MAKE_VERSION(__clang_major__, __clang_minor__, __clang_patchlevel__)
 #else
 #define TOML_CLANG 0
 #endif
@@ -110,6 +113,33 @@
 #define TOML_INTELLISENSE 1
 #else
 #define TOML_INTELLISENSE 0
+#endif
+
+// special handling for apple clang; see:
+// - https://github.com/marzer/tomlplusplus/issues/189
+// - https://en.wikipedia.org/wiki/Xcode
+// - https://stackoverflow.com/questions/19387043/how-can-i-reliably-detect-the-version-of-clang-at-preprocessing-time
+#if TOML_CLANG && defined(__apple_build_version__)
+#undef TOML_CLANG
+#if TOML_CLANG_VERSION >= TOML_MAKE_VERSION(14, 0, 0)
+#define TOML_CLANG 14
+#elif TOML_CLANG_VERSION >= TOML_MAKE_VERSION(13, 1, 6)
+#define TOML_CLANG 13
+#elif TOML_CLANG_VERSION >= TOML_MAKE_VERSION(13, 0, 0)
+#define TOML_CLANG 12
+#elif TOML_CLANG_VERSION >= TOML_MAKE_VERSION(12, 0, 5)
+#define TOML_CLANG 11
+#elif TOML_CLANG_VERSION >= TOML_MAKE_VERSION(12, 0, 0)
+#define TOML_CLANG 10
+#elif TOML_CLANG_VERSION >= TOML_MAKE_VERSION(11, 0, 3)
+#define TOML_CLANG 9
+#elif TOML_CLANG_VERSION >= TOML_MAKE_VERSION(11, 0, 0)
+#define TOML_CLANG 8
+#elif TOML_CLANG_VERSION >= TOML_MAKE_VERSION(10, 0, 1)
+#define TOML_CLANG 7
+#else
+#define TOML_CLANG 6 // not strictly correct but doesn't matter below this
+#endif
 #endif
 
 // IA64
@@ -464,6 +494,7 @@
 
 #define TOML_PUSH_WARNINGS                                                                                             \
 	TOML_PRAGMA_CLANG(diagnostic push)                                                                                 \
+	TOML_PRAGMA_CLANG(diagnostic ignored "-Wunknown-warning-option")                                                   \
 	static_assert(true)
 
 #define TOML_DISABLE_SWITCH_WARNINGS                                                                                   \
@@ -510,7 +541,7 @@
 	__pragma(warning(push))                                                                                            \
 	static_assert(true)
 
-#if TOML_HAS_INCLUDE(<CodeAnalysis / Warnings.h>)
+#if TOML_HAS_INCLUDE(<CodeAnalysis/Warnings.h>)
 #pragma warning(push, 0)
 #include <CodeAnalysis/Warnings.h>
 #pragma warning(pop)
@@ -896,6 +927,10 @@ TOML_ENABLE_WARNINGS;
 #define TOML_ASSERT_ASSUME(expr) TOML_ASSERT(expr)
 #endif
 
+#ifndef TOML_ENABLE_FLOAT16
+#define TOML_ENABLE_FLOAT16 0
+#endif
+
 #if !defined(TOML_FLOAT_CHARCONV) && (TOML_GCC || TOML_CLANG || (TOML_ICC && !TOML_ICC_CL))
 // not supported by any version of GCC or Clang as of 26/11/2020
 // not supported by any version of ICC on Linux as of 11/01/2021
@@ -930,53 +965,6 @@ TOML_ENABLE_WARNINGS;
 	TOML_REQUIRES(condition)
 #define TOML_HIDDEN_CONSTRAINT(condition, ...) TOML_CONSTRAINED_TEMPLATE(condition, __VA_ARGS__)
 
-#ifndef TOML_ENABLE_FLOAT16
-
-#ifdef __FLT16_MANT_DIG__
-#define TOML_FLOAT16_MANT_DIG	__FLT16_MANT_DIG__
-#define TOML_FLOAT16_DIG		__FLT16_DIG__
-#define TOML_FLOAT16_MIN_EXP	__FLT16_MIN_EXP__
-#define TOML_FLOAT16_MIN_10_EXP __FLT16_MIN_10_EXP__
-#define TOML_FLOAT16_MAX_EXP	__FLT16_MAX_EXP__
-#define TOML_FLOAT16_MAX_10_EXP __FLT16_MAX_10_EXP__
-#else
-#define TOML_FLOAT16_MANT_DIG	0
-#define TOML_FLOAT16_DIG		0
-#define TOML_FLOAT16_MIN_EXP	0
-#define TOML_FLOAT16_MIN_10_EXP 0
-#define TOML_FLOAT16_MAX_EXP	0
-#define TOML_FLOAT16_MAX_10_EXP 0
-#endif
-
-#if (TOML_FLOAT16_MANT_DIG && TOML_FLOAT16_DIG && TOML_FLOAT16_MIN_EXP && TOML_FLOAT16_MIN_10_EXP                      \
-	 && TOML_FLOAT16_MAX_EXP && TOML_FLOAT16_MAX_10_EXP)
-#define TOML_FLOAT16_LIMITS_SET 1
-#else
-#define TOML_FLOAT16_LIMITS_SET 0
-#endif
-
-#if TOML_FLOAT16_LIMITS_SET
-
-#if TOML_CLANG // >= 15
-#if (TOML_ARCH_ARM || TOML_ARCH_AMD64 || TOML_ARCH_X86)
-#define TOML_ENABLE_FLOAT16 1
-#endif
-
-#elif TOML_GCC
-#if (TOML_ARCH_ARM || TOML_ARCH_AMD64 /* || TOML_ARCH_X86*/)
-#define TOML_ENABLE_FLOAT16 1
-#endif
-
-#endif // clang/gcc
-
-#endif // TOML_FLOAT16_LIMITS_SET
-
-#endif // !defined(TOML_ENABLE_FLOAT16)
-
-#ifndef TOML_ENABLE_FLOAT16
-#define TOML_ENABLE_FLOAT16 0
-#endif
-
 #if defined(__SIZEOF_FLOAT128__) && defined(__FLT128_MANT_DIG__) && defined(__LDBL_MANT_DIG__)                         \
 	&& __FLT128_MANT_DIG__ > __LDBL_MANT_DIG__
 #define TOML_FLOAT128 __float128
@@ -992,7 +980,7 @@ TOML_ENABLE_WARNINGS;
 //********  impl/version.h  ********************************************************************************************
 
 #define TOML_LIB_MAJOR 3
-#define TOML_LIB_MINOR 2
+#define TOML_LIB_MINOR 3
 #define TOML_LIB_PATCH 0
 
 #define TOML_LANG_MAJOR 1
@@ -1002,9 +990,6 @@ TOML_ENABLE_WARNINGS;
 //********  impl/preprocessor.h  ***************************************************************************************
 
 #define	TOML_LIB_SINGLE_HEADER 1
-
-#define TOML_MAKE_VERSION(major, minor, patch)											\
-		((major) * 10000 + (minor) * 100 + (patch))
 
 #if TOML_ENABLE_UNRELEASED_FEATURES
 	#define TOML_LANG_EFFECTIVE_VERSION													\
@@ -1130,12 +1115,12 @@ TOML_DISABLE_SUGGEST_ATTR_WARNINGS;
 #pragma warning(disable : 4251) // dll exports for std lib types
 #endif
 #elif TOML_CLANG
-#pragma clang diagnostic ignored "-Wheader-hygiene"
+TOML_PRAGMA_CLANG(diagnostic ignored "-Wheader-hygiene")
 #if TOML_CLANG >= 12
-#pragma clang diagnostic ignored "-Wc++20-extensions"
+TOML_PRAGMA_CLANG(diagnostic ignored "-Wc++20-extensions")
 #endif
-#if (TOML_CLANG == 13) && !defined(__APPLE__)
-#pragma clang diagnostic ignored "-Wreserved-identifier"
+#if TOML_CLANG == 13
+TOML_PRAGMA_CLANG(diagnostic ignored "-Wreserved-identifier")
 #endif
 #endif
 
@@ -1145,7 +1130,7 @@ TOML_DISABLE_WARNINGS;
 #include <new>
 TOML_ENABLE_WARNINGS;
 
-#if TOML_CLANG >= 8 || TOML_GCC >= 7 || TOML_ICC >= 1910 || TOML_MSVC >= 1914
+#if (!defined(__apple_build_version__) && TOML_CLANG >= 8) || TOML_GCC >= 7 || TOML_ICC >= 1910 || TOML_MSVC >= 1914
 #define TOML_LAUNDER(x) __builtin_launder(x)
 #elif defined(__cpp_lib_launder) && __cpp_lib_launder >= 201606
 #define TOML_LAUNDER(x) std::launder(x)
@@ -1238,7 +1223,9 @@ TOML_DISABLE_WARNINGS;
 TOML_ENABLE_WARNINGS;
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -2144,7 +2131,9 @@ TOML_IMPL_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -2152,7 +2141,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -2280,7 +2271,9 @@ TOML_IMPL_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -2288,7 +2281,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -2400,7 +2395,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -2408,7 +2405,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -2740,7 +2739,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -2794,7 +2795,9 @@ TOML_ENABLE_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -3375,7 +3378,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -3389,7 +3394,9 @@ TOML_ENABLE_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -3992,7 +3999,9 @@ TOML_IMPL_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -4006,7 +4015,9 @@ TOML_ENABLE_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -4511,7 +4522,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -4519,7 +4532,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -5587,7 +5602,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -5595,7 +5612,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -5763,7 +5782,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -5771,7 +5792,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -6854,7 +6877,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -6862,7 +6887,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -7113,7 +7140,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -7128,7 +7157,9 @@ TOML_ENABLE_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -8273,7 +8304,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -8281,7 +8314,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -8461,7 +8496,9 @@ TOML_IMPL_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -8469,7 +8506,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -8663,7 +8702,9 @@ TOML_IMPL_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -8683,7 +8724,9 @@ TOML_ENABLE_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -8785,7 +8828,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -8797,7 +8842,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -9132,7 +9179,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -9144,7 +9193,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -9247,7 +9298,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -9259,7 +9312,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -9443,7 +9498,9 @@ TOML_IMPL_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -9455,7 +9512,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -9544,7 +9603,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -9556,7 +9617,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -9630,7 +9693,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -9642,7 +9707,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -9721,7 +9788,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -9759,7 +9828,9 @@ extern "C" __declspec(dllimport) int __stdcall MultiByteToWideChar(unsigned int 
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -9826,7 +9897,9 @@ TOML_IMPL_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -9848,7 +9921,9 @@ TOML_DISABLE_WARNINGS;
 TOML_ENABLE_WARNINGS;
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -10313,7 +10388,9 @@ TOML_IMPL_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -10321,7 +10398,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -10450,7 +10529,9 @@ TOML_IMPL_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -10465,7 +10546,9 @@ TOML_DISABLE_WARNINGS;
 TOML_ENABLE_WARNINGS;
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -10739,7 +10822,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -10753,7 +10838,9 @@ TOML_DISABLE_WARNINGS;
 TOML_ENABLE_WARNINGS;
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -11237,7 +11324,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -11245,7 +11334,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -11620,7 +11711,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -11628,7 +11721,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -11938,7 +12033,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -11977,7 +12074,9 @@ TOML_ENABLE_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -12029,7 +12128,9 @@ TOML_IMPL_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -12052,7 +12153,9 @@ TOML_DISABLE_WARNINGS;
 TOML_ENABLE_WARNINGS;
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -14277,14 +14380,21 @@ TOML_IMPL_NAMESPACE_START
 				}
 
 				// range check
-				if TOML_UNLIKELY(result > static_cast<uint64_t>((std::numeric_limits<int64_t>::max)()) + (sign < 0 ? 1ull : 0ull))
+				static constexpr auto i64_max = static_cast<uint64_t>((std::numeric_limits<int64_t>::max)());
+				if TOML_UNLIKELY(result > i64_max + (sign < 0 ? 1u : 0u))
 					set_error_and_return_default("'"sv,
 												 traits::full_prefix,
 												 std::string_view{ digits, length },
 												 "' is not representable in 64 bits"sv);
 
 				if constexpr (traits::is_signed)
+				{
+					// avoid signed multiply UB when parsing INT64_MIN
+					if TOML_UNLIKELY(sign < 0 && result == i64_max + 1u)
+						return (std::numeric_limits<int64_t>::min)();
+
 					return static_cast<int64_t>(result) * sign;
+				}
 				else
 					return static_cast<int64_t>(result);
 			}
@@ -15266,13 +15376,28 @@ TOML_IMPL_NAMESPACE_START
 
 				else if (auto tbl = matching_node.as_table(); !is_arr && tbl && !implicit_tables.empty())
 				{
-					if (auto found = impl::find(implicit_tables.begin(), implicit_tables.end(), tbl);
-						found && (tbl->empty() || tbl->is_homogeneous<table>()))
+					if (auto found = impl::find(implicit_tables.begin(), implicit_tables.end(), tbl); found)
 					{
-						implicit_tables.erase(implicit_tables.cbegin() + (found - implicit_tables.data()));
-						tbl->source_.begin = header_begin_pos;
-						tbl->source_.end   = header_end_pos;
-						return tbl;
+						bool ok = true;
+						if (!tbl->empty())
+						{
+							for (auto& [_, child] : *tbl)
+							{
+								if (!child.is_table() && !child.is_array_of_tables())
+								{
+									ok = false;
+									break;
+								}
+							}
+						}
+
+						if (ok)
+						{
+							implicit_tables.erase(implicit_tables.cbegin() + (found - implicit_tables.data()));
+							tbl->source_.begin = header_begin_pos;
+							tbl->source_.end   = header_end_pos;
+							return tbl;
+						}
 					}
 				}
 
@@ -15772,7 +15897,7 @@ TOML_ANON_NAMESPACE_START
 		TOML_OVERALIGNED char file_buffer[sizeof(void*) * 1024u];
 		file.rdbuf()->pubsetbuf(file_buffer, sizeof(file_buffer));
 #if TOML_WINDOWS
-		file.open(impl::widen(file_path_str), std::ifstream::in | std::ifstream::binary | std::ifstream::ate);
+		file.open(impl::widen(file_path_str).c_str(), std::ifstream::in | std::ifstream::binary | std::ifstream::ate);
 #else
 		file.open(file_path_str, std::ifstream::in | std::ifstream::binary | std::ifstream::ate);
 #endif
@@ -15904,7 +16029,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -15916,7 +16043,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -16414,7 +16543,9 @@ TOML_IMPL_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -16426,7 +16557,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -16818,7 +16951,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -16830,7 +16965,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -16939,7 +17076,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -16951,7 +17090,9 @@ TOML_POP_WARNINGS;
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#ifndef __clang__
 #pragma inline_recursion(on)
+#endif
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min
@@ -17104,7 +17245,9 @@ TOML_NAMESPACE_END;
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#ifndef __clang__
 #pragma inline_recursion(off)
+#endif
 #endif
 TOML_POP_WARNINGS;
 
@@ -17137,6 +17280,7 @@ TOML_POP_WARNINGS;
 #undef TOML_ASYMMETRICAL_EQUALITY_OPS
 #undef TOML_ATTR
 #undef TOML_CLANG
+#undef TOML_CLANG_VERSION
 #undef TOML_CLOSED_ENUM
 #undef TOML_CLOSED_FLAGS_ENUM
 #undef TOML_COMPILER_HAS_EXCEPTIONS

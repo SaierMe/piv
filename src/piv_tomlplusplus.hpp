@@ -18,7 +18,7 @@
 #error TOML++需要 C++17 或更高标准,请使用 Visual Studio 2017 以上版本的编译器.
 #endif
 
-// 开始包含TOML++ https://github.com/marzer/tomlplusplus
+// 包含TOML++ https://github.com/marzer/tomlplusplus
 // 禁用TOML++的异常
 #ifndef TOML_EXCEPTIONS
 #define TOML_EXCEPTIONS 0
@@ -26,6 +26,7 @@
 #undef TOML_EXCEPTIONS
 #define TOML_EXCEPTIONS 0
 #endif
+
 // 启用TOML的UTF-16支持
 #ifndef TOML_ENABLE_WINDOWS_COMPAT
 #define TOML_ENABLE_WINDOWS_COMPAT 1
@@ -33,6 +34,7 @@
 #undef TOML_ENABLE_WINDOWS_COMPAT
 #define TOML_ENABLE_WINDOWS_COMPAT 1
 #endif
+
 // 因为TOML++的源码里有个变量跟火山的inline_宏重名,这里要临时取消定义
 #ifdef inline_
 #undef inline_
@@ -41,11 +43,11 @@
 #ifndef inline_
 #define inline_ inline
 #endif
+
 // 结束包含TOML++
 
 // 包含文本编码转换包装类
 #include "piv_encoding.hpp"
-
 
 /**
  * @brief TOML键值表类
@@ -57,113 +59,187 @@ protected:
 
 public:
     PivTomlTable() {}
+    ~PivTomlTable() {}
+
     PivTomlTable(const toml::table &other) : tbl{other} {}
     PivTomlTable(toml::table &&other) : tbl{other} {}
-    PivTomlTable(toml::table *other)
+    PivTomlTable(const toml::table *other)
     {
         if (other != nullptr)
-        {
             tbl = *other;
-        }
         else
-        {
             tbl.clear();
-        }
     }
-    ~PivTomlTable()
-    {
-    }
-    PivTomlTable &operator=(PivTomlTable &other)
+
+    PivTomlTable &operator=(const PivTomlTable &other)
     {
         tbl = other.tbl;
         return *this;
     }
-    bool operator==(PivTomlTable &other)
+    PivTomlTable &operator=(PivTomlTable &&other)
+    {
+        tbl = std::move(other.tbl);
+        return *this;
+    }
+
+    bool operator==(PivTomlTable &other) const noexcept
     {
         return tbl == other.tbl;
     }
+
     virtual void GetDumpString(CVolString &strDump, INT nMaxDumpSize) override
     {
         strDump.AddText(this->ToString());
     }
+
     CVolString ToString()
     {
         std::stringstream ss;
         ss << tbl;
-        return PivU2W(ss.str());
+        return *PivU2Ws(ss.str());
     }
-    // 解析文件
-    bool ParseFile(const wchar_t *file_path)
+
+    const std::wstring_view &to_wview(const std::wstring_view &str)
     {
-        toml::parse_result result = toml::parse_file(file_path);
+        return str;
+    }
+    std::wstring_view to_wview(const std::wstring &str)
+    {
+        return std::wstring_view{str};
+    }
+    std::wstring_view to_wview(const CVolString &str)
+    {
+        return std::wstring_view{str.GetText()};
+    }
+    std::wstring_view to_wview(const wchar_t *str)
+    {
+        return std::wstring_view{str};
+    }
+    std::wstring_view to_wview(const std::string &str)
+    {
+        return std::wstring_view{*PivU2W{str}};
+    }
+    std::wstring_view to_wview(const std::string_view &str)
+    {
+        return std::wstring_view{*PivU2W{str}};
+    }
+    std::wstring_view to_wview(const char *str)
+    {
+        return std::wstring_view{*PivU2W{str}};
+    }
+
+    const std::string_view &to_view(const std::string_view &str)
+    {
+        return str;
+    }
+    std::string_view to_view(const std::string &str)
+    {
+        return std::string_view{str};
+    }
+    const std::string_view &to_view(const std::wstring_view &str)
+    {
+        return std::string_view{*PivW2U{str}};
+    }
+    std::string_view to_view(const std::wstring &str)
+    {
+        return std::string_view{*PivW2U{str}};
+    }
+    std::string_view to_view(const CVolString &str)
+    {
+        return std::string_view{*PivW2U{str}};
+    }
+    std::string_view to_view(const wchar_t *str)
+    {
+        return std::string_view{*PivW2U{str}};
+    }
+    std::string_view to_view(const char *str)
+    {
+        return std::string_view{str};
+    }
+    std::string_view to_view(const CVolMem &str)
+    {
+        return std::string_view{reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())};
+    }
+
+    /**
+     * @brief 解析文件
+     * @param file_path 文件路径
+     * @return 是否解析成功
+     */
+    template <typename T>
+    bool ParseFile(const T &file_path)
+    {
+        toml::parse_result result = toml::parse_file(to_wview(file_path));
         if (result)
         {
-            tbl = std::move(result).table();
+            tbl = std::move(result.table());
             return true;
         }
         tbl.clear();
         return false;
     }
-    // 解析文本
-    bool Parse(const wchar_t *doc, const wchar_t *source_path)
+
+    /**
+     * @brief 解析文本
+     * @param doc 文本内容
+     * @param source_path 来源路径
+     * @return 是否解析成功
+     */
+    template <typename D, typename S>
+    bool Parse(const D &doc, const S &source_path)
     {
-        toml::parse_result result = toml::parse(PivW2U(doc).String(), source_path);
+        toml::parse_result result = toml::parse(to_view(doc), to_wview(source_path));
         if (result)
         {
-            tbl = std::move(result).table();
+            tbl = std::move(result.table());
             return true;
         }
         tbl.clear();
         return false;
     }
-    // 解析字节集(UTF-8)
-    bool Parse(CVolMem &doc, const wchar_t *source_path)
-    {
-        std::string_view doc_sv{reinterpret_cast<const char *>(doc.GetPtr()), static_cast<size_t>(doc.GetSize())};
-        toml::parse_result result = toml::parse(doc_sv, source_path);
-        if (result)
-        {
-            tbl = std::move(result).table();
-            return true;
-        }
-        tbl.clear();
-        return false;
-    }
+
     // 是否为空
-    bool IsEmpty()
+    bool IsEmpty() const noexcept
     {
         return tbl.empty();
     }
+
     // 取成员数
-    int32_t GetSize()
+    int32_t GetSize() const noexcept
     {
         return static_cast<int32_t>(tbl.size());
     }
+
     // 是否为同类元素
-    bool IsHomogeneous(int8_t ntype, toml::node *first_nonmatch)
+    bool IsHomogeneous(int8_t ntype, toml::node *first_nonmatch) noexcept
     {
         return tbl.is_homogeneous(static_cast<toml::node_type>(ntype), first_nonmatch);
     }
+
     // 是否为内联表
-    bool IsInline()
+    bool IsInline() const noexcept
     {
         return tbl.is_inline();
     }
+
     // 取节点
-    toml::node *Get(const wchar_t *key)
+    template <typename K>
+    toml::node *Get(const K &key)
     {
-        return tbl.get(key);
+        return tbl.get(to_wview(key));
     }
+
     // 取基本值
-    template <typename R>
-    R GetAs(const wchar_t *key)
+    template <typename R, typename K>
+    R GetAs(const K &key)
     {
-        if (auto val = tbl.get_as<R>(key))
+        if (auto val = tbl.get_as<R>(to_wview(key)))
         {
             return **val;
         }
         return R{};
     }
+
     // 取路径基本值
     template <typename R>
     R GetPathAs(const wchar_t *path)
