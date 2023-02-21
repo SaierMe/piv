@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/19                          *
+ * 版本: 2023/02/21                          *
 \*********************************************/
 
 #ifndef _PIV_THREAD_POOL_HPP
@@ -661,7 +661,7 @@ public:
         }
         ::ResetEvent(m_ThreadPool->hEvent[3]);
         HANDLE hExtend = ::CreateThread(NULL, m_ThreadPool->tStackSize,
-                                        reinterpret_cast<LPTHREAD_START_ROUTINE>(ThreadPoolExtendProc), m_ThreadPool.get(), 0, NULL);
+                                        reinterpret_cast<LPTHREAD_START_ROUTINE>(ThreadPoolExtendProc), &m_ThreadPool, 0, NULL);
         if (!hExtend)
         {
             CloseIOCP();
@@ -697,7 +697,7 @@ public:
 
 private:
     // 动态控制函数
-    static VOID ThreadPoolExtendProc(THREADPOOL_INFO *pThreadPool)
+    static VOID ThreadPoolExtendProc(std::shared_ptr<THREADPOOL_INFO> pThreadPool)
     {
         while (::WaitForSingleObject(pThreadPool->hEvent[3], pThreadPool->dwCycleMs) != WAIT_OBJECT_0)
         {
@@ -709,7 +709,7 @@ private:
                     for (DWORD i = 0; i < dwIncrease; i++)
                     {
                         HANDLE hThreadHandle = ::CreateThread(NULL, pThreadPool->tStackSize,
-                                                              reinterpret_cast<LPTHREAD_START_ROUTINE>(ThreadPoolWorkerThread), pThreadPool, 0, NULL);
+                                                              reinterpret_cast<LPTHREAD_START_ROUTINE>(ThreadPoolWorkerThread), &pThreadPool, 0, NULL);
                         if (hThreadHandle)
                         {
                             // 设置线程优先级

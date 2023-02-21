@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/19                          *
+ * 版本: 2023/02/21                          *
 \*********************************************/
 
 #ifndef _PIV_STRING_HPP
@@ -747,7 +747,7 @@ public:
     inline size_t CopyStr(CVolMem &dest, const size_t &pos, const size_t &count) const
     {
         dest.Alloc(count, TRUE);
-        size_t n = CopyStr(const_cast<CharT *>(reinterpret_cast<const CharT *>(dest.GetText())), pos, count);
+        size_t n = CopyStr(const_cast<CharT *>(reinterpret_cast<const CharT *>(dest.GetPtr())), pos, count);
         if (n == 0)
             dest.Empty();
         else
@@ -782,6 +782,43 @@ public:
     {
         ASSERT(sizeof(CharT) == 2); // 只有UTF-16LE编码的文本视图可以置入火山文本型;
         return CVolString(reinterpret_cast<const wchar_t *>(sv.data()), sv.size());
+    }
+
+    /**
+     * @brief 到整数
+     * @return
+     */
+    inline int32_t ToInt() const
+    {
+        if (sizeof(CharT) == 2)
+            return _wtoi(reinterpret_cast<const wchar_t*>(std::basic_string<CharT>{sv.data(), sv.size()}.c_str()));
+        else
+            return atoi(reinterpret_cast<const char*>(std::basic_string<CharT>{sv.data(), sv.size()}.c_str()));
+    }
+
+    /**
+     * @brief 到长整数
+     * @param base 进制
+     * @return
+     */
+    inline int64_t ToInt64() const
+    {
+        if (sizeof(CharT) == 2)
+            return _wtoi64(reinterpret_cast<const wchar_t*>(std::basic_string<CharT>{sv.data(), sv.size()}.c_str()));
+        else
+            return _atoi64(reinterpret_cast<const char*>(std::basic_string<CharT>{sv.data(), sv.size()}.c_str()));
+    }
+
+    /**
+     * @brief 到小数
+     * @return
+     */
+    inline double ToDouble() const
+    {
+        if (sizeof(CharT) == 2)
+            return _wtof(reinterpret_cast<const wchar_t*>(std::basic_string<CharT>{sv.data(), sv.size()}.c_str()));
+        else
+            return atof(reinterpret_cast<const char*>(std::basic_string<CharT>{sv.data(), sv.size()}.c_str()));
     }
 
     /**
@@ -1926,6 +1963,7 @@ public:
     {
         ASSERT(ReadDataSize >= -1);
         ASSERT_R_STR(FileName);
+        VOL_STRING_ENCODE_TYPE StrEncodeType = ReadEncodeType;
         FILE *in = _wfopen(FileName, L"rb");
         if (in == NULL)
             return false;
@@ -1933,32 +1971,32 @@ public:
         fseek(in, 0, SEEK_END);
         size_t fileSize = static_cast<size_t>(ftell(in));
         fseek(in, 0, SEEK_SET);
+        if (ReadDataSize > 0 && static_cast<size_t>(ReadDataSize) < fileSize)
+            fileSize = static_cast<size_t>(ReadDataSize);
         if (fileSize > 2)
         {
-            byte bom[3];
+            uint8_t bom[3];
             fread(bom, 1, 3, in);
             if (bom[0] == 0xFF && bom[1] == 0xFE)
             {
-                ReadEncodeType = VSET_UTF_16;
+                StrEncodeType = VSET_UTF_16;
                 fseek(in, 2, SEEK_SET);
                 fileSize -= 2;
             }
-            else if (bom[0] == 0xEF && bom[1] == 0xBB && bom[1] == 0xBF)
+            else if (bom[0] == 0xEF && bom[1] == 0xBB && bom[2] == 0xBF)
             {
-                ReadEncodeType = VSET_UTF_8;
+                StrEncodeType = VSET_UTF_8;
                 fseek(in, 3, SEEK_SET);
                 fileSize -= 3;
             }
+            else
+            {
+                fseek(in, 0, SEEK_SET);
+            }
         }
-        if (ReadEncodeType == VSET_UNKNOWN)
-        {
-            ReadEncodeType = VSET_MBCS;
-        }
-        if (ReadDataSize > 0 && static_cast<long>(ReadDataSize) < fileSize)
-        {
-            fileSize = static_cast<long>(ReadDataSize);
-        }
-        if (ReadEncodeType == VSET_UTF_16)
+        if (StrEncodeType == VSET_UNKNOWN)
+            StrEncodeType = VSET_MBCS;
+        if (StrEncodeType == VSET_UTF_16)
         {
             if (sizeof(EncodeType) == 2)
             {
@@ -1982,12 +2020,12 @@ public:
                 delete[] data;
             }
         }
-        else if (ReadEncodeType == VSET_UTF_8)
+        else if (StrEncodeType == VSET_UTF_8)
         {
             if (sizeof(EncodeType) == 4)
             {
-                str.resize(fileSize / sizeof(CharT));
-                Succeeded = (fread(str.data(), sizeof(CharT), fileSize / sizeof(CharT), in) == fileSize / sizeof(CharT));
+                str.resize(fileSize);
+                Succeeded = (fread(str.data(), 1, fileSize, in) == fileSize);
             }
             else
             {
@@ -2006,7 +2044,7 @@ public:
                 delete[] data;
             }
         }
-        else if (ReadEncodeType == VSET_MBCS)
+        else if (StrEncodeType == VSET_MBCS)
         {
             if (sizeof(EncodeType) == 1)
             {
@@ -2017,7 +2055,7 @@ public:
             {
                 char *data = new char[fileSize];
                 Succeeded = (fread(data, 1, fileSize, in) == fileSize);
-                if (sizoef(EncodeType) == 2)
+                if (sizeof(EncodeType) == 2)
                 {
                     PivW2A mbcs{reinterpret_cast<const wchar_t *>(data), fileSize / 2};
                     str.assign(reinterpret_cast<const CharT *>(mbcs.GetText()), mbcs.GetSize());
@@ -2031,6 +2069,8 @@ public:
             }
         }
         fclose(in);
+        if (!Succeeded)
+            str.clear();
         return Succeeded;
     }
 
@@ -2412,13 +2452,13 @@ public:
      */
     inline PivString &InsertText(const ptrdiff_t &index, const CharT &ch)
     {
-        ASSERT(index > 0 && index < str.size());
+        ASSERT(index > 0 && index < static_cast<ptrdiff_t>(str.size()));
         str.insert(static_cast<size_t>(index), 1, ch);
         return *this;
     }
     inline PivString &InsertText(const ptrdiff_t &index, const CharT *s, const ptrdiff_t &count = -1)
     {
-        ASSERT(index > 0 && index < str.size());
+        ASSERT(index > 0 && index < static_cast<ptrdiff_t>(str.size()));
         if (count == -1)
             str.insert(static_cast<size_t>(index), s);
         else
@@ -2427,7 +2467,7 @@ public:
     }
     inline PivString &InsertText(const ptrdiff_t &index, const std::basic_string<CharT> &s, const ptrdiff_t &count = -1)
     {
-        ASSERT(index > 0 && index < str.size());
+        ASSERT(index > 0 && index < static_cast<ptrdiff_t>(str.size()));
         if (count == -1)
             str.insert(static_cast<size_t>(index), s);
         else
@@ -2488,7 +2528,7 @@ public:
      */
     inline PivString &RemoveChar(const ptrdiff_t &pos, const ptrdiff_t &count)
     {
-        ASSERT(pos > 0 && pos < str.size() && count >= 0);
+        ASSERT(pos > 0 && pos < static_cast<ptrdiff_t>(str.size()) && count >= 0);
         str.erase(static_cast<size_t>(pos), static_cast<size_t>(count));
         return *this;
     }
@@ -2501,7 +2541,7 @@ public:
      */
     inline ptrdiff_t &RemoveChars(const ptrdiff_t &pos, const ptrdiff_t &count)
     {
-        ASSERT(pos > 0 && pos < str.size() && count >= 0);
+        ASSERT(pos > 0 && pos < static_cast<ptrdiff_t>(str.size()) && count >= 0);
         size_t ret = str.size();
         str.erase(static_cast<size_t>(pos), static_cast<size_t>(count));
         return ret - str.size();
@@ -2936,7 +2976,7 @@ public:
      */
     bool Replace(const ptrdiff_t &pos, const ptrdiff_t &findCh, const CharT &replaceCH)
     {
-        ASSERT(pos >= 0 && pos <= str.length());
+        ASSERT(pos >= 0 && pos <= static_cast<ptrdiff_t>(str.length()));
         bool replaced = false;
         for (size_t i = static_cast<size_t>(pos); i < str.size(); i++)
         {
@@ -2958,7 +2998,7 @@ public:
      */
     inline PivString &Replace(const ptrdiff_t &pos, const ptrdiff_t &count, const CharT *s, const ptrdiff_t &count2 = -1)
     {
-        ASSERT(pos >= 0 && pos <= str.length() && count >= 0);
+        ASSERT(pos >= 0 && pos <= static_cast<ptrdiff_t>(str.length()) && count >= 0);
         if (count2 == -1)
             str.replace(static_cast<size_t>(pos), static_cast<size_t>(count), s);
         else
@@ -2967,7 +3007,7 @@ public:
     }
     inline PivString &Replace(const ptrdiff_t &pos, const ptrdiff_t &count, const std::basic_string<CharT> &s)
     {
-        ASSERT(pos >= 0 && pos <= str.length() && count >= 0);
+        ASSERT(pos >= 0 && pos <= static_cast<ptrdiff_t>(str.length()) && count >= 0);
         str.replace(static_cast<size_t>(pos), static_cast<size_t>(count), s);
         return *this;
     }
@@ -3000,18 +3040,19 @@ public:
      */
     PivString &ReplaceSubText(const piv::basic_string_view<CharT> &findStr, const piv::basic_string_view<CharT> &repStr, const ptrdiff_t &pos = 0, const ptrdiff_t &count = -1, const bool &case_sensitive = true)
     {
-        ASSERT(pos >= 0 && pos <= str.length());
-        size_t fpos = 0, i = 0;
+        ASSERT(pos >= 0 && pos <= static_cast<ptrdiff_t>(str.length()));
+        size_t fpos = 0, opos = pos;
+        ptrdiff_t i = 0;
         while (fpos < str.length())
         {
             if (case_sensitive)
-                fpos = str.find(findStr.data(), pos, findStr.size());
+                fpos = str.find(findStr.data(), opos, findStr.size());
             else
-                fpos = piv::edit::ifind(piv::basic_string_view<CharT>{str}, findStr, pos);
+                fpos = piv::edit::ifind(piv::basic_string_view<CharT>{str}, findStr, opos);
             if (fpos == std::basic_string<CharT>::npos)
                 break;
             str.replace(fpos, findStr.size(), repStr.data(), repStr.size());
-            pos = fpos + repStr.size();
+            opos = fpos + repStr.size();
             i++;
             if (count > 0 && i >= count)
                 break;
@@ -3020,7 +3061,7 @@ public:
     }
     inline PivString &ReplaceSubText(const CharT *findStr, const CharT *repStr, const ptrdiff_t &pos = 0, const ptrdiff_t &count = -1, const bool &case_sensitive = true, const size_t &findLen = (size_t)-1, const size_t &repLen = (size_t)-1)
     {
-        ASSERT(pos >= 0 && pos <= str.length());
+        ASSERT(pos >= 0 && pos <= static_cast<ptrdiff_t>(str.length()));
         if (findLen == (size_t)-1)
             findLen = (sizeof(CharT) == 2) ? wcslen(reinterpret_cast<const wchar_t *>(findStr)) : strlen(reinterpret_cast<const char *>(findStr));
         if (repLen == (size_t)-1)
@@ -3437,7 +3478,7 @@ public:
     inline size_t CopyStr(CVolMem &dest, const size_t &pos, const size_t &count) const
     {
         dest.Alloc(count, TRUE);
-        size_t n = CopyStr(const_cast<CharT *>(reinterpret_cast<cont CharT *>(dest.GetText())), pos, count);
+        size_t n = CopyStr(const_cast<CharT *>(reinterpret_cast<cont CharT *>(dest.GetPtr())), pos, count);
         if (n == 0)
             dest.Empty();
         else
@@ -3483,16 +3524,12 @@ public:
      * @param base 进制
      * @return
      */
-    inline int32_t ToInt(const int &base) const
+    inline int32_t ToInt() const
     {
-        try
-        {
-            return std::stoi(str, nullptr, base);
-        }
-        catch (const std::exception &e)
-        {
-            return 0;
-        }
+        if (sizeof(CharT) == 2)
+            return _wtoi(reinterpret_cast<const wchar_t*>(str.c_str()));
+        else
+            return atoi(reinterpret_cast<const char*>(str.c_str()));
     }
 
     /**
@@ -3500,16 +3537,12 @@ public:
      * @param base 进制
      * @return
      */
-    inline int64_t ToInt64(const int &base) const
+    inline int64_t ToInt64() const
     {
-        try
-        {
-            return std::stoll(str, nullptr, base);
-        }
-        catch (const std::exception &e)
-        {
-            return 0;
-        }
+        if (sizeof(CharT) == 2)
+            return _wtoi64(reinterpret_cast<const wchar_t*>(str.c_str()));
+        else
+            return _atoi64(reinterpret_cast<const char*>(str.c_str()));
     }
 
     /**
@@ -3518,14 +3551,10 @@ public:
      */
     inline double ToDouble() const
     {
-        try
-        {
-            return std::stod(str);
-        }
-        catch (const std::exception &e)
-        {
-            return 0;
-        }
+        if (sizeof(CharT) == 2)
+            return _wtof(reinterpret_cast<const wchar_t*>(str.c_str()));
+        else
+            return atof(reinterpret_cast<const char*>(str.c_str()));
     }
 
     /**
