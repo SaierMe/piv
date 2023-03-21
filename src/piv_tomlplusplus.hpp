@@ -3,16 +3,11 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2022/11/26                          *
+ * 版本: 2023/03/10                          *
 \*********************************************/
 
 #ifndef _PIV_TOML_PLUS_PLUS_HPP
 #define _PIV_TOML_PLUS_PLUS_HPP
-
-// 包含火山视窗基本类,它在火山里的包含顺序比较靠前(全局-110)
-#ifndef __VOL_BASE_H__
-#include <sys/base/libs/win_base/vol_base.h>
-#endif
 
 #if _MSVC_LANG < 201703L
 #error TOML++需要 C++17 或更高标准,请使用 Visual Studio 2017 以上版本的编译器.
@@ -44,10 +39,100 @@
 #define inline_ inline
 #endif
 
-// 结束包含TOML++
-
 // 包含文本编码转换包装类
 #include "piv_encoding.hpp"
+
+namespace piv
+{
+    namespace toml
+    {
+        template <typename = void>
+        inline const std::wstring_view &to_wview(const std::wstring_view &str)
+        {
+            return str;
+        }
+        template <typename = void>
+        inline std::wstring_view to_wview(const std::wstring &str)
+        {
+            return std::wstring_view{str};
+        }
+        template <typename = void>
+        inline std::wstring_view to_wview(const CVolString &str)
+        {
+            return std::wstring_view{str.GetText()};
+        }
+        template <typename = void>
+        inline std::wstring_view to_wview(const wchar_t *str)
+        {
+            return std::wstring_view{str};
+        }
+        template <typename = void>
+        inline std::wstring_view to_wview(const CVolMem &str)
+        {
+            return std::wstring_view{reinterpret_cast<const wchar_t *>(str.GetPtr()), static_cast<size_t>(str.GetSize()) / 2};
+        }
+        /*
+        template <typename = void>
+        inline std::wstring_view to_wview(const std::string &str)
+        {
+            return std::wstring_view{*PivU2W{str}};
+        }
+        template <typename = void>
+        inline std::wstring_view to_wview(const std::string_view &str)
+        {
+            return std::wstring_view{*PivU2W{str}};
+        }
+        template <typename = void>
+        inline std::wstring_view to_wview(const char *str)
+        {
+            return std::wstring_view{*PivU2W{str}};
+        }
+        */
+
+        template <typename = void>
+        inline const std::string_view &to_view(const std::string_view &str)
+        {
+            return str;
+        }
+        template <typename = void>
+        inline std::string_view to_view(const std::string &str)
+        {
+            return std::string_view{str};
+        }
+        template <typename = void>
+        inline std::string_view to_view(const char *str)
+        {
+            return std::string_view{str};
+        }
+        template <typename = void>
+        inline std::string_view to_view(const CVolMem &str)
+        {
+            return std::string_view{reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())};
+        }
+        /*
+        template <typename = void>
+        inline const std::string_view &to_view(const std::wstring_view &str)
+        {
+            return std::string_view{*PivW2U{str}};
+        }
+        template <typename = void>
+        inline std::string_view to_view(const std::wstring &str)
+        {
+            return std::string_view{*PivW2U{str}};
+        }
+        template <typename = void>
+        inline std::string_view to_view(const CVolString &str)
+        {
+            return std::string_view{*PivW2U{str}};
+        }
+        template <typename = void>
+        inline std::string_view to_view(const wchar_t *str)
+        {
+            return std::string_view{*PivW2U{str}};
+        }
+        */
+    }
+}
 
 /**
  * @brief TOML键值表类
@@ -71,94 +156,58 @@ public:
             tbl.clear();
     }
 
-    PivTomlTable &operator=(const PivTomlTable &other)
+    inline PivTomlTable &operator=(const PivTomlTable &other)
     {
         tbl = other.tbl;
         return *this;
     }
-    PivTomlTable &operator=(PivTomlTable &&other)
+    inline PivTomlTable &operator=(PivTomlTable &&other)
     {
         tbl = std::move(other.tbl);
         return *this;
     }
+    inline PivTomlTable &operator=(const toml::table *other)
+    {
+        tbl = *other;
+        return *this;
+    }
+    inline PivTomlTable &operator=(const toml::table &other)
+    {
+        tbl = other;
+        return *this;
+    }
+    inline PivTomlTable &operator=(toml::table &&other)
+    {
+        tbl = std::move(other);
+        return *this;
+    }
 
-    bool operator==(PivTomlTable &other) const noexcept
+    inline bool operator==(const PivTomlTable &other) const noexcept
     {
         return tbl == other.tbl;
+    }
+    inline bool operator==(const toml::table &other) const noexcept
+    {
+        return tbl == other;
     }
 
     virtual void GetDumpString(CVolString &strDump, INT nMaxDumpSize) override
     {
-        strDump.AddText(this->ToString());
+        strDump.AddText(this->ToVolString());
     }
 
-    CVolString ToString()
+    std::string ToString() const
+    {
+        std::stringstream ss;
+        ss << tbl;
+        return ss.str();
+    }
+
+    CVolString ToVolString() const
     {
         std::stringstream ss;
         ss << tbl;
         return *PivU2Ws(ss.str());
-    }
-
-    const std::wstring_view &to_wview(const std::wstring_view &str)
-    {
-        return str;
-    }
-    std::wstring_view to_wview(const std::wstring &str)
-    {
-        return std::wstring_view{str};
-    }
-    std::wstring_view to_wview(const CVolString &str)
-    {
-        return std::wstring_view{str.GetText()};
-    }
-    std::wstring_view to_wview(const wchar_t *str)
-    {
-        return std::wstring_view{str};
-    }
-    std::wstring_view to_wview(const std::string &str)
-    {
-        return std::wstring_view{*PivU2W{str}};
-    }
-    std::wstring_view to_wview(const std::string_view &str)
-    {
-        return std::wstring_view{*PivU2W{str}};
-    }
-    std::wstring_view to_wview(const char *str)
-    {
-        return std::wstring_view{*PivU2W{str}};
-    }
-
-    const std::string_view &to_view(const std::string_view &str)
-    {
-        return str;
-    }
-    std::string_view to_view(const std::string &str)
-    {
-        return std::string_view{str};
-    }
-    const std::string_view &to_view(const std::wstring_view &str)
-    {
-        return std::string_view{*PivW2U{str}};
-    }
-    std::string_view to_view(const std::wstring &str)
-    {
-        return std::string_view{*PivW2U{str}};
-    }
-    std::string_view to_view(const CVolString &str)
-    {
-        return std::string_view{*PivW2U{str}};
-    }
-    std::string_view to_view(const wchar_t *str)
-    {
-        return std::string_view{*PivW2U{str}};
-    }
-    std::string_view to_view(const char *str)
-    {
-        return std::string_view{str};
-    }
-    std::string_view to_view(const CVolMem &str)
-    {
-        return std::string_view{reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())};
     }
 
     /**
@@ -169,7 +218,7 @@ public:
     template <typename T>
     bool ParseFile(const T &file_path)
     {
-        toml::parse_result result = toml::parse_file(to_wview(file_path));
+        toml::parse_result result = toml::parse_file(piv::toml::to_wview(file_path));
         if (result)
         {
             tbl = std::move(result.table());
@@ -188,7 +237,7 @@ public:
     template <typename D, typename S>
     bool Parse(const D &doc, const S &source_path)
     {
-        toml::parse_result result = toml::parse(to_view(doc), to_wview(source_path));
+        toml::parse_result result = toml::parse(piv::toml::to_view(doc), piv::toml::to_wview(source_path));
         if (result)
         {
             tbl = std::move(result.table());
@@ -199,25 +248,25 @@ public:
     }
 
     // 是否为空
-    bool IsEmpty() const noexcept
+    inline bool IsEmpty() const noexcept
     {
         return tbl.empty();
     }
 
     // 取成员数
-    int32_t GetSize() const noexcept
+    inline int32_t GetSize() const noexcept
     {
         return static_cast<int32_t>(tbl.size());
     }
 
     // 是否为同类元素
-    bool IsHomogeneous(int8_t ntype, toml::node *first_nonmatch) noexcept
+    inline bool IsHomogeneous(const int8_t &ntype, toml::node *first_nonmatch) noexcept
     {
         return tbl.is_homogeneous(static_cast<toml::node_type>(ntype), first_nonmatch);
     }
 
     // 是否为内联表
-    bool IsInline() const noexcept
+    inline bool IsInline() const noexcept
     {
         return tbl.is_inline();
     }
@@ -226,45 +275,48 @@ public:
     template <typename K>
     toml::node *Get(const K &key)
     {
-        return tbl.get(to_wview(key));
+        return tbl.get(piv::toml::to_wview(key));
     }
 
     // 取基本值
     template <typename R, typename K>
     R GetAs(const K &key)
     {
-        if (auto val = tbl.get_as<R>(to_wview(key)))
-        {
+        auto val = tbl.get_as<R>(piv::toml::to_wview(key));
+        if (val)
             return **val;
-        }
         return R{};
     }
 
     // 取路径基本值
-    template <typename R>
-    R GetPathAs(const wchar_t *path)
+    template <typename R, typename T>
+    R GetPathAs(const T &path)
     {
-        if (auto val = tbl.at_path(path).as<R>())
-        {
+        auto val = tbl.at_path(piv::toml::to_wview(path)).as<R>();
+        if (val)
             return **val;
-        }
         return R{};
     }
+
     // 删除键
-    int32_t Erase(const wchar_t *key)
+    template <typename T>
+    int32_t Erase(const T &key)
     {
-        return static_cast<int32_t>(tbl.erase(key));
+        return static_cast<int32_t>(tbl.erase(piv::toml::to_wview(key)));
     }
+
     // 删除空成员
-    void Prune(bool recursive)
+    inline void Prune(const bool &recursive)
     {
         tbl.prune(recursive);
     }
+
     // 清空
-    void Clear()
+    inline void Clear()
     {
         tbl.clear();
     }
+
 }; // PivTomlTable
 
 /**
@@ -277,73 +329,76 @@ protected:
 
 public:
     PivTomlNode() {}
+    ~PivTomlNode() {}
+
     PivTomlNode(toml::node *other)
     {
         node = other;
     }
-    ~PivTomlNode() {}
+
     // 是否为空
-    bool IsNull()
+    inline bool IsNull() const noexcept
     {
         return node == nullptr;
     }
+
     // 取节点类型
-    int8_t Type()
+    inline int8_t Type() const
     {
-        return node ? static_cast<int8_t>(node->type()) : false;
+        return node ? static_cast<int8_t>(node->type()) : 0;
     }
+
     // 是否为同类元素
     bool IsHomogeneous(int8_t ntype, toml::node *first_nonmatch)
     {
         return node ? node->is_homogeneous(static_cast<toml::node_type>(ntype), first_nonmatch) : false;
     }
+
     // 是否为...
     template <typename T>
-    bool Is()
+    bool Is() const noexcept
     {
         return node ? node->is<T>() : false;
     }
+
     // 到表
-    toml::table *AsTable()
+    inline toml::table *AsTable() noexcept
     {
-        if (node)
-        {
-            return node->as_table();
-        }
-        return nullptr;
+        return node ? node->as_table() : nullptr;
     }
+
     // 到数组
-    toml::array *AsArray()
+    inline toml::array *AsArray() noexcept
     {
-        if (node)
-        {
-            return node->as_array();
-        }
-        return nullptr;
+        return node ? node->as_array() : nullptr;
     }
+
     // 到基本值
     template <typename R>
     R As()
     {
         if (node)
         {
-            if (auto val = node->as<R>())
-            {
+            auto val = node->as<R>();
+            if (val)
                 return **val;
-            }
         }
         return R{};
     }
+
     // 取路径基本值
-    template <typename R>
-    R GetPathAs(const wchar_t *path)
+    template <typename R, typename T>
+    R GetPathAs(const T &path)
     {
-        if (node &&auto val = node->at_path(path).as<R>())
+        if (node)
         {
-            return **val;
+            auto val = node->at_path(piv::toml::to_wview(path)).as<R>();
+            if (val)
+                return **val;
         }
         return R{};
     }
+
 }; // PivTomlNode
 
 /**
@@ -356,45 +411,87 @@ protected:
 
 public:
     PivTomlDate() {}
+    ~PivTomlDate() {}
+
     PivTomlDate(uint16_t y, uint8_t m, uint8_t d) : date{y, m, d} {}
+
+    PivTomlDate(const toml::date *val)
+    {
+        date = *val;
+    }
     PivTomlDate(toml::date *val)
     {
         date = *val;
     }
-    PivTomlDate(toml::date &val)
+    PivTomlDate(const toml::date &val)
     {
         date = val;
     }
-    ~PivTomlDate() {}
-    void CreateDate(int16_t y, int8_t m, int8_t d)
+    PivTomlDate(toml::date &&val)
     {
-        date = toml::date{y, m, d};
+        date = std::move(val);
     }
-    PivTomlDate &operator=(PivTomlDate &other)
+
+    inline PivTomlDate &operator=(const PivTomlDate &other)
     {
         date = other.date;
         return *this;
     }
-    bool operator==(PivTomlDate &other)
+    inline PivTomlDate &operator=(PivTomlDate &&other)
+    {
+        date = std::move(other.date);
+        return *this;
+    }
+    inline PivTomlDate &operator=(const toml::date *other)
+    {
+        date = *other;
+        return *this;
+    }
+    inline PivTomlDate &operator=(const toml::date &other)
+    {
+        date = other;
+        return *this;
+    }
+    inline PivTomlDate &operator=(toml::date &&other)
+    {
+        date = std::move(other);
+        return *this;
+    }
+
+    inline bool operator==(const PivTomlDate &other) const
     {
         return date == other.date;
     }
+    inline bool operator==(const toml::date &other) const
+    {
+        return date == other;
+    }
+
     virtual void GetDumpString(CVolString &strDump, INT nMaxDumpSize) override
     {
-        strDump.AddText(this->ToString());
+        strDump.AddText(this->ToVolString());
     }
-    int16_t year()
+
+    void CreateDate(int16_t y, int8_t m, int8_t d)
+    {
+        date = std::move(toml::date{y, m, d});
+    }
+
+    inline int16_t year() const
     {
         return static_cast<int16_t>(date.year);
     }
-    int8_t month()
+
+    inline int8_t month() const
     {
         return static_cast<int8_t>(date.month);
     }
-    int8_t day()
+
+    inline int8_t day() const
     {
         return static_cast<int8_t>(date.day);
     }
+
     bool SetVariantTime(double vtime)
     {
         SYSTEMTIME SystemTime{};
@@ -406,17 +503,27 @@ public:
         }
         return false;
     }
-    double ToVariantTime()
+
+    inline double ToVariantTime() const
     {
         return ToTimestamp() / 86400.0 + 25569.0;
     }
-    CVolString ToString()
+
+    std::string ToString() const
     {
         std::stringstream ss;
         ss << date;
-        return PivU2W(ss.str());
+        return ss.str();
     }
-    int64_t ToTimestamp()
+
+    CVolString ToVolString() const
+    {
+        std::stringstream ss;
+        ss << date;
+        return *PivU2Ws(ss.str());
+    }
+
+    int64_t ToTimestamp() const
     {
         struct tm timeinfo
         {
@@ -436,49 +543,88 @@ protected:
 
 public:
     PivTomlTime() {}
+    ~PivTomlTime() {}
+
     PivTomlTime(uint8_t h, uint8_t m, uint8_t s, uint32_t ns = 0) : time{h, m, s, ns} {}
-    PivTomlTime(toml::time *val)
+
+    PivTomlTime(const toml::time *val)
     {
         time = *val;
     }
-    PivTomlTime(toml::time &val)
+    PivTomlTime(const toml::time &val)
     {
         time = val;
     }
-    ~PivTomlTime() {}
-    PivTomlTime &operator=(PivTomlTime &other)
+    PivTomlTime(toml::time &&val)
+    {
+        time = std::move(val);
+    }
+
+    inline PivTomlTime &operator=(const PivTomlTime &other)
     {
         time = other.time;
         return *this;
     }
-    bool operator==(PivTomlTime &other)
+    inline PivTomlTime &operator=(PivTomlTime &&other)
+    {
+        time = std::move(other.time);
+        return *this;
+    }
+    inline PivTomlTime &operator=(const toml::time *other)
+    {
+        time = *other;
+        return *this;
+    }
+    inline PivTomlTime &operator=(const toml::time &other)
+    {
+        time = other;
+        return *this;
+    }
+    inline PivTomlTime &operator=(toml::time &&other)
+    {
+        time = std::move(other);
+        return *this;
+    }
+
+    inline bool operator==(const PivTomlTime &other) const
     {
         return time == other.time;
     }
+    inline bool operator==(const toml::time &other) const
+    {
+        return time == other;
+    }
+
     virtual void GetDumpString(CVolString &strDump, INT nMaxDumpSize) override
     {
-        strDump.AddText(this->ToString());
+        strDump.AddText(this->ToVolString());
     }
+
     void CreateTime(int8_t h, int8_t m, int8_t s, int32_t ns = 0)
     {
         time = toml::time{h, m, s, ns};
     }
-    uint8_t hour()
+
+    inline uint8_t hour() const
     {
         return static_cast<uint8_t>(time.hour);
     }
-    int8_t minute()
+
+    inline int8_t minute() const
     {
         return static_cast<int8_t>(time.minute);
     }
-    int8_t second()
+
+    inline int8_t second() const
     {
         return static_cast<int8_t>(time.second);
     }
-    int32_t nanosecond()
+
+    inline int32_t nanosecond() const
     {
         return static_cast<int32_t>(time.nanosecond);
     }
+
     bool SetVariantTime(double vtime)
     {
         SYSTEMTIME SystemTime{};
@@ -491,15 +637,24 @@ public:
         }
         return false;
     }
-    double ToVariantTime()
+
+    inline double ToVariantTime() const
     {
         return (time.hour * 60 * 60.0 + time.second * 60.0 + time.second + time.nanosecond / 1000000000.0) / 86400.0;
     }
-    CVolString ToString()
+
+    std::string ToString() const
     {
         std::stringstream ss;
         ss << time;
-        return PivU2W(ss.str());
+        return ss.str();
+    }
+
+    CVolString ToVolString() const
+    {
+        std::stringstream ss;
+        ss << time;
+        return *PivU2Ws(ss.str());
     }
 }; // PivTomlTime
 
@@ -513,28 +668,61 @@ protected:
 
 public:
     PivTomlDateTime() {}
-    PivTomlDateTime(toml::date_time *val)
+    ~PivTomlDateTime() {}
+
+    PivTomlDateTime(const toml::date_time *val)
     {
         date_time = *val;
     }
-    PivTomlDateTime(toml::date_time &val)
+    PivTomlDateTime(const toml::date_time &val)
     {
         date_time = val;
     }
-    ~PivTomlDateTime() {}
-    PivTomlDateTime &operator=(PivTomlDateTime &other)
+    PivTomlDateTime(toml::date_time &&val)
+    {
+        date_time = std::move(val);
+    }
+
+    inline PivTomlDateTime &operator=(const PivTomlDateTime &other)
     {
         date_time = other.date_time;
         return *this;
     }
-    bool operator==(PivTomlDateTime &other)
+    inline PivTomlDateTime &operator=(PivTomlDateTime &&other)
+    {
+        date_time = std::move(other.date_time);
+        return *this;
+    }
+    inline PivTomlDateTime &operator=(const toml::date_time *other)
+    {
+        date_time = *other;
+        return *this;
+    }
+    inline PivTomlDateTime &operator=(const toml::date_time &other)
+    {
+        date_time = other;
+        return *this;
+    }
+    inline PivTomlDateTime &operator=(toml::date_time &&other)
+    {
+        date_time = std::move(other);
+        return *this;
+    }
+
+    inline bool operator==(const PivTomlDateTime &other) const noexcept
     {
         return date_time == other.date_time;
     }
+    inline bool operator==(const toml::date_time &other) const noexcept
+    {
+        return date_time == other;
+    }
+
     virtual void GetDumpString(CVolString &strDump, INT nMaxDumpSize) override
     {
-        strDump.AddText(this->ToString());
+        strDump.AddText(this->ToVolString());
     }
+
     void CreateDateTime(int16_t y, int8_t m, int8_t d, int8_t H, int8_t M, int8_t S, int32_t ns = 0, int16_t offset = 0)
     {
         date_time.date = toml::date{y, m, d};
@@ -544,26 +732,29 @@ public:
             date_time.offset->minutes = offset;
         }
     }
-    bool IsLocal()
+
+    inline bool IsLocal() const
     {
         return date_time.is_local();
     }
-    toml::date &GetDate()
+
+    inline toml::date &GetDate()
     {
         return date_time.date;
     }
-    toml::time &GetTime()
+
+    inline toml::time &GetTime()
     {
         return date_time.time;
     }
-    int16_t GetOffset()
+
+    inline int16_t GetOffset() const
     {
         if (date_time.is_local())
-        {
             return date_time.offset->minutes;
-        }
         return 0;
     }
+
     bool SetVariantTime(double vtime)
     {
         SYSTEMTIME SystemTime{};
@@ -580,6 +771,7 @@ public:
         }
         return false;
     }
+
     bool SetTimestamp(int64_t timestamp)
     {
         struct tm timeinfo;
@@ -595,6 +787,7 @@ public:
         }
         return false;
     }
+
     bool SetMsTimestamp(int64_t timestamp)
     {
         struct tm timeinfo;
@@ -610,19 +803,29 @@ public:
         }
         return false;
     }
-    double ToVariantTime()
+
+    double ToVariantTime() const
     {
         TIME_ZONE_INFORMATION tz{0};
         ::GetTimeZoneInformation(&tz);
         return (ToMsTimestamp() - tz.Bias * 1000 * 60) / (1000.0 * 60.0 * 60.0 * 24.0) + 25569;
     }
-    CVolString ToString()
+
+    std::string ToString() const
     {
         std::stringstream ss;
         ss << date_time;
-        return PivU2W(ss.str());
+        return ss.str();
     }
-    int64_t ToTimestamp()
+
+    CVolString ToVolString() const
+    {
+        std::stringstream ss;
+        ss << date_time;
+        return *PivU2Ws(ss.str());
+    }
+
+    int64_t ToTimestamp() const
     {
         struct tm timeinfo
         {
@@ -631,7 +834,8 @@ public:
         };
         return static_cast<int64_t>(::mktime(&timeinfo)) + (date_time.is_local() ? 0 : date_time.offset->minutes * 60);
     }
-    int64_t ToMsTimestamp()
+
+    int64_t ToMsTimestamp() const
     {
         struct tm timeinfo
         {
@@ -640,6 +844,7 @@ public:
         };
         return (static_cast<int64_t>(::mktime(&timeinfo)) + (date_time.is_local() ? 0 : date_time.offset->minutes * 60)) * 1000 + date_time.time.nanosecond / 1000000;
     }
+
 }; // PivTomlDateTime
 
 #endif // _PIV_TOML_PLUS_PLUS_HPP

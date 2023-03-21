@@ -738,7 +738,7 @@ public:
                       Args&&... args) {
     fmt::basic_string_view<FMTLOG_CHAR> sv(format);
     auto&& fmt_args = fmt::make_wformat_args(args...);
-    uint32_t fmt_size = formatted_size(sv, fmt_args);
+    uint32_t fmt_size = (uint32_t)formatted_size(sv, fmt_args);
     uint32_t alloc_size = 8 + 8 + fmt_size * sizeof(FMTLOG_CHAR);
     bool q_full_cb = true;
     do {

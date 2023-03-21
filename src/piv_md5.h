@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/18                          *
+ * 版本: 2023/02/23                          *
 \*********************************************/
 
 #ifndef PIV_MD5_HPP
@@ -13,8 +13,7 @@
 #ifndef __VOL_BASE_H__
 #include <sys/base/libs/win_base/vol_base.h>
 #endif
-#include <stdint.h>
-#include <string>
+#include "piv_string.hpp"
 
 namespace piv
 {
@@ -373,6 +372,13 @@ namespace piv
     {
         MD5Checksum md5;
         md5.Update(data, len);
+        return md5.Final(ret, upper);
+    }
+    template <typename CharT>
+    std::basic_string<CharT> &GetStringMd5(const piv::basic_string_view<CharT> &data, const bool &upper = true, std::basic_string<CharT> &ret = std::basic_string<CharT>{})
+    {
+        MD5Checksum md5;
+        md5.Update(data.data(), data.size() * sizeof(CharT));
         return md5.Final(ret, upper);
     }
 

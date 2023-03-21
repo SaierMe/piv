@@ -1,2 +1,4 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+*.wsv text eol=auto diff
+*.vgrp text eol=auto diff

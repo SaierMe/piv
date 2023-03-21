@@ -1,4 +1,4 @@
-/* auto-generated on 2023-02-10 14:49:15 -0500. Do not edit! */
+/* auto-generated on 2023-02-26 19:10:28 -0500. Do not edit! */
 // dofile: invoked with prepath=D:\Documents\GitHub\simdutf\src, filename=simdutf.cpp
 /* begin file src\simdutf.cpp */
 #include "simdutf.h"
@@ -13786,8 +13786,8 @@ public:
   simdutf_really_inline void advance();
 private:
   const uint8_t *buf;
-  const size_t &len;
-  const size_t &lenminusstep;
+  const size_t len;
+  const size_t lenminusstep;
   size_t idx;
 };
 
@@ -21365,8 +21365,8 @@ public:
   simdutf_really_inline void advance();
 private:
   const uint8_t *buf;
-  const size_t &len;
-  const size_t &lenminusstep;
+  const size_t len;
+  const size_t lenminusstep;
   size_t idx;
 };
 
@@ -23094,8 +23094,8 @@ public:
   simdutf_really_inline void advance();
 private:
   const uint8_t *buf;
-  const size_t &len;
-  const size_t &lenminusstep;
+  const size_t len;
+  const size_t lenminusstep;
   size_t idx;
 };
 
@@ -26695,8 +26695,8 @@ public:
   simdutf_really_inline void advance();
 private:
   const uint8_t *buf;
-  const size_t &len;
-  const size_t &lenminusstep;
+  const size_t len;
+  const size_t lenminusstep;
   size_t idx;
 };
 
