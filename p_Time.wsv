@@ -1,0 +1,1246 @@
+<火山程序 类型 = "通常" 版本 = 1 />
+
+包 火山.PIV基础类 <注释 = "时间和时钟操作" 注释 = "https://github.com/SaierMe/piv" "">
+
+# 日期时间 ===
+
+类 标准时间类 <公开 注释 = "  封装了标准库的std::chrono::system_clock,比视窗基本类的\"时间操作类\"快.\r"
+        注释 = "  system_clock是系统范畴的实时壁钟,可以转换成日期时间,最高精度为100纳秒.\r" 注释 = "  本类初始化时会自动获取当前的系统时间." 折叠
+        @文档 = "category = \"时间操作\"" "@视窗.外部头文件.全局-100" = "<chrono>">
+{
+
+    # 设置时间
+
+    方法 置现行时间 <公开 注释 = "将当前的日期及时间设置为本对象的时间." 折叠 @嵌入式方法 = "">
+    {
+        @ @sn<this>.data () = std::chrono::system_clock::now ()
+    }
+
+    方法 置时间 <公开 注释 = "  将火山的基本时间——双精度小数时间(毫秒级精度)\r" 注释 = "设置为本对象的时间." 折叠>
+    参数 火山时间 <类型 = 小数 注释 = "所欲置入的小数型时间,应为系统的本地时区." "">
+    {
+        @ TIME_ZONE_INFORMATION tz;
+        @ tz.Bias = 0;
+        @ ::GetTimeZoneInformation (&tz);
+        @ INT64 rawtime = (INT64)((@<火山时间> - 25569) * 1000 * 60 * 60 * 24 + tz.Bias * 1000 * 60);
+        @ data () = std::chrono::system_clock::time_point (std::chrono::milliseconds (rawtime));
+    }
+
+    方法 置时间文本 <公开 类型 = 逻辑型 注释 = "  将指定文本设置为本对象的时间,如果给定文本不符合书写格式要求或者时间值错误导致\r" 注释 = "不能进行转换,将返回假." 折叠>
+    参数 日期时间文本 <类型 = 文本型 注释 = "提供具体所欲转换的日期时间文本内容,年份以后的所有部分均可以省略. 格式要求如下:\r" 注释 = "中文格式(年月日排列顺序为年月日),例如:\r"
+            注释 = "  1. 1973年11月15日12时30分25秒\r" 注释 = "  2. 1973/11/15 12:30:25\r"
+            注释 = "  3. 1973/11/15/12/30/25\r" 注释 = "  4. 1973/11/15/12:30:25\r" 注释 = "  5. 1973-11-15-12-30-25\r"
+            注释 = "  6. 1973-11-15-12:30:25\r" 注释 = "  7. 1973.11.15 12:30:25\r" 注释 = "  8. 19731115123025\r"
+            注释 = "非中文格式(年月日排列顺序为月日年),例如:\r" 注释 = "  1. 11/15/1973 12:30:25\r" 注释 = "  2. 11/15/1973/12/30/25\r"
+            注释 = "  4. 11/15/1973/12:30:25\r" 注释 = "  5. 11-15-1973-12-30-25\r" 注释 = "  6. 11-15-1973-12:30:25\r"
+            注释 = "  7. 11.15.1973 12:30:25">
+    参数 是否为中文格式 <类型 = 逻辑型 注释 = "指定所提供的日期时间文本内容是否为中文格式" @默认值 = 真>
+    {
+        变量 时间 <类型 = 小数>
+        时间 = 时间操作类.到时间 (日期时间文本, 是否为中文格式)
+        如果 (为最小时间 (时间) == 真)
+        {
+            返回 (假)
+        }
+        本对象.置时间 (时间)
+        返回 (真)
+    }
+
+    方法 置格林威治时间 <公开 注释 = "将HTTP协议头用的<RFC 1123>格式日期时间文本,置入为本对象的时间." 折叠>
+    参数 GTM时间 <类型 = 文本型 注释 = "必须是\"Mon, 04 Jul 2022 02:20:58 GMT\"这种时间格式.">
+    {
+        @ struct tm timeinfo;
+        @ WCHAR szMonth[4] {};
+        @ WCHAR szWeek[4] {};
+        @ swscanf (@<GTM时间>.GetText (), _T ("%3s, %2d %3s %4d %2d:%2d:%2d GMT"), szWeek, &timeinfo.tm_mday, szMonth, &timeinfo.tm_year, &timeinfo.tm_hour, &timeinfo.tm_min, &timeinfo.tm_sec);
+        @ timeinfo.tm_year -= 1900;
+        @ const WCHAR* szMonList[12] { _T ("Jan"), _T ("Feb"), _T ("Mar"), _T ("Apr"), _T ("May"), _T ("Jun"), _T ("Jul"), _T ("Aug"), _T ("Sep"), _T ("Oct"), _T ("Nov"), _T ("Dec") };
+        @ for (INT i = 0; i < 12; i++) {
+        @     if (wcscmp (szMonList[i], szMonth) == 0) {
+        @         timeinfo.tm_mon = i; break;
+        @     }
+        @ }
+        @ TIME_ZONE_INFORMATION tz { 0 };
+        @ GetTimeZoneInformation (&tz);
+        @ time_t rawtime = mktime (&timeinfo) - tz.Bias * 60;
+        @ data () = std::chrono::system_clock::from_time_t (rawtime);
+    }
+
+    方法 置文件时间 <公开 注释 = "将FILETIME结构体的长整数时间,置入为本对象的时间." 折叠 @嵌入式方法 = "">
+    参数 文件时间 <类型 = 长整数 注释 = "提供FILETIME的LowPart和HighPart合并得到的长整数值.">
+    {
+        @ @sn<this>.data () = std::chrono::system_clock::time_point (std::chrono::microseconds (@<文件时间> / 10 - 11644473600000000))
+    }
+
+    方法 置时间戳 <公开 注释 = "将指定的10位无时区Unix时间戳置入为本对象的时间." 折叠 @嵌入式方法 = "">
+    参数 欲置入时间戳 <类型 = 长整数 注释 = "必须是10位的秒时间戳">
+    {
+        @ @sn<this>.data () = std::chrono::system_clock::from_time_t ((time_t)@<欲置入时间戳>)
+    }
+
+    方法 置毫秒时间戳 <公开 注释 = "将指定的13位无时区Unix时间戳置入为本对象的时间." 折叠 @嵌入式方法 = "">
+    参数 欲置入时间戳 <类型 = 长整数 注释 = "必须是13位的时间戳">
+    {
+        @ @sn<this>.data () = std::chrono::system_clock::time_point (std::chrono::milliseconds (@<欲置入时间戳>))
+    }
+
+    方法 置微秒时间戳 <公开 注释 = "将指定的16位无时区Unix时间戳置入为本对象的时间." 折叠 @嵌入式方法 = "">
+    参数 欲置入时间戳 <类型 = 长整数 注释 = "必须是16位的时间戳">
+    {
+        @ @sn<this>.data () = std::chrono::system_clock::time_point (std::chrono::microseconds (@<欲置入时间戳>))
+    }
+
+    方法 置纳秒时间戳 <公开 注释 = "  将指定的19位无时区Unix时间戳置入到本对象.\r" 注释 = "  因为system_clock不能置入纳秒级精度的时间戳,所以这实际上\r"
+            注释 = "是向下转换到微秒,由于系统时钟的最高精度是0.1微秒,最多也就\r" 注释 = "损失了1位的精度." 折叠 @嵌入式方法 = "">
+    参数 欲置入时间戳 <类型 = 长整数 注释 = "必须是19位的时间戳">
+    {
+        @ @sn<this>.data () = std::chrono::system_clock::time_point (std::chrono::microseconds (@<欲置入时间戳> / 1000))
+    }
+
+    # 时间操作
+
+    方法 取时间部分 <公开 类型 = 整数 注释 = "返回一个包含已知时间指定部分的值." 折叠 @禁止流程检查 = 真>
+    参数 欲取的时间部分 <类型 = 时间部分类型>
+    {
+        @ struct tm timeinfo;
+        @ time_t rawtime = std::chrono::system_clock::to_time_t (data ());
+        @ localtime_s (&timeinfo, &rawtime);
+        @ switch ((INT)@<欲取的时间部分>) {
+        @     case 0: return timeinfo.tm_year + 1900;  // 年份
+        @     case 1: return timeinfo.tm_mon / 3 + 1;  // 季度
+        @     case 2: return timeinfo.tm_mon + 1;      // 月份
+        @     case 3: return timeinfo.tm_yday / 7 + 1; // 自年首周数
+        @     case 4: return timeinfo.tm_mday;         // 日
+        @     case 5: return timeinfo.tm_hour;         // 小时
+        @     case 6: return timeinfo.tm_min;          // 分钟
+        @     case 7: return timeinfo.tm_sec;          // 秒
+        @     case 8: return timeinfo.tm_wday + 1;     // 星期几
+        @     case 9: return timeinfo.tm_yday + 1;     // 自年首天数
+        @ }
+    }
+
+    方法 取时间毫秒部分 <公开 类型 = 整数 注释 = "返回时间中毫秒部分的值(不含秒以上的值)." 折叠 @禁止流程检查 = 真>
+    {
+        变量 毫秒时间戳 <类型 = 长整数>
+        毫秒时间戳 = 本对象.到毫秒时间戳 ()
+        返回 ((整数)(毫秒时间戳 - 毫秒时间戳 / 1000 * 1000))
+    }
+
+    方法 增减时间 <公开 注释 = "将时间增加或减去一段指定的间隔." 折叠>
+    参数 被增减字段 <类型 = 标准时间字段 注释 = "  指定对时间的哪一部分被进行增减操作.\r" 注释 = "  如果是月份、季度或年份,减去后的日期必定不会低于1970年1月1日0点."
+            @默认值 = 标准时间字段.秒>
+    参数 增减值 <类型 = 长整数 注释 = "  时间被增加或减少的数值">
+    {
+        @ switch ((INT)@<被增减字段>) {
+        @     case 0 : { // 纳秒
+        @         std::chrono::microseconds dtnDiff (@<增减值> / 1000);
+        @         data () = data () + dtnDiff; break; }
+        @     case 1 : { // 微秒
+        @         std::chrono::microseconds dtnDiff (@<增减值>);
+        @         data () = data () + dtnDiff; break; }
+        @     case 2 : { // 毫秒
+        @         std::chrono::milliseconds dtnDiff (@<增减值>);
+        @         data () = data () + dtnDiff; break; }
+        @     case 3 : { // 秒
+        @         std::chrono::seconds dtnDiff (@<增减值>);
+        @         data () = data () + dtnDiff; break; }
+        @     case 4 : { // 分
+        @         std::chrono::minutes dtnDiff (@<增减值>);
+        @         data () = data () + dtnDiff; break; }
+        @     case 5 : { // 小时
+        @         std::chrono::hours dtnDiff (@<增减值>);
+        @         data () = data () + dtnDiff; break; }
+        @     case 6 : { // 日
+        @         std::chrono::duration<INT64, std::ratio<86400,1>> dtnDiff (@<增减值>);
+        @         data () = data () + dtnDiff; break; }
+        @     case 7 : { // 周
+        @         std::chrono::duration<INT64, std::ratio<604800,1>> dtnDiff (@<增减值>);
+        @         data () = data () + dtnDiff; break; }
+        @     case 8 : { // 月份
+        @         struct tm timeinfo;
+        @         time_t rawtime = std::chrono::system_clock::to_time_t (data ());
+        @         localtime_s (&timeinfo, &rawtime);
+        @         timeinfo.tm_mon += (INT)@<增减值>;
+        @         timeinfo.tm_year += timeinfo.tm_mon / 12;
+        @         timeinfo.tm_mon = timeinfo.tm_mon % 12;
+        @         time_t newtime = mktime (&timeinfo);
+        @         std::chrono::seconds dtnDiff (newtime - rawtime);
+        @         data () = data () + dtnDiff; break; }
+        @     case 9 : { // 季度
+        @         struct tm timeinfo;
+        @         time_t rawtime = std::chrono::system_clock::to_time_t (data ());
+        @         localtime_s (&timeinfo, &rawtime);
+        @         timeinfo.tm_mon += (INT)@<增减值> * 3;
+        @         timeinfo.tm_year += timeinfo.tm_mon / 12;
+        @         timeinfo.tm_mon = timeinfo.tm_mon % 12;
+        @         time_t newtime = mktime (&timeinfo);
+        @         std::chrono::seconds dtnDiff (newtime - rawtime);
+        @         data () = data () + dtnDiff; break; }
+        @     case 10 : { // 年份
+        @         struct tm timeinfo;
+        @         time_t rawtime = std::chrono::system_clock::to_time_t (data ());
+        @         localtime_s (&timeinfo, &rawtime);
+        @         timeinfo.tm_year += (INT)@<增减值>;
+        @         time_t newtime = mktime (&timeinfo);
+        @         std::chrono::seconds dtnDiff (newtime - rawtime);
+        @         data () = data () + dtnDiff; break; }
+        @ }
+    }
+
+    方法 取时间间隔 <公开 类型 = 长整数 注释 = "返回本对象的时间减去另一个对象的时间的间隔数目." 折叠 @禁止流程检查 = 真>
+    参数 被减去的时间 <类型 = 标准时间类>
+    参数 所欲取间隔的字段 <类型 = 标准时间字段 注释 = "指定时间间隔的精度,最高精度为100纳秒." @默认值 = 标准时间字段.秒>
+    {
+        @ if ((INT)@<所欲取间隔的字段> <= 7) {
+        @     std::chrono::system_clock::duration dtnDiff = data () - @<被减去的时间>.data ();
+        @     switch ((INT)@<所欲取间隔的字段>) {
+        @         case 0 : { return (INT64)std::chrono::duration_cast<std::chrono::nanoseconds> (dtnDiff).count ();} // 纳秒
+        @         case 1 : { return (INT64)std::chrono::duration_cast<std::chrono::microseconds> (dtnDiff).count ();} // 微秒
+        @         case 2 : { return (INT64)std::chrono::duration_cast<std::chrono::milliseconds> (dtnDiff).count ();} // 毫秒
+        @         case 3 : { return (INT64)std::chrono::duration_cast<std::chrono::seconds> (dtnDiff).count ();} // 秒
+        @         case 4 : { return (INT64)std::chrono::duration_cast<std::chrono::minutes> (dtnDiff).count ();} // 分
+        @         case 5 : { return (INT64)std::chrono::duration_cast<std::chrono::hours> (dtnDiff).count ();} // 小时
+        @         case 6 : { return (INT64)std::chrono::duration_cast<std::chrono::duration<INT64, std::ratio<86400,1>>> (dtnDiff).count ();} // 日
+        @         case 7 : { return (INT64)std::chrono::duration_cast<std::chrono::duration<INT64, std::ratio<604800,1>>> (dtnDiff).count ();} // 周
+        @     }
+        @ } else {
+        @     struct tm tm1, tm2;
+        @     time_t time1 = std::chrono::system_clock::to_time_t (data ());
+        @     time_t time2 = std::chrono::system_clock::to_time_t (@<被减去的时间>.data ());
+        @     localtime_s (&tm1, &time1); localtime_s (&tm2, &time2);
+        @     switch ((INT)@<所欲取间隔的字段>) {
+        @         case  8 : { return (tm1.tm_year - tm2.tm_year) * 12 + (tm1.tm_mon - tm2.tm_mon); } // 月份
+        @         case  9 : { return ((tm1.tm_year - tm2.tm_year) * 12 + (tm1.tm_mon - tm2.tm_mon)) / 3; } // 季度
+        @         case 10 : { return tm1.tm_year - tm2.tm_year; } // 年份
+        @     }
+        @ }
+        @ return 0;
+    }
+
+    # 格式化时间
+
+    方法 取格式时间 <公开 类型 = 文本型 注释 = "将时间格式化为指定格式的文本,本方法不依赖{fmt},更轻量一些." 返回值注释 = "  格式文本不正确会崩溃,成功返回指定格式的日期时间.\r"
+            返回值注释 = "  输出的日期时间必定不会低于1970年1月1日0点." 折叠 @禁止流程检查 = 真>
+    参数 格式文本 <类型 = 文本型 注释 = "  默认格式为: \"2022-04-01 16:15:05\",转换后不能超过256个字符.\r" 注释 = "  下列为可用的格式替换符:\r"
+            注释 = "   %%  %字符  |  %n 换行符  |  %t 水平制表符\r" 注释 = "   %C  年份向下整除100          例: 20\r"
+            注释 = "   %y  年份的后2位              例: 22\r" 注释 = "   %Y  完整的4位年份            例: 2022\r"
+            注释 = "   %h  缩写的月份名称           例: Apr\r" 注释 = "   %b  缩写的月份名称           例: Apr\r"
+            注释 = "   %B  完整的月份名称           例: April\r" 注释 = "   %m  十进制的月份             例: 04\r"
+            注释 = "   %d  2位数的某月第N天         例: 01\r" 注释 = "   %e  2位的某月第N天,前补空格  例:  1\r"
+            注释 = "   %a  缩写的星期名称           例: Fri\r" 注释 = "   %A  完整的星期名称           例: Friday\r"
+            注释 = "   %u  十进制的星期数(1-7)      例: 5\r" 注释 = "   %w  星期数(0-6),0为星期天    例: 5\r"
+            注释 = "   %j  3位数的某年第N天         例: 091\r" 注释 = "   %U  2位数的某年第N星期       例: 13\r"
+            注释 = "   %W  2位数的某年第N星期       例: 13\r" 注释 = "   %D  等价于 %m/%d/%y          例: 04/01/22 \r"
+            注释 = "   %F  等价于 %Y-%m-%d          例: 2022-04-01\r" 注释 = "   %H  2位数的小时数(24小时制)  例: 16\r"
+            注释 = "   %I  2位数的小时数(12小时制)  例: 04\r" 注释 = "   %M  2位数的分钟数            例: 15\r"
+            注释 = "   %S  2位数的秒针数            例: 05\r" 注释 = "   %p  12小时进制的AM/PM        例: PM\r"
+            注释 = "   %R  等价于 %H:%M             例: 16:15\r" 注释 = "   %T  等价于 %H:%M:%S          例: 16:15:05\r"
+            注释 = "   %r  12小时制的时分秒时间     例: 04:15:05 PM\r" 注释 = "   %X  本地环境的12小时制时钟   例: 16:15:05\r"
+            注释 = "   %x  本地环境的日期           例: 04/01/22 \r" 注释 = "   %z  UTC格式的时区            例: +0800\r"
+            注释 = "   %Z  时区的本地名称           例: 中国标准时间\r"
+            注释 = "   %c  本地环境的日期与时间     例: Fri Apr  1 16:59:32 2022\r" 注释 = "\r"
+            注释 = "  格式替换符可以在中间加上#,部分无效果; 部分会将前面的补0或补\r"
+            注释 = "空格去掉,比如\"%#F\"会解析为\"2022-4-1\"; 其中\"%#c\"和\"%#x\"会解析\r" 注释 = "为更长的日期时间格式." @默认值 = "%F %T">
+    参数 GMT时间 <类型 = 逻辑型 注释 = "  是否将输出的时间校准为格林威治标准时间(GMT)——即UTC零时区,\r" 注释 = "默认为假,表示系统的本地时区." @默认值 = 假>
+    {
+        @ struct tm timeinfo;
+        @ time_t rawtime = std::chrono::system_clock::to_time_t (data ());
+        @ if (rawtime < 0) rawtime = 0;
+        @ @<GMT时间> ? ::gmtime_s (&timeinfo, &rawtime) : ::localtime_s (&timeinfo, &rawtime);
+        @ WCHAR szTime[256] { 0 };
+        @ ::wcsftime (szTime, sizeof(szTime), @<格式文本>.GetText (), &timeinfo);
+        @ return CVolString (szTime);
+    }
+
+    方法 取格林威治时间 <公开 类型 = 文本型 注释 = "  输出格林威治标准时间(GMT)的<RFC 1123>格式日期时间,\r" 注释 = "这是HTTP协议头的标准日期时间格式." 折叠>
+    {
+        返回 (本对象.取格式时间 ("%a, %d %b %Y %T GMT", 真))
+    }
+
+    # 标准格式化时间(std::format)
+
+    方法 格式化时间 <公开 类型 = 文本型 注释 = "  将时间格式化为指定格式的文本,本方法使用{fmt}库进行格式化,兼容\r" 注释 = "C++20的std::format.\r"
+            注释 = "  性能测试: 连续执行4000次以下时比\"取格式时间\"快,上万次后结果相\r" 注释 = "反."
+            返回值注释 = "  格式文本不正确会直接抛出异常,成功返回指定格式的日期时间.\r" 返回值注释 = "  输出的日期时间必定不会低于1970年1月1日0点." 折叠
+            @视窗.外部头文件 = "src\\fmt\\chrono.h" @强制依赖 = "标准格式化类" @禁止流程检查 = 真>
+    参数 格式文本 <类型 = 文本型 注释 = "  默认格式为: \"2022-04-01 16:15:05\"\r"
+            注释 = "  下列为<chrono>专用的格式替换符(省略了部分效果重复的),基本格式请\r"
+            注释 = "参考\"标准格式化类\",格式替换符需要用\"{}\"包围,若要输入符号\"{\"和\"}\",\r" 注释 = "需要用\"{{\"和\"}}\"转义.\r"
+            注释 = "  因为只有一个参数(时间),所以在使用多个格式替换符时,必须指定参数\r"
+            注释 = "ID为0,例如\"{0:%F}T{0:%T%z}\"解析为\"2022-04-01T16:15:05+0800\".\r"
+            注释 = "   %%  %字符  |  %n 换行符  |  %t 水平制表符\r" 注释 = "   %C  年份向下整除100          例: 20\r"
+            注释 = "   %y  年份的后2位              例: 22\r" 注释 = "   %Y  完整的4位年份            例: 2022\r"
+            注释 = "   %h  缩写的月份名称           例: Apr\r" 注释 = "   %b  缩写的月份名称           例: Apr\r"
+            注释 = "   %B  完整的月份名称           例: April\r" 注释 = "   %m  十进制的月份             例: 04\r"
+            注释 = "   %d  2位数的某月第N天         例: 01\r" 注释 = "   %e  2位的某月第N天,前补空格  例:  1\r"
+            注释 = "   %a  缩写的星期名称           例: Fri\r" 注释 = "   %A  完整的星期名称           例: Friday\r"
+            注释 = "   %u  十进制的星期数(1-7)      例: 5\r" 注释 = "   %w  星期数(0-6),0为星期天    例: 5\r"
+            注释 = "   %j  3位数的某年第N天         例: 091\r" 注释 = "   %U  2位数的某年第N星期       例: 13\r"
+            注释 = "   %W  2位数的某年第N星期       例: 13\r" 注释 = "   %D  等价于 %m/%d/%y          例: 04/01/22 \r"
+            注释 = "   %F  等价于 %Y-%m-%d          例: 2022-04-01\r" 注释 = "   %H  2位数的小时数(24小时制)  例: 16\r"
+            注释 = "   %I  2位数的小时数(12小时制)  例: 04\r" 注释 = "   %M  2位数的分钟数            例: 15\r"
+            注释 = "   %S  2位数的秒针数            例: 05\r" 注释 = "   %p  12小时进制的AM/PM        例: PM\r"
+            注释 = "   %R  等价于 %H:%M             例: 16:15\r" 注释 = "   %T  等价于 %H:%M:%S          例: 16:15:05\r"
+            注释 = "   %r  12小时制的时分秒时间     例: 04:15:05 PM\r" 注释 = "   %X  本地环境的12小时制时钟   例: 16:15:05\r"
+            注释 = "   %z  UTC格式的时区            例: +0800\r" 注释 = "   %Z  时区的本地名称           例: 中国标准时间\r"
+            注释 = "   %c  本地环境的日期与时间     例: Fri Apr  1 16:59:32 2022" @默认值 = "{:%F %T}">
+    参数 GMT时间 <类型 = 逻辑型 注释 = "  是否将输出的时间校准为格林威治标准时间(GMT)——即UTC零时区,\r" 注释 = "默认为假,表示系统的本地时区." @默认值 = 假>
+    {
+        @ struct tm timeinfo;
+        @ time_t rawtime = std::chrono::system_clock::to_time_t (data ());
+        @ if (rawtime < 0) rawtime = 0;
+        @ @<GMT时间> ? ::gmtime_s (&timeinfo, &rawtime) : ::localtime_s (&timeinfo, &rawtime);
+        @ return CVolString ( fmt::format (@<格式文本>.GetText (), timeinfo).c_str () );
+    }
+
+    # 输出时间
+
+    方法 到时间 <公开 类型 = 小数 注释 = "  返回火山的基本时间单位——双精度小数时间(毫秒级精度),\r" 注释 = "原型VariantTime(变体时间)的精度仅为秒."
+            返回值注释 = "返回火山的小数型时间,为本地系统时区." 折叠 @禁止流程检查 = 真>
+    {
+        @ TIME_ZONE_INFORMATION tz;
+        @ tz.Bias = 0;
+        @ ::GetTimeZoneInformation (&tz);
+        @ INT64 rawtime = (INT64)std::chrono::duration_cast<std::chrono::milliseconds> (data ().time_since_epoch ()).count ();
+        @ DOUBLE VariantTime = (rawtime - tz.Bias * 1000 * 60) / (1000.0 * 60.0 * 60.0 * 24.0) + 25569;
+        @ return VariantTime;
+    }
+
+    方法 到时间戳 <公开 类型 = 整数 注释 = "返回10位的无时区Unix时间戳,单位为秒." 折叠 @嵌入式方法 = "">
+    {
+        @ (INT)std::chrono::duration_cast<std::chrono::seconds> (@sn<this>.data ().time_since_epoch ()).count ()
+    }
+
+    方法 到毫秒时间戳 <公开 类型 = 长整数 注释 = "返回13位的无时区Unix时间戳,单位为毫秒." 折叠 @嵌入式方法 = "">
+    {
+        @ (INT64)std::chrono::duration_cast<std::chrono::milliseconds> (@sn<this>.data ().time_since_epoch ()).count ()
+    }
+
+    方法 到微秒时间戳 <公开 类型 = 长整数 注释 = "返回16位的无时区Unix时间戳,单位为微秒." 折叠 @嵌入式方法 = "">
+    {
+        @ (INT64)std::chrono::duration_cast<std::chrono::microseconds> (@sn<this>.data ().time_since_epoch ()).count ()
+    }
+
+    方法 到纳秒时间戳 <公开 类型 = 长整数 注释 = "返回19位的无时区Unix时间戳,单位为纳秒." 折叠 @嵌入式方法 = "">
+    {
+        @ (INT64)std::chrono::duration_cast<std::chrono::nanoseconds> (@sn<this>.data ().time_since_epoch ()).count ()
+    }
+
+    方法 到文件时间 <公开 类型 = 长整数 注释 = "返回FILETIME结构体的长整数时间,精度为100纳秒." 返回值注释 = "返回的长整数为LowPart和HighPart的合并值." 折叠
+            @嵌入式方法 = "">
+    {
+        @ (INT64)std::chrono::duration_cast<std::chrono::microseconds> (@sn<this>.data ().time_since_epoch ()).count () * 10 + 116444736000000000
+    }
+
+    # 时间比较
+
+    方法 是否相等 <公开 类型 = 逻辑型 注释 = "比较两个对象的时间是否相等." 折叠 @嵌入式方法 = "">
+    参数 所欲比较的时间 <类型 = 标准时间类 "">
+    {
+        @ @sn<this>.data () == @<所欲比较的时间>.data ()
+    }
+
+    方法 是否不相等 <公开 类型 = 逻辑型 注释 = "比较两个对象的时间是否不相等." 折叠 @嵌入式方法 = "">
+    参数 所欲比较的时间 <类型 = 标准时间类 "">
+    {
+        @ @sn<this>.data () != @<所欲比较的时间>.data ()
+    }
+
+    方法 是否小于 <公开 类型 = 逻辑型 注释 = "比较本对象的当前时间是否小于另一个对象的时间." 折叠 @嵌入式方法 = "">
+    参数 所欲比较的时间 <类型 = 标准时间类 "">
+    {
+        @ @sn<this>.data () < @<所欲比较的时间>.data ()
+    }
+
+    方法 是否小于等于 <公开 类型 = 逻辑型 注释 = "比较本对象的当前时间是否小于等于另一个对象的时间. " 折叠 @嵌入式方法 = "">
+    参数 所欲比较的时间 <类型 = 标准时间类 "">
+    {
+        @ @sn<this>.data () <= @<所欲比较的时间>.data ()
+    }
+
+    方法 是否大于 <公开 类型 = 逻辑型 注释 = "比较本对象的当前时间是否大于另一个对象的时间. " 折叠 @嵌入式方法 = "">
+    参数 所欲比较的时间 <类型 = 标准时间类 "">
+    {
+        @ @sn<this>.data () > @<所欲比较的时间>.data ()
+    }
+
+    方法 是否大于等于 <公开 类型 = 逻辑型 注释 = "比较本对象的当前时间是否大于另一个对象的时间." 折叠 @嵌入式方法 = "">
+    参数 所欲比较的时间 <类型 = 标准时间类 "">
+    {
+        @ @sn<this>.data () >= @<所欲比较的时间>.data ()
+    }
+
+    # 时区
+
+    方法 取本地时区 <公开 类型 = 整数 注释 = "返回本地系统的时区与UTC零时区的偏移分钟数,如北京时间为8×60=480." 折叠 @禁止流程检查 = 真>
+    {
+        @ TIME_ZONE_INFORMATION tz;
+        @ tz.Bias = 0;
+        @ ::GetTimeZoneInformation (&tz);
+        @ return -tz.Bias;
+    }
+
+    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用.\r" 注释 = "" 折叠 @虚拟方法 = 可覆盖
+            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
+    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
+    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    {
+        展示内容 = 本对象.取格式时间 ("%F %T")
+    }
+
+    # ---
+    # @begin
+    # <> <include>
+    #     std::chrono::system_clock::time_point m_tp;
+    #     void @an<_OnInitExtra> () { m_tp = std::chrono::system_clock::now (); }
+    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_tp = objCopyFrom.m_tp; }
+    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_tp == objCompare.m_tp); }
+    #     inline @sn<current_class> (std::chrono::system_clock::time_point tp) : @sn<current_class>()  { m_tp = tp; }
+    #     inline std::chrono::system_clock::time_point& data () { return m_tp; }
+    #     inline std::chrono::system_clock::time_point* pdata ()  { return &m_tp; }
+    # <> </include>
+    # @end
+    # ===
+}
+
+类 标准计时器类 <公开 注释 = "  封装了标准库的std::chrono::steady_clock,steady_clock是单调时钟,\r"
+        注释 = "时间只能向前走,不能转换到日期时间,类似体育比赛中的秒表.另外还有一\r"
+        注释 = "个high_resolution_clock时钟,跟steady_clock是一致的,就不封装了.\r" 注释 = "  本类的主要用途是用来计算各种运行耗时,最高精度为100纳秒." 折叠
+        @文档 = "category = \"时间操作\"" "@视窗.外部头文件.全局-100" = "<chrono>" @视窗.外部头文件 = "<vector>">
+{
+    方法 计时 <公开 类型 = 整数 注释 = "新增记录当前的时间点,并返回计时索引.\r" 注释 = "计时索引从0开始,但0保留为对象初始化时的时间点,所以返回的值必定大于等于1."
+            返回值注释 = "返回计时索引." 折叠 @禁止流程检查 = 真>
+    {
+        @ data ().push_back (std::chrono::steady_clock::now ());
+        @ return (INT)data ().size () -1;
+    }
+
+    方法 复位 <公开 注释 = "将计时器清空,并重新获取当前时间点作为第一个计时(计时索引0)." 折叠>
+    {
+        @ data ().clear ();
+        @ data ().push_back (std::chrono::steady_clock::now ());
+    }
+
+    方法 取计时间隔 <公开 类型 = 长整数 注释 = "返回指定的两次计时之间的间隔数目." 返回值注释 = "如果提供的计时索引超出范围,将返回\"数值范围.最小长整数值\"." 折叠
+            @禁止流程检查 = 真>
+    参数 计时索引1 <类型 = 整数 注释 = "计时索引从0开始,0为对象初始化时的时间点.">
+    参数 计时索引2 <类型 = 整数>
+    参数 所欲取间隔的字段 <类型 = 标准时间字段 注释 = "指定时间间隔的精度,最高精度为100纳秒.\r" 注释 = "月份、季度、年份在本类中不可用." @默认值 = 标准时间字段.微秒>
+    {
+        @ if (@<计时索引1> < 0 || @<计时索引2> < 0 || (UINT)@<计时索引1> > data ().size () || (UINT)@<计时索引2> > data ().size ())
+        @     return _VOL_INT64_MIN;
+        @ std::chrono::steady_clock::duration dtnDiff = data ()[@<计时索引1>] - data ()[@<计时索引2>];
+        @ return GetDurationCount ((INT)@<所欲取间隔的字段>, dtnDiff);
+    }
+
+    方法 取经历时间 <公开 类型 = 长整数 注释 = "返回从对象初始化到现在的经过时间,必定大于等于0." 折叠 @禁止流程检查 = 真>
+    参数 所欲取间隔的字段 <类型 = 标准时间字段 注释 = "指定时间间隔的精度,最高精度为100纳秒.\r" 注释 = "月份、季度、年份在本类中不可用." @默认值 = 标准时间字段.微秒>
+    {
+        @ std::chrono::steady_clock::duration dtnDiff = std::chrono::steady_clock::now () - data ()[0];
+        @ return GetDurationCount ((INT)@<所欲取间隔的字段>, dtnDiff);
+    }
+
+    方法 取最近两次间隔 <公开 类型 = 长整数 注释 = "  返回最近两次计时之间的间隔数目.\r" 注释 = "  如果计时次数小于2,则返回现行时间点与计时起点之间的间隔,\r"
+            注释 = "这时跟\"取经历时间\"是一样." 折叠 @禁止流程检查 = 真>
+    参数 所欲取间隔的字段 <类型 = 标准时间字段 注释 = "指定时间间隔的精度,最高精度为100纳秒.\r" 注释 = "月份、季度、年份在本类中不可用." @默认值 = 标准时间字段.微秒>
+    {
+        @ INT nCount = (INT)data ().size ();
+        @ std::chrono::steady_clock::duration dtnDiff;
+        @ if (nCount < 2)
+        @     dtnDiff = std::chrono::steady_clock::now () - data ()[0];
+        @ else
+        @     dtnDiff = data ()[nCount-1] - data ()[nCount-2];
+        @ return GetDurationCount ((INT)@<所欲取间隔的字段>, dtnDiff);
+    }
+
+    方法 取计时次数 <公开 类型 = 整数 注释 = "返回计时的计次,第1次(索引为0)为对象初始化时取的时间点,所以必定大于等于1." 折叠 @嵌入式方法 = "">
+    {
+        @ (INT)@sn<this>.data ().size ()
+    }
+
+    方法 取计时表 <公开 类型 = 文本型 注释 = "用文本列出每次计时之间的间隔时间." 折叠>
+    参数 所欲取间隔的字段 <类型 = 标准时间字段 注释 = "指定时间间隔的精度,最高精度为100纳秒." @默认值 = 标准时间字段.微秒>
+    {
+        变量 成员数 <类型 = 整数>
+        变量 索引 <类型 = 整数>
+        变量 展示内容 <类型 = 文本型>
+        变量 单位 <类型 = 文本型>
+        单位 = 多项选择 ((整数)所欲取间隔的字段, "纳秒", "微秒", "毫秒", "秒", "分钟", "小时", "日", "周", "月", "季度", "年")
+        成员数 = 本对象.取计时次数 ()
+        展示内容 = "<标准计时器> 总共 " + 到文本 (成员数) + " 次计时:\r\n0. 计时间隔: 0\r\n"
+        循环 (1, 成员数, 索引, 1)
+        {
+            加入文本 (展示内容, 到文本 (索引) + ". 计时间隔: " + 到文本 (本对象.取计时间隔 (索引, 索引 - 1, 所欲取间隔的字段)) + "\r\n")
+
+        }
+        加入文本 (展示内容, "总经历时间(" + 单位 + "): " + 到文本 (本对象.取计时间隔 (成员数 - 1, 0, 所欲取间隔的字段)) + "\r\n")
+        返回 (展示内容)
+    }
+
+    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用.\r" 注释 = "" 折叠 @虚拟方法 = 可覆盖
+            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
+    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
+    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    {
+        展示内容 = 本对象.取计时表 (标准时间字段.微秒)
+    }
+
+    # ---
+    # @begin
+    # <> <include>
+    #     std::vector<std::chrono::steady_clock::time_point> m_tpArray;
+    #     void @an<_OnInitExtra> () { m_tpArray.push_back (std::chrono::steady_clock::now ()); }
+    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_tpArray = objCopyFrom.m_tpArray; }
+    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_tpArray == objCompare.m_tpArray); }
+    #     inline std::vector<std::chrono::steady_clock::time_point>& data () { return m_tpArray; }
+    #     inline std::vector<std::chrono::steady_clock::time_point>* pdata ()  { return &m_tpArray; }
+    #     INT64 GetDurationCount (INT nTimeField, std::chrono::steady_clock::duration dtnDiff) {
+    #         switch (nTimeField) {
+    #             case 0 : { return (INT64)std::chrono::duration_cast<std::chrono::nanoseconds> (dtnDiff).count (); }
+    #             case 1 : { return (INT64)std::chrono::duration_cast<std::chrono::microseconds> (dtnDiff).count (); }
+    #             case 2 : { return (INT64)std::chrono::duration_cast<std::chrono::milliseconds> (dtnDiff).count (); }
+    #             case 3 : { return (INT64)std::chrono::duration_cast<std::chrono::seconds> (dtnDiff).count (); }
+    #             case 4 : { return (INT64)std::chrono::duration_cast<std::chrono::minutes> (dtnDiff).count (); }
+    #             case 5 : { return (INT64)std::chrono::duration_cast<std::chrono::hours> (dtnDiff).count (); }
+    #             case 6 : { return (INT64)std::chrono::duration_cast<std::chrono::duration<INT64, std::ratio<86400,1>>> (dtnDiff).count (); }
+    #             case 7 : { return (INT64)std::chrono::duration_cast<std::chrono::duration<INT64, std::ratio<604800,1>>> (dtnDiff).count (); }
+    #             default: { return _VOL_INT64_MIN;}
+    #         }
+    #     }
+    # <> </include>
+    # @end
+    # ===
+}
+
+类 标准时间辅助 <公开 注释 = "一些std::chrono常用全局静态方法(需以类名调用)." 折叠 @文档 = "category = \"时间操作\"" @强制依赖 = "标准时间类">
+{
+    方法 取本地时区 <公开 静态 类型 = 整数 注释 = "返回本地系统的时区与UTC零时区的偏移分钟数,如北京时间为8×60=480." 折叠 @禁止流程检查 = 真>
+    {
+        @ TIME_ZONE_INFORMATION tz;
+        @ tz.Bias = 0;
+        @ ::GetTimeZoneInformation (&tz);
+        @ return -tz.Bias;
+    }
+
+    方法 取现行格式时间 <公开 静态 类型 = 文本型 注释 = "将当前系统时间格式化为时间文本\r" 注释 = "默认为\"2022-04-01 16:15:05\"的样式." 折叠
+            @禁止流程检查 = 真>
+    参数 格式文本 <类型 = 文本型 注释 = "  默认格式为: \"2022-04-01 16:15:05\",转换后不能超过256个字符.\r" 注释 = "  下列为可用的格式替换符:\r"
+            注释 = "   %%  %字符  |  %n 换行符  |  %t 水平制表符\r" 注释 = "   %C  年份向下整除100          例: 20\r"
+            注释 = "   %y  年份的后2位              例: 22\r" 注释 = "   %Y  完整的4位年份            例: 2022\r"
+            注释 = "   %h  缩写的月份名称           例: Apr\r" 注释 = "   %b  缩写的月份名称           例: Apr\r"
+            注释 = "   %B  完整的月份名称           例: April\r" 注释 = "   %m  十进制的月份             例: 04\r"
+            注释 = "   %d  2位数的某月第N天         例: 01\r" 注释 = "   %e  2位的某月第N天,前补空格  例:  1\r"
+            注释 = "   %a  缩写的星期名称           例: Fri\r" 注释 = "   %A  完整的星期名称           例: Friday\r"
+            注释 = "   %u  十进制的星期数(1-7)      例: 5\r" 注释 = "   %w  星期数(0-6),0为星期天    例: 5\r"
+            注释 = "   %j  3位数的某年第N天         例: 091\r" 注释 = "   %U  2位数的某年第N星期       例: 13\r"
+            注释 = "   %W  2位数的某年第N星期       例: 13\r" 注释 = "   %D  等价于 %m/%d/%y          例: 04/01/22 \r"
+            注释 = "   %F  等价于 %Y-%m-%d          例: 2022-04-01\r" 注释 = "   %H  2位数的小时数(24小时制)  例: 16\r"
+            注释 = "   %I  2位数的小时数(12小时制)  例: 04\r" 注释 = "   %M  2位数的分钟数            例: 15\r"
+            注释 = "   %S  2位数的秒针数            例: 05\r" 注释 = "   %p  12小时进制的AM/PM        例: PM\r"
+            注释 = "   %R  等价于 %H:%M             例: 16:15\r" 注释 = "   %T  等价于 %H:%M:%S          例: 16:15:05\r"
+            注释 = "   %r  12小时制的时分秒时间     例: 04:15:05 PM\r" 注释 = "   %X  本地环境的12小时制时钟   例: 16:15:05\r"
+            注释 = "   %x  本地环境的日期           例: 04/01/22 \r" 注释 = "   %z  UTC格式的时区            例: +0800\r"
+            注释 = "   %Z  时区的本地名称           例: 中国标准时间\r"
+            注释 = "   %c  本地环境的日期与时间     例: Fri Apr  1 16:59:32 2022\r" 注释 = "\r"
+            注释 = "  格式替换符可以在中间加上#,部分无效果; 部分会将前面的补0或补\r"
+            注释 = "空格去掉,比如\"%#F\"会解析为\"2022-4-1\"; 其中\"%#c\"和\"%#x\"会解析\r" 注释 = "为更长的日期时间格式." @默认值 = "%F %T">
+    {
+        变量 标准时间 <类型 = 标准时间类>
+        返回 (标准时间.取格式时间 (格式文本))
+    }
+
+    方法 取现行时间戳 <公开 静态 类型 = 整数 注释 = "获取当前系统时间的10位无时区Unix时间戳,单位为秒." 折叠 @嵌入式方法 = "">
+    参数 现行时间 <类型 = 逻辑型 @默认值 = 假>
+    {
+        @ (INT)std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now ().time_since_epoch ()).count ()
+    }
+
+    方法 取现行毫秒时间戳 <公开 静态 类型 = 长整数 注释 = "获取当前系统时间的13位无时区Unix时间戳,单位为毫秒." 折叠 @嵌入式方法 = "">
+    参数 现行时间 <类型 = 逻辑型 @默认值 = 假>
+    {
+        @ (INT64)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now ().time_since_epoch ()).count ()
+    }
+
+    方法 取现行微秒时间戳 <公开 静态 类型 = 长整数 注释 = "获取当前系统时间的16位无时区Unix时间戳,单位为微秒." 折叠 @嵌入式方法 = "">
+    参数 现行时间 <类型 = 逻辑型 @默认值 = 假>
+    {
+        @ (INT64)std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now ().time_since_epoch ()).count ()
+    }
+
+    方法 取现行纳秒时间戳 <公开 静态 类型 = 长整数 注释 = "获取当前系统时间的19位无时区Unix时间戳,单位为纳秒." 折叠 @嵌入式方法 = "">
+    {
+        @ (INT64)std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now ().time_since_epoch ()).count ()
+    }
+
+    方法 取现行格林威治时间 <公开 静态 类型 = 文本型 注释 = "  获取当前格林威治标准时间(GMT)的<RFC 1123>格式的日期时间,\r" 注释 = "这是HTTP协议头的标准日期时间格式."
+            折叠>
+    {
+        变量 tp <类型 = 标准时间类>
+        返回 (tp.取格林威治时间 ())
+    }
+}
+
+类 高性能计时器类 <公开 注释 = "极简计时器,可用于计算运行耗时,封装了系统API: QueryPerformanceCounter" 折叠 @文档 = "category = \"时间操作\"">
+{
+    方法 复位 <公开 注释 = "将计时器的开始时间重置为当前时间." 折叠 @嵌入式方法 = "">
+    {
+        @ ::QueryPerformanceCounter(&@sn<this>.m_StartingTime)
+    }
+
+    方法 取经历时间 <公开 类型 = 长整数 注释 = "返回从对象初始化或执行\"复位\"到现在的经过时间,必定大于等于0." 折叠 @禁止流程检查 = 真>
+    参数 所欲取间隔的字段 <类型 = 标准时间字段 注释 = "指定时间间隔的精度,最高精度为100纳秒.\r" 注释 = "只能用秒、毫秒、微秒、纳秒,选择其他字段一律返回秒间隔."
+            @默认值 = 标准时间字段.微秒>
+    {
+        @ LARGE_INTEGER EndingTime;
+        @ ::QueryPerformanceCounter(&EndingTime);
+        @ EndingTime.QuadPart -= m_StartingTime.QuadPart;
+        @ switch ((INT)@<所欲取间隔的字段>) {
+        @     case 0 : { EndingTime.QuadPart *= 1000000000; break; }
+        @     case 1 : { EndingTime.QuadPart *= 1000000; break; }
+        @     case 2 : { EndingTime.QuadPart *= 1000; break; }
+        @     default : { EndingTime.QuadPart *= 1; break; }
+        @ }
+        @ return EndingTime.QuadPart / m_Frequency.QuadPart;
+    }
+
+    # @begin
+    # <> <include>
+    #     LARGE_INTEGER m_Frequency, m_StartingTime;
+    #     void @an<_OnInitExtra> () { ::QueryPerformanceFrequency(&m_Frequency); ::QueryPerformanceCounter(&m_StartingTime); }
+    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_Frequency = objCopyFrom.m_Frequency; m_StartingTime = objCopyFrom.m_StartingTime; }
+    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_StartingTime.QuadPart == objCompare.m_StartingTime.QuadPart); }
+    # <> </include>
+}
+
+类 标准时间字段 <公开 折叠 @文档 = "category = \"时间操作.辅助类\"" @常量类 = 整数>
+{
+    常量 纳秒 <公开 值 = 0 注释 = "1纳秒 = 十亿分之一秒">
+    常量 微秒 <公开 值 = 1 注释 = "1微秒 = 1000纳秒">
+    常量 毫秒 <公开 值 = 2 注释 = "1毫秒 = 1000微秒">
+    常量 秒 <公开 值 = 3 注释 = "1秒钟 = 1000毫秒">
+    常量 分钟 <公开 值 = 4 注释 = "1分钟 = 60秒">
+    常量 小时 <公开 值 = 5 注释 = "1小时 = 60分钟">
+    常量 日 <公开 值 = 6 注释 = "1日   = 24小时">
+    常量 周 <公开 值 = 7 注释 = "1星期 = 7日">
+    常量 月份 <公开 值 = 8 注释 = "1个月 = 27-31日">
+    常量 季度 <公开 值 = 9 注释 = "1季度 = 3个月">
+    常量 年份 <公开 值 = 10 注释 = "1年 = 365-366日">
+}
+
+类 系统时间结构类 <公开 注释 = "SYSTEMTIME结构体" 折叠 @文档 = "category = \"时间操作.辅助类\"" @视窗.结构类 = 0>
+{
+    变量 年 <公开 类型 = 短整数 注释 = "1601-30827" @输出名 = "wYear">
+    变量 月 <公开 类型 = 短整数 注释 = "1-12" @输出名 = "wMonth">
+    变量 周 <公开 类型 = 短整数 注释 = "0-6,0为星期天" @输出名 = "wDayOfWeek">
+    变量 日 <公开 类型 = 短整数 注释 = "1-31" @输出名 = "wDay">
+    变量 时 <公开 类型 = 短整数 注释 = "0-23" @输出名 = "wHour">
+    变量 分 <公开 类型 = 短整数 注释 = "0-59" @输出名 = "wMinute">
+    变量 秒 <公开 类型 = 短整数 注释 = "0-59" @输出名 = "wSecond">
+    变量 毫秒 <公开 类型 = 短整数 注释 = "0-999" @输出名 = "wMilliseconds">
+
+    方法 置时间 <公开 注释 = "将火山的小数型时间转换到SYSTEMTIME,并填入到成员变量中." 折叠>
+    参数 火山时间 <类型 = 小数>
+    {
+        @ SYSTEMTIME st;
+        @ if (VariantTimeToSystemTime (@<火山时间>, &st)) {
+        @     SetStruct ((const S*)&st);
+        @ }
+    }
+
+    方法 取时间 <公开 类型 = 小数 注释 = "将本对象的SYSTEMTIME转换为火山的小数型时间." 折叠 @禁止流程检查 = 真>
+    {
+        @ SYSTEMTIME st;
+        @ GetStruct ((S*)&st);
+        @ DOUBLE vTime = 0.0;
+        @ SystemTimeToVariantTime (&st, &vTime);
+        @ return vTime;
+    }
+
+    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用.\r" 注释 = "" 折叠 @虚拟方法 = 可覆盖
+            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
+    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
+    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    {
+        展示内容 = "<SYSTEMTIME> 总共 8 个成员:\r\n"
+        加入文本 (展示内容, "1.wYear(1601-30827): " + 取调试文本2 (最大展示数据尺寸, 年) + "\r\n")
+        加入文本 (展示内容, "2.wMonth(1-12): " + 取调试文本2 (最大展示数据尺寸, 月) + "\r\n")
+        加入文本 (展示内容, "3.wDayOfWeek(0-6): " + 取调试文本2 (最大展示数据尺寸, 周) + "\r\n")
+        加入文本 (展示内容, "4.wDay(1-31): " + 取调试文本2 (最大展示数据尺寸, 日) + "\r\n")
+        加入文本 (展示内容, "5.wHour(0-59): " + 取调试文本2 (最大展示数据尺寸, 时) + "\r\n")
+        加入文本 (展示内容, "6.wMinute(0-59): " + 取调试文本2 (最大展示数据尺寸, 分) + "\r\n")
+        加入文本 (展示内容, "7.wSecond(0-59): " + 取调试文本2 (最大展示数据尺寸, 秒) + "\r\n")
+        加入文本 (展示内容, "8.wMilliseconds(0-999): " + 取调试文本2 (最大展示数据尺寸, 毫秒) + "\r\n")
+    }
+}
+
+类 纳秒时钟类 <公开 注释 = "一个基于x86 CPU时钟周期的低开销纳秒级精度时钟.\r" 注释 = "源码: https://github.com/MengRao/tscns" 折叠
+        @文档 = "category = \"时间操作.辅助类\"" @视窗.外部头文件 = "src\\tscns.h" "@视窗.外部头文件.全局-100" = "<chrono>">
+{
+
+    # @ @m<DECLARE_REF_OBJECT_CLASS_WITH_DATA> (TSCNS)
+
+    方法 初始化 <公开 注释 = "使用本类之前必须执行本方法进行初始化校准." 折叠 @嵌入式方法 = "">
+    参数 初始校准耗时 <类型 = 长整数 注释 = "用于获取CPU时钟周期的频率,单位为纳秒,默认为20毫秒." @默认值 = 20000000>
+    参数 校准间隔 <类型 = 长整数 注释 = "之后定期校准的最大时间间隔,单位为纳秒,默认为3秒." @默认值 = 3000000000>
+    {
+        @ @sn<this>.data ().init (@<初始校准耗时>, @<校准间隔>)
+    }
+
+    方法 校准 <公开 注释 = "时间会逐渐跑偏,所以需要定期在后台(线程中)执行本方法校准时间.\r" 注释 = "执行本方法的间隔不应大于\"初始化\"时设置的\"校准间隔\"值." 折叠
+            @嵌入式方法 = "">
+    {
+        @ @sn<this>.data ().calibrate ()
+    }
+
+    方法 取纳秒时间 <公开 类型 = 长整数 注释 = "一步获取当前的纳秒时间戳." 返回值注释 = "返回纳秒时间戳" 折叠 @嵌入式方法 = "">
+    {
+        @ @sn<this>.data ().rdns ()
+    }
+
+    方法 取时钟周期 <公开 类型 = 长整数 注释 = "  获取CPU自启动以来的时钟周期数.\r" 注释 = "  本方法执行效率极高,如果任务对时间间隔\r"
+            注释 = "有严格要求,可以先用本方法记录时钟周期,\r" 注释 = "再在之后用\"时钟周期到时间\"转换为时间戳." 返回值注释 = "返回时钟周期数" 折叠 @嵌入式方法 = "">
+    {
+        @ @sn<this>.data ().rdtsc ()
+    }
+
+    方法 时钟周期到时间 <公开 类型 = 长整数 注释 = "将时钟周期数转换为纳秒时间戳." 返回值注释 = "返回纳秒时间戳" 折叠 @嵌入式方法 = "">
+    参数 时钟周期数 <类型 = 长整数 注释 = "所欲转换为时间的周期数.">
+    {
+        @ @sn<this>.data ().tsc2ns (@<时钟周期数>)
+    }
+}
+
+# 时钟 ===
+
+类 时钟队列类 <公开 注释 = "  封装自系统API的timer-queue timer,跟<Mmsystem.h>里的多媒体时钟对比:\r"
+        注释 = "  多媒体时钟的回调函数会造成阻塞,想不阻塞需要配合线程使用,但启动线程有\r" 注释 = "额外的开销; 周期时间也是每次回调函数运行完再计算,所以每次事件之间的间隔\r"
+        注释 = "时间不稳定; 系统限制了最多只能设置16个多媒体时钟.\r" 注释 = "  时钟队列的回调函数在非I/O的线程池中执行,不会阻塞其他的时钟; \"周期事件\"\r"
+        注释 = "之间的时间间隔固定不变; 可以在同一个\"时钟队列类\"中添加多个不同周期时间的\r" 注释 = "时钟.而且可添加的时钟数量几乎没有上限,我测试添加了上万个也没有问题,开销\r"
+        注释 = "也很低.\r" 注释 = "  注意: 时钟的计时精度比较差,最大有15毫秒的误差" 折叠 @文档 = "category = \"多线程\""
+        @视窗.外部头文件 = "threadpoollegacyapiset.h\r\n<map>">
+{
+    方法 类_初始化 <折叠>
+    {
+        创建时钟队列 ()
+    }
+
+    方法 类_清理 <折叠>
+    {
+        销毁时钟队列 (0)
+    }
+
+    方法 创建时钟队列 <公开 类型 = 逻辑型 注释 = "  创建时钟队列.\r" 注释 = "  类初始化时会自动调用本方法,除非执行过\"销毁时钟队列\",否则无需使用."
+            返回值注释 = "  返回是否创建成功,重复创建将返回假." 折叠 @禁止流程检查 = 真>
+    {
+        @ if (m_hTimerQueue) return FALSE;
+        @ m_hTimerQueue = ::CreateTimerQueue ();
+        @ return m_hTimerQueue != NULL;
+    }
+
+    方法 销毁时钟队列 <公开 类型 = 逻辑型 注释 = "  销毁时钟队列,队列中所有的时钟都将被取消并删除.\r" 注释 = "  类清理时会自动调用本方法." 返回值注释 = "  返回是否成功."
+            折叠 @禁止流程检查 = 真>
+    参数 完成事件 <类型 = 变整数 注释 = "  0 将时钟标记为删除并立即返回,如果存在未完成的周期事件,会立即返回假;\r" 注释 = "  -1 等待所有\"时钟事件\"完成后返回;\r"
+            注释 = "  如果提供事件句柄(同步事件类),将立即返回并在删除时钟队列和\"周期事件\"完成后发出信号;" @默认值 = 0 @输出名 = "hCompletionEvent">
+    {
+        @ if (m_hTimerQueue == NULL) return FALSE;
+        @ BOOL bRes = ::DeleteTimerQueueEx (m_hTimerQueue, (HANDLE)hCompletionEvent);
+        @ m_hTimerQueue = NULL;
+        @ m_locker.lock ();
+        @ for (std::map<CVolString, PTIMERCALLBACKPARAMETER>::iterator it = m_hTimerMap.begin(); it != m_hTimerMap.end(); it++)
+        @ {   // 释放时钟的回调参数
+        @     delete it->second;
+        @ }
+        @ m_hTimerMap.clear ();
+        @ m_locker.unlock ();
+        @ return bRes;
+    }
+
+    方法 添加时钟 <公开 类型 = 逻辑型 注释 = "  创建时钟并添加到时钟队列,添加成功后将立即启动时钟并开始响应\"周期事件\"."
+            返回值注释 = "  返回是否添加成功,如果时钟标记已存在则返回假." 折叠 @禁止流程检查 = 真>
+    参数 时钟标记 <类型 = 文本型 注释 = "  用户自定义的时钟标记." @输出名 = "szTimerID">
+    参数 周期时间 <类型 = 整数 注释 = "  时钟的周期时间(毫秒),如果参数为0,只发生一次性的\"周期事件\";\r"
+            注释 = "  如果参数大于0,则每经过该时间段后响应\"周期事件\",直到使用\"删除时钟\"或\"更新时钟\"功能." @输出名 = "dwPeriod">
+    参数 启动延时 <类型 = 整数 注释 = "  时钟第一次发出信号之前必须经过的时间量(毫秒).\r" 注释 = "  0为不延时,创建时钟后立即响应\"周期事件\"." @默认值 = 0
+            @输出名 = "dwDueTime">
+    参数 用户数据 <类型 = 变整数 注释 = "  用户自定义的参数,将传递到\"周期事件\"中,可用于传递数据." @默认值 = 0 @输出名 = "lpUserData">
+    参数 是否线程池运行 <类型 = 逻辑型 注释 = "  是否在非I/O线程池中运行\"周期事件\",默认为真.\r"
+            注释 = "  为真时回调函数之间不会阻塞,固定以周期时间为间隔响应\"周期事件\";\r"
+            注释 = "  为假时在时钟线程中调用\"周期事件\",回调函数之间有阻塞,在上一个\"周期事件\"结束后,\r" 注释 = "经过指定的周期时间才响应下一个\"周期事件\";" @默认值 = 真
+            @输出名 = "bInThreadPool">
+    {
+        @ if (m_hTimerQueue == NULL) return FALSE;
+        @ if (m_hTimerMap[szTimerID] != 0) return FALSE;
+        @ PTIMERCALLBACKPARAMETER pTimerParam = new TIMERCALLBACKPARAMETER;
+        @ pTimerParam->pThis = this;
+        @ pTimerParam->hTimer = NULL;
+        @ pTimerParam->szTimerID = szTimerID;
+        @ pTimerParam->lpUserData = lpUserData;
+        @ if (::CreateTimerQueueTimer (&pTimerParam->hTimer, m_hTimerQueue, (WAITORTIMERCALLBACK)onTimerFunc,
+        @                              pTimerParam, (DWORD)dwDueTime, (DWORD)dwPeriod, bInThreadPool ? WT_EXECUTEDEFAULT : WT_EXECUTEINTIMERTHREAD) )
+        @ {
+        @     m_locker.lock ();
+        @     m_hTimerMap[szTimerID] = pTimerParam;
+        @     m_locker.unlock ();
+        @     return TRUE;
+        @ }
+        @ delete pTimerParam;
+        @ return FALSE;
+    }
+
+    方法 添加时钟2 <公开 类型 = 逻辑型 注释 = "  创建时钟并添加到时钟队列,与\"添加时钟\"的不同之处是\r" 注释 = "  需要提供自定义的静态方法作为时钟的回调函数."
+            返回值注释 = "  返回是否添加成功,如果时钟标记已存在则返回假." 折叠 @嵌入式方法 = "">
+    参数 时钟标记 <类型 = 文本型 注释 = "  用户自定义的时钟标记.">
+    参数 回调函数 <注释 = "  提供所欲执行的时钟回调函数,该方法必须为静态,\r" 注释 = "  无返回值,且参数类型与\"时钟回调函数模板\"一样." @匹配方法 = "时钟回调函数模板">
+    参数 周期时间 <类型 = 整数 注释 = "  时钟的周期时间(毫秒),如果参数为0,只一次性地执行回调函数.\r"
+            注释 = "  如果参数大于0,则每经过该时间段后执行回调函数,直到使用\"删除时钟\"或\"更新时钟\"功能.">
+    参数 启动延时 <类型 = 整数 注释 = "  时钟第一次发出信号之前必须经过的时间量(毫秒).\r" 注释 = "  0为不延时,创建时钟后立即执行回调函数." @默认值 = 0>
+    参数 用户数据 <类型 = 变整数 注释 = "  用户自定义的参数,将传递到回调函数中,可用于传递数据." @默认值 = 0>
+    参数 是否线程池运行 <类型 = 逻辑型 注释 = "  是否在非I/O线程池中运行回调函数,默认为真.\r" 注释 = "  为真时回调函数之间不会阻塞,固定以周期时间为间隔运行;\r"
+            注释 = "  为假时在时钟线程中调用回调函数,回调函数之间有阻塞,在上一个回调函数结束后,\r" 注释 = "经过指定的周期时间才运行下一个回调函数;" @默认值 = 真>
+    {
+        @ (INT)@sn<this>.AddTimerQueue (@<时钟标记>, (WAITORTIMERCALLBACK)&@<回调函数>, (PVOID)@<用户数据>, (DWORD)@<启动延时>, (DWORD)@<周期时间>, @<是否线程池运行>)
+    }
+
+    方法 移除时钟 <公开 类型 = 逻辑型 注释 = "  从时钟队列中移除时钟,可选是否等待回调函数完成再删除时钟." 返回值注释 = "  返回是否成功." 折叠 @禁止流程检查 = 真>
+    参数 时钟标记 <类型 = 文本型 注释 = "  提供用户自定义的时钟标记." @输出名 = "szTimerID">
+    参数 完成事件 <类型 = 变整数 注释 = "  0 将时钟标记为删除并立即返回,如果存在未完成的周期事件,会立即返回假;\r" 注释 = "  -1 等待\"周期事件\"完成后返回;\r"
+            注释 = "  如果提供事件句柄(同步事件类),将立即返回并在并在删除时钟和\"周期事件\"完成后发出信号;" @默认值 = 0 @输出名 = "hCompletionEvent">
+    {
+        @ if (m_hTimerQueue == NULL) return FALSE;
+        @ BOOL bRes = FALSE;
+        @ m_locker.lock ();
+        @ if (m_hTimerMap[szTimerID] != 0)
+        @ {
+        @     bRes = ::DeleteTimerQueueTimer (m_hTimerQueue, m_hTimerMap[szTimerID]->hTimer, (HANDLE)hCompletionEvent);
+        @     delete m_hTimerMap[szTimerID];
+        @ }
+        @ m_hTimerMap.erase (szTimerID);
+        @ m_locker.unlock ();
+        @ return bRes;
+    }
+
+    方法 更新时钟 <公开 类型 = 逻辑型 注释 = "  更改时钟的周期时间和启动延时.\r" 注释 = "  如果时钟之前的周期时间为0,则无法更新时钟." 返回值注释 = "  返回是否成功." 折叠
+            @禁止流程检查 = 真>
+    参数 时钟标记 <类型 = 文本型 注释 = "  提供用户自定义的时钟标记." @输出名 = "szTimerID">
+    参数 周期时间 <类型 = 整数 注释 = "  时钟的周期时间(毫秒),如果参数为0,只发生一次性的\"周期事件\";\r"
+            注释 = "  如果参数大于0,则每经过该时间段后响应\"周期事件\",直到使用\"删除时钟\"或\"更新时钟\"功能." @输出名 = "dwPeriod">
+    参数 启动延时 <类型 = 整数 注释 = "  时钟第一次发出信号之前必须经过的时间量(毫秒).\r" 注释 = "  0为不延时,更新时钟后立即响应\"周期事件\"." @默认值 = 0
+            @输出名 = "dwDueTime">
+    {
+        @ if (m_hTimerQueue == NULL) return FALSE;
+        @ BOOL bRes = FALSE;
+        @ m_locker.lock ();
+        @ if (m_hTimerMap[szTimerID] != 0)
+        @     bRes = ::ChangeTimerQueueTimer (m_hTimerQueue, m_hTimerMap[szTimerID]->hTimer, (DWORD)dwDueTime, (DWORD)dwPeriod);
+        @ else
+        @     m_hTimerMap.erase (szTimerID);
+        @ m_locker.unlock ();
+        @ return bRes;
+    }
+
+    方法 取时钟句柄 <公开 类型 = 变整数 注释 = "根据用户自定义的标记获取时钟的句柄." 返回值注释 = "成功返回句柄,失败返回0." 折叠 @禁止流程检查 = 真>
+    参数 时钟标记 <类型 = 文本型 注释 = "提供用户自定义的时钟标记." @输出名 = "szTimerID">
+    {
+        @ INT_P npTimer = 0;
+        @ m_locker.lock ();
+        @ if (m_hTimerMap.find (szTimerID) != m_hTimerMap.end ())
+        @     npTimer = (INT_P)m_hTimerMap[szTimerID]->hTimer;
+        @ m_locker.unlock ();
+        @ return npTimer;
+    }
+
+    方法 取所有时钟标记 <公开 类型 = 整数 注释 = "获取所有正在运行的时钟标记." 返回值注释 = "成功返回时钟序号的数量." 折叠 @禁止流程检查 = 真>
+    参数 时钟标记数组 <类型 = 文本数组类 注释 = "获取到的时钟标记在此参数中返回." @输出名 = "sTimerIDArray">
+    {
+        @ sTimerIDArray.data ().RemoveAll ();
+        @ m_locker.lock ();
+        @ for (std::map<CVolString, PTIMERCALLBACKPARAMETER>::iterator it = m_hTimerMap.begin(); it != m_hTimerMap.end(); it++)
+        @ {
+        @     sTimerIDArray.data ().Add (it->first);
+        @ }
+        @ m_locker.unlock ();
+        @ return sTimerIDArray.data ().GetCount ();
+    }
+
+    方法 取运行时钟数 <公开 类型 = 整数 注释 = "获取当前正在运行的时钟数量." 折叠 @禁止流程检查 = 真>
+    {
+        @ m_locker.lock ();
+        @ INT nCount = (INT)m_hTimerMap.size ();
+        @ m_locker.unlock ();
+        @ return nCount;
+    }
+
+    方法 时钟是否有效 <公开 类型 = 逻辑型 注释 = "根据时钟标记检查对应的时钟是否正在运行." 折叠 @禁止流程检查 = 真>
+    参数 时钟标记 <类型 = 文本型 注释 = "提供用户自定义的时钟标记." @输出名 = "szTimerID">
+    {
+        @ return (m_hTimerMap.find (szTimerID) != m_hTimerMap.end ());
+    }
+
+    方法 时钟回调函数模板 <静态 注释 = "提供\"添加时钟2\"执行回调函数的模板方法" 折叠>
+    参数 用户数据 <类型 = 变整数 注释 = "为\"添加时钟2\"时所提供的用户数据值">
+    参数 等待超时 <类型 = 字节 注释 = "时钟回调中此参数始终为1,无用处.">
+
+    方法 周期事件 <公开 定义事件 类型 = 整数 注释 = "每当经过了指定的时钟周期,将发送本事件." 返回值注释 = "此返回值无意义." 折叠>
+    参数 时钟标记 <类型 = 文本型 注释 = "用户在\"添加时钟\"时自定义的时钟标记.">
+    参数 用户数据 <类型 = 变整数 注释 = "用户在\"添加时钟\"时传入的参数.可用于传递数据.">
+
+    # ---
+    # @begin
+    # <> <include>
+    # private:
+    #     typedef struct tagTIMERCALLBACKPARAMETER {
+    #         @sn<current_class>* pThis;
+    #         HANDLE hTimer;
+    #         CVolString szTimerID;
+    #         INT_P lpUserData;
+    #     } TIMERCALLBACKPARAMETER, *PTIMERCALLBACKPARAMETER;
+    #     std::map<CVolString, PTIMERCALLBACKPARAMETER> m_hTimerMap; // 时钟标记到时钟参数哈希表
+    #     CMMutex m_locker; // 互斥锁,临界区
+    #     static VOID CALLBACK onTimerFunc (PVOID lpParameter, BOOLEAN TimerOrWaitFired) {
+    #         PTIMERCALLBACKPARAMETER pTimerParam = (PTIMERCALLBACKPARAMETER)lpParameter;
+    #         CVolString szTimerID = pTimerParam->szTimerID;
+    #         pTimerParam->pThis->@<周期事件> (szTimerID, pTimerParam->lpUserData);
+    #     }
+    # public:
+    #     HANDLE m_hTimerQueue = NULL; // 时钟队列句柄
+    #     BOOL AddTimerQueue (CVolString& szTimerID, WAITORTIMERCALLBACK lpTimerCallBack, PVOID lpUserData, DWORD dwDueTime, DWORD dwPeriod, BOOL bInThreadPool) {
+    #         if (m_hTimerQueue == NULL) return FALSE;
+    #         if (m_hTimerMap[szTimerID] != 0) return FALSE;
+    #         PTIMERCALLBACKPARAMETER pTimerParam = new TIMERCALLBACKPARAMETER;
+    #         pTimerParam->szTimerID = szTimerID;
+    #         pTimerParam->lpUserData = (INT_P)lpUserData;
+    #         if (::CreateTimerQueueTimer (&pTimerParam->hTimer, m_hTimerQueue, lpTimerCallBack,
+    #                                     lpUserData, dwDueTime, dwPeriod, bInThreadPool ? WT_EXECUTEDEFAULT : WT_EXECUTEINTIMERTHREAD) ) {
+    #             m_locker.lock ();
+    #             m_hTimerMap[szTimerID] = pTimerParam;
+    #             m_locker.unlock ();
+    #             return TRUE;
+    #         }
+    #         delete pTimerParam;
+    #         return FALSE;
+    #     }
+    # <> </include>
+    # @end
+    # ---
+}
+
+类 时钟队列类2 <公开 注释 = "跟\"时钟队列类\"的不同之处是,使用自增的时钟序号代替自定义的时钟标记.\r" 注释 = "注意: 时钟的计时精度比较差,最大有15毫秒的误差" 折叠
+        @文档 = "category = \"多线程\"" @视窗.外部头文件 = "threadpoollegacyapiset.h\r\n<atomic>\r\n<unordered_map>">
+{
+    方法 类_初始化 <折叠>
+    {
+        创建时钟队列 ()
+    }
+
+    方法 类_清理 <折叠>
+    {
+        销毁时钟队列 (0)
+    }
+
+    方法 创建时钟队列 <公开 类型 = 逻辑型 注释 = "  创建时钟队列.\r" 注释 = "  类初始化时会自动调用本方法,除非执行过\"销毁时钟队列\",否则无需使用."
+            返回值注释 = "  返回是否创建成功,重复创建将返回假." 折叠 @禁止流程检查 = 真>
+    {
+        @ if (m_hTimerQueue) return FALSE;
+        @ m_hTimerQueue = ::CreateTimerQueue ();
+        @ m_atomic.store (0);
+        @ return m_hTimerQueue != NULL;
+    }
+
+    方法 销毁时钟队列 <公开 类型 = 逻辑型 注释 = "  销毁时钟队列,队列中所有的时钟都将被取消并删除.\r" 注释 = "  类清理时会自动调用本方法." 返回值注释 = "  返回是否成功."
+            折叠 @禁止流程检查 = 真>
+    参数 完成事件 <类型 = 变整数 注释 = "  0 将时钟标记为删除并立即返回,如果存在未完成的周期事件,会立即返回假;\r" 注释 = "  -1 等待所有\"时钟事件\"完成后返回;\r"
+            注释 = "  如果提供事件句柄(同步事件类),将立即返回并在删除时钟队列和\"周期事件\"完成后发出信号;" @默认值 = 0 @输出名 = "hCompletionEvent">
+    {
+        @ if (m_hTimerQueue == NULL) return FALSE;
+        @ BOOL bRes = ::DeleteTimerQueueEx (m_hTimerQueue, (HANDLE)hCompletionEvent);
+        @ m_hTimerQueue = NULL;
+        @ m_locker.lock ();
+        @ for (UINT i = 0; i < m_ParamArray.GetCount (); i++)
+        @ {   // 释放时钟的回调参数
+        @     delete m_ParamArray.GetAt (i);
+        @ }
+        @ m_ParamArray.RemoveAll ();
+        @ m_hTimerMap.clear ();
+        @ m_locker.unlock ();
+        @ m_atomic.store(0);
+        @ return bRes;
+    }
+
+    方法 添加时钟 <公开 类型 = 整数 注释 = "  创建时钟并添加到时钟队列,添加成功后将立即启动时钟并开始响应\"周期事件\"."
+            返回值注释 = "  成功返回时钟序号(从0开始分配),失败返回-1." 折叠 @禁止流程检查 = 真>
+    参数 周期时间 <类型 = 整数 注释 = "  时钟的周期时间(毫秒),如果参数为0,只发生一次性的\"周期事件\";\r"
+            注释 = "  如果参数大于0,则每经过该时间段后响应\"周期事件\",直到使用\"删除时钟\"或\"更新时钟\"功能." @输出名 = "dwPeriod">
+    参数 启动延时 <类型 = 整数 注释 = "  时钟第一次发出信号之前必须经过的时间量(毫秒).\r" 注释 = "  0为不延时,创建时钟后立即响应\"周期事件\"." @默认值 = 0
+            @输出名 = "dwDueTime">
+    参数 用户数据 <类型 = 变整数 注释 = "  用户自定义的参数,将传递到\"周期事件\"中,可用于传递数据,亦可作为时钟的标记符." @默认值 = 0 @输出名 = "lpUserData">
+    参数 是否线程池运行 <类型 = 逻辑型 注释 = "  是否在非I/O线程池中运行\"周期事件\",默认为真.\r"
+            注释 = "  为真时回调函数之间不会阻塞,固定以周期时间为间隔响应\"周期事件\";\r"
+            注释 = "  为假时在时钟线程中调用\"周期事件\",回调函数之间有阻塞,在上一个\"周期事件\"结束后,\r" 注释 = "经过指定的周期时间才响应下一个\"周期事件\";" @默认值 = 真
+            @输出名 = "bInThreadPool">
+    {
+        @ if (m_hTimerQueue == NULL) return -1;
+        @ PTIMERCALLBACKPARAMETER pTimerParam = new TIMERCALLBACKPARAMETER;
+        @ pTimerParam->pThis = this;
+        @ pTimerParam->hTimer = NULL;
+        @ pTimerParam->lpUserData = lpUserData;
+        @ if (::CreateTimerQueueTimer (&pTimerParam->hTimer, m_hTimerQueue, (WAITORTIMERCALLBACK)onTimerFunc,
+        @                              pTimerParam, (DWORD)dwDueTime, (DWORD)dwPeriod, bInThreadPool ? WT_EXECUTEDEFAULT : WT_EXECUTEINTIMERTHREAD) )
+        @ {
+        @     m_locker.lock ();
+        @     m_ParamArray.Add (pTimerParam);
+        @     pTimerParam->nTimerIndex = m_atomic.load();
+        @     m_hTimerMap[pTimerParam->nTimerIndex] = pTimerParam->hTimer;
+        @     m_locker.unlock ();
+        @     m_atomic.fetch_add(1);
+        @     return pTimerParam->nTimerIndex;
+        @ }
+        @ delete pTimerParam;
+        @ return -1;
+    }
+
+    方法 添加时钟2 <公开 类型 = 整数 注释 = "  创建时钟并添加到时钟队列,与\"添加时钟\"的不同之处是\r" 注释 = "  需要提供自定义的静态方法作为时钟的回调函数."
+            返回值注释 = "  成功返回时钟序号(从0开始分配),失败返回-1." 折叠 @嵌入式方法 = "">
+    参数 回调函数 <注释 = "  提供所欲执行的时钟回调函数,该方法必须为静态,\r" 注释 = "  无返回值,且参数类型与\"时钟回调函数模板\"一样." @匹配方法 = "时钟回调函数模板">
+    参数 周期时间 <类型 = 整数 注释 = "  时钟的周期时间(毫秒),如果参数为0,只一次性地执行回调函数.\r"
+            注释 = "  如果参数大于0,则每经过该时间段后执行回调函数,直到使用\"删除时钟\"或\"更新时钟\"功能.">
+    参数 启动延时 <类型 = 整数 注释 = "  时钟第一次发出信号之前必须经过的时间量(毫秒).\r" 注释 = "  0为不延时,创建时钟后立即执行回调函数." @默认值 = 0>
+    参数 用户数据 <类型 = 变整数 注释 = "  用户自定义的参数,将传递到回调函数中,可用于传递数据,亦可作为时钟的标记符." @默认值 = 0>
+    参数 是否线程池运行 <类型 = 逻辑型 注释 = "  是否在非I/O线程池中运行回调函数,默认为真.\r" 注释 = "  为真时回调函数之间不会阻塞,固定以周期时间为间隔运行;\r"
+            注释 = "  为假时在时钟线程中调用回调函数,回调函数之间有阻塞,在上一个回调函数结束后,\r" 注释 = "经过指定的周期时间才运行下一个回调函数;" @默认值 = 真>
+    {
+        @ (INT)@sn<this>.AddTimerQueue ((WAITORTIMERCALLBACK)&@<回调函数>, (PVOID)@<用户数据>, (DWORD)@<启动延时>, (DWORD)@<周期时间>, @<是否线程池运行>)
+    }
+
+    方法 移除时钟 <公开 类型 = 逻辑型 注释 = "  从时钟队列中移除时钟,可选是否等待回调函数完成再删除时钟." 返回值注释 = "  返回是否成功." 折叠 @禁止流程检查 = 真>
+    参数 时钟序号 <类型 = 整数 注释 = "  提供由\"添加时钟\"返回的序号(从0开始)." @输出名 = "nIndex">
+    参数 完成事件 <类型 = 变整数 注释 = "  0 将时钟标记为删除并立即返回,如果存在未完成的周期事件,会立即返回假;\r" 注释 = "  -1 等待\"周期事件\"完成后返回;\r"
+            注释 = "  如果提供事件句柄(同步事件类),将立即返回并在并在删除时钟和\"周期事件\"完成后发出信号;" @默认值 = 0 @输出名 = "hCompletionEvent">
+    {
+        @ if (m_hTimerQueue == NULL) return FALSE;
+        @ BOOL bRes = FALSE;
+        @ m_locker.lock ();
+        @ if (m_hTimerMap.find (nIndex) != m_hTimerMap.end ())
+        @ {
+        @     bRes = ::DeleteTimerQueueTimer (m_hTimerQueue, m_hTimerMap[nIndex], (HANDLE)hCompletionEvent);
+        @     m_hTimerMap.erase (nIndex);
+        @ }
+        @ m_locker.unlock ();
+        @ return bRes;
+    }
+
+    方法 更新时钟 <公开 类型 = 逻辑型 注释 = "  更改时钟的周期时间和启动延时.\r" 注释 = "  如果时钟之前的周期时间为0,则无法更新时钟." 返回值注释 = "  返回是否成功." 折叠
+            @禁止流程检查 = 真>
+    参数 时钟序号 <类型 = 整数 注释 = "  提供由\"添加时钟\"返回的序号(从0开始)." @输出名 = "nIndex">
+    参数 周期时间 <类型 = 整数 注释 = "  时钟的周期时间(毫秒),如果参数为0,只发生一次性的\"周期事件\";\r"
+            注释 = "  如果参数大于0,则每经过该时间段后响应\"周期事件\",直到使用\"删除时钟\"或\"更新时钟\"功能." @输出名 = "dwPeriod">
+    参数 启动延时 <类型 = 整数 注释 = "  时钟第一次发出信号之前必须经过的时间量(毫秒).\r" 注释 = "  0为不延时,更新时钟后立即响应\"周期事件\"." @默认值 = 0
+            @输出名 = "dwDueTime">
+    {
+        @ if (m_hTimerQueue == NULL) return FALSE;
+        @ BOOL bRes = FALSE;
+        @ m_locker.lock ();
+        @ if (m_hTimerMap.find (nIndex) != m_hTimerMap.end ())
+        @ {
+        @     bRes = ::ChangeTimerQueueTimer (m_hTimerQueue, m_hTimerMap[nIndex], (DWORD)dwDueTime, (DWORD)dwPeriod);
+        @ }
+        @ m_locker.unlock ();
+        @ return bRes;
+    }
+
+    方法 取时钟句柄 <公开 类型 = 变整数 注释 = "根据序号获取时钟的句柄." 返回值注释 = "成功返回句柄,失败返回0." 折叠 @禁止流程检查 = 真>
+    参数 时钟序号 <类型 = 整数 注释 = "提供由\"添加时钟\"返回的序号(从0开始)." @输出名 = "nIndex">
+    {
+        @ INT_P npTimer = 0;
+        @ m_locker.lock ();
+        @ if (m_hTimerMap.find (nIndex) != m_hTimerMap.end ())
+        @     npTimer = (INT_P)m_hTimerMap[nIndex];
+        @ m_locker.unlock ();
+        @ return npTimer;
+    }
+
+    方法 取所有时钟序号 <公开 类型 = 整数 注释 = "获取所有正在运行的时钟序号." 返回值注释 = "成功返回时钟序号的数量." 折叠 @禁止流程检查 = 真>
+    参数 时钟序号数组 <类型 = 整数数组类 注释 = "获取到的时钟序号在此参数中返回." @输出名 = "nTimeIndexArray">
+    {
+        @ nTimeIndexArray.data ().RemoveAll ();
+        @ m_locker.lock ();
+        @ for (std::unordered_map<INT, HANDLE>::iterator it = m_hTimerMap.begin(); it != m_hTimerMap.end(); it++)
+        @ {
+        @     nTimeIndexArray.data ().Add (it->first);
+        @ }
+        @ m_locker.unlock ();
+        @ return nTimeIndexArray.data ().GetCount ();
+    }
+
+    方法 取添加时钟数 <公开 类型 = 整数 注释 = "获取已添加的时钟数量,包括已经移除的时钟." 折叠 @禁止流程检查 = 真>
+    {
+        @ return m_atomic.load ();
+    }
+
+    方法 取运行时钟数 <公开 类型 = 整数 注释 = "获取当前正在运行的时钟数量." 折叠 @禁止流程检查 = 真>
+    {
+        @ m_locker.lock ();
+        @ INT nCount = (INT)m_hTimerMap.size ();
+        @ m_locker.unlock ();
+        @ return nCount;
+    }
+
+    方法 时钟是否有效 <公开 类型 = 逻辑型 注释 = "根据时钟序号检查对应的时钟是否正在运行." 折叠 @禁止流程检查 = 真>
+    参数 时钟序号 <类型 = 整数 注释 = "提供由\"添加时钟\"返回的序号(从0开始)." @输出名 = "nIndex">
+    {
+        @ return (m_hTimerMap.find (nIndex) != m_hTimerMap.end ());
+    }
+
+    方法 时钟回调函数模板 <静态 注释 = "提供\"添加时钟2\"执行回调函数的模板方法" 折叠>
+    参数 用户数据 <类型 = 变整数 注释 = "为\"添加时钟2\"时所提供的用户数据值">
+    参数 等待超时 <类型 = 字节 注释 = "时钟回调中此参数始终为1,无用处.">
+
+    方法 周期事件 <公开 定义事件 类型 = 整数 注释 = "每当经过了指定的时钟周期,将发送本事件." 返回值注释 = "此返回值无意义." 折叠>
+    参数 时钟序号 <类型 = 整数 注释 = "提供周期事件的来源时钟序号(从0开始),该序号跟\"添加时钟\"返回的值一样.">
+    参数 用户数据 <类型 = 变整数 注释 = "用户在\"添加时钟\"时传入的参数.可用于传递数据,亦可作为时钟的标记符.">
+
+    # @begin
+    # <> <include>
+    # private:
+    #     typedef struct tagTIMERCALLBACKPARAMETER {
+    #         @sn<current_class>* pThis;
+    #         HANDLE hTimer;
+    #         INT nTimerIndex;
+    #         INT_P lpUserData;
+    #     } TIMERCALLBACKPARAMETER, *PTIMERCALLBACKPARAMETER;
+    #     CMArray<PTIMERCALLBACKPARAMETER> m_ParamArray; // 回调参数指针数组类
+    #     std::unordered_map<INT, HANDLE> m_hTimerMap; // 时钟序号到时钟句柄哈希表
+    #     std::atomic<INT> m_atomic; // 原子操作记录添加的时钟数量
+    #     CMMutex m_locker; // 互斥锁,临界区
+    #     static VOID CALLBACK onTimerFunc (PVOID lpParameter, BOOLEAN TimerOrWaitFired) {
+    #         PTIMERCALLBACKPARAMETER pTimerParam = (PTIMERCALLBACKPARAMETER)lpParameter;
+    #         pTimerParam->pThis->@<周期事件> ((INT_P)pTimerParam->nTimerIndex, pTimerParam->lpUserData);
+    #     }
+    # public:
+    #     HANDLE m_hTimerQueue = NULL; // 时钟队列句柄
+    #     INT AddTimerQueue (WAITORTIMERCALLBACK lpTimerCallBack, PVOID lpUserData, DWORD dwDueTime, DWORD dwPeriod, BOOL bInThreadPool) {
+    #         if (m_hTimerQueue == NULL) return -1;
+    #         HANDLE hTimer = NULL;
+    #         if (::CreateTimerQueueTimer (&hTimer, m_hTimerQueue, lpTimerCallBack,
+    #                                      lpUserData, dwDueTime, dwPeriod, bInThreadPool ? WT_EXECUTEDEFAULT : WT_EXECUTEINTIMERTHREAD) ) {
+    #             INT nIndex = m_atomic.load();
+    #             m_locker.lock ();
+    #             m_hTimerMap[nIndex] = hTimer;
+    #             m_locker.unlock ();
+    #             m_atomic.fetch_add(1);
+    #             return nIndex;
+    #         }
+    #         return -1;
+    #     }
+    # <> </include>
+    # @end
+    # ---
+}
+
+类 线程时钟类 <公开 注释 = "时钟事件以线程的方式运行.\r" 注释 = "由于系统限制,最多只能创建16个多媒体时钟.\r" 注释 = "注意: 时钟的计时精度比较差,最大有15毫秒的误差" 折叠
+        @文档 = "category = \"多线程\"" @视窗.外部头文件 = "Mmsystem.h" @视窗.外部库 = "winmm.lib">
+{
+    方法 类_初始化 <折叠>
+    {
+        结束时钟 ()
+    }
+
+    方法 启动时钟 <公开 类型 = 逻辑型 注释 = "启动一个时钟,重复启动会先销毁之前创建的时钟." 折叠 @禁止流程检查 = 真>
+    参数 周期时间 <类型 = 整数 注释 = "时钟运行的周期时间,以毫秒为单位">
+    {
+        @ if (m_nIDTimer) timeKillEvent (m_nIDTimer);
+        @ m_nIDTimer = timeSetEvent (@<周期时间>, 1, @sn<current_class>::onTimeFunc, (DWORD_PTR)this, TIME_PERIODIC | TIME_CALLBACK_FUNCTION | TIME_KILL_SYNCHRONOUS);
+        @ return m_nIDTimer != NULL;
+    }
+
+    方法 结束时钟 <公开 注释 = "结束时钟周期." 折叠>
+    {
+        @ if (m_nIDTimer)
+        @ {
+        @     timeKillEvent (m_nIDTimer);
+        @     m_nIDTimer = NULL;
+        @ }
+    }
+
+    方法 是否正在任务 <公开 属性读 类型 = 逻辑型 注释 = "返回时钟是否正在运行." 折叠 @禁止流程检查 = 真>
+    {
+        @ return m_nIDTimer != NULL;
+    }
+
+    方法 时钟事件 <公开 定义事件 类型 = 整数 注释 = "每当经过了指定的时钟周期,将发送本事件.\r" 注释 = "事件以线程方式运行,耗时极低." 返回值注释 = "此返回值无意义" 折叠>
+    {
+
+    }
+
+    # ---
+    # @begin
+    # <> <include>
+    # private:
+    #     UINT m_nIDTimer = NULL;
+    #     static void CALLBACK onTimeFunc (UINT uID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2) {
+    #         HANDLE hThread = ::CreateThread (NULL, 8192, (LPTHREAD_START_ROUTINE)ThreadProc, (LPVOID)dwUser, 0, NULL);
+    #         if (hThread) { ::CloseHandle (hThread); }
+    #     }
+    #     static void CALLBACK ThreadProc (LPVOID lpTis) {
+    #         ((@sn<current_class>*)lpTis)->@<时钟事件> ();
+    #     }
+    # public:
+    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const {
+    #         return ( this->m_nIDTimer == objCompare.m_nIDTimer );
+    #     }
+    # <> </include>
+    # @end
+    # ---
+}
+
+类 多媒体时钟类 <公开 注释 = "多媒体时钟不容易丢失窗口消息.\r" 注释 = "由于系统限制,最多只能创建16个多媒体时钟.\r" 注释 = "注意: 时钟的计时精度比较差,最大有15毫秒的误差"
+        折叠 @文档 = "category = \"多线程\"" @视窗.外部头文件 = "Mmsystem.h" @视窗.外部库 = "winmm.lib">
+{
+    方法 类_初始化 <折叠>
+    {
+        结束时钟 ()
+    }
+
+    方法 启动时钟 <公开 类型 = 逻辑型 注释 = "启动一个时钟,重复启动会先销毁之前创建的时钟." 折叠 @禁止流程检查 = 真>
+    参数 周期时间 <类型 = 整数 注释 = "时钟运行的周期时间,以毫秒为单位">
+    {
+        @ if (m_nIDTimer) timeKillEvent (m_nIDTimer);
+        @ m_nIDTimer = timeSetEvent (@<周期时间>, 1, @sn<current_class>::onTimeFunc, (DWORD_PTR)this, TIME_PERIODIC | TIME_CALLBACK_FUNCTION | TIME_KILL_SYNCHRONOUS);
+        @ return m_nIDTimer != NULL;
+    }
+
+    方法 结束时钟 <公开 注释 = "结束时钟周期." 折叠>
+    {
+        @ if (m_nIDTimer)
+        @ {
+        @     timeKillEvent (m_nIDTimer);
+        @     m_nIDTimer = NULL;
+        @ }
+    }
+
+    方法 是否正在任务 <公开 属性读 类型 = 逻辑型 注释 = "返回时钟是否正在运行." 折叠 @禁止流程检查 = 真>
+    {
+        @ return m_nIDTimer != NULL;
+    }
+
+    方法 时钟事件 <公开 定义事件 类型 = 整数 注释 = "每当经过了指定的时钟周期,将发送本事件.\r" 注释 = "请注意是本事件运行完毕后才开始下一次的计时." 返回值注释 = "此返回值无意义"
+            折叠>
+    {
+
+    }
+
+    # ---
+    # @begin
+    # <> <include>
+    # private:
+    #     UINT m_nIDTimer = NULL;
+    #     static void CALLBACK onTimeFunc (UINT uID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2) {
+    #         ((@sn<current_class>*)dwUser)->@<时钟事件> ();
+    #     }
+    # public:
+    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const {
+    #         return ( this->m_nIDTimer == objCompare.m_nIDTimer );
+    #     }
+    # <> </include>
+    # @end
+    # ---
+}

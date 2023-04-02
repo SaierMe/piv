@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/14                          *
+ * 版本: 2023/04/01                          *
 \*********************************************/
 
 #ifndef _PIV_PROCESS_HPP
@@ -17,7 +17,6 @@
 #include <cstdint>
 #include <string>
 #include <psapi.h>
-#include <tlhelp32.h>
 #include <winternl.h>
 #pragma comment(lib, "Psapi.lib")
 
@@ -25,8 +24,8 @@ class PivProcess
 {
 private:
     HANDLE hProcess = NULL;
-    BYTE *ProcessStart = NULL;
-    BYTE *ProcessEnd = NULL;
+    const BYTE *ProcessStart = NULL;
+    const BYTE *ProcessEnd = NULL;
     DWORD PID;
     MODULEINFO sProcessModuleInfo{0, 0, 0};
 
@@ -39,35 +38,31 @@ private:
                                                   IN SIZE_T StackZeroBits, IN SIZE_T SizeOfStackCommit, IN SIZE_T SizeOfStackReserve, OUT PVOID lpBytesBuffer);
 
     // 取首模块信息
-    void get_base_module_info(const DWORD &pid)
+    BOOL get_base_module_info()
     {
-        HANDLE hModuleSnap = ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pid);
-        if (hModuleSnap != INVALID_HANDLE_VALUE)
-        {
-            MODULEENTRY32W me32{0};
-            me32.dwSize = sizeof(me32);
-            if (::Module32FirstW(hModuleSnap, &me32))
-            {
-                ProcessStart = me32.modBaseAddr;
-                do
-                {
-                    if (ProcessStart == NULL || me32.modBaseAddr < ProcessStart)
-                    {
-                        ProcessStart = me32.modBaseAddr;
-                    }
-                    if (ProcessEnd < me32.modBaseAddr + me32.modBaseSize)
-                    {
-                        ProcessEnd = me32.modBaseAddr + me32.modBaseSize;
-                    }
-                } while (::Module32NextW(hModuleSnap, &me32));
-            }
-            ::CloseHandle(hModuleSnap);
-        }
+        if (hProcess == NULL)
+            return FALSE;
+        DWORD dwNeeded = 0;
+        ::EnumProcessModulesEx(hProcess, NULL, 0, &dwNeeded, 3);
+        HMODULE *lphModule = (HMODULE *)malloc(dwNeeded + 4);
+        if (lphModule == NULL)
+            return FALSE;
+        ::EnumProcessModulesEx(hProcess, lphModule, dwNeeded + 4, &dwNeeded, 3);
+        HMODULE firstModule = lphModule[0], lastModule = lphModule[dwNeeded / sizeof(HMODULE) - 1];
+        free(lphModule);
+        MODULEINFO sModuleInfo{0};
+        if (!::GetModuleInformation(hProcess, firstModule, &sModuleInfo, sizeof(sModuleInfo)))
+            return FALSE;
+        ProcessStart = static_cast<const BYTE *>(sModuleInfo.lpBaseOfDll);
+        if (!::GetModuleInformation(hProcess, lastModule, &sModuleInfo, sizeof(sModuleInfo)))
+            return FALSE;
+        ProcessEnd = static_cast<const BYTE *>(sModuleInfo.lpBaseOfDll) + sModuleInfo.SizeOfImage;
+        return TRUE;
     }
 
 public:
     PivProcess() {}
-    PivProcess(const int32_t &process_id, const int32_t &desired_access)
+    PivProcess(const DWORD &process_id, const DWORD &desired_access)
     {
         open_process(process_id, desired_access);
     }
@@ -77,15 +72,14 @@ public:
     }
 
     // 打开进程
-    BOOL open_process(const int32_t &process_id, const int32_t &desired_access)
+    BOOL open_process(const DWORD &process_id, const DWORD &desired_access)
     {
         close_process();
-        PID = process_id ? static_cast<DWORD>(process_id) : ::GetCurrentProcessId();
-        hProcess = ::OpenProcess(static_cast<DWORD>(desired_access), FALSE, PID);
+        PID = process_id ? process_id : ::GetCurrentProcessId();
+        hProcess = ::OpenProcess(desired_access, FALSE, PID);
         if (hProcess == NULL)
-            return false;
-        get_base_module_info(PID);
-        return true;
+            return FALSE;
+        return TRUE;
     }
 
     // 关闭进程
@@ -102,24 +96,24 @@ public:
     }
 
     // 取进程句柄
-    ptrdiff_t get_process_handle() const noexcept
+    HANDLE get_process_handle() const noexcept
     {
-        return reinterpret_cast<ptrdiff_t>(hProcess);
+        return hProcess;
     }
 
     // 取进程ID
-    int32_t get_process_id() const noexcept
+    DWORD get_process_id() const noexcept
     {
-        return static_cast<int32_t>(PID);
+        return PID;
     }
 
     // 取句柄数量
-    int32_t get_handle_count() const noexcept
+    DWORD get_handle_count() const noexcept
     {
         DWORD dwHandleCount = 0;
         if (hProcess != NULL)
             ::GetProcessHandleCount(hProcess, &dwHandleCount);
-        return static_cast<int32_t>(dwHandleCount);
+        return dwHandleCount;
     }
 
     // 取创建时间
@@ -149,38 +143,38 @@ public:
     }
 
     // 取优先级
-    int32_t get_priority_class()
+    DWORD get_priority_class()
     {
         return hProcess ? ::GetPriorityClass(hProcess) : 0;
     }
 
     // 置优先级
-    BOOL set_priority_class(const int32_t &priority)
+    BOOL set_priority_class(const DWORD &priority)
     {
-        return ::SetPriorityClass(hProcess, static_cast<DWORD>(priority));
+        return ::SetPriorityClass(hProcess, priority);
     }
 
     // 取进程DEP策略
-    BOOL get_dep_policy(int32_t &flags, BOOL &is_permanet)
+    BOOL get_dep_policy(DWORD &flags, BOOL &is_permanet)
     {
         flags = 0;
-        is_permanet = false;
+        is_permanet = FALSE;
         if (hProcess != NULL)
         {
             Piv_GetProcessDEPPolicy pfn = reinterpret_cast<Piv_GetProcessDEPPolicy>(
                 ::GetProcAddress(::GetModuleHandleW(L"Kernel32.dll"), "GetProcessDEPPolicy"));
             if (pfn)
             {
-                return pfn(hProcess, reinterpret_cast<LPDWORD>(&flags), reinterpret_cast<PBOOL>(&is_permanet));
+                return pfn(hProcess, &flags, &is_permanet);
             }
         }
-        return false;
+        return FALSE;
     }
 
     // 是否为WOW64模式
     BOOL is_wow64()
     {
-        BOOL result = false;
+        BOOL result = FALSE;
         if (hProcess != NULL)
         {
             Piv_IsWow64Process pfn = reinterpret_cast<Piv_IsWow64Process>(
@@ -227,7 +221,7 @@ public:
     }
 
     // 取模块句柄
-    ptrdiff_t get_module_handle(const wchar_t *module_name)
+    HMODULE get_module_handle(const wchar_t *module_name)
     {
         HMODULE hRes = 0;
         if (hProcess != NULL)
@@ -261,37 +255,37 @@ public:
             }
             free(lphModule);
         }
-        return reinterpret_cast<ptrdiff_t>(hRes);
+        return hRes;
     }
 
     // 取模块基址
-    ptrdiff_t get_module_base(const ptrdiff_t &hMoudle)
+    void *get_module_base(const HMODULE &hMoudle)
     {
         if (hProcess != NULL)
         {
             MODULEINFO sModuleInfo{0};
-            if (::GetModuleInformation(hProcess, reinterpret_cast<HMODULE>(hMoudle), &sModuleInfo, sizeof(sModuleInfo)))
+            if (::GetModuleInformation(hProcess, hMoudle, &sModuleInfo, sizeof(sModuleInfo)))
             {
-                return reinterpret_cast<ptrdiff_t>(sModuleInfo.lpBaseOfDll);
+                return sModuleInfo.lpBaseOfDll;
             }
         }
-        return 0;
+        return NULL;
     }
 
     // 枚举模块句柄
-    int32_t enum_modules(CMArray<INT_P> &module_array, const int32_t &filter_flag)
+    int32_t enum_modules(CMArray<INT_P> &module_array, const DWORD &filter_flag)
     {
         module_array.RemoveAll();
         if (hProcess != NULL)
         {
             DWORD dwNeeded = 0;
-            ::EnumProcessModulesEx(hProcess, NULL, 0, &dwNeeded, static_cast<DWORD>(filter_flag));
+            ::EnumProcessModulesEx(hProcess, NULL, 0, &dwNeeded, filter_flag);
             HMODULE *lphModule = (HMODULE *)malloc(dwNeeded + 4);
             if (lphModule == NULL)
             {
                 return 0;
             }
-            ::EnumProcessModulesEx(hProcess, lphModule, dwNeeded + 4, &dwNeeded, static_cast<DWORD>(filter_flag));
+            ::EnumProcessModulesEx(hProcess, lphModule, dwNeeded + 4, &dwNeeded, filter_flag);
             size_t nModuleCount = dwNeeded / sizeof(HMODULE);
             for (size_t i = 0; i < nModuleCount; i++)
             {
@@ -303,20 +297,20 @@ public:
     }
 
     // 枚举模块名称
-    int32_t enum_modules(CMArray<INT_P> &module_array, CMStringArray &name_array, const BOOL &is_fullpath, const int32_t &filter_flag)
+    int32_t enum_modules(CMArray<INT_P> &module_array, CMStringArray &name_array, const BOOL &is_fullpath, const DWORD &filter_flag)
     {
         module_array.RemoveAll();
         name_array.RemoveAll();
         if (hProcess != NULL)
         {
             DWORD dwNeeded = 0;
-            ::EnumProcessModulesEx(hProcess, NULL, 0, &dwNeeded, static_cast<DWORD>(filter_flag));
+            ::EnumProcessModulesEx(hProcess, NULL, 0, &dwNeeded, filter_flag);
             HMODULE *lphModule = (HMODULE *)malloc(dwNeeded + 4);
             if (lphModule == NULL)
             {
                 return 0;
             }
-            ::EnumProcessModulesEx(hProcess, lphModule, dwNeeded + 4, &dwNeeded, static_cast<DWORD>(filter_flag));
+            ::EnumProcessModulesEx(hProcess, lphModule, dwNeeded + 4, &dwNeeded, filter_flag);
             size_t nModuleCount = dwNeeded / sizeof(HMODULE);
             WCHAR szFileName[MAX_PATH + 1]{'\0'};
             for (size_t i = 0; i < nModuleCount; i++)
@@ -338,22 +332,22 @@ public:
     }
 
     // 取模块信息
-    BOOL get_module_info(const ptrdiff_t &hModule, MODULEINFO *pModuleInfo)
+    BOOL get_module_info(const HMODULE &hModule, MODULEINFO *pModuleInfo)
     {
         if (hProcess != NULL)
         {
-            return ::GetModuleInformation(hProcess, reinterpret_cast<HMODULE>(hModule), pModuleInfo, sizeof(MODULEINFO));
+            return ::GetModuleInformation(hProcess, hModule, pModuleInfo, sizeof(MODULEINFO));
         }
         return false;
     }
 
     // 取模块名称
-    CVolString get_module_name(const ptrdiff_t &hModule)
+    CVolString get_module_name(const HMODULE &hModule)
     {
         if (hProcess != NULL)
         {
             WCHAR szBaseName[MAX_PATH + 1]{'\0'};
-            if (::GetModuleBaseNameW(hProcess, reinterpret_cast<HMODULE>(hModule), szBaseName, MAX_PATH) > 0)
+            if (::GetModuleBaseNameW(hProcess, hModule, szBaseName, MAX_PATH) > 0)
             {
                 return CVolString(szBaseName);
             }
@@ -362,12 +356,12 @@ public:
     }
 
     // 取模块文件名
-    CVolString get_module_filename(const ptrdiff_t &hModule)
+    CVolString get_module_filename(const HMODULE &hModule)
     {
         if (hProcess != NULL)
         {
             WCHAR szFilename[MAX_PATH + 1]{'\0'};
-            if (::GetModuleFileNameExW(hProcess, reinterpret_cast<HMODULE>(hModule), szFilename, MAX_PATH) > 0)
+            if (::GetModuleFileNameExW(hProcess, hModule, szFilename, MAX_PATH) > 0)
             {
                 return CVolString(szFilename);
             }
@@ -376,12 +370,12 @@ public:
     }
 
     // 取内存映射文件
-    CVolString get_mapped_filename(const ptrdiff_t &mem_ptr)
+    CVolString get_mapped_filename(void *mem_ptr)
     {
         if (hProcess != NULL)
         {
             WCHAR szFilename[MAX_PATH + 1]{'\0'};
-            if (::GetMappedFileNameW(hProcess, reinterpret_cast<LPVOID>(mem_ptr), szFilename, MAX_PATH) > 0)
+            if (::GetMappedFileNameW(hProcess, mem_ptr, szFilename, MAX_PATH) > 0)
             {
                 return CVolString(szFilename);
             }
@@ -404,7 +398,7 @@ public:
     }
 
     // 创建远程线程
-    BOOL create_remote_thread(const ptrdiff_t &func_ptr, const ptrdiff_t &parm_ptr, const BOOL &is_wait)
+    BOOL create_remote_thread(void *func_ptr, void *parm_ptr, const BOOL &is_wait)
     {
         BOOL result = false;
         if (hProcess != NULL)
@@ -414,13 +408,12 @@ public:
                 ::GetProcAddress(::GetModuleHandleW(L"ntdll.dll"), "NtCreateThreadEx"));
             if (pfn != NULL)
             {
-                pfn(&hThread, 0x1FFFFF, NULL, hProcess, reinterpret_cast<PVOID>(func_ptr),
-                    reinterpret_cast<PVOID>(parm_ptr), 0, NULL, NULL, NULL, NULL);
+                pfn(&hThread, 0x1FFFFF, NULL, hProcess, func_ptr, parm_ptr, 0, NULL, NULL, NULL, NULL);
             }
             else
             {
                 hThread = ::CreateRemoteThread(hProcess, NULL, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(func_ptr),
-                                               reinterpret_cast<PVOID>(parm_ptr), 0, NULL);
+                                               parm_ptr, 0, NULL);
             }
             if (hThread != NULL)
             {
@@ -436,27 +429,23 @@ public:
     }
 
     // 分配虚拟内存
-    ptrdiff_t virtual_alloc(const ptrdiff_t &address, const ptrdiff_t &men_size, const int32_t &allocation_type, const int32_t &protect)
+    void *virtual_alloc(void *address, const size_t &men_size, const DWORD &allocation_type, const DWORD &protect)
     {
-        return reinterpret_cast<ptrdiff_t>(::VirtualAllocEx(hProcess, reinterpret_cast<LPVOID>(address),
-                                                            static_cast<SIZE_T>(men_size), static_cast<DWORD>(allocation_type),
-                                                            static_cast<DWORD>(protect)));
+        return ::VirtualAllocEx(hProcess, address, men_size, allocation_type, protect);
     }
 
     // 释放虚拟内存
-    BOOL virtual_free(const ptrdiff_t &address, const ptrdiff_t &men_size, const int32_t &free_type)
+    BOOL virtual_free(void *address, const size_t &men_size, const DWORD &free_type)
     {
-        return ::VirtualFreeEx(hProcess, reinterpret_cast<LPVOID>(address),
-                               static_cast<SIZE_T>(men_size), static_cast<DWORD>(free_type));
+        return ::VirtualFreeEx(hProcess, address, men_size, free_type);
     }
     // 修改内存保护
-    int32_t modify_memory_protect(const ptrdiff_t &address, const ptrdiff_t &mem_size, const int32_t &new_protect)
+    int32_t modify_memory_protect(void *address, const size_t &mem_size, const DWORD &new_protect)
     {
         if (hProcess != NULL)
         {
             DWORD dwOldProtect;
-            if (::VirtualProtectEx(hProcess, reinterpret_cast<LPVOID>(address), static_cast<SIZE_T>(mem_size),
-                                   static_cast<DWORD>(new_protect), &dwOldProtect))
+            if (::VirtualProtectEx(hProcess, address, mem_size, new_protect, &dwOldProtect))
             {
                 return static_cast<int32_t>(dwOldProtect);
             }
@@ -465,16 +454,19 @@ public:
     }
 
     // 寻找所有内存特征码
-    int32_t find_signatures(const wchar_t *signatures, CMArray<INT_P> &address_array, const ptrdiff_t &start_ptr, const ptrdiff_t &end_ptr, const ptrdiff_t &max_count = PTRDIFF_MAX)
+    int32_t find_signatures(const wchar_t *signatures, CMArray<INT_P> &address_array, const BYTE *start_ptr, const BYTE *end_ptr, const ptrdiff_t &max_count = PTRDIFF_MAX)
     {
         address_array.RemoveAll();
         if (hProcess == NULL)
-        {
             return 0;
+        if (ProcessStart == NULL || ProcessEnd == NULL)
+        {
+            if (!get_base_module_info())
+                return 0;
         }
-        size_t StartAddress = MAX(reinterpret_cast<size_t>(ProcessStart), static_cast<size_t>(start_ptr));
-        size_t EndAddress = (end_ptr <= 0) ? reinterpret_cast<size_t>(ProcessEnd) : MAX(StartAddress, static_cast<size_t>(end_ptr));
-        size_t RetAddress = 0;
+        const BYTE *StartAddress = MIN(MAX(ProcessStart, start_ptr), ProcessEnd);
+        const BYTE *EndAddress = (end_ptr == NULL) ? ProcessEnd : MAX(StartAddress, end_ptr);
+        const BYTE *RetAddress = 0;
         // 特征码转字节数组
         CVolMem sign_buf;
         GetMbsText(signatures, sign_buf, NULL);
@@ -524,13 +516,13 @@ public:
         // 获取Next数组end
         MEMORY_BASIC_INFORMATION mbi{0};
         BYTE *MemoryData = new BYTE[BLOCKMAXSIZE];
-        while (::VirtualQueryEx(hProcess, reinterpret_cast<LPCVOID>(StartAddress), &mbi, sizeof(mbi)) != 0)
+        while (::VirtualQueryEx(hProcess, StartAddress, &mbi, sizeof(mbi)) != 0)
         {
             uint32_t i = 0;
             uint32_t BlockSize = static_cast<uint32_t>(mbi.RegionSize);
             while (BlockSize >= BLOCKMAXSIZE)
             {
-                if (::ReadProcessMemory(hProcess, reinterpret_cast<LPCVOID>(StartAddress + (BLOCKMAXSIZE * i)), MemoryData, BLOCKMAXSIZE, NULL))
+                if (::ReadProcessMemory(hProcess, StartAddress + (BLOCKMAXSIZE * i), MemoryData, BLOCKMAXSIZE, NULL))
                 {
                     for (size_t m = 0, j, k; m < BLOCKMAXSIZE;)
                     {
@@ -540,7 +532,7 @@ public:
                             ;
                         if (k == TzmLength)
                         {
-                            if (address_array.Add2(static_cast<INT_P>(StartAddress + (BLOCKMAXSIZE * i) + m)) >= (max_count - 1))
+                            if (address_array.Add2(reinterpret_cast<INT_P>(StartAddress) + (BLOCKMAXSIZE * i) + m) >= (max_count - 1))
                             {
                                 return static_cast<int32_t>(max_count); // 达到所欲获取的最大数组成员数后退出
                             }
@@ -559,7 +551,7 @@ public:
                 BlockSize -= BLOCKMAXSIZE;
                 i++;
             }
-            if (::ReadProcessMemory(hProcess, (LPCVOID)(StartAddress + (BLOCKMAXSIZE * i)), MemoryData, BlockSize, NULL))
+            if (::ReadProcessMemory(hProcess, StartAddress + (BLOCKMAXSIZE * i), MemoryData, BlockSize, NULL))
             {
                 for (size_t m = 0, j, k; m < BlockSize;)
                 {
@@ -569,7 +561,7 @@ public:
                         ;
                     if (k == TzmLength)
                     {
-                        if (address_array.Add2(static_cast<INT_P>(StartAddress + (BLOCKMAXSIZE * i) + m)) >= (max_count - 1))
+                        if (address_array.Add2(reinterpret_cast<INT_P>(StartAddress) + (BLOCKMAXSIZE * i) + m) >= (max_count - 1))
                         {
                             return static_cast<int32_t>(max_count); // 达到所欲获取的最大数组成员数后退出
                         }
@@ -598,7 +590,7 @@ public:
     }
 
     // 寻找内存特征码
-    ptrdiff_t find_signatures(const wchar_t *signatures, const ptrdiff_t &start_ptr = 0, const ptrdiff_t &end_ptr = PTRDIFF_MAX)
+    ptrdiff_t find_signatures(const wchar_t *signatures, const BYTE *start_ptr, const BYTE *end_ptr)
     {
         if (hProcess != NULL)
         {
@@ -612,30 +604,35 @@ public:
     }
 
     // 寻找所有内存字节集
-    int32_t find_memory(const CVolMem &mem_data, CMArray<INT_P> &address_array, const ptrdiff_t &start_ptr = 0, const ptrdiff_t &end_ptr = PTRDIFF_MAX, const ptrdiff_t &max_count = PTRDIFF_MAX)
+    int32_t find_memory(const CVolMem &mem_data, CMArray<INT_P> &address_array, const BYTE *start_ptr, const BYTE *end_ptr, const ptrdiff_t &max_count = PTRDIFF_MAX)
     {
         address_array.RemoveAll();
         if (hProcess == NULL)
         {
             return 0;
         }
-        size_t StartAddress = MAX(reinterpret_cast<size_t>(ProcessStart), static_cast<size_t>(start_ptr));
-        size_t EndAddress = (end_ptr <= 0) ? reinterpret_cast<size_t>(ProcessEnd) : MAX(StartAddress, static_cast<size_t>(end_ptr));
+        if (ProcessStart == NULL || ProcessEnd == NULL)
+        {
+            if (!get_base_module_info())
+                return 0;
+        }
+        const BYTE *StartAddress = MIN(MAX(ProcessStart, start_ptr), ProcessEnd);
+        const BYTE *EndAddress = (end_ptr == NULL) ? ProcessEnd : MAX(StartAddress, end_ptr);
         MEMORY_BASIC_INFORMATION mbi{0};
         CVolMem MemoryData;
         MemoryData.Alloc(BLOCKMAXSIZE, TRUE);
-        while (::VirtualQueryEx(hProcess, reinterpret_cast<LPCVOID>(StartAddress), &mbi, sizeof(mbi)) != 0)
+        while (::VirtualQueryEx(hProcess, StartAddress, &mbi, sizeof(mbi)) != 0)
         {
             uint32_t i = 0;
             uint32_t BlockSize = static_cast<uint32_t>(mbi.RegionSize);
             while (BlockSize >= BLOCKMAXSIZE)
             {
-                if (::ReadProcessMemory(hProcess, reinterpret_cast<LPCVOID>(StartAddress + (BLOCKMAXSIZE * i)), reinterpret_cast<LPVOID>(MemoryData.GetPtr()), BLOCKMAXSIZE, NULL))
+                if (::ReadProcessMemory(hProcess, StartAddress + (BLOCKMAXSIZE * i), MemoryData.GetPtr(), BLOCKMAXSIZE, NULL))
                 {
                     INT_P ret = MemoryData.FindBin(mem_data, 0);
                     if (ret != -1)
                     {
-                        if (address_array.Add2(StartAddress + (BLOCKMAXSIZE * i) + static_cast<size_t>(ret)) >= (max_count - 1))
+                        if (address_array.Add2(reinterpret_cast<INT_P>(StartAddress) + (BLOCKMAXSIZE * i) + ret) >= (max_count - 1))
                         {
                             return static_cast<int32_t>(max_count); // 达到所欲获取的最大数组成员数后退出
                         }
@@ -645,12 +642,12 @@ public:
                 i++;
             }
             MemoryData.Zero();
-            if (::ReadProcessMemory(hProcess, (LPCVOID)(StartAddress + (BLOCKMAXSIZE * i)), reinterpret_cast<LPVOID>(MemoryData.GetPtr()), BlockSize, NULL))
+            if (::ReadProcessMemory(hProcess, StartAddress + (BLOCKMAXSIZE * i), MemoryData.GetPtr(), BlockSize, NULL))
             {
                 INT_P ret = MemoryData.FindBin(mem_data, 0);
                 if (ret != -1)
                 {
-                    if (address_array.Add2(StartAddress + (BLOCKMAXSIZE * i) + static_cast<size_t>(ret)) >= (max_count - 1)) // 达到所欲获取的最大数组成员数后退出
+                    if (address_array.Add2(reinterpret_cast<INT_P>(StartAddress) + (BLOCKMAXSIZE * i) + ret) >= (max_count - 1)) // 达到所欲获取的最大数组成员数后退出
                     {
                         return static_cast<int32_t>(max_count);
                     }
@@ -666,7 +663,7 @@ public:
     }
 
     // 寻找内存字节集
-    ptrdiff_t find_memory(const CVolMem &mem_data, const ptrdiff_t &start_ptr = 0, const ptrdiff_t &end_ptr = PTRDIFF_MAX)
+    ptrdiff_t find_memory(const CVolMem &mem_data, const BYTE *start_ptr, const BYTE *end_ptr)
     {
         if (hProcess != NULL)
         {
@@ -680,25 +677,24 @@ public:
     }
 
     // 读内存数据
-    BOOL read_memory(const ptrdiff_t &write_address, const ptrdiff_t &read_address, const ptrdiff_t &read_size)
+    BOOL read_memory(void *write_address, const void *read_address, const size_t &read_size)
     {
         if (hProcess != NULL)
         {
-            return ::ReadProcessMemory(hProcess, reinterpret_cast<LPCVOID>(read_address), reinterpret_cast<LPVOID>(write_address),
-                                       static_cast<SIZE_T>(read_size), NULL);
+            return ::ReadProcessMemory(hProcess, read_address, write_address, read_size, NULL);
         }
-        return false;
+        return FALSE;
     }
 
     // 读内存字节集
-    CVolMem read_memory(const ptrdiff_t &read_address, const ptrdiff_t &read_size)
+    CVolMem read_memory(const void *read_address, const size_t &read_size)
     {
         if (hProcess != NULL)
         {
             CVolMem MemoryData;
             MemoryData.Alloc(read_size, TRUE);
-            if (::ReadProcessMemory(hProcess, reinterpret_cast<LPCVOID>(read_address), MemoryData.GetPtr(),
-                                    static_cast<SIZE_T>(read_size), NULL))
+            if (::ReadProcessMemory(hProcess, read_address, MemoryData.GetPtr(),
+                                    read_size, NULL))
             {
                 return MemoryData;
             }
@@ -708,49 +704,44 @@ public:
 
     // 读内存值
     template <typename R>
-    R read_memory_value(const ptrdiff_t &read_address)
+    R read_memory_value(const void *read_address)
     {
         R value;
-        if (hProcess != NULL)
+        if (hProcess != NULL && ::ReadProcessMemory(hProcess, read_address, &value, sizeof(R), NULL))
         {
-            if (::ReadProcessMemory(hProcess, reinterpret_cast<LPCVOID>(read_address),
-                                    &value, sizeof(R), NULL))
-            {
-                return value;
-            }
+            return value;
         }
         return value;
     }
 
     // 写内存数据
-    BOOL write_memory(const ptrdiff_t &write_address, const ptrdiff_t &data_address, const ptrdiff_t &data_size)
+    BOOL write_memory(void *write_address, const void *data_address, const size_t &data_size)
     {
-        BOOL result = false;
+        BOOL result = FALSE;
         if (hProcess != NULL)
         {
             DWORD dwOldProtect = 0;
-            if (::VirtualProtectEx(hProcess, reinterpret_cast<LPVOID>(write_address), static_cast<SIZE_T>(data_size), PAGE_EXECUTE_READWRITE, &dwOldProtect))
+            if (::VirtualProtectEx(hProcess, write_address, data_size, PAGE_EXECUTE_READWRITE, &dwOldProtect))
             {
-                result = ::WriteProcessMemory(hProcess, reinterpret_cast<LPVOID>(write_address), reinterpret_cast<LPCVOID>(data_address),
-                                              static_cast<SIZE_T>(data_size), NULL);
-                ::VirtualProtectEx(hProcess, reinterpret_cast<LPVOID>(write_address), static_cast<SIZE_T>(data_size), dwOldProtect, NULL);
+                result = ::WriteProcessMemory(hProcess, write_address, data_address, data_size, NULL);
+                ::VirtualProtectEx(hProcess, write_address, data_size, dwOldProtect, NULL);
             }
         }
         return result;
     }
 
     // 写内存字节集
-    BOOL write_memory(const ptrdiff_t &write_address, const CVolMem &data)
+    BOOL write_memory(void *write_address, const CVolMem &data)
     {
-        BOOL result = false;
+        BOOL result = FALSE;
         if (hProcess != NULL)
         {
             DWORD dwOldProtect = 0;
-            if (::VirtualProtectEx(hProcess, reinterpret_cast<LPVOID>(write_address), static_cast<SIZE_T>(data.GetSize()), PAGE_EXECUTE_READWRITE, &dwOldProtect))
+            if (::VirtualProtectEx(hProcess, write_address, static_cast<size_t>(data.GetSize()), PAGE_EXECUTE_READWRITE, &dwOldProtect))
             {
-                result = ::WriteProcessMemory(hProcess, reinterpret_cast<LPVOID>(write_address), data.GetPtr(),
-                                              static_cast<SIZE_T>(data.GetSize()), NULL);
-                ::VirtualProtectEx(hProcess, reinterpret_cast<LPVOID>(write_address), static_cast<SIZE_T>(data.GetSize()), dwOldProtect, NULL);
+                result = ::WriteProcessMemory(hProcess, write_address, data.GetPtr(),
+                                              static_cast<size_t>(data.GetSize()), NULL);
+                ::VirtualProtectEx(hProcess, write_address, static_cast<size_t>(data.GetSize()), dwOldProtect, NULL);
             }
         }
         return result;
@@ -758,125 +749,116 @@ public:
 
     // 写内存值
     template <typename T>
-    BOOL write_memory_value(const ptrdiff_t &write_address, const T &value)
+    BOOL write_memory_value(void *write_address, const T &value)
     {
         BOOL result = false;
         if (hProcess != NULL)
         {
             DWORD dwOldProtect = 0;
-            if (::VirtualProtectEx(hProcess, reinterpret_cast<LPVOID>(write_address), sizeof(T), PAGE_EXECUTE_READWRITE, &dwOldProtect))
+            if (::VirtualProtectEx(hProcess, write_address, sizeof(T), PAGE_EXECUTE_READWRITE, &dwOldProtect))
             {
-                result = ::WriteProcessMemory(hProcess, reinterpret_cast<LPVOID>(write_address),
+                result = ::WriteProcessMemory(hProcess, write_address,
                                               &value, sizeof(T), NULL);
-                ::VirtualProtectEx(hProcess, reinterpret_cast<LPVOID>(write_address), sizeof(T), dwOldProtect, NULL);
+                ::VirtualProtectEx(hProcess, write_address, sizeof(T), dwOldProtect, NULL);
             }
         }
         return result;
     }
 
     // 寻找模块特征码
-    ptrdiff_t find_module_signatures(const ptrdiff_t &hModule, const wchar_t *signatures, const ptrdiff_t &start_off, const ptrdiff_t &end_off)
+    ptrdiff_t find_module_signatures(const HMODULE &hModule, const wchar_t *signatures, const size_t &start_off, const size_t &end_off)
     {
         ptrdiff_t result = 0;
         if (hProcess != NULL)
         {
             MODULEINFO ModuleInfo{0};
-            if (::GetModuleInformation(hProcess, reinterpret_cast<HMODULE>(hModule), &ModuleInfo, sizeof(MODULEINFO)))
+            if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && start_off < ModuleInfo.SizeOfImage && end_off < ModuleInfo.SizeOfImage)
             {
-                ptrdiff_t module_base = reinterpret_cast<ptrdiff_t>(ModuleInfo.lpBaseOfDll);
-                result = find_signatures(signatures, start_off < module_base ? module_base : start_off,
-                                         end_off > static_cast<ptrdiff_t>(ModuleInfo.SizeOfImage) ? module_base + ModuleInfo.SizeOfImage : module_base + end_off);
+                const BYTE* module_base = static_cast<const BYTE*>(ModuleInfo.lpBaseOfDll);
+                result = find_signatures(signatures, module_base + start_off,
+                                         module_base + (end_off ? end_off : ModuleInfo.SizeOfImage));
             }
         }
         return result;
     }
 
     // 寻找所有模块特征码
-    ptrdiff_t find_module_signatures(const ptrdiff_t &hModule, const wchar_t *signatures, CMArray<INT_P> &address_array, const ptrdiff_t &start_off, const ptrdiff_t &end_off)
+    ptrdiff_t find_module_signatures(const HMODULE &hModule, const wchar_t *signatures, CMArray<INT_P> &address_array, const size_t &start_off, const size_t &end_off)
     {
         ptrdiff_t result = 0;
         if (hProcess != NULL)
         {
             MODULEINFO ModuleInfo{0};
-            if (::GetModuleInformation(hProcess, reinterpret_cast<HMODULE>(hModule), &ModuleInfo, sizeof(MODULEINFO)))
+            if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && start_off < ModuleInfo.SizeOfImage && end_off < ModuleInfo.SizeOfImage)
             {
-                ptrdiff_t module_base = reinterpret_cast<ptrdiff_t>(ModuleInfo.lpBaseOfDll);
-                result = find_signatures(signatures, address_array, start_off < module_base ? module_base : start_off,
-                                         end_off > static_cast<ptrdiff_t>(ModuleInfo.SizeOfImage) ? module_base + ModuleInfo.SizeOfImage : module_base + end_off);
+                const BYTE* module_base = static_cast<const BYTE*>(ModuleInfo.lpBaseOfDll);
+                result = find_signatures(signatures, address_array, module_base + start_off, module_base + (end_off ? end_off : ModuleInfo.SizeOfImage));
             }
         }
         return result;
     }
 
     // 寻找模块字节集
-    ptrdiff_t find_module_memory(const ptrdiff_t &hModule, const CVolMem &mem_data, const ptrdiff_t &start_off, const ptrdiff_t &end_off)
+    ptrdiff_t find_module_memory(const HMODULE &hModule, const CVolMem &mem_data, const size_t &start_off, const size_t &end_off)
     {
         ptrdiff_t result = 0;
         if (hProcess != NULL)
         {
             MODULEINFO ModuleInfo{0};
-            if (::GetModuleInformation(hProcess, reinterpret_cast<HMODULE>(hModule), &ModuleInfo, sizeof(MODULEINFO)))
+            if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && start_off < ModuleInfo.SizeOfImage && end_off < ModuleInfo.SizeOfImage)
             {
-                ptrdiff_t module_base = reinterpret_cast<ptrdiff_t>(ModuleInfo.lpBaseOfDll);
-                result = find_memory(mem_data, start_off < module_base ? module_base : start_off,
-                                     end_off > static_cast<ptrdiff_t>(ModuleInfo.SizeOfImage) ? module_base + ModuleInfo.SizeOfImage : module_base + end_off);
+                const BYTE* module_base = static_cast<const BYTE*>(ModuleInfo.lpBaseOfDll);
+                result = find_memory(mem_data, module_base + start_off, module_base + (end_off ? end_off : ModuleInfo.SizeOfImage));
             }
         }
         return result;
     }
 
     // 寻找模块字节集
-    ptrdiff_t find_module_memory(const ptrdiff_t &hModule, const CVolMem &mem_data, CMArray<INT_P> &address_array, const ptrdiff_t &start_off, const ptrdiff_t &end_off)
+    ptrdiff_t find_module_memory(const HMODULE &hModule, const CVolMem &mem_data, CMArray<INT_P> &address_array, const size_t &start_off, const size_t &end_off)
     {
         ptrdiff_t result = 0;
         if (hProcess != NULL)
         {
             MODULEINFO ModuleInfo{0};
-            if (::GetModuleInformation(hProcess, reinterpret_cast<HMODULE>(hModule), &ModuleInfo, sizeof(MODULEINFO)))
+            if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && start_off < ModuleInfo.SizeOfImage && end_off < ModuleInfo.SizeOfImage)
             {
-                ptrdiff_t module_base = reinterpret_cast<ptrdiff_t>(ModuleInfo.lpBaseOfDll);
-                result = find_memory(mem_data, address_array, start_off < module_base ? module_base : start_off,
-                                     end_off > static_cast<ptrdiff_t>(ModuleInfo.SizeOfImage) ? module_base + ModuleInfo.SizeOfImage : module_base + end_off);
+                const BYTE* module_base = static_cast<const BYTE*>(ModuleInfo.lpBaseOfDll);
+                result = find_memory(mem_data, address_array, module_base + start_off, module_base + (end_off ? end_off : ModuleInfo.SizeOfImage));
             }
         }
         return result;
     }
 
     // 读内存数据
-    BOOL read_module_memory(const ptrdiff_t &hModule, const ptrdiff_t &write_address, const ptrdiff_t &read_off, const ptrdiff_t &read_size)
+    BOOL read_module_memory(const HMODULE &hModule, void *write_address, const size_t &read_off, const size_t &read_size)
     {
         if (hProcess != NULL)
         {
             MODULEINFO ModuleInfo{0};
-            if (::GetModuleInformation(hProcess, reinterpret_cast<HMODULE>(hModule), &ModuleInfo, sizeof(MODULEINFO)))
+            if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && read_off < ModuleInfo.SizeOfImage)
             {
-                if (read_off < static_cast<ptrdiff_t>(ModuleInfo.SizeOfImage))
-                {
-                    return ::ReadProcessMemory(hProcess, reinterpret_cast<LPCVOID>(reinterpret_cast<ptrdiff_t>(ModuleInfo.lpBaseOfDll) + read_off),
-                                               reinterpret_cast<LPVOID>(write_address), static_cast<SIZE_T>(read_size), NULL);
-                }
+                return ::ReadProcessMemory(hProcess, reinterpret_cast<const BYTE *>(ModuleInfo.lpBaseOfDll) + read_off,
+                                           write_address, read_size, NULL);
             }
         }
         return false;
     }
 
     // 读内存字节集
-    CVolMem read_module_memory(const ptrdiff_t &hModule, const ptrdiff_t &read_off, const ptrdiff_t &read_size)
+    CVolMem read_module_memory(const HMODULE &hModule, const size_t &read_off, const size_t &read_size)
     {
         if (hProcess != NULL)
         {
             MODULEINFO ModuleInfo{0};
-            if (::GetModuleInformation(hProcess, reinterpret_cast<HMODULE>(hModule), &ModuleInfo, sizeof(MODULEINFO)))
+            if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && read_off < ModuleInfo.SizeOfImage)
             {
-                if (read_off < static_cast<ptrdiff_t>(ModuleInfo.SizeOfImage))
+                CVolMem MemoryData;
+                MemoryData.Alloc(read_size, TRUE);
+                if (::ReadProcessMemory(hProcess, reinterpret_cast<const BYTE *>(ModuleInfo.lpBaseOfDll) + read_off,
+                                        MemoryData.GetPtr(), read_size, NULL))
                 {
-                    CVolMem MemoryData;
-                    MemoryData.Alloc(read_size, TRUE);
-                    if (::ReadProcessMemory(hProcess, reinterpret_cast<LPCVOID>(reinterpret_cast<ptrdiff_t>(ModuleInfo.lpBaseOfDll) + read_off),
-                                            MemoryData.GetPtr(), static_cast<SIZE_T>(read_size), NULL))
-                    {
-                        return MemoryData;
-                    }
+                    return MemoryData;
                 }
             }
         }
@@ -885,41 +867,38 @@ public:
 
     // 读模块内存值
     template <typename R>
-    R read_module_value(const ptrdiff_t &hModule, const ptrdiff_t &read_off)
+    R read_module_value(const HMODULE &hModule, const size_t &read_off)
     {
         R value;
         if (hProcess != NULL)
         {
             MODULEINFO ModuleInfo{0};
-            if (::GetModuleInformation(hProcess, reinterpret_cast<HMODULE>(hModule), &ModuleInfo, sizeof(MODULEINFO)))
+            if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && read_off < ModuleInfo.SizeOfImage)
             {
-                if (read_off < static_cast<ptrdiff_t>(ModuleInfo.SizeOfImage))
+                if (::ReadProcessMemory(hProcess, reinterpret_cast<const BYTE *>(ModuleInfo.lpBaseOfDll) + read_off,
+                                        &value, sizeof(R), NULL))
                 {
-                    if (::ReadProcessMemory(hProcess, reinterpret_cast<LPCVOID>(reinterpret_cast<ptrdiff_t>(ModuleInfo.lpBaseOfDll) + read_off),
-                                            &value, sizeof(R), NULL))
-                    {
-                        return value;
-                    }
+                    return value;
                 }
             }
         }
         return value;
     }
     // 写模块数据
-    BOOL write_module_memory(const ptrdiff_t &hModule, const ptrdiff_t &write_off, const ptrdiff_t &data_address, const ptrdiff_t &data_size)
+    BOOL write_module_memory(const HMODULE &hModule, const size_t &write_off, const void *data_address, const size_t &data_size)
     {
         BOOL result = false;
         if (hProcess != NULL)
         {
             MODULEINFO ModuleInfo{0};
-            if (::GetModuleInformation(hProcess, reinterpret_cast<HMODULE>(hModule), &ModuleInfo, sizeof(MODULEINFO)))
+            if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && write_off < ModuleInfo.SizeOfImage)
             {
                 DWORD dwOldProtect = 0;
-                LPVOID write_address = reinterpret_cast<LPVOID>(reinterpret_cast<ptrdiff_t>(ModuleInfo.lpBaseOfDll) + write_off);
-                if (::VirtualProtectEx(hProcess, write_address, static_cast<SIZE_T>(data_size), PAGE_EXECUTE_READWRITE, &dwOldProtect))
+                BYTE *write_address = reinterpret_cast<BYTE *>(ModuleInfo.lpBaseOfDll) + write_off;
+                if (::VirtualProtectEx(hProcess, write_address, data_size, PAGE_EXECUTE_READWRITE, &dwOldProtect))
                 {
-                    result = ::WriteProcessMemory(hProcess, write_address, reinterpret_cast<LPCVOID>(data_address), static_cast<SIZE_T>(data_size), NULL);
-                    ::VirtualProtectEx(hProcess, write_address, static_cast<SIZE_T>(data_size), dwOldProtect, NULL);
+                    result = ::WriteProcessMemory(hProcess, write_address, data_address, data_size, NULL);
+                    ::VirtualProtectEx(hProcess, write_address, data_size, dwOldProtect, NULL);
                 }
             }
         }
@@ -927,20 +906,20 @@ public:
     }
 
     // 写模块字节集
-    BOOL write_module_memory(const ptrdiff_t &hModule, const ptrdiff_t &write_off, const CVolMem &data)
+    BOOL write_module_memory(const HMODULE &hModule, const size_t &write_off, const CVolMem &data)
     {
         BOOL result = false;
         if (hProcess != NULL)
         {
             MODULEINFO ModuleInfo{0};
-            if (::GetModuleInformation(hProcess, reinterpret_cast<HMODULE>(hModule), &ModuleInfo, sizeof(MODULEINFO)))
+            if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && write_off < ModuleInfo.SizeOfImage)
             {
                 DWORD dwOldProtect = 0;
-                LPVOID write_address = reinterpret_cast<LPVOID>(reinterpret_cast<ptrdiff_t>(ModuleInfo.lpBaseOfDll) + write_off);
-                if (::VirtualProtectEx(hProcess, write_address, static_cast<SIZE_T>(data.GetSize()), PAGE_EXECUTE_READWRITE, &dwOldProtect))
+                BYTE *write_address = reinterpret_cast<BYTE *>(ModuleInfo.lpBaseOfDll) + write_off;
+                if (::VirtualProtectEx(hProcess, write_address, static_cast<size_t>(data.GetSize()), PAGE_EXECUTE_READWRITE, &dwOldProtect))
                 {
-                    result = ::WriteProcessMemory(hProcess, write_address, data.GetPtr(), static_cast<SIZE_T>(data.GetSize()), NULL);
-                    ::VirtualProtectEx(hProcess, write_address, static_cast<SIZE_T>(data.GetSize()), dwOldProtect, NULL);
+                    result = ::WriteProcessMemory(hProcess, write_address, data.GetPtr(), static_cast<size_t>(data.GetSize()), NULL);
+                    ::VirtualProtectEx(hProcess, write_address, static_cast<size_t>(data.GetSize()), dwOldProtect, NULL);
                 }
             }
         }
@@ -949,16 +928,16 @@ public:
 
     // 写模块值
     template <typename T>
-    BOOL write_module_value(const ptrdiff_t &hModule, const ptrdiff_t &write_off, const T &value)
+    BOOL write_module_value(const HMODULE &hModule, const size_t &write_off, const T &value)
     {
         BOOL result = false;
         if (hProcess != NULL)
         {
             MODULEINFO ModuleInfo{0};
-            if (::GetModuleInformation(hProcess, reinterpret_cast<HMODULE>(hModule), &ModuleInfo, sizeof(MODULEINFO)))
+            if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && write_off < ModuleInfo.SizeOfImage)
             {
                 DWORD dwOldProtect = 0;
-                LPVOID write_address = reinterpret_cast<LPVOID>(reinterpret_cast<ptrdiff_t>(ModuleInfo.lpBaseOfDll) + write_off);
+                BYTE *write_address = reinterpret_cast<BYTE *>(ModuleInfo.lpBaseOfDll) + write_off;
                 if (::VirtualProtectEx(hProcess, write_address, sizeof(T), PAGE_EXECUTE_READWRITE, &dwOldProtect))
                 {
                     result = ::WriteProcessMemory(hProcess, write_address, &value, sizeof(T), NULL);
@@ -969,107 +948,5 @@ public:
         return result;
     }
 }; // PivProcess
-
-namespace piv
-{
-    namespace process
-    {
-        // 创建进程
-        static int32_t create_process(const wchar_t *app_name, const wchar_t *commandline, const BOOL &waitend, const ptrdiff_t &show_window)
-        {
-            STARTUPINFO infStartup{0};
-            infStartup.cb = sizeof(infStartup);
-            if (show_window >= 0)
-            {
-                infStartup.dwFlags |= STARTF_USESHOWWINDOW;
-                infStartup.wShowWindow = static_cast<WORD>(show_window);
-            }
-            PROCESS_INFORMATION pi{0};
-            CVolMem memCommandLine;
-            memCommandLine.AddString(commandline);
-            if (!::CreateProcessW(wcslen(app_name) ? app_name : NULL,
-                                  wcslen(commandline) ? reinterpret_cast<LPWSTR>(memCommandLine.GetPtr()) : NULL,
-                                  NULL, NULL, FALSE, 0, NULL, NULL, &infStartup, &pi))
-            {
-                return 0;
-            }
-            if (waitend)
-            {
-                ::WaitForSingleObject(pi.hProcess, INFINITE);
-            }
-            else
-            {
-                ::WaitForInputIdle(pi.hProcess, 500);
-            }
-            ::CloseHandle(pi.hThread);
-            ::CloseHandle(pi.hProcess);
-            return static_cast<int32_t>(pi.dwProcessId);
-        }
-
-        // 提升进程权限
-        static BOOL adjust_privileges(const wchar_t *privilege)
-        {
-            HANDLE hToken;
-            if (!::OpenProcessToken(::GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
-            {
-                return false;
-            }
-            TOKEN_PRIVILEGES tokenPrivilege{0};
-            if (!::LookupPrivilegeValueW(NULL, privilege, &tokenPrivilege.Privileges[0].Luid))
-            {
-                return false;
-            }
-            tokenPrivilege.PrivilegeCount = 1;
-            tokenPrivilege.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-            BOOL result = ::AdjustTokenPrivileges(hToken, FALSE, &tokenPrivilege, sizeof(TOKEN_PRIVILEGES), NULL, NULL);
-            ::CloseHandle(hToken);
-            return result;
-        }
-
-        // 调整当前权限
-        static int32_t Rtl_adjust_privilege(const int32_t &privilege, const BOOL &enbale, const BOOL &currentThread, BOOL *enabled)
-        {
-            typedef DWORD(WINAPI * NT_RtlAdjustPrivilege)(ULONG Privilege, BOOLEAN Enable, BOOLEAN CurrentThread, PBOOLEAN Enabled);
-            NT_RtlAdjustPrivilege pfn = reinterpret_cast<NT_RtlAdjustPrivilege>(::GetProcAddress(::GetModuleHandle(L"Ntdll.dll"), "RtlAdjustPrivilege"));
-            if (pfn)
-            {
-                return static_cast<int32_t>(pfn(static_cast<ULONG>(privilege), enbale, currentThread, reinterpret_cast<PBOOLEAN>(enabled)));
-            }
-            return -1;
-        }
-
-        // 置进程DEP策略
-        static BOOL set_dep_policy(const int32_t &dep)
-        {
-            typedef BOOL(WINAPI * Typedef_SetProcessDEPPolicy)(DWORD);
-            Typedef_SetProcessDEPPolicy pfn = reinterpret_cast<Typedef_SetProcessDEPPolicy>(::GetProcAddress(::GetModuleHandleW(L"Kernel32.dll"), "SetProcessDEPPolicy"));
-            if (pfn)
-            {
-                return pfn(static_cast<DWORD>(dep));
-            }
-            return false;
-        }
-
-        // 进程ID取窗口句柄
-        static ptrdiff_t get_hwnd_from_pid(const int32_t &pid)
-        {
-            HWND hWnd = ::GetTopWindow(NULL);
-            DWORD dwFindPID = pid ? static_cast<DWORD>(pid) : ::GetCurrentProcessId();
-            while (hWnd)
-            {
-                DWORD dwPID = 0;
-                DWORD dwTheardId = ::GetWindowThreadProcessId(hWnd, &dwPID);
-                if (dwTheardId)
-                {
-                    if (dwPID == dwFindPID)
-                        return (INT_P)hWnd;
-                }
-                hWnd = ::GetNextWindow(hWnd, GW_HWNDNEXT);
-            }
-            return 0;
-        }
-
-    }
-} // namespace piv
 
 #endif // _PIV_PROCESS_HPP

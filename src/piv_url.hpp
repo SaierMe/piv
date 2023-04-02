@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/03/15                          *
+ * 版本: 2023/03/28                          *
 \*********************************************/
 
 #ifndef _PIV_URL_HPP
@@ -181,7 +181,7 @@ public:
         uint32_t Size;
         stream.read(&Size, 4);
         urlstr.resize(Size / sizeof(CharT));
-        if (stream.ReadExact(const_cast<CharT*>(urlstr.data()), Size))
+        if (stream.ReadExact(const_cast<CharT *>(urlstr.data()), Size))
             Parse(urlstr);
         else
             urlstr.clear();
@@ -343,12 +343,18 @@ public:
     }
     inline void Parse(const CVolString &urlAdress, const bool &storeBuf = false, const bool &simple = false)
     {
-        if (sizeof(EncodeType) == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
             Parse(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(urlAdress.GetText())}, storeBuf, simple);
-        else if (sizeof(EncodeType) == 4)
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        {
             Parse(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{urlAdress}.GetText())}, true);
+        }
         else
+        {
             Parse(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{urlAdress}.GetText())}, true, simple);
+        }
     }
 
     /**
@@ -407,12 +413,18 @@ public:
      */
     inline CVolString GetScheme() const
     {
-        if (sizeof(EncodeType) == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
             return CVolString(scheme.data(), scheme.size());
-        else if (sizeof(EncodeType) == 4)
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        {
             return *PivU2Ws{reinterpret_cast<const char *>(scheme.data()), scheme.size()};
+        }
         else
+        {
             return *PivA2Ws{reinterpret_cast<const char *>(scheme.data()), scheme.size()};
+        }
     }
 
     /**
@@ -427,12 +439,18 @@ public:
             piv::encoding::UrlStrDecode(user, utf8, str);
         else
             str.assign(user.data(), user.size());
-        if (sizeof(EncodeType) == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
             return CVolString(str.c_str());
-        else if (sizeof(EncodeType) == 4)
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        {
             return *PivU2Ws{reinterpret_cast<const char *>(str.data()), str.size()};
+        }
         else
+        {
             return *PivA2Ws{reinterpret_cast<const char *>(str.data()), str.size()};
+        }
     }
     inline std::basic_string<CharT> DecodeUser(const bool &utf8 = true) const
     {
@@ -452,12 +470,18 @@ public:
             piv::encoding::UrlStrDecode(password, utf8, str);
         else
             str.assign(password.data(), password.size());
-        if (sizeof(EncodeType) == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
             return CVolString(str.c_str());
-        else if (sizeof(EncodeType) == 4)
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        {
             return *PivU2Ws{reinterpret_cast<const char *>(str.data()), str.size()};
+        }
         else
+        {
             return *PivA2Ws{reinterpret_cast<const char *>(str.data()), str.size()};
+        }
     }
     inline std::basic_string<CharT> DecodePassword(const bool &utf8 = true) const
     {
@@ -470,12 +494,18 @@ public:
      */
     inline CVolString GetHost() const
     {
-        if (sizeof(EncodeType) == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
             return CVolString(host.data(), host.size());
-        else if (sizeof(EncodeType) == 4)
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        {
             return *PivU2Ws{reinterpret_cast<const char *>(host.data()), host.size()};
+        }
         else
+        {
             return *PivA2Ws{reinterpret_cast<const char *>(host.data()), host.size()};
+        }
     }
 
     /**
@@ -484,12 +514,18 @@ public:
      */
     inline CVolString GetPath() const
     {
-        if (sizeof(EncodeType) == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
             return CVolString(path.data(), path.size());
-        else if (sizeof(EncodeType) == 4)
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        {
             return *PivU2Ws{reinterpret_cast<const char *>(path.data()), path.size()};
+        }
         else
+        {
             return *PivA2Ws{reinterpret_cast<const char *>(path.data()), path.size()};
+        }
     }
 
     /**
@@ -498,12 +534,18 @@ public:
      */
     inline CVolString GetPort() const
     {
-        if (sizeof(EncodeType) == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
             return CVolString(port.data(), port.size());
-        else if (sizeof(EncodeType) == 4)
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        {
             return *PivU2Ws{reinterpret_cast<const char *>(port.data()), port.size()};
+        }
         else
+        {
             return *PivA2Ws{reinterpret_cast<const char *>(port.data()), port.size()};
+        }
     }
 
     /**
@@ -512,12 +554,18 @@ public:
      */
     inline CVolString GetQuery() const
     {
-        if (sizeof(EncodeType) == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
             return CVolString(query.data(), query.size());
-        else if (sizeof(EncodeType) == 4)
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        {
             return *PivU2Ws{reinterpret_cast<const char *>(query.data()), query.size()};
+        }
         else
+        {
             return *PivA2Ws{reinterpret_cast<const char *>(query.data()), query.size()};
+        }
     }
 
     /**
@@ -526,12 +574,18 @@ public:
      */
     inline CVolString GetFragment() const
     {
-        if (sizeof(EncodeType) == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
             return CVolString(fragment.data(), fragment.size());
-        else if (sizeof(EncodeType) == 4)
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        {
             return *PivU2Ws{reinterpret_cast<const char *>(fragment.data()), fragment.size()};
+        }
         else
+        {
             return *PivA2Ws{reinterpret_cast<const char *>(fragment.data()), fragment.size()};
+        }
     }
 
     /**
@@ -566,12 +620,18 @@ public:
     }
     inline piv::basic_string_view<CharT> GetParam(const CVolString &name, const bool &utf8 = true)
     {
-        if (sizeof(EncodeType) == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
             return GetParam(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(name.GetText()), static_cast<size_t>(name.GetLength())}, utf8);
-        else if (sizeof(EncodeType) == 4)
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        {
             return GetParam(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{name}.GetText())}, true);
+        }
         else
+        {
             return GetParam(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{name}.GetText())}, false);
+        }
     }
 
     /**
@@ -651,10 +711,14 @@ private:
     {
         if (!form.IsEmpty())
         {
-            if (sizeof(EncodeType) == 2)
+            PIV_IF(sizeof(EncodeType) == 2)
+            {
                 form.AddWChar('&');
+            }
             else
+            {
                 form.AddU8Char('&');
+            }
         }
         if (key.empty())
             return;
@@ -668,19 +732,29 @@ private:
         {
             form.Append(reinterpret_cast<const void *>(key.data()), key.size() * sizeof(CharT));
         }
-        if (sizeof(EncodeType) == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
             form.AddWChar('=');
+        }
         else
+        {
             form.AddU8Char('=');
+        }
     }
     inline void AddKey(const CVolString &key, const bool &utf8 = true)
     {
-        if (sizeof(EncodeType) == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
             AddKey(reinterpret_cast<const CharT *>(key.GetText()), -1, utf8);
-        else if (sizeof(EncodeType) == 4)
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        {
             AddKey(reinterpret_cast<const CharT *>(PivW2U{key}.GetText()), -1, utf8);
+        }
         else
+        {
             AddKey(reinterpret_cast<const CharT *>(PivW2A{key}.GetText()), -1, utf8);
+        }
     }
     inline void AddKey(const CVolMem &key, const bool &utf8 = true)
     {
@@ -705,7 +779,7 @@ private:
     {
         if (piv::encoding::UrlEncodeNeed(value.data(), value.size()))
         {
-            if (sizeof(EncodeType) == 2)
+            PIV_IF(sizeof(EncodeType) == 2)
             {
                 std::basic_string<CharT> buffer;
                 piv::encoding::UrlStrEncode(value, utf8, false, buffer);
@@ -725,12 +799,18 @@ private:
     }
     inline void AddValue(const CVolString &value, const bool &utf8)
     {
-        if (sizeof(EncodeType) == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
             AddValue(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(value.GetText())}, utf8);
-        else if (sizeof(EncodeType) == 4)
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        {
             AddValue(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{value}.GetText())}, utf8);
+        }
         else
+        {
             AddValue(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{value}.GetText())}, utf8);
+        }
     }
     inline void AddValue(const CVolMem &value, const bool &utf8)
     {
@@ -887,12 +967,18 @@ public:
      */
     inline CVolString ToStr() const
     {
-        if (sizeof(EncodeType) == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
             return CVolString(reinterpret_cast<const wchar_t *>(form.GetPtr()), form.GetSize() / 2);
-        else if (sizeof(EncodeType) == 4)
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        {
             return *PivU2Ws{reinterpret_cast<const char *>(form.GetPtr()), static_cast<size_t>(form.GetSize())};
+        }
         else
+        {
             return *PivA2Ws{reinterpret_cast<const char *>(form.GetPtr()), static_cast<size_t>(form.GetSize())};
+        }
     }
 
     /**
@@ -901,12 +987,18 @@ public:
      */
     inline void GetStr(CVolString &s) const
     {
-        if (sizeof(EncodeType) == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
             s.SetText(reinterpret_cast<const wchar_t *>(form.GetPtr()), form.GetSize() / 2);
-        else if (sizeof(EncodeType) == 4)
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        {
             PivU2Ws{reinterpret_cast<const char *>(form.GetPtr()), static_cast<size_t>(form.GetSize())}.GetStr(s);
+        }
         else
+        {
             PivA2Ws{reinterpret_cast<const char *>(form.GetPtr()), static_cast<size_t>(form.GetSize())}.GetStr(s);
+        }
     }
 }; // PivFormCreater
 
@@ -1005,12 +1097,18 @@ public:
         int32_t i = 0;
         for (auto it = params.cbegin(); it != params.cend(); it++, i++)
         {
-            if (sizeof(CharT) == 2)
+            PIV_IF(sizeof(EncodeType) == 2)
+            {
                 strDump.AddFormatLine(L"%d. %s = %s", i, std::wstring{reinterpret_cast<const wchar_t *>(it->first.data()), it->first.size()}.c_str(), std::wstring{reinterpret_cast<const wchar_t *>(it->second.data()), it->second.size()}.c_str());
-            else if (sizeof(EncodeType) == 4)
+            }
+            PIV_ELSE_IF(sizeof(EncodeType) == 4)
+            {
                 strDump.AddFormatLine(L"%d. %s = %s", i, PivU2Ws{reinterpret_cast<const char *>(it->first.data()), it->first.size()}.GetText(), PivU2Ws{reinterpret_cast<const char *>(it->second.data()), it->second.size()}.GetText());
+            }
             else
+            {
                 strDump.AddFormatLine(L"%d. %s = %s", i, PivA2Ws{reinterpret_cast<const char *>(it->first.data()), it->first.size()}.GetText(), PivA2Ws{reinterpret_cast<const char *>(it->second.data()), it->second.size()}.GetText());
+            }
         }
     }
 
@@ -1026,7 +1124,7 @@ public:
         uint32_t Size;
         stream.read(&Size, 4);
         form_str.resize(Size / sizeof(CharT));
-        if (stream.ReadExact(const_cast<CharT*>(form_str.data()), Size))
+        if (stream.ReadExact(const_cast<CharT *>(form_str.data()), Size))
         {
             if (form_str.back() == '\0')
                 form_str.pop_back();
@@ -1137,12 +1235,18 @@ public:
     }
     inline bool Parse(const CVolString &s, const bool &storeBuf = false)
     {
-        if (sizeof(EncodeType) == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
             return Parse(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(s.GetText())}, storeBuf);
-        else if (sizeof(EncodeType) == 4)
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        {
             return Parse(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{s}.GetText())}, true);
+        }
         else
+        {
             return Parse(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{s}.GetText())}, true);
+        }
     }
 
     /**
@@ -1176,12 +1280,18 @@ public:
     }
     inline piv::basic_string_view<CharT> GetParam(const CVolString &name, const bool &utf8 = true)
     {
-        if (sizeof(EncodeType) == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
             return GetParam(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(name.GetText())}, utf8);
-        else if (sizeof(EncodeType) == 4)
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        {
             return GetParam(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{name}.GetText())}, utf8);
+        }
         else
+        {
             return GetParam(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{name}.GetText())}, utf8);
+        }
     }
 
     /**

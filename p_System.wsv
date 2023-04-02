@@ -1,0 +1,1395 @@
+<火山程序 类型 = "通常" 版本 = 1 />
+
+包 火山.PIV基础类 <注释 = "https://github.com/SaierMe/piv" "">
+
+类 系统辅助类 <公开 注释 = "一些未分类的全局辅助方法" 折叠 @文档 = "category = \"系统操作\"" @禁止创建对象 = 真 @全局类 = 真>
+{
+    方法 跳转到 <公开 静态 注释 = "goto操作符的封装,需要配合\"置跳转标号\"使用." 折叠 @嵌入式方法 = "">
+    参数 语句标号 <类型 = 文本型 注释 = "  请提供由\"置跳转标号\"设置过标号.\r" 注释 = "  只能填入用\"\"包围的字符串字面量,不能使用文本变量." @需求类型 = 立即数或常量>
+    {
+        @ goto @pvpt<语句标号>
+    }
+
+    方法 置跳转标号 <公开 静态 注释 = "设置语句标号,用设置\"跳转到\"(goto)的目标位置." 折叠 @嵌入式方法 = "no_end_sem = true">
+    参数 语句标号 <类型 = 文本型 注释 = "只能填入用\"\"包围的字符串字面量,不能使用文本变量." @需求类型 = 立即数或常量>
+    {
+        @ @pvpt<语句标号>:
+    }
+
+    #
+
+    方法 取执行文件路径 <公开 静态 类型 = 文本型 注释 = "返回当前被执行程序文件的完整路径(带文件名)." 折叠 @禁止流程检查 = 真>
+    {
+        @ TCHAR buf [MAX_PATH + 1] { 0 };
+        @ if (::GetModuleFileName (NULL, buf, MAX_PATH) > 0)
+        @     return @an<CVolString> (buf);
+        @ return _CT ("");
+    }
+
+    方法 禁止重复运行 <公开 静态 注释 = "禁止当前程序多开运行" 折叠>
+    参数 标识文本 <类型 = 文本型 注释 = "请用英文字母标记,尽量输复杂一点的文本">
+    {
+        @ @an<CVolString> szGlobal = _CT ("Global\\"); // 给标识加上全局前缀
+        @ szGlobal.AddText (@<标识文本>.GetText ());
+        @ if (::OpenEventW (EVENT_ALL_ACCESS, FALSE, szGlobal.GetText ()) != 0)
+        @     ::ExitProcess (0);
+        @ else
+        @     ::CreateEventW (NULL, FALSE, FALSE, szGlobal.GetText ());
+    }
+
+    方法 取最后错误信息 <公开 静态 类型 = 文本型 注释 = "获取最后一次错误的代码和描述信息." 返回值注释 = "成功返回错误信息,失败返回空文本." 折叠 @禁止流程检查 = 真>
+    参数 错误信息格式 <类型 = 文本型 注释 = "%u为错误代码,%s为错误信息,这两个格式替代符 的前后顺序不能改动." @默认值 = "最后错误(%u): %s">
+    {
+        @ DWORD dwLastError = ::GetLastError ();
+        @ LPVOID lpvMessageBuffer;
+        @ @an<CVolString> ErrorMsg;
+        @ if (::FormatMessageW ( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        @       NULL, dwLastError, MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&lpvMessageBuffer, 0, NULL)) {
+        @     ErrorMsg.Format (@<错误信息格式>.GetText (), dwLastError, (LPWSTR)lpvMessageBuffer);
+        @     ::LocalFree (lpvMessageBuffer);
+        @ }
+        @ return ErrorMsg;
+    }
+
+    方法 取指定错误信息 <公开 静态 类型 = 文本型 注释 = "获取指定错误的代码的描述信息." 返回值注释 = "成功返回错误信息,失败返回空文本." 折叠 @禁止流程检查 = 真>
+    参数 错误代码 <类型 = 整数>
+    参数 错误信息格式 <类型 = 文本型 注释 = "%u为错误代码,%s为错误信息,这两个格式替代符 的前后顺序不能改动." @默认值 = "错误(%u): %s">
+    {
+        @ DWORD dwLastError = (DWORD)@<错误代码>;
+        @ LPVOID lpvMessageBuffer;
+        @ @an<CVolString> ErrorMsg;
+        @ if (::FormatMessageW (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        @       NULL, dwLastError, MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&lpvMessageBuffer, 0, NULL)) {
+        @     ErrorMsg.Format (@<错误信息格式>, dwLastError, (LPWSTR)lpvMessageBuffer);
+        @     ::LocalFree (lpvMessageBuffer);
+        @ }
+        @ return ErrorMsg;
+    }
+
+    方法 取机器码_VMP <公开 静态 类型 = 文本型 注释 = "VMProtect的辅助函数,可以将HWID中各硬件的机器码解析出来,返回不包含网卡特征的另一种机器码格式." 折叠>
+    参数 HWID <类型 = 文本型>
+    {
+        变量 机器码 <类型 = 字节集类>
+        变量 索引 <类型 = 整数>
+        变量 长度 <类型 = 整数>
+        机器码 = BASE64文本到字节集 (HWID)
+        长度 = 机器码.取字节集长度 ()
+        如果 (长度 < 8 || 长度 % 4 != 0)
+        {
+            返回 ("")
+
+        }
+        变量 CPU <类型 = 文本型>
+        变量 HOST <类型 = 文本型>
+        变量 HDD <类型 = 文本型>
+        循环 (0, 长度, 索引, 4)
+        {
+            变量 t1 <类型 = 整数>
+            变量 t2 <类型 = 整数>
+            变量 t3 <类型 = 整数>
+            变量 t4 <类型 = 整数>
+            变量 val <类型 = 整数>
+            变量 ids <类型 = 文本型>
+            t1 = 无符号字节到整数 (机器码.取字节集数据 (索引, 字节))
+            t2 = 无符号字节到整数 (机器码.取字节集数据 (索引 + 1, 字节))
+            t3 = 无符号字节到整数 (机器码.取字节集数据 (索引 + 2, 字节))
+            t4 = 无符号字节到整数 (机器码.取字节集数据 (索引 + 3, 字节))
+            val = t4 * 位左移 (2, 23) + t3 * 位左移 (2, 15) + t2 * 位左移 (2, 7) + 位与 (t1, 0xFC)
+            @ wchar_t buffer[20] { 0 };
+            @ _itow(@<val>, buffer, 16);
+            @ @<ids> = CVolString (buffer).MakeUpper ();
+            如果 (取文本长度 (ids) < 8)
+            {
+                插入文本 (ids, 0, 取重复文本 ("0", 8 - 取文本长度 (ids)))
+
+            }
+            分支判断 (位与 (t1, 3))
+            {
+                分支 (0)
+                {
+                    CPU = ids
+                }
+                分支 (1)
+                {
+                    HOST = ids
+                }
+                分支 (3)
+                {
+                    HDD = ids
+                }
+
+            }
+        }
+        返回 (CPU + "-" + HOST + "-" + HDD)
+    }
+
+    方法 写文本数组注册项 <公开 静态 类型 = 逻辑型 注释 = "在Windows注册表中保存或建立指定的文本数组(REG_MULTI_SZ)注册表项" 返回值注释 = "返回是否成功" 折叠
+            @禁止流程检查 = 真>
+    参数 根目录 <类型 = 注册表根目录类型>
+    参数 全路径注册项名 <类型 = 文本型>
+    参数 欲写入值 <类型 = 文本数组类>
+    {
+        @ CVolString strPath;
+        @ const TCHAR* szItemName = @<全路径注册项名>.GetText ();
+        @ const TCHAR* ps = _tcsrchr (szItemName, '\\');
+        @ if (ps != NULL) {
+        @     strPath.SetText (szItemName, ps - szItemName);
+        @     szItemName = ps + 1;
+        @ }
+        @ return @<写文本数组注册项2> (@<根目录>, strPath, CVolString (szItemName), @<欲写入值>);
+    }
+
+    方法 写文本数组注册项2 <公开 静态 类型 = 逻辑型 注释 = "在Windows注册表中保存或建立指定的文本数组(REG_MULTI_SZ)注册表项" 返回值注释 = "返回是否成功" 折叠
+            @禁止流程检查 = 真>
+    参数 根目录 <类型 = 注册表根目录类型>
+    参数 表项路径 <类型 = 文本型 注释 = "提供表项所处的注册表路径文本,路径分隔符为\'\\\\\'字符.">
+    参数 表项名称 <类型 = 文本型 注释 = "提供表项的具体名称,如欲读取注册项默认值,请提供空文本.">
+    参数 欲写入值 <类型 = 文本数组类>
+    {
+        @ HKEY hKey;
+        @ if (::RegOpenKeyEx ((HKEY)(UINT_P)@<根目录>, @<表项路径>.GetText (), 0, KEY_WRITE, &hKey) == ERROR_SUCCESS ||
+        @         ::RegCreateKey ((HKEY)(UINT_P)@<根目录>, @<表项路径>.GetText (), &hKey) == ERROR_SUCCESS) {
+        @     @an<CVolMem> szItemValue;
+        @     for (INT_P i = 0; i < @<欲写入值>.data ().GetCount (); i++) {
+        @         szItemValue.AddTextValue (@<欲写入值>.data ().GetAt (i), TRUE);
+        @     }
+        @     BOOL bRes = (::RegSetValueEx (hKey, @<表项名称>.GetText (), NULL, REG_MULTI_SZ, (BYTE*)szItemValue.GetPtr (), (DWORD)szItemValue.GetSize ()) == ERROR_SUCCESS);
+        @     ::RegCloseKey (hKey);
+        @     return bRes;
+        @ }
+        @ return FALSE;
+    }
+
+    方法 取文本数组注册项 <公开 静态 类型 = 文本数组类 注释 = "在Windows注册表中返回指定的文本数组(REG_MULTI_SZ)注册表项值" 折叠 @禁止流程检查 = 真>
+    参数 根目录 <类型 = 注册表根目录类型>
+    参数 全路径注册项名 <类型 = 文本型>
+    {
+        @ CVolString strPath;
+        @ const TCHAR* szItemName = @<全路径注册项名>.GetText ();
+        @ const TCHAR* ps = _tcsrchr (szItemName, '\\');
+        @ if (ps != NULL) {
+        @     strPath.SetText (szItemName, ps - szItemName);
+        @     szItemName = ps + 1;
+        @ }
+        @ return @<取文本数组注册项2> (@<根目录>, strPath, CVolString (szItemName));
+    }
+
+    方法 取文本数组注册项2 <公开 静态 类型 = 文本数组类 注释 = "在Windows注册表中返回指定的文本数组(REG_MULTI_SZ)注册表项值" 折叠>
+    参数 根目录 <类型 = 注册表根目录类型>
+    参数 表项路径 <类型 = 文本型 注释 = "提供表项所处的注册表路径文本,路径分隔符为\'\\\\\'字符.">
+    参数 表项名称 <类型 = 文本型 注释 = "提供表项的具体名称,如欲读取注册项默认值,请提供空文本.">
+    {
+        变量 结果变量 <类型 = 文本数组类>
+        @ HKEY hKey;
+        @ if (::RegOpenKeyEx ((HKEY)(UINT_P)@<根目录>, @<表项路径>.GetText (), 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+        @     DWORD dwType, dwDataSize = 0;
+        @     if (::RegQueryValueEx (hKey, @<表项名称>.GetText (), NULL, &dwType, NULL, &dwDataSize) == ERROR_SUCCESS && dwType == REG_MULTI_SZ) {
+        @         WCHAR *pChValue = new WCHAR[dwDataSize]{0};
+        @         if (!pChValue) return @<结果变量>;
+        @         if (::RegQueryValueEx (hKey, @<表项名称>.GetText (), NULL, NULL, (LPBYTE)pChValue, &dwDataSize) == ERROR_SUCCESS) {
+        @             UINT nIndex = 0, nLen = wcslen (&pChValue[0]);
+        @             do {
+        @                 @<结果变量>.data ().Add (&pChValue[nIndex]);
+        @                 nIndex += nLen + 1;
+        @                 nLen = wcslen (&pChValue[nIndex]);
+        @             } while (nLen > 0);
+        @         }
+        @         delete[] pChValue;
+        @     }
+        @     ::RegCloseKey (hKey);
+        @ }
+        返回 (结果变量)
+    }
+
+    方法 全局处理事件 <公开 静态 注释 = "暂时转让控制权,以便让Windows操作系统有机会处理其它的如用户键盘或鼠标输入等事件.\r"
+            注释 = "直到操作系统处理并发送完程序消息队列中的所有事件后,本方法才会返回." 折叠>
+    {
+        @ MSG msg;
+        @ while (::PeekMessage (&msg, NULL, NULL, NULL, PM_NOREMOVE) && msg.message != WM_QUIT)
+        @ {
+        @     if (::GetMessage (&msg, NULL, 0, 0) <= 0)
+        @         break;
+        @     ::TranslateMessage (&msg);
+        @     ::DispatchMessage (&msg);
+        @ }
+    }
+
+    # 待废弃
+
+    方法 添加拖放消息过滤 <公开 静态 注释 = "*官方的\"允许拖放\"已经支持该功能,已经没用处了.\r" 注释 = "\r"
+            注释 = "在UIPI\"用户界面特权隔离\"消息过滤器中增加拖放消息.\r" 注释 = "\"以管理员身份运行\"时必须调用本方法,否则将收不到拖放消息.\r"
+            注释 = "本方法用来配合官方窗口类的拖放文件." 折叠 @废弃 = 警告>
+    {
+        @ typedef BOOL(WINAPI* Typedef_ChangeWindowMessageFilter)(UINT, DWORD);
+        @ Typedef_ChangeWindowMessageFilter API_ChangeWindowMessageFilter =
+        @         (Typedef_ChangeWindowMessageFilter)::GetProcAddress(::GetModuleHandleW (L"User32.dll"), "ChangeWindowMessageFilter");
+        @ if (API_ChangeWindowMessageFilter) {
+        @     API_ChangeWindowMessageFilter (WM_DROPFILES, 1); // WM_DROPFILES, MSGFLT_ADD
+        @     API_ChangeWindowMessageFilter (0x0049, 1); // 0x0049 == WM_COPYGLOBALDATA, MSGFLT_ADD
+        @ }
+    }
+
+    方法 移除拖放消息过滤 <公开 静态 注释 = "*官方的\"允许拖放\"已经支持该功能,已经没用处了.\r" 注释 = "\r"
+            注释 = "从UIPI\"用户界面特权隔离\"消息过滤器中移除拖放消息.\r" 注释 = "调用本方法后,\"以管理员身份运行\"时将收不到拖放消息.\r"
+            注释 = "本方法用来配合官方窗口类的拖放文件." 折叠 @废弃 = 警告>
+    {
+        @ typedef BOOL(WINAPI* Typedef_ChangeWindowMessageFilter)(UINT, DWORD);
+        @ Typedef_ChangeWindowMessageFilter API_ChangeWindowMessageFilter =
+        @         (Typedef_ChangeWindowMessageFilter)::GetProcAddress(::GetModuleHandleW (L"User32.dll"), "ChangeWindowMessageFilter");
+        @ if (API_ChangeWindowMessageFilter) {
+        @     API_ChangeWindowMessageFilter (WM_DROPFILES, 0); // WM_DROPFILES, MSGFLT_RESET
+        @     API_ChangeWindowMessageFilter (0x0049, 0); // 0x0049 == WM_COPYGLOBALDATA, MSGFLT_RESET
+        @ }
+    }
+
+    方法 添加拖放消息过滤2 <公开 静态 注释 = "*官方的\"允许拖放\"已经支持该功能,已经没用处了.\r" 注释 = "\r"
+            注释 = "跟\"添加拖放消息过滤\"不同是本方法可以只对某个窗口组件起作用." 折叠 @废弃 = 警告>
+    参数 窗口句柄 <类型 = 变整数>
+    {
+        @ typedef struct tagCHANGEFILTERSTRUCT {
+        @   DWORD cbSize;
+        @   DWORD ExtStatus;
+        @ } CHANGEFILTERSTRUCT, *PCHANGEFILTERSTRUCT;
+        @ typedef BOOL(WINAPI* Typedef_ChangeWindowMessageFilterEx)(HWND, UINT, DWORD, PCHANGEFILTERSTRUCT);
+        @ Typedef_ChangeWindowMessageFilterEx API_ChangeWindowMessageFilterEx =
+        @         (Typedef_ChangeWindowMessageFilterEx)::GetProcAddress(::GetModuleHandleW (L"User32.dll"), "ChangeWindowMessageFilterEx");
+        @ if (API_ChangeWindowMessageFilterEx) {
+        @     API_ChangeWindowMessageFilterEx ((HWND)@<窗口句柄>, WM_DROPFILES, 1, NULL); // WM_DROPFILES, MSGFLT_ADD
+        @     API_ChangeWindowMessageFilterEx ((HWND)@<窗口句柄>, 0x0049, 1, NULL); // 0x0049 == WM_COPYGLOBALDATA, MSGFLT_ADD
+        @ }
+    }
+
+    方法 移除拖放消息过滤2 <公开 静态 注释 = "*官方的\"允许拖放\"已经支持该功能,已经没用处了.\r" 注释 = "\r"
+            注释 = "跟\"移除拖放消息过滤\"不同是本方法可以只对某个窗口组件起作用." 折叠 @废弃 = 警告>
+    参数 窗口句柄 <类型 = 变整数>
+    {
+        @ typedef struct tagCHANGEFILTERSTRUCT {
+        @   DWORD cbSize;
+        @   DWORD ExtStatus;
+        @ } CHANGEFILTERSTRUCT, *PCHANGEFILTERSTRUCT;
+        @ typedef BOOL(WINAPI* Typedef_ChangeWindowMessageFilterEx)(HWND, UINT, DWORD, PCHANGEFILTERSTRUCT);
+        @ Typedef_ChangeWindowMessageFilterEx API_ChangeWindowMessageFilterEx =
+        @         (Typedef_ChangeWindowMessageFilterEx)::GetProcAddress(::GetModuleHandleW (L"User32.dll"), "ChangeWindowMessageFilterEx");
+        @ if (API_ChangeWindowMessageFilterEx) {
+        @     API_ChangeWindowMessageFilterEx ((HWND)@<窗口句柄>, WM_DROPFILES, 0, NULL); // WM_DROPFILES, MSGFLT_RESET
+        @     API_ChangeWindowMessageFilterEx ((HWND)@<窗口句柄>, 0x0049, 0, NULL); // 0x0049 == WM_COPYGLOBALDATA, MSGFLT_RESET
+        @ }
+    }
+}
+
+类 全局内存管理类 <公开 注释 = "  各种内存管理都是在堆中分配内存,但因为分配器的机制不同,不能交叉使用,\r" 注释 = "比如\"分配内存\"的地址不能用\"释放全局内存\"来释放.\r"
+        注释 = "  由于部分系统API需要使用\"释放全局内存\"释放,所以本类的封装还是有意义的.\r" 注释 = "  本类只封装了固定地址一种应用方法,未封装另一种可移动内存对象.\r"
+        注释 = "  本类的开销比\"分配内存\"大,如非必要不建议使用.\r" 注释 = "  全局内存和本地内存只在Win16系统中有区别,在Win32以上系统中这两者无区别." 折叠
+        @文档 = "category = \"内存操作\"" @禁止创建对象 = 真 "//@全局类" = 真>
+{
+    方法 分配全局内存 <公开 静态 类型 = 变整数 注释 = "  在堆中分配一段所指定尺寸的全局内存,返回所分配内存的地址.\r"
+            注释 = "  注意: 所返回的内存地址在不再使用后必须使用\"释放全局内存\"\r" 注释 = "方法将其释放(除非调用了\"重分配全局内存\"方法将其重新分配)."
+            返回值注释 = "成功返回所分配内存的地址指针,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 所欲分配内存的尺寸 <类型 = 整数 注释 = "  提供所欲分配内存的尺寸,必须大于0.\r" 注释 = "  实际分配的内存可能会大于该值,可以用\"取全局内存尺寸\"获取实际尺寸.">
+    参数 是否清零 <类型 = 逻辑型 注释 = "是否将所分配的内容空间清除为字节值零." @默认值 = 真>
+    {
+        @ (INT_P)GlobalAlloc (@<是否清零> ? GPTR : GMEM_FIXED , (SIZE_T)@<所欲分配内存的尺寸>)
+    }
+
+    方法 重分配全局内存 <公开 静态 类型 = 变整数 注释 = "重新分配先前所已分配内存的尺寸或属性,返回重分配后的内存地址指针.\r"
+            注释 = "注意: 先前内存中的数据内容将被保留,即使本方法返回了不同的地址指针." 返回值注释 = "成功返回所重分配内存的地址指针,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 先前所分配内存地址 <类型 = 变整数 注释 = "  提供先前调用\"分配内存\"或\"重分配内存\"方法所返回的内存地址指针,注\r"
+            注释 = "意所提供的先前内存地址指针在重分配后将不再有效(注意本方法也可能返\r" 注释 = "回相同的地址指针值).">
+    参数 所欲重分配内存的尺寸 <类型 = 整数 注释 = "提供所欲重新分配内存的尺寸,必须大于0.">
+    参数 是否清零 <类型 = 逻辑型 注释 = "如果新尺寸大于原尺寸,是否在新增的内存区域清零." @默认值 = 真>
+    {
+        @ (INT_P)GlobalReAlloc ((HGLOBAL)@<先前所分配内存地址>, (SIZE_T)@<所欲重分配内存的尺寸>, @<是否清零> ? GMEM_ZEROINIT : 0)
+    }
+
+    方法 取全局内存尺寸 <公开 静态 类型 = 整数 注释 = "获取指定全局内存地址的实际尺寸,实际分配的尺寸可能会大于分配时指定要分配的尺寸."
+            返回值注释 = "成功返回字节单位的尺寸,失败或地址已被释放返回0." 折叠 @嵌入式方法 = "">
+    参数 全局内存地址 <类型 = 变整数 注释 = "提供\"分配全局内存\"或\"重分配全局内存\"返回的全局内存地址.">
+    {
+        @ (INT)GlobalSize ((HGLOBAL)@<全局内存地址>)
+    }
+
+    方法 释放全局内存 <公开 静态 类型 = 变整数 注释 = "释放先前调用\"分配全局内存\"或\"重分配全局内存\"方法所分配的全局内存." 返回值注释 = "成功返回0,失败返回原来的内存地址."
+            折叠 @嵌入式方法 = "">
+    参数 先前所分配内存地址 <类型 = 变整数 注释 = "  提供先前调用\"分配全局内存\"或\"重分配全局内存\"方法所返回的内存地址指针,\r"
+            注释 = "注意所提供的内存地址指针在释放后将不再有效.">
+    {
+        @ (INT_P)GlobalFree ((HGLOBAL)@<先前所分配内存地址>)
+    }
+}
+
+类 本地内存管理类 <公开 注释 = "  各种内存管理都是在堆中分配内存,但因为分配器的机制不同,不能交叉使用,\r" 注释 = "比如\"分配内存\"的地址不能用\"释放本地内存\"来释放.\r"
+        注释 = "  由于部分系统API需要使用\"释放本地内存\"释放,所以本类的封装还是有意义的.\r" 注释 = "  本类只封装了固定地址一种应用方法,未封装另一种可移动内存对象.\r"
+        注释 = "  本类的开销比\"分配内存\"大,如非必要不建议使用.\r" 注释 = "  全局内存和本地内存只在Win16系统中有区别,在Win32以上系统中这两者无区别." 折叠
+        @文档 = "category = \"内存操作\"" @禁止创建对象 = 真 "//@全局类" = 真>
+{
+    方法 分配本地内存 <公开 静态 类型 = 变整数 注释 = "  在堆中分配一段所指定尺寸的本地内存,返回所分配内存的地址.\r"
+            注释 = "  注意: 所返回的内存地址在不再使用后必须使用\"释放本地内存\"\r" 注释 = "方法将其释放(除非调用了\"重分配本地内存\"方法将其重新分配)."
+            返回值注释 = "成功返回所分配内存的地址指针,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 所欲分配内存的尺寸 <类型 = 整数 注释 = "  提供所欲分配内存的尺寸,必须大于0.\r" 注释 = "  实际分配的内存可能会大于该值,可以用\"取全局内存尺寸\"获取实际尺寸.">
+    参数 是否清零 <类型 = 逻辑型 注释 = "是否将所分配的内容空间清除为字节值零." @默认值 = 真>
+    {
+        @ (INT_P)LocalAlloc (@<是否清零> ? LPTR : LMEM_FIXED , (SIZE_T)@<所欲分配内存的尺寸>)
+    }
+
+    方法 重分配本地内存 <公开 静态 类型 = 变整数 注释 = "重新分配先前所已分配内存的尺寸或属性,返回重分配后的内存地址指针.\r"
+            注释 = "注意: 先前内存中的数据内容将被保留,即使本方法返回了不同的地址指针." 返回值注释 = "成功返回所重分配内存的地址指针,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 先前所分配内存地址 <类型 = 变整数 注释 = "  提供先前调用\"分配内存\"或\"重分配内存\"方法所返回的内存地址指针,注\r"
+            注释 = "意所提供的先前内存地址指针在重分配后将不再有效(注意本方法也可能返\r" 注释 = "回相同的地址指针值).">
+    参数 所欲重分配内存的尺寸 <类型 = 整数 注释 = "提供所欲重新分配内存的尺寸,必须大于0.">
+    参数 是否清零 <类型 = 逻辑型 注释 = "如果新尺寸大于原尺寸,是否在新增的内存区域清零." @默认值 = 真>
+    {
+        @ (INT_P)LocalReAlloc ((HLOCAL)@<先前所分配内存地址>, (SIZE_T)@<所欲重分配内存的尺寸>, @<是否清零> ? LMEM_ZEROINIT : 0)
+    }
+
+    方法 取本地内存尺寸 <公开 静态 类型 = 整数 注释 = "获取指定全局内存地址的实际尺寸,实际分配的尺寸可能会大于分配时指定要分配的尺寸."
+            返回值注释 = "成功返回字节单位的尺寸,失败或地址已被释放返回0." 折叠 @嵌入式方法 = "">
+    参数 全局内存地址 <类型 = 变整数 注释 = "提供\"分配全局内存\"或\"重分配全局内存\"返回的全局内存地址.">
+    {
+        @ (INT)GlobalSize ((HGLOBAL)@<全局内存地址>)
+    }
+
+    方法 释放本地内存 <公开 静态 类型 = 变整数 注释 = "释放先前调用\"分配本地内存\"或\"重分配本地内存\"方法所分配的本地内存." 返回值注释 = "成功返回0,失败返回原来的内存地址."
+            折叠 @嵌入式方法 = "">
+    参数 先前所分配内存地址 <类型 = 变整数 注释 = "  提供先前调用\"分配本地内存\"或\"重分配本地内存\"方法所返回的内存地址指针,\r"
+            注释 = "注意所提供的内存地址指针在释放后将不再有效.">
+    {
+        @ (INT_P)LocalFree ((HLOCAL)@<先前所分配内存地址>)
+    }
+}
+
+类 剪贴板类 <公开 注释 = "封装了一些剪贴板的功能" 折叠 @文档 = "category = \"系统操作\"" @禁止创建对象 = 真>
+{
+    方法 置剪贴板文件 <静态 类型 = 逻辑型 注释 = "内部调用" 返回值注释 = "返回是否成功" 折叠 @禁止流程检查 = 真>
+    参数 缓冲区 <类型 = 字节集类 @输出名 = "Buffer">
+    参数 是否复制 <类型 = 逻辑型 注释 = "默认复制文件,假为剪切文件." @默认值 = 真 @输出名 = "bCopy">
+    {
+        @ if (::OpenClipboard (NULL) == FALSE) return FALSE;
+        @ if (::EmptyClipboard () == FALSE) return FALSE;
+        @ UINT uDropEffect;
+        @ DROPFILES dropFiles;
+        @ UINT uDropFilesLen;
+        @ HGLOBAL hGblFiles, hGblEffect;
+        @ char *szData, *szFileList;
+
+        @ DWORD *dwDropEffect;
+        @ uDropEffect = ::RegisterClipboardFormatW (CFSTR_PREFERREDDROPEFFECT);
+        @ hGblEffect = ::GlobalAlloc (GMEM_ZEROINIT | GMEM_MOVEABLE | GMEM_DDESHARE, sizeof (DWORD));
+        @ if (hGblEffect == NULL) return FALSE;
+        @ dwDropEffect = (DWORD*)::GlobalLock (hGblEffect);
+        @ if (bCopy == TRUE)
+        @     *dwDropEffect = DROPEFFECT_COPY;
+        @ else
+        @     *dwDropEffect = DROPEFFECT_MOVE;
+        @ ::GlobalUnlock (hGblEffect);
+
+        @ uDropFilesLen = sizeof (DROPFILES);
+        @ dropFiles.pFiles = uDropFilesLen;
+        @ dropFiles.pt.x = 0;
+        @ dropFiles.pt.y = 0;
+        @ dropFiles.fNC = FALSE;
+        @ dropFiles.fWide = TRUE;
+
+        @ hGblFiles = ::GlobalAlloc (GMEM_ZEROINIT | GMEM_MOVEABLE | GMEM_DDESHARE, uDropFilesLen + Buffer.GetSize () + 8);
+        @ if (hGblFiles == NULL) return FALSE;
+        @ szData = (char*)::GlobalLock (hGblFiles);
+        @ memcpy (szData, (LPVOID)(&dropFiles), uDropFilesLen);
+        @ szFileList = szData + uDropFilesLen;
+        @ memcpy (szFileList, Buffer.GetPtr (), Buffer.GetSize ());
+        @ ::GlobalUnlock (hGblFiles);
+
+        @ HANDLE hRetD = ::SetClipboardData (CF_HDROP, hGblFiles);
+        @ HANDLE hRetE = ::SetClipboardData (uDropEffect, hGblEffect);
+        @ ::CloseClipboard ();
+        @ ::GlobalFree (hGblFiles);
+        @ ::GlobalFree (hGblEffect);
+        @ if (hRetD == NULL || hRetE == NULL)
+        @     return FALSE;
+        @ else
+        @     return TRUE;
+    }
+
+    方法 复制文件到剪贴板 <公开 静态 类型 = 逻辑型 注释 = "将文件复制到剪贴板,之后可以在文件资源管理器等地方粘贴来复制文件." 返回值注释 = "返回是否成功" 折叠>
+    参数 文件路径 <类型 = 文本型>
+    {
+        变量 文件 <类型 = 字节集类>
+        文件 = 文本到字节集 (文件路径)
+        文件.添加字节集内容 (0, 0)
+        返回 (置剪贴板文件 (文件, 真))
+    }
+
+    方法 剪切文件到剪贴板 <公开 静态 类型 = 逻辑型 注释 = "将文件剪切到剪贴板,之后可以在文件资源管理器等地方粘贴来移动文件." 返回值注释 = "返回是否成功" 折叠>
+    参数 文件路径 <类型 = 文本型>
+    {
+        变量 文件 <类型 = 字节集类>
+        文件 = 文本到字节集 (文件路径)
+        文件.添加字节集内容 (0, 0)
+        返回 (置剪贴板文件 (文件, 假))
+    }
+
+    方法 复制多个文件到剪贴板 <公开 静态 类型 = 逻辑型 注释 = "将多个文件复制到剪贴板,之后可以在文件资源管理器等地方粘贴来复制文件." 返回值注释 = "返回是否成功" 折叠>
+    参数 文件列表 <类型 = 文本数组类>
+    {
+        变量 文件列表_ <类型 = 字节集类>
+        文件列表.枚举循环 ()
+        {
+            文件列表_.添加文本到字节集 (文件列表.取枚举值 ())
+            文件列表_.添加字节集内容 (0, 0)
+        }
+        返回 (置剪贴板文件 (文件列表_, 真))
+    }
+
+    方法 剪切多个文件到剪贴板 <公开 静态 类型 = 逻辑型 注释 = "将多个文件剪切到剪贴板,之后可以在文件资源管理器等地方粘贴来移动文件." 返回值注释 = "返回是否成功" 折叠>
+    参数 文件列表 <类型 = 文本数组类>
+    {
+        变量 文件列表_ <类型 = 字节集类>
+        文件列表.枚举循环 ()
+        {
+            文件列表_.添加文本到字节集 (文件列表.取枚举值 ())
+            文件列表_.添加字节集内容 (0, 0)
+        }
+        返回 (置剪贴板文件 (文件列表_, 假))
+    }
+
+    方法 取剪贴板文件 <公开 静态 类型 = 整数 注释 = "获取剪贴板中保存的文件,同时判断是复制文件还是剪切文件." 返回值注释 = "0表示获取失败,1表示复制文件,2表示剪切文件." 折叠
+            @禁止流程检查 = 真>
+    参数 文件列表 <类型 = 文本数组类 注释 = "从剪贴板获取的文件列表" @输出名 = "aFileList">
+    {
+        @ aFileList.data ().RemoveAll ();
+        @ INT iRet;
+        @ if (::IsClipboardFormatAvailable (CF_HDROP) == FALSE) return 0;
+        @ if (::OpenClipboard (NULL)) {
+        @     HDROP hDrop = HDROP (::GetClipboardData (CF_HDROP));
+        @     if (hDrop) {
+        @         DWORD dwEffect, *dw;
+        @         UINT uDropEffect = ::RegisterClipboardFormatW (CFSTR_PREFERREDDROPEFFECT);
+        @         dw = (DWORD*)(::GetClipboardData (uDropEffect));
+        @         if (dw == NULL)
+        @             dwEffect = DROPEFFECT_COPY;
+        @         else
+        @             dwEffect = *dw;
+        @         UINT nFiles = DragQueryFileW (hDrop, 0xFFFFFFFF, NULL, 0);
+        @         WCHAR szFile[MAX_PATH];
+        @         for (UINT count = 0; count < nFiles; count++) {
+        @             DragQueryFileW (hDrop, count, szFile, sizeof (szFile));
+        @             aFileList.data ().Add (szFile);
+        @         }
+        @         if (dwEffect & DROPEFFECT_MOVE) {
+        @             iRet = 2;
+        @         } else if (dwEffect & DROPEFFECT_COPY) {
+        @             iRet = 1;
+        @         }
+        @     }
+        @     ::CloseClipboard();
+        @ }
+        @ return iRet;
+    }
+
+    方法 粘贴文件自剪贴板 <公开 静态 类型 = 逻辑型 注释 = "将剪贴板中的文件粘贴到指定的位置,自动识别是复制文件还是剪切文件." 返回值注释 = "返回是否成功" 折叠>
+    参数 目标位置 <类型 = 文本型 注释 = "粘贴文件的目标位置,请以\\\\结尾">
+    参数 是否覆盖 <类型 = 逻辑型 注释 = "默认覆盖目标位置的同名文件: 如果不覆盖,自动将粘贴的文件改名." @默认值 = 真>
+    {
+        变量 文件列表 <类型 = 文本数组类>
+        变量 返回值 <类型 = 整数>
+        检查加入路径字符 (目标位置)
+        返回值 = 取剪贴板文件 (文件列表)
+        如果 (返回值 == 1)  // 复制文件
+        {
+            如果 (创建目录 (目标位置) == 假)
+            {
+                返回 (假)
+
+            }
+            文件列表.枚举循环 ()
+            {
+                变量 目标文件名 <类型 = 文本型>
+                目标文件名 = 目标位置 + 取文件名无路径部分 (文件列表.取枚举值 ())
+                如果 (是否覆盖 == 假)
+                {
+                    变量 临时文件名 <类型 = 文本型>
+                    变量 编号 <类型 = 整数 值 = 1>
+                    变量 扩展名 <类型 = 文本型>
+                    变量 插入位置 <类型 = 整数>
+                    扩展名 = 取文件名后缀 (目标文件名)
+                    如果 (文本是否为空 (扩展名) == 假)
+                    {
+                        插入位置 = 寻找文本 (目标文件名, 扩展名) - 1
+                    }
+                    否则
+                    {
+                        插入位置 = 取文本长度 (目标文件名)
+                    }
+                    临时文件名 = 目标文件名
+                    判断循环 (文件是否存在 (临时文件名) == 真)
+                    {
+                        临时文件名 = 目标文件名
+                        插入文本 (临时文件名, 插入位置, " - 副本 (" + 到文本 (编号) + ")")
+                        编号 = 编号 + 1
+                    }
+                    目标文件名 = 临时文件名
+                }
+                复制文件 (文件列表.取枚举值 (), 目标文件名)
+
+            }
+            返回 (真)
+        }
+        否则 (返回值 == 2)  // 粘贴文件
+        {
+            如果 (创建目录 (目标位置) == 假)
+            {
+                返回 (假)
+            }
+            文件列表.枚举循环 ()
+            {
+                变量 目标文件名 <类型 = 文本型>
+                目标文件名 = 目标位置 + 取文件名无路径部分 (文件列表.取枚举值 ())
+                如果 (是否覆盖 == 假)
+                {
+                    变量 临时文件名 <类型 = 文本型>
+                    变量 编号 <类型 = 整数 值 = 1>
+                    变量 扩展名 <类型 = 文本型>
+                    变量 插入位置 <类型 = 整数>
+                    扩展名 = 取文件名后缀 (目标文件名)
+                    如果 (文本是否为空 (扩展名) == 假)
+                    {
+                        插入位置 = 寻找文本 (目标文件名, 扩展名) - 1
+                    }
+                    否则
+                    {
+                        插入位置 = 取文本长度 (目标文件名)
+                    }
+                    临时文件名 = 目标文件名
+                    判断循环 (文件是否存在 (临时文件名) == 真)
+                    {
+                        临时文件名 = 目标文件名
+                        插入文本 (临时文件名, 插入位置, " - 副本 (" + 到文本 (编号) + ")")
+                        编号 = 编号 + 1
+                    }
+                    目标文件名 = 临时文件名
+                }
+                移动文件 (文件列表.取枚举值 (), 目标文件名)
+
+            }
+            返回 (真)
+        }
+        否则
+        {
+            返回 (假)
+        }
+
+    }
+
+    方法 置剪贴板图像 <公开 静态 类型 = 逻辑型 注释 = "将位图对象类置入到剪贴板中,之后可以粘贴到其他支持位图的软件,比如QQ、Photoshop." 返回值注释 = "返回是否成功" 折叠
+            @禁止流程检查 = 真>
+    参数 位图 <类型 = 位图对象类>
+    {
+        变量 位图字节集 <类型 = 字节集类 @输出名 = "BitmapBuffer">
+        位图.取图片数据 (位图字节集)
+        @ if (::OpenClipboard (NULL) == FALSE) return FALSE;
+        @ if (::EmptyClipboard () == FALSE) return FALSE;
+        @ INT buflen = (INT)BitmapBuffer.GetSize ();
+        @ buflen -= sizeof (BITMAPFILEHEADER);
+        @ HGLOBAL hResult = ::GlobalAlloc (GMEM_MOVEABLE, buflen);
+        @ if (hResult == NULL) return FALSE;
+        @ memcpy (::GlobalLock (hResult), BitmapBuffer.GetPtr () + sizeof (BITMAPFILEHEADER), buflen);
+        @ ::GlobalUnlock (hResult);
+        @ HANDLE hRet = ::SetClipboardData (CF_DIB, hResult);
+        @ ::CloseClipboard ();
+        @ ::GlobalFree (hResult);
+        @ return (hRet != NULL);
+    }
+
+    方法 置剪贴板图像文件 <公开 静态 类型 = 逻辑型 注释 = "从图片文件读入位图数,然后置入到剪贴板中,之后可以粘贴到其他支持位图的软件,比如QQ、Photoshop."
+            返回值注释 = "返回是否成功" 折叠 "">
+    参数 图片文件 <类型 = 文本型>
+    {
+        变量 位图对象 <类型 = 位图对象类>
+        位图对象 = 载入位图文件 (图片文件)
+        如果 (位图对象.为空 () == 真)
+        {
+            返回 (假)
+        }
+        返回 (置剪贴板图像 (位图对象))
+    }
+
+    方法 取剪贴板图像 <公开 静态 类型 = 逻辑型 注释 = "获取剪贴板中的位图数据\r" 注释 = "之后可以用\"CxImage图像处理支持\"转换图像格式\r"
+            注释 = "图像处理类.创建自位图对象 (位图对象)\r" 注释 = "图像处理类.保存到文件 (保存路径, 图像格式类型.PNG格式)" 返回值注释 = "返回是否成功" 折叠>
+    参数 位图 <类型 = 位图对象类 注释 = "获取的位图对象">
+    {
+        变量 位图字节集 <类型 = 字节集类 @输出名 = "BitmapBuffer">
+        @ if (::IsClipboardFormatAvailable (CF_DIB) == FALSE) return FALSE;
+        @ if (::OpenClipboard (NULL) == FALSE) return FALSE;
+        @ GLOBALHANDLE hGMem = ::GetClipboardData (CF_DIB);
+        @ if (hGMem == NULL) return FALSE;
+        @ BITMAPFILEHEADER bmpHeader;
+        @ bmpHeader.bfType = 'MB';
+        @ bmpHeader.bfSize = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)GlobalSize (hGMem);
+        @ bmpHeader.bfReserved1 = 0;
+        @ bmpHeader.bfReserved2 = 0;
+        @ bmpHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof (BITMAPINFOHEADER);
+        @ LPBITMAPINFO lpBI;
+        @ lpBI = (LPBITMAPINFO)::GlobalLock (hGMem);
+        @ BitmapBuffer.Append ((void*)&bmpHeader, sizeof (BITMAPFILEHEADER));
+        @ BitmapBuffer.Append (lpBI, GlobalSize (hGMem));
+        @ ::GlobalUnlock (hGMem);
+        @ ::CloseClipboard ();
+        位图 = 载入位图数据 (位图字节集)
+        返回 (取反 (位图.为空 ()))
+    }
+
+    方法 取剪贴板图像到文件 <公开 静态 类型 = 逻辑型 注释 = "获取剪贴板中的位图数据,并保存为位图文件" 返回值注释 = "返回是否成功" 折叠 @禁止流程检查 = 真>
+    参数 位图文件 <类型 = 文本型 注释 = "保存的目标文件名(包含完整路径),文件后缀为 .bmp">
+    参数 是否覆盖 <类型 = 逻辑型 注释 = "默认覆盖目标位置的同名文件: 如果不覆盖,自动将粘贴的文件改名" @默认值 = 真>
+    {
+        变量 位图对象 <类型 = 位图对象类>
+        变量 目标文件名 <类型 = 文本型>
+        如果 (取剪贴板图像 (位图对象) == 假)
+        {
+            返回 (假)
+        }
+        目标文件名 = 位图文件
+        如果 (是否覆盖 == 假)
+        {
+            变量 临时文件名 <类型 = 文本型>
+            变量 编号 <类型 = 整数 值 = 1>
+            变量 扩展名 <类型 = 文本型>
+            变量 插入位置 <类型 = 整数>
+            扩展名 = 取文件名后缀 (目标文件名)
+            如果 (文本是否为空 (扩展名) == 假)
+            {
+                插入位置 = 寻找文本 (目标文件名, 扩展名) - 1
+            }
+            否则
+            {
+                插入位置 = 取文本长度 (目标文件名)
+            }
+            临时文件名 = 目标文件名
+            判断循环 (文件是否存在 (临时文件名) == 真)
+            {
+                临时文件名 = 目标文件名
+                插入文本 (临时文件名, 插入位置, " - 副本 (" + 到文本 (编号) + ")")
+                编号 = 编号 + 1
+            }
+            目标文件名 = 临时文件名
+        }
+        返回 (位图对象.写图片文件 (目标文件名))
+    }
+}
+
+类 通用文件对话框 <公开 注释 = "调用系统的文件对话框选择文件." 折叠 @文档 = "category = \"文件操作\"" @禁止创建对象 = 真>
+{
+    方法 打开文件 <公开 静态 类型 = 逻辑型 注释 = "调用系统的文件对话框选择打开文件." 返回值注释 = "  返回是否成功,成功时在\"文件名\"参数中返回全路径文件名.\r"
+            返回值注释 = "  如失败或取消打开文件,则\"文件名\"参数返回空文本." 折叠 @禁止流程检查 = 真>
+    参数 文件名 <类型 = 文本型 注释 = "用作初始化对话框中的文件名编辑框内容,以及返回用户所选择的全路径文件名.">
+    参数 过滤器 <类型 = 文本型 注释 = "  要选择的文件后缀,过滤器文本由单个或多个成对的文本串组成.\r" 注释 = "  每对文本串的第一个提供显示文本,如:\"文本文件(*.txt)\",\r"
+            注释 = "  第二个指定实际的过滤匹配符,如: \"*.txt\".\r" 注释 = "  所有各文本串之间用\"|\"号隔开.\r"
+            注释 = "  例如 \"MP4文件(*.mp4;*.m4a)|*.mp4;*.m4a|所有文件(*.*)|*.*\"\r" 注释 = "  留空则不显示过滤器,可以选择所有类型的文件."
+            @默认值 = 空对象>
+    参数 父窗口句柄 <类型 = 变整数 注释 = "父窗口的句柄,0表示无父窗口" @默认值 = 0>
+    参数 标题 <类型 = 文本型 注释 = "文件对话框的标题,默认为\"打开\"" @默认值 = 空对象>
+    参数 初始过滤器 <类型 = 整数 注释 = "  指定初始过滤器在\"过滤器\"属性中的索引位置(从1开始),\r" 注释 = "0为不指定初始过滤器,以第一个过滤器为初始项." @默认值 = 0>
+    参数 初始目录 <类型 = 文本型 注释 = "指定打开对话框时自动跳转到的目录" @默认值 = 空对象>
+    参数 默认文件后缀 <类型 = 文本型 注释 = "当用户没有输入文件的后缀名称时,自动使用这里的文件后缀名称." @默认值 = 空对象>
+    参数 创建时提示 <类型 = 逻辑型 注释 = "如果输入的文件不存在,提示是否创建文件" @默认值 = 假>
+    参数 禁止解析快捷方式 <类型 = 逻辑型 注释 = "选择快捷方式时默认解析为它指向的目标文件,设置为真时返回快捷方式文件本身." @默认值 = 假>
+    参数 不改变目录 <类型 = 逻辑型 注释 = "是否在对话框关闭后,将\"当前目录\"还原为打开对话框之前的目录." @默认值 = 假>
+    {
+        @ OPENFILENAMEW ofn { 0 };
+        @ ofn.lStructSize = sizeof (OPENFILENAMEW);
+        @ ofn.hwndOwner = @<父窗口句柄> ? (HWND)@<父窗口句柄> : NULL;
+        @ @an<CVolMem> szFilter;
+        @ if (@<过滤器>.IsEmpty ()) {
+        @     ofn.lpstrFilter = NULL;
+        @ } else {
+        @     szFilter.AddTextValue (@<过滤器>, TRUE);
+        @     szFilter.ReplaceBin (CVolMem (_CT ("|")), CVolMem ().AddManyBytes (2, 0, 0), 0, 0);
+        @     szFilter.AddWord (0);
+        @     ofn.lpstrFilter = reinterpret_cast<const WCHAR*>(szFilter.GetPtr ());
+        @ }
+        @ ofn.lpstrInitialDir = @<初始目录>.IsEmpty () ? NULL : @<初始目录>.GetText ();
+        @ WCHAR szBuffer[MAX_PATH * 4];
+        @ if (@<文件名>.IsEmpty ())
+        @     szBuffer[0] = '\0';
+        @ else
+        @     wcscpy_s (szBuffer, MAX_PATH * 4, @<文件名>.GetText ());
+        @ ofn.lpstrFile = szBuffer;
+        @ ofn.lpstrTitle = @<标题>.IsEmpty () ? NULL : @<标题>.GetText ();
+        @ ofn.nMaxFile = sizeof (szBuffer);
+        @ ofn.nFilterIndex = static_cast<DWORD>(@<初始过滤器>);
+        @ ofn.lpstrDefExt = @<默认文件后缀>.IsEmpty () ? NULL : @<默认文件后缀>.GetText ();
+        @ ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
+        @ if (@<创建时提示>) ofn.Flags |= OFN_CREATEPROMPT;
+        @ if (@<禁止解析快捷方式>) ofn.Flags |= OFN_NODEREFERENCELINKS;
+        @ if (@<不改变目录>) ofn.Flags |= OFN_NOCHANGEDIR;
+        @ if (::GetOpenFileNameW (&ofn)) {
+        @     @<文件名>.SetText (ofn.lpstrFile);
+        @     return TRUE;
+        @ }
+        @ @<文件名>.Empty ();
+        @ return FALSE;
+    }
+
+    方法 打开选择多个文件 <公开 静态 类型 = 整数 注释 = "调用系统的文件对话框选择打开文件,允许多选." 返回值注释 = "成功返回文件名的数量,失败或未选择文件返回0." 折叠
+            @禁止流程检查 = 真>
+    参数 文件名列表 <类型 = 文本数组类 注释 = "成功在此返回文件名数组.不建议打开超过1000个文件,否则可能会因为缓冲区不足而失败.">
+    参数 过滤器 <类型 = 文本型 注释 = "  要选择的文件后缀,过滤器文本由单个或多个成对的文本串组成.\r" 注释 = "  每对文本串的第一个提供显示文本,如:\"文本文件(*.txt)\",\r"
+            注释 = "  第二个指定实际的过滤匹配符,如: \"*.txt\".\r" 注释 = "  所有各文本串之间用\"|\"号隔开.\r"
+            注释 = "  例如 \"MP4文件(*.mp4;*.m4a)|*.mp4;*.m4a|所有文件(*.*)|*.*\"\r" 注释 = "  留空则不显示过滤器,可以选择所有类型的文件."
+            @默认值 = 空对象>
+    参数 父窗口句柄 <类型 = 变整数 注释 = "父窗口的句柄,0表示无父窗口" @默认值 = 0>
+    参数 标题 <类型 = 文本型 注释 = "文件对话框的标题,默认为\"打开\"" @默认值 = 空对象>
+    参数 初始过滤器 <类型 = 整数 注释 = "  指定初始过滤器在\"过滤器\"属性中的索引位置(从1开始),\r" 注释 = "0为不指定初始过滤器,以第一个过滤器为初始项." @默认值 = 0>
+    参数 初始目录 <类型 = 文本型 注释 = "指定打开对话框时自动跳转到的目录" @默认值 = 空对象>
+    参数 不改变目录 <类型 = 逻辑型 注释 = "是否在对话框关闭后,将\"当前目录\"还原为打开对话框之前的目录." @默认值 = 假>
+    {
+        @ @<文件名列表>.data ().RemoveAll ();
+        @ OPENFILENAMEW ofn { 0 };
+        @ ofn.lStructSize = sizeof (OPENFILENAMEW);
+        @ ofn.hwndOwner = @<父窗口句柄> ? (HWND)@<父窗口句柄> : NULL;
+        @ @an<CVolMem> szFilter;
+        @ if (@<过滤器>.IsEmpty ()) {
+        @     ofn.lpstrFilter = NULL;
+        @ } else {
+        @     szFilter.AddTextValue (@<过滤器>, TRUE);
+        @     szFilter.ReplaceBin (CVolMem (_CT ("|")), CVolMem ().AddManyBytes (2, 0, 0), 0, 0);
+        @     szFilter.AddWord (0);
+        @     ofn.lpstrFilter = reinterpret_cast<const WCHAR*>(szFilter.GetPtr ());
+        @ }
+        @ ofn.lpstrInitialDir = @<初始目录>.IsEmpty () ? NULL : @<初始目录>.GetText ();
+        @ WCHAR szBuffer[MAX_PATH * 512] { 0 }; // 这个缓冲区大小保守可以打开1000-2000个文件
+        @ ofn.lpstrFile = szBuffer;
+        @ ofn.lpstrTitle = @<标题>.IsEmpty () ? NULL : @<标题>.GetText ();
+        @ ofn.nMaxFile = sizeof (szBuffer);
+        @ ofn.nFilterIndex = static_cast<DWORD>(@<初始过滤器>);
+        @ ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_ALLOWMULTISELECT | OFN_NODEREFERENCELINKS;
+        @ if (@<不改变目录>) ofn.Flags |= OFN_NOCHANGEDIR;
+        @ if (::GetOpenFileNameW (&ofn)) {
+        @     @an<CVolString> szPath {szBuffer, ofn.nFileOffset};
+        @     szPath.CheckAddPathChar ();
+        @     WCHAR* p = szBuffer + ofn.nFileOffset; // 把指针移到第一个文件
+        @     while (*p) {
+        @         @an<CVolString> szFileName;
+        @         szFileName.AddText (szPath);
+        @         szFileName.AddText (p);
+        @         @<文件名列表>.data ().Add (szFileName);
+        @         p += wcslen (p) + 1; // 移至下一个文件
+        @     }
+        @     return (INT)@<文件名列表>.data ().GetCount ();
+        @ }
+        @ return 0;
+    }
+
+    方法 保存文件 <公开 静态 类型 = 逻辑型 注释 = "调用系统的文件对话框选择保存文件." 返回值注释 = "  返回是否成功,成功时在\"文件名\"参数中返回全路径文件名.\r"
+            返回值注释 = "  如失败或取消打开文件,则\"文件名\"参数返回空文本." 折叠 @禁止流程检查 = 真>
+    参数 文件名 <类型 = 文本型 注释 = "用作初始化对话框中的文件名编辑框内容,以及返回用户所选择的全路径文件名.">
+    参数 过滤器 <类型 = 文本型 注释 = "  要选择的文件后缀,过滤器文本由单个或多个成对的文本串组成.\r" 注释 = "  每对文本串的第一个提供显示文本,如:\"文本文件(*.txt)\",\r"
+            注释 = "  第二个指定实际的过滤匹配符,如: \"*.txt\".\r" 注释 = "  所有各文本串之间用\"|\"号隔开.\r"
+            注释 = "  例如 \"MP4文件(*.mp4;*.m4a)|*.mp4;*.m4a|所有文件(*.*)|*.*\"\r" 注释 = "  留空则不显示过滤器,可以选择所有类型的文件."
+            @默认值 = 空对象>
+    参数 父窗口句柄 <类型 = 变整数 注释 = "父窗口的句柄,0=表示无父窗口" @默认值 = 0>
+    参数 标题 <类型 = 文本型 注释 = "文件对话框的标题,默认为\"保存\"" @默认值 = 空对象>
+    参数 初始过滤器 <类型 = 整数 注释 = "  指定初始过滤器在\"过滤器\"属性中的索引位置(从1开始),\r" 注释 = "0为不指定初始过滤器,以第一个过滤器为初始项." @默认值 = 0>
+    参数 初始目录 <类型 = 文本型 注释 = "指定打开对话框时自动跳转到的目录" @默认值 = 空对象>
+    参数 默认文件后缀 <类型 = 文本型 注释 = "当用户没有输入文件的后缀名称时,自动使用这里的文件后缀名称." @默认值 = 空对象>
+    参数 文件覆盖提示 <类型 = 逻辑型 注释 = "如果选择的文件已经存在,提示是否覆盖" @默认值 = 真>
+    参数 不改变目录 <类型 = 逻辑型 注释 = "是否在对话框关闭后,将\"当前目录\"还原为打开对话框之前的目录." @默认值 = 假>
+    {
+        @ OPENFILENAMEW ofn { 0 };
+        @ ofn.lStructSize = sizeof (OPENFILENAMEW);
+        @ ofn.hwndOwner = @<父窗口句柄> ? (HWND)@<父窗口句柄> : NULL;
+        @ @an<CVolMem> szFilter;
+        @ if (@<过滤器>.IsEmpty ()) {
+        @     ofn.lpstrFilter = NULL;
+        @ } else {
+        @     szFilter.AddTextValue (@<过滤器>, TRUE);
+        @     szFilter.ReplaceBin (CVolMem (_CT ("|")), CVolMem ().AddManyBytes (2, 0, 0), 0, 0);
+        @     szFilter.AddWord (0);
+        @     ofn.lpstrFilter = reinterpret_cast<const WCHAR*>(szFilter.GetPtr ());
+        @ }
+        @ ofn.lpstrInitialDir = @<初始目录>.IsEmpty () ? NULL : @<初始目录>.GetText ();
+        @ WCHAR szBuffer[MAX_PATH * 4];
+        @ if (@<文件名>.IsEmpty ())
+        @     szBuffer[0] = '\0';
+        @ else
+        @     wcscpy_s (szBuffer, MAX_PATH * 4, @<文件名>.GetText ());
+        @ ofn.lpstrFile = szBuffer;
+        @ ofn.lpstrTitle = @<标题>.IsEmpty () ? NULL : @<标题>.GetText ();
+        @ ofn.nMaxFile = sizeof (szBuffer);
+        @ ofn.nFilterIndex = static_cast<DWORD>(@<初始过滤器>);
+        @ ofn.lpstrDefExt = @<默认文件后缀>.IsEmpty () ? NULL : @<默认文件后缀>.GetText ();
+        @ ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
+        @ if (@<文件覆盖提示>) ofn.Flags |= OFN_OVERWRITEPROMPT;
+        @ if (@<不改变目录>) ofn.Flags |= OFN_NOCHANGEDIR;
+        @ if (::GetSaveFileNameW (&ofn)) {
+        @     @<文件名>.SetText (ofn.lpstrFile);
+        @     return TRUE;
+        @ }
+        @ @<文件名>.Empty ();
+        @ return FALSE;
+    }
+}
+
+类 文件拖放类 <公开 注释 = "给窗口组件启用文件拖放功能" 折叠 @文档 = "category = \"文件操作\"">
+{
+
+    # ---
+    # @begin
+    # <> <include>
+    #     LONG_PTR m_OldWndProc = NULL;
+    #     HWND m_hWnd = NULL;
+    #     typedef struct tagCHANGEFILTERSTRUCT {
+    #       DWORD cbSize;
+    #       DWORD ExtStatus;
+    #     } CHANGEFILTERSTRUCT, *PCHANGEFILTERSTRUCT;
+    #     typedef BOOL(WINAPI* Typedef_ChangeWindowMessageFilterEx)(HWND, UINT, DWORD, PCHANGEFILTERSTRUCT);
+    #     Typedef_ChangeWindowMessageFilterEx API_ChangeWindowMessageFilterEx =
+    #             (Typedef_ChangeWindowMessageFilterEx)::GetProcAddress(::GetModuleHandle (L"User32.dll"), "ChangeWindowMessageFilterEx");
+    # <> </include>
+    # LRESULT CALLBACK WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    #     @sn<current_class>* pThis = (@sn<current_class>*)GetWindowLongPtrW (hwnd, GWLP_USERDATA);
+    #     if (pThis != NULL) {
+    #         if (uMsg == WM_DROPFILES) {
+    #             @dt<文本数组类> saryFileNames;
+    #             WCHAR szFileName[MAX_PATH] = { _T ('\0') };
+    #             UINT uFileNum = ::DragQueryFileW ((HDROP)wParam, 0xFFFFFFFF, NULL, 0);
+    #             for (UINT i = 0; i < uFileNum; ++i) {
+    #                 ::DragQueryFileW ((HDROP)wParam, i, szFileName, MAX_PATH);
+    #                 saryFileNames.data ().Add (szFileName);
+    #             }
+    #             ::DragFinish ((HDROP)wParam);
+    #             pThis->@<文件被拖放> (saryFileNames);
+    #             return 0;
+    #         }
+    #         return ::CallWindowProcW ((WNDPROC)pThis->m_OldWndProc, hwnd, uMsg, wParam, lParam);
+    #     }
+    #     return ::DefWindowProcW (hwnd, uMsg, wParam, lParam);
+    # }
+    # @end
+
+    方法 类_清理 <折叠>
+    {
+        禁用拖放 ()
+    }
+
+    方法 文件被拖放 <公开 定义事件 类型 = 整数 注释 = "拖放操作的回调事件" 折叠>
+    参数 所拖放文件 <类型 = 文本数组类 注释 = "拖放操作接收到的文件">
+
+    方法 启用拖放 <公开 注释 = "启用文件拖放,并选择需要绑定的窗口组件" 折叠>
+    参数 绑定组件 <类型 = 变整数 注释 = "所欲绑定到拖放的窗口组件句柄(可使用\"取窗口句柄\"获取)">
+    {
+        @ if (!m_hWnd) @<禁用拖放> (); // 如果之前有绑定过其他组件,先将它禁用
+        @ m_hWnd = (HWND)@<绑定组件>;
+        @ if (!m_OldWndProc) {
+        @     ::SetWindowLongPtrW (m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
+        @     m_OldWndProc = ::SetWindowLongPtrW (m_hWnd, GWLP_WNDPROC, (LONG_PTR)WindowProc);
+        @ }
+        @ ::DragAcceptFiles (m_hWnd, TRUE);
+        @ if (API_ChangeWindowMessageFilterEx) {
+        @     API_ChangeWindowMessageFilterEx (m_hWnd, WM_DROPFILES, 1, NULL); // WM_DROPFILES, MSGFLT_ADD
+        @     API_ChangeWindowMessageFilterEx (m_hWnd, 0x0049, 1, NULL); // 0x0049 == WM_COPYGLOBALDATA, MSGFLT_ADD
+        @ }
+    }
+
+    方法 禁用拖放 <公开 注释 = "停止拖放功能" 折叠>
+    {
+        @ if (m_hWnd && m_OldWndProc) {
+        @     ::DragAcceptFiles (m_hWnd, FALSE);
+        @     ::SetWindowLongPtrW (m_hWnd, GWLP_WNDPROC, (LONG_PTR)m_OldWndProc);
+        @     if (API_ChangeWindowMessageFilterEx) {
+        @         API_ChangeWindowMessageFilterEx (m_hWnd, WM_DROPFILES, 0, NULL); // WM_DROPFILES, MSGFLT_RESET
+        @         API_ChangeWindowMessageFilterEx (m_hWnd, 0x0049, 0, NULL); // 0x0049 == WM_COPYGLOBALDATA, MSGFLT_RESET
+        @     }
+        @     m_hWnd = NULL;
+        @ }
+    }
+}
+
+类 字体枚举类 <公开 注释 = "枚举系统字体" 折叠 @文档 = "category = \"系统操作\"">
+{
+
+    # @begin
+    #     BOOL CALLBACK nEnumFontFamExProc (LPLOGFONTW lplf, LPTEXTMETRIC lptm, DWORD iType, LPARAM lpData) {
+    #         (*(@dt<文本数组类>*)lpData).data ().Add (CVolString (lplf->lfFaceName));
+    #         return TRUE;
+    #     }
+    #     BOOL CALLBACK eEnumFontFamExProc (LPLOGFONTW lplf, LPTEXTMETRIC lptm, DWORD iType, LPARAM lpData) {
+    #         if (((@sn<current_class>*)lpData)->@<字体回调> (CVolString (lplf->lfFaceName), (INT)iType) == 0)
+    #             return TRUE;
+    #         return FALSE;
+    #     }
+    # @end
+
+    方法 取系统字体列表 <公开 类型 = 整数 注释 = "枚举系统中的字体到文本数组类中" 返回值注释 = "成功返回字体数量" 折叠 @禁止流程检查 = 真>
+    参数 字体列表 <类型 = 文本数组类 注释 = "返回的字体列表" @默认值 = 空对象>
+    参数 字符集 <类型 = 字体字符集类 注释 = "指定返回哪个字符集的字体,默认为系统当前的区域设置." @默认值 = 字体字符集类.默认>
+    参数 检索字体 <类型 = 文本型 注释 = "为空返回所有字体, 否则只返回指定名称的字体(文本超长将被忽略),可用于判断指定的字体是否存在." @默认值 = 空对象>
+    参数 窗口句柄 <类型 = 变整数 注释 = "可空" @默认值 = 0>
+    {
+        @ @<字体列表>.data ().RemoveAll ();
+        @ HDC hdc = ::GetDC ((@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>);
+        @ LOGFONTW lf;
+        @ memset (&lf, 0, sizeof (LOGFONTW));
+        @ lf.lfCharSet = (BYTE)@<字符集>;
+        @ if (@<检索字体>.GetLength ()<= 32) lstrcat (lf.lfFaceName, @<检索字体>.GetText ());
+        @ ::EnumFontFamiliesExW (hdc, (LPLOGFONTW)&lf, (FONTENUMPROCW)&nEnumFontFamExProc, (LPARAM)&@<字体列表>, 0);
+        @ ::ReleaseDC ((@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>, hdc);
+        @ return (INT)@<字体列表>.data ().GetCount ();
+    }
+
+    方法 枚举系统字体 <公开 注释 = "枚举系统中的字体,然后在\"字体回调\"事件中处理找到的字体." 折叠 "">
+    参数 字符集 <类型 = 字体字符集类 注释 = "指定返回哪个字符集的字体,默认为系统当前的区域设置." @默认值 = 字体字符集类.默认>
+    参数 检索字体 <类型 = 文本型 注释 = "为空返回所有字体, 否则只返回指定名称的字体(文本超长将被忽略)." @默认值 = 空对象>
+    参数 窗口句柄 <类型 = 变整数 注释 = "可空" @默认值 = 0>
+    {
+        @ HDC hdc = ::GetDC ((@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>);
+        @ LOGFONTW lf;
+        @ memset (&lf, 0, sizeof (LOGFONTW));
+        @ lf.lfCharSet = @<字符集>;
+        @ if (@<检索字体>.GetLength ()<= 32) lstrcat (lf.lfFaceName, @<检索字体>.GetText ());
+        @ ::EnumFontFamiliesExW (hdc, (LPLOGFONTW)&lf, (FONTENUMPROCW)&eEnumFontFamExProc, (LPARAM)this, 0);
+        @ ::ReleaseDC ((@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>, hdc);
+    }
+
+    方法 字体回调 <公开 定义事件 类型 = 整数 注释 = "执行\"枚举系统字体\"后,本事件会收到枚举的字体,每次事件返回一个字体"
+            返回值注释 = "返回0继续枚举下一个字体,返回任意的非0整数将停止枚举." 折叠>
+    参数 字体名称 <类型 = 文本型 注释 = "找到的字体名称">
+    参数 字体类型 <类型 = 整数 注释 = " 找到的字体类型,这是一个组合值.\r" 注释 = " 可以通过\"是否设备字体\"、\"是否栅格字体\"、\"是否TrueType字体\"等方法判断.">
+
+    方法 是否设备字体 <公开 类型 = 逻辑型 注释 = "检查字体的类型是否为设备字体(DEVICE_FONTTYPE)" 返回值注释 = "返回是否为设备字体" 折叠 @嵌入式方法 = "">
+    参数 字体类型 <类型 = 整数 注释 = "为\"字体回调\"事件中的\"字体类型\"参数.">
+    {
+        @ ((DWORD)@<字体类型> & DEVICE_FONTTYPE) == DEVICE_FONTTYPE
+    }
+
+    方法 是否栅格字体 <公开 类型 = 逻辑型 注释 = "检查字体的类型是否为栅格字体(RASTER_FONTTYPE)" 返回值注释 = "返回是否为栅格字体" 折叠 @嵌入式方法 = "">
+    参数 字体类型 <类型 = 整数 注释 = "为\"字体回调\"事件中的\"字体类型\"参数.">
+    {
+        @ ((DWORD)@<字体类型> & RASTER_FONTTYPE) == RASTER_FONTTYPE
+    }
+
+    方法 是否TrueType字体 <公开 类型 = 逻辑型 注释 = "检查字体的类型是否为TrueType字体(TRUETYPE_FONTTYPE)" 返回值注释 = "返回是否为TrueType字体"
+            折叠 @嵌入式方法 = "">
+    参数 字体类型 <类型 = 整数 注释 = "为\"字体回调\"事件中的\"字体类型\"参数.">
+    {
+        @ ((DWORD)@<字体类型> & TRUETYPE_FONTTYPE) == TRUETYPE_FONTTYPE
+    }
+}
+
+类 字体字符集类 <公开 注释 = "\"字体枚举类\"的辅助类" 折叠 @文档 = "category = \"系统操作.辅助类\"" @常量类 = 字节>
+{
+    常量 ANSI <公开 值 = @ANSI_CHARSET>
+    常量 波罗的语族 <公开 值 = @BALTIC_CHARSET>
+    常量 繁体中文BIG5码 <公开 值 = @CHINESEBIG5_CHARSET>
+    常量 默认 <公开 值 = @DEFAULT_CHARSET 注释 = "默认字符集基于当前系统的区域设置. 例如系统区域设置为\"简体中文(中国)\"时,它被设置为GB2312字符集.">
+    常量 东欧 <公开 值 = @EASTEUROPE_CHARSET>
+    常量 简体中文GB2312 <公开 值 = @GB2312_CHARSET>
+    常量 希腊文 <公开 值 = @GREEK_CHARSET>
+    常量 韩文 <公开 值 = @HANGUL_CHARSET>
+    常量 MAC <公开 值 = @MAC_CHARSET>
+    常量 OEM <公开 值 = @OEM_CHARSET 注释 = "指定与操作系统相关的字符集.">
+    常量 俄语 <公开 值 = @RUSSIAN_CHARSET>
+    常量 日文SHIFTJIS <公开 值 = @SHIFTJIS_CHARSET>
+    常量 符号 <公开 值 = @SYMBOL_CHARSET>
+    常量 土耳其语 <公开 值 = @TURKISH_CHARSET>
+    常量 越南语 <公开 值 = @VIETNAMESE_CHARSET>
+    常量 JOHAB <公开 值 = @JOHAB_CHARSET 注释 = "韩国版Windows系统">
+    常量 阿拉伯文 <公开 值 = @ARABIC_CHARSET 注释 = "中东版Windows系统">
+    常量 希伯来文 <公开 值 = @HEBREW_CHARSET 注释 = "中东版Windows系统">
+    常量 泰文 <公开 值 = @THAI_CHARSET 注释 = "泰国版Windows系统">
+}
+
+类 管道命令行类 <公开 注释 = "启动一个命令行提示符进程,通过匿名管道让当前进程和命令行之间交互传递输出输入信息." 折叠 @文档 = "category = \"系统操作\""
+        @视窗.外部头文件 = "namedpipeapi.h">
+{
+    方法 类_初始化 <折叠>
+    {
+        启动命令行 (200)
+    }
+
+    方法 类_清理 <折叠>
+    {
+        关闭命令行 ()
+    }
+
+    方法 是否已启动 <公开 属性读 类型 = 逻辑型 注释 = "返回当前是否已启动." 折叠 @嵌入式方法 = "">
+    {
+        @ @sn<this>.m_hProcess != NULL
+    }
+
+    方法 收到输出信息 <公开 定义事件 类型 = 整数 注释 = "启动命令行提示符或执行命令后,在此返回命令的输出信息." 返回值注释 = "此返回值无意义" 折叠>
+    参数 输出信息 <类型 = 文本型 注释 = "命令行提示符打印在屏幕上的文本">
+
+    方法 启动命令行 <公开 类型 = 逻辑型 注释 = "启动命令行提示符进程,并建立匿名管道.\r" 注释 = "类初始化时会自动启动,除非你执行过\"关闭命令行\",否则不需要手动调用本方法." 折叠
+            @禁止流程检查 = 真 "">
+    参数 刷新时间 <类型 = 整数 注释 = "读取屏幕信息的间隔" @默认值 = 200>
+    {
+        @ if (m_hProcess) { return FALSE; } // 避免重复启动CMD
+        @ // 设定管道的安全属性
+        @ SECURITY_ATTRIBUTES sa { 0 };
+        @ sa.bInheritHandle = TRUE;
+        @ sa.nLength = sizeof(sa);
+        @ sa.lpSecurityDescriptor = NULL;
+        @ // 创建第一条匿名管道
+        @ if (!::CreatePipe (&m_hReadPipeHandle, &m_hWritePipeShell, &sa, 0))
+        @     goto Fail;
+        @ // 创建第二条匿名管道
+        @ if (!::CreatePipe (&m_hReadPipeShell, &m_hWritePipeHandle, &sa, 0))
+        @     goto Fail;
+        @ // 设置进程的信息
+        @ STARTUPINFO si { 0 };
+        @ PROCESS_INFORMATION pi { 0 };
+        @ GetStartupInfo (&si);
+        @ si.cb = sizeof(STARTUPINFO);
+        @ si.hStdError = m_hWritePipeShell; // 设置命令行错误输出管道
+        @ si.hStdOutput = m_hWritePipeShell; // 设置命令行信息输出管道
+        @ si.hStdInput = m_hReadPipeShell; // 设置命令行输入管道
+        @ si.wShowWindow = SW_HIDE; // 隐藏命令行窗口
+        @ si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
+        @ // 设置命令行提示符的文件路径
+        @ WCHAR strShellPath[MAX_PATH] { 0 };
+        @ GetSystemDirectoryW (strShellPath, MAX_PATH);
+        @ wcscat (strShellPath, L"\\cmd.exe");
+        @ // 创建命令行提示符进程
+        @ if (!::CreateProcessW (strShellPath, NULL, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi))
+        @     goto Fail;
+        @ m_hProcess = pi.hProcess; // 保存进程句柄
+        @ if (pi.hThread) { ::CloseHandle (pi.hThread); } // 因为后续不需要使用,先关闭命令行的线程句柄
+        @ m_dwTime = (DWORD)@<刷新时间>; // 读取屏显文本的时间间隔
+        @ m_hEvent = ::CreateEventW (0, FALSE, FALSE, NULL); // 该事件用来通知回调函数退出
+        @ ::ResetEvent (m_hEvent);
+        @ // 创建回调线程
+        @ m_hThread = ::CreateThread (NULL, 0, (LPTHREAD_START_ROUTINE)&@<读屏显>, this, 0, NULL);
+        @ if (m_hThread == NULL) { goto Fail; }
+        @ return TRUE;
+        @ Fail:
+        @     if (m_hProcess) { ::CloseHandle (m_hProcess); m_hProcess = NULL; }
+        @     if (m_hReadPipeHandle) { ::CloseHandle (m_hReadPipeHandle); m_hReadPipeHandle = NULL; }
+        @     if (m_hWritePipeShell) { ::CloseHandle (m_hWritePipeShell); m_hWritePipeShell = NULL; }
+        @     if (m_hReadPipeShell) { ::CloseHandle (m_hReadPipeShell); m_hReadPipeShell = NULL; }
+        @     if (m_hWritePipeHandle) { ::CloseHandle (m_hWritePipeHandle); m_hWritePipeHandle = NULL; }
+        @ return FALSE;
+    }
+
+    方法 读屏显 <静态 类型 = 整数 注释 = "内部函数,线程获取命令行提示符的屏幕显示内容" 折叠 @禁止流程检查 = 真>
+    参数 对象指针 <类型 = 变整数>
+    {
+        @ @sn<current_class>* pThis = (@sn<current_class>*)@<对象指针>;
+        @ DWORD BytesRead = 0;
+        @ DWORD TotalBytesAvail;
+        @ // 用等待事件来无限循环尝试读取屏显文本,读取间隔为等待事件的第二个参数
+        @ // 如果等待的事件发出信息,即结束循环,退出本线程
+        @ while (::WaitForSingleObject (pThis->m_hEvent, pThis->m_dwTime) != WAIT_OBJECT_0)
+        @ {
+        @     // 尝试读取匿名管道中的数据,读取的数据不会从管道中删除
+        @     // 这里只用来返回管道中是否有可供读取的数据
+        @     ::PeekNamedPipe (pThis->m_hReadPipeHandle, NULL, NULL, NULL, &TotalBytesAvail, NULL);
+        @     if (TotalBytesAvail) // 如果管道中有数据
+        @     {
+        @         @an<CVolString> ResStr; // 创建文本型变量
+        @         LPBYTE lpBuffer = (LPBYTE)::LocalAlloc (LPTR, TotalBytesAvail + 1); // 分配缓冲区内存
+        @         // 从管道中读取数据,数据读取后会在管道中删除
+        @         ::ReadFile (pThis->m_hReadPipeHandle, lpBuffer, TotalBytesAvail, &BytesRead, NULL);
+        @         // CMD是ANSI文本,这里从缓冲区转换成火山的文本型
+        @         ResStr.SetText (GetWideText ((const CHAR*)lpBuffer, CVolMem (), NULL));
+        @         ::LocalFree (lpBuffer); // 释放缓冲区的内存
+        @         if (ResStr.IsEmpty () == FALSE) // 如果文本不为空
+        @         {   // 执行定义事件
+        @             pThis->@<收到输出信息> (ResStr);
+        @         }
+        @     }
+        @ }
+        @ return 0; // 结束线程
+    }
+
+    方法 执行命令 <公开 类型 = 逻辑型 注释 = "在命令行提示符中执行一条命令,如果当前有正在运行的命令,执行会失败." 折叠 @禁止流程检查 = 真>
+    参数 执行命令 <类型 = 文本型 注释 = "提供你要执行的命令,后面不需要添加回车符.">
+    {
+        变量 命令行 <类型 = 字节集类>
+        // 命令行是ANSI,所以需要转换,命令后加了换行符,命令的最后不能有结尾0字符
+        命令行 = 文本到多字节 (执行命令 + "\r\n", 假)
+        @ DWORD BytesWrite = 0;
+        @ // 将命令输入给管道
+        @ ::WriteFile (m_hWritePipeHandle, @<命令行>.GetPtr(), @<命令行>.GetSize(), &BytesWrite, NULL);
+        @ if (BytesWrite)
+        @     return TRUE;
+        @ return FALSE;
+    }
+
+    方法 关闭命令行 <公开 注释 = "关闭命令行提示符" 折叠 @禁止流程检查 = 真>
+    {
+        @ if (m_hEvent) { ::SetEvent (m_hEvent); } // 发信号让回调函数退出线程
+        @ if (m_hThread)
+        @ {   // 等待回调线程结束,然后关闭句柄
+        @     ::WaitForSingleObject (m_hThread, INFINITE);
+        @     ::CloseHandle (m_hThread); m_hThread = NULL;
+        @ }
+        执行命令 ("exit")  // 尝试执行命令退出命令行提示符,如果当前还有命令未执行完毕,则不起作用
+        @ if (m_hProcess)
+        @ {   // 等待1秒,如果命令行还没结束,就强制结束进程
+        @     if (::WaitForSingleObject (m_hThread, 1000) == WAIT_TIMEOUT)
+        @     {
+        @         ::TerminateProcess (m_hProcess, 0);
+        @     }
+        @     ::CloseHandle (m_hProcess); m_hProcess = NULL;
+        @ }
+        @ // 关闭匿名管道的读写句柄
+        @ if (m_hReadPipeHandle) { ::CloseHandle (m_hReadPipeHandle); m_hReadPipeHandle = NULL; }
+        @ if (m_hWritePipeShell) { ::CloseHandle (m_hWritePipeShell); m_hWritePipeShell = NULL; }
+        @ if (m_hReadPipeShell) { ::CloseHandle (m_hReadPipeShell); m_hReadPipeShell = NULL; }
+        @ if (m_hWritePipeHandle) { ::CloseHandle (m_hWritePipeHandle); m_hWritePipeHandle = NULL; }
+    }
+
+    # ---
+    # @begin
+    # <> <include>
+    #     HANDLE m_hReadPipeHandle = NULL;
+    #     HANDLE m_hWritePipeShell = NULL;
+    #     HANDLE m_hReadPipeShell = NULL;
+    #     HANDLE m_hWritePipeHandle = NULL;
+    #     HANDLE m_hProcess = NULL;
+    #     HANDLE m_hThread = NULL;
+    #     HANDLE m_hEvent = NULL;
+    #     DWORD m_dwTime;
+    # <> </include>
+    # @end
+}
+
+类 磁盘管理类 <公开 注释 = "需要管理员权限" 折叠 @文档 = "category = \"文件操作\"" @禁止创建对象 = 真>
+{
+    方法 删除卷装载点 <公开 静态 类型 = 逻辑型 注释 = "删除驱动器号或装载的文件夹." 返回值注释 = "返回是否成功." 折叠 @嵌入式方法 = "">
+    参数 卷装载路径 <类型 = 文本型 注释 = " 所欲删除的驱动器号或装载的文件夹.\r" 注释 = " 需要以反斜杠结尾,例如\"X:\\\"或\"Y:\\\\MountX\\\".">
+    {
+        @ ::DeleteVolumeMountPointW ((LPCWSTR)@<卷装载路径>.GetText ())
+    }
+
+    方法 置卷装载点 <公开 静态 类型 = 逻辑型 注释 = "将卷与另一卷上的驱动器号或目录相关联." 返回值注释 = "返回是否成功." 折叠 @嵌入式方法 = "">
+    参数 卷装载路径 <类型 = 文本型 注释 = " 所欲与卷关联的用户模式路径.\r" 注释 = " 这可以是驱动器号(例如\"X:\")或另一卷上的目录(例如\"Y:\\MountX\").\r"
+            注释 = " 文本必须以反斜杠\"\\\"结尾.">
+    参数 卷GUID <类型 = 文本型 注释 = " 卷的GUID路径(可用\"取卷装载点路径\"获取).\r"
+            注释 = " 字符串格式必须为\"\\\\?\\Volume{GUID}\\\",其中GUID是卷的标识GUID,\r" 注释 = " \"\\\\?\\\"用于关闭路径解析,在路径中会被忽略.">
+    {
+        @ ::SetVolumeMountPointW ((LPCWSTR)@<卷装载路径>.GetText (), (LPCWSTR)@<卷GUID>.GetText ())
+    }
+
+    方法 取卷装载点路径 <公开 静态 类型 = 逻辑型 注释 = "获取与指定卷装载点(驱动器号、卷GUID路径或装载的文件夹)关联的卷GUID路径."
+            返回值注释 = "返回是否成功,成功将在\"卷GUID\"中返回结果." 折叠 @禁止流程检查 = 真>
+    参数 卷装载路径 <类型 = 文本型 注释 = " 所欲取卷GUID路径的已装载文件夹的路径(例如\"Y:\\MountX\\\")或驱动器号(例如\"X:\\\").\r"
+            注释 = " 文本必须以反斜杠\"\\\"结尾.">
+    参数 卷GUID <类型 = 文本型 注释 = " 返回获取的卷GUID路径.\r" 注释 = " 此路径的格式为\"\\\\?\\Volume{GUID}\\\",其中GUID是卷的标识GUID.\r"
+            注释 = " 如果该卷有多个卷GUID路径,则只返回装载管理器缓存中的第一个路径.">
+    {
+        @ TCHAR szVolumeName[50];
+        @ if ( ::GetVolumeNameForVolumeMountPointW ((LPCWSTR)@<卷装载路径>.GetText (), szVolumeName, 50) ) {
+        @     @<卷GUID>.SetText (szVolumeName);
+        @     return TRUE;
+        @ }
+        @ @<卷GUID>.Empty ();
+        @ return FALSE;
+    }
+}
+
+类 "//文件对话框选项" <公开 注释 = "暂未使用,直接写在内嵌代码里了,仅供参考." 折叠 @常量类 = 整数 @文档 = "category = \"文件操作.辅助类\"">
+{
+    常量 允许多选 <公开 值 = @OFN_ALLOWMULTISELECT 注释 = "允许多选文件,如果不同时设置Explorer风格,将显示旧版风格的文件对话框.">
+    常量 创建时提示 <公开 值 = @OFN_CREATEPROMPT 注释 = "如果用户指定了一个不存在的文件,这个标记使用对话框能提示用户是否新建这个文件.">
+    常量 不添加到最近使用 <公开 值 = @OFN_DONTADDTORECENT 注释 = "禁止系统将选择的文件增加快捷链接到最近使用文档中.">
+    常量 启用钩子 <公开 值 = @OFN_ENABLEHOOK 注释 = "有这个风格,才可以响应对话框的事件,如\"创建完毕\".">
+    常量 启用通知 <公开 值 = @OFN_ENABLEINCLUDENOTIFY 注释 = "当用户打开一个文件夹时,引起对话框发送CDN_INCLUDEITEM通知消息到你的OFNHookProc程序.">
+    常量 可调节尺寸 <公开 值 = @OFN_ENABLESIZING 注释 = "使Explorer风格的对话框可以使用鼠标或键盘调整大小.">
+    常量 启用模板 <公开 值 = @OFN_ENABLETEMPLATE 注释 = "指出lpTemplateName成员是指向对话框模板资源的名字,这个模板资源在能被hInstance成员识别的模块中 .">
+    常量 启用模板句柄 <公开 值 = @OFN_ENABLETEMPLATEHANDLE
+            注释 = "指出hInstance成员能识别的包含预载对话框模板的数据块. 如果这个标记被指定的,系统忽略lpTemplateName.">
+    常量 Explorer风格 <公开 值 = @OFN_EXPLORER 注释 = "使用新的Explorer风格对话框,该选项为默认值.\r"
+            注释 = "这个标记仅在你提供了一个钩子程序或定制模板或设置了 OFN_ALLOWMULTISELECT 标记时是必需的.">
+    常量 不同扩展名 <公开 值 = @OFN_EXTENSIONDIFFERENT 注释 = "指定用户输入的一个文件的扩展名与lpstrDefExt指定的扩展名不同.">
+    常量 文件必须存在 <公开 值 = @OFN_FILEMUSTEXIST 注释 = "指定用户仅可以在文件名登录字段中输入已存在的文件的名字.">
+    常量 显示隐藏文件 <公开 值 = @OFN_FORCESHOWHIDDEN 注释 = "强制显示系统和隐藏属性的文件.">
+    常量 隐藏只读复选框 <公开 值 = @OFN_HIDEREADONLY 注释 = "隐藏只读复选框.">
+    常量 长文件名 <公开 值 = @OFN_LONGNAMES 注释 = "对于旧风格对话框,这个标记引起对话框使用长文件名. EXPLORER风格默认显示长文件名.">
+    常量 不改变初始目录 <公开 值 = @OFN_NOCHANGEDIR 注释 = "如果当搜索文件时用户改变了目录的时候,恢复当前目录到它的初始值.">
+    常量 不解引用快捷方式 <公开 值 = @OFN_NODEREFERENCELINKS
+            注释 = "返回所选快捷方式(.LNK)文件的路径和文件名,如果不启用该选项,会返回快捷方式所引用的文件路径和文件名.">
+    常量 短文件名 <公开 值 = @OFN_NOLONGNAMES 注释 = "对于旧风格对话框,这个标识引起对话框去使用短文件名(8.3格式).">
+    常量 隐藏网络按钮 <公开 值 = @OFN_NONETWORKBUTTON 注释 = "隐藏网络按钮.">
+    常量 返回非只读文件 <公开 值 = @OFN_NOREADONLYRETURN 注释 = "指定返回的文件不具有只读属性,且不在写保护的文件夹中.">
+    常量 不检测文件创建 <公开 值 = @OFN_NOTESTFILECREATE 注释 = "指定文件不是在对话框关闭前建立的.">
+    常量 不验证数据 <公开 值 = @OFN_NOVALIDATE 注释 = "允许在返回的文件名中有无效的字符.">
+    常量 文件覆盖提示 <公开 值 = @OFN_OVERWRITEPROMPT 注释 = "如果选择的文件已经存在,使用另存为对话框产生一个消息框. 用户必须确认是否复盖这个文件.">
+    常量 路径必须存在 <公开 值 = @OFN_PATHMUSTEXIST 注释 = "指定用户仅能输入的路径和文件名.">
+    常量 显示只读复选框 <公开 值 = @OFN_READONLY 注释 = "当对话框建立时,显示被选择的只读复选框.">
+    常量 获取共享文件 <公开 值 = @OFN_SHAREAWARE 注释 = "如果调用OpenFile函数因为网络共享冲突而失败,将忽略错误并返回对话框选择的文件名.">
+    常量 显示帮助按钮 <公开 值 = @OFN_SHOWHELP 注释 = "文件对话框显示帮助按钮.">
+}
+
+类 "//内存映射文件类2" <公开 注释 = "  本类提供内存映射文件创建/读/写操作的支持.\r" 注释 = "  在\"内存映射文件类\"的基础上增加了更多打开选项." 折叠
+        @文档 = "category = \"文件操作\"">
+{
+    方法 类_初始化 <折叠>
+    {
+        @ hFile = INVALID_HANDLE_VALUE;
+        @ hFileMap = NULL;
+        @ m_pvFile = NULL;
+    }
+
+    方法 类_清理 <折叠>
+    {
+        关闭映射文件 ()
+    }
+
+    方法 创建映射文件 <公开 类型 = 逻辑型 注释 = "创建内存映射文件" 返回值注释 = "执行成功返回真,否则返回假." 折叠 @禁止流程检查 = 真>
+    参数 文件名称 <类型 = 文本型 注释 = "欲创建内存映射文件的文件全路径名称." @输出名 = "lpFileName">
+    参数 文件创建方式 <类型 = 映射文件创建方式 注释 = "提供\'映射文件创建方式\'常量,设置是打开一个已经存在的文件还是创建一个新文件." @默认值 = 映射文件创建方式.创建并覆盖
+            @输出名 = "dwCreateFlag">
+    参数 文件尺寸 <类型 = 长整数 注释 = "欲创建内存映射文件的文件大小,默认4096字节(4K).如果是打开一个已经存在的文件,可以指定该值为0,表示创建的内存映射文件大小和文件本身大小是一致的."
+            @默认值 = 4096 @输出名 = "n64Size">
+    参数 内存映射名称 <类型 = 文本型 注释 = "创建内存映射文件的名称,其它进程可以通过该名称打开内存映射文件.该参数可以为空,表示创建一个没有名称的内存映射文件." @默认值 = ""
+            @输出名 = "lpName">
+    参数 打开方式 <类型 = 整数 注释 = " 0 读写\r" 注释 = " 1 只读\r" 注释 = " 2 只写" @默认值 = 0>
+    参数 共享方式 <类型 = 文件共享方式 注释 = "指定限制其它进程操作此文件的方式" @默认值 = 文件共享方式.无限制>
+    参数 内存映射保护 <类型 = 整数 @默认值 = 内存页面保护属性.读写 @输出名 = "dwProtect">
+    {
+        关闭映射文件 ()
+        @ DWORD dwAccess = 0;
+        @ switch (@<打开方式>) {
+        @     case 0:  dwAccess = (GENERIC_READ | GENERIC_WRITE);  break;
+        @     case 1:  dwAccess = GENERIC_READ;  break;
+        @     case 2:  dwAccess = GENERIC_WRITE;  break;
+        @     default:  return FALSE;
+        @ }
+        @ DWORD dwShareMode = 0;
+        @ switch (@<共享方式>) {
+        @     case 1:  dwShareMode = (FILE_SHARE_WRITE | FILE_SHARE_READ);  break;
+        @     case 2:  dwShareMode = FILE_SHARE_WRITE;  break;
+        @     case 3:  dwShareMode = FILE_SHARE_READ;  break;
+        @     case 4:  dwShareMode = 0;  break;
+        @     default:  return FALSE;
+        @ }
+        @ hFile = CreateFileW (
+        @         (LPCWSTR)lpFileName.GetText (),
+        @         dwAccess, dwShareMode, NULL, (DWORD)dwCreateFlag, FILE_ATTRIBUTE_NORMAL, NULL);
+        @ if (hFile == INVALID_HANDLE_VALUE)
+        @     return FALSE;
+        @ hFileMap = CreateFileMappingW (hFile, NULL,
+        @     (DWORD)dwProtect, (DWORD)(n64Size >> 32), (DWORD)n64Size,
+        @     (LPCWSTR)lpName.GetText());
+        @ return (hFileMap != NULL);
+    }
+
+    方法 打开映射文件 <公开 类型 = 逻辑型 注释 = "打开一个其他进程创建的内存映射文件" 返回值注释 = "执行成功返回真,否则返回假." 折叠 @禁止流程检查 = 真>
+    参数 内存映射名称 <类型 = 文本型 注释 = "其他进程创建的内存映射文件名称" @输出名 = "lpName">
+    参数 内存访问权限 <类型 = 整数 注释 = " 0 所有权限\r" 注释 = " 1 可执行,可读写\r" 注释 = " 2 只读\r" 注释 = " 3 可读写" @默认值 = 3>
+    {
+        关闭映射文件 ()
+        @ DWORD  dwDesiredAccess;
+        @ switch (@<内存访问权限>) {
+        @     case 0:  dwDesiredAccess = FILE_MAP_ALL_ACCESS;  break;
+        @     case 1:  dwDesiredAccess = FILE_MAP_EXECUTE; break;
+        @     case 2:  dwDesiredAccess = FILE_MAP_READ; break;
+        @     case 3:  dwDesiredAccess = FILE_MAP_WRITE; break;
+        @     default:  return FALSE;
+        @ }
+        @ hFileMap = OpenFileMappingW (dwDesiredAccess, FALSE, (LPCWSTR)lpName.GetText());
+        @ return (hFileMap != NULL);
+    }
+
+    方法 映射到内存 <公开 类型 = 逻辑型 注释 = "将一个创建完毕或已打开的内存映射文件的全部或一部分映射到进程的内存空间中" 返回值注释 = "执行成功返回真,否则返回假." 折叠
+            @禁止流程检查 = 真>
+    参数 起始位置 <类型 = 长整数 注释 = "  映射到内存的文件起始位置.注意该值一定要是系统分配内存的分配粒度.windows的分配粒度是64k(即0x10000),\r"
+            注释 = "所以该值一定要是64k的倍数,否则会执行出错,起始位置的值从0开始." @默认值 = 0 @输出名 = "n64FileOffset">
+    参数 映射尺寸 <类型 = 整数 注释 = "映射到内存的字节数量,该值等于0代表从起始位置开始文件其余部分全部映射到内存." @默认值 = 0 @输出名 = "stSize">
+    参数 内存访问权限 <类型 = 整数 注释 = " 0 所有权限\r" 注释 = " 1 可执行,可读写\r" 注释 = " 2 只读\r" 注释 = " 3 可读写" @默认值 = 3>
+    {
+        @ if (hFileMap == NULL)
+        @     return FALSE;
+        @ if (NULL != m_pvFile)
+        @     UnmapViewOfFile (m_pvFile); //取消映射
+        @ DWORD  dwDesiredAccess;
+        @ switch (@<内存访问权限>) {
+        @     case 0:  dwDesiredAccess = FILE_MAP_ALL_ACCESS;  break;
+        @     case 1:  dwDesiredAccess = FILE_MAP_EXECUTE; break;
+        @     case 2:  dwDesiredAccess = FILE_MAP_READ; break;
+        @     case 3:  dwDesiredAccess = FILE_MAP_WRITE; break;
+        @     default:  return FALSE;
+        @ }
+        @ m_pvFile = MapViewOfFile (hFileMap, dwDesiredAccess, (DWORD)(n64FileOffset >> 32), (DWORD)n64FileOffset, stSize);
+        @ return (m_pvFile != NULL);
+    }
+
+    方法 解除映射 <公开 类型 = 逻辑型 注释 = "\"映射到内存\"方法的反操作,将已经映射到内存的文件解除映射.\r" 注释 = "解除映射后先前所获取的数据指针不能再使用."
+            返回值注释 = "执行成功返回真,否则返回假." 折叠 @禁止流程检查 = 真>
+    {
+        @ return (m_pvFile == NULL ? FALSE : UnmapViewOfFile(m_pvFile));
+    }
+
+    方法 读数据 <公开 类型 = 逻辑型 注释 = "从已映射内存中读出数据,使用该命令时一定要注意不能超过已映射内存的边界,否则会造成非法内存访问从而异常退出.\r"
+            注释 = "执行本方法前必须已经成功调用\"映射到内存\"方法." 返回值注释 = "执行成功返回真,否则返回假." 折叠 @禁止流程检查 = 真>
+    参数 起始位置 <类型 = 整数 注释 = "从已映射内存中读出的数据的起始位置偏移,从0开始." @默认值 = 0>
+    参数 长度 <类型 = 整数 注释 = "从已映射内存中读出数据的长度">
+    参数 数据 <类型 = 字节集类 注释 = "提供字节集变量,存放从内存映射文件中读出的数据,作为方法的返回值.">
+    {
+        @ if(m_pvFile == NULL)  return FALSE;
+        @ @<数据>.CopyFrom ((BYTE*)m_pvFile + @<起始位置>, @<长度>);
+        @ return TRUE;
+    }
+
+    方法 取数据指针 <公开 类型 = 变整数 注释 = "取得已映射内存的首地址,用于后续对其进行内存修改和复制操作.\r" 注释 = "执行本方法前必须已经成功调用\"映射到内存\"方法."
+            返回值注释 = "执行成功返回数据地址指针,否则返回0." 折叠 @禁止流程检查 = 真>
+    {
+        @ return (INT_P)m_pvFile;
+    }
+
+    方法 写数据 <公开 类型 = 逻辑型 注释 = "向已映射内存中写入数据. 执行本方法前必须已经成功调用\"映射到内存\"方法." 返回值注释 = "执行成功返回真,否则返回假." 折叠
+            @禁止流程检查 = 真>
+    参数 起始位置 <类型 = 整数 注释 = "已经映射内存中的起始写入偏移位置,从0开始." @默认值 = 0>
+    参数 数据 <类型 = 字节集类 注释 = "欲写入的数据. 注意数据的长度不能超过已映射内存的边界,否则会造成非法内存访问从而异常退出.">
+    {
+        @ if (m_pvFile == NULL)
+        @     return FALSE;
+        @ memcpy ((BYTE *)m_pvFile + (DWORD)@<起始位置>, @<数据>.GetPtr(), @<数据>.GetSize());
+        @ return TRUE;
+    }
+
+    方法 保存映射文件 <公开 类型 = 逻辑型 注释 = "将已映射内存中的所有数据都真实写入到对应磁盘文件(调用\"创建映射文件\"方法时指定)中" 返回值注释 = "执行成功返回真,否则返回假." 折叠
+            @禁止流程检查 = 真>
+    {
+        @ if (m_pvFile == NULL)
+        @     return FALSE;
+        @ return FlushViewOfFile (m_pvFile, stSize);
+    }
+
+    方法 写指针数据 <公开 类型 = 逻辑型 注释 = "向已映射内存中写入数据" 返回值注释 = "执行成功返回真,否则返回假." 折叠 @禁止流程检查 = 真>
+    参数 起始位置 <类型 = 整数 注释 = "向已映射内存中写入数据的起始偏移位置,从0开始." @默认值 = 0>
+    参数 数据指针 <类型 = 变整数 注释 = "欲写入数据的指针">
+    参数 数据尺寸 <类型 = 整数 注释 = "欲写入的数据的尺寸. 注意不能超过已映射内存的边界,否则会造成非法内存访问从而异常退出.">
+    {
+        @ if (m_pvFile == NULL)
+        @     return FALSE;
+        @ memcpy ((BYTE *)m_pvFile + (DWORD)@<起始位置>, (PVOID)@<数据指针>, @<数据尺寸>);
+        @ return TRUE;
+    }
+
+    方法 关闭映射文件 <公开 注释 = "关闭并释放已经创建或打开的内存映射文件,关闭后先前所取得的已映射内存指针不可再使用." 折叠 @禁止流程检查 = 真>
+    {
+        @ if (NULL != m_pvFile) {
+        @     UnmapViewOfFile (m_pvFile); //取消映射
+        @     m_pvFile = NULL;
+        @ }
+        @ if (NULL != hFileMap) {
+        @     CloseHandle (hFileMap); //关闭文件映射
+        @     hFileMap = NULL;
+        @ }
+        @ if (NULL != hFile && INVALID_HANDLE_VALUE != hFile) {
+        @     CloseHandle (hFile); //关闭文件
+        @     hFile = INVALID_HANDLE_VALUE;
+        @ }
+    }
+
+    # ---
+    # @begin
+    # <> <include>
+    # private:
+    #     PVOID m_pvFile;
+    #     HANDLE hFile;
+    #     HANDLE hFileMap;
+    # <> </include>
+    # @end
+}

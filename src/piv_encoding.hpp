@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/03/19                          *
+ * 版本: 2023/03/30                          *
 \*********************************************/
 
 #ifndef _PIV_ENCODING_HPP
@@ -17,9 +17,13 @@
 #include <algorithm>
 #include <string>
 #if defined(_MSVC_LANG) && (_MSVC_LANG >= 201703L)
-#include <string_view>
+    #include <string_view>
+    #define PIV_IF if constexpr
+    #define PIV_ELSE_IF else if constexpr
 #else
-#include "string_view.hpp"
+    #include "string_view.hpp"
+    #define PIV_IF if
+    #define PIV_ELSE_IF else if
 #endif
 
 namespace piv
@@ -329,7 +333,7 @@ namespace piv
          * @param SrcLen 所欲解码的数据长度
          * @return
          */
-        static ptrdiff_t GuessUrlDecodeBound(const unsigned char *lpszSrc, const size_t &SrcLen) noexcept
+        static size_t GuessUrlDecodeBound(const unsigned char *lpszSrc, const size_t &SrcLen) noexcept
         {
             size_t Percent = 0;
             for (size_t i = 0; i < SrcLen; i++)
@@ -1905,9 +1909,9 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
-    inline ptrdiff_t GetSize() const noexcept
+    inline size_t GetSize() const noexcept
     {
-        return utf16str.GetLength();
+        return static_cast<size_t>(utf16str.GetLength());
     }
 
     /**
@@ -2106,9 +2110,9 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
-    inline ptrdiff_t GetSize() const noexcept
+    inline size_t GetSize() const noexcept
     {
-        return utf16str.GetLength();
+        return static_cast<size_t>(utf16str.GetLength());
     }
 
     /**
@@ -2189,7 +2193,7 @@ namespace piv
             if (piv::encoding::UrlDecodeNeed(str.data(), str.size()))
             {
                 size_t buffer_len;
-                if (sizeof(CharT) == 2)
+                PIV_IF(sizeof(CharT) == 2)
                 {
                     std::string buffer;
                     if (utf8)
@@ -2238,7 +2242,7 @@ namespace piv
             if (piv::encoding::UrlDecodeNeed(str.data(), str.size()))
             {
 
-                if (sizeof(CharT) == 2)
+                PIV_IF(sizeof(CharT) == 2)
                 {
                     std::string buffer;
                     if (utf8)
@@ -2308,7 +2312,7 @@ namespace piv
             if (piv::encoding::UrlDecodeNeed(str.data(), str.size()))
             {
                 std::string buffer;
-                if (sizeof(CharT) == 2)
+                PIV_IF(sizeof(CharT) == 2)
                 {
                     if (utf8)
                     {
@@ -2338,7 +2342,7 @@ namespace piv
                         return PivA2Ws{buffer}.GetStr(decoded);
                 }
             }
-            if (sizeof(CharT) == 1)
+            PIV_IF(sizeof(CharT) == 1)
             {
                 if (utf8)
                     return PivU2Ws{reinterpret_cast<const char *>(str.data()), str.size()}.GetStr(decoded);
@@ -2362,7 +2366,7 @@ namespace piv
             size_t buffer_len;
             if (piv::encoding::UrlEncodeNeed(str.data(), str.size(), ReservedWord))
             {
-                if (sizeof(CharT) == 2)
+                PIV_IF(sizeof(CharT) == 2)
                 {
                     CVolMem buffer;
                     if (utf8)
@@ -2389,6 +2393,7 @@ namespace piv
                     buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(str.data()), str.size(), ReservedWord);
                     encoded.resize(buffer_len);
                     piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(str.data()), str.size(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(encoded.data())), buffer_len, ReservedWord);
+                    encoded.resize(buffer_len);
                 }
             }
             else
@@ -2410,21 +2415,21 @@ namespace piv
             size_t buffer_len;
             if (piv::encoding::UrlEncodeNeed(str.data(), str.size(), ReservedWord))
             {
-                if (sizeof(CharT) == 2)
+                PIV_IF(sizeof(CharT) == 2)
                 {
                     CVolMem buffer;
                     if (utf8)
                     {
                         PivW2U text{reinterpret_cast<const wchar_t *>(str.data()), str.size()};
                         buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(text.GetPtr()), text.GetSize(), ReservedWord);
-                        piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(text.GetPtr()), static_cast<ptrdiff_t>(text.GetSize()), buffer.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
+                        piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(text.GetPtr()), text.GetSize(), buffer.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
                         return PivU2W{buffer, buffer_len}.GetMem(encoded);
                     }
                     else
                     {
                         PivW2A text{reinterpret_cast<const wchar_t *>(str.data()), str.size()};
                         buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(text.GetPtr()), text.GetSize(), ReservedWord);
-                        piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(text.GetPtr()), static_cast<ptrdiff_t>(text.GetSize()), buffer.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
+                        piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(text.GetPtr()), text.GetSize(), buffer.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
                         return PivA2W{buffer, buffer_len}.GetMem(encoded);
                     }
                 }
@@ -2432,6 +2437,7 @@ namespace piv
                 {
                     buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(str.data()), str.size(), ReservedWord);
                     piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(str.data()), str.size(), encoded.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
+                    encoded.Realloc(buffer_len);
                     return encoded;
                 }
             }

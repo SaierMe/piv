@@ -1,0 +1,1390 @@
+<火山程序 类型 = "通常" 版本 = 1 />
+
+包 火山.PIV基础类 <注释 = "https://github.com/SaierMe/piv" "">
+
+# 随机数 ===
+
+类 标准随机数基本类 <注释 = "封装了<std::random>的基本操作" 折叠 编辑时信息 = "36FA5, 0, 0, 0" @文档 = "category = \"伪随机数\""
+        @视窗.外部头文件 = "<random>">
+{
+
+    # 均匀分布
+
+    方法 取随机数 <公开 注释 = "产生在一个范围内均匀分布的伪随机数.\r" 注释 = "本方法可以自定义返回的整数类型." 返回值注释 = "返回产生的随机数,类型与参数\"数值类型\"相同." 折叠
+            @嵌入式方法 = "">
+    参数 数值类型 <注释 = "请填写\"字节\"、\"短整数\"、\"字符\"、\"整数\"、\"长整数\"等基本整数型." @匹配类型 = 通用整数型 @需求类型 = 数据类型 @返回值类型 = 0>
+    参数 最小值 <注释 = "指定取值范围的最小值,可使用\"数值范围\"中的常量." @匹配类型 = 匹配前参数值类型>
+    参数 最大值 <注释 = "指定取值范围的最大值,必须大于等于最小值,可使用\"数值范围\"中的常量." @匹配类型 = 匹配前参数值类型>
+    {
+        @ [&] {
+        @     std::uniform_int_distribution<@<数值类型>> dist (@<最小值>, @<最大值>);
+        @     return dist (@sn<this>.gen);
+        @ } ()
+    }
+
+    方法 取随机整数 <公开 类型 = 整数 注释 = "产生在一个范围内均匀分布的伪随机整数." 返回值注释 = "返回产生的随机整数." 折叠 @嵌入式方法 = "">
+    参数 最小值 <类型 = 整数 注释 = "指定取值范围的最小值" @默认值 = 0>
+    参数 最大值 <类型 = 整数 注释 = "指定取值范围的最大值,必须大于等于最小值" @默认值 = 数值范围.最大整数值>
+    {
+        @ [&] {
+        @     std::uniform_int_distribution<INT> dist (@<最小值>, @<最大值>);
+        @     return dist (@sn<this>.gen);
+        @ } ()
+    }
+
+    方法 取随机长整数 <公开 类型 = 长整数 注释 = "产生在一个范围内均匀分布的伪随机长整数." 返回值注释 = "返回产生的随机长整数." 折叠 @嵌入式方法 = "">
+    参数 最小值 <类型 = 长整数 注释 = "指定取值范围的最小值" @默认值 = 0>
+    参数 最大值 <类型 = 长整数 注释 = "指定取值范围的最大值,必须大于等于最小值" @默认值 = 数值范围.最大长整数值>
+    {
+        @ [&] {
+        @     std::uniform_int_distribution<INT64> dist (@<最小值>, @<最大值>);
+        @     return dist (@sn<this>.gen);
+        @ } ()
+    }
+
+    方法 取随机小数 <公开 类型 = 小数 注释 = "产生在一个范围内均匀分布的伪随机小数." 返回值注释 = "返回产生的随机小数." 折叠 @嵌入式方法 = "">
+    参数 最小值 <类型 = 小数 注释 = "指定取值范围的最小值" @默认值 = 0>
+    参数 最大值 <类型 = 小数 注释 = "指定取值范围的最大值,必须大于等于最小值" @默认值 = 1.0>
+    {
+        @ [&] {
+        @     std::uniform_real_distribution<DOUBLE> dist (@<最小值>, @<最大值>);
+        @     return dist (@sn<this>.gen);
+        @ } ()
+    }
+
+    # 伯努利分布
+
+    方法 取伯努利分布逻辑 <公开 类型 = 逻辑型 注释 = "根据伯努利分布离散概率函数产生随机逻辑值." 返回值注释 = "返回产生的随机逻辑值." 折叠 @嵌入式方法 = "">
+    参数 成功概率 <类型 = 小数 注释 = "  取值范围为 0 ≤ p ≤ 1\r" 注释 = "  默认为50%的概率产生\"真\"." @默认值 = 0.50>
+    {
+        @ [&] {
+        @     std::bernoulli_distribution dist (@<成功概率>);
+        @     return dist (@sn<this>.gen);
+        @ } ()
+    }
+
+    方法 取二项分布整数 <公开 类型 = 整数 注释 = "根据二项分布离散概率函数产生随机正整数值.\r" 注释 = "若每次试验的成功率为p,返回t次试验中的成功次数."
+            返回值注释 = "返回随机的成功次数." 折叠 @嵌入式方法 = "">
+    参数 试验次数 <类型 = 整数 注释 = "定义为t,必须大于等于0,为试验次数">
+    参数 成功概率 <类型 = 小数 注释 = "定义为p,取值范围为0 ≤ p ≤ 1,为每次试验产生\"真\"的概率." @默认值 = 0.50>
+    {
+        @ [&] {
+        @     std::binomial_distribution<INT> dist (@<试验次数>, @<成功概率>);
+        @     return dist (@sn<this>.gen);
+        @ } ()
+    }
+
+    方法 取负二项分布整数 <公开 类型 = 整数 注释 = "根据负二项分布离散概率函数产生随机正整数值.\r" 注释 = "若每次试验的成功率为p,在多次试验后得到的成功次数为k,返回其中的失败次数."
+            返回值注释 = "返回随机的失败次数." 折叠 @嵌入式方法 = "">
+    参数 成功次数 <类型 = 整数 注释 = "定义为k,必须大于0,为多次试验的成功次数">
+    参数 成功概率 <类型 = 小数 注释 = "定义为p,取值范围为0 < p ≤ 1,为每次试验产生\"真\"的概率." @默认值 = 0.50>
+    {
+        @ [&] {
+        @     std::negative_binomial_distribution<INT> dist (@<成功次数>, @<成功概率>);
+        @     return dist (@sn<this>.gen);
+        @ } ()
+    }
+
+    方法 取几何分布整数 <公开 类型 = 整数 注释 = "根据几何分布离散概率函数产生随机正整数值.\r" 注释 = "若每次试验的成功率为p,返回需要试验多少次才能获得成功."
+            返回值注释 = "返回随机的试验次数." 折叠 @嵌入式方法 = "">
+    参数 成功概率 <类型 = 小数 注释 = "定义为p,取值范围为0 < p < 1,为每次试验产生\"真\"的概率." @默认值 = 0.50>
+    {
+        @ [&] {
+        @     std::geometric_distribution<INT> dist (@<成功概率>);
+        @     return dist (@sn<this>.gen);
+        @ } ()
+    }
+
+    # 泊松分布
+
+    方法 取泊松分布整数 <公开 类型 = 整数 注释 = "根据泊松分布离散概率函数产生随机正整数值.\r" 注释 = "若同一时间或空间内平均发生μ次事件,返回其发生i次的概率."
+            返回值注释 = "返回随机的概率." 折叠 @嵌入式方法 = "">
+    参数 平均数 <类型 = 小数 注释 = "定义为μ,取值范围为0 < μ,为随机事件发生的平均数." @默认值 = 1.0>
+    {
+        @ [&] {
+        @     std::poisson_distribution<INT> dist (@<平均数>);
+        @     return dist (@sn<this>.gen);
+        @ } ()
+    }
+
+    方法 取指数分布小数 <公开 类型 = 小数 注释 = "根据指数分布离散概率函数产生随机正小数值.\r" 注释 = "若随机事件在每个时间或距离单位发生的频率为λ,返回的值为到一次随机事件的时间或距离."
+            返回值注释 = "返回随机的时间或距离小数." 折叠 @嵌入式方法 = "">
+    参数 事件频率 <类型 = 小数 注释 = "定义为λ,取值范围为0 < λ,为每单位事件发生的频率." @默认值 = 1.0>
+    {
+        @ [&] {
+        @     std::exponential_distribution<DOUBLE> dist (@<事件频率>);
+        @     return dist (@sn<this>.gen);
+        @ } ()
+    }
+
+    方法 取伽玛分布小数 <公开 类型 = 小数 注释 = "根据伽玛分布离散概率函数产生随机正小数值.\r" 注释 = "返回α个独立指数分布的随机变量的和,每个的平均值为β." 折叠 @嵌入式方法 = "">
+    参数 形状 <类型 = 小数 注释 = "定义为α,为形状参数." @默认值 = 1.0>
+    参数 尺度 <类型 = 小数 注释 = "定义为β,为尺度参数." @默认值 = 1.0>
+    {
+        @ [&] {
+        @     std::gamma_distribution<DOUBLE> dist (@<形状>, @<尺度>);
+        @     return dist (@sn<this>.gen);
+        @ } ()
+    }
+
+    方法 取威布尔分布小数 <公开 类型 = 小数 注释 = "根据威布尔分布离散概率函数产生随机正小数值." 折叠 @嵌入式方法 = "">
+    参数 形状 <类型 = 小数 注释 = "定义为α,为形状参数." @默认值 = 1.0>
+    参数 尺度 <类型 = 小数 注释 = "定义为β,为尺度参数." @默认值 = 1.0>
+    {
+        @ [&] {
+        @     std::weibull_distribution<DOUBLE> dist (@<形状>, @<尺度>);
+        @     return dist (@sn<this>.gen);
+        @ } ()
+    }
+
+    方法 取极值分布小数 <公开 类型 = 小数 注释 = "根据极值分布离散概率函数产生随机小数值." 折叠 @嵌入式方法 = "">
+    参数 位置 <类型 = 小数 注释 = "定义为α,为位置参数." @默认值 = 1.0>
+    参数 尺度 <类型 = 小数 注释 = "定义为β,为尺度参数." @默认值 = 1.0>
+    {
+        @ [&] {
+        @     std::extreme_value_distribution<DOUBLE> dist (@<位置>, @<尺度>);
+        @     return dist (@sn<this>.gen);
+        @ } ()
+    }
+
+    # 正态分布
+
+    方法 取正态分布小数 <公开 类型 = 小数 注释 = "根据正态分布离散概率函数产生随机小数值." 折叠 @嵌入式方法 = "">
+    参数 平均数 <类型 = 小数 注释 = "定义为μ,为位置参数." @默认值 = 1.0>
+    参数 标准差 <类型 = 小数 注释 = "定义为σ,为尺度参数." @默认值 = 1.0>
+    {
+        @ [&] {
+        @     std::normal_distribution<DOUBLE> dist (@<平均数>, @<标准差>);
+        @     return dist (@sn<this>.gen);
+        @ } ()
+    }
+
+    方法 取卡方分布小数 <公开 类型 = 小数 注释 = "根据卡方分布离散概率函数产生随机小数值." 折叠 @嵌入式方法 = "">
+    参数 自由度 <类型 = 小数 @默认值 = 1.0>
+    {
+        @ [&] {
+        @     std::chi_squared_distribution<DOUBLE> dist (@<自由度>);
+        @     return dist (@sn<this>.gen);
+        @ } ()
+    }
+
+    方法 取柯西分布小数 <公开 类型 = 小数 注释 = "根据柯西分布离散概率函数产生随机小数值." 折叠 @嵌入式方法 = "">
+    参数 位置 <类型 = 小数 @默认值 = 1.0>
+    参数 尺度 <类型 = 小数 @默认值 = 1.0>
+    {
+        @ [&] {
+        @     std::cauchy_distribution<DOUBLE> dist (@<位置>, @<尺度>);
+        @     return dist (@sn<this>.gen);
+        @ } ()
+    }
+
+    方法 取费舍尔分布小数 <公开 类型 = 小数 注释 = "根据费舍尔F分布离散概率函数产生随机小数值." 折叠 @嵌入式方法 = "">
+    参数 自由度m <类型 = 小数 @默认值 = 1.0>
+    参数 自由度n <类型 = 小数 @默认值 = 1.0>
+    {
+        @ [&] {
+        @     std::fisher_f_distribution<DOUBLE> dist (@<自由度m>, @<自由度n>);
+        @     return dist (@sn<this>.gen);
+        @ } ()
+    }
+
+    方法 取学生T分布小数 <公开 类型 = 小数 注释 = "根据学生T分布离散概率函数产生随机小数值." 折叠 @嵌入式方法 = "">
+    参数 自由度 <类型 = 小数 @默认值 = 1.0>
+    {
+        @ [&] {
+        @     std::student_t_distribution<DOUBLE> dist (@<自由度>);
+        @     return dist (@sn<this>.gen);
+        @ } ()
+    }
+
+    # 自定义方法
+
+    方法 取随机字符 <公开 类型 = 文本型 注释 = "获取由指定数量和类型的随机ASCII字符,适合用来生成密码." 返回值注释 = "成功返回指定字符数的随机文本,失败返回空文本." 折叠
+            @嵌入式方法 = "">
+    参数 欲取字符数 <类型 = 整数 注释 = "要取的字符个数">
+    参数 字符类型 <类型 = 整数 注释 = "为以下数值相加值或位或值,默认为1+2+4;\r" 注释 = "  1、数字\r" 注释 = "  2、小写字母\r" 注释 = "  4、大写字母\r"
+            注释 = "  8、特殊符号" @默认值 = 7>
+    {
+        @ [&] {
+        @     TCHAR Buffer[96] { 0 };
+        @     INT nFlags = @<字符类型>;
+        @     if ((nFlags & 1) == 1) wcscat (Buffer, L"0123456789");
+        @     if ((nFlags & 2) == 2) wcscat (Buffer, L"abcdefghijklmnopqrstuvwxyz");
+        @     if ((nFlags & 4) == 4) wcscat (Buffer, L"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        @     if ((nFlags & 8) == 8) wcscat (Buffer, L" !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
+        @     size_t Offset = wcslen (Buffer) - 1;
+        @     @an<CVolString> szStr;
+        @     if (Offset <= 0) return szStr;
+        @     INT nLength = @<欲取字符数>;
+        @     szStr.SetLength (nLength);
+        @     std::uniform_int_distribution<size_t> dist (0, Offset);
+        @     for (INT i = 0; i < nLength; i++) {
+        @         wcsncpy ((wchar_t*)szStr.GetText () + i, Buffer + dist (@sn<this>.gen), 1);
+        @     }
+        @     return szStr;
+        @ } ()
+    }
+
+    方法 取随机汉字 <公开 类型 = 文本型 注释 = "获取指定数量的随机汉字.\r" 注释 = "注: 从20902个汉字中获取,有大量非常用汉字,看起来非常像乱码." 折叠 @嵌入式方法 = "">
+    参数 汉字数量 <类型 = 整数 注释 = "提供随机汉字的数量">
+    {
+        @ [&] {
+        @     INT nSize = @<汉字数量>;
+        @     @an<CVolString> szStr;
+        @     szStr.SetNumAlignChars (nSize);
+        @     std::uniform_int_distribution<TCHAR> dist (0x4E00, 0x9FA5);
+        @     for (INT i = 0; i < nSize; i++) {
+        @         szStr.AddChar (dist (@sn<this>.gen));
+        @     }
+        @     return szStr;
+        @ } ()
+    }
+
+    方法 取随机百家姓 <公开 类型 = 文本型 注释 = "获取随机的百家姓." 返回值注释 = "成功返回指定字符数的随机文本,失败返回空文本." 折叠 @嵌入式方法 = "">
+    {
+        @ [&] {
+        @     const TCHAR* surname[] {_T("赵"),_T("钱"),_T("孙"),_T("李"),_T("周"),_T("吴"),_T("郑"),_T("王"),_T("冯"),_T("陈"),
+        @                             _T("褚"),_T("卫"),_T("蒋"),_T("沈"),_T("韩"),_T("杨"),_T("朱"),_T("秦"),_T("尤"),_T("许"),
+        @                             _T("何"),_T("吕"),_T("施"),_T("张"),_T("孔"),_T("曹"),_T("严"),_T("华"),_T("金"),_T("魏"),
+        @                             _T("陶"),_T("姜"),_T("戚"),_T("谢"),_T("邹"),_T("喻"),_T("柏"),_T("水"),_T("窦"),_T("章"),
+        @                             _T("云"),_T("苏"),_T("潘"),_T("葛"),_T("奚"),_T("范"),_T("彭"),_T("郎"),_T("鲁"),_T("韦"),
+        @                             _T("昌"),_T("马"),_T("苗"),_T("凤"),_T("花"),_T("方"),_T("俞"),_T("任"),_T("袁"),_T("柳"),
+        @                             _T("酆"),_T("鲍"),_T("史"),_T("唐"),_T("费"),_T("廉"),_T("岑"),_T("薛"),_T("雷"),_T("贺"),
+        @                             _T("倪"),_T("汤"),_T("滕"),_T("殷"),_T("罗"),_T("毕"),_T("郝"),_T("邬"),_T("安"),_T("常"),
+        @                             _T("乐"),_T("于"),_T("时"),_T("傅"),_T("皮"),_T("卞"),_T("齐"),_T("康"),_T("伍"),_T("余"),
+        @                             _T("元"),_T("卜"),_T("顾"),_T("孟"),_T("平"),_T("黄"),_T("和"),_T("穆"),_T("萧"),_T("尹"),
+        @                             _T("姚"),_T("邵"),_T("湛"),_T("汪"),_T("祁"),_T("毛"),_T("禹"),_T("狄"),_T("米"),_T("贝"),
+        @                             _T("明"),_T("臧"),_T("计"),_T("伏"),_T("成"),_T("戴"),_T("谈"),_T("宋"),_T("茅"),_T("庞"),
+        @                             _T("熊"),_T("纪"),_T("舒"),_T("屈"),_T("项"),_T("祝"),_T("董"),_T("梁"),_T("杜"),_T("阮"),
+        @                             _T("蓝"),_T("闵"),_T("席"),_T("季"),_T("麻"),_T("强"),_T("贾"),_T("路"),_T("娄"),_T("危"),
+        @                             _T("江"),_T("童"),_T("颜"),_T("郭"),_T("梅"),_T("盛"),_T("林"),_T("刁"),_T("钟"),_T("徐"),
+        @                             _T("邱"),_T("骆"),_T("高"),_T("夏"),_T("蔡"),_T("田"),_T("樊"),_T("胡"),_T("凌"),_T("霍"),
+        @                             _T("虞"),_T("万"),_T("支"),_T("柯"),_T("昝"),_T("管"),_T("卢"),_T("莫"),_T("经"),_T("房"),
+        @                             _T("裘"),_T("缪"),_T("干"),_T("解"),_T("应"),_T("宗"),_T("丁"),_T("宣"),_T("贲"),_T("邓"),
+        @                             _T("郁"),_T("单"),_T("杭"),_T("洪"),_T("包"),_T("诸"),_T("左"),_T("石"),_T("崔"),_T("吉"),
+        @                             _T("钮"),_T("龚"),_T("程"),_T("嵇"),_T("邢"),_T("滑"),_T("裴"),_T("陆"),_T("荣"),_T("翁"),
+        @                             _T("荀"),_T("羊"),_T("於"),_T("惠"),_T("甄"),_T("曲"),_T("家"),_T("封"),_T("芮"),_T("羿"),
+        @                             _T("储"),_T("靳"),_T("汲"),_T("邴"),_T("糜"),_T("松"),_T("井"),_T("段"),_T("富"),_T("巫"),
+        @                             _T("乌"),_T("焦"),_T("巴"),_T("弓"),_T("牧"),_T("隗"),_T("山"),_T("谷"),_T("车"),_T("侯"),
+        @                             _T("宓"),_T("蓬"),_T("全"),_T("郗"),_T("班"),_T("仰"),_T("秋"),_T("仲"),_T("伊"),_T("宫"),
+        @                             _T("宁"),_T("仇"),_T("栾"),_T("暴"),_T("甘"),_T("钭"),_T("厉"),_T("戎"),_T("祖"),_T("武"),
+        @                             _T("符"),_T("刘"),_T("景"),_T("詹"),_T("束"),_T("龙"),_T("叶"),_T("幸"),_T("司"),_T("韶"),
+        @                             _T("郜"),_T("黎"),_T("蓟"),_T("薄"),_T("印"),_T("宿"),_T("白"),_T("怀"),_T("蒲"),_T("邰"),
+        @                             _T("从"),_T("鄂"),_T("索"),_T("咸"),_T("籍"),_T("赖"),_T("卓"),_T("蔺"),_T("屠"),_T("蒙"),
+        @                             _T("池"),_T("乔"),_T("阴"),_T("胥"),_T("能"),_T("苍"),_T("双"),_T("闻"),_T("莘"),_T("党"),
+        @                             _T("翟"),_T("谭"),_T("贡"),_T("劳"),_T("逄"),_T("姬"),_T("申"),_T("扶"),_T("堵"),_T("冉"),
+        @                             _T("宰"),_T("郦"),_T("雍"),_T("郤"),_T("璩"),_T("桑"),_T("桂"),_T("濮"),_T("牛"),_T("寿"),
+        @                             _T("通"),_T("边"),_T("扈"),_T("燕"),_T("冀"),_T("郏"),_T("浦"),_T("尚"),_T("农"),_T("温"),
+        @                             _T("别"),_T("庄"),_T("晏"),_T("柴"),_T("瞿"),_T("阎"),_T("充"),_T("慕"),_T("连"),_T("茹"),
+        @                             _T("习"),_T("宦"),_T("艾"),_T("鱼"),_T("容"),_T("向"),_T("古"),_T("易"),_T("慎"),_T("戈"),
+        @                             _T("廖"),_T("庾"),_T("终"),_T("暨"),_T("居"),_T("衡"),_T("步"),_T("都"),_T("耿"),_T("满"),
+        @                             _T("弘"),_T("匡"),_T("国"),_T("文"),_T("寇"),_T("广"),_T("禄"),_T("阙"),_T("东"),_T("欧"),
+        @                             _T("殳"),_T("沃"),_T("利"),_T("蔚"),_T("越"),_T("夔"),_T("隆"),_T("师"),_T("巩"),_T("厍"),
+        @                             _T("聂"),_T("晁"),_T("勾"),_T("敖"),_T("融"),_T("冷"),_T("訾"),_T("辛"),_T("阚"),_T("那"),
+        @                             _T("简"),_T("饶"),_T("空"),_T("曾"),_T("毋"),_T("沙"),_T("乜"),_T("养"),_T("鞠"),_T("须"),
+        @                             _T("丰"),_T("巢"),_T("关"),_T("蒯"),_T("相"),_T("查"),_T("後"),_T("荆"),_T("红"),_T("游"),
+        @                             _T("竺"),_T("权"),_T("逯"),_T("盖"),_T("益"),_T("桓"),_T("公"),_T("万俟"),_T("司马"),_T("上官"),
+        @                             _T("欧阳"),_T("夏侯"),_T("诸葛"),_T("闻人"),_T("东方"),_T("赫连"),_T("皇甫"),_T("尉迟"),
+        @                             _T("公羊"),_T("澹台"),_T("公冶"),_T("宗政"),_T("濮阳"),_T("淳于"),_T("单于"),_T("太叔"),
+        @                             _T("申屠"),_T("公孙"),_T("仲孙"),_T("轩辕"),_T("令狐"),_T("钟离"),_T("宇文"),_T("长孙"),
+        @                             _T("慕容"),_T("鲜于"),_T("闾丘"),_T("司徒"),_T("司空"),_T("亓官"),_T("司寇"),_T("仉"),
+        @                             _T("督"),_T("子车"),_T("颛孙"),_T("端木"),_T("巫马"),_T("公西"),_T("漆雕"),_T("乐正"),
+        @                             _T("壤驷"),_T("公良"),_T("拓跋"),_T("夹谷"),_T("宰父"),_T("谷梁"),_T("晋"),_T("楚"),_T("闫"),
+        @                             _T("法"),_T("汝"),_T("鄢"),_T("涂"),_T("钦"),_T("段干"),_T("百里"),_T("东郭"),_T("南门"),
+        @                             _T("呼延"),_T("归"),_T("海"),_T("羊舌"),_T("微生"),_T("岳"),_T("帅"),_T("缑"),_T("亢"),
+        @                             _T("况"),_T("后"),_T("有"),_T("琴"),_T("梁丘"),_T("左丘"),_T("东门"),_T("西门"),_T("商"),
+        @                             _T("牟"),_T("佘"),_T("佴"),_T("伯"),_T("赏"),_T("南宫"),_T("墨"),_T("哈"),_T("谯"),_T("笪"),
+        @                             _T("年"),_T("爱"),_T("阳"),_T("佟"),_T("第五"),_T("言"),_T("福")};
+        @     std::uniform_int_distribution<size_t> dist (0, NUM_ELEMENTS_OF (surname) - 1);
+        @     return @an<CVolString> (surname[dist (@sn<this>.gen)]);
+        @ } ()
+    }
+
+    方法 取随机字节集 <公开 类型 = 字节集类 注释 = "获取指定长度的随机内容字节集." 折叠 @嵌入式方法 = "">
+    参数 字节集长度 <类型 = 整数 注释 = "提供随机字节集的长度">
+    参数 去除零值 <类型 = 逻辑型 注释 = "返回的字节集中是否包含0值" @默认值 = 真>
+    {
+        @ [&] {
+        @     INT nSize = @<字节集长度>;
+        @     @an<CVolMem> memBuf;
+        @     memBuf.SetMemAlignSize (nSize);
+        @     std::uniform_int_distribution<BYTE> dist (@<去除零值> ? 1 : 0, 255);
+        @     for (INT i = 0; i < nSize; i++) {
+        @         memBuf.AddByte (dist (@sn<this>.gen));
+        @     }
+        @     return memBuf;
+        @ } ()
+    }
+}
+
+类 标准随机数类 <公开 基础类 = 标准随机数基本类 注释 = "采用\"std::mt19937\"的32位梅森旋转算法,耗时最慢且状态存储要求较高,但产生的随机数质量最高." 折叠
+        编辑时信息 = "3DC94, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+{
+    方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致\r" 注释 = "后续的取随机数系列方法返回不同的随机数系列值.\r"
+            注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的\r" 注释 = "种子值时,才需要手动调用." 折叠>
+    {
+        @ gen.seed (rd ());
+    }
+
+    # @begin
+    # <> <include>
+    #     std::random_device rd;
+    #     std::mt19937 gen;
+    #     inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
+    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
+    # <> </include>
+    # @end
+}
+
+类 随机数类_mt19937_64 <公开 基础类 = 标准随机数基本类 注释 = "采用\"std::mt19937_64\"的64位梅森旋转算法,耗时最慢且状态存储要求较高,但产生的随机数质量最高."
+        折叠 编辑时信息 = "2DF4E, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+{
+    方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致\r" 注释 = "后续的取随机数系列方法返回不同的随机数系列值.\r"
+            注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的\r" 注释 = "种子值时,才需要手动调用." 折叠>
+    {
+        @ gen.seed (rd ());
+    }
+
+    # @begin
+    # <> <include>
+    #     std::random_device rd;
+    #     std::mt19937_64 gen;
+    #     inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
+    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
+    # <> </include>
+    # @end
+}
+
+类 随机数类_minstd_rand0 <公开 基础类 = 标准随机数基本类 注释 = "采用\"std::minstd_rand0\"的线性同余算法,速度较快且状态存储要求最低,但产生的随机数质量一般."
+        折叠 编辑时信息 = "2A364, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+{
+    方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致\r" 注释 = "后续的取随机数系列方法返回不同的随机数系列值.\r"
+            注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的\r" 注释 = "种子值时,才需要手动调用." 折叠>
+    {
+        @ gen.seed (rd ());
+    }
+
+    # @begin
+    # <> <include>
+    #     std::random_device rd;
+    #     std::minstd_rand0 gen;
+    #     inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
+    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
+    # <> </include>
+    # @end
+}
+
+类 随机数类_minstd_rand <公开 基础类 = 标准随机数基本类 注释 = "采用\"std::minstd_rand\"的线性同余算法,速度较快且状态存储要求最低,但产生的随机数质量一般."
+        折叠 编辑时信息 = "2C985, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+{
+    方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致\r" 注释 = "后续的取随机数系列方法返回不同的随机数系列值.\r"
+            注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的\r" 注释 = "种子值时,才需要手动调用." 折叠>
+    {
+        @ gen.seed (rd ());
+    }
+
+    # @begin
+    # <> <include>
+    #     std::random_device rd;
+    #     std::minstd_rand gen;
+    #     inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
+    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
+    # <> </include>
+    # @end
+}
+
+类 随机数类_ranlux24_base <公开 基础类 = 标准随机数基本类
+        注释 = "采用\"std::ranlux24_base\"的带进位减(延迟斐波那契)算法,速度非常快,但状态存储要求最大,也有不太适合的谱特性." 折叠
+        编辑时信息 = "2A61E, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+{
+    方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致\r" 注释 = "后续的取随机数系列方法返回不同的随机数系列值.\r"
+            注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的\r" 注释 = "种子值时,才需要手动调用." 折叠>
+    {
+        @ gen.seed (rd ());
+    }
+
+    # @begin
+    # <> <include>
+    #     std::random_device rd;
+    #     std::ranlux24_base gen;
+    #     inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
+    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
+    # <> </include>
+    # @end
+}
+
+类 随机数类_ranlux48_base <公开 基础类 = 标准随机数基本类
+        注释 = "采用\"std::ranlux48_base\"的带进位减(延迟斐波那契)算法,速度非常快,但状态存储要求最大,也有不太适合的谱特性." 折叠
+        编辑时信息 = "2B102, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+{
+    方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致\r" 注释 = "后续的取随机数系列方法返回不同的随机数系列值.\r"
+            注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的\r" 注释 = "种子值时,才需要手动调用." 折叠>
+    {
+        @ gen.seed (rd ());
+    }
+
+    # @begin
+    # <> <include>
+    #     std::random_device rd;
+    #     std::ranlux48_base gen;
+    #     inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
+    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
+    # <> </include>
+    # @end
+}
+
+类 随机数类_ranlux24 <公开 基础类 = 标准随机数基本类 注释 = "基于\"随机数类_ranlux24_base\"加上随机数引擎适配器,舍弃了部分不太适合的谱特性." 折叠
+        编辑时信息 = "34C3E, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+{
+    方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致\r" 注释 = "后续的取随机数系列方法返回不同的随机数系列值.\r"
+            注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的\r" 注释 = "种子值时,才需要手动调用." 折叠>
+    {
+        @ gen.seed (rd ());
+    }
+
+    # @begin
+    # <> <include>
+    #     std::random_device rd;
+    #     std::ranlux24 gen;
+    #     inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
+    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
+    # <> </include>
+    # @end
+}
+
+类 随机数类_ranlux48 <公开 基础类 = 标准随机数基本类 注释 = "基于\"随机数类_ranlux48_base\"加上随机数引擎适配器,舍弃了部分不太适合的谱特性." 折叠
+        编辑时信息 = "36207, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+{
+    方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致\r" 注释 = "后续的取随机数系列方法返回不同的随机数系列值.\r"
+            注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的\r" 注释 = "种子值时,才需要手动调用." 折叠>
+    {
+        @ gen.seed (rd ());
+    }
+
+    # @begin
+    # <> <include>
+    #     std::random_device rd;
+    #     std::ranlux48 gen;
+    #     inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
+    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
+    # <> </include>
+    # @end
+}
+
+类 随机数类_knuth_b <公开 基础类 = 标准随机数基本类 注释 = "基于\"随机数类_minstd_rand0\"加上随机数引擎适配器,打乱了随机数引擎的输出." 折叠
+        编辑时信息 = "3A0AA, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+{
+    方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致\r" 注释 = "后续的取随机数系列方法返回不同的随机数系列值.\r"
+            注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的\r" 注释 = "种子值时,才需要手动调用." 折叠>
+    {
+        @ gen.seed (rd ());
+    }
+
+    # @begin
+    # <> <include>
+    #     std::random_device rd;
+    #     std::knuth_b gen;
+    #     inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
+    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
+    # <> </include>
+    # @end
+}
+
+# ini 配置文件 ===
+
+类 配置文件操作类 <公开 注释 = "  提供简易的ini配置文件读写操作,支持多字节、UTF-8和UTF-16LE编码.\r"
+        注释 = "  所有属性写的方法,都必须在\"打开文件\"、\"创建自文件\"、\"创建自字节集\"\r" 注释 = "之前设置,后续设置无效.\r"
+        注释 = "  源码: https://github.com/brofield/simpleini" 折叠 @文档 = "category = \"配置文件.INI\""
+        @视窗.外部头文件 = "src\\SimpleIni.h\r\nsrc\\piv_encoding.hpp">
+{
+    方法 类_初始化 <折叠>
+    {
+        @ data ().SetUnicode (true); // 默认使用UTF-8
+    }
+
+    方法 类_清理 <折叠>
+    {
+        @ if (m_szIniFile.IsEmpty () == FALSE && m_bAutoSave == TRUE)
+        @ {
+        @     this->@<保存> ();
+        @ }
+    }
+
+    方法 清空 <公开 注释 = "释放本配置对象的所有内存数据." 折叠 @嵌入式方法 = "">
+    {
+        @ @sn<this>.data ().Reset ()
+    }
+
+    方法 是否为空 <公开 类型 = 逻辑型 注释 = "检查本配置对象是否为空(未加载任何数据)." 折叠 @嵌入式方法 = "">
+    {
+        @ @sn<this>.data ().IsEmpty ()
+    }
+
+    方法 是否允许重复键名 <公开 属性写 注释 = "  设置是否允许存在重复的键名,即一个键名允许存在多个键值.\r" 注释 = "  如果开启本属性,使用\"取XX键值\"时只获取到第一个键值,只有\r"
+            注释 = "\"取所有键值\"能获取全部键值." 折叠>
+    参数 是否允许 <类型 = 逻辑型 注释 = "默认为假">
+    {
+        @ data ().SetMultiKey (@<是否允许>);
+    }
+
+    方法 是否允许重复键名 <公开 属性读 类型 = 逻辑型 注释 = "返回是否允许重复键名" 折叠 @嵌入式方法 = "">
+    {
+        @ @sn<this>.data ().IsMultiKey ()
+    }
+
+    方法 是否允许跨行键值 <公开 属性写 注释 = "  设置是否允许键值可以跨越多行,格式如下:\r" 注释 = "    key = <<<TAG\r"
+            注释 = "    .... multiline value ....\r" 注释 = "    TAG\r"
+            注释 = "  其中\"TAG\"标签可以自定义,但一定要成对出现,开始标签前一定要有\"<<<\",\r" 注释 = "结束标签要单独写一行，而且一定要写在行首.\r"
+            注释 = "  中间是跨行的键值,可以有很多行,其中换行符会被替换为\'\\\\n\'字符." 折叠>
+    参数 是否允许 <类型 = 逻辑型 注释 = "默认为假">
+    {
+        @ data ().SetMultiLine (@<是否允许>);
+    }
+
+    方法 是否允许跨行键值 <公开 属性读 类型 = 逻辑型 注释 = "返回是否允许跨行键值" 折叠 @嵌入式方法 = "">
+    {
+        @ @sn<this>.data ().IsMultiLine ()
+    }
+
+    方法 是否添加空格 <公开 属性写 注释 = "  设置是否在键值对的等号两边添加空格.\r" 注释 = "  为真时: \"key = value\";\r"
+            注释 = "  为假时: \"key=value\"." 折叠>
+    参数 是否添加 <类型 = 逻辑型 注释 = "默认为假">
+    {
+        @ data ().SetSpaces (@<是否添加>);
+    }
+
+    方法 是否添加空格 <公开 属性读 类型 = 逻辑型 注释 = "返回是否在等号两边添加空格" 折叠 @嵌入式方法 = "">
+    {
+        @ @sn<this>.data ().UsingSpaces ()
+    }
+
+    方法 是否解析引号 <公开 属性写 注释 = "  设置是否解析包围单行键值的双引号.\r" 注释 = "  为真时会将这对双引号当作语法解析,不会输出到键值中;\r"
+            注释 = "  为假时会将这对双引号输出为字符." 折叠>
+    参数 是否解析 <类型 = 逻辑型 注释 = "默认为假">
+    {
+        @ data ().SetQuotes (@<是否解析>);
+    }
+
+    方法 是否解析引号 <公开 属性读 类型 = 逻辑型 注释 = "返回是否解析包围单行键值的引号." 折叠 @嵌入式方法 = "">
+    {
+        @ @sn<this>.data ().UsingQuotes ()
+    }
+
+    方法 是否允许单键名 <公开 属性写 注释 = "  设置是否允许存在没有等号和键值的单个键名.\r" 注释 = "  为假时必须有等号才会解析出键名和键值;\r"
+            注释 = "  为真时将没有等号的单行文本识别为单个键名." 折叠>
+    参数 是否允许 <类型 = 逻辑型 注释 = "默认为假">
+    {
+        @ data ().SetAllowKeyOnly (@<是否允许>);
+    }
+
+    方法 是否允许单键名 <公开 属性读 类型 = 逻辑型 注释 = "返回是否允许存在没有等号和键值的单个键名." 折叠 @嵌入式方法 = "">
+    {
+        @ @sn<this>.data ().UsingQuotes ()
+    }
+
+    # ---
+
+    方法 创建自文本 <公开 类型 = 整数 注释 = "从文本型数据中读入ini配置数据,本方法会覆盖本类之前的数据." 返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠
+            @禁止流程检查 = 真>
+    参数 配置内容 <类型 = 文本型>
+    {
+        @ data ().Reset ();
+        @ CVolMem memData;
+        @ data ().SetUnicode (true);
+        @ return static_cast<INT>(data ().LoadData (*PivW2U(@<配置内容>.GetText ())));
+    }
+
+    方法 创建自字节集 <公开 类型 = 整数 注释 = "从字节集数据中读入ini配置数据,本方法会覆盖本类之前的数据." 返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠
+            @禁止流程检查 = 真>
+    参数 配置内容 <类型 = 字节集类>
+    参数 文本编码 <类型 = 文本编码类型 注释 = "  指定字节集文本编码,文本编码必须对应,否则可能会乱码.\r" 注释 = "  其中\"未知\"等同多字节." @默认值 = 文本编码类型.UTF8>
+    {
+        @ data ().Reset ();
+        @ if (@<文本编码> == VSET_UTF_8) {
+        @     data ().SetUnicode (true);
+        @     return static_cast<INT>(data ().LoadData (reinterpret_cast<const char*>(@<配置内容>.GetPtr ()), @<配置内容>.GetSize ()));
+        @ } else if (@<文本编码> == VSET_UTF_16) {
+        @     data ().SetUnicode (true);
+        @     return static_cast<INT>(data ().LoadData (*PivW2U (reinterpret_cast<const wchar_t*>(@<配置内容>.GetPtr ()), @<配置内容>.GetSize () / 2)));
+        @ } else {
+        @     data ().SetUnicode (false);
+        @     return static_cast<INT>(data ().LoadData (reinterpret_cast<const char*>(@<配置内容>.GetPtr ()), @<配置内容>.GetSize ()));
+        @ }
+    }
+
+    方法 创建自文件 <公开 类型 = 整数 注释 = "  从指定的文件中读入ini配置数据,本方法会覆盖本类之前的数据.\r"
+            注释 = "  注意: 读入配置后就会关闭文件,所以之后修改的配置并不会反映到\r" 注释 = "ini文件中,必须调用\"保存/保存文件\"才会将结果保存到文件."
+            返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @禁止流程检查 = 真>
+    参数 文件名 <类型 = 文本型 注释 = "所欲打开的ini配置文件,文件不存在时会自动创建.">
+    参数 文本编码 <类型 = 文本编码类型 注释 = "  指定所打开ini文件的文本编码.\r" 注释 = "  首先会根据文件的BOM签名自动识别编码.\r"
+            注释 = "  若不存在签名,则以此参数指定的编码打开,\"未知\"等同多字节.\r" 注释 = "  文本编码必须选择正确,否则可能会乱码." @默认值 = 文本编码类型.未知>
+    参数 自动保存 <类型 = 逻辑型 注释 = "  是否在对象被释放之前自动保存更改到文件中.\r" 注释 = "  为假时必须手动调用\"保存\",否则可能丢失未保存的编辑内容.\r"
+            注释 = "  为真时,即使已经通过\"保存文件\"将配置数据保存到新文件中,\r" 注释 = "仍会将更改保存到原文件中." @默认值 = 真>
+    {
+        @ m_szIniFile.Empty (); m_bAutoSave = FALSE;
+        @ data ().Reset ();
+        @ INT nRet;
+        @ FILE* fp = _wfopen (@<文件名>.GetText (), L"ab+");
+        @ if (!fp) return -3;
+        @ fseek (fp, 0, SEEK_END);
+        @ int nSize = ftell (fp);
+        @ fseek (fp, 0, SEEK_SET);
+        @ char* szData = new char [nSize + 2] { 0 };
+        @ if (!szData) { fclose (fp); return -2; }
+        @ fread (szData, sizeof(char), nSize, fp);
+        @ fclose (fp);
+        @ m_nType = VSET_UNKNOWN;
+        @ bool hasBom = false;
+        @ if (memcmp (szData, SI_UTF16_SIGNATURE, 2) == 0) {
+        @     m_nType = VSET_UTF_16; hasBom = true;
+        @ } else if (memcmp (szData, SI_UTF8_SIGNATURE, 3) == 0) {
+        @     m_nType = VSET_UTF_8;
+        @ }
+        @ if (m_nType == VSET_UTF_16 || (m_nType == VSET_UNKNOWN && @<文本编码> == VSET_UTF_16)) {
+        @     data ().SetUnicode (true);
+        @     nRet = static_cast<INT>(data ().LoadData (*PivW2U (reinterpret_cast<const WCHAR*>(szData + hasBom ? 2 : 0), 0)));
+        @ } else if (m_nType == VSET_UTF_8 || (m_nType == VSET_UNKNOWN && @<文本编码> == VSET_UTF_8)) {
+        @     data ().SetUnicode (true);
+        @     nRet = static_cast<INT>(data ().LoadData (reinterpret_cast<const char*>(szData), nSize));
+        @ } else {
+        @     m_nType = VSET_MBCS;
+        @     data ().SetUnicode (false);
+        @     nRet = static_cast<INT>(data ().LoadData (reinterpret_cast<const char*>(szData), nSize));
+        @ }
+        @ delete [] szData;
+        @ if (nRet >= 0) {
+        @     m_szIniFile = @<文件名>;
+        @     m_bAutoSave = @<自动保存>;
+        @ }
+        @ return nRet;
+    }
+
+    方法 打开文件 <公开 类型 = 整数 注释 = "  本方法跟\"创建自文件\"一样,只是为了兼容以前的代码才保留.\r"
+            注释 = "  从指定的文件中获取ini配置数据,本方法会覆盖本类之前的数据.\r" 注释 = "  注意: 读入配置后就会关闭文件,所以之后修改的配置并不会反映到\r"
+            注释 = "ini文件中,必须调用\"保存/保存文件\"才会将结果保存到文件." 返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @禁止流程检查 = 真>
+    参数 文件名 <类型 = 文本型 注释 = "所欲打开的ini配置文件,文件不存在时会自动创建.">
+    参数 文本编码 <类型 = 文本编码类型 注释 = "  指定所打开ini文件的文本编码.\r" 注释 = "  首先会根据文件的BOM签名自动识别编码.\r"
+            注释 = "  若不存在签名,则以此参数指定的编码打开,\"未知\"等同多字节.\r" 注释 = "  文本编码必须选择正确,否则可能会乱码." @默认值 = 文本编码类型.未知>
+    参数 自动保存 <类型 = 逻辑型 注释 = "  是否在对象被释放之前自动保存更改到文件中.\r" 注释 = "  为假时必须手动调用\"保存\",否则可能丢失未保存的编辑内容.\r"
+            注释 = "  为真时,即使已经通过\"保存文件\"将配置数据保存到新文件中,\r" 注释 = "仍会将更改保存到原文件中." @默认值 = 真>
+    {
+        返回 (创建自文件 (文件名, 文本编码, 自动保存))
+    }
+
+    方法 保存 <公开 类型 = 整数 注释 = "覆盖保存打开过的ini文件,如果未成功执行过\"创建自文件/打开文件\",将保存失败." 返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠
+            @禁止流程检查 = 真>
+    {
+        @ if (m_szIniFile.IsEmpty ()) {
+        @     return -3;
+        @ } else {
+        @     return this->@<保存文件> (m_szIniFile, m_nType);
+        @ }
+    }
+
+    方法 保存文件 <公开 类型 = 整数 注释 = "将当前编辑的内容保存到指定的ini文件中." 返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @禁止流程检查 = 真>
+    参数 文件名 <类型 = 文本型 注释 = "所欲保存内容的ini配置文件,如果文件不存在将自动创建.">
+    参数 文本编码 <类型 = 文本编码类型 注释 = "指定保存文件的文本编码,UTF8和UTF16都会添加自动BOM签名,其中\"未知\"等同多字节." @默认值 = 文本编码类型.UTF8>
+    {
+        @ if (@<文本编码> == @<文本编码类型.UTF8>) {
+        @     if (data ().IsUnicode ()) {
+        @         return static_cast<INT>(data ().SaveFile (@<文件名>.GetText (), true));
+        @     } else {
+        @         CVolMem memUtf8;
+        @         std::string szBuffer;
+        @         data ().Save (szBuffer, false);
+        @         PivA2U utf8str {szBuffer};
+        @         utf8str.GetMem (memUtf8, false);
+        @         memUtf8.InsertValue_S_BYTE (0, (S_BYTE)0xBF); memUtf8.InsertValue_S_BYTE (0, (S_BYTE)0xBB); memUtf8.InsertValue_S_BYTE (0, (S_BYTE)0xEF);
+        @         return memUtf8.WriteIntoFile (@<文件名>, -1) ? 0 : -3;
+        @     }
+        @ } else if (@<文本编码> == @<文本编码类型.UTF16>) {
+        @     CVolMem memWStr; std::string szBuffer;
+        @     data ().Save (szBuffer, false);
+        @     if (data ().IsUnicode ()) {
+        @         PivU2W utf16str {szBuffer};
+        @         utf16str.GetMem (memWStr, false);
+        @     } else {
+        @         PivA2W utf16str {szBuffer};
+        @         utf16str.GetMem (memWStr, false);
+        @     }
+        @     memWStr.InsertValue_SHORT (0, (SHORT)0xFEFF);
+        @     return memWStr.WriteIntoFile (@<文件名>, -1) ? 0 : -3;
+        @ } else {
+        @     if (data ().IsUnicode ()) {
+        @         CVolMem memMBS;
+        @         std::string szBuffer;
+        @         data ().Save (szBuffer, false);
+        @         PivU2A mbstr {szBuffer};
+        @         mbstr.GetMem (memMBS, false);
+        @         return memMBS.WriteIntoFile (@<文件名>, -1) ? 0 : -3;
+        @     } else {
+        @         return static_cast<INT>(data ().SaveFile (@<文件名>.GetText (), false));
+        @     }
+        @ }
+    }
+
+    方法 取文件编码 <公开 类型 = 文本编码类型 注释 = "返回已打开ini配置文件的文本编码.\r" 注释 = "若未成功执行过\"打开文件\",则返回\"文本编码类型.未知\"." 折叠
+            @嵌入式方法 = "">
+    {
+        @ @sn<this>.m_nType
+    }
+
+    方法 到文本 <公开 类型 = 文本型 注释 = "将内存中的配置数据输出到文本." 折叠 @禁止流程检查 = 真>
+    {
+        @ std::string szBuffer;
+        @ data ().Save (szBuffer, false);
+        @ if (data ().IsUnicode ())
+        @     return *PivU2Ws {szBuffer};
+        @ else
+        @     return *PivA2Ws {szBuffer};
+    }
+
+    方法 到字节集 <公开 类型 = 字节集类 注释 = "将内存中的配置数据输出到字节集类.\r" 注释 = "本方法不做编码转换,直接返回类的内部数据,内部只使用多字节和UTF8两种编码." 折叠
+            @禁止流程检查 = 真>
+    参数 添加签名 <类型 = 逻辑型 注释 = "是否对UTF-8数据添加BOM签名(多字节无签名)" @默认值 = 假>
+    参数 是否UTF8编码 <类型 = 逻辑型类 注释 = "返回字节集的数据是否为UTF8编码,返回假则说明是多字节编码." @默认值 = 空对象>
+    {
+        @ std::string szBuffer;
+        @ data ().Save (szBuffer, @<添加签名>);
+        @ @<是否UTF8编码.值> = data ().IsUnicode ();
+        @ return @an<CVolMem> (szBuffer.c_str (), szBuffer.size ());
+    }
+
+    方法 取所有节名 <公开 注释 = "获取配置数据中所有节的名称." 折叠>
+    参数 返回节名数组 <类型 = 文本数组类 注释 = "成功返回节名的数组">
+    {
+        @ @<返回节名数组>.data ().RemoveAll ();
+        @ CSimpleIniW::TNamesDepend sections;
+        @ data ().GetAllSections (sections);
+        @ for (auto it = sections.begin(); it != sections.end(); it++) {
+        @     @<返回节名数组>.data ().Add ((*it).pItem);
+        @ }
+    }
+
+    方法 取所有键名 <公开 类型 = 逻辑型 注释 = "获取指定节中的所有唯一键名." 折叠 @禁止流程检查 = 真>
+    参数 节名 <类型 = 文本型 注释 = "所欲取所有键名的节">
+    参数 返回键名数组 <类型 = 文本数组类 注释 = "成功返回键名的数组">
+    {
+        @ @<返回键名数组>.data ().RemoveAll ();
+        @ CSimpleIniW::TNamesDepend keys;
+        @ BOOL bRet = data ().GetAllKeys (@<节名>.GetText (), keys);
+        @ if (!bRet) return FALSE;
+        @ for (auto it = keys.begin(); it != keys.end(); it++) {
+        @     @<返回键名数组>.data ().Add ((*it).pItem);
+        @ }
+        @ return bRet;
+    }
+
+    方法 取所有键值 <公开 类型 = 逻辑型 注释 = "获取指定节指定键的所有键值.\r" 注释 = "\"是否允许重复键名\"为真时会返回所有同键名的值,为假时只会返回第一个值." 折叠
+            @禁止流程检查 = 真>
+    参数 节名 <类型 = 文本型 注释 = "所欲取键值的节名">
+    参数 键名 <类型 = 文本型 注释 = "所欲取键值的键名">
+    参数 返回值数组 <类型 = 文本数组类 注释 = "成功返回键值数组">
+    {
+        @ @<返回值数组>.data ().RemoveAll ();
+        @ CSimpleIniW::TNamesDepend values;
+        @ BOOL bRet = data ().GetAllValues (@<节名>.GetText (), @<键名>.GetText (), values);
+        @ if (!bRet) return FALSE;
+        @ for (auto it = values.begin(); it != values.end(); it++) {
+        @     @<返回值数组>.data ().Add ((*it).pItem);
+        @ }
+        @ return bRet;
+    }
+
+    方法 取所有节名2 <公开 注释 = "获取配置数据中所有节的信息.\r" 注释 = "本方法除了节名,还能返回注释和序号." 折叠>
+    参数 返回配置项数组 <类型 = 配置项信息数组类 注释 = "成功返回节名的数组">
+    {
+        @ @<返回配置项数组>.RemoveAll ();
+        @ CSimpleIniW::TNamesDepend sections;
+        @ data ().GetAllSections (sections);
+        @ for (auto it = sections.begin(); it != sections.end(); it++) {
+        @     @dt<配置项信息类> iniInf;
+        @     if ((*it).pItem) iniInf.pItem = @an<CVolString> ((*it).pItem);
+        @     if ((*it).pComment) iniInf.pComment = @an<CVolString> ((*it).pComment);
+        @     iniInf.nOrder = (*it).nOrder;
+        @     @<返回配置项数组>.Add (iniInf, NULL);
+        @ }
+    }
+
+    方法 取所有键名2 <公开 类型 = 逻辑型 注释 = "获取指定节中所有唯一键名的信息.\r" 注释 = "本方法除了键名,还能返回注释和序号." 折叠 @禁止流程检查 = 真>
+    参数 节名 <类型 = 文本型 注释 = "所欲取所有键名的节">
+    参数 返回配置项数组 <类型 = 配置项信息数组类 注释 = "成功返回键名的数组">
+    {
+        @ @<返回配置项数组>.RemoveAll ();
+        @ CSimpleIniW::TNamesDepend keys;
+        @ BOOL bRet = data ().GetAllKeys (@<节名>.GetText (), keys);
+        @ if (!bRet) return FALSE;
+        @ for (auto it = keys.begin(); it != keys.end(); it++) {
+        @     @dt<配置项信息类> iniInf;
+        @     if ((*it).pItem) iniInf.pItem = @an<CVolString> ((*it).pItem);
+        @     if ((*it).pComment) iniInf.pComment = @an<CVolString> ((*it).pComment);
+        @     iniInf.nOrder = (*it).nOrder;
+        @     @<返回配置项数组>.Add (iniInf, NULL);
+        @ }
+        @ return bRet;
+    }
+
+    方法 取所有键值2 <公开 类型 = 逻辑型 注释 = "获取指定节指定键的所有键值信息.\r" 注释 = "本方法除了键值,还能返回注释和序号.\r"
+            注释 = "\"是否允许重复键名\"为真时会返回所有同键名的值,为假时只会返回第一个值." 折叠 @禁止流程检查 = 真>
+    参数 节名 <类型 = 文本型 注释 = "所欲取键值的节名">
+    参数 键名 <类型 = 文本型 注释 = "所欲取键值的键名">
+    参数 返回配置项数组 <类型 = 配置项信息数组类 注释 = "成功返回键值数组">
+    {
+        @ @<返回配置项数组>.RemoveAll ();
+        @ CSimpleIniW::TNamesDepend values;
+        @ BOOL bRet = data ().GetAllValues (@<节名>.GetText (), @<键名>.GetText (), values);
+        @ if (!bRet) return FALSE;
+        @ for (auto it = values.begin(); it != values.end(); it++) {
+        @     @dt<配置项信息类> iniInf;
+        @     if ((*it).pItem) iniInf.pItem = @an<CVolString> ((*it).pItem);
+        @     if ((*it).pComment) iniInf.pComment = @an<CVolString> ((*it).pComment);
+        @     iniInf.nOrder = (*it).nOrder;
+        @     @<返回配置项数组>.Add (iniInf, NULL);
+        @ }
+        @ return bRet;
+    }
+
+    方法 取节成员数 <公开 类型 = 整数 注释 = "获取指定节的键数量." 折叠 @嵌入式方法 = "">
+    参数 节名 <类型 = 文本型 注释 = "所欲取键数量的节名">
+    {
+        @ @sn<this>.data ().GetSectionSize (@<节名>.GetText ())
+    }
+
+    方法 取节键值对 <公开 类型 = 文本到文本哈希表 注释 = "获取指定节名的所有键值对." 返回值注释 = "返回键值对哈希表" 折叠>
+    参数 节名 <类型 = 文本型 注释 = "所欲取键值对的节名">
+    {
+        变量 结果 <类型 = 文本到文本哈希表>
+        @ const CSimpleIniW::TKeyVal* kv = data ().GetSection (@<节名>.GetText ());
+        @ for (auto it = kv->begin (); it != kv->end (); it++) {
+        @     @<结果>.m_map [@an<CVolString> (it->first.pItem)] = @an<CVolString> (it->second);
+        @ }
+        返回 (结果)
+    }
+
+    方法 节名是否存在 <公开 类型 = 逻辑型 注释 = "检查指定的节是否存在." 折叠 @嵌入式方法 = "">
+    参数 节名 <类型 = 文本型 注释 = "所欲检查的节名">
+    {
+        @ @sn<this>.data ().SectionExists (@<节名>.GetText ())
+    }
+
+    方法 键名是否存在 <公开 类型 = 逻辑型 注释 = "检查指定的键名是否存在" 折叠 @嵌入式方法 = "">
+    参数 节名 <类型 = 文本型 注释 = "所欲检查键名的节名">
+    参数 键名 <类型 = 文本型 注释 = "所欲检查的键名">
+    {
+        @ @sn<this>.data ().KeyExists (@<节名>.GetText (), @<键名>.GetText ())
+    }
+
+    方法 取文本键值 <公开 类型 = 文本型 注释 = "获取指定键的文本型键值.\r" 注释 = "即使\"是否允许重复键名\"为真,也只会返回找到的第一个值." 折叠 @嵌入式方法 = "">
+    参数 节名 <类型 = 文本型 注释 = "所欲获取键值的节名称">
+    参数 键名 <类型 = 文本型 注释 = "所欲获取键值的键名称">
+    参数 默认值 <类型 = 文本型 注释 = "如果所指定键名不存在,将返回此默认值." @默认值 = "">
+    参数 是否有多个值 <类型 = 逻辑型类 注释 = "返回当前键是否有多个值,为真时可以用\"取所有键值\"获取." @默认值 = 空对象>
+    {
+        @ @an<CVolString> (@sn<this>.data ().GetValue (@<节名>.GetText (), @<键名>.GetText (), @<默认值>.GetText (), (bool*)&@<是否有多个值.值>))
+    }
+
+    方法 取整数键值 <公开 类型 = 整数 注释 = "获取指定键的整数型键值.\r" 注释 = "即使\"是否允许重复键名\"为真,也只会返回找到的第一个值." 折叠 @嵌入式方法 = "">
+    参数 节名 <类型 = 文本型 注释 = "所欲获取键值的节名称">
+    参数 键名 <类型 = 文本型 注释 = "所欲获取键值的键名称">
+    参数 默认值 <类型 = 整数 注释 = "如果所指定键名不存在,将返回此默认值." @默认值 = 0>
+    参数 是否有多个值 <类型 = 逻辑型类 注释 = "返回当前键是否有多个值,为真时可以用\"取所有键值\"获取." @默认值 = 空对象>
+    {
+        @ (INT)@sn<this>.data ().GetLongValue (@<节名>.GetText (), @<键名>.GetText (), (long)@<默认值>, (bool*)&@<是否有多个值.值>)
+    }
+
+    方法 取小数键值 <公开 类型 = 小数 注释 = "获取指定键的小数型键值.\r" 注释 = "即使\"是否允许重复键名\"为真,也只会返回找到的第一个值." 折叠 @嵌入式方法 = "">
+    参数 节名 <类型 = 文本型 注释 = "所欲获取键值的节名称">
+    参数 键名 <类型 = 文本型 注释 = "所欲获取键值的键名称">
+    参数 默认值 <类型 = 小数 注释 = "如果所指定键名不存在,将返回此默认值." @默认值 = 0>
+    参数 是否有多个值 <类型 = 逻辑型类 注释 = "返回当前键是否有多个值,为真时可以用\"取所有键值\"获取." @默认值 = 空对象>
+    {
+        @ (DOUBLE)@sn<this>.data ().GetDoubleValue (@<节名>.GetText (), @<键名>.GetText (), (double)@<默认值>, (bool*)&@<是否有多个值.值>)
+    }
+
+    方法 取逻辑键值 <公开 类型 = 逻辑型 注释 = "获取指定键的逻辑型键值.\r" 注释 = "即使\"是否允许重复键名\"为真,也只会返回找到的第一个值." 折叠 @嵌入式方法 = "">
+    参数 节名 <类型 = 文本型 注释 = "所欲获取键值的节名称">
+    参数 键名 <类型 = 文本型 注释 = "所欲获取键值的键名称">
+    参数 默认值 <类型 = 逻辑型 注释 = "如果所指定键名不存在,将返回此默认值." @默认值 = 假>
+    参数 是否有多个值 <类型 = 逻辑型类 注释 = "返回当前键是否有多个值,为真时可以用\"取所有键值\"获取." @默认值 = 空对象>
+    {
+        @ (BOOL)@sn<this>.data ().GetBoolValue (@<节名>.GetText (), @<键名>.GetText (), (bool)@<默认值>, (bool*)&@<是否有多个值.值>)
+    }
+
+    方法 置文本键值 <公开 类型 = 整数 注释 = "添加或更新一个节或文本型键值.\r" 注释 = "当\"是否允许重复键名\"为真时,始终为添加键值."
+            返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @禁止流程检查 = 真>
+    参数 节名 <类型 = 文本型 注释 = "所欲添加或更新的节">
+    参数 键名 <类型 = 文本型 注释 = "所欲添加或更新的键,留空表示创建一个空节." @默认值 = 空对象>
+    参数 键值 <类型 = 文本型 注释 = "所欲设置的键值,留空表示创建一个空节." @默认值 = 空对象>
+    参数 注释 <类型 = 文本型 注释 = "  设置节或键的注释,如果键名为空则是设置节的注释.\r" 注释 = "  可空,注释文本必须以字符\';\'或\'#\'开头.\r"
+            注释 = "  仅在第一次创建新的节或键名时才会写入注释." @默认值 = 空对象>
+    参数 强制替换 <类型 = 逻辑型 注释 = "  \"是否允许重复键名\"为真时,是否强制将同一个键名的\r" 注释 = "所有键值都替换成新值." @默认值 = 假>
+    {
+        @ return (INT)data ().SetValue (@<节名>.GetText (), @<键名>.IsEmpty () ? NULL : @<键名>.GetText (),
+        @     @<键值>.IsEmpty () ? NULL : @<键值>.GetText (), @<注释>.IsEmpty () ? NULL : @<注释>.GetText (), (bool)@<强制替换>);
+    }
+
+    方法 置整数键值 <公开 类型 = 整数 注释 = "添加或更新一个整数型键值.\r" 注释 = "当\"是否允许重复键名\"为真时,始终为添加键值."
+            返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @禁止流程检查 = 真>
+    参数 节名 <类型 = 文本型 注释 = "所欲添加或更新的节">
+    参数 键名 <类型 = 文本型 注释 = "所欲添加或更新的键">
+    参数 键值 <类型 = 整数 注释 = "所欲设置的键值">
+    参数 注释 <类型 = 文本型 注释 = "  设置节或键的注释,如果键名为空则是设置节的注释.\r" 注释 = "  可空,注释文本必须以字符\';\'或\'#\'开头.\r"
+            注释 = "  仅在第一次创建新的节或键名时才会写入注释." @默认值 = 空对象>
+    参数 使用十六进制 <类型 = 逻辑型 注释 = "是否以十六进制文本的格式来写入整数型键值" @默认值 = 假>
+    参数 强制替换 <类型 = 逻辑型 注释 = "  \"是否允许重复键名\"为真时,是否强制将同一个键名的\r" 注释 = "所有键值都替换成新值." @默认值 = 假>
+    {
+        @ return (INT)data ().SetLongValue (@<节名>.GetText (), @<键名>.GetText (), (long)@<键值>,
+        @         @<注释>.IsEmpty () ? NULL : @<注释>.GetText (), @<使用十六进制>, (bool)@<强制替换>);
+    }
+
+    方法 置小数键值 <公开 类型 = 整数 注释 = "添加或更新一个小数型键值.\r" 注释 = "当\"是否允许重复键名\"为真时,始终为添加键值."
+            返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @禁止流程检查 = 真>
+    参数 节名 <类型 = 文本型 注释 = "所欲添加或更新的节">
+    参数 键名 <类型 = 文本型 注释 = "所欲添加或更新的键">
+    参数 键值 <类型 = 小数 注释 = "所欲设置的键值">
+    参数 注释 <类型 = 文本型 注释 = "  设置节或键的注释,如果键名为空则是设置节的注释.\r" 注释 = "  可空,注释文本必须以字符\';\'或\'#\'开头.\r"
+            注释 = "  仅在第一次创建新的节或键名时才会写入注释." @默认值 = 空对象>
+    参数 强制替换 <类型 = 逻辑型 注释 = "  \"是否允许重复键名\"为真时,是否强制将同一个键名的\r" 注释 = "所有键值都替换成新值." @默认值 = 假>
+    {
+        @ return (INT)data ().SetDoubleValue (@<节名>.GetText (), @<键名>.GetText (), (double)@<键值>,
+        @         @<注释>.IsEmpty () ? NULL : @<注释>.GetText (), (bool)@<强制替换>);
+    }
+
+    方法 置逻辑键值 <公开 类型 = 整数 注释 = "添加或更新一个逻辑型键值.\r" 注释 = "当\"是否允许重复键名\"为真时,始终为添加键值."
+            返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @禁止流程检查 = 真>
+    参数 节名 <类型 = 文本型 注释 = "所欲添加或更新的节">
+    参数 键名 <类型 = 文本型 注释 = "所欲添加或更新的键">
+    参数 键值 <类型 = 逻辑型 注释 = "所欲设置的键值">
+    参数 注释 <类型 = 文本型 注释 = "  设置节或键的注释,如果键名为空则是设置节的注释.\r" 注释 = "  可空,注释文本必须以字符\';\'或\'#\'开头.\r"
+            注释 = "  仅在第一次创建新的节或键名时才会写入注释." @默认值 = 空对象>
+    参数 强制替换 <类型 = 逻辑型 注释 = "  \"是否允许重复键名\"为真时,是否强制将同一个键名的\r" 注释 = "所有键值都替换成新值." @默认值 = 假>
+    {
+        @ return (INT)data ().SetBoolValue (@<节名>.GetText (), @<键名>.GetText (), (bool)@<键值>,
+        @         @<注释>.IsEmpty () ? NULL : @<注释>.GetText (), (bool)@<强制替换>);
+    }
+
+    方法 删除配置 <公开 类型 = 逻辑型 注释 = "  删除整个节,或节中的某个键.\r" 注释 = "  当\"是否允许重复键名\"为真时,将删除所有同名的键,\r"
+            注释 = "如果要单独删除某个键值对,请用\"删除键值\"." 返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @禁止流程检查 = 真>
+    参数 节名 <类型 = 文本型 注释 = "所欲删除配置的节,如果如果键名为空,则表示删除整个节.">
+    参数 键名 <类型 = 文本型 注释 = "所欲删除的键,如果键名为空,则表示删除整个节." @默认值 = 空对象>
+    参数 删除空节 <类型 = 逻辑型 注释 = "如果删除指定键后,节已经没有其他内容,是否把这个空节也删除掉?" @默认值 = 假>
+    {
+        @ return data ().Delete (@<节名>.GetText (), @<键名>.IsEmpty () ? NULL : @<键名>.GetText (), (bool)@<删除空节>);
+    }
+
+    方法 删除键值 <公开 类型 = 逻辑型 注释 = "删除整个节,或节中的某个键.如果提供了键值,则只删除对应的键." 返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠
+            @禁止流程检查 = 真>
+    参数 节名 <类型 = 文本型 注释 = "所欲删除配置的节,如果如果键名为空,则表示删除整个节.">
+    参数 键名 <类型 = 文本型 注释 = "所欲删除的键,如果键名为空,则表示删除整个节." @默认值 = 空对象>
+    参数 键值 <类型 = 文本型 注释 = "所欲删除的指定键值,如果留空则表示删除所有同名的键." @默认值 = 空对象>
+    参数 删除空节 <类型 = 逻辑型 注释 = "如果删除指定键后,节已经没有其他内存,是否把这个空节也删除掉." @默认值 = 假>
+    {
+        @ return data ().DeleteValue (@<节名>.GetText (), @<键名>.IsEmpty () ? NULL : @<键名>.GetText (),
+        @        @<键值>.IsEmpty () ? NULL : @<键值>.GetText (), (bool)@<删除空节>);
+    }
+
+    # @begin
+    # @m<DECLARE_REF_OBJECT_CLASS_WITH_DATA> (CSimpleIniW)
+    # <> <include>
+    #     #define SI_UTF16_SIGNATURE     "\xFF\xFE"
+    #     CVolString m_szIniFile;
+    #     BOOL m_bAutoSave;
+    #     INT m_nType = VSET_UNKNOWN;
+    # <> </include>
+    # @end
+}
+
+类 配置项信息类 <公开 折叠 @文档 = "category = \"配置文件.INI.辅助类\"">
+{
+    变量 项目 <公开 类型 = 文本型 注释 = "节名、键名、键值" @输出名 = "pItem">
+    变量 注释 <公开 类型 = 文本型 注释 = "配置项的注释" @输出名 = "pComment">
+    变量 序号 <公开 类型 = 整数 注释 = "配置项的序号,从0开始,为ini配置数据除去空行和注释之后的排序." @输出名 = "nOrder">
+
+    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
+            @视窗.后缀文本 = "override">
+    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
+    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    {
+        展示内容 = "<配置项信息类> 总共 3 个成员:\r\n"
+        加入文本 (展示内容, "1. 项目: " + 取调试文本2 (最大展示数据尺寸, 项目) + "\r\n")
+        加入文本 (展示内容, "2. 注释: " + 取调试文本2 (最大展示数据尺寸, 注释) + "\r\n")
+        加入文本 (展示内容, "3. 序号: " + 取调试文本2 (最大展示数据尺寸, 序号) + "\r\n")
+    }
+
+    # @begin
+    # <> <include>
+    #
+    # <> </include>
+    # @end
+}
+
+类 配置项信息数组类 <公开 基础类 = 对象数组模板类 @文档 = "category = \"配置文件.INI.辅助类\"" @模板实现类 = "配置项信息类">
+
+# 快捷方式 ===
+
+类 快捷方式操作 <公开 注释 = "自己写的快捷方式解析,别问我为什么不用IShellLink对象,我写完才发现有这玩意…\r"
+        注释 = "基本把我电脑上的快捷方式都测试了一遍,如果还遇到不能解析的,可以提交给我.\r" 注释 = "另外,部分快捷方式文件没有目标文件属性、时间等信息是正常的." 折叠
+        @文档 = "category = \"快捷方式\"">
+{
+    方法 解析 <公开 静态 类型 = 逻辑型 注释 = "解析快捷方式文件中的信息." 返回值注释 = "返回是否成功." 折叠>
+    参数 文件路径 <类型 = 文本型 注释 = "快捷方式文件的文件路径.">
+    参数 快捷方式信息 <类型 = 快捷方式信息类 注释 = "成功返回快捷方式的各项信息.">
+    {
+        变量 数据 <类型 = 字节集类>
+        变量 数据长度 <类型 = 整数>
+        快捷方式信息.重置为空对象 ()
+        数据长度 = 数据.从文件读字节集 (文件路径)
+        如果 (数据长度 == -1 || 数据长度 < 78)
+        {
+            返回 (假)
+        }
+        如果 (数据.取字节集数据 (0, 整数) != 76)  // 字符"L"
+        {
+            返回 (假)
+        }
+        快捷方式信息.GUID.从字节集创建 (数据.取字节集中间 (4, 16))  // GUID
+        快捷方式信息.可选属性 = 数据.取字节集数据 (20, 整数)
+        快捷方式信息.目标文件属性 = 数据.取字节集数据 (24, 整数)
+        快捷方式信息.创建时间 = 数据.取字节集数据 (28, 长整数)
+        快捷方式信息.修改时间 = 数据.取字节集数据 (36, 长整数)
+        快捷方式信息.访问时间 = 数据.取字节集数据 (44, 长整数)
+        快捷方式信息.目标文件长度 = 数据.取字节集数据 (52, 整数)
+        快捷方式信息.图标个数 = 数据.取字节集数据 (56, 整数)
+        快捷方式信息.运行方式 = 数据.取字节集数据 (60, 整数)
+        快捷方式信息.快捷键 = 数据.取字节集数据 (64, 整数)
+        变量 信息段位置 <类型 = 整数>
+        如果 (位与 (快捷方式信息.可选属性, 1) == 1)  // 判断是否存在shell item id list
+        {
+            信息段位置 = 78 + 数据.取字节集数据 (76, 短整数)  // 跳过shell item id list段
+            如果 (位与 (快捷方式信息.可选属性, 2) != 2)  // 文件或文件夹段不存在时,尝试在shell item id list中获取
+            {
+                变量 item_ID偏移 <类型 = 整数>
+                变量 item_ID长度 <类型 = 整数>
+                变量 item_ID <类型 = 字节集数组类>
+                变量 GUID索引 <类型 = 整数>
+                // 取出所有shell item id
+                item_ID偏移 = 78
+                item_ID长度 = 数据.取字节集数据 (item_ID偏移, 短整数)
+                循环判断首 ()
+                {
+                    变量 成员索引 <类型 = 整数>
+                    成员索引 = item_ID.加入成员 (数据.取字节集中间 (item_ID偏移 + 2, item_ID长度 - 2))
+                    如果 (item_ID长度 == 20)  // 判断是否存在"我的电脑"的GUID,如果存在则表示本地卷有目标文件
+                    {
+                        变量 我的电脑 <类型 = GUID类>
+                        我的电脑.从字节集创建 (数据.取字节集中间 (item_ID偏移 + 4, 16))
+                        如果 (文本比较 (我的电脑.取文本 (), "{20D04FE0-3AEA-1069-A2D8-08002B30309D}") == 0)
+                        {
+                            GUID索引 = 成员索引
+
+                        }
+                    }
+                    item_ID偏移 = item_ID偏移 + item_ID长度
+                    item_ID长度 = 数据.取字节集数据 (item_ID偏移, 短整数)
+
+                }
+                循环判断尾 (item_ID长度 > 0)
+                // 获取本地卷目标文件
+                如果 (GUID索引 + 1 < item_ID.取成员数 () && item_ID.取成员 (GUID索引 + 1).取字节集数据 (0, 字节) == 0x2F)
+                {
+                    加入文本 (快捷方式信息.本地目标, 文本_多字节指针到文本 (item_ID.取成员 (GUID索引 + 1).取字节集指针 () + 1))
+                    GUID索引 = GUID索引 + 2
+                    判断循环 (item_ID.取成员 (GUID索引).取字节集数据 (0, 字节) == 0x31)
+                    {
+                        加入文本 (快捷方式信息.本地目标, 文本_多字节指针到文本 (item_ID.取成员 (GUID索引).取字节集指针 () + 12))
+                        检查加入路径字符 (快捷方式信息.本地目标)
+                        如果 (GUID索引 + 1 < item_ID.取成员数 ())
+                        {
+                            GUID索引 = GUID索引 + 1
+
+                        }
+                    }
+                    如果 (item_ID.取成员 (GUID索引).取字节集数据 (0, 字节) == 0x32)
+                    {
+                        加入文本 (快捷方式信息.本地目标, 文本_多字节指针到文本 (item_ID.取成员 (GUID索引).取字节集指针 () + 12))
+
+                    }
+                }
+            }
+        }
+        否则
+        {
+            信息段位置 = 76
+
+        }
+        如果 (位与 (快捷方式信息.可选属性, 2) == 2)  // 指向文件或文件夹
+        {
+            变量 本地路径位置 <类型 = 整数>
+            变量 网络卷位置 <类型 = 整数>
+            变量 附加信息位置 <类型 = 整数>
+            变量 附加信息结尾 <类型 = 整数>
+            变量 卷位置标志 <类型 = 整数>
+            变量 结尾字符位置 <类型 = 整数>
+            如果 (数据长度 < 信息段位置 + 4 || 数据长度 < 信息段位置 + 数据.取字节集数据 (信息段位置, 整数) + 4)
+            {
+                返回 (假)
+
+            }
+            本地路径位置 = 信息段位置 + 数据.取字节集数据 (信息段位置 + 16, 整数)
+            网络卷位置 = 数据.取字节集数据 (信息段位置 + 20, 整数)
+            如果 (网络卷位置 != 0)
+            {
+                网络卷位置 = 网络卷位置 + 信息段位置
+            }
+            附加信息位置 = 信息段位置 + 数据.取字节集数据 (信息段位置 + 24, 整数)
+            附加信息结尾 = 数据.寻找字节集 (取空白字节集 (1), 附加信息位置)
+            卷位置标志 = 数据.取字节集数据 (信息段位置 + 8, 整数)
+            如果 (位与 (卷位置标志, 1) == 1)  // 文件在本地卷
+            {
+                结尾字符位置 = 数据.寻找字节集 (取空白字节集 (1), 本地路径位置)
+                快捷方式信息.本地目标 = 多字节到文本 (数据.取字节集中间 (本地路径位置, 结尾字符位置 - 本地路径位置))
+                加入文本 (快捷方式信息.本地目标, 多字节到文本 (数据.取字节集中间 (附加信息位置, 附加信息结尾 - 附加信息位置)))
+
+            }
+            如果 (位与 (卷位置标志, 2) == 2)  // 文件在网络卷
+            {
+                结尾字符位置 = 数据.寻找字节集 (取空白字节集 (1), 网络卷位置 + 20)
+                快捷方式信息.网络目标 = 多字节到文本 (数据.取字节集中间 (网络卷位置 + 20, 结尾字符位置 - 网络卷位置 + 20))
+                检查加入路径字符 (快捷方式信息.网络目标)
+                加入文本 (快捷方式信息.网络目标, 多字节到文本 (数据.取字节集中间 (附加信息位置, 附加信息结尾 - 附加信息位置)))
+
+            }
+            如果 (附加信息结尾 == 0)
+            {
+                信息段位置 = 信息段位置 + 数据.取字节集数据 (信息段位置, 整数)
+            }
+            否则
+            {
+                信息段位置 = 附加信息结尾 + 1
+
+            }
+        }
+        变量 字符串长度 <类型 = 整数>
+        如果 (位与 (快捷方式信息.可选属性, 4) == 4)  // 备注
+        {
+            字符串长度 = 数据.取字节集数据 (信息段位置, 短整数) * 2
+            如果 (数据长度 < 信息段位置 + 字符串长度 + 4)
+            {
+                返回 (假)
+            }
+            快捷方式信息.备注 = 字节集到文本 (数据.取字节集中间 (信息段位置 + 2, 字符串长度))
+            信息段位置 = 信息段位置 + 字符串长度 + 2
+
+        }
+        如果 (位与 (快捷方式信息.可选属性, 8) == 8)  // 相对路径
+        {
+            字符串长度 = 数据.取字节集数据 (信息段位置, 短整数) * 2
+            如果 (数据长度 < 信息段位置 + 字符串长度 + 4)
+            {
+                返回 (假)
+            }
+            快捷方式信息.相对路径 = 字节集到文本 (数据.取字节集中间 (信息段位置 + 2, 字符串长度))
+            信息段位置 = 信息段位置 + 字符串长度 + 2
+
+        }
+        如果 (位与 (快捷方式信息.可选属性, 16) == 16)  // 起始位置
+        {
+            字符串长度 = 数据.取字节集数据 (信息段位置, 短整数) * 2
+            如果 (数据长度 < 信息段位置 + 字符串长度 + 4)
+            {
+                返回 (假)
+            }
+            快捷方式信息.起始位置 = 字节集到文本 (数据.取字节集中间 (信息段位置 + 2, 字符串长度))
+            信息段位置 = 信息段位置 + 字符串长度 + 2
+
+        }
+        如果 (位与 (快捷方式信息.可选属性, 32) == 32)  // 命令行参数
+        {
+            字符串长度 = 数据.取字节集数据 (信息段位置, 短整数) * 2
+            如果 (数据长度 < 信息段位置 + 字符串长度 + 4)
+            {
+                返回 (假)
+            }
+            快捷方式信息.命令行参数 = 字节集到文本 (数据.取字节集中间 (信息段位置 + 2, 字符串长度))
+            信息段位置 = 信息段位置 + 字符串长度 + 2
+
+        }
+        如果 (位与 (快捷方式信息.可选属性, 64) == 64)  // 图标文件
+        {
+            字符串长度 = 数据.取字节集数据 (信息段位置, 短整数) * 2
+            如果 (数据长度 < 信息段位置 + 字符串长度 + 4)
+            {
+                返回 (假)
+            }
+            快捷方式信息.自定义图标文件 = 字节集到文本 (数据.取字节集中间 (信息段位置 + 2, 字符串长度))
+            信息段位置 = 信息段位置 + 字符串长度 + 2
+
+        }
+        返回 (真)
+    }
+}
+
+类 快捷方式信息类 <公开 注释 = "备注的\"可空\"是可能为空的意思..." 折叠 @文档 = "category = \"快捷方式.辅助类\"">
+{
+    变量 本地目标 <公开 类型 = 文本型 注释 = "快捷方式所指向的本地卷目标">
+    变量 网络目标 <公开 类型 = 文本型 注释 = "快捷方式所指向的网络卷目标">
+    变量 起始位置 <公开 类型 = 文本型 注释 = "快捷方式所指向目标的工作路径">
+    变量 备注 <公开 类型 = 文本型 注释 = "(可空)快捷方式文件的备注">
+    变量 相对路径 <公开 类型 = 文本型 注释 = "(可空)快捷方式文件的相对路径">
+    变量 命令行参数 <公开 类型 = 文本型 注释 = "(可空)快捷方式文件的命令行参数">
+    变量 自定义图标文件 <公开 类型 = 文本型 注释 = "(可空)自定义图标文件的路径">
+    变量 可选属性 <公开 类型 = 整数 注释 = "快捷方式文件的可选属性,为\"快捷方式可选属性\"类中常量的组合值.">
+    变量 目标文件属性 <公开 类型 = 整数 注释 = "(可空)目标文件属性,为\"快捷方式目标文件属性\"类中常量的组合值.">
+    变量 创建时间 <公开 类型 = 长整数 注释 = "(可空)快捷方式文件的创建时间">
+    变量 修改时间 <公开 类型 = 长整数 注释 = "(可空)快捷方式文件的创建时间">
+    变量 访问时间 <公开 类型 = 长整数 注释 = "(可空)快捷方式文件的上一次访问时间">
+    变量 目标文件长度 <公开 类型 = 整数 注释 = "(可空)目标文件的字节长度">
+    变量 图标个数 <公开 类型 = 整数 注释 = "(可空)快捷方式的自定义图标个数">
+    变量 运行方式 <公开 类型 = 整数 注释 = "(可空)目标文件执行时窗口显示方式：\r" 注释 = "  1. 常规窗口\r" 注释 = "  2. 最小化\r" 注释 = "  3. 最大化">
+    变量 快捷键 <公开 类型 = 整数 注释 = "(可空)快捷方式的快捷键">
+    变量 GUID <公开 类型 = GUID类 注释 = "快捷方式文件的GUID">
+
+    方法 取目标文件属性描述 <公开 类型 = 文本型 折叠>
+    {
+        如果 (目标文件属性 == 0)
+        {
+            返回 ("")
+        }
+        变量 结果 <类型 = 文本型>
+        如果 (是否为指定属性 (目标文件属性, 快捷方式目标文件属性.只读文件) == 真)
+        {
+            加入文本 (结果, "只读文件")
+
+        }
+        如果 (是否为指定属性 (目标文件属性, 快捷方式目标文件属性.隐藏文件) == 真)
+        {
+            加入文本 (结果, "、隐藏文件")
+
+        }
+        如果 (是否为指定属性 (目标文件属性, 快捷方式目标文件属性.系统文件) == 真)
+        {
+            加入文本 (结果, "、系统文件")
+
+        }
+        如果 (是否为指定属性 (目标文件属性, 快捷方式目标文件属性.卷标) == 真)
+        {
+            加入文本 (结果, "、卷标")
+
+        }
+        如果 (是否为指定属性 (目标文件属性, 快捷方式目标文件属性.文件夹) == 真)
+        {
+            加入文本 (结果, "、文件夹")
+
+        }
+        如果 (是否为指定属性 (目标文件属性, 快捷方式目标文件属性.可以存档文件) == 真)
+        {
+            加入文本 (结果, "、可以存档文件")
+
+        }
+        如果 (是否为指定属性 (目标文件属性, 快捷方式目标文件属性.加密文件) == 真)
+        {
+            加入文本 (结果, "、加密文件")
+
+        }
+        如果 (是否为指定属性 (目标文件属性, 快捷方式目标文件属性.常规文件) == 真)
+        {
+            加入文本 (结果, "、常规文件")
+
+        }
+        如果 (是否为指定属性 (目标文件属性, 快捷方式目标文件属性.临时文件) == 真)
+        {
+            加入文本 (结果, "、临时文件")
+
+        }
+        如果 (是否为指定属性 (目标文件属性, 快捷方式目标文件属性.稀疏文件) == 真)
+        {
+            加入文本 (结果, "、稀疏文件")
+
+        }
+        如果 (是否为指定属性 (目标文件属性, 快捷方式目标文件属性.重分析点数据) == 真)
+        {
+            加入文本 (结果, "、重分析点数据")
+
+        }
+        如果 (是否为指定属性 (目标文件属性, 快捷方式目标文件属性.压缩内容) == 真)
+        {
+            加入文本 (结果, "、压缩内容")
+
+        }
+        如果 (是否为指定属性 (目标文件属性, 快捷方式目标文件属性.脱机文件) == 真)
+        {
+            加入文本 (结果, "、脱机文件")
+
+        }
+        如果 (是否以字符开头 (结果, '、') == 真)
+        {
+            删除字符 (结果, 0, 1)
+
+        }
+        返回 (结果)
+    }
+
+    方法 是否为指定属性 <公开 类型 = 逻辑型 折叠>
+    参数 标志值 <类型 = 整数>
+    参数 欲匹配的属性 <类型 = 整数 注释 = "请参考\"快捷方式目标文件属性\"">
+    {
+        返回 (位与 (标志值, 欲匹配的属性) == 欲匹配的属性)
+    }
+
+    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
+            @视窗.后缀文本 = "override">
+    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
+    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    {
+        展示内容 = "<快捷方式信息类> 总共 15 个成员:\r\n"
+        加入文本 (展示内容, "1. 本地目标: " + 取调试文本2 (最大展示数据尺寸, 本地目标) + "\r\n")
+        加入文本 (展示内容, "2. 网络目标: " + 取调试文本2 (最大展示数据尺寸, 网络目标) + "\r\n")
+        加入文本 (展示内容, "3. 起始位置: " + 取调试文本2 (最大展示数据尺寸, 起始位置) + "\r\n")
+        加入文本 (展示内容, "4. 备注: " + 取调试文本2 (最大展示数据尺寸, 备注) + "\r\n")
+        加入文本 (展示内容, "5. 相对路径: " + 取调试文本2 (最大展示数据尺寸, 相对路径) + "\r\n")
+        加入文本 (展示内容, "6. 命令行参数: " + 取调试文本2 (最大展示数据尺寸, 命令行参数) + "\r\n")
+        加入文本 (展示内容, "7. 自定义图标文件: " + 取调试文本2 (最大展示数据尺寸, 自定义图标文件) + "\r\n")
+        加入文本 (展示内容, "8. 可选属性: " + 取调试文本2 (最大展示数据尺寸, 可选属性) + "\r\n")
+        加入文本 (展示内容, "9. 目标文件属性: " + 到文本 (目标文件属性) + "(" + 取目标文件属性描述 () + ")\r\n")
+        加入文本 (展示内容, "10. 创建时间: " + 取调试文本2 (最大展示数据尺寸, 创建时间) + "\r\n")
+        加入文本 (展示内容, "11. 修改时间: " + 取调试文本2 (最大展示数据尺寸, 修改时间) + "\r\n")
+        加入文本 (展示内容, "12. 访问时间: " + 取调试文本2 (最大展示数据尺寸, 访问时间) + "\r\n")
+        加入文本 (展示内容, "13. 目标文件长度: " + 取调试文本2 (最大展示数据尺寸, 目标文件长度) + "\r\n")
+        加入文本 (展示内容, "14. 图标个数: " + 取调试文本2 (最大展示数据尺寸, 图标个数) + "\r\n")
+        加入文本 (展示内容, "15. 运行方式: " + 取调试文本2 (最大展示数据尺寸, 图标个数) + 多项选择 (运行方式 - 1, " (常规窗口)", " (最小化)", " (最大化)") + "\r\n")
+        加入文本 (展示内容, "16. 快捷键: " + 取调试文本2 (最大展示数据尺寸, 快捷键) + "\r\n")
+        加入文本 (展示内容, "17. GUID: " + 取调试文本2 (最大展示数据尺寸, GUID.取文本 ()) + "\r\n")
+    }
+}
+
+类 快捷方式目标文件属性 <公开 折叠 @文档 = "category = \"快捷方式.辅助类\"">
+{
+    常量 只读文件 <公开 类型 = 整数 值 = 1 注释 = "快捷方式所指目标文件有只读属性">
+    常量 隐藏文件 <公开 类型 = 整数 值 = 2 注释 = "快捷方式所指目标文件有隐藏属性">
+    常量 系统文件 <公开 类型 = 整数 值 = 4 注释 = "快捷方式所指目标文件是系统文件">
+    常量 卷标 <公开 类型 = 整数 值 = 8 注释 = "快捷方式所指目标是卷标">
+    常量 文件夹 <公开 类型 = 整数 值 = 16 注释 = "快捷方式所指目标是文件夹">
+    常量 可以存档文件 <公开 类型 = 整数 值 = 32 注释 = "快捷方式所指目标文件在上次存档后被修改过.\r" 注释 = "(跟系统备份有关,系统备份文件后会取消这个属性,之后修改文件就会加回来)">
+    常量 加密文件 <公开 类型 = 整数 值 = 64 注释 = "快捷方式所指目标文件被加密(加密内容以便保护数据)">
+    常量 常规文件 <公开 类型 = 整数 值 = 128 注释 = "快捷方式所指目标文件属性为一般">
+    常量 临时文件 <公开 类型 = 整数 值 = 256 注释 = "快捷方式所指目标文件为临时">
+    常量 稀疏文件 <公开 类型 = 整数 值 = 512 注释 = "快捷方式所指目标文件为稀疏文件">
+    常量 重分析点数据 <公开 类型 = 整数 值 = 1024 注释 = "快捷方式所指目标文件有重分析点数据">
+    常量 压缩内容 <公开 类型 = 整数 值 = 2048 注释 = "快捷方式所指目标文件被压缩(压缩内容以便节省磁盘空间)">
+    常量 脱机文件 <公开 类型 = 整数 值 = 4096 注释 = "快捷方式所指目标文件脱机">
+}
+
+类 快捷方式可选属性 <公开 折叠 @文档 = "category = \"快捷方式.辅助类\"">
+{
+    常量 存在list段 <公开 类型 = 整数 值 = 1 注释 = "是否存在Shell item ID list段">
+    常量 指向文件或文件夹 <公开 类型 = 整数 值 = 2 注释 = "存在是快捷方式指向文件或文件夹,否则为指向其他.">
+    常量 存在备注 <公开 类型 = 整数 值 = 4 注释 = "存在备注字符串">
+    常量 存在相对路径 <公开 类型 = 整数 值 = 8 注释 = "存在相对路径">
+    常量 存在起始位置 <公开 类型 = 整数 值 = 16 注释 = "存在起始位置">
+    常量 存在命令行参数 <公开 类型 = 整数 值 = 32 注释 = "存在命令行参数">
+    常量 存在自定义图标 <公开 类型 = 整数 值 = 64 注释 = "存在自定义图标">
+}

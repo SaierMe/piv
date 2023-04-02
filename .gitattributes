@@ -1,4 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
-*.wsv text eol=auto diff
-*.vgrp text eol=auto diff
+*.wsv text working-tree-encoding=UTF-16LE-BOM eol=CRLF diff
+*.vgrp text working-tree-encoding=UTF-16LE-BOM eol=CRLF diff
+*.vsln text working-tree-encoding=UTF-16LE-BOM eol=CRLF diff
+*.vprj text working-tree-encoding=UTF-16LE-BOM eol=CRLF diff

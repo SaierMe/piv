@@ -1018,7 +1018,19 @@ namespace piv
             }
             return default_value;
         }
-
+        template <typename J, typename K>
+        CVolString ValueStr(const J &json, const K &key, const CVolString &default_value)
+        {
+            try
+            {
+                return *PivU2Ws{json.at(to_key(key)).get_ref<const std::string &>()};
+            }
+            catch (J::exception &)
+            {
+            }
+            return default_value;
+        }
+    
         /**
          * @brief 取成员对象
          * @param json JSON对象

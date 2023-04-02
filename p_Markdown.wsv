@@ -1,0 +1,95 @@
+<火山程序 类型 = "通常" 版本 = 1 />
+
+包 火山.PIV基础类 <注释 = "Markdown解析">
+
+类 Markdown解析器 <公开 注释 = "md4c 0.4.8" 注释 = "在CommonMark规范的基础上兼容GitHub Flavored Markdown和LaTeX数学公式"
+        注释 = "源代码 https://github.com/mity/md4c" 注释 = "" 注释 = "CommonMark 规范"
+        注释 = "https://spec.commonmark.org/" 注释 = "GitHub Flavored Markdown 规范"
+        注释 = "https://github.github.com/gfm/" 折叠 编辑时信息 = "4987E, 0, 0, 0" @文档 = "category = \"Markdown\""
+        @视窗.外部头文件 = "src\\md4c\\entity.h\nsrc\\md4c\\md4c.h\nsrc\\md4c\\md4c-html.h"
+        @视窗.外部源文件 = "src\\md4c\\entity.c\nsrc\\md4c\\md4c.c\nsrc\\md4c\\md4c-html.c">
+{
+
+    # @begin
+    # void MdRenderProc (const MD_CHAR* data, MD_SIZE size, void* userdata) {
+    #     (*(@an<CVolMem>*)userdata).Append ((void*)data, (INT_P)size);
+    # }
+    # @end
+
+    方法 渲染 <公开 类型 = 文本型 注释 = "将Markdown文本转换到HTML文本." 返回值注释 = "成功返回转换后的HTML文本,失败返回空文本." 折叠>
+    参数 Markdown <类型 = 文本型 注释 = "欲解析的Markdown文本">
+    参数 解析器标志 <类型 = 整数 注释 = "为\"MD解析器选项\"的组合值(用\"位或\"组合)." @默认值 = MD解析器标志.GitHub规范>
+    参数 渲染器标志 <类型 = 整数 注释 = "为\"MD渲染器选项\"的组合值(用\"位或\"组合)." @默认值 = MD渲染器标志.跳过UTF8签名>
+    {
+        变量 HTML <类型 = 字节集类>
+        如果 (渲染2 (文本到UTF8 (Markdown, 假), HTML, 解析器标志, 渲染器标志) == 真)
+        {
+            返回 (UTF8到文本 (HTML))
+        }
+        否则
+        {
+            返回 ("")
+        }
+    }
+
+    方法 渲染2 <公开 类型 = 逻辑型 注释 = "将Markdown字节集转换到HTML字节集(UTF8编码)." 返回值注释 = "返回是否成功" 折叠 @禁止流程检查 = 真>
+    参数 Markdown <类型 = 字节集类 注释 = "欲解析的Markdown字节集(UTF8编码)">
+    参数 HTML <类型 = 字节集类 注释 = "保存转换后的HTML字节集(UTF8编码)">
+    参数 解析器标志 <类型 = 整数 注释 = "为\"MD解析器选项\"的组合值(用\"位或\"组合)." @默认值 = MD解析器标志.GitHub规范>
+    参数 渲染器标志 <类型 = 整数 注释 = "为\"MD渲染器选项\"的组合值(用\"位或\"组合)." @默认值 = MD渲染器标志.跳过UTF8签名>
+    {
+        @ @<HTML>.Empty (); // 清空字节集,防止用户传入了非空的字节集参数
+        @ @<HTML>.SetMemAlignSize (@<Markdown>.GetSize () * 3); // 置字节集预分配字尺寸,加快处理速度
+        @ return !md_html ((const MD_CHAR*)@<Markdown>.GetPtr (), (MD_SIZE)@<Markdown>.GetSize (), &MdRenderProc, (void*)&@<HTML>, (unsigned)@<解析器标志>, (unsigned)@<渲染器标志>);
+    }
+
+    方法 "//解析" <类型 = 整数 折叠>
+    参数 文本 <类型 = 字节集类>
+    {
+        @ (INT)md_parse ((const MD_CHAR*)@<文本>.GetPtr (), (MD_SIZE)@<文本>.GetSize (), const MD_PARSER* parser, void* userdata);
+    }
+}
+
+类 MD解析器标志 <公开 注释 = "指定一些基于CommonMark规范的扩展语法,或允许一些违背规范的语法."
+        注释 = "默认值(0)时严格遵从CommonMark规范,可以用\"位或\"组合多个标志." 折叠 @文档 = "category = \"Markdown.辅助类\"">
+{
+    常量 CommonMark规范 <公开 类型 = 整数 值 = @MD_DIALECT_COMMONMARK 注释 = "默认选项,使用CommonMark规范.">
+    常量 GitHub规范 <公开 类型 = 整数 值 = @MD_DIALECT_GITHUB
+            注释 = "基于CommonMark扩展的GitHub Flavored Markdown语法,组合了\"宽松自动链接\"、\"表格扩展\"、\"删除线扩展\"、\"任务列表扩展\".">
+    常量 ""
+    常量 合并空格 <公开 类型 = 整数 值 = @MD_FLAG_COLLAPSEWHITESPACE
+            注释 = "将有意义的连续空格合并成一个. 无论如何,Markdown 中无意义的空格都会被删除,比如行首或行尾的空格.">
+    常量 宽松ATX标题 <公开 类型 = 整数 值 = @MD_FLAG_PERMISSIVEATXHEADERS
+            注释 = "ATX 标题中无需空格,比如规范要求 ### header,开启后可以允许 ###header">
+    常量 宽松URL自动链接 <公开 类型 = 整数 值 = @MD_FLAG_PERMISSIVEURLAUTOLINKS 注释 = "即使URL没有被< >包围,也允许识别为自动链接.">
+    常量 宽松邮箱自动链接 <公开 类型 = 整数 值 = @MD_FLAG_PERMISSIVEEMAILAUTOLINKS 注释 = "即使邮件地址没有< >和mailto,也允许识别为自动链接.">
+    常量 禁止缩进代码块 <公开 类型 = 整数 值 = @MD_FLAG_NOINDENTEDCODEBLOCKS
+            注释 = "禁止缩进代码块(Indented code blocks),只允许围栏代码块(Fenced code blocks)."
+            注释 = "缩进代码块由4个空格开始,围栏代码块由多个重音符(`)或腭化符(~)包围.">
+    常量 禁止HTML块级元素 <公开 类型 = 整数 值 = @MD_FLAG_NOHTMLBLOCKS
+            注释 = "禁止解析Markdown中原始HTML的块级元素(<h1>,<p>,<ul>,<table>,<div>等),将<和>转译成字符实体.">
+    常量 禁止HTML内联元素 <公开 类型 = 整数 值 = @MD_FLAG_NOHTMLSPANS
+            注释 = "禁止解析Markdown中原始HTML的内联元素(<b>,<td>,<a>,<img>,<span>等),将<和>转译成字符实体.">
+    常量 表格扩展 <公开 类型 = 整数 值 = @MD_FLAG_TABLES 注释 = "启用GitHub风格的表格扩展.">
+    常量 删除线扩展 <公开 类型 = 整数 值 = @MD_FLAG_STRIKETHROUGH 注释 = "启用GitHub风格的删除线扩展.">
+    常量 宽松WWW自动链接 <公开 类型 = 整数 值 = @MD_FLAG_PERMISSIVEWWWAUTOLINKS
+            注释 = "启用WWW自动链接. 即使没有http:等前缀,只要是www开头就识别为自动链接,例如: www.example.com">
+    常量 任务列表扩展 <公开 类型 = 整数 值 = @MD_FLAG_TASKLISTS 注释 = "启用GitHub风格的任务列表扩展.">
+    常量 LaTeX数学公式 <公开 类型 = 整数 值 = @MD_FLAG_LATEXMATHSPANS 注释 = "启用由$和$$包围的LaTeX公式.">
+    常量 维基链接 <公开 类型 = 整数 值 = @MD_FLAG_WIKILINKS 注释 = "启用Wiki风格的链接扩展.">
+    常量 下划线扩展 <公开 类型 = 整数 值 = @MD_FLAG_UNDERLINE 注释 = "启用 __下划线__ 扩展,将取代原来的 __加粗__ 语法.">
+    常量 宽松自动链接 <公开 类型 = 整数 值 = @MD_FLAG_PERMISSIVEAUTOLINKS
+            注释 = "组合了\"宽松URL自动链接\"、\"宽松邮箱自动链接\"、\"宽松WWW自动链接\".">
+    常量 禁止解析HTML <公开 类型 = 整数 值 = @MD_FLAG_NOHTML
+            注释 = "组合了\"禁止HTML块级元素\"、\"禁止HTML内联元素\",不解析Markdown文本里的任何HTML元素,将<和>转译成字符实体.">
+}
+
+类 MD渲染器标志 <公开 注释 = "可以用\"位或\"组合多个标志." 折叠 @文档 = "category = \"Markdown.辅助类\"">
+{
+    常量 调试模式 <公开 类型 = 整数 值 = @MD_HTML_FLAG_DEBUG 注释 = "调试模式,使用stderr输出错误日志(对火山而言没什么用).">
+    常量 不转译实体 <公开 类型 = 整数 值 = @MD_HTML_FLAG_VERBATIM_ENTITIES 注释 = "不转译字符实体.即禁止将\"&copy;\"等字符实体转译成 ©"
+            注释 = "HTML的字符实体列表: https://www.w3school.com.cn/charsets/ref_html_8859.asp">
+    常量 跳过UTF8签名 <公开 类型 = 整数 值 = @MD_HTML_FLAG_SKIP_UTF8_BOM 注释 = "检查并跳过UTF-8的BOM签名,输入编码为UTF-8时应开启该选项.">
+    常量 XHTML规范 <公开 类型 = 整数 值 = @MD_HTML_FLAG_XHTML
+            注释 = "使用更严格的XHTML规范: https://www.w3school.com.cn/html/html_xhtml.asp">
+}
