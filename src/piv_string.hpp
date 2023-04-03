@@ -11,7 +11,6 @@
 
 #include "piv_encoding.hpp"
 #include "piv_base.hpp"
-#include <algorithm>
 #include <vector>
 #include <memory>
 
