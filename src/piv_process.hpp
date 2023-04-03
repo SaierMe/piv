@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/04/01                          *
+ * 版本: 2023/04/03                          *
 \*********************************************/
 
 #ifndef _PIV_PROCESS_HPP
@@ -27,7 +27,7 @@ private:
     const BYTE *ProcessStart = NULL;
     const BYTE *ProcessEnd = NULL;
     DWORD PID;
-    MODULEINFO sProcessModuleInfo{0, 0, 0};
+    CMArray<HMODULE> hModuleArray;
 
     const uint32_t BLOCKMAXSIZE{409600};
     typedef BOOL(WINAPI *Piv_GetProcessDEPPolicy)(HANDLE, LPDWORD, PBOOL);
@@ -40,21 +40,20 @@ private:
     // 取首模块信息
     BOOL get_base_module_info()
     {
+        hModuleArray.RemoveAll();
         if (hProcess == NULL)
             return FALSE;
         DWORD dwNeeded = 0;
         ::EnumProcessModulesEx(hProcess, NULL, 0, &dwNeeded, 3);
-        HMODULE *lphModule = (HMODULE *)malloc(dwNeeded + 4);
-        if (lphModule == NULL)
+        hModuleArray.InitCount(dwNeeded / sizeof(HMODULE), TRUE);
+        ::EnumProcessModulesEx(hProcess, hModuleArray.GetData(), dwNeeded, &dwNeeded, 3);
+        if (hModuleArray.GetCount() <= 0)
             return FALSE;
-        ::EnumProcessModulesEx(hProcess, lphModule, dwNeeded + 4, &dwNeeded, 3);
-        HMODULE firstModule = lphModule[0], lastModule = lphModule[dwNeeded / sizeof(HMODULE) - 1];
-        free(lphModule);
         MODULEINFO sModuleInfo{0};
-        if (!::GetModuleInformation(hProcess, firstModule, &sModuleInfo, sizeof(sModuleInfo)))
+        if (!::GetModuleInformation(hProcess, hModuleArray.GetAt(0), &sModuleInfo, sizeof(sModuleInfo)))
             return FALSE;
         ProcessStart = static_cast<const BYTE *>(sModuleInfo.lpBaseOfDll);
-        if (!::GetModuleInformation(hProcess, lastModule, &sModuleInfo, sizeof(sModuleInfo)))
+        if (!::GetModuleInformation(hProcess, hModuleArray.GetLastElement(), &sModuleInfo, sizeof(sModuleInfo)))
             return FALSE;
         ProcessEnd = static_cast<const BYTE *>(sModuleInfo.lpBaseOfDll) + sModuleInfo.SizeOfImage;
         return TRUE;
@@ -79,6 +78,7 @@ public:
         hProcess = ::OpenProcess(desired_access, FALSE, PID);
         if (hProcess == NULL)
             return FALSE;
+        get_base_module_info();
         return TRUE;
     }
 
@@ -92,6 +92,7 @@ public:
             ProcessStart = NULL;
             ProcessEnd = NULL;
             PID = 0;
+            hModuleArray.RemoveAll();
         }
     }
 
@@ -223,16 +224,9 @@ public:
     // 取模块句柄
     HMODULE get_module_handle(const wchar_t *module_name)
     {
-        HMODULE hRes = 0;
         if (hProcess != NULL)
         {
             DWORD dwNeeded = 0;
-            ::EnumProcessModulesEx(hProcess, NULL, 0, &dwNeeded, 3);
-            HMODULE *lphModule = (HMODULE *)malloc(dwNeeded + 4);
-            if (lphModule == NULL)
-            {
-                return 0;
-            }
             std::wstring module_name_sv{module_name};
             WCHAR szBaseName[MAX_PATH + 1]{'\0'};
             if (module_name_sv.empty())
@@ -240,22 +234,16 @@ public:
                 ::GetModuleBaseNameW(hProcess, 0, szBaseName, MAX_PATH);
                 module_name_sv = szBaseName;
             }
-            ::EnumProcessModulesEx(hProcess, lphModule, dwNeeded + 4, &dwNeeded, 3);
-            size_t nModuleCount = dwNeeded / sizeof(HMODULE);
-            WCHAR szFileName[MAX_PATH + 1]{'\0'};
-            for (size_t i = 0; i < nModuleCount; i++)
+            std::wstring sFileName;
+            sFileName.resize(MAX_PATH);
+            for (INT_P i = 0; i < hModuleArray.GetCount(); i++)
             {
-                ::GetModuleFileNameExW(hProcess, lphModule[i], szFileName, MAX_PATH);
-                std::wstring sFileName{szFileName};
-                if (sFileName.rfind(module_name_sv, MAX_PATH) != std::wstring::npos)
-                {
-                    hRes = lphModule[i];
-                    break;
-                }
+                ::GetModuleFileNameExW(hProcess, hModuleArray.GetAt(i), sFileName.data(), MAX_PATH);
+                if (sFileName.rfind(module_name_sv, std::wstring::npos) != std::wstring::npos)
+                    return hModuleArray.GetAt(i);
             }
-            free(lphModule);
         }
-        return hRes;
+        return 0;
     }
 
     // 取模块基址
@@ -280,12 +268,10 @@ public:
         {
             DWORD dwNeeded = 0;
             ::EnumProcessModulesEx(hProcess, NULL, 0, &dwNeeded, filter_flag);
-            HMODULE *lphModule = (HMODULE *)malloc(dwNeeded + 4);
+            HMODULE *lphModule = (HMODULE *)malloc(dwNeeded);
             if (lphModule == NULL)
-            {
                 return 0;
-            }
-            ::EnumProcessModulesEx(hProcess, lphModule, dwNeeded + 4, &dwNeeded, filter_flag);
+            ::EnumProcessModulesEx(hProcess, lphModule, dwNeeded, &dwNeeded, filter_flag);
             size_t nModuleCount = dwNeeded / sizeof(HMODULE);
             for (size_t i = 0; i < nModuleCount; i++)
             {
@@ -305,24 +291,18 @@ public:
         {
             DWORD dwNeeded = 0;
             ::EnumProcessModulesEx(hProcess, NULL, 0, &dwNeeded, filter_flag);
-            HMODULE *lphModule = (HMODULE *)malloc(dwNeeded + 4);
+            HMODULE *lphModule = (HMODULE *)malloc(dwNeeded);
             if (lphModule == NULL)
-            {
                 return 0;
-            }
-            ::EnumProcessModulesEx(hProcess, lphModule, dwNeeded + 4, &dwNeeded, filter_flag);
+            ::EnumProcessModulesEx(hProcess, lphModule, dwNeeded, &dwNeeded, filter_flag);
             size_t nModuleCount = dwNeeded / sizeof(HMODULE);
             WCHAR szFileName[MAX_PATH + 1]{'\0'};
             for (size_t i = 0; i < nModuleCount; i++)
             {
                 if (is_fullpath)
-                {
                     ::GetModuleFileNameExW(hProcess, lphModule[i], szFileName, MAX_PATH);
-                }
                 else
-                {
                     ::GetModuleBaseNameW(hProcess, lphModule[i], szFileName, MAX_PATH);
-                }
                 name_array.Add(szFileName);
                 module_array.Add(reinterpret_cast<INT_P>(lphModule[i]));
             }
@@ -774,7 +754,7 @@ public:
             MODULEINFO ModuleInfo{0};
             if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && start_off < ModuleInfo.SizeOfImage && end_off < ModuleInfo.SizeOfImage)
             {
-                const BYTE* module_base = static_cast<const BYTE*>(ModuleInfo.lpBaseOfDll);
+                const BYTE *module_base = static_cast<const BYTE *>(ModuleInfo.lpBaseOfDll);
                 result = find_signatures(signatures, module_base + start_off,
                                          module_base + (end_off ? end_off : ModuleInfo.SizeOfImage));
             }
@@ -791,7 +771,7 @@ public:
             MODULEINFO ModuleInfo{0};
             if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && start_off < ModuleInfo.SizeOfImage && end_off < ModuleInfo.SizeOfImage)
             {
-                const BYTE* module_base = static_cast<const BYTE*>(ModuleInfo.lpBaseOfDll);
+                const BYTE *module_base = static_cast<const BYTE *>(ModuleInfo.lpBaseOfDll);
                 result = find_signatures(signatures, address_array, module_base + start_off, module_base + (end_off ? end_off : ModuleInfo.SizeOfImage));
             }
         }
@@ -807,7 +787,7 @@ public:
             MODULEINFO ModuleInfo{0};
             if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && start_off < ModuleInfo.SizeOfImage && end_off < ModuleInfo.SizeOfImage)
             {
-                const BYTE* module_base = static_cast<const BYTE*>(ModuleInfo.lpBaseOfDll);
+                const BYTE *module_base = static_cast<const BYTE *>(ModuleInfo.lpBaseOfDll);
                 result = find_memory(mem_data, module_base + start_off, module_base + (end_off ? end_off : ModuleInfo.SizeOfImage));
             }
         }
@@ -823,7 +803,7 @@ public:
             MODULEINFO ModuleInfo{0};
             if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && start_off < ModuleInfo.SizeOfImage && end_off < ModuleInfo.SizeOfImage)
             {
-                const BYTE* module_base = static_cast<const BYTE*>(ModuleInfo.lpBaseOfDll);
+                const BYTE *module_base = static_cast<const BYTE *>(ModuleInfo.lpBaseOfDll);
                 result = find_memory(mem_data, address_array, module_base + start_off, module_base + (end_off ? end_off : ModuleInfo.SizeOfImage));
             }
         }
