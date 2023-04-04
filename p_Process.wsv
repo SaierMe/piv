@@ -611,7 +611,7 @@
         @ }
         @ PROCESS_INFORMATION pi{0};
         @ CVolMem memCommandLine;
-        @ memCommandLine.AddString (commandline);
+        @ memCommandLine.AddString (@<欲运行的命令行>.GetText());
         @ if (!::CreateProcessW (@<欲运行的可执行文件>.IsEmpty() ? NULL : @<欲运行的可执行文件>.GetText(),
         @                        @<欲运行的命令行>.IsEmpty() ? NULL : memCommandLine.GetTextPtr(),
         @                        NULL, NULL, FALSE, 0, NULL, NULL, &infStartup, &pi)) {

@@ -19324,7 +19324,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
         uint32_t Size;
         stream.read(&Size, 4);
         ss.resize(Size);
-        if (stream.ReadExact(ss.data(), Size))
+        if (stream.ReadExact(const_cast<char *>(ss.data()), Size))
             *this = parse(ss, nullptr, false, true);
     }
     virtual void SaveIntoStream(CVolBaseOutputStream &stream)
