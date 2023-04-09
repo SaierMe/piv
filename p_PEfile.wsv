@@ -16,9 +16,9 @@
     方法 打开数据 <公开 类型 = 逻辑型 注释 = "打开并解析内存中的可执行数据." 返回值注释 = "返回是否解析成功." 折叠 @嵌入式方法 = "">
     参数 数据指针 <类型 = 变整数 注释 = "可执行数据的首地址(基址)">
     参数 数据大小 <类型 = 整数 注释 = "可执行文件的字节大小">
-    参数 是否已对齐 <类型 = 逻辑型 注释 = "  请确定可执行数据是否已经内存对齐.\r" 注释 = "  如果是原始的PE文件,请设置为假.\r" 注释 = "  如果节区已经被对齐,请设置为真."
+    参数 是否已对齐 <类型 = 逻辑型 注释 = "  请确定可执行数据是否已经内存对齐." 注释 = "  如果是原始的PE文件,请设置为假." 注释 = "  如果节区已经被对齐,请设置为真."
             @默认值 = 假>
-    参数 是否已加载 <类型 = 逻辑型 注释 = "  请确定可执行数据是否已经被加载运行.\r" 注释 = "  如果是原始的PE文件,请设置为假.\r"
+    参数 是否已加载 <类型 = 逻辑型 注释 = "  请确定可执行数据是否已经被加载运行." 注释 = "  如果是原始的PE文件,请设置为假.\r"
             注释 = "  如果是系统已经加载运行的模块,请设置为真." @默认值 = 假>
     {
         @ (BOOL)@sn<this>.data ().OpenPeData ((void*)@<数据指针>, (DWORD)@<数据大小>, @<是否已对齐>, @<是否已加载>)
@@ -26,8 +26,8 @@
 
     方法 打开模块 <公开 类型 = 逻辑型 注释 = "打开并解析系统中已加载的模块." 返回值注释 = "返回是否解析成功." 折叠 @禁止流程检查 = 真>
     参数 进程ID <类型 = 整数 注释 = "  0为当前进程" @默认值 = 0>
-    参数 模块名称 <类型 = 文本型 注释 = "  请提供模块的文件名称(区分大小写).\r" 注释 = "  如省略扩展名则默认为\".dll\". 结尾为\".\"则表示模块名称没有扩展名.\r"
-            注释 = "  该名称可以不包含路径,如果指定路径,必须用反斜杠\"\\\\\".\r" 注释 = "  留空为打开进程的exe文件." @默认值 = 空对象>
+    参数 模块名称 <类型 = 文本型 注释 = "  请提供模块的文件名称(区分大小写)." 注释 = "  如省略扩展名则默认为\".dll\". 结尾为\".\"则表示模块名称没有扩展名.\r"
+            注释 = "  该名称可以不包含路径,如果指定路径,必须用反斜杠\"\\\\\"." 注释 = "  留空为打开进程的exe文件." @默认值 = 空对象>
     {
         变量 进程操作 <类型 = 进程操作类>
         变量 模块信息 <类型 = 模块信息类>
@@ -62,8 +62,8 @@
         @ (BOOL)@sn<this>.data ().IsWriteable ()
     }
 
-    方法 复制到新内存 <公开 类型 = 变整数 注释 = "  将可执行数据复制到新的内存地址,本类默认以只读方式打开PE数据,\r" 注释 = "如果要进行改写操作,必须执行本方法.\r"
-            注释 = "  新的内存尺寸跟\"取映像尺寸\"的返回值一样." 返回值注释 = "  成功返回新的内存地址,失败返回0.\r" 返回值注释 = "  成功后将关闭之前打开的文件句柄和内存映射文件."
+    方法 复制到新内存 <公开 类型 = 变整数 注释 = "  将可执行数据复制到新的内存地址,本类默认以只读方式打开PE数据," 注释 = "如果要进行改写操作,必须执行本方法.\r"
+            注释 = "  新的内存尺寸跟\"取映像尺寸\"的返回值一样." 返回值注释 = "  成功返回新的内存地址,失败返回0." 返回值注释 = "  成功后将关闭之前打开的文件句柄和内存映射文件."
             折叠 @嵌入式方法 = "">
     {
         @ (INT_P)@sn<this>.data ().CopyToNewMem (TRUE)
@@ -74,7 +74,7 @@
         @ (BOOL)@sn<this>.data ().MemLoadPE ()
     }
 
-    方法 取最后错误 <公开 类型 = 整数 注释 = "  返回本类最后一次的操作结果,0表示操作成功,其他值表示有错误,\r" 注释 = "可以调用\"取错误信息\"得知具体的中文错误信息." 折叠
+    方法 取最后错误 <公开 类型 = 整数 注释 = "  返回本类最后一次的操作结果,0表示操作成功,其他值表示有错误," 注释 = "可以调用\"取错误信息\"得知具体的中文错误信息." 折叠
             @嵌入式方法 = "">
     {
         @ (INT)@sn<this>.data ().GetErrorCode ()
@@ -279,16 +279,16 @@
 # ---
 
 类 内存DLL加载类 <公开 注释 = "  本类不使用系统的加载器载正常加载DLL模块,而是手动修改DLL的PE数据\r"
-        注释 = "并运行,因此成功加载的DLL没有模块句柄,也不会被系统API枚举出来.\r" 注释 = "  * 将DLL数据复制到一块新申请的可执行可读写的虚拟内存,然后对DLL的\r"
-        注释 = "PE数据进行内存对齐、地址重定位和绑定导入表函数地址,最后执行DLL模块\r" 注释 = "的入口点函数.\r"
-        注释 = "  * 在类析构或卸载模块之前,可以获取DLL导出表里的函数并调用.\r" 注释 = "  * 只能在当前进程中加载,不支持注入到其他进程.\r"
-        注释 = "  * 兼容32位和64位的程序,DLL模块和进程的位数不符会返回失败.\r" 注释 = "  * 若重建导入表时,有模块未被系统加载,会自动调用LoadLibrary加载,\r"
+        注释 = "并运行,因此成功加载的DLL没有模块句柄,也不会被系统API枚举出来." 注释 = "  * 将DLL数据复制到一块新申请的可执行可读写的虚拟内存,然后对DLL的\r"
+        注释 = "PE数据进行内存对齐、地址重定位和绑定导入表函数地址,最后执行DLL模块" 注释 = "的入口点函数.\r"
+        注释 = "  * 在类析构或卸载模块之前,可以获取DLL导出表里的函数并调用." 注释 = "  * 只能在当前进程中加载,不支持注入到其他进程.\r"
+        注释 = "  * 兼容32位和64位的程序,DLL模块和进程的位数不符会返回失败." 注释 = "  * 若重建导入表时,有模块未被系统加载,会自动调用LoadLibrary加载,\r"
         注释 = "卸载模块时会自动FreeLibrary(例如该DLL有依赖其他非系统的DLL)." 折叠 @文档 = "category = \"内存注入\"">
 {
 
     # @ @m<DECLARE_REF_OBJECT_CLASS_WITH_DATA> (CMemLoadDll)
 
-    方法 保存数据 <公开 类型 = 逻辑型 注释 = "!!!功能未完成,未修复内存中的PE数据!!!\r" 注释 = "将当前打开的可执行数据保存到新文件中." 返回值注释 = "返回是否保存成功." 折叠
+    方法 保存数据 <公开 类型 = 逻辑型 注释 = "!!!功能未完成,未修复内存中的PE数据!!!" 注释 = "将当前打开的可执行数据保存到新文件中." 返回值注释 = "返回是否保存成功." 折叠
             @禁止流程检查 = 真>
     参数 文件名 <类型 = 文本型 注释 = "提供所欲写到文件的路径名称">
     {
@@ -296,15 +296,15 @@
     }
 
     方法 加载模块 <公开 类型 = 逻辑型 注释 = "  在内存中加载DLL数据,并运行DLL的入口点函数.提供的DLL数据\r"
-            注释 = "必须是未经修改的(内容跟磁盘的DLL文件一致),否则会崩溃.\r" 注释 = "  除非DLL已经被卸载,再次调用此方法不会重复加载DLL.\r" 注释 = "  本方法不支持EXE."
-            返回值注释 = "  返回是否加载成功.本类只支持加载DLL文件,如果程序和DLL的程序\r" 返回值注释 = "位数不同亦返回假." 折叠 @嵌入式方法 = "">
+            注释 = "必须是未经修改的(内容跟磁盘的DLL文件一致),否则会崩溃." 注释 = "  除非DLL已经被卸载,再次调用此方法不会重复加载DLL." 注释 = "  本方法不支持EXE."
+            返回值注释 = "  返回是否加载成功.本类只支持加载DLL文件,如果程序和DLL的程序" 返回值注释 = "位数不同亦返回假." 折叠 @嵌入式方法 = "">
     参数 DLL数据地址 <类型 = 变整数 注释 = "DLL数据在内存中的地址,请提供原始的DLL数据">
     参数 DLL数据大小 <类型 = 整数 注释 = "DLL数据的字节大小">
     {
         @ @sn<this>.data ().MemLoadLibrary ((void*)@<DLL数据地址>, (DWORD)@<DLL数据大小>)
     }
 
-    方法 卸载模块 <公开 注释 = "  卸载内存DLL,卸载后请勿再调用DLL中的函数,否则会造成崩溃.\r" 注释 = "  类析构时会自动卸载,一般不需要手动调用." 折叠 @嵌入式方法 = "">
+    方法 卸载模块 <公开 注释 = "  卸载内存DLL,卸载后请勿再调用DLL中的函数,否则会造成崩溃." 注释 = "  类析构时会自动卸载,一般不需要手动调用." 折叠 @嵌入式方法 = "">
     {
         @ @sn<this>.data ().MemFreeLibrary ()
     }
@@ -326,7 +326,7 @@
         @ (INT_P)@sn<this>.data ().GetBaseAddress ()
     }
 
-    方法 取模块尺寸 <公开 类型 = 整数 注释 = "  获取DLL数据在内存对齐之后的映像尺寸,该尺寸不等于DLL\r" 注释 = "的文件尺寸." 返回值注释 = "成功返回模块的尺寸,失败返回0."
+    方法 取模块尺寸 <公开 类型 = 整数 注释 = "  获取DLL数据在内存对齐之后的映像尺寸,该尺寸不等于DLL" 注释 = "的文件尺寸." 返回值注释 = "成功返回模块的尺寸,失败返回0."
             折叠 @嵌入式方法 = "">
     {
         @ (INT)@sn<this>.data ().CalcTotalImageSize ()
@@ -337,7 +337,7 @@
         @ @sn<this>.data ().IsLoadOk ()
     }
 
-    方法 取最后错误 <公开 类型 = 整数 注释 = "  返回本类最后一次的操作结果,0表示操作成功,其他值表示有错误,\r" 注释 = "可以调用\"取错误信息\"得知具体的中文错误信息." 折叠
+    方法 取最后错误 <公开 类型 = 整数 注释 = "  返回本类最后一次的操作结果,0表示操作成功,其他值表示有错误," 注释 = "可以调用\"取错误信息\"得知具体的中文错误信息." 折叠
             @嵌入式方法 = "">
     {
         @ (INT)@sn<this>.data ().GetErrorCode ()
@@ -417,8 +417,8 @@
         @文档 = "category = \"PE文件操作.辅助类\"" @视窗.结构类 = 0>
 {
     变量 Signature <公开 类型 = 整数 注释 = "  PE文件的标识,固定为\"PE\\0\\0\"{50,45,00,00},整数为 0x4550/17744\r"
-            注释 = "  IMAGE_DOS_SIGNATURE    0x5A4D      MZ\r" 注释 = "  IMAGE_OS2_SIGNATURE    0x454E      NE\r"
-            注释 = "  IMAGE_OS2_SIGNATURE_LE 0x454C      LE\r" 注释 = "  IMAGE_VXD_SIGNATURE    0x454C      LE\r"
+            注释 = "  IMAGE_DOS_SIGNATURE    0x5A4D      MZ" 注释 = "  IMAGE_OS2_SIGNATURE    0x454E      NE\r"
+            注释 = "  IMAGE_OS2_SIGNATURE_LE 0x454C      LE" 注释 = "  IMAGE_VXD_SIGNATURE    0x454C      LE\r"
             注释 = "  IMAGE_NT_SIGNATURE     0x00004550  PE00">
     变量 FileHeader <公开 类型 = IMAGE_FILE_HEADER 注释 = "映像文件头结构体(20个字节)">
     变量 OptionalHeader <公开 类型 = IMAGE_OPTIONAL_HEADER32 注释 = "映像可选头结构体32位">
@@ -440,8 +440,8 @@
         @文档 = "category = \"PE文件操作.辅助类\"" @视窗.结构类 = 0>
 {
     变量 Signature <公开 类型 = 整数 注释 = "  PE文件的标识,固定为\"PE\\0\\0\"{50,45,00,00},整数为 0x4550/17744\r"
-            注释 = "  IMAGE_DOS_SIGNATURE    0x5A4D      MZ\r" 注释 = "  IMAGE_OS2_SIGNATURE    0x454E      NE\r"
-            注释 = "  IMAGE_OS2_SIGNATURE_LE 0x454C      LE\r" 注释 = "  IMAGE_VXD_SIGNATURE    0x454C      LE\r"
+            注释 = "  IMAGE_DOS_SIGNATURE    0x5A4D      MZ" 注释 = "  IMAGE_OS2_SIGNATURE    0x454E      NE\r"
+            注释 = "  IMAGE_OS2_SIGNATURE_LE 0x454C      LE" 注释 = "  IMAGE_VXD_SIGNATURE    0x454C      LE\r"
             注释 = "  IMAGE_NT_SIGNATURE     0x00004550  PE00">
     变量 FileHeader <公开 类型 = IMAGE_FILE_HEADER 注释 = "映像文件头部结构体(20个字节)">
     变量 OptionalHeader <公开 类型 = IMAGE_OPTIONAL_HEADER64 注释 = "映像可选头部结构体64位">
@@ -462,7 +462,7 @@
         注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_file_header" 折叠
         @文档 = "category = \"PE文件操作.辅助类\"" @视窗.结构类 = 0>
 {
-    变量 Machine <公开 类型 = 短整数 注释 = "  可执行文件的目标CPU类型\r" 注释 = "  IMAGE_FILE_MACHINE_I386   0x014c  x86\r"
+    变量 Machine <公开 类型 = 短整数 注释 = "  可执行文件的目标CPU类型" 注释 = "  IMAGE_FILE_MACHINE_I386   0x014c  x86\r"
             注释 = "  IMAGE_FILE_MACHINE_IA64   0x0200  Intel Itanium\r"
             注释 = "  IMAGE_FILE_MACHINE_AMD64  0x8664  x64">
     变量 NumberOfSections <公开 类型 = 短整数 注释 = "节区的数目,如果我们要在文件中增加或删除一个节区,就需要修改这个值.">
@@ -501,7 +501,7 @@
         注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_optional_header32" 折叠
         @文档 = "category = \"PE文件操作.辅助类\"" @视窗.结构类 = 0>
 {
-    变量 Magic <公开 类型 = 短整数 注释 = "  映像文件类型\r" 注释 = "  IMAGE_NT_OPTIONAL_HDR32_MAGIC  0x10b  32位程序\r"
+    变量 Magic <公开 类型 = 短整数 注释 = "  映像文件类型" 注释 = "  IMAGE_NT_OPTIONAL_HDR32_MAGIC  0x10b  32位程序\r"
             注释 = "  IMAGE_NT_OPTIONAL_HDR64_MAGIC  0x20b  64位程序\r"
             注释 = "  IMAGE_ROM_OPTIONAL_HDR_MAGIC   0x107  ROM文件">
     变量 MajorLinkerVersion <公开 类型 = 字节 注释 = "链接器的主版本号">
@@ -608,7 +608,7 @@
         注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_optional_header64" 折叠
         @文档 = "category = \"PE文件操作.辅助类\"" @视窗.结构类 = 0>
 {
-    变量 Magic <公开 类型 = 短整数 注释 = "  映像文件类型\r" 注释 = "  IMAGE_NT_OPTIONAL_HDR32_MAGIC  0x10b  32位程序\r"
+    变量 Magic <公开 类型 = 短整数 注释 = "  映像文件类型" 注释 = "  IMAGE_NT_OPTIONAL_HDR32_MAGIC  0x10b  32位程序\r"
             注释 = "  IMAGE_NT_OPTIONAL_HDR64_MAGIC  0x20b  64位程序\r"
             注释 = "  IMAGE_ROM_OPTIONAL_HDR_MAGIC   0x107  ROM文件">
     变量 MajorLinkerVersion <公开 类型 = 字节 注释 = "链接器的主版本号">
@@ -654,7 +654,7 @@
     变量 NumberOfRvaAndSizes <公开 类型 = 整数 注释 = "Rva数和大小">
     变量 DataDirectory <公开 类型 = "IMAGE_DATA_DIRECTORY [16]"
             注释 = "  IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];\r"
-            注释 = "  映像文件数据目录,索引可选:\r" 注释 = "  IMAGE_DIRECTORY_ENTRY_EXPORT          0   // Export Directory\r"
+            注释 = "  映像文件数据目录,索引可选:" 注释 = "  IMAGE_DIRECTORY_ENTRY_EXPORT          0   // Export Directory\r"
             注释 = "  IMAGE_DIRECTORY_ENTRY_IMPORT          1   // Import Directory\r"
             注释 = "  IMAGE_DIRECTORY_ENTRY_RESOURCE        2   // Resource Directory\r"
             注释 = "  IMAGE_DIRECTORY_ENTRY_EXCEPTION       3   // Exception Directory\r"
@@ -767,15 +767,15 @@
 
 类 IMAGE_IMPORT_DESCRIPTOR <公开 注释 = "PE文件的导入表描述符结构体" 折叠 @文档 = "category = \"PE文件操作.辅助类\"" @视窗.结构类 = 0>
 {
-    变量 OriginalFirstThunk <公开 类型 = 整数 注释 = "联合体{\r" 注释 = "  Characteristics     0为空导入表描述符的结束符\r"
-            注释 = "  OriginalFirstThunk  原始未绑定IAT(PIMAGE_THUNK_DATA)的相对虚拟地址\r" 注释 = "}\r"
+    变量 OriginalFirstThunk <公开 类型 = 整数 注释 = "联合体{" 注释 = "  Characteristics     0为空导入表描述符的结束符\r"
+            注释 = "  OriginalFirstThunk  原始未绑定IAT(PIMAGE_THUNK_DATA)的相对虚拟地址" 注释 = "}\r"
             注释 = "由于存在单桥结构的DLL,最好别用该成员进程分析">
-    变量 TimeDateStamp <公开 类型 = 整数 注释 = "文件创建时间戳\r" 注释 = "  0    未绑定导入表\r"
+    变量 TimeDateStamp <公开 类型 = 整数 注释 = "文件创建时间戳" 注释 = "  0    未绑定导入表\r"
             注释 = "  -1   如果已绑定,真实的时间戳在IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT表中\r"
             注释 = "  其他 导入表已绑定,该时间戳与IMAGE_FILE_HEADER.TimeDateStamp一致">
     变量 ForwarderChain <公开 类型 = 短整数 注释 = "链表的前一结构">
     变量 Name <公开 类型 = 整数 注释 = "模块的名称地址(ASCII字符串的RVA)">
-    变量 FirstThunk <公开 类型 = 整数 注释 = "  导入表的IAT结构的相对虚拟地址\r" 注释 = "  绑定导入表后,该地址数组指向真实的函数地址(VA)">
+    变量 FirstThunk <公开 类型 = 整数 注释 = "  导入表的IAT结构的相对虚拟地址" 注释 = "  绑定导入表后,该地址数组指向真实的函数地址(VA)">
 
     方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
             @视窗.后缀文本 = "override">
@@ -798,9 +798,9 @@
     变量 TimeDateStamp <公开 类型 = 整数 注释 = "文件创建时间戳">
     变量 MajorVersion <公开 类型 = 短整数 注释 = "未使用,总为0">
     变量 MinorVersion <公开 类型 = 短整数 注释 = "未使用,总为0">
-    变量 Name <公开 类型 = 整数 注释 = "模块的内部名称地址(UTF8编码字符串的RVA)\r" 注释 = "即使DLL文件的名称被修改,仍可以从这个字符串得知编译时的名称">
-    变量 Base <公开 类型 = 整数 注释 = "函数的起始序号.\r" 注释 = "比如一个函数的序号是4,Base是2,就表示该函数位于导出地址列表第三个成员.\r"
-            注释 = "导出地址列表中的首成员(索引0)对应序号1,而不是序号0.\r" 注释 = "序号的起始数字可以在.DEF文件中定义.">
+    变量 Name <公开 类型 = 整数 注释 = "模块的内部名称地址(UTF8编码字符串的RVA)" 注释 = "即使DLL文件的名称被修改,仍可以从这个字符串得知编译时的名称">
+    变量 Base <公开 类型 = 整数 注释 = "函数的起始序号." 注释 = "比如一个函数的序号是4,Base是2,就表示该函数位于导出地址列表第三个成员.\r"
+            注释 = "导出地址列表中的首成员(索引0)对应序号1,而不是序号0." 注释 = "序号的起始数字可以在.DEF文件中定义.">
     变量 NumberOfFunctions <公开 类型 = 整数 注释 = "导出函数的个数">
     变量 NumberOfNames <公开 类型 = 整数 注释 = "以名称导出的函数的个数">
     变量 AddressOfFunctions <公开 类型 = 整数 注释 = "导出地址列表(Export Address Table, EAT 其实就是一个地址数组)的首地址(RVA)">
