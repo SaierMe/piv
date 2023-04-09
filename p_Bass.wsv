@@ -3,7 +3,7 @@
 包 火山.BASS音频支持库 <注释 = "https://github.com/SaierMe/piv" @视窗.外部头文件 = "BASS\\include\\bass.h"
         @视窗.外部库 = "BASS\\$(p)\\bass.lib" @视窗.附属文件 = "BASS\\$(p)\\bass.dll">
 
-类 BASS音频类 <公开 注释 = "BASS version: 2.4.16.7" 注释 = "http://www.un4seen.com\r"
+类 BASS音频类 <公开 注释 = "BASS version: 2.4.16.7" 注释 = "http://www.un4seen.com"
         注释 = "BASS 可以在非盈利软件中免费使用,商用则需要购买许可证." 折叠>
 {
     变量 错误对照表 <类型 = 整数到文本哈希表>
@@ -51,7 +51,7 @@
         @ (INT_P)BASS_GetConfigPtr (@<选项>)
     }
 
-    方法 取版本 <公开 类型 = 整数 注释 = "获取已加载的BASS的版本号" 返回值注释 = "  返回BASS版本; 例如, 0x02040103(十六进制)将是版本2.4.1.3\r"
+    方法 取版本 <公开 类型 = 整数 注释 = "获取已加载的BASS的版本号" 返回值注释 = "  返回BASS版本; 例如, 0x02040103(十六进制)将是版本2.4.1.3"
             返回值注释 = "  其中高16位为主版本号,低16位为修订版本号." 折叠 @嵌入式方法 = "">
     {
         @ (INT)BASS_GetVersion ()
@@ -282,7 +282,7 @@
         @ BASS_Pause ()
     }
 
-    方法 是否已启动 <公开 类型 = 整数 注释 = "检查是否已经开始输出" 返回值注释 = "  设备未启动返回0,如果设备已启动且处于活动状态,则返回1.\r"
+    方法 是否已启动 <公开 类型 = 整数 注释 = "检查是否已经开始输出" 返回值注释 = "  设备未启动返回0,如果设备已启动且处于活动状态,则返回1."
             返回值注释 = "  如果处于非活动状态(没有播放任何内容,并且禁用BASS_CONFIG_DEV_NONSTOP),则返回2." 折叠 @嵌入式方法 = "">
     {
         @ (INT)BASS_IsStarted ()
@@ -307,7 +307,7 @@
         @ BASS_SetVolume ((float)@<音量>)
     }
 
-    方法 取音量 <公开 类型 = 小数 注释 = "获取当前的主音量级别" 返回值注释 = "成功返回音量值,失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息.\r"
+    方法 取音量 <公开 类型 = 小数 注释 = "获取当前的主音量级别" 返回值注释 = "成功返回音量值,失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
             返回值注释 = "音量范围:0(静音)到1(最大值)." 折叠 @嵌入式方法 = "">
     {
         @ (DOUBLE)BASS_GetVolume ()
@@ -323,11 +323,11 @@
 
     方法 置空间音效因子 <公开 类型 = 逻辑型 注释 = "设置3D空间音效计算的影响因子,修改设置后需要调用\"应用空间音效\"才会实际生效."
             返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
-    参数 距离因子 <类型 = 小数 注释 = "  小于等于0=保持当前设置, 1.0=米, 0.9144=码, 0.3048=英尺.\r"
+    参数 距离因子 <类型 = 小数 注释 = "  小于等于0=保持当前设置, 1.0=米, 0.9144=码, 0.3048=英尺."
             注释 = "  默认情况下,BASS以米为单位测量距离,如果要使用不同的测量单位,可以更改此参数." @默认值 = 0.0>
-    参数 衰减因子 <类型 = 小数 注释 = "  声音随距离衰减的速度,取值0.0-10.0\r"
+    参数 衰减因子 <类型 = 小数 注释 = "  声音随距离衰减的速度,取值0.0-10.0"
             注释 = "  少于或等于0.0=保持当前设置, 0.0=无衰减,1.0=真实世界,2.0=真实世界×2" @默认值 = 0.0>
-    参数 多普勒因子 <类型 = 小数 注释 = "  取值0.0-10.0" 注释 = "  少于或等于0.0=保持当前设置, 0.0=无多普勒,1.0=真实世界,2.0=真实世界×2\r"
+    参数 多普勒因子 <类型 = 小数 注释 = "  取值0.0-10.0" 注释 = "  少于或等于0.0=保持当前设置, 0.0=无多普勒,1.0=真实世界,2.0=真实世界×2"
             注释 = "  多普勒效应是声音在靠近或远离你时改变音调的方式. 听众和声速设置用于计算此效果,此参数值可用于减小或放大效果." @默认值 = 0.0>
     {
         @ BASS_Set3DFactors ((float)@<距离因子>, (float)@<衰减因子>, (float)@<多普勒因子>)
@@ -335,11 +335,11 @@
 
     方法 取空间音效因子 <公开 类型 = 逻辑型 注释 = "获取3D空间音效计算的影响因子" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
             折叠 @禁止流程检查 = 真>
-    参数 距离因子 <类型 = 小数类 注释 = "  小于等于0=保持当前设置, 1.0=米, 0.9144=码, 0.3048=英尺\r"
+    参数 距离因子 <类型 = 小数类 注释 = "  小于等于0=保持当前设置, 1.0=米, 0.9144=码, 0.3048=英尺"
             注释 = "  默认情况下,BASS以米为单位测量距离,如果要使用不同的测量单位,可以更改此参数.">
-    参数 衰减因子 <类型 = 小数类 注释 = "  声音随距离衰减的速度,取值0.0-10.0\r"
+    参数 衰减因子 <类型 = 小数类 注释 = "  声音随距离衰减的速度,取值0.0-10.0"
             注释 = "  少于或等于0.0=保持当前设置, 0.0=无衰减,1.0=真实世界,2.0=真实世界×2">
-    参数 多普勒因子 <类型 = 小数类 注释 = "  取值0.0-10.0" 注释 = "  少于或等于0.0=保持当前设置, 0.0=无多普勒,1.0=真实世界,2.0=真实世界×2\r"
+    参数 多普勒因子 <类型 = 小数类 注释 = "  取值0.0-10.0" 注释 = "  少于或等于0.0=保持当前设置, 0.0=无多普勒,1.0=真实世界,2.0=真实世界×2"
             注释 = "  多普勒效应是声音在靠近或远离你时改变音调的方式. 听众和声速设置用于计算此效果,此参数值可用于减小或放大效果.">
     {
         @ float distf, rollf, doppf;
@@ -355,7 +355,7 @@
     方法 置空间音效位置 <公开 类型 = 逻辑型 注释 = "设置听众(即播放器)的位置、速度和方向,修改设置后需要调用\"应用空间音效\"才会实际生效."
             返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 位置 <类型 = BASS_3D矢量 注释 = "听众的位置, NULL=保持当前设置." @默认值 = 空对象>
-    参数 速度 <类型 = BASS_3D矢量 注释 = "  听众的速度单位为长度/秒(长度单位用\"置空间音效因子\"设置).\r"
+    参数 速度 <类型 = BASS_3D矢量 注释 = "  听众的速度单位为长度/秒(长度单位用\"置空间音效因子\"设置)."
             注释 = "  NULL=保持当前设置. 只用于计算多普勒效应,不会影响听众的位置." @默认值 = 空对象>
     参数 正面 <类型 = BASS_3D矢量 注释 = "  听众正面所指的方向." 注释 = "  NULL=保持当前设置,这是自动规范化的." @默认值 = 空对象>
     参数 顶部 <类型 = BASS_3D矢量 注释 = "  听众顶部指向的方向." 注释 = "  NULL=保持当前设置,这是自动规范化的,并在必要时调整为与前向量成直角." @默认值 = 空对象>
@@ -369,7 +369,7 @@
     方法 取空间音效位置 <公开 类型 = 逻辑型 注释 = "获取听众(即播放器)的位置、速度和方向"
             返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 位置 <类型 = BASS_3D矢量 注释 = "听众的位置, NULL=保持当前设置" @默认值 = 空对象>
-    参数 速度 <类型 = BASS_3D矢量 注释 = "  听众的速度单位为长度/秒(长度单位用\"置空间音效因子\"设置).\r"
+    参数 速度 <类型 = BASS_3D矢量 注释 = "  听众的速度单位为长度/秒(长度单位用\"置空间音效因子\"设置)."
             注释 = "  NULL=保持当前设置. 只用于计算多普勒效应,不会影响听众的位置." @默认值 = 空对象>
     参数 正面 <类型 = BASS_3D矢量 注释 = "  听众正面所指的方向." 注释 = "  NULL=保持当前设置,这是自动规范化的." @默认值 = 空对象>
     参数 顶部 <类型 = BASS_3D矢量 注释 = "  听众顶部指向的方向." 注释 = "  NULL=保持当前设置,这是自动规范化的,并在必要时调整为与前向量成直角." @默认值 = 空对象>
@@ -470,10 +470,10 @@
     参数 文件名 <类型 = 文本型 注释 = "文件的完整路径和名称">
     参数 数据偏移 <类型 = 长整数 注释 = "从文件偏移一段位置开始获取数据流" @默认值 = 0>
     参数 数据长度 <类型 = 整数 注释 = "0 = 使用整个文件数据. 如果长度超过文件末尾,它将自动降低到文件的结尾." @默认值 = 0>
-    参数 最大回放 <类型 = 整数 注释 = "  最大同时播放数量,取值1(最小)-65535(最大).\r"
+    参数 最大回放 <类型 = 整数 注释 = "  最大同时播放数量,取值1(最小)-65535(最大)."
             注释 = "  如果没有可供播放的剩余通道(播放已达到最大次数),在下一参数使用BASS_SAMPLE_OVER_标志之一可以越过限制.">
-    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:\r"
-            注释 = "  BASS_SAMPLE_FLOAT、BASS_SAMPLE_LOOP、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_MUTEMAX、\r"
+    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:"
+            注释 = "  BASS_SAMPLE_FLOAT、BASS_SAMPLE_LOOP、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_MUTEMAX、"
             注释 = "  BASS_SAMPLE_OVER_VOL、BASS_SAMPLE_OVER_POS、BASS_SAMPLE_OVER_DIST">
     {
         @ (INT)BASS_SampleLoad (FALSE, @<文件名>.GetText (), (QWORD)@<数据偏移>, (DWORD)@<数据长度>, (DWORD)@<最大回放>, (DWORD)@<标志>)
@@ -482,10 +482,10 @@
     方法 打开内存样本数据 <公开 类型 = 整数 注释 = "从WAV、AIFF、MP3、MP2、MP1、OGG或插件支持的文件格式加载一段样本."
             返回值注释 = "成功返回样本句柄,失败返回0,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
     参数 样本数据 <类型 = 字节集类 注释 = "注意局部字节集可能会被释放">
-    参数 最大回放 <类型 = 整数 注释 = "  最大同时播放数量,取值1(最小)-65535(最大).\r"
+    参数 最大回放 <类型 = 整数 注释 = "  最大同时播放数量,取值1(最小)-65535(最大)."
             注释 = "  如果没有可供播放的剩余通道(播放已达到最大次数),使用BASS_SAMPLE_OVER_标志之一可以越过限制.">
-    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:\r"
-            注释 = "  BASS_SAMPLE_FLOAT、BASS_SAMPLE_LOOP、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_MUTEMAX、\r"
+    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:"
+            注释 = "  BASS_SAMPLE_FLOAT、BASS_SAMPLE_LOOP、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_MUTEMAX、"
             注释 = "  BASS_SAMPLE_OVER_VOL、BASS_SAMPLE_OVER_POS、BASS_SAMPLE_OVER_DIST">
     {
         @ return (INT)BASS_SampleLoad (TRUE, (const BYTE*)@<样本数据>.GetPtr (), NULL, (DWORD)@<样本数据>.GetSize (), (DWORD)@<最大回放>, (DWORD)@<标志>);
@@ -496,10 +496,10 @@
     参数 样本长度 <类型 = 整数 注释 = "样本的数据长度(单位为字节)">
     参数 采样率 <类型 = 整数 注释 = "默认采样率" @默认值 = 48000>
     参数 声道数 <类型 = 整数 注释 = "声道数量. 1 = 单声道, 2 = 立体声, 以此类推..." @默认值 = 2>
-    参数 最大回放 <类型 = 整数 注释 = "  最大同时播放数量,取值1(最小)-65535(最大).\r"
+    参数 最大回放 <类型 = 整数 注释 = "  最大同时播放数量,取值1(最小)-65535(最大)."
             注释 = "  如果没有可供播放的剩余通道(播放已达到最大次数),在下一参数使用BASS_SAMPLE_OVER_标志之一可以越过限制." @默认值 = 1>
-    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:\r"
-            注释 = "  BASS_SAMPLE_8BITS、BASS_SAMPLE_FLOAT、BASS_SAMPLE_LOOP、BASS_SAMPLE_3D、BASS_SAMPLE_MUTEMAX、\r"
+    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:"
+            注释 = "  BASS_SAMPLE_8BITS、BASS_SAMPLE_FLOAT、BASS_SAMPLE_LOOP、BASS_SAMPLE_3D、BASS_SAMPLE_MUTEMAX、"
             注释 = "  BASS_SAMPLE_OVER_VOL、BASS_SAMPLE_OVER_POS、BASS_SAMPLE_OVER_DIST" @默认值 = 0>
     {
         @ (INT)BASS_SampleCreate ((DWORD)@<样本长度>, (DWORD)@<采样率>, (DWORD)@<声道数>, (DWORD)@<最大回放>, (DWORD)@<标志>)
@@ -572,9 +572,9 @@
     方法 取样本通道 <公开 类型 = 整数 注释 = "为样本创建并初始化一条播放通道" 返回值注释 = "成功返回通道句柄,失败返回0,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
             折叠 @嵌入式方法 = "">
     参数 样本句柄 <类型 = 整数 注释 = "样本的句柄">
-    参数 标志 <类型 = 整数 注释 = "  1 = BASS_SAMCHAN_NEW, 不覆盖现有的通道,获取一个新的播放通道.\r"
-            注释 = "  2 = BASS_SAMCHAN_STREAM, 创建新的流句柄而不是通道句柄." 注释 = "  以及\"BASS_音频标志\"类中的以下部分常量的组合值:\r"
-            注释 = "  BASS_SAMPLE_LOOP、BASS_SAMPLE_OVER_VOL、BASS_SAMPLE_OVER_POS、\r"
+    参数 标志 <类型 = 整数 注释 = "  1 = BASS_SAMCHAN_NEW, 不覆盖现有的通道,获取一个新的播放通道."
+            注释 = "  2 = BASS_SAMCHAN_STREAM, 创建新的流句柄而不是通道句柄." 注释 = "  以及\"BASS_音频标志\"类中的以下部分常量的组合值:"
+            注释 = "  BASS_SAMPLE_LOOP、BASS_SAMPLE_OVER_VOL、BASS_SAMPLE_OVER_POS、"
             注释 = "  BASS_SAMPLE_OVER_DIST、BASS_STREAM_AUTOFREE、BASS_STREAM_DECODE、BASS_SPEAKER_xxx" @默认值 = 0>
     {
         @ (INT)BASS_SampleGetChannel ((HSAMPLE)@<样本句柄>, (DWORD)@<标志>)
@@ -612,11 +612,11 @@
             返回值注释 = "成功返回流句柄,失败返回0,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
     参数 采样率 <类型 = 整数 @默认值 = 48000>
     参数 声道 <类型 = 整数 注释 = "1 = 单声道, 2 = 立体声, 4 = 四声道, 6 = 5.1, 8 = 7.1 " @默认值 = 2>
-    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:\r"
+    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:"
             注释 = "  BASS_SAMPLE_8BITS、BASS_SAMPLE_FLOAT、BASS_SAMPLE_3D、BASS_STREAM_AUTOFREE、BASS_STREAM_DECODE、BASS_SPEAKER_xxx"
             @默认值 = 0>
-    参数 处理函数 <类型 = 整数 注释 = "  0(除1-3外的任意值)=需要在接收事件\"BASS音频类_写入流回调\"中写入流数据.\r"
-            注释 = "  1=STREAMPROC_DEVICE 为设备的最终输出混合创建一个\"虚拟\"流." 注释 = "  2=STREAMPROC_DUMMY 创建一个\"虚拟\"流.\r"
+    参数 处理函数 <类型 = 整数 注释 = "  0(除1-3外的任意值)=需要在接收事件\"BASS音频类_写入流回调\"中写入流数据."
+            注释 = "  1=STREAMPROC_DEVICE 为设备的最终输出混合创建一个\"虚拟\"流." 注释 = "  2=STREAMPROC_DUMMY 创建一个\"虚拟\"流."
             注释 = "  3=STREAMPROC_PUSH 创建一个\"推送\"流,不是从STREAMPROC函数中提取BASS数据,而是通过\"推送流数据(BASS_StreamPutData)\"将数据推送到BASS."
             @默认值 = 0>
     {
@@ -642,8 +642,8 @@
     参数 文件路径 <类型 = 文本型 注释 = "文件的完整路径和名称">
     参数 数据偏移 <类型 = 长整数 注释 = "从文件偏移一段位置开始获取数据流" @默认值 = 0>
     参数 数据长度 <类型 = 长整数 注释 = "0 = 使用整个文件数据" @默认值 = 0>
-    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:\r"
-            注释 = "  BASS_SAMPLE_FLOAT、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_LOOP、BASS_STREAM_PRESCAN\r"
+    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:"
+            注释 = "  BASS_SAMPLE_FLOAT、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_LOOP、BASS_STREAM_PRESCAN"
             注释 = "  BASS_STREAM_AUTOFREE、BASS_STREAM_DECODE、BASS_SPEAKER_xxx、BASS_ASYNCFILE" @默认值 = 0>
     {
         @ (INT)BASS_StreamCreateFile (FALSE, @<文件路径>.GetText (), (DWORD)@<数据偏移>, (DWORD)@<数据长度>, (DWORD)@<标志>)
@@ -652,20 +652,20 @@
     方法 打开内存流数据 <公开 类型 = 整数 注释 = "从支持格式的字节集中创建一段样本流"
             返回值注释 = "成功返回流句柄,失败返回0,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
     参数 音频数据 <类型 = 字节集类 注释 = "注意局部字节集可能会被释放">
-    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:\r"
-            注释 = "  BASS_SAMPLE_FLOAT、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_LOOP、BASS_STREAM_PRESCAN\r"
+    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:"
+            注释 = "  BASS_SAMPLE_FLOAT、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_LOOP、BASS_STREAM_PRESCAN"
             注释 = "  BASS_STREAM_AUTOFREE、BASS_STREAM_DECODE、BASS_SPEAKER_xxx、BASS_ASYNCFILE" @默认值 = 0>
     {
         @ return (INT)BASS_StreamCreateFile (TRUE, (const BYTE*)@<音频数据>.GetPtr (), NULL, (DWORD)@<音频数据>.GetSize (), (DWORD)@<标志>);
     }
 
-    方法 打开网络文件 <公开 类型 = 整数 注释 = "从Internet上的MP3, MP2, MP1, OGG, WAV, AIFF或插件支持的文件创建样本流.\r"
+    方法 打开网络文件 <公开 类型 = 整数 注释 = "从Internet上的MP3, MP2, MP1, OGG, WAV, AIFF或插件支持的文件创建样本流."
             注释 = "执行本方法后,可以在接收事件\"BASS音频类_下载回调\"中处理下载的网络数据."
             返回值注释 = "成功返回流句柄,失败返回0,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
     参数 Url地址 <类型 = 文本型 注释 = "流文件的网络地址必须以\"http://\"、\"https://\"或\"ftp://\"开头.">
     参数 数据偏移 <类型 = 整数 注释 = "从网络文件偏移一段位置开始获取数据流" @默认值 = 0>
-    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:\r"
-            注释 = "  BASS_SAMPLE_FLOAT、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_LOOP、BASS_STREAM_RESTRATE\r"
+    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:"
+            注释 = "  BASS_SAMPLE_FLOAT、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_LOOP、BASS_STREAM_RESTRATE"
             注释 = "  BASS_STREAM_BLOCK、BASS_STREAM_STATUS、BASS_STREAM_AUTOFREE、BASS_STREAM_DECODE、BASS_SPEAKER_xxx"
             @默认值 = 0>
     {
@@ -676,14 +676,14 @@
     参数 缓冲区 <类型 = 变整数 注释 = "缓冲区包含了下载的部分数据, 0 = 下载结束 ">
     参数 数据长度 <类型 = 整数 注释 = "缓冲区的字节长度,0 = HTTP or ICY 标签">
 
-    方法 打开网络文件_下载 <公开 类型 = 整数 注释 = "从Internet上的MP3, MP2, MP1, OGG, WAV, AIFF或插件支持的文件创建样本流.\r"
+    方法 打开网络文件_下载 <公开 类型 = 整数 注释 = "从Internet上的MP3, MP2, MP1, OGG, WAV, AIFF或插件支持的文件创建样本流."
             注释 = "本方法在播放网络文件的同时保存下载文件,本方法内部处理了文件保存,无需也无法使用\"BASS音频类_下载回调\"事件."
             返回值注释 = "成功返回流句柄,失败返回0,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
     参数 Url地址 <类型 = 文本型 注释 = "流文件的网络地址必须以\"http://\"、\"https://\"或\"ftp://\"开头.">
     参数 保存文件名 <类型 = 文本型 注释 = "下载后保存的文件名">
     参数 数据偏移 <类型 = 整数 注释 = "从网络文件偏移一段位置开始获取数据流" @默认值 = 0>
-    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:\r"
-            注释 = "  BASS_SAMPLE_FLOAT、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_LOOP、BASS_STREAM_RESTRATE\r"
+    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:"
+            注释 = "  BASS_SAMPLE_FLOAT、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_LOOP、BASS_STREAM_RESTRATE"
             注释 = "  BASS_STREAM_BLOCK、BASS_STREAM_STATUS、BASS_STREAM_AUTOFREE、BASS_STREAM_DECODE、BASS_SPEAKER_xxx"
             @默认值 = 0>
     {
@@ -721,20 +721,20 @@
     参数 缓冲区 <类型 = 变整数 注释 = "指向获取数据的缓冲区指针">
     参数 长度 <类型 = 整数 注释 = "导入的最大字节数">
 
-    方法 文件处理_搜索 <公开 定义事件 类型 = 整数 注释 = "执行\"创建用户流文件\"后,在本事件中移动文件的读取位置(仅限无缓冲的文件系统).\r"
+    方法 文件处理_搜索 <公开 定义事件 类型 = 整数 注释 = "执行\"创建用户流文件\"后,在本事件中移动文件的读取位置(仅限无缓冲的文件系统)."
             注释 = "通常不需要使用,除非你循环播放文件." 返回值注释 = "返回 1 表示成功,返回 0 表示失败" 折叠>
     参数 偏移 <类型 = 长整数 注释 = "移动文件的读取位置">
 
-    方法 创建用户流文件 <公开 类型 = 整数 注释 = "从MP3、MP2、MP1、OGG、WAV、AIFF或插件支持的文件创建样本流,\r"
-            注释 = "本方法需要通过\"文件处理_关闭\"、\"文件处理_长度\"、\"文件处理_读入\"、\"文件处理_搜索\"这四个接收事件处理文件.\r"
+    方法 创建用户流文件 <公开 类型 = 整数 注释 = "从MP3、MP2、MP1、OGG、WAV、AIFF或插件支持的文件创建样本流,"
+            注释 = "本方法需要通过\"文件处理_关闭\"、\"文件处理_长度\"、\"文件处理_读入\"、\"文件处理_搜索\"这四个接收事件处理文件."
             注释 = "本方法比较复杂,需要用户自行处理流数据,建议使用\"打开流文件\"." 返回值注释 = "成功返回流句柄,失败返回0,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
             @禁止流程检查 = 真>
-    参数 文件系统 <类型 = 整数 注释 = "  0 = 无缓冲(STREAMFILE_NOBUFFER),\"打开流文件(BASS_StreamCreateFile)\"使用的文件系统.\r"
-            注释 = "  1 = 有缓冲(STREAMFILE_BUFFER),\"打开网络文件(BASS_StreamCreateURL)\"使用的文件系统.\r"
-            注释 = "  2 = 有缓冲(STREAMFILE_BUFFERPUSH),跟1差不多,但数据通过\"推送流文件数据(BASS_StreamPutFileData)\"来获取.\r"
+    参数 文件系统 <类型 = 整数 注释 = "  0 = 无缓冲(STREAMFILE_NOBUFFER),\"打开流文件(BASS_StreamCreateFile)\"使用的文件系统."
+            注释 = "  1 = 有缓冲(STREAMFILE_BUFFER),\"打开网络文件(BASS_StreamCreateURL)\"使用的文件系统."
+            注释 = "  2 = 有缓冲(STREAMFILE_BUFFERPUSH),跟1差不多,但数据通过\"推送流文件数据(BASS_StreamPutFileData)\"来获取."
             注释 = "  不同文件系统的回调方法有差别." "">
-    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:\r"
-            注释 = " BASS_SAMPLE_FLOAT、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_LOOP、BASS_STREAM_PRESCAN、BASS_STREAM_RESTRATE、\r"
+    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:"
+            注释 = " BASS_SAMPLE_FLOAT、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_LOOP、BASS_STREAM_PRESCAN、BASS_STREAM_RESTRATE、"
             注释 = "  BASS_STREAM_BLOCK、BASS_STREAM_AUTOFREE、、BASS_STREAM_DECODE、BASS_SPEAKER_xxx、BASS_ASYNCFILE"
             @默认值 = 0>
     {
@@ -765,7 +765,7 @@
             返回值注释 = "成功返回读入数据的字节数量,失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 流句柄 <类型 = 整数 注释 = "样本流的句柄">
     参数 缓冲区 <类型 = 变整数 注释 = "指向样本数据的指针, 0 = 在队列缓冲区中分配空间,分配的空间尺寸不少于\"数据长度\"参数指定的值.">
-    参数 数据长度 <类型 = 整数 注释 = "  以字节为单位的数据长度.\r"
+    参数 数据长度 <类型 = 整数 注释 = "  以字节为单位的数据长度."
             注释 = "  可以选择使用 BASS_StreamProc_END (0x80000000)标志来表示流的结尾,为 0 时可用于仅检查队列的数据量.">
     {
         @ (INT)BASS_StreamPutData ((HSTREAM)@<流句柄>, (void*)@<缓冲区>, (DWORD)@<数据长度>)
@@ -795,7 +795,7 @@
     参数 文件路径 <类型 = 文本型 注释 = "文件的完整路径">
     参数 数据偏移 <类型 = 长整数 注释 = "文件偏移一段距离才开始读入MOD音乐格式" @默认值 = 0>
     参数 数据长度 <类型 = 长整数 注释 = "0 = 使用整个文件" @默认值 = 0>
-    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中以下部分常量的组合值:\r"
+    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中以下部分常量的组合值:"
             注释 = "  BASS_SAMPLE_8BITS、BASS_SAMPLE_FLOAT、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_LOOP、BASS_MUSIC_xxx、BASS_SPEAKER_xxx"
             @默认值 = 0>
     参数 采样率 <类型 = 整数 注释 = "0 = 初始化时指定的采样率, 1 = 设备当前输出的采样率 " @默认值 = 0>
@@ -806,7 +806,7 @@
     方法 打开内存MOD音乐 <公开 类型 = 整数 注释 = "打开MOD格式的音乐数据"
             返回值注释 = "如果成功, 返回音乐句柄, 否则返回0;可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
     参数 内存数据 <类型 = 字节集类 注释 = "MOD 格式音乐的数据">
-    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中以下部分常量的组合值:\r"
+    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中以下部分常量的组合值:"
             注释 = "  BASS_SAMPLE_8BITS、BASS_SAMPLE_FLOAT、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_LOOP、BASS_MUSIC_xxx、BASS_SPEAKER_xxx"
             @默认值 = 0>
     参数 采样率 <类型 = 整数 注释 = "0 = 初始化时指定的采样率, 1 = 设备当前输出的采样率 " @默认值 = 0>
@@ -910,7 +910,7 @@
         @ BASS_RecordSetInput ((INT)@<输入设备>, @<是否启用> ? BASS_INPUT_ON : BASS_INPUT_OFF, (float)@<音量>)
     }
 
-    方法 取录制设备设置 <公开 类型 = 整数 注释 = "获取录制输入源的当前设置" 返回值注释 = "成功返回设置值,可以与\"BASS_录制标志\"位与确定具体的设置.\r"
+    方法 取录制设备设置 <公开 类型 = 整数 注释 = "获取录制输入源的当前设置" 返回值注释 = "成功返回设置值,可以与\"BASS_录制标志\"位与确定具体的设置."
             返回值注释 = "失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
     参数 输入设备 <类型 = 整数 注释 = "0 = 第一个设备, -1 = 主设备.">
     参数 音量 <类型 = 小数类 注释 = "返回音量" @默认值 = 空对象>
@@ -987,7 +987,7 @@
             返回值注释 = "成功返回录制句柄,失败返回0,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
     参数 采样率 <类型 = 整数 注释 = "0 为当前设备的采样率">
     参数 声道 <类型 = 整数 注释 = "0 为设备当前的声道数量,1=单声道, 2=立体声, 4=四声道, 6=5.1, 8=7.1">
-    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中以下部分常量的组合值:\r"
+    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中以下部分常量的组合值:"
             注释 = "  BASS_SAMPLE_8BITS、BASS_SAMPLE_FLOAT、BASS_RECORD_PAUSE" @默认值 = 0>
     {
         @ return (INT)BASS_RecordStart ((DWORD)@<采样率>, (DWORD)@<声道>, (DWORD)@<标志>, (RECORDPROC*)&@<录制回调函数>, this);
@@ -1005,7 +1005,7 @@
     参数 采样率 <类型 = 整数 注释 = "0为当前设备的采样率">
     参数 声道 <类型 = 整数 注释 = "0为设备当前的声道数量,1=单声道, 2=立体声, 4=四声道, 6=5.1, 8=7.1">
     参数 位深度 <类型 = BASS_位深度 注释 = "采样位深度" @默认值 = BASS_位深度.位深_16位>
-    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中以下部分常量的组合值:\r"
+    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中以下部分常量的组合值:"
             注释 = "  BASS_SAMPLE_8BITS、BASS_SAMPLE_FLOAT、BASS_RECORD_PAUSE" @默认值 = 0>
     {
         变量 文件头 <类型 = 字节集类>
@@ -1112,8 +1112,8 @@
         @ return FALSE;
     }
 
-    方法 取通道标签 <公开 类型 = 变整数 注释 = "获取通道的标签或标题. 返回的数据有可能是二进制、ASCII、UTF8、数组或结构体,需要你根据标签类型从指针获取数据.\r"
-            注释 = "如果获取简单的标签,推荐使用\"取通道标签_xxx\"等一系列二次封装的版本(仅支持了部分标签类型).\r"
+    方法 取通道标签 <公开 类型 = 变整数 注释 = "获取通道的标签或标题. 返回的数据有可能是二进制、ASCII、UTF8、数组或结构体,需要你根据标签类型从指针获取数据."
+            注释 = "如果获取简单的标签,推荐使用\"取通道标签_xxx\"等一系列二次封装的版本(仅支持了部分标签类型)."
             注释 = "如果获取较复杂的标签,推荐使用\"音频标签类\",后果是多附带一个dll文件."
             返回值注释 = "成功返回标签指针,失败返回0,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HMUSIC或HSTREAM句柄.">
@@ -1125,8 +1125,8 @@
     方法 取通道标签_文本数组 <公开 类型 = 整数 注释 = "获取通道的部分返回数据为文本数组的的标签,为\"取通道标签\"的二次封装."
             返回值注释 = "成功返回数组成员数,失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HMUSIC或HSTREAM句柄.">
-    参数 标签 <类型 = 整数 注释 = "  欲取的标签或标题,必须为下列\"BASS_标签类型\"的常量之一:\r"
-            注释 = "  BASS_TAG_OGG、BASS_TAG_HTTP、BASS_TAG_ICY、BASS_TAG_APE、BASS_TAG_MP4、BASS_TAG_WMA、\r"
+    参数 标签 <类型 = 整数 注释 = "  欲取的标签或标题,必须为下列\"BASS_标签类型\"的常量之一:"
+            注释 = "  BASS_TAG_OGG、BASS_TAG_HTTP、BASS_TAG_ICY、BASS_TAG_APE、BASS_TAG_MP4、BASS_TAG_WMA、"
             注释 = "  BASS_TAG_MF、BASS_TAG_RIFF_INFO">
     参数 标签数组 <类型 = 文本数组类 注释 = "返回的标签/标题数组">
     {
@@ -1146,9 +1146,9 @@
     方法 取通道标签_文本 <公开 类型 = 文本型 注释 = "获取通道的部分返回数据为文本型的的标签,为\"取通道标签\"的二次封装."
             返回值注释 = "成功返回标签文本,失败返回空文本,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HMUSIC或HSTREAM句柄.">
-    参数 标签 <类型 = 整数 注释 = "  欲取的标签或标题,必须为下列\"BASS_标签类型\"的常量之一:\r"
-            注释 = "  BASS_TAG_META、BASS_TAG_VENDOR、BASS_TAG_LYRICS3、BASS_TAG_AM_NAME、BASS_TAG_AM_MIME、\r"
-            注释 = "  BASS_TAG_RIFF_DISP、BASS_TAG_MUSIC_NAME、BASS_TAG_MUSIC_MESSAGE、BASS_TAG_MUSIC_AUTH、\r"
+    参数 标签 <类型 = 整数 注释 = "  欲取的标签或标题,必须为下列\"BASS_标签类型\"的常量之一:"
+            注释 = "  BASS_TAG_META、BASS_TAG_VENDOR、BASS_TAG_LYRICS3、BASS_TAG_AM_NAME、BASS_TAG_AM_MIME、"
+            注释 = "  BASS_TAG_RIFF_DISP、BASS_TAG_MUSIC_NAME、BASS_TAG_MUSIC_MESSAGE、BASS_TAG_MUSIC_AUTH、"
             注释 = "  BASS_TAG_MUSIC_INST、BASS_TAG_MUSIC_CHAN、BASS_TAG_MUSIC_SAMPLE">
     {
         @ const char *text = BASS_ChannelGetTags ((DWORD)@<通道句柄>, (DWORD)@<标签>);
@@ -1183,14 +1183,14 @@
     方法 置取通道标志 <公开 类型 = 整数 注释 = "修改和获取通道的标志" 返回值注释 = "成功返回通道的新标志,失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
             @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC或HSTREAM句柄.">
-    参数 标志 <类型 = 整数 注释 = "  为\"BASS_音频标志\"中以下标志的组合值:\r"
-            注释 = "  BASS_SAMPLE_LOOP、BASS_SAMPLE_MUTEMAX、BASS_STREAM_AUTOFREE、BASS_STREAM_RESTRATE、\r"
-            注释 = "  BASS_MUSIC_NONINTER、BASS_MUSIC_SINCINTER、BASS_MUSIC_RAMP、BASS_MUSIC_RAMPS、\r"
-            注释 = "  BASS_MUSIC_SURROUND、BASS_MUSIC_SURROUND2、BASS_MUSIC_FT2MOD、BASS_MUSIC_PT1MOD、\r"
+    参数 标志 <类型 = 整数 注释 = "  为\"BASS_音频标志\"中以下标志的组合值:"
+            注释 = "  BASS_SAMPLE_LOOP、BASS_SAMPLE_MUTEMAX、BASS_STREAM_AUTOFREE、BASS_STREAM_RESTRATE、"
+            注释 = "  BASS_MUSIC_NONINTER、BASS_MUSIC_SINCINTER、BASS_MUSIC_RAMP、BASS_MUSIC_RAMPS、"
+            注释 = "  BASS_MUSIC_SURROUND、BASS_MUSIC_SURROUND2、BASS_MUSIC_FT2MOD、BASS_MUSIC_PT1MOD、"
             注释 = "  BASS_MUSIC_POSRESET、BASS_MUSIC_POSRESETEX 、BASS_MUSIC_STOPBACK、BASS_SPEAKER_xxx">
-    参数 掩码 <类型 = 整数 注释 = "  要修改的标志(如上一参数所述),未包含在此参数的标志会保持原样. " 注释 = "  如果将本参数设置为0,则可以用来获取通道的当前标志.\r"
-            注释 = "  如果要添加标志,则需要在\"标志\"和\"掩码\"参数里都有一样的标志.\r"
-            注释 = "  如果要移除标志,则在此参数填写要移除的标志,且确保这个标志不在\"标志参数\"中.\r"
+    参数 掩码 <类型 = 整数 注释 = "  要修改的标志(如上一参数所述),未包含在此参数的标志会保持原样. " 注释 = "  如果将本参数设置为0,则可以用来获取通道的当前标志."
+            注释 = "  如果要添加标志,则需要在\"标志\"和\"掩码\"参数里都有一样的标志."
+            注释 = "  如果要移除标志,则在此参数填写要移除的标志,且确保这个标志不在\"标志参数\"中."
             注释 = "  要修改扬声器标志,可以在本参数中使用任意的\"BASS_SPEAKER_xxx\"标志(无需包括其所有标志).">
     {
         @ (INT)BASS_ChannelFlags ((DWORD)@<通道句柄>, (DWORD)@<标志>, (DWORD)@<掩码>)
@@ -1244,11 +1244,11 @@
     方法 置通道属性 <公开 类型 = 逻辑型 注释 = "设置通道的属性值" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
             @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM或HRECORD句柄.">
-    参数 属性 <类型 = 整数 注释 = "  要设置的值的属性,为\"BASS_通道属性\"的下列属性之一\r"
-            注释 = "  BASS_ATTRIB_BUFFER、BASS_ATTRIB_FREQ、BASS_ATTRIB_GRANULE、BASS_ATTRIB_MUSIC_AMPLIFY、\r"
-            注释 = "  BASS_ATTRIB_MUSIC_BPM、ASS_ATTRIB_MUSIC_PANSEP、BASS_ATTRIB_MUSIC_PSCALER、BASS_ATTRIB_MUSIC_SPEED、\r"
-            注释 = "  BASS_ATTRIB_MUSIC_VOL_CHAN、BASS_ATTRIB_MUSIC_VOL_GLOBAL、BASS_ATTRIB_MUSIC_VOL_INST、BASS_ATTRIB_NET_RESUME、\r"
-            注释 = "  BASS_ATTRIB_NOBUFFER、BASS_ATTRIB_NORAMP、BASS_ATTRIB_PAN、BASS_ATTRIB_PUSH_LIMIT、BASS_ATTRIB_SRC、\r"
+    参数 属性 <类型 = 整数 注释 = "  要设置的值的属性,为\"BASS_通道属性\"的下列属性之一"
+            注释 = "  BASS_ATTRIB_BUFFER、BASS_ATTRIB_FREQ、BASS_ATTRIB_GRANULE、BASS_ATTRIB_MUSIC_AMPLIFY、"
+            注释 = "  BASS_ATTRIB_MUSIC_BPM、ASS_ATTRIB_MUSIC_PANSEP、BASS_ATTRIB_MUSIC_PSCALER、BASS_ATTRIB_MUSIC_SPEED、"
+            注释 = "  BASS_ATTRIB_MUSIC_VOL_CHAN、BASS_ATTRIB_MUSIC_VOL_GLOBAL、BASS_ATTRIB_MUSIC_VOL_INST、BASS_ATTRIB_NET_RESUME、"
+            注释 = "  BASS_ATTRIB_NOBUFFER、BASS_ATTRIB_NORAMP、BASS_ATTRIB_PAN、BASS_ATTRIB_PUSH_LIMIT、BASS_ATTRIB_SRC、"
             注释 = "  BASS_ATTRIB_TAIL、BASS_ATTRIB_VOL">
     参数 值 <类型 = 小数 注释 = "新的属性值. 有关取值范围的详细信息,请参见属性的备注或文档.">
     {
@@ -1272,11 +1272,11 @@
     方法 置通道滑动属性 <公开 类型 = 逻辑型 注释 = "将通道的属性从其当前值滑动到新值" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
             折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HSTREAM、HMUSIC或HRECORD句柄.">
-    参数 属性 <类型 = 整数 注释 = "  需要滑动的属性的值. 为\"BASS_通道属性\"的以下选项之一.\r"
-            注释 = "  BASS_ATTRIB_FREQ、BASS_ATTRIB_PAN、BASS_ATTRIB_VOL、BASS_ATTRIB_MUSIC_AMPLIFY、\r"
-            注释 = "  BASS_ATTRIB_MUSIC_BPM、BASS_ATTRIB_MUSIC_PANSEP、BASS_ATTRIB_MUSIC_PSCALER、\r"
-            注释 = "  BASS_ATTRIB_MUSIC_SPEED、BASS_ATTRIB_MUSIC_VOL_CHAN、BASS_ATTRIB_MUSIC_VOL_GLOBAL、\r"
-            注释 = "  BASS_ATTRIB_MUSIC_VOL_INST\r"
+    参数 属性 <类型 = 整数 注释 = "  需要滑动的属性的值. 为\"BASS_通道属性\"的以下选项之一."
+            注释 = "  BASS_ATTRIB_FREQ、BASS_ATTRIB_PAN、BASS_ATTRIB_VOL、BASS_ATTRIB_MUSIC_AMPLIFY、"
+            注释 = "  BASS_ATTRIB_MUSIC_BPM、BASS_ATTRIB_MUSIC_PANSEP、BASS_ATTRIB_MUSIC_PSCALER、"
+            注释 = "  BASS_ATTRIB_MUSIC_SPEED、BASS_ATTRIB_MUSIC_VOL_CHAN、BASS_ATTRIB_MUSIC_VOL_GLOBAL、"
+            注释 = "  BASS_ATTRIB_MUSIC_VOL_INST"
             注释 = "  可选标志: BASS_SLIDE_LOG(0x1000000), 以对数方式而不是线性方式滑动属性值. 当从正变为负或从负变为正时,不能使用此选项.">
     参数 值 <类型 = 小数 注释 = "新的属性值. 有关取值范围的详细信息,请参阅属性的备注.">
     参数 时间 <类型 = 整数 注释 = "属性改变成新值所需的时间长度(毫秒)">
@@ -1287,10 +1287,10 @@
     方法 通道是否滑动 <公开 类型 = 逻辑型 注释 = "检查样本、流或MOD音乐的一个属性(或所有属性)是否设置了滑动." 返回值注释 = "如果属性为滑动则返回真,否则返回假." 折叠
             @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是 HCHANNEL、HSTREAM或HMUSIC句柄.">
-    参数 属性 <类型 = 整数 注释 = "  欲检查是否滑动的属性,为\"BASS_通道属性\"的以下选项之一,为0时表示所有属性.\r"
-            注释 = "  BASS_ATTRIB_FREQ、BASS_ATTRIB_PAN、BASS_ATTRIB_VOL、BASS_ATTRIB_MUSIC_AMPLIFY、\r"
-            注释 = "  BASS_ATTRIB_MUSIC_BPM、BASS_ATTRIB_MUSIC_PANSEP、BASS_ATTRIB_MUSIC_PSCALER、\r"
-            注释 = "  BASS_ATTRIB_MUSIC_SPEED、BASS_ATTRIB_MUSIC_VOL_CHAN、BASS_ATTRIB_MUSIC_VOL_GLOBAL、\r"
+    参数 属性 <类型 = 整数 注释 = "  欲检查是否滑动的属性,为\"BASS_通道属性\"的以下选项之一,为0时表示所有属性."
+            注释 = "  BASS_ATTRIB_FREQ、BASS_ATTRIB_PAN、BASS_ATTRIB_VOL、BASS_ATTRIB_MUSIC_AMPLIFY、"
+            注释 = "  BASS_ATTRIB_MUSIC_BPM、BASS_ATTRIB_MUSIC_PANSEP、BASS_ATTRIB_MUSIC_PSCALER、"
+            注释 = "  BASS_ATTRIB_MUSIC_SPEED、BASS_ATTRIB_MUSIC_VOL_CHAN、BASS_ATTRIB_MUSIC_VOL_GLOBAL、"
             注释 = "  BASS_ATTRIB_MUSIC_VOL_INST">
     {
         @ BASS_ChannelIsSliding ((DWORD)@<通道句柄>, (DWORD)@<属性>)
@@ -1299,7 +1299,7 @@
     方法 置通道属性EX <公开 类型 = 逻辑型 注释 = "设置通道的属性值" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
             @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM或HRECORD句柄.">
-    参数 属性 <类型 = 整数 注释 = "  要设置的值的属性,为\"BASS_通道属性\"的下列属性之一.\r"
+    参数 属性 <类型 = 整数 注释 = "  要设置的值的属性,为\"BASS_通道属性\"的下列属性之一."
             注释 = "  BASS_ATTRIB_SCANINFO、BASS_ATTRIB_USER">
     参数 值 <类型 = 变整数 注释 = "新的属性数据">
     参数 尺寸 <类型 = 整数 注释 = "属性数据的大小(单位为字节)">
@@ -1310,7 +1310,7 @@
     方法 取通道属性EX <公开 类型 = 整数 注释 = "获取通道的指定属性值" 返回值注释 = "成功返回属性数据的大小,失败返回0,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
             折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM或HRECORD句柄.">
-    参数 属性 <类型 = 整数 注释 = "  要设置的值的属性,为\"BASS_通道属性\"的下列属性之一.\r"
+    参数 属性 <类型 = 整数 注释 = "  要设置的值的属性,为\"BASS_通道属性\"的下列属性之一."
             注释 = "  BASS_ATTRIB_SCANINFO、BASS_ATTRIB_USER">
     参数 值 <类型 = 变整数 注释 = "获取属性数据的指针">
     参数 尺寸 <类型 = 整数 注释 = "属性数据的大小(单位为字节),为0则仅获取属性的大小而不获取数据.">
@@ -1321,9 +1321,9 @@
     方法 置通道空间属性 <公开 类型 = 逻辑型 注释 = "设置具有3D空间音效功能的样本、流或MOD音乐通道的3D属性."
             返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM、HRECORD或HSAMPLE句柄.">
-    参数 三维模式 <类型 = 整数 注释 = "  3D处理模式,为以下的标志之一,-1为保持当前状态." 注释 = "  0 = BASS_3DMODE_NORMAL, 正常的3D处理.\r"
-            注释 = "  1 = BASS_3DMODE_RELATIVE, 通道的3D位置(位置速度/方向)为听众的相对位置.\r"
-            注释 = "  当使用\"置通道3D位置\"更改听众的位置、速度和方向时,通道与听众的相对位置不会变.\r"
+    参数 三维模式 <类型 = 整数 注释 = "  3D处理模式,为以下的标志之一,-1为保持当前状态." 注释 = "  0 = BASS_3DMODE_NORMAL, 正常的3D处理."
+            注释 = "  1 = BASS_3DMODE_RELATIVE, 通道的3D位置(位置速度/方向)为听众的相对位置."
+            注释 = "  当使用\"置通道3D位置\"更改听众的位置、速度和方向时,通道与听众的相对位置不会变."
             注释 = "  2 = BASS_3DMODE_OFF, 关闭通道上的3D处理,声音将在中央播放.">
     参数 最小距离 <类型 = 小数 注释 = "当听众在此距离内时,音量达到最大值. 少于等于0为保持当前状态.">
     参数 最大距离 <类型 = 小数 注释 = "当听众超过此距离时,音量停止下降. 少于等于0为保持当前状态.">
@@ -1337,9 +1337,9 @@
     方法 取通道空间属性 <公开 类型 = 逻辑型 注释 = "获取具有3D空间音效功能的样本、流或MOD音乐通道的3D属性."
             返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM、HRECORD或HSAMPLE句柄." "">
-    参数 三维模式 <类型 = 整数类 注释 = "  3D处理模式,为以下的标志之一. 参数留空为不获取." 注释 = "  0 = BASS_3DMODE_NORMAL, 正常的3D处理.\r"
-            注释 = "  1 = BASS_3DMODE_RELATIVE, 通道的3D位置(位置速度/方向)为听众的相对位置.\r"
-            注释 = "当使用\"置通道3D位置\"更改听众的位置、速度和方向时,通道与听众的相对位置不会变.\r"
+    参数 三维模式 <类型 = 整数类 注释 = "  3D处理模式,为以下的标志之一. 参数留空为不获取." 注释 = "  0 = BASS_3DMODE_NORMAL, 正常的3D处理."
+            注释 = "  1 = BASS_3DMODE_RELATIVE, 通道的3D位置(位置速度/方向)为听众的相对位置."
+            注释 = "当使用\"置通道3D位置\"更改听众的位置、速度和方向时,通道与听众的相对位置不会变."
             注释 = "  2 = BASS_3DMODE_OFF, 关闭通道上的3D处理,声音将在中央播放." @默认值 = 空对象>
     参数 最小距离 <类型 = 小数类 注释 = "当听众在此距离内时,音量达到最大值. 参数留空为不获取." @默认值 = 空对象>
     参数 最大距离 <类型 = 小数类 注释 = "当听众超过此距离时,音量停止下降.参数留空为不获取." @默认值 = 空对象>
@@ -1387,7 +1387,7 @@
     方法 取通道长度 <公开 类型 = 长整数 注释 = "获取通道的播放总长度" 返回值注释 = "成功返回通道长度,失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
             @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM、HRECORD或HSAMPLE句柄.">
-    参数 位置模式 <类型 = 整数 注释 = "  仅支持以下三种模式." 注释 = "  0 = BASS_POS_BYTE,获取字节长度.\r"
+    参数 位置模式 <类型 = 整数 注释 = "  仅支持以下三种模式." 注释 = "  0 = BASS_POS_BYTE,获取字节长度."
             注释 = "  1 = BASS_POS_MUSIC_ORDER,获取顺序长度(仅限MOD音乐)." 注释 = "  3 = BASS_POS_OGG,获取OGG文件中的比特流数."
             @默认值 = BASS_位置类型.BASS_POS_BYTE>
     {
@@ -1398,7 +1398,7 @@
             折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HSTREAM或HMUSIC句柄.">
     参数 播放位置 <类型 = 长整数 注释 = "播放位置,单位由参数\"长度模式\"确定.">
-    参数 位置模式 <类型 = 整数 注释 = "  位置模式,默认为字节长度,可使用\"BASS_位置类型\"中的选项之一.\r"
+    参数 位置模式 <类型 = 整数 注释 = "  位置模式,默认为字节长度,可使用\"BASS_位置类型\"中的选项之一."
             注释 = "  可选位或\"BASS_位置类型\"的所有标志,再额外加上\"BASS_音频标志\"的BASS_MUSIC_POSRESET、BASS_MUSIC_POSRESETEX标志"
             @默认值 = BASS_位置类型.BASS_POS_BYTE>
     {
@@ -1408,7 +1408,7 @@
     方法 取播放位置 <公开 类型 = 长整数 注释 = "获取样本、流或MOD音乐的播放位置,也可以在录制通道上使用."
             返回值注释 = "成功返回播放位置,失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM、HRECORD或HSAMPLE句柄.">
-    参数 位置模式 <类型 = 整数 注释 = "  仅支持以下两种模式" 注释 = "  0 = BASS_POS_BYTE,获取字节长度\r"
+    参数 位置模式 <类型 = 整数 注释 = "  仅支持以下两种模式" 注释 = "  0 = BASS_POS_BYTE,获取字节长度"
             注释 = "  1 = BASS_POS_MUSIC_ORDER,获取顺序长度(仅限MOD音乐)" 注释 = "  可选位或标志 BASS_POS_DECODE."
             @默认值 = BASS_位置类型.BASS_POS_BYTE>
     {
@@ -1416,8 +1416,8 @@
     }
 
     方法 取通道电平 <公开 类型 = 整数 注释 = "获取样本、流、MOD音乐或录制的通道级别(峰值振幅)."
-            返回值注释 = "失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息.\r"
-            返回值注释 = "如果成功,左声道的电平在低位(低16位),右声道在高位(高16位)返回,若通道为单声道,则低位与高位重复.\r"
+            返回值注释 = "失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
+            返回值注释 = "如果成功,左声道的电平在低位(低16位),右声道在高位(高16位)返回,若通道为单声道,则低位与高位重复."
             返回值注释 = "该级别的线性范围为0(无声)到32768(最大).通道暂停时将返回0." 折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM或HRECORD句柄.">
     {
@@ -1481,9 +1481,9 @@
     }
 
     方法 取通道数据 <公开 类型 = 整数 注释 = "获取样本、流、MOD音乐或录制通道的即时样本数据(或其FFT信号)"
-            返回值注释 = "  失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息.\r"
-            返回值注释 = "  请求FFT数据时,返回从通道读取的字节数(用于执行FFT).\r"
-            返回值注释 = "  请求样本数据时,将返回写入缓冲区的字节数(不一定与使用BASS_DATA_FLOAT或BBASS_DATA_FIXED标志时读取的字节数相同).\r"
+            返回值注释 = "  失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
+            返回值注释 = "  请求FFT数据时,返回从通道读取的字节数(用于执行FFT)."
+            返回值注释 = "  请求样本数据时,将返回写入缓冲区的字节数(不一定与使用BASS_DATA_FLOAT或BBASS_DATA_FIXED标志时读取的字节数相同)."
             返回值注释 = "  使用BASS_DATA_AVAILABLE标志时,将返回通道缓冲区中的字节数." 折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM或HRECORD句柄.">
     参数 缓冲区 <类型 = 变整数 注释 = "  用来接收数据的缓冲区指针." 注释 = "  当句柄是录制句柄(HRECORD)时,可以为0,以丢弃从录制缓冲区请求的数据." "">
@@ -1492,11 +1492,11 @@
         @ (INT)BASS_ChannelGetData ((DWORD)@<通道句柄>, (void*)@<缓冲区>, (DWORD)@<长度>)
     }
 
-    方法 取通道数据2 <公开 类型 = 整数 注释 = "获取样本、流、MOD音乐或录制通道的即时样本数据(或其FFT信号).\r"
+    方法 取通道数据2 <公开 类型 = 整数 注释 = "获取样本、流、MOD音乐或录制通道的即时样本数据(或其FFT信号)."
             注释 = "为\"取通道数据\"的二次封装版本,缓冲区改成字节集类了,而原始版本更适合在回调事件中使用."
-            返回值注释 = "  失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息..\r"
-            返回值注释 = "  请求FFT数据时,返回从通道读取的字节数(用于执行FFT).\r"
-            返回值注释 = "  请求样本数据时,将返回写入缓冲区的字节数(不一定与使用BASS_DATA_FLOAT或BBASS_DATA_FIXED标志时读取的字节数相同).\r"
+            返回值注释 = "  失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息.."
+            返回值注释 = "  请求FFT数据时,返回从通道读取的字节数(用于执行FFT)."
+            返回值注释 = "  请求样本数据时,将返回写入缓冲区的字节数(不一定与使用BASS_DATA_FLOAT或BBASS_DATA_FIXED标志时读取的字节数相同)."
             返回值注释 = "  使用BASS_DATA_AVAILABLE标志时,将返回通道缓冲区中的字节数." 折叠 @禁止流程检查 = 真>
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM或HRECORD句柄.">
     参数 缓冲区 <类型 = 字节集类 注释 = "  用来接收数据的缓冲区字节集." 注释 = "  当句柄是录制句柄(HRECORD)时,可以为\"空对象\",以丢弃从录制缓冲区请求的数据."
@@ -1636,10 +1636,10 @@
     方法 置音效参数 <公开 类型 = 逻辑型 注释 = "设置音效的具体参数" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
             @嵌入式方法 = "">
     参数 音效句柄 <类型 = 整数 注释 = "音效的句柄">
-    参数 参数 <类型 = 变整数 注释 = "  欲设置参数的结构体指针,该指针可以由\"参数类型.转换到结构体()\"获取.\r"
-            注释 = "  参数必须为以下的类型之一(具体类型由\"置通道音效\"的效果类型决定):\r"
-            注释 = "  BASS_DX8_CHORUS、BASS_DX8_COMPRESSOR、BASS_DX8_DISTORTION、BASS_DX8_ECHO、\r"
-            注释 = "  BASS_DX8_FLANGER、BASS_DX8_GARGLE、BASS_DX8_I3DL2REVERB、BASS_DX8_PARAMEQ、\r"
+    参数 参数 <类型 = 变整数 注释 = "  欲设置参数的结构体指针,该指针可以由\"参数类型.转换到结构体()\"获取."
+            注释 = "  参数必须为以下的类型之一(具体类型由\"置通道音效\"的效果类型决定):"
+            注释 = "  BASS_DX8_CHORUS、BASS_DX8_COMPRESSOR、BASS_DX8_DISTORTION、BASS_DX8_ECHO、"
+            注释 = "  BASS_DX8_FLANGER、BASS_DX8_GARGLE、BASS_DX8_I3DL2REVERB、BASS_DX8_PARAMEQ、"
             注释 = "  BASS_DX8_REVERB、BASS_FX_VOLUME_PARAM">
     {
         @ BASS_FXSetParameters ((HFX)@<音效句柄>, (const void *)@<参数>)
@@ -1648,10 +1648,10 @@
     方法 取音效参数 <公开 类型 = 逻辑型 注释 = "获取音效的具体参数" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
             @嵌入式方法 = "">
     参数 音效句柄 <类型 = 整数 注释 = "音效的句柄">
-    参数 参数 <类型 = 变整数 注释 = "  返回参数的结构体指针,返回的指针可以用\"参数类型.取结构体数据(参数)\"将数据填写到参数变量中.\r"
-            注释 = "  参数必须为以下的类型之一(具体类型由\"置通道音效\"的效果类型决定):\r"
-            注释 = "  BASS_DX8_CHORUS、BASS_DX8_COMPRESSOR、BASS_DX8_DISTORTION、BASS_DX8_ECHO、\r"
-            注释 = "  BASS_DX8_FLANGER、BASS_DX8_GARGLE、BASS_DX8_I3DL2REVERB、BASS_DX8_PARAMEQ、\r"
+    参数 参数 <类型 = 变整数 注释 = "  返回参数的结构体指针,返回的指针可以用\"参数类型.取结构体数据(参数)\"将数据填写到参数变量中."
+            注释 = "  参数必须为以下的类型之一(具体类型由\"置通道音效\"的效果类型决定):"
+            注释 = "  BASS_DX8_CHORUS、BASS_DX8_COMPRESSOR、BASS_DX8_DISTORTION、BASS_DX8_ECHO、"
+            注释 = "  BASS_DX8_FLANGER、BASS_DX8_GARGLE、BASS_DX8_I3DL2REVERB、BASS_DX8_PARAMEQ、"
             注释 = "  BASS_DX8_REVERB、BASS_FX_VOLUME_PARAM">
     {
         @ BASS_FXGetParameters ((HFX)@<音效句柄>, @<参数>)
@@ -1788,7 +1788,7 @@
         格式过滤器.添加值到字节集 (0)
     }
 
-    方法 浏览音乐文件 <公开 类型 = 整数 注释 = "调用系统的文件对话框选择打开音乐文件，允许多选,返回到文本数组类\r"
+    方法 浏览音乐文件 <公开 类型 = 整数 注释 = "调用系统的文件对话框选择打开音乐文件，允许多选,返回到文本数组类"
             注释 = "请务必用\"加载插件目录\"来加载插件,本方法才能自动处理格式支持." 返回值注释 = "返回音乐文件名的数量,失败或未选择返回0" 折叠 @禁止流程检查 = 真>
     参数 父窗口句柄 <类型 = 变整数 注释 = "父窗口的句柄,0=表示无父窗口" @默认值 = 0>
     参数 文件名列表 <类型 = 文本数组类 注释 = "返回的文件名数组">
@@ -2011,7 +2011,7 @@
 
 类 BASS_录制信息 <公开 注释 = "\"取录制信息/BASS_RecordGetInfo\"返回的信息" 折叠 @文档 = "category = \"辅助类\"" @视窗.结构类 = 0>
 {
-    变量 标志 <公开 类型 = 整数 注释 = "DSCCAPS_EMULDRIVER 0x00000020 设备的驱动程序不支持DirectSound,因此只能模拟输出\r"
+    变量 标志 <公开 类型 = 整数 注释 = "DSCCAPS_EMULDRIVER 0x00000020 设备的驱动程序不支持DirectSound,因此只能模拟输出"
             注释 = "DSCCAPS_CERTIFIED 0x00000040 设备的驱动程序已通过Microsoft认证,此标志始终设置在WDM驱动程序上">
     变量 支持格式 <公开 类型 = 整数 注释 = "支持的标准格式,\"BASS_WAVE格式\"类中的 WAVE_FORMAT_xxx 标志">
     变量 输入数量 <公开 类型 = 整数 注释 = "设备可用的输入源数">
@@ -2188,9 +2188,9 @@
     变量 声道数 <公开 类型 = 整数 注释 = "1=单声道,2=立体声,以此类推">
     变量 标志 <公开 类型 = 整数 注释 = "为\"BASS_音频选项\"的组合值">
     变量 通道类型 <公开 类型 = 整数 注释 = "为\"BASS_音轨类型\"中的常量">
-    变量 原始比特率 <公开 类型 = 整数 注释 = "原始解析度(每个样本比特数). 0=未定义\r"
+    变量 原始比特率 <公开 类型 = 整数 注释 = "原始解析度(每个样本比特数). 0=未定义"
             注释 = "如果原始样本格式为浮点格式,将设置BASS_ORIGRES_FLOAT标志,并且位数将为低位">
-    变量 插件句柄 <公开 类型 = 整数 注释 = "音轨上应用的插件,0=未使用插件.\r"
+    变量 插件句柄 <公开 类型 = 整数 注释 = "音轨上应用的插件,0=未使用插件."
             注释 = "注意这仅适用于通过标准BASS流创建功能使用插件系统创建的流,而不是通过附加功能创建的流.有关插件的信息可以通过\"取插件信息(BASS_PlugingeInfo)\"获取">
     变量 样本句柄 <公开 类型 = 整数 注释 = "音轨正在播放的样本,仅当\"音轨类型\"为BASS_CTYPE_SAMPLE或BASS_CTYPE_STREAM_SAMPLE时可用">
     变量 文件名 <公开 类型 = 文本型 注释 = "音轨关联的文件名(仅限HSTREAM)">
@@ -2214,9 +2214,9 @@
 
 类 BASS_信息 <公开 注释 = "\"取输出信息/BASS_GetInfo\"返回的信息" 折叠 @文档 = "category = \"辅助类\"" @视窗.结构类 = 0>
 {
-    变量 标志 <公开 类型 = 整数 注释 = "设备的DirectSound功能,为以下常量的组合值：\r"
-            注释 = "DSCAPS_EMULDRIVER 0x00000020 设备的驱动程序不支持DirectSound,因此只能模拟输出\r"
-            注释 = "DSCAPS_CERTIFIED 0x00000040 设备的驱动程序已通过Microsoft认证,此标志始终设置在WDM驱动程序上\r"
+    变量 标志 <公开 类型 = 整数 注释 = "设备的DirectSound功能,为以下常量的组合值："
+            注释 = "DSCAPS_EMULDRIVER 0x00000020 设备的驱动程序不支持DirectSound,因此只能模拟输出"
+            注释 = "DSCAPS_CERTIFIED 0x00000040 设备的驱动程序已通过Microsoft认证,此标志始终设置在WDM驱动程序上"
             注释 = "DSCAPS_HARDWARE 0x80000000 设备使用硬件混音来播放BASS输出,BASS声道的混音仍由BASS在软件中完成 ">
     变量 hwsize <公开 类型 = 整数 注释 = "未使用">
     变量 hwfree <公开 类型 = 整数 注释 = "未使用">
@@ -2225,9 +2225,9 @@
     变量 minrate <公开 类型 = 整数 注释 = "未使用">
     变量 maxrate <公开 类型 = 整数 注释 = "未使用">
     变量 eax <公开 类型 = 逻辑型 注释 = "未使用">
-    变量 最小缓冲 <公开 类型 = 整数 注释 = "避免播放卡顿的最小缓冲长度(四舍五入到最接近的毫秒). 这是由 BASS_CONFIG_DEV_PERIOD 设置决定的.\r"
+    变量 最小缓冲 <公开 类型 = 整数 注释 = "避免播放卡顿的最小缓冲长度(四舍五入到最接近的毫秒). 这是由 BASS_CONFIG_DEV_PERIOD 设置决定的."
             注释 = "注意: 如果缓冲更新不够频繁,使用缓冲长度仍可能出现卡顿. 如果需要最小延迟,最好通过BASS_ATTRIB_BUFFER选项禁用缓冲">
-    变量 DirectSound版本 <公开 类型 = 整数 注释 = "DirectSound 版本\r"
+    变量 DirectSound版本 <公开 类型 = 整数 注释 = "DirectSound 版本"
             注释 = "9 = 支持DX9/8/7/5; 8 = 支持DX8/7/5; 7 = 支持DX7/5; 5 = 支持DX5; 0 = DX9/8/7/5都不支持">
     变量 时延 <公开 类型 = 整数 注释 = "开始播放声道到听到声音的平均延迟(四舍五入至最接近的毫秒)">
     变量 初始化标志 <公开 类型 = 整数 注释 = "初始化(BASS_Init)时设置的设备标志,这里面包含了自动应用的标志">
@@ -2252,125 +2252,125 @@
 类 BASS_配置选项 <公开 注释 = "\"置配置选项/BASS_SetConfig\"的选项,含部分扩展的配置" 折叠 @文档 = "category = \"辅助类\"">
 {
     常量 BASS_CONFIG_BUFFER <公开 类型 = 整数 值 = @BASS_CONFIG_BUFFER
-            注释 = "流(HSTREAM)和MOD音乐(HMUSIC)通道的播放缓冲区长度.\r"
-            注释 = "参数: 缓冲区长度(单位为毫秒),最小长度为10ms,最大长度为5000ms,如果指定的长度超出此范围,则会自动将其封顶.\r"
+            注释 = "流(HSTREAM)和MOD音乐(HMUSIC)通道的播放缓冲区长度."
+            注释 = "参数: 缓冲区长度(单位为毫秒),最小长度为10ms,最大长度为5000ms,如果指定的长度超出此范围,则会自动将其封顶."
             注释 = "默认为500ms.更改后只影响以后创建的流,不影响现有的.">
     常量 BASS_CONFIG_UPDATEPERIOD <公开 类型 = 整数 值 = @BASS_CONFIG_UPDATEPERIOD
-            注释 = "HSTREAM和HMUSIC通道播放缓冲区的更新周期.\r"
-            注释 = "参数: 更新周期(单位为毫秒)...0=禁用自动更新,最小周期为5ms,最大周期为100ms. 默认为100ms.\r"
-            注释 = "更新周期是正在播放的HSTREAM/HMUSIC频道的播放缓冲器之间的更新时间.没有播放任何内容时,不会产生更新周期.\r"
-            注释 = "较短的更新周期允许使用BASS_CONFIG_BUFFER选项设置较小的缓冲区,但随着更新速率的增加,将占用更多的CPU.\r"
-            注释 = "更新周期仅影响HSTREAM和HMUSIC通道,它不影响样本,它对解码通道也没有任何影响.\r"
-            注释 = "BASS专门创建一个或多个线程(由BASS_CONFIG_UPDATETHREADS确定)来执行更新,除非禁用自动更新(周期=0),在这种情况下,应使用\"更新缓存/BASS_Update\"或\"更新通道缓存/BASS_ChannelUpdate\".\r"
-            注释 = "这允许BASS的CPU使用率与软件的CPU使用率同步.例如在游戏循环中,你可以每帧调用一次\"更新缓存/BASS_Update\",以保持所有处理同步,从而使帧速率尽可能平滑.\r"
+            注释 = "HSTREAM和HMUSIC通道播放缓冲区的更新周期."
+            注释 = "参数: 更新周期(单位为毫秒)...0=禁用自动更新,最小周期为5ms,最大周期为100ms. 默认为100ms."
+            注释 = "更新周期是正在播放的HSTREAM/HMUSIC频道的播放缓冲器之间的更新时间.没有播放任何内容时,不会产生更新周期."
+            注释 = "较短的更新周期允许使用BASS_CONFIG_BUFFER选项设置较小的缓冲区,但随着更新速率的增加,将占用更多的CPU."
+            注释 = "更新周期仅影响HSTREAM和HMUSIC通道,它不影响样本,它对解码通道也没有任何影响."
+            注释 = "BASS专门创建一个或多个线程(由BASS_CONFIG_UPDATETHREADS确定)来执行更新,除非禁用自动更新(周期=0),在这种情况下,应使用\"更新缓存/BASS_Update\"或\"更新通道缓存/BASS_ChannelUpdate\"."
+            注释 = "这允许BASS的CPU使用率与软件的CPU使用率同步.例如在游戏循环中,你可以每帧调用一次\"更新缓存/BASS_Update\",以保持所有处理同步,从而使帧速率尽可能平滑."
             注释 = "更新周期可以随时更改,包括播放的时候.">
-    常量 BASS_CONFIG_GVOL_SAMPLE <公开 类型 = 整数 值 = @BASS_CONFIG_GVOL_SAMPLE 注释 = "样本的全局音量级别.\r"
-            注释 = "参数: 0 (静音) 到 10000 (最大音量). " 注释 = "此配置选项允许你控制所有样本的音量级别,例如单独的音乐和效果音量控制.\r"
+    常量 BASS_CONFIG_GVOL_SAMPLE <公开 类型 = 整数 值 = @BASS_CONFIG_GVOL_SAMPLE 注释 = "样本的全局音量级别."
+            注释 = "参数: 0 (静音) 到 10000 (最大音量). " 注释 = "此配置选项允许你控制所有样本的音量级别,例如单独的音乐和效果音量控制."
             注释 = "通道的最终音量=通道音量x全局音量/10000. 例如,如果流的音量为0.5,全局音量为8000,则流的实际音量级别实际上为0.4 (0.5 x 8000/10000=0.4)">
-    常量 BASS_CONFIG_GVOL_STREAM <公开 类型 = 整数 值 = @BASS_CONFIG_GVOL_STREAM 注释 = "流的全局音量级别.\r"
-            注释 = "参数: 0 (静音) 到 10000 (最大音量). " 注释 = "此配置选项允许你控制所有流的音量级别,例如单独的音乐和效果音量控制.\r"
+    常量 BASS_CONFIG_GVOL_STREAM <公开 类型 = 整数 值 = @BASS_CONFIG_GVOL_STREAM 注释 = "流的全局音量级别."
+            注释 = "参数: 0 (静音) 到 10000 (最大音量). " 注释 = "此配置选项允许你控制所有流的音量级别,例如单独的音乐和效果音量控制."
             注释 = "通道的最终音量=通道音量x全局音量/10000. 例如,如果流的音量为0.5,全局音量为8000,则流的实际音量级别实际上为0.4 (0.5 x 8000/10000=0.4)">
-    常量 BASS_CONFIG_GVOL_MUSIC <公开 类型 = 整数 值 = @BASS_CONFIG_GVOL_MUSIC 注释 = "MOD音乐的全局音量级别.\r"
-            注释 = "参数: 0 (静音) 到 10000 (最大音量). " 注释 = "此配置选项允许你控制所有MOD音乐的音量级别,例如单独的音乐和效果音量控制.\r"
+    常量 BASS_CONFIG_GVOL_MUSIC <公开 类型 = 整数 值 = @BASS_CONFIG_GVOL_MUSIC 注释 = "MOD音乐的全局音量级别."
+            注释 = "参数: 0 (静音) 到 10000 (最大音量). " 注释 = "此配置选项允许你控制所有MOD音乐的音量级别,例如单独的音乐和效果音量控制."
             注释 = "通道的最终音量=通道音量x全局音量/10000. 例如,如果流的音量为0.5,全局音量为8000,则流的实际音量级别实际上为0.4 (0.5 x 8000/10000=0.4)">
-    常量 BASS_CONFIG_CURVE_VOL <公开 类型 = 整数 值 = @BASS_CONFIG_CURVE_VOL 注释 = "音量值的平移曲线.\r"
-            注释 = "参数: 0(假)=线性, 1(真)=对数. 默认为线性曲线.\r"
-            注释 = "使用线性曲线时,音量范围为0%(静音)到100%(最高音量);使用对数曲线时,音量范围为-100 dB(有效静音)到0 dB(最高音量).\r"
+    常量 BASS_CONFIG_CURVE_VOL <公开 类型 = 整数 值 = @BASS_CONFIG_CURVE_VOL 注释 = "音量值的平移曲线."
+            注释 = "参数: 0(假)=线性, 1(真)=对数. 默认为线性曲线."
+            注释 = "使用线性曲线时,音量范围为0%(静音)到100%(最高音量);使用对数曲线时,音量范围为-100 dB(有效静音)到0 dB(最高音量)."
             注释 = "例如,0.5的音量水平为50%线性或-50 dB对数">
-    常量 BASS_CONFIG_CURVE_PAN <公开 类型 = 整数 值 = @BASS_CONFIG_CURVE_PAN 注释 = "声像值的平移曲线.\r"
-            注释 = "参数: 0(假)=线性, 1(真)=对数. 默认为线性曲线.\r"
+    常量 BASS_CONFIG_CURVE_PAN <公开 类型 = 整数 值 = @BASS_CONFIG_CURVE_PAN 注释 = "声像值的平移曲线."
+            注释 = "参数: 0(假)=线性, 1(真)=对数. 默认为线性曲线."
             注释 = "使用线性曲线时,声像值范围为0%(左声道)到100%(右声道);使用对数曲线时,声像值范围为-100 dB(左声道)到0 dB(右声道).">
-    常量 BASS_CONFIG_FLOATDSP <公开 类型 = 整数 值 = @BASS_CONFIG_FLOATDSP 注释 = "是否将32位浮点样本数据传递给所有DSP回调函数？\r"
-            注释 = "参数: 0(假)=不传递, 1(真)=将32位浮点样本数据传递给所有DSPPROC回调函数.\r"
+    常量 BASS_CONFIG_FLOATDSP <公开 类型 = 整数 值 = @BASS_CONFIG_FLOATDSP 注释 = "是否将32位浮点样本数据传递给所有DSP回调函数？"
+            注释 = "参数: 0(假)=不传递, 1(真)=将32位浮点样本数据传递给所有DSPPROC回调函数."
             注释 = "通常,DSP功能以通道使用的格式接收样本数据,即8、16或32位. 但当启用此配置选项时,BASS会将8/16位样本数据转换为32位浮点,再将其传递给DSP功能,然后在完成所有DSP功能后将其转换回.">
-    常量 BASS_CONFIG_3DALGORITHM <公开 类型 = 整数 值 = @BASS_CONFIG_3DALGORITHM 注释 = "3D空间通道的定位算法.\r"
-            注释 = "参数: 以下选项之一,默认为0.\r"
-            注释 = "0 BASS_3DALG_DEFAULT 如果至少有4个扬声器可用(请参阅BASS_GetInfo),则声音在其中平移,否则等同于BASS_3DALG_OFF\r"
+    常量 BASS_CONFIG_3DALGORITHM <公开 类型 = 整数 值 = @BASS_CONFIG_3DALGORITHM 注释 = "3D空间通道的定位算法."
+            注释 = "参数: 以下选项之一,默认为0."
+            注释 = "0 BASS_3DALG_DEFAULT 如果至少有4个扬声器可用(请参阅BASS_GetInfo),则声音在其中平移,否则等同于BASS_3DALG_OFF"
             注释 = "1 BASS_3DALG_OFF 仅在两个扬声器上使用左右平移" 注释 = "2 BASS_3DALG_FULL" 注释 = "3 BASS_3DALG_LIGHT">
-    常量 BASS_CONFIG_NET_TIMEOUT <公开 类型 = 整数 值 = @BASS_CONFIG_NET_TIMEOUT 注释 = "等待服务器响应连接请求的时间.\r"
-            注释 = "参数: 参数: 等待时间(单位为毫秒),默认为5000ms(5秒).\r"
-            注释 = "位或BASS_CONFIG_THREAD标志可使设置限定在当前线程生效. 当该值非零时,它将覆盖当前线程的全局设置.\r"
+    常量 BASS_CONFIG_NET_TIMEOUT <公开 类型 = 整数 值 = @BASS_CONFIG_NET_TIMEOUT 注释 = "等待服务器响应连接请求的时间."
+            注释 = "参数: 参数: 等待时间(单位为毫秒),默认为5000ms(5秒)."
+            注释 = "位或BASS_CONFIG_THREAD标志可使设置限定在当前线程生效. 当该值非零时,它将覆盖当前线程的全局设置."
             注释 = "当通过BASS_CONFIG_NET_PLAYLIST选项启用播放列表处理时,超时将应用于每个播放列表项目,而不是整个播放列表.">
-    常量 BASS_CONFIG_NET_BUFFER <公开 类型 = 整数 值 = @BASS_CONFIG_NET_BUFFER 注释 = "网络下载缓冲区长度.\r"
+    常量 BASS_CONFIG_NET_BUFFER <公开 类型 = 整数 值 = @BASS_CONFIG_NET_BUFFER 注释 = "网络下载缓冲区长度."
             注释 = "参数: 缓冲区长度(单位为毫秒),默认为5000ms.">
-    常量 BASS_CONFIG_PAUSE_NOPLAY <公开 类型 = 整数 值 = @BASS_CONFIG_PAUSE_NOPLAY 注释 = "是否在暂停输出时阻止播放通道?\r"
-            注释 = "参数: 0(假)=不阻止,1(真)=不在暂停输出时播放通道,默认为真.\r"
-            注释 = "当使用\"暂停输出(BASS_Pause)\"暂停输出且启用此配置选项时,在使用\"开始输出(BASS_Start)\"恢复输出之前,无法播放通道.\r"
+    常量 BASS_CONFIG_PAUSE_NOPLAY <公开 类型 = 整数 值 = @BASS_CONFIG_PAUSE_NOPLAY 注释 = "是否在暂停输出时阻止播放通道?"
+            注释 = "参数: 0(假)=不阻止,1(真)=不在暂停输出时播放通道,默认为真."
+            注释 = "当使用\"暂停输出(BASS_Pause)\"暂停输出且启用此配置选项时,在使用\"开始输出(BASS_Start)\"恢复输出之前,无法播放通道."
             注释 = "任何播放通道的尝试都将导致BASS错误.">
-    常量 BASS_CONFIG_NET_PREBUF <公开 类型 = 整数 值 = @BASS_CONFIG_NET_PREBUF 注释 = "播放网络流之前的预缓冲区数量.\r"
-            注释 = "参数: 预缓冲区的数量(百分比).\r"
-            注释 = "此设置确定开始播放前应填充缓冲区长度的百分比(BASS_CONFIG_NET_BUFFER),默认值为75%,该参数为最小值.\r"
+    常量 BASS_CONFIG_NET_PREBUF <公开 类型 = 整数 值 = @BASS_CONFIG_NET_PREBUF 注释 = "播放网络流之前的预缓冲区数量."
+            注释 = "参数: 预缓冲区的数量(百分比)."
+            注释 = "此设置确定开始播放前应填充缓冲区长度的百分比(BASS_CONFIG_NET_BUFFER),默认值为75%,该参数为最小值."
             注释 = "BASS总是预先下载一定量的数据,以检测流的格式并初始化解码器.">
-    常量 BASS_CONFIG_NET_PASSIVE <公开 类型 = 整数 值 = @BASS_CONFIG_NET_PASSIVE 注释 = "是否在FTP连接中使用被动模式?\r"
+    常量 BASS_CONFIG_NET_PASSIVE <公开 类型 = 整数 值 = @BASS_CONFIG_NET_PASSIVE 注释 = "是否在FTP连接中使用被动模式?"
             注释 = "参数: 0(假)=不使用,1(真)=使用被动模式. 默认为真." 注释 = "更改将从下一个网络流开始生效.">
-    常量 BASS_CONFIG_REC_BUFFER <公开 类型 = 整数 值 = @BASS_CONFIG_REC_BUFFER 注释 = "录制通道的缓冲区长度.\r"
-            注释 = "参数: 缓冲区长度(单位为毫秒)...10(最小)-5000(最大),如果指定的长度超出此范围,会自动将其封顶." 注释 = "默认录制缓冲区长度是2000毫秒.\r"
-            注释 = "与播放缓冲区不同,播放缓冲区的目的是使缓冲区保持满载,录制缓冲区则尽可能保持空,因此此设置对延迟没有影响.\r"
-            注释 = "除非你对录制数据的处理可能会导致明显的延迟,或者您希望在\"开始录制(BASS_RecordStart)\"中使用较长的记录时间,否则不需要增加该时间.\r"
+    常量 BASS_CONFIG_REC_BUFFER <公开 类型 = 整数 值 = @BASS_CONFIG_REC_BUFFER 注释 = "录制通道的缓冲区长度."
+            注释 = "参数: 缓冲区长度(单位为毫秒)...10(最小)-5000(最大),如果指定的长度超出此范围,会自动将其封顶." 注释 = "默认录制缓冲区长度是2000毫秒."
+            注释 = "与播放缓冲区不同,播放缓冲区的目的是使缓冲区保持满载,录制缓冲区则尽可能保持空,因此此设置对延迟没有影响."
+            注释 = "除非你对录制数据的处理可能会导致明显的延迟,或者您希望在\"开始录制(BASS_RecordStart)\"中使用较长的记录时间,否则不需要增加该时间."
             注释 = "此配置选项仅影响之后创建的录制通道,而不影响现有的通道.">
-    常量 BASS_CONFIG_NET_PLAYLIST <公开 类型 = 整数 值 = @BASS_CONFIG_NET_PLAYLIST 注释 = "何时处理PLS和M3U播放列表中的URL？\r"
-            注释 = "参数: 0=从不, 1=仅在\"打开网络文件(BASS_StreamCreateURL)\"时, 2=在\"打开流文件(BASS_StreamCreateFile)\"和\"创建用户流文件(BASS_StreamCreateFileUser)\"时.\r"
-            注释 = "默认为禁用. 启用后,BASS将处理PLS和M3U播放列表,尝试每个URL,直到找到一个可以播放的URL.BASS_ChannelGetInfo可用于查找成功打开的URL.\r"
+    常量 BASS_CONFIG_NET_PLAYLIST <公开 类型 = 整数 值 = @BASS_CONFIG_NET_PLAYLIST 注释 = "何时处理PLS和M3U播放列表中的URL？"
+            注释 = "参数: 0=从不, 1=仅在\"打开网络文件(BASS_StreamCreateURL)\"时, 2=在\"打开流文件(BASS_StreamCreateFile)\"和\"创建用户流文件(BASS_StreamCreateFileUser)\"时."
+            注释 = "默认为禁用. 启用后,BASS将处理PLS和M3U播放列表,尝试每个URL,直到找到一个可以播放的URL.BASS_ChannelGetInfo可用于查找成功打开的URL."
             注释 = "支持嵌套播放列表,即一个播放列表可以包含另一个播放列表的URL. BASS_CONFIG_NET_PLAYLIST_DEPTH选项可限制嵌套的播放列表深度.">
-    常量 BASS_CONFIG_MUSIC_VIRTUAL <公开 类型 = 整数 值 = @BASS_CONFIG_MUSIC_VIRTUAL 注释 = "渲染IT文件时使用的最大虚拟通道数.\r"
-            注释 = "参数: 虚拟通道的数量,0(最小)到512(最大).如果指定的值超出此范围,则会自动封顶.\r"
+    常量 BASS_CONFIG_MUSIC_VIRTUAL <公开 类型 = 整数 值 = @BASS_CONFIG_MUSIC_VIRTUAL 注释 = "渲染IT文件时使用的最大虚拟通道数."
+            注释 = "参数: 虚拟通道的数量,0(最小)到512(最大).如果指定的值超出此范围,则会自动封顶."
             注释 = "默认为64. 此设置仅影响IT文件,因为其他MOD音乐格式没有虚拟通道. 更改仅适用于之后加载的文件.">
-    常量 BASS_CONFIG_VERIFY <公开 类型 = 整数 值 = @BASS_CONFIG_VERIFY 注释 = "为验证/检测文件格式而要检查的数据量.\r"
-            注释 = "参数: 检查的数据量,单位为字节...1000(最小)到1000000(最大). 如果指定的值超出此范围,则会自动封顶." 注释 = "默认长度为16000字节.\r"
-            注释 = "在标准支持的文件格式中,此设置仅影响MP3/MP2/MP1格式的检测,但也用于附加组件(请参阅文档). 验证长度不包括可能在文件头找到的任何标记.\r"
+    常量 BASS_CONFIG_VERIFY <公开 类型 = 整数 值 = @BASS_CONFIG_VERIFY 注释 = "为验证/检测文件格式而要检查的数据量."
+            注释 = "参数: 检查的数据量,单位为字节...1000(最小)到1000000(最大). 如果指定的值超出此范围,则会自动封顶." 注释 = "默认长度为16000字节."
+            注释 = "在标准支持的文件格式中,此设置仅影响MP3/MP2/MP1格式的检测,但也用于附加组件(请参阅文档). 验证长度不包括可能在文件头找到的任何标记."
             注释 = "对于网络(和\"缓冲\"用户文件)流,可以用BASS_CONFIG_VERIFY_NET设置检查的数据量.">
-    常量 BASS_CONFIG_UPDATETHREADS <公开 类型 = 整数 值 = @BASS_CONFIG_UPDATETHREADS 注释 = "用于更新播放缓冲区的线程数.\r"
-            注释 = "参数: 使用的线程数, 0=禁用自动更新. 默认为1\r"
-            注释 = "更新线程的数量决定了可以并行更新多少HSTREAM/HMUSIC通道的播放缓冲区. 每个线程一次可以处理一个通道.\r"
-            注释 = "默认使用单个线程,但可以使用其他线程来利用多个CPU核心. 一般而言,创建更多的线程不会比多内核的CPU更好,但是使用多个线程(即使只有一个CPU内核)的一个好处是,更新缓慢的通道不或拖慢其他通道的更新.\r"
-            注释 = "当禁用自动更新(线程=0)时,应改用\"更新缓存/BASS_Update\"或\"更新通道缓存/BASS_ChannelUpdate\"手动更新.\r"
+    常量 BASS_CONFIG_UPDATETHREADS <公开 类型 = 整数 值 = @BASS_CONFIG_UPDATETHREADS 注释 = "用于更新播放缓冲区的线程数."
+            注释 = "参数: 使用的线程数, 0=禁用自动更新. 默认为1"
+            注释 = "更新线程的数量决定了可以并行更新多少HSTREAM/HMUSIC通道的播放缓冲区. 每个线程一次可以处理一个通道."
+            注释 = "默认使用单个线程,但可以使用其他线程来利用多个CPU核心. 一般而言,创建更多的线程不会比多内核的CPU更好,但是使用多个线程(即使只有一个CPU内核)的一个好处是,更新缓慢的通道不或拖慢其他通道的更新."
+            注释 = "当禁用自动更新(线程=0)时,应改用\"更新缓存/BASS_Update\"或\"更新通道缓存/BASS_ChannelUpdate\"手动更新."
             注释 = "更新线程的数量可以随时更改,包括播放的时候.">
-    常量 BASS_CONFIG_DEV_BUFFER <公开 类型 = 整数 值 = @BASS_CONFIG_DEV_BUFFER 注释 = "输出设备的缓冲区长度.\r"
+    常量 BASS_CONFIG_DEV_BUFFER <公开 类型 = 整数 值 = @BASS_CONFIG_DEV_BUFFER 注释 = "输出设备的缓冲区长度."
             注释 = "参数: 缓冲区长度(单位为毫秒)">
     常量 BASS_CONFIG_REC_LOOPBACK <公开 类型 = 整数 值 = @BASS_CONFIG_REC_LOOPBACK 注释 = "【文档没写】">
     常量 BASS_CONFIG_VISTA_TRUEPOS <公开 类型 = 整数 值 = @BASS_CONFIG_VISTA_TRUEPOS 注释 = "【文档没写】">
-    常量 BASS_CONFIG_IOS_SESSION <公开 类型 = 整数 值 = @BASS_CONFIG_IOS_SESSION 注释 = "iOS上的音频会话配置.\r"
-            注释 = "参数: 为以下的选项之一.\r"
-            注释 = "1 BASS_IOS_SESSION_MIX, 允许同时收听其他应用程序.启用 AVAudioSessionCategoryOptionMixWithOthers\r"
-            注释 = "2 BASS_IOS_SESSION_DUCK, 允许同时收听其他应用程序,但降低其音量. 启用 AVAudioSessionCategoryOptionDuckOthers\r"
-            注释 = "3 BASS_IOS_SESSION_AMBIENT, 使用\"环境\"类别.\r"
-            注释 = "4 BASS_IOS_SESSION_SPEAKER, 将输出路由到扬声器而不是接收器. 启用AVAudioSessionCategoryOptionDefaultToSpeaker\r"
+    常量 BASS_CONFIG_IOS_SESSION <公开 类型 = 整数 值 = @BASS_CONFIG_IOS_SESSION 注释 = "iOS上的音频会话配置."
+            注释 = "参数: 为以下的选项之一."
+            注释 = "1 BASS_IOS_SESSION_MIX, 允许同时收听其他应用程序.启用 AVAudioSessionCategoryOptionMixWithOthers"
+            注释 = "2 BASS_IOS_SESSION_DUCK, 允许同时收听其他应用程序,但降低其音量. 启用 AVAudioSessionCategoryOptionDuckOthers"
+            注释 = "3 BASS_IOS_SESSION_AMBIENT, 使用\"环境\"类别."
+            注释 = "4 BASS_IOS_SESSION_SPEAKER, 将输出路由到扬声器而不是接收器. 启用AVAudioSessionCategoryOptionDefaultToSpeaker"
             注释 = "5 BASS_IOS_SESSION_DISABLE, 禁用BASS的音频会话配置管理,以便应用程序自行处理.">
     常量 BASS_CONFIG_IOS_MIXAUDIO <公开 类型 = 整数 值 = @BASS_CONFIG_IOS_MIXAUDIO 注释 = "【文档没写】">
-    常量 BASS_CONFIG_DEV_DEFAULT <公开 类型 = 整数 值 = @BASS_CONFIG_DEV_DEFAULT 注释 = "是否在输出设备列表中包含\"默认\"选项?\r"
-            注释 = "参数: 0(假)=不包含, 1(真)=\"默认\"设备将包含在设备列表中,默认为真.\r"
+    常量 BASS_CONFIG_DEV_DEFAULT <公开 类型 = 整数 值 = @BASS_CONFIG_DEV_DEFAULT 注释 = "是否在输出设备列表中包含\"默认\"选项?"
+            注释 = "参数: 0(假)=不包含, 1(真)=\"默认\"设备将包含在设备列表中,默认为真."
             注释 = "\"默认设备\"将映射到系统的默认设备,当系统更改了默认设备,BASS的输出也随之更改." 注释 = "启用时,初始化(ASS_Init)的默认设备(-1)即为此\"默认\"设备.">
     常量 BASS_CONFIG_NET_READTIMEOUT <公开 类型 = 整数 值 = @BASS_CONFIG_NET_READTIMEOUT
-            注释 = "等待服务器为网络流提供更多数据的时间." 注释 = "参数: 等待时间(单位为毫秒),默认为0,即不等待.\r"
-            注释 = "超时之后,将断开与服务器的连接. 默认设置为0,没有超时. 更改只影响之后创建的流,不影响现有的流.\r"
+            注释 = "等待服务器为网络流提供更多数据的时间." 注释 = "参数: 等待时间(单位为毫秒),默认为0,即不等待."
+            注释 = "超时之后,将断开与服务器的连接. 默认设置为0,没有超时. 更改只影响之后创建的流,不影响现有的流."
             注释 = "位或BASS_CONFIG_THREAD标志可使设置限定在当前线程生效. 当该值非零时,它将覆盖当前线程中的全局设置.">
     常量 BASS_CONFIG_VISTA_SPEAKERS <公开 类型 = 整数 值 = @BASS_CONFIG_VISTA_SPEAKERS 注释 = "【文档没写】">
     常量 BASS_CONFIG_IOS_SPEAKER <公开 类型 = 整数 值 = @BASS_CONFIG_IOS_SPEAKER 注释 = "【文档没写】">
-    常量 BASS_CONFIG_MF_DISABLE <公开 类型 = 整数 值 = @BASS_CONFIG_MF_DISABLE 注释 = "是否禁用媒体Media Foundation？\r"
-            注释 = "参数: 0(假)=禁用, 1(真)=禁用.\r"
+    常量 BASS_CONFIG_MF_DISABLE <公开 类型 = 整数 值 = @BASS_CONFIG_MF_DISABLE 注释 = "是否禁用媒体Media Foundation？"
+            注释 = "参数: 0(假)=禁用, 1(真)=禁用."
             注释 = "此选项确定Media Foundation编解码器是否可用于解码文件和流. 默认情况下,当系统为支持Media Foundation解码器的Windows 7及以上版本时,默认设置为加.否则,它将为真且为只读.">
     常量 BASS_CONFIG_HANDLES <公开 类型 = 整数 值 = @BASS_CONFIG_HANDLES
-            注释 = "现有HMUSIC/HRECORD/HSAMPLE/HSTREAM句柄的数量.\r"
-            注释 = "参数: 只读选项,提供当前存在的HMUSIC/HRECORD/HSAMPLE/HSTREAM句柄总数.\r"
+            注释 = "现有HMUSIC/HRECORD/HSAMPLE/HSTREAM句柄的数量."
+            注释 = "参数: 只读选项,提供当前存在的HMUSIC/HRECORD/HSAMPLE/HSTREAM句柄总数."
             注释 = "可用于检测泄漏,即未缩放的句柄.一些附加功能可能会创建自己的句柄供内部使用,因此单个流可以将句柄总数增加(释放时减少)一个以上.">
-    常量 BASS_CONFIG_UNICODE <公开 类型 = 整数 值 = @BASS_CONFIG_UNICODE 注释 = "是否在设备信息中使用Unicode字符集？\r"
-            注释 = "参数: 0(假)=ANSI字符集, 1(真)=UTF-8字符集.\r"
-            注释 = "此配置选项确定\"BASS_设备信息/BASS_DEVICEINFO\"结构体和\"取录制设备名/BASS_RecordGetInputName\"函数使用的字符集.\r"
+    常量 BASS_CONFIG_UNICODE <公开 类型 = 整数 值 = @BASS_CONFIG_UNICODE 注释 = "是否在设备信息中使用Unicode字符集？"
+            注释 = "参数: 0(假)=ANSI字符集, 1(真)=UTF-8字符集."
+            注释 = "此配置选项确定\"BASS_设备信息/BASS_DEVICEINFO\"结构体和\"取录制设备名/BASS_RecordGetInputName\"函数使用的字符集."
             注释 = "默认设置为ANSI,只能在调用\"取设备信息/BASS_GetDeviceInfo\"、\"初始化/BASS_Init\"或\"取录制设备信息/BASS_RecordGetDeviceInfo\"或\"初始化录制设备/BASS_RecordInit\"之前更改.">
-    常量 BASS_CONFIG_SRC <公开 类型 = 整数 值 = @BASS_CONFIG_SRC 注释 = "默认采样率转换品质.\r"
-            注释 = "参数: 0=线性插值, 1=8点sinc插值, 2=16点sinc插值, 3=32点sinc插值, 4=64点sinc插值. 也接受其他数值.\r"
-            注释 = "此配置选项确定新通道最初的采样率转换品质,但使用BASS_CONFIG_SRC_SAMPLE设置的样本通道(HCHANNEL)除外.\r"
+    常量 BASS_CONFIG_SRC <公开 类型 = 整数 值 = @BASS_CONFIG_SRC 注释 = "默认采样率转换品质."
+            注释 = "参数: 0=线性插值, 1=8点sinc插值, 2=16点sinc插值, 3=32点sinc插值, 4=64点sinc插值. 也接受其他数值."
+            注释 = "此配置选项确定新通道最初的采样率转换品质,但使用BASS_CONFIG_SRC_SAMPLE设置的样本通道(HCHANNEL)除外."
             注释 = "通道的采样率转换品质也可以在之后通过BASS_ATTRIB_SRC属性进行更改.">
-    常量 BASS_CONFIG_SRC_SAMPLE <公开 类型 = 整数 值 = @BASS_CONFIG_SRC_SAMPLE 注释 = "样本通道的默认采样率转换品质.\r"
-            注释 = "参数: 0=线性插值, 1=8点sinc插值, 2=16点sinc插值, 3=32点sinc插值, 4=64点sinc插值. 也接受其他数值.\r"
-            注释 = "此配置选项确定在调用\"取样本通道/BASS_SampleGetChannel\"之后,新通道(HCHANNEL)最初的采样率转换品质.\r"
+    常量 BASS_CONFIG_SRC_SAMPLE <公开 类型 = 整数 值 = @BASS_CONFIG_SRC_SAMPLE 注释 = "样本通道的默认采样率转换品质."
+            注释 = "参数: 0=线性插值, 1=8点sinc插值, 2=16点sinc插值, 3=32点sinc插值, 4=64点sinc插值. 也接受其他数值."
+            注释 = "此配置选项确定在调用\"取样本通道/BASS_SampleGetChannel\"之后,新通道(HCHANNEL)最初的采样率转换品质."
             注释 = "通道的采样率转换品质也可以在之后通过BASS_ATTRIB_SRC属性进行更改">
-    常量 BASS_CONFIG_ASYNCFILE_BUFFER <公开 类型 = 整数 值 = @BASS_CONFIG_ASYNCFILE_BUFFER 注释 = "读取异步文件的缓冲区长度.\r"
-            注释 = "参数: 缓冲区长度(单位为字节),自动四舍五入到最接近的4096字节(4KB)的值.\r"
+    常量 BASS_CONFIG_ASYNCFILE_BUFFER <公开 类型 = 整数 值 = @BASS_CONFIG_ASYNCFILE_BUFFER 注释 = "读取异步文件的缓冲区长度."
+            注释 = "参数: 缓冲区长度(单位为字节),自动四舍五入到最接近的4096字节(4KB)的值."
             注释 = "默认为64KB,更改后只影响以后创建的流,不影响现有的,因此在创建每个缓冲区之前使用此配置选项,可以使流具有不同的缓冲区长度.">
-    常量 BASS_CONFIG_OGG_PRESCAN <公开 类型 = 整数 值 = @BASS_CONFIG_OGG_PRESCAN 注释 = "是否预扫描链接OGG文件?\r"
-            注释 = "参数:  0(假)=不预扫描, 1(真)=预扫描链接OGG文件.\r"
-            注释 = "默认启用此选项,相当于在调用BASS_StreamCreateFile打开OGG文件时使用包含BASS_STREAM_PRESCAN标志.\r"
+    常量 BASS_CONFIG_OGG_PRESCAN <公开 类型 = 整数 值 = @BASS_CONFIG_OGG_PRESCAN 注释 = "是否预扫描链接OGG文件?"
+            注释 = "参数:  0(假)=不预扫描, 1(真)=预扫描链接OGG文件."
+            注释 = "默认启用此选项,相当于在调用BASS_StreamCreateFile打开OGG文件时使用包含BASS_STREAM_PRESCAN标志."
             注释 = "如果禁用,链接OGG文件的扫描将延迟到第一次调用\"取通道长度/BASS_ChannelGetLength\"或\"置播放位置/BASS_ChannelSetPosition\"的时候,以便更快地创建流.">
     常量 BASS_CONFIG_MF_VIDEO <公开 类型 = 整数 值 = @BASS_CONFIG_MF_VIDEO
             注释 = "是否使用Media Foundation播放视频文件里的音频? " 注释 = "参数:  0(假)=不支持, 1(真)=支持播放视频文件. 默认为假.">
@@ -2378,80 +2378,80 @@
     常量 BASS_CONFIG_DEV_NONSTOP <公开 类型 = 整数 值 = @BASS_CONFIG_DEV_NONSTOP
             注释 = "当输出设备上没有播放任何内容时,是否停止输出设备?" 注释 = "参数: 0(假)=停止, 1(真)=没有播放任何内容时,样本数据仍继续发送到输出设备. 默认为假.">
     常量 BASS_CONFIG_IOS_NOCATEGORY <公开 类型 = 整数 值 = @BASS_CONFIG_IOS_NOCATEGORY 注释 = "【文档没写】">
-    常量 BASS_CONFIG_VERIFY_NET <公开 类型 = 整数 值 = @BASS_CONFIG_VERIFY_NET 注释 = "为验证/检测网络流的文件格式而要检查的数据量.\r"
-            注释 = "参数: 检查的数据量,单位为字节...1000(最小)到1000000(最大), 0=BASS_CONFIG_VERIFY设置的25%(最小值为1000字节). 如果指定的值超出此范围,则会自动封顶.\r"
-            注释 = "默认设置为0,这代表需要BASS_CONFIG_VERIFY设置值的25%.\r"
-            注释 = "在标准支持的文件格式中,此设置仅影响MP3/MP2/MP1格式的检测,但也用于附加组件(请参阅文档). 验证长度不包括可能在文件头找到的任何标记.\r"
+    常量 BASS_CONFIG_VERIFY_NET <公开 类型 = 整数 值 = @BASS_CONFIG_VERIFY_NET 注释 = "为验证/检测网络流的文件格式而要检查的数据量."
+            注释 = "参数: 检查的数据量,单位为字节...1000(最小)到1000000(最大), 0=BASS_CONFIG_VERIFY设置的25%(最小值为1000字节). 如果指定的值超出此范围,则会自动封顶."
+            注释 = "默认设置为0,这代表需要BASS_CONFIG_VERIFY设置值的25%."
+            注释 = "在标准支持的文件格式中,此设置仅影响MP3/MP2/MP1格式的检测,但也用于附加组件(请参阅文档). 验证长度不包括可能在文件头找到的任何标记."
             注释 = "与网络流一样,此配置设置也适用于使用\"创建用户流文件/BASS_StreamCreateFileUser\"创建的\"缓冲\"用户文件流.">
-    常量 BASS_CONFIG_DEV_PERIOD <公开 类型 = 整数 值 = @BASS_CONFIG_DEV_PERIOD 注释 = "输出设备的更新周期.\r"
-            注释 = "参数: 更新周期(单位为毫秒),如果为负数,则以样本为单位." 注释 = "默认为10ms,更改后只影响之后创建的流.\r"
+    常量 BASS_CONFIG_DEV_PERIOD <公开 类型 = 整数 值 = @BASS_CONFIG_DEV_PERIOD 注释 = "输出设备的更新周期."
+            注释 = "参数: 更新周期(单位为毫秒),如果为负数,则以样本为单位." 注释 = "默认为10ms,更改后只影响之后创建的流."
             注释 = "设备的更新周期确定数据生成和放置在输出设备缓冲区中的频率. 较短的周期允许较小的缓冲区和较低的延迟,但可能占用更多的CPU.">
-    常量 BASS_CONFIG_FLOAT <公开 类型 = 整数 值 = @BASS_CONFIG_FLOAT 注释 = "是否支持浮点样本数据?\r"
-            注释 = "参数: 只读选项,只能取参数,获取的值为0(假)=不支持, 1(真)=支持.\r"
+    常量 BASS_CONFIG_FLOAT <公开 类型 = 整数 值 = @BASS_CONFIG_FLOAT 注释 = "是否支持浮点样本数据?"
+            注释 = "参数: 只读选项,只能取参数,获取的值为0(假)=不支持, 1(真)=支持."
             注释 = "不支持浮点数据时,BASS_CONFIG_FLOATDSP选项仍可用,但它将导致DSPPROC函数接收8.24定点数据而不是浮点数据">
     常量 BASS_CONFIG_NET_SEEK <公开 类型 = 整数 值 = @BASS_CONFIG_NET_SEEK 注释 = "【文档没写】">
-    常量 BASS_CONFIG_AM_DISABLE <公开 类型 = 整数 值 = @BASS_CONFIG_AM_DISABLE 注释 = "是否禁用Android媒体编解码?\r"
+    常量 BASS_CONFIG_AM_DISABLE <公开 类型 = 整数 值 = @BASS_CONFIG_AM_DISABLE 注释 = "是否禁用Android媒体编解码?"
             注释 = "参数: 0(假)=不禁用, 1(真)=禁用. 安卓4.1及以上版本默认为假,其他版本默认为真且不能修改.">
     常量 BASS_CONFIG_NET_PLAYLIST_DEPTH <公开 类型 = 整数 值 = @BASS_CONFIG_NET_PLAYLIST_DEPTH
-            注释 = "最大嵌套播放列表处理深度." 注释 = "参数: 0=不处理嵌套的播放列表.\r"
-            注释 = "当通过BASS_CONFIG_NET_PLAYLIST选项启用播放列表处理时,此选项限制\"打开网络文件(BASS_StreamCreateURL)\"嵌套播放列表的深度.\r"
+            注释 = "最大嵌套播放列表处理深度." 注释 = "参数: 0=不处理嵌套的播放列表."
+            注释 = "当通过BASS_CONFIG_NET_PLAYLIST选项启用播放列表处理时,此选项限制\"打开网络文件(BASS_StreamCreateURL)\"嵌套播放列表的深度."
             注释 = "默认深度为1，这意味着将处理根播放列表中的播放列表.">
-    常量 BASS_CONFIG_NET_PREBUF_WAIT <公开 类型 = 整数 值 = @BASS_CONFIG_NET_PREBUF_WAIT 注释 = "打开网络流时是否等待预缓冲?\r"
-            注释 = "参数: 0(假)=不等待, 1(真)=等待预缓冲, 默认设置为假.\r"
-            注释 = "此设置确定\"打开网络文件(BASS_StreamCreateURL)\"是否在返回新流的句柄之前等待下载一定量的数据.\r"
-            注释 = "该数据量由BASS_CONFIG_NET_BUFFER和BASS_FILEPOS_BUFFERING设置确定. 默认不等待,这意味着预缓冲将异步进行,并且在进行预缓冲时,播放将以暂停状态开始.\r"
+    常量 BASS_CONFIG_NET_PREBUF_WAIT <公开 类型 = 整数 值 = @BASS_CONFIG_NET_PREBUF_WAIT 注释 = "打开网络流时是否等待预缓冲?"
+            注释 = "参数: 0(假)=不等待, 1(真)=等待预缓冲, 默认设置为假."
+            注释 = "此设置确定\"打开网络文件(BASS_StreamCreateURL)\"是否在返回新流的句柄之前等待下载一定量的数据."
+            注释 = "该数据量由BASS_CONFIG_NET_BUFFER和BASS_FILEPOS_BUFFERING设置确定. 默认不等待,这意味着预缓冲将异步进行,并且在进行预缓冲时,播放将以暂停状态开始."
             注释 = "可以使用\"取流文件位置/BASS_StreamGetFilePosition(BASS_FILEPOS_BUFFERING)\"监控进度.">
     常量 BASS_CONFIG_ANDROID_SESSIONID <公开 类型 = 整数 值 = @BASS_CONFIG_ANDROID_SESSIONID
             注释 = "设置安卓用于输出的音频的会话ID." 注释 = "参数: 会话ID">
     常量 BASS_CONFIG_WASAPI_PERSIST <公开 类型 = 整数 值 = @BASS_CONFIG_WASAPI_PERSIST
-            注释 = "是否跨会话保留Windows的合成器设置?" 注释 = "参数: 0=假,1=真,Windows合成器设置将在会话间保持. 默认为真.\r"
-            注释 = "使用WASAPI输出时,此选项确定Windows合成器中的音量和静音设置是否会在会话间保持,即下次应用程序运行时.\r"
+            注释 = "是否跨会话保留Windows的合成器设置?" 注释 = "参数: 0=假,1=真,Windows合成器设置将在会话间保持. 默认为真."
+            注释 = "使用WASAPI输出时,此选项确定Windows合成器中的音量和静音设置是否会在会话间保持,即下次应用程序运行时."
             注释 = "在Windows Vista及更高版本上使用DirectSound输出时,这些设置始终保持不变.">
-    常量 BASS_CONFIG_REC_WASAPI <公开 类型 = 整数 值 = @BASS_CONFIG_REC_WASAPI 注释 = "是否使用WASAPI进行录制? \r"
-            注释 = "参数: 0(假)=不启用, 1(真)=启用WASAPI.\r"
-            注释 = "从回放设备录制时将始终使用WASAPI,此配置选项确定从其他设备录制时是使用WASAPI还是使用DirectSound.\r"
-            注释 = "当WASAPI可用时默认启用(在Windows Vista及更高版本上).\r"
+    常量 BASS_CONFIG_REC_WASAPI <公开 类型 = 整数 值 = @BASS_CONFIG_REC_WASAPI 注释 = "是否使用WASAPI进行录制? "
+            注释 = "参数: 0(假)=不启用, 1(真)=启用WASAPI."
+            注释 = "从回放设备录制时将始终使用WASAPI,此配置选项确定从其他设备录制时是使用WASAPI还是使用DirectSound."
+            注释 = "当WASAPI可用时默认启用(在Windows Vista及更高版本上)."
             注释 = "更改从下一次调用\"初始化录制(BASS_RecordInit)\"开始生效,现在已初始化的设备不受影响.">
-    常量 BASS_CONFIG_ANDROID_AAUDIO <公开 类型 = 整数 值 = @BASS_CONFIG_ANDROID_AAUDIO 注释 = "是否在安卓上启用AAudio输出?\r"
-            注释 = "参数: 0(假)=不启用, 1(真)=启用. 安卓4.1及以上版本默认为假,其他版本默认为真且不能修改.\r"
+    常量 BASS_CONFIG_ANDROID_AAUDIO <公开 类型 = 整数 值 = @BASS_CONFIG_ANDROID_AAUDIO 注释 = "是否在安卓上启用AAudio输出?"
+            注释 = "参数: 0(假)=不启用, 1(真)=启用. 安卓4.1及以上版本默认为假,其他版本默认为真且不能修改."
             注释 = "AAudio仅在在Android 8.1及以上版本可用,且默认设置为真,而在早期Android版本上为假.">
     常量 BASS_CONFIG_SAMPLE_ONEHANDLE <公开 类型 = 整数 值 = @BASS_CONFIG_SAMPLE_ONEHANDLE
-            注释 = "是否对样本及其单个播放通道使用相同的句柄?" 注释 = "参数: 0(假)=使用不同的句柄,1(真)=使用一样的句柄.\r"
-            注释 = "当样本限制为只有一个通道(\"打开样本xx/BASS_SampleLoad\"或\"创建样本/BASS_SampleCreate\"的最大回放为1)时,样本(HSAMPLE)及其播放通道(HCHANNEL)将使用相同的句柄.\r"
-            注释 = "使用相同的句柄时,仍需要调用\"取样本通道/BASS_SampleGetChannel\"来创建播放通道.\r"
+            注释 = "是否对样本及其单个播放通道使用相同的句柄?" 注释 = "参数: 0(假)=使用不同的句柄,1(真)=使用一样的句柄."
+            注释 = "当样本限制为只有一个通道(\"打开样本xx/BASS_SampleLoad\"或\"创建样本/BASS_SampleCreate\"的最大回放为1)时,样本(HSAMPLE)及其播放通道(HCHANNEL)将使用相同的句柄."
+            注释 = "使用相同的句柄时,仍需要调用\"取样本通道/BASS_SampleGetChannel\"来创建播放通道."
             注释 = "默认启用此配置选项,更改从下一次调用\"取样本通道/BASS_SampleGetChannel\"开始生效.">
     常量 BASS_CONFIG_DEV_TIMEOUT <公开 类型 = 整数 值 = @BASS_CONFIG_DEV_TIMEOUT 注释 = "【文档没写】">
-    常量 BASS_CONFIG_NET_META <公开 类型 = 整数 值 = @BASS_CONFIG_NET_META 注释 = "是否从网络服务器请求Shoutcast的元数据?\r"
-            注释 = "参数: 0(假)=不请求,1(真)=请求. 默认为真.\r"
-            注释 = "默认情况下，BASS将在打开URL时从服务器请求Shoutcast元数据,该URL可从\"取通道标签/BASS_ChannelGetTags(BASS_TAG_META)\"获取.\r"
+    常量 BASS_CONFIG_NET_META <公开 类型 = 整数 值 = @BASS_CONFIG_NET_META 注释 = "是否从网络服务器请求Shoutcast的元数据?"
+            注释 = "参数: 0(假)=不请求,1(真)=请求. 默认为真."
+            注释 = "默认情况下，BASS将在打开URL时从服务器请求Shoutcast元数据,该URL可从\"取通道标签/BASS_ChannelGetTags(BASS_TAG_META)\"获取."
             注释 = "如果不需要Shoutcast元数据,可以禁用该选项以节省一点带宽.">
-    常量 BASS_CONFIG_NET_RESTRATE <公开 类型 = 整数 值 = @BASS_CONFIG_NET_RESTRATE 注释 = "限制网络文件流的下载速率.\r"
-            注释 = "参数: 下载速度(bytes/s),默认设置为20000\r"
-            注释 = "此设置确定通过BASS_STREAM_RESTRATE标志启用网络文件流下载速度限制的的最大下载速度.\r"
-            注释 = "只有当流的缓冲数据超过其BASS_CONFIG_NET_BUFFER设置时,速度限制才会生效,否则下载速度将不受限.\r"
-            注释 = "请注意,设置过低可能会导致服务器在下载完成之前关闭(超时)连接.\r"
+    常量 BASS_CONFIG_NET_RESTRATE <公开 类型 = 整数 值 = @BASS_CONFIG_NET_RESTRATE 注释 = "限制网络文件流的下载速率."
+            注释 = "参数: 下载速度(bytes/s),默认设置为20000"
+            注释 = "此设置确定通过BASS_STREAM_RESTRATE标志启用网络文件流下载速度限制的的最大下载速度."
+            注释 = "只有当流的缓冲数据超过其BASS_CONFIG_NET_BUFFER设置时,速度限制才会生效,否则下载速度将不受限."
+            注释 = "请注意,设置过低可能会导致服务器在下载完成之前关闭(超时)连接."
             注释 = "更改只影响以后创建的流,而不影响现有的流. 与网络流一样,此配置设置也适用于使用\"创建用户流文件/BASS_StreamCreateFileUser\"创建的\"缓冲\"用户文件流.">
     常量 BASS_CONFIG_THREAD <公开 类型 = 整数 值 = @BASS_CONFIG_THREAD 注释 = "标志: 将设置限定在当前线程中">
     常量 ""
-    常量 BASS_CONFIG_MIXER_BUFFER <公开 类型 = 整数 值 = 0x10601 注释 = "【BASS混合器类】源通道的缓冲区长度.\r"
+    常量 BASS_CONFIG_MIXER_BUFFER <公开 类型 = 整数 值 = 0x10601 注释 = "【BASS混合器类】源通道的缓冲区长度."
             注释 = "参数: 缓冲区长度,其中1到5是BASS_CONFIG_BUFFER设置(在\"创建混合流\"时)的倍数,其他则是以毫秒为单位的绝对长度.">
     常量 BASS_CONFIG_MIXER_POSEX <公开 类型 = 整数 值 = 0x10602
-            注释 = "【BASS混合器类】保持源位置记录的时间间隔，以便为BASS_Mixer_ChannelGetPositionEx提供可用的时间间隔.\r"
+            注释 = "【BASS混合器类】保持源位置记录的时间间隔，以便为BASS_Mixer_ChannelGetPositionEx提供可用的时间间隔."
             注释 = "参数: 返回时间的长度(单位为毫秒)">
-    常量 BASS_CONFIG_SPLIT_BUFFER <公开 类型 = 整数 值 = 0x10610 注释 = "【BASS混合器类】分离器的缓冲区长度.\r"
+    常量 BASS_CONFIG_SPLIT_BUFFER <公开 类型 = 整数 值 = 0x10610 注释 = "【BASS混合器类】分离器的缓冲区长度."
             注释 = "参数: 缓冲区长度(单位为毫秒)">
     常量 ""
 }
 
 类 BASS_配置选项_指针 <公开 注释 = "\"置配置选项_指针/BASS_SetConfigPtr\"的选项" 折叠 @文档 = "category = \"辅助类\"">
 {
-    常量 BASS_CONFIG_NET_AGENT <公开 类型 = 整数 值 = @BASS_CONFIG_NET_AGENT 注释 = "发送到服务器的\"User-Agent\"请求头.\r"
+    常量 BASS_CONFIG_NET_AGENT <公开 类型 = 整数 值 = @BASS_CONFIG_NET_AGENT 注释 = "发送到服务器的\"User-Agent\"请求头."
             注释 = "参数: User-Agent的文本指针">
-    常量 BASS_CONFIG_NET_PROXY <公开 类型 = 整数 值 = @BASS_CONFIG_NET_PROXY 注释 = "代理服务器设置.\r"
-            注释 = "参数: 设置的文本指针,以\"user:pass@server:port\"为格式, NULL=不使用代理, \"\"(空文本)=使用操作系统的默认代理设置.\r"
+    常量 BASS_CONFIG_NET_PROXY <公开 类型 = 整数 值 = @BASS_CONFIG_NET_PROXY 注释 = "代理服务器设置."
+            注释 = "参数: 设置的文本指针,以\"user:pass@server:port\"为格式, NULL=不使用代理, \"\"(空文本)=使用操作系统的默认代理设置."
             注释 = "如果只指定了\"user:pass@\"部分,则这些授权凭据将用于默认代理服务器. 如果只指定了\"server:port\"部分,则在没有任何授权凭据的情况下使用该代理服务器.">
     常量 BASS_CONFIG_IOS_NOTIFY <公开 类型 = 整数 值 = @BASS_CONFIG_IOS_NOTIFY 注释 = "【文档没写】">
-    常量 BASS_CONFIG_LIBSSL <公开 类型 = 整数 值 = @BASS_CONFIG_LIBSSL 注释 = "用于处理HTTPS连接的OpenSSL库.\r"
+    常量 BASS_CONFIG_LIBSSL <公开 类型 = 整数 值 = @BASS_CONFIG_LIBSSL 注释 = "用于处理HTTPS连接的OpenSSL库."
             注释 = "参数: OpenSSL库的文件名指针,NULL=使用默认值">
     常量 BASS_CONFIG_THREAD <公开 类型 = 整数 值 = @BASS_CONFIG_THREAD 注释 = "标志: 将设置限定在当前线程中">
 }
@@ -2539,13 +2539,13 @@
     常量 BASS_SAMPLE_OVER_DIST <公开 类型 = 整数 值 = @BASS_SAMPLE_OVER_DIST 注释 = "超越与听众的最远距离(仅3D空间音效).">
     常量 ""
     常量 BASS_STREAM_PRESCAN <公开 类型 = 整数 值 = @BASS_STREAM_PRESCAN
-            注释 = "在读取MP3/MP2/MP1文件和链接OGG文件(对正常OGG文件没有影响)时预扫描文件,以获得准确的寻道点和长度.\r"
+            注释 = "在读取MP3/MP2/MP1文件和链接OGG文件(对正常OGG文件没有影响)时预扫描文件,以获得准确的寻道点和长度."
             注释 = "这会显著增加创建流所需的时间,尤其是大文件和速度较慢的存储介质.">
     常量 BASS_STREAM_AUTOFREE <公开 类型 = 整数 值 = @BASS_STREAM_AUTOFREE 注释 = "播放结束后自动释放流">
     常量 BASS_STREAM_RESTRATE <公开 类型 = 整数 值 = @BASS_STREAM_RESTRATE 注释 = "限制网络文件流的下载速率">
     常量 BASS_STREAM_BLOCK <公开 类型 = 整数 值 = @BASS_STREAM_BLOCK 注释 = "以小块方式下载网络文件流">
     常量 BASS_STREAM_DECODE <公开 类型 = 整数 值 = @BASS_STREAM_DECODE
-            注释 = "解码样本数据,而不播放它. 使用\"取通道数据/BASS_ChannelGetData\"获取解码的样本数据.\r"
+            注释 = "解码样本数据,而不播放它. 使用\"取通道数据/BASS_ChannelGetData\"获取解码的样本数据."
             注释 = "BASS_SAMPLE_3D、BASS_STREAM_AUTOFREE和SPEAKER标志不能与此标志一起使用.">
     常量 BASS_STREAM_STATUS <公开 类型 = 整数 值 = @BASS_STREAM_STATUS 注释 = "在下载过程中提供服务器状态信息(HTTP/ICY标签)">
     常量 ""
@@ -2561,10 +2561,10 @@
     常量 BASS_MUSIC_3D <公开 类型 = 整数 值 = @BASS_MUSIC_3D 注释 = "启用3D空间音效功能. 流必须是单声道,且SPEAKER标志不能与此标志一起使用.">
     常量 BASS_MUSIC_FX <公开 类型 = 整数 值 = @BASS_MUSIC_FX 注释 = "【文档没写】">
     常量 BASS_MUSIC_AUTOFREE <公开 类型 = 整数 值 = @BASS_MUSIC_AUTOFREE 注释 = "播放结束时自动释放音乐. 请注意有些音乐会无限循环,因此不会自己结束.">
-    常量 BASS_MUSIC_DECODE <公开 类型 = 整数 值 = @BASS_MUSIC_DECODE 注释 = "解码/渲染样本数据,而不播放它.\r"
+    常量 BASS_MUSIC_DECODE <公开 类型 = 整数 值 = @BASS_MUSIC_DECODE 注释 = "解码/渲染样本数据,而不播放它."
             注释 = "可使用\"取通道数据/BASS_ChannelGetData\"获取解码的样本数据. BASS_SAMPLE_3D、BASS_STREAM_AUTOFREE和SPEAKER的标志不能与此标志一起使用.">
     常量 BASS_MUSIC_PRESCAN <公开 类型 = 整数 值 = @BASS_MUSIC_PRESCAN
-            注释 = "计算音乐的播放长度,并启用搜索(单位为字节). 这会略微增加打开音乐所需的时间,具体取决于音乐的长度.\r"
+            注释 = "计算音乐的播放长度,并启用搜索(单位为字节). 这会略微增加打开音乐所需的时间,具体取决于音乐的长度."
             注释 = "对于循环的音乐,计算发生循环之前的长度. 使用\"取通道长度/BASS_ChannelGetLength\"可获取该长度.">
     常量 BASS_MUSIC_CALCLEN <公开 类型 = 整数 值 = @BASS_MUSIC_CALCLEN 注释 = "【文档没写】">
     常量 BASS_MUSIC_RAMP <公开 类型 = 整数 值 = @BASS_MUSIC_RAMP 注释 = "使用\"normal\"淡入淡出(如FastTracker 2).">
@@ -2584,14 +2584,14 @@
     常量 BASS_MUSIC_POSRESET <公开 类型 = 整数 值 = @BASS_MUSIC_POSRESET
             注释 = "移动位置时停止所有音符(\"置播放位置/BASS_ChannelSetPosition\")">
     常量 BASS_MUSIC_POSRESETEX <公开 类型 = 整数 值 = @BASS_MUSIC_POSRESETEX 注释 = "移动位置时停止所有音符并将bpm/etc重置为默认值">
-    常量 BASS_MUSIC_STOPBACK <公开 类型 = 整数 值 = @BASS_MUSIC_STOPBACK 注释 = "播放向后跳跃效果时停止音乐.\r"
+    常量 BASS_MUSIC_STOPBACK <公开 类型 = 整数 值 = @BASS_MUSIC_STOPBACK 注释 = "播放向后跳跃效果时停止音乐."
             注释 = "这阻止了永不结束的音乐进入无休止的循环.一些MOD音乐被设计成到处跳跃,所以这个标志会导致这些音乐过早停止.如果此标志与BASS_SAMPLE_LOOP标志一起使用,则不会停止音乐,但会触发任意BASS_SYNC_END.">
     常量 BASS_MUSIC_NOSAMPLE <公开 类型 = 整数 值 = @BASS_MUSIC_NOSAMPLE
             注释 = "不要加载样本. 这减少了打开音乐所需的时间和内存,尤其是MO3文件." 注释 = "如果你只想在不播放音乐的情况下获取音乐的文本和长度,这将非常有用.">
 }
 
-类 BASS_扬声器分配标志 <公开 注释 = "如今大多数声卡的输出能力不仅仅是普通的立体声. 为了利用这一点,可以将HSTREAM和HMUSIC通道分配给特定的扬声器.\r"
-        注释 = "例如,可以在前置或后置扬声器上播放通道,从而有效地从一个设备获得两个独立的立体声输出." 注释 = "5.1声卡上有第三个立体声输出，7.1声卡上有四个立体声输出.\r"
+类 BASS_扬声器分配标志 <公开 注释 = "如今大多数声卡的输出能力不仅仅是普通的立体声. 为了利用这一点,可以将HSTREAM和HMUSIC通道分配给特定的扬声器."
+        注释 = "例如,可以在前置或后置扬声器上播放通道,从而有效地从一个设备获得两个独立的立体声输出." 注释 = "5.1声卡上有第三个立体声输出，7.1声卡上有四个立体声输出."
         注释 = "\"BASS_信息\"类的\"扬声器数量\"成员可用于检查有多少扬声器可用." 折叠 @文档 = "category = \"辅助类\"">
 {
     常量 BASS_SPEAKER_FRONT <公开 类型 = 整数 值 = @BASS_SPEAKER_FRONT 注释 = "立体声标志: 前置扬声器">
@@ -2662,48 +2662,48 @@
 
 类 BASS_同步类型 <公开 注释 = "\"置通道同步器/BASS_ChannelSetSync\"的同步类型." 折叠 @文档 = "category = \"辅助类\"">
 {
-    常量 BASS_SYNC_POS <公开 类型 = 整数 值 = @BASS_SYNC_POS 注释 = "当通道到达某个位置时进行同步.\r"
+    常量 BASS_SYNC_POS <公开 类型 = 整数 值 = @BASS_SYNC_POS 注释 = "当通道到达某个位置时进行同步."
             注释 = "参数: 字节位置(自动向下舍入到最近的样本). 数据: 未使用.">
-    常量 BASS_SYNC_END <公开 类型 = 整数 值 = @BASS_SYNC_END 注释 = "当通道到达结尾时同步,包括循环播放.\r"
-            注释 = "请注意一些MOD音乐不会结束,他们可能会先跳到另一个位置.\r"
-            注释 = "如果BASS_MUSIC_STOPBACK标志与MOD音乐(通过BASS_MusicLoad或BASS_ChannelFlags)一起使用,则在播放向后跳跃效果时也会调用此同步.\r"
+    常量 BASS_SYNC_END <公开 类型 = 整数 值 = @BASS_SYNC_END 注释 = "当通道到达结尾时同步,包括循环播放."
+            注释 = "请注意一些MOD音乐不会结束,他们可能会先跳到另一个位置."
+            注释 = "如果BASS_MUSIC_STOPBACK标志与MOD音乐(通过BASS_MusicLoad或BASS_ChannelFlags)一起使用,则在播放向后跳跃效果时也会调用此同步."
             注释 = "参数: 未使用.  数据: 0=正常结束位置，1=MOD音乐中的向后跳跃，2=BASS_POS_END的位置，3=尾部的末端(BASS_ATTRIB_TAIL).">
     常量 BASS_SYNC_META <公开 类型 = 整数 值 = @BASS_SYNC_META
-            注释 = "在Shoutcast流中接收元数据时进行同步. 更新的元数据可调用\"取通道标签/BASS_ChannelGetTags\"获取。\r"
+            注释 = "在Shoutcast流中接收元数据时进行同步. 更新的元数据可调用\"取通道标签/BASS_ChannelGetTags\"获取。"
             注释 = "参数: 未使用.  数据: 未使用.">
-    常量 BASS_SYNC_SLIDE <公开 类型 = 整数 值 = @BASS_SYNC_SLIDE 注释 = "属性滑动结束时同步.\r"
+    常量 BASS_SYNC_SLIDE <公开 类型 = 整数 值 = @BASS_SYNC_SLIDE 注释 = "属性滑动结束时同步."
             注释 = "参数: 未使用.  数据: 已完成滑动的属性.">
-    常量 BASS_SYNC_STALL <公开 类型 = 整数 值 = @BASS_SYNC_STALL 注释 = "停滞/恢复播放通道时同步.\r"
+    常量 BASS_SYNC_STALL <公开 类型 = 整数 值 = @BASS_SYNC_STALL 注释 = "停滞/恢复播放通道时同步."
             注释 = "参数: 未使用.  数据: 0 = 停滞, 1 = 恢复. ">
-    常量 BASS_SYNC_DOWNLOAD <公开 类型 = 整数 值 = @BASS_SYNC_DOWNLOAD 注释 = "网络或\"缓冲\"用户文件流的下载完成时同步.\r"
+    常量 BASS_SYNC_DOWNLOAD <公开 类型 = 整数 值 = @BASS_SYNC_DOWNLOAD 注释 = "网络或\"缓冲\"用户文件流的下载完成时同步."
             注释 = "参数: 未使用.  数据: 未使用.">
-    常量 BASS_SYNC_FREE <公开 类型 = 整数 值 = @BASS_SYNC_FREE 注释 = "释放通道时同步. 当您需要释放一些与通道相关联的资源时,这可能非常有用.\r"
+    常量 BASS_SYNC_FREE <公开 类型 = 整数 值 = @BASS_SYNC_FREE 注释 = "释放通道时同步. 当您需要释放一些与通道相关联的资源时,这可能非常有用."
             注释 = "请注意,你将无法对回调中的通道使用任何BASS函数，因为该通道将不再存在." 注释 = "参数: 未使用.  数据: 未使用.">
-    常量 BASS_SYNC_SETPOS <公开 类型 = 整数 值 = @BASS_SYNC_SETPOS 注释 = "设置通道位置时同步,包括循环/重头播放.\r"
+    常量 BASS_SYNC_SETPOS <公开 类型 = 整数 值 = @BASS_SYNC_SETPOS 注释 = "设置通道位置时同步,包括循环/重头播放."
             注释 = "参数: 未使用.  数据: 0 = 回复缓冲区未刷新, 1 = 回复缓冲区已刷新.">
-    常量 BASS_SYNC_MUSICPOS <公开 类型 = 整数 值 = @BASS_SYNC_MUSICPOS 注释 = "当MOD音乐到达order.row位置时进行同步.\r"
+    常量 BASS_SYNC_MUSICPOS <公开 类型 = 整数 值 = @BASS_SYNC_MUSICPOS 注释 = "当MOD音乐到达order.row位置时进行同步."
             注释 = "参数: 低位 = order (0=first, -1=all), 高位 = row (0=first, -1=all). 数据: 低位 = order, 高位 = row.">
     常量 BASS_SYNC_MUSICINST <公开 类型 = 整数 值 = @BASS_SYNC_MUSICINST
-            注释 = "在MOD音乐中播放乐器(MOD/S3M/MTM格式的样本)时进行同步(不包括重发).\r"
+            注释 = "在MOD音乐中播放乐器(MOD/S3M/MTM格式的样本)时进行同步(不包括重发)."
             注释 = "参数: 低位 = 乐器 (1=first), 高位 = 音符 (0=c0...119=b9, -1=all). 数据: 低位 = 音符, 高位 = 音量 (0-64).">
     常量 BASS_SYNC_MUSICFX <公开 类型 = 整数 值 = @BASS_SYNC_MUSICFX
-            注释 = "在MOD音乐中使用同步效果时同步. 对于XM/MTM/MOD格式,同步效果为E8x或Wxx,对于IT/S3M格式,同步效果为S2x(其中x=任何值).\r"
+            注释 = "在MOD音乐中使用同步效果时同步. 对于XM/MTM/MOD格式,同步效果为E8x或Wxx,对于IT/S3M格式,同步效果为S2x(其中x=任何值)."
             注释 = "参数: 0 = 该位置将传递给回调函数 (数据: 低位 = order, 高位 = row), 1 = x值将被传递给回调函数 (数据: x 值).">
     常量 BASS_SYNC_OGG_CHANGE <公开 类型 = 整数 值 = @BASS_SYNC_OGG_CHANGE
             注释 = "当链接OGG流中的新逻辑位流开始时进行同步. 更新的标签可从\"取通道标签/BASS_ChannelGetTags\"获取." 注释 = "参数: 未使用.  数据: 未使用.">
-    常量 BASS_SYNC_DEV_FAIL <公开 类型 = 整数 值 = @BASS_SYNC_DEV_FAIL 注释 = "当通道的设备意外停止时同步(例如设备被断开或禁用).\r"
+    常量 BASS_SYNC_DEV_FAIL <公开 类型 = 整数 值 = @BASS_SYNC_DEV_FAIL 注释 = "当通道的设备意外停止时同步(例如设备被断开或禁用)."
             注释 = "发生这种情况时,将无法恢复录制,但一旦设备再次可用,可以通过\"开始输出/BASS_Start\"恢复播放." 注释 = "参数: 未使用.  数据: 未使用.">
     常量 BASS_SYNC_DEV_FORMAT <公开 类型 = 整数 值 = @BASS_SYNC_DEV_FORMAT
             注释 = "当通道设备的样本格式(采样率和/通道计数)更改时同步. 新格式可用\"取输出信息/BASS_GetInfo\"获取." 注释 = "参数: 未使用.  数据: 未使用.">
-    常量 BASS_SYNC_THREAD <公开 类型 = 整数 值 = @BASS_SYNC_THREAD 注释 = "标志: 在专用同步线程中异步调用同步。\r"
+    常量 BASS_SYNC_THREAD <公开 类型 = 整数 值 = @BASS_SYNC_THREAD 注释 = "标志: 在专用同步线程中异步调用同步。"
             注释 = "这只影响混音时间同步(BASS_SYNC_FREE同步时除外),并允许回调函数在同一通道句柄上安全调用BASS_ChannelFree、BASS_StreamFree或BASS_MusicFree. ">
-    常量 BASS_SYNC_MIXTIME <公开 类型 = 整数 值 = @BASS_SYNC_MIXTIME 注释 = "标志：触发同步时立即调用同步函数,而不是延迟调用直到实际听到同步事件.\r"
+    常量 BASS_SYNC_MIXTIME <公开 类型 = 整数 值 = @BASS_SYNC_MIXTIME 注释 = "标志：触发同步时立即调用同步函数,而不是延迟调用直到实际听到同步事件."
             注释 = "对于某些同步类型,自动设置该标志. 对于解码和录制通道,这也是自动设置的,因为它们无法播放/收听. ">
     常量 BASS_SYNC_ONETIME <公开 类型 = 整数 值 = @BASS_SYNC_ONETIME 注释 = "标志：仅调用同步一次，然后将其从通道中删除.">
     常量 ""
-    常量 BASS_SYNC_MIXER_ENVELOPE <公开 类型 = 整数 值 = 0x10200 注释 = "【BASS混合器类】包络线结束时同步,这不是由循环包络线触发的.\r"
+    常量 BASS_SYNC_MIXER_ENVELOPE <公开 类型 = 整数 值 = 0x10200 注释 = "【BASS混合器类】包络线结束时同步,这不是由循环包络线触发的."
             注释 = "参数: 要同步的包络线类型,0=所有类型. 数据: 包络线类型.">
-    常量 BASS_SYNC_MIXER_ENVELOPE_NODE <公开 类型 = 整数 值 = 0x10201 注释 = "【BASS混合器类】包络线到达新节点时进行同步.\r"
+    常量 BASS_SYNC_MIXER_ENVELOPE_NODE <公开 类型 = 整数 值 = 0x10201 注释 = "【BASS混合器类】包络线到达新节点时进行同步."
             注释 = "参数: 要同步的包络线类型,0=所有类型. 数据: 低位=包络线类型, 高位=节点编号.">
 }
 
@@ -2730,7 +2730,7 @@
     常量 BASS_CTYPE_STREAM_DEVICE <公开 类型 = 整数 值 = @BASS_CTYPE_STREAM_DEVICE
             注释 = "设备最终输出混合的\"dummy\"流(使用STREAMPROC_DEVICE).">
     常量 BASS_CTYPE_STREAM_WAV <公开 类型 = 整数 值 = @BASS_CTYPE_STREAM_WAV
-            注释 = "波形格式标志. 这标志可用于测试通道是否为任意类型的波形. 编解码(文件的\"wFormatTag\")在低位中指定.\r"
+            注释 = "波形格式标志. 这标志可用于测试通道是否为任意类型的波形. 编解码(文件的\"wFormatTag\")在低位中指定."
             注释 = "其他的格式信息可以用\"取通道标签/BASS_ChannelGetTags (BASS_TAG_WAVEFORMAT)\"获取.">
     常量 BASS_CTYPE_STREAM_WAV_PCM <公开 类型 = 整数 值 = @BASS_CTYPE_STREAM_WAV_PCM 注释 = "整数PCM波形格式流.">
     常量 BASS_CTYPE_STREAM_WAV_FLOAT <公开 类型 = 整数 值 = @BASS_CTYPE_STREAM_WAV_FLOAT 注释 = "浮点数PCM波形格式流.">
@@ -2750,31 +2750,31 @@
     常量 BASS_POS_MUSIC_ORDER <公开 类型 = 整数 值 = @BASS_POS_MUSIC_ORDER
             注释 = "此位置按顺序和行排列. 使用MAKELONG(顺序、行).(仅限HMUSIC)">
     常量 BASS_POS_OGG <公开 类型 = 整数 值 = @BASS_POS_OGG 注释 = "此位置是OGG文件的位流编号,0=第一个.">
-    常量 BASS_POS_END <公开 类型 = 整数 值 = @BASS_POS_END 注释 = "此位置以字节为单位,是通道的结尾位置.\r"
+    常量 BASS_POS_END <公开 类型 = 整数 值 = @BASS_POS_END 注释 = "此位置以字节为单位,是通道的结尾位置."
             注释 = "0=正常结尾位置.如果超出通道的正常结尾位置,不会产生任何影响. 如果通道已经位于或超出该位置,则它将在其当前位置结束.">
-    常量 BASS_POS_LOOP <公开 类型 = 整数 值 = @BASS_POS_LOOP 注释 = "此位置以字节为单位,是循环开始的位置(启用循环时).\r"
+    常量 BASS_POS_LOOP <公开 类型 = 整数 值 = @BASS_POS_LOOP 注释 = "此位置以字节为单位,是循环开始的位置(启用循环时)."
             注释 = "如果该值位于或超出结尾,则使用默认循环位置0.">
-    常量 BASS_POS_FLUSH <公开 类型 = 整数 值 = @BASS_POS_FLUSH 注释 = "标志: 刷新所有输出缓冲区(包括FX),以便在移动位置后不会听到旧位置的余音.\r"
+    常量 BASS_POS_FLUSH <公开 类型 = 整数 值 = @BASS_POS_FLUSH 注释 = "标志: 刷新所有输出缓冲区(包括FX),以便在移动位置后不会听到旧位置的余音."
             注释 = "在\"混音时间\"SYNCPROC之外的正常播放通道(非解码通道)自动设置.">
-    常量 BASS_POS_RESET <公开 类型 = 整数 值 = @BASS_POS_RESET 注释 = "标志: 重置用户文件缓冲区.\r"
+    常量 BASS_POS_RESET <公开 类型 = 整数 值 = @BASS_POS_RESET 注释 = "标志: 重置用户文件缓冲区."
             注释 = "这允许重置设置了BASS_STREAM_BLOCK标志的用户文件流,以便它准备好处理新数据." 注释 = "此标志只能用于BASS_POS_BYTE模式,且POS必须为0.">
-    常量 BASS_POS_RELATIVE <公开 类型 = 整数 值 = @BASS_POS_RELATIVE 注释 = "标志: 请求的位置为当前位置的相对位置.\r"
+    常量 BASS_POS_RELATIVE <公开 类型 = 整数 值 = @BASS_POS_RELATIVE 注释 = "标志: 请求的位置为当前位置的相对位置."
             注释 = "这种情况下,pos的值是有符号,可以是负数.">
-    常量 BASS_POS_INEXACT <公开 类型 = 整数 值 = @BASS_POS_INEXACT 注释 = "标志: 允许不精确的搜索.\r"
+    常量 BASS_POS_INEXACT <公开 类型 = 整数 值 = @BASS_POS_INEXACT 注释 = "标志: 允许不精确的搜索."
             注释 = "基于速度优先,搜索可能会停止在块的开始处，而非部分处理以到达请求的为准。" 注释 = "对于速度，搜索可能会在块的开始处停止，而不是特意地处理块以达到请求的位置.">
     常量 BASS_POS_DECODE <公开 类型 = 整数 值 = @BASS_POS_DECODE 注释 = "标志: 获取解码(不播放)的位置">
-    常量 BASS_POS_DECODETO <公开 类型 = 整数 值 = @BASS_POS_DECODETO 注释 = "标志: 解码/渲染到该位置,而不是搜索到该位置.\r"
+    常量 BASS_POS_DECODETO <公开 类型 = 整数 值 = @BASS_POS_DECODETO 注释 = "标志: 解码/渲染到该位置,而不是搜索到该位置."
             注释 = "这对于不可搜索或具有不精确搜索的流是有用的,是它通常比正常的搜索慢,并且请求的位置不能在当前解码位置后面." 注释 = "此标志只能与BASS_POS_BYTE模式一起使用.">
-    常量 BASS_POS_SCAN <公开 类型 = 整数 值 = @BASS_POS_SCAN 注释 = "标志: 如果尚未扫描该文件,则扫描该文件以建立一个搜索表,直至该位置.\r"
+    常量 BASS_POS_SCAN <公开 类型 = 整数 值 = @BASS_POS_SCAN 注释 = "标志: 如果尚未扫描该文件,则扫描该文件以建立一个搜索表,直至该位置."
             注释 = "扫描将从之前停止的位置继续,而不是每次从文件的开头重新开始." 注释 = "此标志仅适用于MP3/MP2/MP1文件,其他文件格式将忽略此标志.">
 }
 
 类 BASS_通道数据类型 <公开 注释 = "\"取通道数据/BASS_ChannelGetData\"的标志" 折叠 编辑时信息 = "D2A9D, 0, 0, 0"
         @文档 = "category = \"辅助类\"">
 {
-    常量 BASS_DATA_AVAILABLE <公开 类型 = 整数 值 = @BASS_DATA_AVAILABLE 注释 = "查询通道为播放或录制缓冲的数据量.\r"
+    常量 BASS_DATA_AVAILABLE <公开 类型 = 整数 值 = @BASS_DATA_AVAILABLE 注释 = "查询通道为播放或录制缓冲的数据量."
             注释 = "此标志不能用于解码通道,因为它们没有播放缓冲区. 使用此标志时忽略\"缓冲区\"参数.">
-    常量 BASS_DATA_NOREMOVE <公开 类型 = 整数 值 = @BASS_DATA_NOREMOVE 注释 = "标志: 不删除录制通道的缓冲区数据.\r"
+    常量 BASS_DATA_NOREMOVE <公开 类型 = 整数 值 = @BASS_DATA_NOREMOVE 注释 = "标志: 不删除录制通道的缓冲区数据."
             注释 = "如果录制通道使用了\"录制回调\"事件,会自动附带该标志.其他通道类型忽略此标志.">
     常量 BASS_DATA_FIXED <公开 类型 = 整数 值 = @BASS_DATA_FIXED 注释 = "标志: 返回 8.24 定点数数据">
     常量 BASS_DATA_FLOAT <公开 类型 = 整数 值 = @BASS_DATA_FLOAT 注释 = "标志: 返回单精度浮点数样本数据">
@@ -2791,7 +2791,7 @@
     常量 BASS_DATA_FFT_NOWINDOW <公开 类型 = 整数 值 = @BASS_DATA_FFT_NOWINDOW 注释 = "FFT标志: 防止在执行FFT时对样本数据应用Hann窗口.">
     常量 BASS_DATA_FFT_REMOVEDC <公开 类型 = 整数 值 = @BASS_DATA_FFT_REMOVEDC 注释 = "FFT标志: 执行FFT时,从样本数据中移除所有直流偏置.">
     常量 BASS_DATA_FFT_COMPLEX <公开 类型 = 整数 值 = @BASS_DATA_FFT_COMPLEX
-            注释 = "FFT标志: 返回复合FFT的结果,而不是magnitude.\r"
+            注释 = "FFT标志: 返回复合FFT的结果,而不是magnitude."
             注释 = "返回的数据量(如上所列的值)将增加了四倍,因为它返回实部和虚部以及完整的FFT结果(不仅仅是前半部分).">
     常量 BASS_DATA_FFT_NYQUIST <公开 类型 = 整数 值 = @BASS_DATA_FFT_NYQUIST
             注释 = "FFT标志: 返回奈奎斯特频率幅值的额外值.奈奎斯特频率始终包含在复合FFT结果中.">
@@ -2799,98 +2799,98 @@
 
 类 BASS_通道属性 <公开 注释 = "通道属性" 折叠 @文档 = "category = \"辅助类\"">
 {
-    常量 BASS_ATTRIB_FREQ <公开 类型 = 整数 值 = @BASS_ATTRIB_FREQ 注释 = "通道的采样率.\r"
-            注释 = "参数: 采样率,0=原始采样率(通道创建时的设置值)" 注释 = "此属性仅应用于通道的播放,不会影响通道的样本数据,对解码通道也没有实际影响.\r"
+    常量 BASS_ATTRIB_FREQ <公开 类型 = 整数 值 = @BASS_ATTRIB_FREQ 注释 = "通道的采样率."
+            注释 = "参数: 采样率,0=原始采样率(通道创建时的设置值)" 注释 = "此属性仅应用于通道的播放,不会影响通道的样本数据,对解码通道也没有实际影响."
             注释 = "此属性可以用来修改播放速度.">
-    常量 BASS_ATTRIB_VOL <公开 类型 = 整数 值 = @BASS_ATTRIB_VOL 注释 = "通道的音量级别.\r"
+    常量 BASS_ATTRIB_VOL <公开 类型 = 整数 值 = @BASS_ATTRIB_VOL 注释 = "通道的音量级别."
             注释 = "参数: 音量级别,0=静音,1.0=正常,大于1.0=放大." 注释 = "此属性仅适用于通道的播放,不会影响通道的样本数据,对解码通道也没有直接影响.">
-    常量 BASS_ATTRIB_PAN <公开 类型 = 整数 值 = @BASS_ATTRIB_PAN 注释 = "通道的声像/平衡位置.\r"
-            注释 = "参数: 声像位置,-1(最左侧)到+1(最右侧),0=中置." 注释 = "此属性仅用于通道的播放,并不会影响通道的样本数据,对解码通道也没有实际影响.\r"
+    常量 BASS_ATTRIB_PAN <公开 类型 = 整数 值 = @BASS_ATTRIB_PAN 注释 = "通道的声像/平衡位置."
+            注释 = "参数: 声像位置,-1(最左侧)到+1(最右侧),0=中置." 注释 = "此属性仅用于通道的播放,并不会影响通道的样本数据,对解码通道也没有实际影响."
             注释 = "无法设置3D空间音效通道的声像位置.">
     常量 BASS_ATTRIB_EAXMIX <公开 类型 = 整数 值 = @BASS_ATTRIB_EAXMIX 注释 = "【文档没写】">
-    常量 BASS_ATTRIB_NOBUFFER <公开 类型 = 整数 值 = @BASS_ATTRIB_NOBUFFER 注释 = "是否禁用播放缓冲区. (HMUSIC/HSTREAM)\r"
+    常量 BASS_ATTRIB_NOBUFFER <公开 类型 = 整数 值 = @BASS_ATTRIB_NOBUFFER 注释 = "是否禁用播放缓冲区. (HMUSIC/HSTREAM)"
             注释 = "参数: 0=不禁用,其他任意数字为禁用播放缓冲区." 注释 = "此属性将BASS_ATTRIB_BUFFER的属性设置为0(禁用播放缓冲)或完整播放缓冲长度(启用播放缓冲).">
     常量 BASS_ATTRIB_VBR <公开 类型 = 整数 值 = @BASS_ATTRIB_VBR 注释 = "【文档没写】">
-    常量 BASS_ATTRIB_CPU <公开 类型 = 整数 值 = @BASS_ATTRIB_CPU 注释 = "CPU的使用率. (HMUSIC/HSTREAM)\r"
-            注释 = "参数: CPU使用率的百分百" 注释 = "只读属性,只能获取不能设置. 此属性给出通道的CPU使用率,包括解码和DSP/FX处理所花费的时间.\r"
+    常量 BASS_ATTRIB_CPU <公开 类型 = 整数 值 = @BASS_ATTRIB_CPU 注释 = "CPU的使用率. (HMUSIC/HSTREAM)"
+            注释 = "参数: CPU使用率的百分百" 注释 = "只读属性,只能获取不能设置. 此属性给出通道的CPU使用率,包括解码和DSP/FX处理所花费的时间."
             注释 = "但不包括播放期间将通道数据添加到最终输出混音所需的时间.">
-    常量 BASS_ATTRIB_SRC <公开 类型 = 整数 值 = @BASS_ATTRIB_SRC 注释 = "通道的采样率转换质量.\r"
-            注释 = "参数: 采样率转换质量,0=线性插值,1=8点sinc插值,2=16点sinc插值,3=32点sinc插值,4=64点sinc插值.\r"
-            注释 = "也可以接受其他值,但将被解释为0或4,这取决于它们是更低还是更高.\r"
-            注释 = "当通道的采样率与输出设备使用的采样率不同时,需要转换通道的采样数据,以便在播放时与输出设备的速率相匹配.\r"
-            注释 = "此属性确定如何转换采样率,线性插值选项使用更少的CPU,但sinc插值提供更好的音质,音质和CPU使用率随着sinc点数递增.\r"
-            注释 = "对于配置较低的系统,较好的折衷方案是使用sinc插值进行音乐播放,使用线性插值进行声音效果.\r"
-            注释 = "通道的采样率应与输出设备的速率相匹配,以避免任何采样率转换. 例如,可以在调用\"BASS_StreamCreate\"、\"BASS_MusicLoad\"或创建MIDI流时使用设备的采样率.\r"
-            注释 = "采样率转换会在原本数据离开通道的播放缓冲区后的播放过程中发生,因此不会影响\"取通道数据/BASS_ChannelGetData\"提供的数据,对解码通道也没有直接影响.\r"
+    常量 BASS_ATTRIB_SRC <公开 类型 = 整数 值 = @BASS_ATTRIB_SRC 注释 = "通道的采样率转换质量."
+            注释 = "参数: 采样率转换质量,0=线性插值,1=8点sinc插值,2=16点sinc插值,3=32点sinc插值,4=64点sinc插值."
+            注释 = "也可以接受其他值,但将被解释为0或4,这取决于它们是更低还是更高."
+            注释 = "当通道的采样率与输出设备使用的采样率不同时,需要转换通道的采样数据,以便在播放时与输出设备的速率相匹配."
+            注释 = "此属性确定如何转换采样率,线性插值选项使用更少的CPU,但sinc插值提供更好的音质,音质和CPU使用率随着sinc点数递增."
+            注释 = "对于配置较低的系统,较好的折衷方案是使用sinc插值进行音乐播放,使用线性插值进行声音效果."
+            注释 = "通道的采样率应与输出设备的速率相匹配,以避免任何采样率转换. 例如,可以在调用\"BASS_StreamCreate\"、\"BASS_MusicLoad\"或创建MIDI流时使用设备的采样率."
+            注释 = "采样率转换会在原本数据离开通道的播放缓冲区后的播放过程中发生,因此不会影响\"取通道数据/BASS_ChannelGetData\"提供的数据,对解码通道也没有直接影响."
             注释 = "可以随时设置此属性,并且更改会立即生效. 初始设置由BASS_CONFIG_SRC配置选项或BASS_CONFIG_SRC_SAMPLE(样本通道)决定.">
     常量 BASS_ATTRIB_NET_RESUME <公开 类型 = 整数 值 = @BASS_ATTRIB_NET_RESUME
-            注释 = "恢复暂停播放所需的下载缓冲区级别. (HSTREAM)" 注释 = "参数: 以百分比表示的恢复级别,0-100.\r"
-            注释 = "此属性确定在恢复播放暂停的网络流之前,需要填充多少百分比的下载缓冲区(BASS_CONFIG_NET_BUFFER).\r"
-            注释 = "它还适用于使用\"创建用户流文件/BASS_StreamCreateFileUser\"创建的\"缓冲\"用户文件流.\r"
+            注释 = "恢复暂停播放所需的下载缓冲区级别. (HSTREAM)" 注释 = "参数: 以百分比表示的恢复级别,0-100."
+            注释 = "此属性确定在恢复播放暂停的网络流之前,需要填充多少百分比的下载缓冲区(BASS_CONFIG_NET_BUFFER)."
+            注释 = "它还适用于使用\"创建用户流文件/BASS_StreamCreateFileUser\"创建的\"缓冲\"用户文件流."
             注释 = "缓冲进度可通过\"取流文件位置/BASS_StreamGetFilePosition(BASS_FILEPOS_BUFFERING)\"进行监控.">
-    常量 BASS_ATTRIB_SCANINFO <公开 类型 = 整数 值 = @BASS_ATTRIB_SCANINFO 注释 = "通道的扫描信息.\r"
-            注释 = "参数1: 扫描信息指针." 注释 = "参数2: 扫描信息的大小.\r"
-            注释 = "此属性是在调用\"打开流文件\"中使用BASS_STREAM_PRESCAN标志或BASS_POS_SCAN标志与\"置通道位置\"一起使用时从文件扫描的信息.\r"
+    常量 BASS_ATTRIB_SCANINFO <公开 类型 = 整数 值 = @BASS_ATTRIB_SCANINFO 注释 = "通道的扫描信息."
+            注释 = "参数1: 扫描信息指针." 注释 = "参数2: 扫描信息的大小."
+            注释 = "此属性是在调用\"打开流文件\"中使用BASS_STREAM_PRESCAN标志或BASS_POS_SCAN标志与\"置通道位置\"一起使用时从文件扫描的信息."
             注释 = "它在MP3/MP2/MP1文件和链接OGG文件上受支持,它也可能由附加组件增加支持.">
-    常量 BASS_ATTRIB_NORAMP <公开 类型 = 整数 值 = @BASS_ATTRIB_NORAMP 注释 = "禁用淡入淡出播放？\r"
-            注释 = "参数: 0=不禁用,其他值为禁用." 注释 = "默认情况下,在开始播放时音量从小到大,在停止/暂停时将音量从大到小变化,以避免突然的音量变化,从而可能导致的咔嗒声.\r"
-            注释 = "通过启用此选项可以禁用淡入淡出.无论此选项如何,音量(BASS_ATTRIB_VOL)和声像(BASS_ATTRIB_PAN)的变化始终是渐变的.\r"
-            注释 = "淡入淡出仅适用于正常播放,不影响解码通道,它也不会出现在\"取通道数据/BASS_ChannelGetData\"提供的数据中.\r"
-            注释 = "当通道的样本数据是从低电平开始时(因此不会产生咔嗒声),将跳过淡入.淡出需要通道播放缓冲区中的数据.\r"
+    常量 BASS_ATTRIB_NORAMP <公开 类型 = 整数 值 = @BASS_ATTRIB_NORAMP 注释 = "禁用淡入淡出播放？"
+            注释 = "参数: 0=不禁用,其他值为禁用." 注释 = "默认情况下,在开始播放时音量从小到大,在停止/暂停时将音量从大到小变化,以避免突然的音量变化,从而可能导致的咔嗒声."
+            注释 = "通过启用此选项可以禁用淡入淡出.无论此选项如何,音量(BASS_ATTRIB_VOL)和声像(BASS_ATTRIB_PAN)的变化始终是渐变的."
+            注释 = "淡入淡出仅适用于正常播放,不影响解码通道,它也不会出现在\"取通道数据/BASS_ChannelGetData\"提供的数据中."
+            注释 = "当通道的样本数据是从低电平开始时(因此不会产生咔嗒声),将跳过淡入.淡出需要通道播放缓冲区中的数据."
             注释 = "因此当通过BASS_ATTRIB_BUFFER选项禁用缓冲时,通常会禁用淡出,除非通道是\"推送\"流或使用了\"更新播放缓冲/BASS_ChannelUpdate\"预缓冲了数据.">
-    常量 BASS_ATTRIB_BITRATE <公开 类型 = 整数 值 = @BASS_ATTRIB_BITRATE 注释 = "文件流的平均比特率.\r"
+    常量 BASS_ATTRIB_BITRATE <公开 类型 = 整数 值 = @BASS_ATTRIB_BITRATE 注释 = "文件流的平均比特率."
             注释 = "参数: 比特率,单位为 kb/s. 只读属性,只能获取不能设置." 注释 = "如果文件含有视频,获取的比特率不会包含视频的.">
-    常量 BASS_ATTRIB_BUFFER <公开 类型 = 整数 值 = @BASS_ATTRIB_BUFFER 注释 = "播放缓冲区长度. (仅限HMUSIC/HSTREAM)\r"
-            注释 = "参数: 单位为秒的缓冲长度, 0=无缓冲. 上限值自动限制到通道播放缓冲区的全长.\r"
+    常量 BASS_ATTRIB_BUFFER <公开 类型 = 整数 值 = @BASS_ATTRIB_BUFFER 注释 = "播放缓冲区长度. (仅限HMUSIC/HSTREAM)"
+            注释 = "参数: 单位为秒的缓冲长度, 0=无缓冲. 上限值自动限制到通道播放缓冲区的全长."
             注释 = "默认值是通道的完整播放缓冲区长度,由创建时的BASS_CONFIG_BUFFER设置确定." 注释 = "此属性允许在不重新创建通道的情况下更改,即可以在播放时更改.">
     常量 BASS_ATTRIB_GRANULE <公开 类型 = 整数 值 = @BASS_ATTRIB_GRANULE
-            注释 = "通道的处理粒度. (HMUSIC/HSTREAM/HRECORD)" 注释 = "参数: 样本帧的处理单元大小,0=无. 更改将立即生效.\r"
-            注释 = "此属性允许以一定大小的单位进行通道的处理,这对某些DSP处理很有帮助.\r"
+            注释 = "通道的处理粒度. (HMUSIC/HSTREAM/HRECORD)" 注释 = "参数: 样本帧的处理单元大小,0=无. 更改将立即生效."
+            注释 = "此属性允许以一定大小的单位进行通道的处理,这对某些DSP处理很有帮助."
             注释 = "它不适用于解码通道和没有录制回调的录制通道,它们的处理由\"取通道数据/BASS_ChannelGetData\"控制.">
-    常量 BASS_ATTRIB_USER <公开 类型 = 整数 值 = @BASS_ATTRIB_USER 注释 = "用户定义的信息." 注释 = "参数1: 信息.\r"
+    常量 BASS_ATTRIB_USER <公开 类型 = 整数 值 = @BASS_ATTRIB_USER 注释 = "用户定义的信息." 注释 = "参数1: 信息."
             注释 = "参数2: 信息的大小,1(最小)到8(最大). " 注释 = "此属性可用于将任何信息与通道关联,可以将其设置为指针以获取更大的信息.">
-    常量 BASS_ATTRIB_TAIL <公开 类型 = 整数 值 = @BASS_ATTRIB_TAIL 注释 = "增加通道长度的时间量. (HMUSIC/HSTREAM)\r"
-            注释 = "参数: 增加的时间量(以秒为单位). 默认值为0. 变化立即生效.\r"
-            注释 = "此属性允许在通道结尾添加一段静音,这有助于在通道上听到DSP/FX处理的尾部,例如混响或回声效果.启用循环时不会添加静音.\r"
-            注释 = "在通道上设置的任何BASS_SYNC_END同步(通过BASS_ChannelSetSync)将触发两次: 一次在正常结束位置,另一次在尾部结束位置.\r"
+    常量 BASS_ATTRIB_TAIL <公开 类型 = 整数 值 = @BASS_ATTRIB_TAIL 注释 = "增加通道长度的时间量. (HMUSIC/HSTREAM)"
+            注释 = "参数: 增加的时间量(以秒为单位). 默认值为0. 变化立即生效."
+            注释 = "此属性允许在通道结尾添加一段静音,这有助于在通道上听到DSP/FX处理的尾部,例如混响或回声效果.启用循环时不会添加静音."
+            注释 = "在通道上设置的任何BASS_SYNC_END同步(通过BASS_ChannelSetSync)将触发两次: 一次在正常结束位置,另一次在尾部结束位置."
             注释 = "同步回调事件的\"数据\"参数将指示发生了什么.">
-    常量 BASS_ATTRIB_PUSH_LIMIT <公开 类型 = 整数 值 = @BASS_ATTRIB_PUSH_LIMIT 注释 = "推送流的最大数据量.\r"
-            注释 = "参数: 以字节为单位的最大数据量,0=无限制." 注释 = "默认情况下,推送流可以保存的数据量仅受内存的限制. 此属性可用于设置下限,以防止流的缓冲区爆掉内存.\r"
+    常量 BASS_ATTRIB_PUSH_LIMIT <公开 类型 = 整数 值 = @BASS_ATTRIB_PUSH_LIMIT 注释 = "推送流的最大数据量."
+            注释 = "参数: 以字节为单位的最大数据量,0=无限制." 注释 = "默认情况下,推送流可以保存的数据量仅受内存的限制. 此属性可用于设置下限,以防止流的缓冲区爆掉内存."
             注释 = "此限制不包括流的播放缓冲区." 注释 = "此限制可以随时更改,如果新的限制低于当前值,现有的流允许保留现有的数据,但在剩余数据低于新限制值之前,不会接受新的数据.">
     常量 BASS_ATTRIB_MUSIC_AMPLIFY <公开 类型 = 整数 值 = @BASS_ATTRIB_MUSIC_AMPLIFY
             注释 = "MOD音乐的功放级别. (仅限HMUSIC)" 注释 = "参数: 功放级别,0(最小)到100(最大). 将四舍五入为整数. 默认值为50.">
-    常量 BASS_ATTRIB_MUSIC_PANSEP <公开 类型 = 整数 值 = @BASS_ATTRIB_MUSIC_PANSEP 注释 = "MOD音乐的声像分离级别. (HMUSIC)\r"
-            注释 = "参数: 0(最小)到100(最大),50=线性. 将四舍五入为整数.\r"
+    常量 BASS_ATTRIB_MUSIC_PANSEP <公开 类型 = 整数 值 = @BASS_ATTRIB_MUSIC_PANSEP 注释 = "MOD音乐的声像分离级别. (HMUSIC)"
+            注释 = "参数: 0(最小)到100(最大),50=线性. 将四舍五入为整数."
             注释 = "默认情况下,低音使用线性声像\"曲线\". 如果要使用FT2的声像,请使用大约35的声像分离设置." 注释 = "要使用Amiga声像(即完全偏左和偏右),请将其设置为100.">
-    常量 BASS_ATTRIB_MUSIC_PSCALER <公开 类型 = 整数 值 = @BASS_ATTRIB_MUSIC_PSCALER 注释 = "MOD音乐的位置刻度. (HMUSIC)\r"
-            注释 = "参数: 刻度,1(最小)到256(最大). 将四舍五入为整数. 默认值为1.\r"
+    常量 BASS_ATTRIB_MUSIC_PSCALER <公开 类型 = 整数 值 = @BASS_ATTRIB_MUSIC_PSCALER 注释 = "MOD音乐的位置刻度. (HMUSIC)"
+            注释 = "参数: 刻度,1(最小)到256(最大). 将四舍五入为整数. 默认值为1."
             注释 = "通过\"取通道位置/BASS_ChannelGetPosition\"获取顺序位置时,行将按此值缩放." 注释 = "通过使用更高的刻度,你可以获得更精确的位置指示.">
-    常量 BASS_ATTRIB_MUSIC_BPM <公开 类型 = 整数 值 = @BASS_ATTRIB_MUSIC_BPM 注释 = "MOD音乐的BPM(每分钟节拍数). (HMUSIC)\r"
-            注释 = "参数:  1(最小)到255(最大). 将四舍五入为整数." 注释 = "该属性是MOD音乐BPM的直接映射,因此可以通过MOD本身中的效果更改该值.\r"
+    常量 BASS_ATTRIB_MUSIC_BPM <公开 类型 = 整数 值 = @BASS_ATTRIB_MUSIC_BPM 注释 = "MOD音乐的BPM(每分钟节拍数). (HMUSIC)"
+            注释 = "参数:  1(最小)到255(最大). 将四舍五入为整数." 注释 = "该属性是MOD音乐BPM的直接映射,因此可以通过MOD本身中的效果更改该值."
             注释 = "请注意更改此属性可以更改播放长度.">
-    常量 BASS_ATTRIB_MUSIC_SPEED <公开 类型 = 整数 值 = @BASS_ATTRIB_MUSIC_SPEED 注释 = "MOD音乐的速度. (HMUSIC) \r"
-            注释 = "参数: 速度,0(最小)到255(最大). 将四舍五入为整数." 注释 = "该属性是MOD速度的直接映射,因此可以通过MOD本身的效果更改该值.\r"
+    常量 BASS_ATTRIB_MUSIC_SPEED <公开 类型 = 整数 值 = @BASS_ATTRIB_MUSIC_SPEED 注释 = "MOD音乐的速度. (HMUSIC) "
+            注释 = "参数: 速度,0(最小)到255(最大). 将四舍五入为整数." 注释 = "该属性是MOD速度的直接映射,因此可以通过MOD本身的效果更改该值."
             注释 = "\"速度\"是每行的滴答声数.将其设置为0,停止并结束音乐. 请注意更改此属性会改变播放长度.">
     常量 BASS_ATTRIB_MUSIC_VOL_GLOBAL <公开 类型 = 整数 值 = @BASS_ATTRIB_MUSIC_VOL_GLOBAL
-            注释 = "MOD音乐的全局音量级别. (HMUSIC)" 注释 = "参数: 0(静音)到64(最大音量,IT格式音乐的最大值为128). 将四舍五入到整数.\r"
-            注释 = "该属性是MOD全局全局的直接映射,因此可以通过MOD本身的效果更改该值.\r"
+            注释 = "MOD音乐的全局音量级别. (HMUSIC)" 注释 = "参数: 0(静音)到64(最大音量,IT格式音乐的最大值为128). 将四舍五入到整数."
+            注释 = "该属性是MOD全局全局的直接映射,因此可以通过MOD本身的效果更改该值."
             注释 = "播放时因为缓冲,不会立即听到此属性更改后的效果.此延迟可以通过调整BASS_ATTRIB_BUFFER属性来降低.">
-    常量 BASS_ATTRIB_MUSIC_ACTIVE <公开 类型 = 整数 值 = @BASS_ATTRIB_MUSIC_ACTIVE 注释 = "MOD音乐中的活动通道数量.\r"
+    常量 BASS_ATTRIB_MUSIC_ACTIVE <公开 类型 = 整数 值 = @BASS_ATTRIB_MUSIC_ACTIVE 注释 = "MOD音乐中的活动通道数量."
             注释 = "参数: 通道数量. 只读属性,只能获取不能设置." 注释 = "此属性提供解码器中当前活动的通道数(包括虚拟通道),由于缓冲,这些通道数可能与播放期间听到的声音不匹配.">
     常量 BASS_ATTRIB_MUSIC_VOL_CHAN <公开 类型 = 整数 值 = @BASS_ATTRIB_MUSIC_VOL_CHAN
-            注释 = "MOD音乐其中一条通道音量级别. 使用时需要在后面+通道编号(从0开始)." 注释 = "参数: 0(静音)到1(最大音量).\r"
-            注释 = "此属性使用的音量曲线始终是线性的,例如0.5=50%.BASS_CONFIG_CURVE_VOL配置选项的设置对此没有影响.\r"
-            注释 = "所有通道的音量级别默认为1(最大音量). 播放时因为缓冲,不会立即听到此属性更改后的效果.此延迟可以通过调整BASS_ATTRIB_BUFFER属性来降低.\r"
+            注释 = "MOD音乐其中一条通道音量级别. 使用时需要在后面+通道编号(从0开始)." 注释 = "参数: 0(静音)到1(最大音量)."
+            注释 = "此属性使用的音量曲线始终是线性的,例如0.5=50%.BASS_CONFIG_CURVE_VOL配置选项的设置对此没有影响."
+            注释 = "所有通道的音量级别默认为1(最大音量). 播放时因为缓冲,不会立即听到此属性更改后的效果.此延迟可以通过调整BASS_ATTRIB_BUFFER属性来降低."
             注释 = "此属性还可用于计算MOD音乐的通道数.">
     常量 BASS_ATTRIB_MUSIC_VOL_INST <公开 类型 = 整数 值 = @BASS_ATTRIB_MUSIC_VOL_INST
-            注释 = "MOD音乐其中一个乐器音量级别. 使用时需要在后面+乐器编号(从0开始)." 注释 = "参数: 0(静音)到1(最大音量).\r"
-            注释 = "此属性使用的音量曲线始终是线性的,例如0.5=50%.BASS_CONFIG_CURVE_VOL配置选项的设置对此没有影响.\r"
-            注释 = "所有乐器的音量级别默认为1(最大音量). 播放时因为缓冲,不会立即听到此属性更改后的效果.此延迟可以通过调整BASS_ATTRIB_BUFFER属性来降低.\r"
+            注释 = "MOD音乐其中一个乐器音量级别. 使用时需要在后面+乐器编号(从0开始)." 注释 = "参数: 0(静音)到1(最大音量)."
+            注释 = "此属性使用的音量曲线始终是线性的,例如0.5=50%.BASS_CONFIG_CURVE_VOL配置选项的设置对此没有影响."
+            注释 = "所有乐器的音量级别默认为1(最大音量). 播放时因为缓冲,不会立即听到此属性更改后的效果.此延迟可以通过调整BASS_ATTRIB_BUFFER属性来降低."
             注释 = "此属性还可用于计算MOD乐器的数量数.">
     常量 ""
-    常量 BASS_ATTRIB_SPLIT_ASYNCBUFFER <公开 类型 = 整数 值 = 0x15010 注释 = "【BASS混合器类】从分离器源异步缓冲的数据量.\r"
+    常量 BASS_ATTRIB_SPLIT_ASYNCBUFFER <公开 类型 = 整数 值 = 0x15010 注释 = "【BASS混合器类】从分离器源异步缓冲的数据量."
             注释 = "参数: 缓冲的数据量(单位为秒). 0=禁用异步缓冲." 注释 = "异步缓冲将被限制为分离器的缓冲区长度,由BASS_CONFIG_SPLIT_BUFFER确定.">
-    常量 BASS_ATTRIB_SPLIT_ASYNCPERIOD <公开 类型 = 整数 值 = 0x15011 注释 = "【BASS混合器类】一次从分离器源异步缓冲的最大数据量.\r"
+    常量 BASS_ATTRIB_SPLIT_ASYNCPERIOD <公开 类型 = 整数 值 = 0x15011 注释 = "【BASS混合器类】一次从分离器源异步缓冲的最大数据量."
             注释 = "参数: 周期,一次从源异步缓冲的最大数据量(单位为秒). 0=尽可能多.">
 }
 
@@ -2924,7 +2924,7 @@
     变量 频率 <公开 类型 = 小数 注释 = "LFO的频率,在0到10之间. 默认值为1.1" @视窗.单精度小数 = 真>
     变量 波形 <公开 类型 = 整数 注释 = "LFO的波形. 0 = 三角, 1 = 正弦. 默认的波形为正弦.">
     变量 延迟 <公开 类型 = 小数 注释 = "在播放输入之前延迟的毫秒数,范围为0到20. 默认值为16毫秒." @视窗.单精度小数 = 真>
-    变量 相位差 <公开 类型 = 整数 注释 = "左右LFO之间的相位差,为以下选项的其中之一. 默认值为 BASS_DX8_PHASE_90.\r"
+    变量 相位差 <公开 类型 = 整数 注释 = "左右LFO之间的相位差,为以下选项的其中之一. 默认值为 BASS_DX8_PHASE_90."
             注释 = "BASS_DX8_PHASE_NEG_180、BASS_DX8_PHASE_NEG_90、BASS_DX8_PHASE_ZERO、BASS_DX8_PHASE_90 和 BASS_DX8_PHASE_180.">
 
     方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
@@ -3069,7 +3069,7 @@
     变量 频率 <公开 类型 = 小数 注释 = "LFO的频率,在0到10之间. 默认值为0.25" @视窗.单精度小数 = 真>
     变量 波形 <公开 类型 = 整数 注释 = "LFO的波形. 0 = 三角, 1 = 正弦. 默认的波形为正弦.">
     变量 延迟 <公开 类型 = 小数 注释 = "在播放输入之前延迟的毫秒数,范围为0到4. 默认值为2毫秒." @视窗.单精度小数 = 真>
-    变量 相位差 <公开 类型 = 整数 注释 = "左右LFO之间的相位差,为以下选项的其中之一. 默认值为 BASS_DX8_PHASE_ZERO.\r"
+    变量 相位差 <公开 类型 = 整数 注释 = "左右LFO之间的相位差,为以下选项的其中之一. 默认值为 BASS_DX8_PHASE_ZERO."
             注释 = "BASS_DX8_PHASE_NEG_180、BASS_DX8_PHASE_NEG_90、BASS_DX8_PHASE_ZERO、BASS_DX8_PHASE_90 和 BASS_DX8_PHASE_180.">
 
     方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
