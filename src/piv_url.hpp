@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/03/28                          *
+ * 版本: 2023/04/07                          *
 \*********************************************/
 
 #ifndef _PIV_URL_HPP
@@ -15,9 +15,9 @@
 /**
  * @brief URL地址解析类
  * @tparam CharT 字符类型
- * @tparam EncodeType 文本编码,按类型的尺寸区分(1=ANSI;2=UTF-16LE;4=UTF8)
+ * @tparam EncodeType 文本编码,按类型的尺寸区分(0=ANSI; 1=UTF8; 2=UTF-16LE)
  */
-template <typename CharT, typename EncodeType = CharT>
+template <typename CharT, uint8_t EncodeType>
 class PivUrlParser : public CVolObject
 {
 private:
@@ -164,7 +164,7 @@ public:
     virtual void GetDumpString(CVolString &strDump, INT nMaxDumpSize) override
     {
         strDump.AddFormatText(L"<URL地址解析类%s> 解析结果:\r\n1. 协议: %s\r\n2. 账户: %s\r\n3. 密码: %s\r\n4. 域名: %s\r\n5. 端口: %s\r\n6. 路径: %s\r\n7. 参数: %s\r\n8. 段落: %s\r\n",
-                              (sizeof(EncodeType) == 2) ? L"W" : (sizeof(EncodeType) == 4 ? L"U" : L"A"),
+                              (EncodeType == 2) ? L"W" : (EncodeType == 1 ? L"U" : L"A"),
                               GetScheme().GetText(), GetUser().GetText(), GetPassword().GetText(), GetHost().GetText(),
                               GetPort().GetText(), GetPath().GetText(), GetQuery().GetText(), GetFragment().GetText());
     }
@@ -343,11 +343,11 @@ public:
     }
     inline void Parse(const CVolString &urlAdress, const bool &storeBuf = false, const bool &simple = false)
     {
-        PIV_IF(sizeof(EncodeType) == 2)
+        PIV_IF(EncodeType == 2)
         {
             Parse(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(urlAdress.GetText())}, storeBuf, simple);
         }
-        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        PIV_ELSE_IF(EncodeType == 1)
         {
             Parse(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{urlAdress}.GetText())}, true);
         }
@@ -413,11 +413,11 @@ public:
      */
     inline CVolString GetScheme() const
     {
-        PIV_IF(sizeof(EncodeType) == 2)
+        PIV_IF(EncodeType == 2)
         {
             return CVolString(scheme.data(), scheme.size());
         }
-        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        PIV_ELSE_IF(EncodeType == 1)
         {
             return *PivU2Ws{reinterpret_cast<const char *>(scheme.data()), scheme.size()};
         }
@@ -439,11 +439,11 @@ public:
             piv::encoding::UrlStrDecode(user, utf8, str);
         else
             str.assign(user.data(), user.size());
-        PIV_IF(sizeof(EncodeType) == 2)
+        PIV_IF(EncodeType == 2)
         {
             return CVolString(str.c_str());
         }
-        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        PIV_ELSE_IF(EncodeType == 1)
         {
             return *PivU2Ws{reinterpret_cast<const char *>(str.data()), str.size()};
         }
@@ -470,11 +470,11 @@ public:
             piv::encoding::UrlStrDecode(password, utf8, str);
         else
             str.assign(password.data(), password.size());
-        PIV_IF(sizeof(EncodeType) == 2)
+        PIV_IF(EncodeType == 2)
         {
             return CVolString(str.c_str());
         }
-        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        PIV_ELSE_IF(EncodeType == 1)
         {
             return *PivU2Ws{reinterpret_cast<const char *>(str.data()), str.size()};
         }
@@ -494,11 +494,11 @@ public:
      */
     inline CVolString GetHost() const
     {
-        PIV_IF(sizeof(EncodeType) == 2)
+        PIV_IF(EncodeType == 2)
         {
             return CVolString(host.data(), host.size());
         }
-        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        PIV_ELSE_IF(EncodeType == 1)
         {
             return *PivU2Ws{reinterpret_cast<const char *>(host.data()), host.size()};
         }
@@ -514,11 +514,11 @@ public:
      */
     inline CVolString GetPath() const
     {
-        PIV_IF(sizeof(EncodeType) == 2)
+        PIV_IF(EncodeType == 2)
         {
             return CVolString(path.data(), path.size());
         }
-        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        PIV_ELSE_IF(EncodeType == 1)
         {
             return *PivU2Ws{reinterpret_cast<const char *>(path.data()), path.size()};
         }
@@ -534,11 +534,11 @@ public:
      */
     inline CVolString GetPort() const
     {
-        PIV_IF(sizeof(EncodeType) == 2)
+        PIV_IF(EncodeType == 2)
         {
             return CVolString(port.data(), port.size());
         }
-        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        PIV_ELSE_IF(EncodeType == 1)
         {
             return *PivU2Ws{reinterpret_cast<const char *>(port.data()), port.size()};
         }
@@ -554,11 +554,11 @@ public:
      */
     inline CVolString GetQuery() const
     {
-        PIV_IF(sizeof(EncodeType) == 2)
+        PIV_IF(EncodeType == 2)
         {
             return CVolString(query.data(), query.size());
         }
-        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        PIV_ELSE_IF(EncodeType == 1)
         {
             return *PivU2Ws{reinterpret_cast<const char *>(query.data()), query.size()};
         }
@@ -574,11 +574,11 @@ public:
      */
     inline CVolString GetFragment() const
     {
-        PIV_IF(sizeof(EncodeType) == 2)
+        PIV_IF(EncodeType == 2)
         {
             return CVolString(fragment.data(), fragment.size());
         }
-        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        PIV_ELSE_IF(EncodeType == 1)
         {
             return *PivU2Ws{reinterpret_cast<const char *>(fragment.data()), fragment.size()};
         }
@@ -620,11 +620,11 @@ public:
     }
     inline piv::basic_string_view<CharT> GetParam(const CVolString &name, const bool &utf8 = true)
     {
-        PIV_IF(sizeof(EncodeType) == 2)
+        PIV_IF(EncodeType == 2)
         {
             return GetParam(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(name.GetText()), static_cast<size_t>(name.GetLength())}, utf8);
         }
-        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        PIV_ELSE_IF(EncodeType == 1)
         {
             return GetParam(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{name}.GetText())}, true);
         }
@@ -693,9 +693,9 @@ public:
 /**
  * @brief 表单构造类
  * @tparam CharT 字符类型
- * @tparam EncodeType 文本编码,按类型的尺寸区分(1=ANSI;2=UTF-16LE;4=UTF8)
+ * @tparam EncodeType 文本编码,按类型的尺寸区分(0=ANSI; 1=UTF8 2=UTF-16LE)
  */
-template <typename CharT, typename EncodeType = CharT>
+template <typename CharT, uint8_t EncodeType>
 class PivFormCreater : public CVolObject
 {
 private:
@@ -711,7 +711,7 @@ private:
     {
         if (!form.IsEmpty())
         {
-            PIV_IF(sizeof(EncodeType) == 2)
+            PIV_IF(EncodeType == 2)
             {
                 form.AddWChar('&');
             }
@@ -732,7 +732,7 @@ private:
         {
             form.Append(reinterpret_cast<const void *>(key.data()), key.size() * sizeof(CharT));
         }
-        PIV_IF(sizeof(EncodeType) == 2)
+        PIV_IF(EncodeType == 2)
         {
             form.AddWChar('=');
         }
@@ -743,11 +743,11 @@ private:
     }
     inline void AddKey(const CVolString &key, const bool &utf8 = true)
     {
-        PIV_IF(sizeof(EncodeType) == 2)
+        PIV_IF(EncodeType == 2)
         {
             AddKey(reinterpret_cast<const CharT *>(key.GetText()), -1, utf8);
         }
-        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        PIV_ELSE_IF(EncodeType == 1)
         {
             AddKey(reinterpret_cast<const CharT *>(PivW2U{key}.GetText()), -1, utf8);
         }
@@ -779,7 +779,7 @@ private:
     {
         if (piv::encoding::UrlEncodeNeed(value.data(), value.size()))
         {
-            PIV_IF(sizeof(EncodeType) == 2)
+            PIV_IF(EncodeType == 2)
             {
                 std::basic_string<CharT> buffer;
                 piv::encoding::UrlStrEncode(value, utf8, false, buffer);
@@ -799,11 +799,11 @@ private:
     }
     inline void AddValue(const CVolString &value, const bool &utf8)
     {
-        PIV_IF(sizeof(EncodeType) == 2)
+        PIV_IF(EncodeType == 2)
         {
             AddValue(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(value.GetText())}, utf8);
         }
-        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        PIV_ELSE_IF(EncodeType == 1)
         {
             AddValue(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{value}.GetText())}, utf8);
         }
@@ -967,11 +967,11 @@ public:
      */
     inline CVolString ToStr() const
     {
-        PIV_IF(sizeof(EncodeType) == 2)
+        PIV_IF(EncodeType == 2)
         {
             return CVolString(reinterpret_cast<const wchar_t *>(form.GetPtr()), form.GetSize() / 2);
         }
-        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        PIV_ELSE_IF(EncodeType == 1)
         {
             return *PivU2Ws{reinterpret_cast<const char *>(form.GetPtr()), static_cast<size_t>(form.GetSize())};
         }
@@ -987,11 +987,11 @@ public:
      */
     inline void GetStr(CVolString &s) const
     {
-        PIV_IF(sizeof(EncodeType) == 2)
+        PIV_IF(EncodeType == 2)
         {
             s.SetText(reinterpret_cast<const wchar_t *>(form.GetPtr()), form.GetSize() / 2);
         }
-        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        PIV_ELSE_IF(EncodeType == 1)
         {
             PivU2Ws{reinterpret_cast<const char *>(form.GetPtr()), static_cast<size_t>(form.GetSize())}.GetStr(s);
         }
@@ -1005,9 +1005,9 @@ public:
 /**
  * @brief 表单解析类
  * @tparam CharT 字符类型
- * @tparam EncodeType 文本编码,按类型的尺寸区分(1=ANSI;2=UTF-16LE;4=UTF8)
+ * @tparam EncodeType 文本编码,按类型的尺寸区分(0=ANSI; 1=UTF8; 2=UTF-16LE)
  */
-template <typename CharT, typename EncodeType = CharT>
+template <typename CharT, uint8_t EncodeType>
 class PivFormParser : public CVolObject
 {
 private:
@@ -1093,15 +1093,15 @@ public:
      */
     virtual void GetDumpString(CVolString &strDump, INT nMaxDumpSize) override
     {
-        strDump.AddFormatLine(L"<表单解析类%s> 总共 %d 个键值对:", (sizeof(CharT) == 2) ? L"W" : (sizeof(EncodeType) == 4 ? L"U" : L"A"), (int32_t)params.size());
+        strDump.AddFormatLine(L"<表单解析类%s> 总共 %d 个键值对:", (EncodeType == 2) ? L"W" : (EncodeType == 1 ? L"U" : L"A"), (int32_t)params.size());
         int32_t i = 0;
         for (auto it = params.cbegin(); it != params.cend(); it++, i++)
         {
-            PIV_IF(sizeof(EncodeType) == 2)
+            PIV_IF(EncodeType == 2)
             {
                 strDump.AddFormatLine(L"%d. %s = %s", i, std::wstring{reinterpret_cast<const wchar_t *>(it->first.data()), it->first.size()}.c_str(), std::wstring{reinterpret_cast<const wchar_t *>(it->second.data()), it->second.size()}.c_str());
             }
-            PIV_ELSE_IF(sizeof(EncodeType) == 4)
+            PIV_ELSE_IF(EncodeType == 1)
             {
                 strDump.AddFormatLine(L"%d. %s = %s", i, PivU2Ws{reinterpret_cast<const char *>(it->first.data()), it->first.size()}.GetText(), PivU2Ws{reinterpret_cast<const char *>(it->second.data()), it->second.size()}.GetText());
             }
@@ -1235,11 +1235,11 @@ public:
     }
     inline bool Parse(const CVolString &s, const bool &storeBuf = false)
     {
-        PIV_IF(sizeof(EncodeType) == 2)
+        PIV_IF(EncodeType == 2)
         {
             return Parse(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(s.GetText())}, storeBuf);
         }
-        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        PIV_ELSE_IF(EncodeType == 1)
         {
             return Parse(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{s}.GetText())}, true);
         }
@@ -1280,11 +1280,11 @@ public:
     }
     inline piv::basic_string_view<CharT> GetParam(const CVolString &name, const bool &utf8 = true)
     {
-        PIV_IF(sizeof(EncodeType) == 2)
+        PIV_IF(EncodeType == 2)
         {
             return GetParam(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(name.GetText())}, utf8);
         }
-        PIV_ELSE_IF(sizeof(EncodeType) == 4)
+        PIV_ELSE_IF(EncodeType == 1)
         {
             return GetParam(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{name}.GetText())}, utf8);
         }
@@ -1656,16 +1656,16 @@ public:
 
 }; // PivUrlCreaterW
 
-using PivUrlParserA = PivUrlParser<char, char>;
-using PivUrlParserU = PivUrlParser<char, int32_t>;
-using PivUrlParserW = PivUrlParser<wchar_t, wchar_t>;
+using PivUrlParserA = PivUrlParser<char, 0>;
+using PivUrlParserU = PivUrlParser<char, 1>;
+using PivUrlParserW = PivUrlParser<wchar_t, 2>;
 
-using PivFormCreaterA = PivFormCreater<char, char>;
-using PivFormCreaterU = PivFormCreater<char, int32_t>;
-using PivFormCreaterW = PivFormCreater<wchar_t, wchar_t>;
+using PivFormCreaterA = PivFormCreater<char, 0>;
+using PivFormCreaterU = PivFormCreater<char, 1>;
+using PivFormCreaterW = PivFormCreater<wchar_t, 2>;
 
-using PivFormParserA = PivFormParser<char, char>;
-using PivFormParserU = PivFormParser<char, int32_t>;
-using PivFormParserW = PivFormParser<wchar_t, wchar_t>;
+using PivFormParserA = PivFormParser<char, 0>;
+using PivFormParserU = PivFormParser<char, 1>;
+using PivFormParserW = PivFormParser<wchar_t, 2>;
 
 #endif // _PIV_URL_HPP

@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/04/03                          *
+ * 版本: 2023/04/07                          *
 \*********************************************/
 
 #ifndef _PIV_PROCESS_HPP
@@ -238,7 +238,7 @@ public:
             sFileName.resize(MAX_PATH);
             for (INT_P i = 0; i < hModuleArray.GetCount(); i++)
             {
-                ::GetModuleFileNameExW(hProcess, hModuleArray.GetAt(i), sFileName.data(), MAX_PATH);
+                ::GetModuleFileNameExW(hProcess, hModuleArray.GetAt(i), const_cast<wchar_t *>(sFileName.data()), MAX_PATH);
                 if (sFileName.rfind(module_name_sv, std::wstring::npos) != std::wstring::npos)
                     return hModuleArray.GetAt(i);
             }

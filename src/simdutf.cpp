@@ -1,4 +1,4 @@
-/* auto-generated on 2023-04-03 21:25:11 -0400. Do not edit! */
+/* auto-generated on 2023-04-08 14:48:04 -0400. Do not edit! */
 // dofile: invoked with prepath=D:\Documents\GitHub\simdutf\src, filename=simdutf.cpp
 /* begin file src\simdutf.cpp */
 #include "simdutf.h"
@@ -4812,7 +4812,7 @@ simdutf_warn_unused result convert_utf16be_to_utf8_with_errors(const char16_t * 
   return get_active_implementation()->convert_utf16be_to_utf8_with_errors(buf, len, utf8_buffer);
 }
 simdutf_warn_unused size_t convert_valid_utf16_to_utf8(const char16_t * buf, size_t len, char* utf8_buffer) noexcept {
-  #if BIG_ENDIAN
+  #if SIMDUTF_IS_BIG_ENDIAN
   return convert_valid_utf16be_to_utf8(buf, len, utf8_buffer);
   #else
   return convert_valid_utf16le_to_utf8(buf, len, utf8_buffer);
@@ -11299,8 +11299,10 @@ template <endianness endian>
 inline result rewind_and_convert_with_errors(size_t prior_bytes, const char* buf, size_t len, char16_t* utf16_output) {
   size_t extra_len{0};
   // We potentially need to go back in time and find a leading byte.
-  size_t how_far_back = 3; // 3 bytes in the past + current position
-  if(how_far_back >= prior_bytes) { how_far_back = prior_bytes; }
+  // In theory '3' would be sufficient, but sometimes the error can go back quite far.
+  size_t how_far_back = prior_bytes;
+  // size_t how_far_back = 3; // 3 bytes in the past + current position
+  // if(how_far_back >= prior_bytes) { how_far_back = prior_bytes; }
   bool found_leading_bytes{false};
   // important: it is i <= how_far_back and not 'i < how_far_back'.
   for(size_t i = 0; i <= how_far_back; i++) {
@@ -12206,6 +12208,14 @@ size_t convert_masked_utf8_to_utf16(const char *input,
     utf16_output += 4;
   } else if (idx < 209) {
     // TWO (2) input code-words
+    //////////////
+    // There might be garbage inputs where a leading byte mascarades as a four-byte
+    // leading byte (by being followed by 3 continuation byte), but is not greater than
+    // 0xf0. This could trigger a buffer overflow if we only counted leading
+    // bytes of the form 0xf0 as generating surrogate pairs, without further UTF-8 validation.
+    // Thus we must be careful to ensure that only leading bytes at least as large as 0xf0 generate surrogate pairs.
+    // We do as at the cost of an extra mask.
+    /////////////
     uint8x16_t sh = vld1q_u8(reinterpret_cast<const uint8_t*>(simdutf::tables::utf8_to_utf16::shufutf8[idx]));
     uint8x16_t perm = vqtbl1q_u8(in, sh);
     uint8x16_t ascii = vandq_u8(perm, vreinterpretq_u8_u32(vmovq_n_u32(0x7f)));
@@ -12217,8 +12227,14 @@ size_t convert_masked_utf8_to_utf16(const char *input,
         vreinterpretq_u8_u32(vshrq_n_u32(vreinterpretq_u32_u8(vandq_u8(perm, vreinterpretq_u8_u32(vmovq_n_u32(0x400000)))), 1));
     middlehighbyte = veorq_u8(correct, middlehighbyte);
     uint8x16_t middlehighbyte_shifted = vreinterpretq_u8_u32(vshrq_n_u32(vreinterpretq_u32_u8(middlehighbyte), 4));
-    uint8x16_t highbyte = vandq_u8(perm, vreinterpretq_u8_u32(vmovq_n_u32(0x07000000)));
-    uint8x16_t highbyte_shifted =vreinterpretq_u8_u32(vshrq_n_u32(vreinterpretq_u32_u8(highbyte), 6));
+    // We deliberately carry the leading four bits if they are present, we remove
+    // them later when computing hightenbits.
+    uint8x16_t highbyte = vandq_u8(perm, vreinterpretq_u8_u32(vmovq_n_u32(0xff000000)));
+    uint8x16_t highbyte_shifted = vreinterpretq_u8_u32(vshrq_n_u32(vreinterpretq_u32_u8(highbyte), 6));
+    // When we need to generate a surrogate pair (leading byte > 0xF0), then
+    // the corresponding 32-bit value in 'composed'  will be greater than
+    // > (0xff00000>>6) or > 0x3c00000. This can be used later to identify the
+    // location of the surrogate pairs.
     uint8x16_t composed =
         vorrq_u8(vorrq_u8(ascii, middlebyte_shifted),
                      vorrq_u8(highbyte_shifted, middlehighbyte_shifted));
@@ -12226,7 +12242,8 @@ size_t convert_masked_utf8_to_utf16(const char *input,
         vsubq_u32(vreinterpretq_u32_u8(composed), vmovq_n_u32(0x10000));
     uint32x4_t lowtenbits =
         vandq_u32(composedminus, vmovq_n_u32(0x3ff));
-    uint32x4_t hightenbits = vshrq_n_u32(composedminus, 10);
+    // Notice the 0x3ff mask:
+    uint32x4_t hightenbits = vandq_u32(vshrq_n_u32(composedminus, 10), vmovq_n_u32(0x3ff));
     uint32x4_t lowtenbitsadd =
         vaddq_u32(lowtenbits, vmovq_n_u32(0xDC00));
     uint32x4_t hightenbitsadd =
@@ -12244,13 +12261,13 @@ size_t convert_masked_utf8_to_utf16(const char *input,
     uint32_t surrogate_buffer[4];
     vst1q_u32(surrogate_buffer, surrogates);
     for (size_t i = 0; i < 3; i++) {
-      if (basic_buffer[i] < 65536) {
-        utf16_output[0] = !match_system(big_endian) ? uint16_t(basic_buffer_swap[i]) : uint16_t(basic_buffer[i]);
-        utf16_output++;
-      } else {
+      if(basic_buffer[i] > 0x3c00000) {
         utf16_output[0] = uint16_t(surrogate_buffer[i] & 0xffff);
         utf16_output[1] = uint16_t(surrogate_buffer[i] >> 16);
         utf16_output += 2;
+      } else {
+        utf16_output[0] = !match_system(big_endian) ? uint16_t(basic_buffer_swap[i]) : uint16_t(basic_buffer[i]);
+        utf16_output++;
       }
     }
   } else {
@@ -19867,6 +19884,14 @@ size_t convert_masked_utf8_to_utf16(const char *input,
     utf16_output += 4; // Here we overflow by 8 bytes.
   } else if (idx < 209) {
     // TWO (2) input code-words
+    //////////////
+    // There might be garbage inputs where a leading byte mascarades as a four-byte
+    // leading byte (by being followed by 3 continuation byte), but is not greater than
+    // 0xf0. This could trigger a buffer overflow if we only counted leading
+    // bytes of the form 0xf0 as generating surrogate pairs, without further UTF-8 validation.
+    // Thus we must be careful to ensure that only leading bytes at least as large as 0xf0 generate surrogate pairs.
+    // We do as at the cost of an extra mask.
+    /////////////
     const __m128i sh =
         _mm_loadu_si128((const __m128i *)simdutf::tables::utf8_to_utf16::shufutf8[idx]);
     const __m128i perm = _mm_shuffle_epi8(in, sh);
@@ -19879,8 +19904,14 @@ size_t convert_masked_utf8_to_utf16(const char *input,
         _mm_srli_epi32(_mm_and_si128(perm, _mm_set1_epi32(0x400000)), 1);
     middlehighbyte = _mm_xor_si128(correct, middlehighbyte);
     const __m128i middlehighbyte_shifted = _mm_srli_epi32(middlehighbyte, 4);
-    const __m128i highbyte = _mm_and_si128(perm, _mm_set1_epi32(0x07000000));
+    // We deliberately carry the leading four bits in highbyte if they are present,
+    // we remove them later when computing hightenbits.
+    const __m128i highbyte = _mm_and_si128(perm, _mm_set1_epi32(0xff000000));
     const __m128i highbyte_shifted = _mm_srli_epi32(highbyte, 6);
+    // When we need to generate a surrogate pair (leading byte > 0xF0), then
+    // the corresponding 32-bit value in 'composed'  will be greater than
+    // > (0xff00000>>6) or > 0x3c00000. This can be used later to identify the
+    // location of the surrogate pairs.
     const __m128i composed =
         _mm_or_si128(_mm_or_si128(ascii, middlebyte_shifted),
                      _mm_or_si128(highbyte_shifted, middlehighbyte_shifted));
@@ -19888,7 +19919,8 @@ size_t convert_masked_utf8_to_utf16(const char *input,
         _mm_sub_epi32(composed, _mm_set1_epi32(0x10000));
     const __m128i lowtenbits =
         _mm_and_si128(composedminus, _mm_set1_epi32(0x3ff));
-    const __m128i hightenbits = _mm_srli_epi32(composedminus, 10);
+    // Notice the 0x3ff mask:
+    const __m128i hightenbits = _mm_and_si128(_mm_srli_epi32(composedminus, 10), _mm_set1_epi32(0x3ff));
     const __m128i lowtenbitsadd =
         _mm_add_epi32(lowtenbits, _mm_set1_epi32(0xDC00));
     const __m128i hightenbitsadd =
@@ -19906,13 +19938,13 @@ size_t convert_masked_utf8_to_utf16(const char *input,
     uint32_t surrogate_buffer[4];
     _mm_storeu_si128((__m128i *)surrogate_buffer, surrogates);
     for (size_t i = 0; i < 3; i++) {
-      if (basic_buffer[i] < 65536) {
-        utf16_output[0] = big_endian ? uint16_t(basic_buffer_swap[i]) : uint16_t(basic_buffer[i]);
-        utf16_output++;
-      } else {
+      if(basic_buffer[i] > 0x3c00000) {
         utf16_output[0] = uint16_t(surrogate_buffer[i] & 0xffff);
         utf16_output[1] = uint16_t(surrogate_buffer[i] >> 16);
         utf16_output += 2;
+      } else  {
+        utf16_output[0] = big_endian ? uint16_t(basic_buffer_swap[i]) : uint16_t(basic_buffer[i]);
+        utf16_output++;
       }
     }
   } else {
@@ -25289,6 +25321,14 @@ size_t convert_masked_utf8_to_utf16(const char *input,
     utf16_output += 4;
   } else if (idx < 209) {
     // TWO (2) input code-words
+    //////////////
+    // There might be garbage inputs where a leading byte mascarades as a four-byte
+    // leading byte (by being followed by 3 continuation byte), but is not greater than
+    // 0xf0. This could trigger a buffer overflow if we only counted leading
+    // bytes of the form 0xf0 as generating surrogate pairs, without further UTF-8 validation.
+    // Thus we must be careful to ensure that only leading bytes at least as large as 0xf0 generate surrogate pairs.
+    // We do as at the cost of an extra mask.
+    /////////////
     const __m128i sh =
         _mm_loadu_si128((const __m128i *)tables::utf8_to_utf16::shufutf8[idx]);
     const __m128i perm = _mm_shuffle_epi8(in, sh);
@@ -25301,8 +25341,14 @@ size_t convert_masked_utf8_to_utf16(const char *input,
         _mm_srli_epi32(_mm_and_si128(perm, _mm_set1_epi32(0x400000)), 1);
     middlehighbyte = _mm_xor_si128(correct, middlehighbyte);
     const __m128i middlehighbyte_shifted = _mm_srli_epi32(middlehighbyte, 4);
-    const __m128i highbyte = _mm_and_si128(perm, _mm_set1_epi32(0x07000000));
+    // We deliberately carry the leading four bits in highbyte if they are present,
+    // we remove them later when computing hightenbits.
+    const __m128i highbyte = _mm_and_si128(perm, _mm_set1_epi32(0xff000000));
     const __m128i highbyte_shifted = _mm_srli_epi32(highbyte, 6);
+    // When we need to generate a surrogate pair (leading byte > 0xF0), then
+    // the corresponding 32-bit value in 'composed'  will be greater than
+    // > (0xff00000>>6) or > 0x3c00000. This can be used later to identify the
+    // location of the surrogate pairs.
     const __m128i composed =
         _mm_or_si128(_mm_or_si128(ascii, middlebyte_shifted),
                      _mm_or_si128(highbyte_shifted, middlehighbyte_shifted));
@@ -25310,7 +25356,8 @@ size_t convert_masked_utf8_to_utf16(const char *input,
         _mm_sub_epi32(composed, _mm_set1_epi32(0x10000));
     const __m128i lowtenbits =
         _mm_and_si128(composedminus, _mm_set1_epi32(0x3ff));
-    const __m128i hightenbits = _mm_srli_epi32(composedminus, 10);
+    // Notice the 0x3ff mask:
+    const __m128i hightenbits = _mm_and_si128(_mm_srli_epi32(composedminus, 10), _mm_set1_epi32(0x3ff));
     const __m128i lowtenbitsadd =
         _mm_add_epi32(lowtenbits, _mm_set1_epi32(0xDC00));
     const __m128i hightenbitsadd =
@@ -25328,13 +25375,13 @@ size_t convert_masked_utf8_to_utf16(const char *input,
     uint32_t surrogate_buffer[4];
     _mm_storeu_si128((__m128i *)surrogate_buffer, surrogates);
     for (size_t i = 0; i < 3; i++) {
-      if (basic_buffer[i] < 65536) {
-        utf16_output[0] = big_endian ? uint16_t(basic_buffer_swap[i]) : uint16_t(basic_buffer[i]);
-        utf16_output++;
-      } else {
+      if(basic_buffer[i] > 0x3c00000) {
         utf16_output[0] = uint16_t(surrogate_buffer[i] & 0xffff);
         utf16_output[1] = uint16_t(surrogate_buffer[i] >> 16);
         utf16_output += 2;
+      } else {
+        utf16_output[0] = big_endian ? uint16_t(basic_buffer_swap[i]) : uint16_t(basic_buffer[i]);
+        utf16_output++;
       }
     }
   } else {

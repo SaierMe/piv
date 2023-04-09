@@ -71,6 +71,7 @@ namespace piv
         {
             return std::wstring_view{reinterpret_cast<const wchar_t *>(str.GetPtr()), static_cast<size_t>(str.GetSize()) / 2};
         }
+
         /*
         template <typename = void>
         inline std::wstring_view to_wview(const std::string &str)

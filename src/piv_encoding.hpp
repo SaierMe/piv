@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/03/30                          *
+ * 版本: 2023/04/09                          *
 \*********************************************/
 
 #ifndef _PIV_ENCODING_HPP
@@ -321,7 +321,7 @@ namespace piv
             for (size_t i = 0; i < SrcLen; i++)
             {
                 unsigned char c = lpszSrc[i];
-                if (!(piv::encoding::IsUrlValidWord(lpszSrc[i], ReservedWord)) || c != ' ') // 空格需要特别对待
+                if (!(piv::encoding::IsUrlValidWord(lpszSrc[i], ReservedWord)))
                     Add += 2;
             }
             return SrcLen + Add;
@@ -369,8 +369,6 @@ namespace piv
                 c = lpszSrc[i];
                 if (piv::encoding::IsUrlValidWord(lpszSrc[i], ReservedWord))
                     lpszDest[j++] = c;
-                else if (c == ' ')
-                    lpszDest[j++] = '+';
                 else
                 {
                     if (j + 3 > DestLen)
