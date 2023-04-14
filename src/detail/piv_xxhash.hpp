@@ -21,6 +21,34 @@ namespace piv
     namespace hash
     {
         /**
+         * @brief 生成密码
+         * @param secretSize 密码长度
+         * @param customSeed 自定义种子
+         * @return 返回所生成的密码
+         */
+        static CVolMem Generate_Secret(size_t secretSize, const CVolMem& customSeed)
+        {
+            CVolMem secret;
+            secret.Alloc(secretSize, TRUE);
+            if (XXH_INLINE_XXH3_generateSecret(secret.GetPtr(), secretSize, customSeed.GetPtr(), static_cast<size_t>(customSeed.GetSize())) == XXH_OK)
+                return secret;
+            return CVolMem();
+        }
+
+        /**
+         * @brief 生成密码_192
+         * @param seed 种子值
+         * @return 返回所生成的密码
+         */
+        static CVolMem Generate_Secret_fromSeed(uint64_t seed)
+        {
+            CVolMem secret;
+            secret.Alloc(192, TRUE);
+            XXH_INLINE_XXH3_generateSecret_fromSeed(secret.GetPtr(), seed);
+            return secret;
+        }
+
+        /**
          * @brief 取数据XXH128
          * @tparam T 返回类型(字节集类、文本型)
          * @param input 所欲摘要的数据
