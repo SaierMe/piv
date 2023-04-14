@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/21                          *
+ * 版本: 2023/04/10                          *
 \*********************************************/
 
 #ifndef _PIV_THREAD_POOL_HPP
@@ -50,6 +50,7 @@ protected:
         DWORD dwWorkerTask = 0;                      // 执行任务数
         DWORD dwQueueTask = 0;                       // 队列任务数量
         DWORD dwComplateTask = 0;                    // 已完成任务数
+        BOOL bCoInitialize = FALSE;                  // 是否初始化COM
     };
     struct THREADPOOL_PARAM // 线程参数
     {
@@ -98,7 +99,7 @@ public:
         return TRUE;
     }
     // 创建
-    virtual BOOL CreateThreadPool(const INT &nCapacity = 0, const INT &nStackSize = 0, const INT &nPriority = THREAD_PRIORITY_NORMAL)
+    virtual BOOL CreateThreadPool(const INT &nCapacity = 0, const INT &nStackSize = 0, const INT &nPriority = THREAD_PRIORITY_NORMAL, const BOOL &bCoInitialize = FALSE)
     {
         // 线程池已创建则直接返回真,其他情况返回假
         if (m_ThreadPool)
@@ -134,6 +135,7 @@ public:
         m_ThreadPool->dwCapacity = (nCapacity <= 0) ? m_dwProcessors + 1 : static_cast<DWORD>(nCapacity);
         // 创建线程
         m_ThreadPool->nPriority = nPriority;
+        m_ThreadPool->bCoInitialize = bCoInitialize;
         DWORD dwCreatedCount = 0;
         m_ThreadPool->tStackSize = static_cast<SIZE_T>(nStackSize);
         for (DWORD i = 0; i < m_ThreadPool->dwCapacity; i++)
@@ -450,6 +452,7 @@ protected:
     static INT CALLBACK ThreadPoolWorkerThread(std::shared_ptr<THREADPOOL_INFO> *lpThreadPool)
     {
         std::shared_ptr<THREADPOOL_INFO> ThreadPool = *lpThreadPool;
+        BOOL bComInit = ThreadPool->bCoInitialize ? SUCCEEDED (::CoInitializeEx (NULL, COINIT_APARTMENTTHREADED)) : FALSE;
         ::InterlockedIncrement(&ThreadPool->dwThreadsCount);
         // 创建线程时发信号
         if (ThreadPool->hEvent[0])
@@ -519,6 +522,8 @@ protected:
             }
         }
         ::InterlockedDecrement(&ThreadPool->dwThreadsCount); // 原子锁递减线程数量
+        if (bComInit)
+            ::CoUninitialize ();
         return 0;
     }
     // (内部)清空任务线程
@@ -590,7 +595,7 @@ public:
     PivThreadPoolEx() {}
     ~PivThreadPoolEx() {}
     // 创建
-    BOOL CreateThreadPool(const INT &nThreadsMin = 5, const INT &nThreadsMax = 20, const INT &nCycleMs = 5000, const INT &nStackSize = 0, const INT &nPriority = THREAD_PRIORITY_NORMAL)
+    BOOL CreateThreadPool(const INT &nThreadsMin = 5, const INT &nThreadsMax = 20, const INT &nCycleMs = 5000, const INT &nStackSize = 0, const INT &nPriority = THREAD_PRIORITY_NORMAL, const BOOL &bCoInitialize = FALSE)
     {
         // 线程池已创建则直接返回真,其他情况返回假
         if (m_ThreadPool)
@@ -627,6 +632,7 @@ public:
         m_ThreadPool->dwCycleMs = (nCycleMs < 100) ? 100 : static_cast<DWORD>(nCycleMs);
         // 创建线程
         m_ThreadPool->nPriority = nPriority;
+        m_ThreadPool->bCoInitialize = bCoInitialize;
         DWORD dwCreatedCount = 0;
         m_ThreadPool->tStackSize = static_cast<SIZE_T>(nStackSize);
         for (DWORD i = 0; i < m_ThreadPool->dwThreadsMin; i++)

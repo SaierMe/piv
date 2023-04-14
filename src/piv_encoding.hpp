@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/04/09                          *
+ * 版本: 2023/04/13                          *
 \*********************************************/
 
 #ifndef _PIV_ENCODING_HPP
@@ -17,13 +17,13 @@
 #include <algorithm>
 #include <string>
 #if defined(_MSVC_LANG) && (_MSVC_LANG >= 201703L)
-    #include <string_view>
-    #define PIV_IF if constexpr
-    #define PIV_ELSE_IF else if constexpr
+#include <string_view>
+#define PIV_IF if constexpr
+#define PIV_ELSE_IF else if constexpr
 #else
-    #include "string_view.hpp"
-    #define PIV_IF if
-    #define PIV_ELSE_IF else if
+#include "detail/string_view.hpp"
+#define PIV_IF if
+#define PIV_ELSE_IF else if
 #endif
 
 namespace piv
@@ -618,6 +618,62 @@ namespace piv
             return ret;
         }
 
+        /**
+         * @brief 值到十六进制
+         * @param v 所欲转换的hash值
+         * @param hexstr 返回的十六进制
+         * @return
+         */
+        template <typename T>
+        CVolMem &value_to_hex(const T &v, CVolMem &hex = CVolMem())
+        {
+            hex.Append(&v, sizeof(T));
+            return hex;
+        }
+        template <typename T>
+        CVolString &value_to_hex(const T &v, CVolString &hex, const bool &upper = true)
+        {
+            const unsigned char *pValue = reinterpret_cast<const unsigned char *>(&v);
+            if(upper)
+            {
+                for (size_t i = 0; i < sizeof(T); ++i)
+                {
+                    hex.AddChar(hexUpCh[static_cast<unsigned char>(pValue[i]) >> 4]);
+                    hex.AddChar(hexUpCh[static_cast<unsigned char>(pValue[i]) & 0xF]);
+                }
+            }
+            else
+            {
+                for (size_t i = 0; i < sizeof(T); ++i)
+                {
+                    hex.AddChar(hexLowCh[static_cast<unsigned char>(pValue[i]) >> 4]);
+                    hex.AddChar(hexLowCh[static_cast<unsigned char>(pValue[i]) & 0xF]);
+                }
+            }
+            return hex;
+        }
+        template <typename T, typename CharT>
+        std::basic_string<CharT> &value_to_hex(const T &v, std::basic_string<CharT> &hex, const bool &upper = true)
+        {
+            const unsigned char *pValue = reinterpret_cast<const unsigned char *>(&v);
+            if(upper)
+            {
+                for (size_t i = 0; i < sizeof(T); ++i)
+                {
+                    hex.push_back(hexUpCh[static_cast<unsigned char>(pValue[i]) >> 4]);
+                    hex.push_back(hexUpCh[static_cast<unsigned char>(pValue[i]) & 0xF]);
+                }
+            }
+            else
+            {
+                for (size_t i = 0; i < sizeof(T); ++i)
+                {
+                    hex.push_back(hexLowCh[static_cast<unsigned char>(pValue[i]) >> 4]);
+                    hex.push_back(hexLowCh[static_cast<unsigned char>(pValue[i]) & 0xF]);
+                }
+            }
+            return hex;
+        }
     } // namespace encoding
 
 } // namespace piv
@@ -763,9 +819,18 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
-    inline size_t GetSize() const noexcept
+    inline size_t GetLength() const noexcept
     {
         return utf16str.size();
+    }
+
+    /**
+     * @brief 获取转换后的文本字节长度
+     * @return 文本的字节长度
+     */
+    inline size_t GetSize() const noexcept
+    {
+        return utf16str.size() * 2;
     }
 
     /**
@@ -967,6 +1032,15 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
+    inline size_t GetLength() const noexcept
+    {
+        return mbstr.size();
+    }
+
+    /**
+     * @brief 获取转换后的文本字长度
+     * @return 文本的字节长度
+     */
     inline size_t GetSize() const noexcept
     {
         return mbstr.size();
@@ -1161,6 +1235,15 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
+    inline size_t GetLength() const noexcept
+    {
+        return utf8str.size();
+    }
+
+    /**
+     * @brief 获取转换后的文本字节长度
+     * @return 文本的字节长度
+     */
     inline size_t GetSize() const noexcept
     {
         return utf8str.size();
@@ -1351,9 +1434,18 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
-    inline size_t GetSize() const noexcept
+    inline size_t GetLength() const noexcept
     {
         return utf16str.size();
+    }
+
+    /**
+     * @brief 获取转换后的文本字节长度
+     * @return 文本的字节长度
+     */
+    inline size_t GetSize() const noexcept
+    {
+        return utf16str.size() * 2;
     }
 
     /**
@@ -1543,6 +1635,15 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
+    inline size_t GetLength() const noexcept
+    {
+        return mbstr.size();
+    }
+
+    /**
+     * @brief 获取转换后的字节长度
+     * @return 文本的字节长度
+     */
     inline size_t GetSize() const noexcept
     {
         return mbstr.size();
@@ -1720,6 +1821,15 @@ public:
     /**
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
+     */
+    inline size_t GetLength() const noexcept
+    {
+        return utf8str.size();
+    }
+
+    /**
+     * @brief 获取转换后的字节长度
+     * @return 文本的字节长度
      */
     inline size_t GetSize() const noexcept
     {
@@ -1907,9 +2017,18 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
-    inline size_t GetSize() const noexcept
+    inline size_t GetLength() const noexcept
     {
         return static_cast<size_t>(utf16str.GetLength());
+    }
+
+    /**
+     * @brief 获取转换后的字节长度
+     * @return 文本的字节长度
+     */
+    inline size_t GetSize() const noexcept
+    {
+        return utf16str.GetLength() * 2;
     }
 
     /**
@@ -2108,9 +2227,18 @@ public:
      * @brief 获取转换后的文本长度
      * @return 文本的字符长度
      */
-    inline size_t GetSize() const noexcept
+    inline size_t GetLength() const noexcept
     {
         return static_cast<size_t>(utf16str.GetLength());
+    }
+
+    /**
+     * @brief 获取转换后的字节长度
+     * @return 文本的字节长度
+     */
+    inline size_t GetSize() const noexcept
+    {
+        return utf16str.GetLength() * 2;
     }
 
     /**
@@ -2374,7 +2502,7 @@ namespace piv
                         CVolMem buffer;
                         piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(text.GetPtr()), text.GetSize(), buffer.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
                         PivU2W urled{buffer, buffer_len};
-                        encoded.assign(reinterpret_cast<const CharT *>(urled.GetText()), urled.GetSize());
+                        encoded.assign(reinterpret_cast<const CharT *>(urled.GetText()), urled.GetLength());
                     }
                     else
                     {
@@ -2383,7 +2511,7 @@ namespace piv
                         CVolMem buffer;
                         piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(text.GetPtr()), text.GetSize(), buffer.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
                         PivA2W urled{buffer, buffer_len};
-                        encoded.assign(reinterpret_cast<const CharT *>(urled.GetText()), urled.GetSize());
+                        encoded.assign(reinterpret_cast<const CharT *>(urled.GetText()), urled.GetLength());
                     }
                 }
                 else

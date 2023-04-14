@@ -36,5 +36,10 @@ DEL /F /Q  "%PATH%p_WinHTTP.v"
 DEL /F /Q  "%PATH%p_MMKV.v"
 DEL /F /Q  "%PATH%p_SevenZip.v"
 
-ECHO 已删除旧版PIV模块的残留文件。
+DEL /F /Q  "%PATH%src\piv_md5.h"
+DEL /F /Q  "%PATH%src\piv_base.hpp"
+DEL /F /Q  "%PATH%src\string_view.hpp"
+DEL /F /Q  "%PATH%src\piv_tomlplusplus.hpp"
+
+ECHO 已删除 2023-04-12 版之前的PIV模块残留文件。
 PAUSE

@@ -105,6 +105,13 @@
 
 ※我经常反复修改已封装好的代码，比如修正bug、优化效率、规范格式、修订备注等，但如果功能和用法没有改变，一般不会写在更新日志里，所以每次更新改动的地方其实还是有不少的。
 
+### 📅 2023/04/14
+
+1. 新增「xxHash类」，速度最快的摘要算法之一，工作速度接近内存的速度限制，实测比 MD5 快几倍以上。
+2. 完善「CNG加解密」对 PEM 格式 RSA 密钥的支持，抛弃坑爹的 Windows API，改为纯手写转换。
+3. 线程池类的创建方法增加参数「是否初始化COM」，用于指定是否在线程中自动初始化和清理COM。
+4. 其他优化
+
 ### 📅 2023/04/09
 
 1. 统一将空格URL编码为%20，而不是 + 号
@@ -406,12 +413,13 @@
 - **[{fmt}](https://github.com/fmtlib/fmt)**  `9.1.0`  `MIT license` 格式化文本库，std::format 的实现 
 - **[md4c](https://github.com/mity/md4c)** `0.4.8`  `MIT license` 一个 CommonMark 0.30 规范 + GFM 的 Markdown 解析库
 - **[simpleini](https://github.com/brofield/simpleini)** `4.19` `MIT license` 简易的 INI 配置文件读写库
-- **[simdutf](https://github.com/simdutf/simdutf)** `3.2.7` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
+- **[simdutf](https://github.com/simdutf/simdutf)** `3.2.8` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
 - **[OpenCC](https://github.com/BYVoid/OpenCC)** `1.1.4` `Apache-2.0 license` 中文简繁转换开源项目，支持词汇级别的转换、异体字转换和地区习惯用词转换
 - **[bit7z](https://github.com/rikyoz/bit7z)** `4.0.0-RC` `Mozilla Public License v2.0` 7-zip的封装类
 - **[7-zip](https://www.7-zip.org/)** `22.01` `GNU LGPL license` 完全免费而且开源的压缩软件（采用GNU LGPL协议，只使用它的 dll 文件不会传染）
 - **[MinHook](https://github.com/TsudaKageyu/minhook)** `1.3.3` `BSD-2-Clause License` 一个简约的 x86/x64 API Hook 库
 - **[MMKV](https://github.com/Tencent/MMKV)** `1.2.14` `BSD-3-Clause License` 腾讯的高性能键值表
+- **[xxHash](https://github.com/Cyan4973/xxHash)** `8.0.1` `BSD-2-Clause License` 一个非常快的散列算法，速度接近 RAM 限制
 
 ※本模块封装的开源项目均采用较宽松的开源协议，如 MIT、BSD、MPLv2 ……
 

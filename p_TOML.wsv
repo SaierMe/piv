@@ -3,8 +3,8 @@
 包 火山.PIV基础类 <注释 = "https://toml.io/cn/v1.0.0" 注释 = "TOML v1.0.0"
         注释 = "全称：Tom的(语义)明显、(配置)最小化的语言(Tom\'s Obvious, Minimal Language)."
         注释 = "TOML 旨在成为一个语义明显且易于阅读的最小化配置文件格式." 注释 = "TOML 被设计成可以无歧义地映射为哈希表."
-        注释 = "TOML 应该能很容易地被解析成各种语言中的数据结构." @视窗.外部头文件 = "src\\piv_tomlplusplus.hpp"
-        @视窗.附加编译参数 = "cpp: /std:c++17" @视窗.需求VS版本 = "15-">
+        注释 = "TOML 应该能很容易地被解析成各种语言中的数据结构." @视窗.外部头文件 = "src\\piv_toml.hpp" @视窗.附加编译参数 = "cpp: /std:c++17"
+        @视窗.需求VS版本 = "15-">
 
 类 TOML键值表 <公开 注释 = "  源码: https://github.com/marzer/tomlplusplus" 注释 = "本模块未封装完成,请勿使用." 折叠
         @文档 = "category = \"配置文件.TOML\"" @别名 = "PivTomlTable">

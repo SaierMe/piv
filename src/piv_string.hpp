@@ -3,14 +3,14 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/04/07                          *
+ * 版本: 2023/04/12                          *
 \*********************************************/
 
 #ifndef _PIV_STRING_HPP
 #define _PIV_STRING_HPP
 
 #include "piv_encoding.hpp"
-#include "piv_base.hpp"
+#include "detail/piv_base.hpp"
 #include <vector>
 #include <memory>
 
@@ -618,7 +618,46 @@ namespace piv
         {
             return s;
         }
-    
+
+        /**
+         * @brief 到UTF-8文本
+         */
+        template <typename = void>
+        inline const string_view &ustr(const string_view &s)
+        {
+            return s;
+        }
+        template <typename = void>
+        inline const std::string &ustr(const std::string &s)
+        {
+            return s;
+        }
+        template <typename = void>
+        inline const string_view &ustr(const char *s)
+        {
+            return string_view{s};
+        }
+        template <typename = void>
+        inline const std::string &ustr(const CVolString &s)
+        {
+            return *PivW2U{CVolString};
+        }
+        template <typename = void>
+        inline const std::string &ustr(const CVolMem &s)
+        {
+            return *PivW2U{s};
+        }
+        template <typename = void>
+        inline const std::string &ustr(const wstring_view &s)
+        {
+            return *PivW2U{s};
+        }
+        template <typename = void>
+        inline const std::string &ustr(const std::wstring &s)
+        {
+            return *PivW2U{s};
+        }
+
         /**
          * @brief 文字长度转换到字符长度
          * @param str 所欲操作文本
@@ -1184,19 +1223,18 @@ public:
             }
             else
             {
-                char *data = new char[fileSize];
-                Succeeded = (fread(data, 1, fileSize, in) == fileSize);
+                std::unique_ptr<char> data{new char[fileSize]};
+                Succeeded = (fread(const_cast<char *>(data.get()), 1, fileSize, in) == fileSize);
                 PIV_IF(EncodeType == 1)
                 {
-                    PivU2W utf{reinterpret_cast<const char *>(data), fileSize};
-                    pStr->assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetSize());
+                    PivU2W utf{reinterpret_cast<const char *>(data.get()), fileSize};
+                    pStr->assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetLength());
                 }
                 else
                 {
-                    PivA2W utf{reinterpret_cast<const char *>(data), fileSize};
-                    pStr->assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetSize());
+                    PivA2W utf{reinterpret_cast<const char *>(data.get()), fileSize};
+                    pStr->assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetLength());
                 }
-                delete[] data;
             }
         }
         else if (StrEncodeType == VSET_UTF_8)
@@ -1208,19 +1246,18 @@ public:
             }
             else
             {
-                char *data = new char[fileSize];
-                Succeeded = (fread(data, 1, fileSize, in) == fileSize);
+                std::unique_ptr<char> data{new char[fileSize]};
+                Succeeded = (fread(const_cast<char *>(data.get()), 1, fileSize, in) == fileSize);
                 PIV_IF(EncodeType == 2)
                 {
-                    PivW2U utf{reinterpret_cast<const wchar_t *>(data), fileSize / 2};
-                    pStr->assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetSize());
+                    PivW2U utf{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2};
+                    pStr->assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetLength());
                 }
                 else
                 {
-                    PivA2U utf{reinterpret_cast<const char *>(data), fileSize};
-                    pStr->assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetSize());
+                    PivA2U utf{reinterpret_cast<const char *>(data.get()), fileSize};
+                    pStr->assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetLength());
                 }
-                delete[] data;
             }
         }
         else if (StrEncodeType == VSET_MBCS)
@@ -1232,19 +1269,18 @@ public:
             }
             else
             {
-                char *data = new char[fileSize];
-                Succeeded = (fread(data, 1, fileSize, in) == fileSize);
+                std::unique_ptr<char> data{new char[fileSize]};
+                Succeeded = (fread(const_cast<char *>(data.get()), 1, fileSize, in) == fileSize);
                 PIV_IF(EncodeType == 2)
                 {
-                    PivW2A mbcs{reinterpret_cast<const wchar_t *>(data), fileSize / 2};
-                    pStr->assign(reinterpret_cast<const CharT *>(mbcs.GetText()), mbcs.GetSize());
+                    PivW2A mbcs{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2};
+                    pStr->assign(reinterpret_cast<const CharT *>(mbcs.GetText()), mbcs.GetLength());
                 }
                 PIV_ELSE_IF(EncodeType == 1)
                 {
-                    PivU2A mbcs{reinterpret_cast<const char *>(data), fileSize};
-                    pStr->assign(reinterpret_cast<const CharT *>(mbcs.GetText()), mbcs.GetSize());
+                    PivU2A mbcs{reinterpret_cast<const char *>(data.get()), fileSize};
+                    pStr->assign(reinterpret_cast<const CharT *>(mbcs.GetText()), mbcs.GetLength());
                 }
-                delete[] data;
             }
         }
         fclose(in);
@@ -1291,12 +1327,12 @@ public:
             PIV_ELSE_IF(EncodeType == 1)
             {
                 PivU2W utf{reinterpret_cast<const char *>(sv.data()), count};
-                Succeeded = (fwrite(utf.GetText(), 2, utf.GetSize(), out) == utf.GetSize());
+                Succeeded = (fwrite(utf.GetText(), 2, utf.GetLength(), out) == utf.GetLength());
             }
             else
             {
                 PivA2W utf{reinterpret_cast<const char *>(sv.data()), count};
-                Succeeded = (fwrite(utf.GetText(), 2, utf.GetSize(), out) == utf.GetSize());
+                Succeeded = (fwrite(utf.GetText(), 2, utf.GetLength(), out) == utf.GetLength());
             }
         }
         else if (WriteEncodeType == VSET_UTF_8)
@@ -1309,7 +1345,7 @@ public:
             PIV_IF(EncodeType == 2)
             {
                 PivW2U utf{reinterpret_cast<const wchar_t *>(sv.data()), count};
-                Succeeded = (fwrite(utf.GetText(), 1, utf.GetSize(), out) == utf.GetSize());
+                Succeeded = (fwrite(utf.GetText(), 1, utf.GetLength(), out) == utf.GetLength());
             }
             PIV_ELSE_IF(EncodeType == 1)
             {
@@ -1318,7 +1354,7 @@ public:
             else
             {
                 PivA2U utf{reinterpret_cast<const char *>(sv.data()), count};
-                Succeeded = (fwrite(utf.GetText(), 1, utf.GetSize(), out) == utf.GetSize());
+                Succeeded = (fwrite(utf.GetText(), 1, utf.GetLength(), out) == utf.GetLength());
             }
         }
         else if (WriteEncodeType == VSET_MBCS)
@@ -1326,12 +1362,12 @@ public:
             PIV_IF(EncodeType == 2)
             {
                 PivW2A mbcs{reinterpret_cast<const wchar_t *>(sv.data()), count};
-                Succeeded = (fwrite(mbcs.GetText(), 1, mbcs.GetSize(), out) == mbcs.GetSize());
+                Succeeded = (fwrite(mbcs.GetText(), 1, mbcs.GetLength(), out) == mbcs.GetLength());
             }
             PIV_ELSE_IF(EncodeType == 1)
             {
                 PivU2A mbcs{reinterpret_cast<const char *>(sv.data()), count};
-                Succeeded = (fwrite(mbcs.GetText(), 1, mbcs.GetSize(), out) == mbcs.GetSize());
+                Succeeded = (fwrite(mbcs.GetText(), 1, mbcs.GetLength(), out) == mbcs.GetLength());
             }
             else
             {
@@ -1360,11 +1396,11 @@ public:
     }
 
     /**
-     * @brief 取文本长度
+     * @brief 取字节长度
      */
     inline size_t GetSize() const
     {
-        return sv.size();
+        return sv.size() * sizeof(CharT);
     }
 
     /**
@@ -2953,11 +2989,11 @@ public:
     }
 
     /**
-     * @brief 取文本长度
+     * @brief 取字节长度
      */
     inline size_t GetSize() const
     {
-        return str.size();
+        return str.size() * sizeof(CharT);
     }
 
     /**
@@ -3199,12 +3235,12 @@ public:
         PIV_ELSE_IF(EncodeType == 1)
         {
             PivW2U utf8{s};
-            str.assign(reinterpret_cast<const CharT *>(utf8.GetText()), (count == (size_t)-1) ? utf8.GetSize() : count);
+            str.assign(reinterpret_cast<const CharT *>(utf8.GetText()), (count == (size_t)-1) ? utf8.GetLength() : count);
         }
         else
         {
             PivW2A ansi{s};
-            str.assign(reinterpret_cast<const CharT *>(ansi.GetText()), (count == (size_t)-1) ? ansi.GetSize() : count);
+            str.assign(reinterpret_cast<const CharT *>(ansi.GetText()), (count == (size_t)-1) ? ansi.GetLength() : count);
         }
         return *this;
     }
@@ -3388,19 +3424,18 @@ public:
             }
             else
             {
-                char *data = new char[fileSize];
-                Succeeded = (fread(data, 1, fileSize, in) == fileSize);
+                std::unique_ptr<char> data{new char[fileSize]};
+                Succeeded = (fread(const_cast<char *>(data.get()), 1, fileSize, in) == fileSize);
                 PIV_IF(EncodeType == 1)
                 {
-                    PivU2W utf{reinterpret_cast<const char *>(data), fileSize};
-                    str.assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetSize());
+                    PivU2W utf{reinterpret_cast<const char *>(data.get()), fileSize};
+                    str.assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetLength());
                 }
                 else
                 {
-                    PivA2W utf{reinterpret_cast<const char *>(data), fileSize};
-                    str.assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetSize());
+                    PivA2W utf{reinterpret_cast<const char *>(data.get()), fileSize};
+                    str.assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetLength());
                 }
-                delete[] data;
             }
         }
         else if (StrEncodeType == VSET_UTF_8)
@@ -3412,19 +3447,18 @@ public:
             }
             else
             {
-                char *data = new char[fileSize];
-                Succeeded = (fread(data, 1, fileSize, in) == fileSize);
+                std::unique_ptr<char> data{new char[fileSize]};
+                Succeeded = (fread(const_cast<char *>(data.get()), 1, fileSize, in) == fileSize);
                 PIV_IF(EncodeType == 2)
                 {
-                    PivW2U utf{reinterpret_cast<const wchar_t *>(data), fileSize / 2};
-                    str.assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetSize());
+                    PivW2U utf{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2};
+                    str.assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetLength());
                 }
                 else
                 {
-                    PivA2U utf{reinterpret_cast<const char *>(data), fileSize};
-                    str.assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetSize());
+                    PivA2U utf{reinterpret_cast<const char *>(data.get()), fileSize};
+                    str.assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetLength());
                 }
-                delete[] data;
             }
         }
         else if (StrEncodeType == VSET_MBCS)
@@ -3436,19 +3470,18 @@ public:
             }
             else
             {
-                char *data = new char[fileSize];
-                Succeeded = (fread(data, 1, fileSize, in) == fileSize);
+                std::unique_ptr<char> data{new char[fileSize]};
+                Succeeded = (fread(const_cast<char *>(data.get()), 1, fileSize, in) == fileSize);
                 PIV_IF(EncodeType == 2)
                 {
-                    PivW2A mbcs{reinterpret_cast<const wchar_t *>(data), fileSize / 2};
-                    str.assign(reinterpret_cast<const CharT *>(mbcs.GetText()), mbcs.GetSize());
+                    PivW2A mbcs{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2};
+                    str.assign(reinterpret_cast<const CharT *>(mbcs.GetText()), mbcs.GetLength());
                 }
                 else
                 {
-                    PivU2A mbcs{reinterpret_cast<const char *>(data), fileSize};
-                    str.assign(reinterpret_cast<const CharT *>(mbcs.GetText()), mbcs.GetSize());
+                    PivU2A mbcs{reinterpret_cast<const char *>(data.get()), fileSize};
+                    str.assign(reinterpret_cast<const CharT *>(mbcs.GetText()), mbcs.GetLength());
                 }
-                delete[] data;
             }
         }
         fclose(in);
@@ -3488,12 +3521,12 @@ public:
             PIV_ELSE_IF(EncodeType == 1)
             {
                 PivU2W utf{reinterpret_cast<const char *>(str.c_str()), count};
-                Succeeded = (fwrite(utf.GetText(), 2, utf.GetSize(), out) == utf.GetSize());
+                Succeeded = (fwrite(utf.GetText(), 2, utf.GetLength(), out) == utf.GetLength());
             }
             else
             {
                 PivA2W utf{reinterpret_cast<const char *>(str.c_str()), count};
-                Succeeded = (fwrite(utf.GetText(), 2, utf.GetSize(), out) == utf.GetSize());
+                Succeeded = (fwrite(utf.GetText(), 2, utf.GetLength(), out) == utf.GetLength());
             }
         }
         else if (WriteEncodeType == VSET_UTF_8)
@@ -3506,7 +3539,7 @@ public:
             PIV_IF(EncodeType == 2)
             {
                 PivW2U utf{reinterpret_cast<const wchar_t *>(str.c_str()), count};
-                Succeeded = (fwrite(utf.GetText(), 1, utf.GetSize(), out) == utf.GetSize());
+                Succeeded = (fwrite(utf.GetText(), 1, utf.GetLength(), out) == utf.GetLength());
             }
             PIV_ELSE_IF(EncodeType == 1)
             {
@@ -3515,7 +3548,7 @@ public:
             else
             {
                 PivA2U utf{reinterpret_cast<const char *>(str.c_str()), count};
-                Succeeded = (fwrite(utf.GetText(), 1, utf.GetSize(), out) == utf.GetSize());
+                Succeeded = (fwrite(utf.GetText(), 1, utf.GetLength(), out) == utf.GetLength());
             }
         }
         else if (WriteEncodeType == VSET_MBCS)
@@ -3523,12 +3556,12 @@ public:
             PIV_IF(EncodeType == 2)
             {
                 PivW2A mbcs{reinterpret_cast<const wchar_t *>(str.c_str()), count};
-                Succeeded = (fwrite(mbcs.GetText(), 1, mbcs.GetSize(), out) == mbcs.GetSize());
+                Succeeded = (fwrite(mbcs.GetText(), 1, mbcs.GetLength(), out) == mbcs.GetLength());
             }
             PIV_ELSE_IF(EncodeType == 1)
             {
                 PivU2A mbcs{reinterpret_cast<const char *>(str.c_str()), count};
-                Succeeded = (fwrite(mbcs.GetText(), 1, mbcs.GetSize(), out) == mbcs.GetSize());
+                Succeeded = (fwrite(mbcs.GetText(), 1, mbcs.GetLength(), out) == mbcs.GetLength());
             }
             else
             {
@@ -3751,12 +3784,12 @@ public:
         PIV_ELSE_IF(EncodeType == 1)
         {
             PivW2U utf8{s};
-            str.append(reinterpret_cast<const CharT *>(utf8.GetText()), (count == (size_t)-1) ? utf8.GetSize() : count);
+            str.append(reinterpret_cast<const CharT *>(utf8.GetText()), (count == (size_t)-1) ? utf8.GetLength() : count);
         }
         else
         {
             PivW2A ansi{s};
-            str.append(reinterpret_cast<const CharT *>(ansi.GetText()), (count == (size_t)-1) ? ansi.GetSize() : count);
+            str.append(reinterpret_cast<const CharT *>(ansi.GetText()), (count == (size_t)-1) ? ansi.GetLength() : count);
         }
         return *this;
     }

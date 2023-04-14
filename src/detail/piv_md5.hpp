@@ -3,17 +3,13 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/23                          *
+ * 版本: 2023/04/14                          *
 \*********************************************/
 
 #ifndef PIV_MD5_HPP
 #define PIV_MD5_HPP
 
-// 包含火山视窗基本类,它在火山里的包含顺序比较靠前(全局-110)
-#ifndef __VOL_BASE_H__
-#include <sys/base/libs/win_base/vol_base.h>
-#endif
-#include "piv_string.hpp"
+#include "../piv_string.hpp"
 
 namespace piv
 {
@@ -156,14 +152,6 @@ namespace piv
             return ptr;
         }
 
-        static unsigned char hb2hex(const unsigned char &hb, const bool &upper)
-        {
-            if (upper)
-                return hb < 10 ? '0' + hb : hb - 10 + 'A';
-            else
-                return hb < 10 ? '0' + hb : hb - 10 + 'a';
-        }
-
     public:
         MD5Checksum()
         {
@@ -269,60 +257,52 @@ namespace piv
             unsigned char out[16];
             Final(out);
             str.Empty();
-            for (size_t i = 0; i < 16; i++)
-            {
-                str.AddChar(hb2hex((out[i] >> 4) & 0xF, upper));
-                str.AddChar(hb2hex(out[i] & 0xF, upper));
-            }
-            return str;
+            return piv::encoding::value_to_hex(out, str, upper);
         }
         std::string &Final(std::string &str = std::string{}, const bool &upper = true)
         {
             unsigned char out[16];
             Final(out);
             str.clear();
-            for (size_t i = 0; i < 16; i++)
-            {
-                str.push_back(hb2hex((out[i] >> 4) & 0xF, upper));
-                str.push_back(hb2hex(out[i] & 0xF, upper));
-            }
-            return str;
+            return piv::encoding::value_to_hex(out, str, upper);
         }
         std::wstring &Final(std::wstring &str = std::wstring{}, const bool &upper = true)
         {
             unsigned char out[16];
             Final(out);
             str.clear();
-            for (size_t i = 0; i < 16; i++)
-            {
-                str.push_back(hb2hex((out[i] >> 4) & 0xF, upper));
-                str.push_back(hb2hex(out[i] & 0xF, upper));
-            }
-            return str;
+            return piv::encoding::value_to_hex(out, str, upper);
         }
     };
 
-    static CVolString GetFileMd5(FILE *file, const bool &upper)
+    static CVolString GetFileMd5(FILE *file, const bool &upper, int64_t off, uint64_t len)
     {
         MD5Checksum md5;
-
-        char buff[BUFSIZ];
-        size_t len = 0;
-        while ((len = fread(buff, sizeof(char), BUFSIZ, file)) > 0)
+        char buff[1024];
+        if (off > 0)
+            _fseeki64(file, off, SEEK_SET);
+        size_t rsize = 0;
+        while ((rsize = fread(buff, sizeof(char), 1024, file)) > 0)
         {
-            md5.Update(buff, len);
+            if (rsize > len)
+            {
+                md5.Update(buff, static_cast<size_t>(len));
+                break;
+            }
+            md5.Update(buff, rsize);
+            len -= rsize;
         }
         return md5.Final(CVolString{}, upper);
     }
 
-    static CVolString GetFileMd5(const wchar_t *filename, const bool &upper)
+    static CVolString GetFileMd5(const wchar_t *filename, const bool &upper, int64_t off, uint64_t len)
     {
         FILE *file = NULL;
         file = _wfopen(filename, L"rb");
         CVolString res;
         if (file == NULL)
             return res;
-        res = GetFileMd5(file, upper);
+        res = GetFileMd5(file, upper, off, len);
         fclose(file);
         return res;
     }
