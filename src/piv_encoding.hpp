@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/04/13                          *
+ * 版本: 2023/04/15                          *
 \*********************************************/
 
 #ifndef _PIV_ENCODING_HPP
@@ -37,6 +37,27 @@ namespace piv
     using nonstd::string_view;
     using nonstd::wstring_view;
 #endif
+
+    struct utf8
+    {
+        unsigned char bom[3] = {0xEF, 0xBB, 0xBF};
+    };
+    struct utf16_le
+    {
+        unsigned char bom[2] = {0xFF, 0xFE};
+    };
+    struct utf16_be
+    {
+        unsigned char bom[2] = {0xFE, 0xFF};
+    };
+    struct utf32_le
+    {
+        unsigned char bom[4] = {0xFF, 0xFE, 0x00, 0x00};
+    };
+    struct utf32_be
+    {
+        unsigned char bom[4] = {0x00, 0x00, 0xFE, 0xFF};
+    };
 
     namespace encoding
     {
@@ -634,7 +655,7 @@ namespace piv
         CVolString &value_to_hex(const T &v, CVolString &hex, const bool &upper = true)
         {
             const unsigned char *pValue = reinterpret_cast<const unsigned char *>(&v);
-            if(upper)
+            if (upper)
             {
                 for (size_t i = 0; i < sizeof(T); ++i)
                 {
@@ -656,7 +677,7 @@ namespace piv
         std::basic_string<CharT> &value_to_hex(const T &v, std::basic_string<CharT> &hex, const bool &upper = true)
         {
             const unsigned char *pValue = reinterpret_cast<const unsigned char *>(&v);
-            if(upper)
+            if (upper)
             {
                 for (size_t i = 0; i < sizeof(T); ++i)
                 {

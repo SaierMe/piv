@@ -3,7 +3,7 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/04/12                          *
+ * 版本: 2023/04/15                          *
 \*********************************************/
 
 #ifndef _PIV_STRING_HPP
@@ -282,12 +282,12 @@ namespace piv
         /**
          * @brief 取文字长度
          */
-        template <typename CharT, uint8_t EncodeType>
+        template <typename CharT, typename EncodeType>
         size_t get_word_length(const basic_string_view<CharT> &str)
         {
             CharT ch;
             size_t count = 0;
-            PIV_IF(EncodeType == 2)
+            PIV_IF(sizeof(EncodeType) == 2)
             {
                 for (size_t i = 0; i < str.size(); i++, count++)
                 {
@@ -296,7 +296,7 @@ namespace piv
                         i++;
                 }
             }
-            PIV_ELSE_IF(EncodeType == 1)
+            PIV_ELSE_IF(sizeof(EncodeType) == 3)
             {
                 for (size_t i = 0; i < str.size(); i++, count++)
                 {
@@ -324,14 +324,14 @@ namespace piv
         /**
          * @brief 取逆序文本
          */
-        template <typename CharT, uint8_t EncodeType>
+        template <typename CharT, typename EncodeType>
         std::basic_string<CharT> reverse_text(const basic_string_view<CharT> &str)
         {
             std::basic_string<CharT> reverse;
             size_t n = str.size(), i = 0;
             CharT ch;
             reverse.resize(n);
-            PIV_IF(EncodeType == 2)
+            PIV_IF(sizeof(EncodeType) == 2)
             {
                 while (n--)
                 {
@@ -347,7 +347,7 @@ namespace piv
                     }
                 }
             }
-            PIV_ELSE_IF(EncodeType == 1)
+            PIV_ELSE_IF(sizeof(EncodeType) == 3)
             {
                 size_t len = n;
                 while (n--)
@@ -399,7 +399,7 @@ namespace piv
             }
             return reverse;
         }
-        template <typename CharT, uint8_t EncodeType>
+        template <typename CharT, typename EncodeType>
         std::basic_string<CharT> reverse_text(const std::basic_string<CharT> &str)
         {
             return reverse_text<CharT, EncodeType>(basic_string_view<CharT>{str});
@@ -410,7 +410,7 @@ namespace piv
          * @param option 转换选项 1 2 4
          * @return 返回转换后的文本
          */
-        template <typename CharT, uint8_t EncodeType>
+        template <typename CharT, typename EncodeType>
         std::basic_string<CharT> to_fullwidth(const basic_string_view<CharT> &str, const int32_t &option)
         {
             std::basic_string<CharT> ret;
@@ -419,7 +419,7 @@ namespace piv
             ret.reserve(str.size() * 2);
             ret = str;
             CharT ch;
-            PIV_IF(EncodeType == 2)
+            PIV_IF(sizeof(EncodeType) == 2)
             {
                 for (auto it = ret.begin(); it != ret.end(); it++)
                 {
@@ -436,7 +436,7 @@ namespace piv
                     }
                 }
             }
-            PIV_ELSE_IF(EncodeType == 1)
+            PIV_ELSE_IF(sizeof(EncodeType) == 3)
             {
                 CharT qj[4]{};
                 for (size_t i = 0; i < ret.size(); i++)
@@ -499,7 +499,7 @@ namespace piv
          * @param option 转换选项 1 2 4
          * @return 返回转换后的文本
          */
-        template <typename CharT, uint8_t EncodeType>
+        template <typename CharT, typename EncodeType>
         std::basic_string<CharT> to_halfwidth(const basic_string_view<CharT> &str, const int32_t &option)
         {
             std::basic_string<CharT> ret;
@@ -507,7 +507,7 @@ namespace piv
                 return ret;
             ret.reserve(str.size());
             CharT ch;
-            PIV_IF(EncodeType == 2)
+            PIV_IF(sizeof(EncodeType) == 2)
             {
                 ret = str;
                 for (auto it = ret.begin(); it != ret.end(); it++)
@@ -525,7 +525,7 @@ namespace piv
                     }
                 }
             }
-            PIV_ELSE_IF(EncodeType == 1)
+            PIV_ELSE_IF(sizeof(EncodeType) == 3)
             {
                 uint32_t fullCh;
                 size_t len = str.size();
@@ -664,7 +664,7 @@ namespace piv
          * @param pos 提供文字索引,返回字符索引
          * @param count 提供文字个数,返回字符个数
          */
-        template <typename CharT, uint8_t EncodeType>
+        template <typename CharT, typename EncodeType>
         void length_word_to_char(const basic_string_view<CharT> &str, size_t &pos, size_t &count)
         {
             if (count == 0)
@@ -677,12 +677,12 @@ namespace piv
                 if (n == pos)
                     spos = i;
                 ch = str[i];
-                PIV_IF(EncodeType == 2)
+                PIV_IF(sizeof(EncodeType) == 2)
                 {
                     if (ch >= (CharT)0xD800 && ch <= (CharT)0xDBFF)
                         i++;
                 }
-                PIV_ELSE_IF(EncodeType == 1)
+                PIV_ELSE_IF(sizeof(EncodeType) == 3)
                 {
                     if (ch >= (char)0xE0 && ch <= (char)0xEF) // 3字节
                         i += 2;
@@ -714,7 +714,7 @@ namespace piv
          * @param count 文字长度
          * @return
          */
-        template <typename CharT, uint8_t EncodeType>
+        template <typename CharT, typename EncodeType>
         basic_string_view<CharT> substr(const basic_string_view<CharT> &str, const size_t &pos, const size_t &count)
         {
             size_t spos = pos, cb = count;
@@ -723,7 +723,7 @@ namespace piv
                 return str.substr(spos, cb);
             return basic_string_view<CharT>{};
         }
-        template <typename CharT, uint8_t EncodeType>
+        template <typename CharT, typename EncodeType>
         basic_string_view<CharT> substr(const std::basic_string<CharT> &str, const size_t &pos, const size_t &count)
         {
             return substr<CharT, EncodeType>(basic_string_view<CharT>{str}, pos, count);
@@ -735,7 +735,7 @@ namespace piv
          * @param pos 删除的起始位置
          * @param count 删除的文字数量
          */
-        template <typename CharT, uint8_t EncodeType>
+        template <typename CharT, typename EncodeType>
         void remove_words(std::basic_string<CharT> &str, const size_t &pos, const size_t &count)
         {
             size_t spos = pos, cb = count;
@@ -798,9 +798,9 @@ namespace piv
 /*********************************************
  * @brief  文本视图模板类
  * @tparam CharT 字符类型
- * @tparam EncodeType 文本编码,按类型的尺寸区分(0=ANSI; 1=UTF8; 2=UTF-16LE)
+ * @tparam EncodeType 文本编码,按类型的尺寸区分(1=ANSI; 2=UTF-16LE; 3=UTF8;)
  */
-template <typename CharT, uint8_t EncodeType>
+template <typename CharT, typename EncodeType>
 class PivStringView : public CVolObject
 {
 private:
@@ -976,11 +976,11 @@ public:
      */
     virtual void GetDumpString(CVolString &strDump, INT nMaxDumpSize) override
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             strDump.SetText(reinterpret_cast<const wchar_t *>(sv.data()), sv.length());
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             PivU2Ws{reinterpret_cast<const char *>(sv.data()), sv.length()}.GetStr(strDump);
         }
@@ -1173,14 +1173,14 @@ public:
      * @brief 读入文本文件
      * @param FileName 所欲读取文件名
      * @param ReadDataSize 所欲读取数据尺寸
-     * @param ReadEncodeType 所欲读取文本编码
+     * @param ReadEncode 所欲读取文本编码
      * @return
      */
-    bool ReadFromFile(const wchar_t *FileName, const int32_t &ReadDataSize = -1, const VOL_STRING_ENCODE_TYPE &ReadEncodeType = VSET_UTF_16)
+    bool ReadFromFile(const wchar_t *FileName, const int32_t &ReadDataSize = -1, const VOL_STRING_ENCODE_TYPE &ReadEncode = VSET_UTF_16)
     {
         ASSERT(ReadDataSize >= -1);
         ASSERT_R_STR(FileName);
-        VOL_STRING_ENCODE_TYPE StrEncodeType = ReadEncodeType;
+        VOL_STRING_ENCODE_TYPE StrEncode = ReadEncode;
         pStr.reset(new std::basic_string<CharT>{});
         FILE *in = _wfopen(FileName, L"rb");
         if (in == NULL)
@@ -1197,13 +1197,13 @@ public:
             fread(bom, 1, 3, in);
             if (bom[0] == 0xFF && bom[1] == 0xFE)
             {
-                StrEncodeType = VSET_UTF_16;
+                StrEncode = VSET_UTF_16;
                 fseek(in, 2, SEEK_SET);
                 fileSize -= 2;
             }
             else if (bom[0] == 0xEF && bom[1] == 0xBB && bom[2] == 0xBF)
             {
-                StrEncodeType = VSET_UTF_8;
+                StrEncode = VSET_UTF_8;
                 fseek(in, 3, SEEK_SET);
                 fileSize -= 3;
             }
@@ -1212,11 +1212,11 @@ public:
                 fseek(in, 0, SEEK_SET);
             }
         }
-        if (StrEncodeType == VSET_UNKNOWN)
-            StrEncodeType = VSET_MBCS;
-        if (StrEncodeType == VSET_UTF_16)
+        if (StrEncode == VSET_UNKNOWN)
+            StrEncode = VSET_MBCS;
+        if (StrEncode == VSET_UTF_16)
         {
-            PIV_IF(EncodeType == 2)
+            PIV_IF(sizeof(EncodeType) == 2)
             {
                 pStr->resize(fileSize / sizeof(CharT));
                 Succeeded = (fread(const_cast<CharT *>(pStr->data()), sizeof(CharT), fileSize / sizeof(CharT), in) == fileSize / sizeof(CharT));
@@ -1225,7 +1225,7 @@ public:
             {
                 std::unique_ptr<char> data{new char[fileSize]};
                 Succeeded = (fread(const_cast<char *>(data.get()), 1, fileSize, in) == fileSize);
-                PIV_IF(EncodeType == 1)
+                PIV_IF(sizeof(EncodeType) == 3)
                 {
                     PivU2W utf{reinterpret_cast<const char *>(data.get()), fileSize};
                     pStr->assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetLength());
@@ -1237,9 +1237,9 @@ public:
                 }
             }
         }
-        else if (StrEncodeType == VSET_UTF_8)
+        else if (StrEncode == VSET_UTF_8)
         {
-            PIV_IF(EncodeType == 1)
+            PIV_IF(sizeof(EncodeType) == 3)
             {
                 pStr->resize(fileSize);
                 Succeeded = (fread(const_cast<CharT *>(pStr->data()), 1, fileSize, in) == fileSize);
@@ -1248,7 +1248,7 @@ public:
             {
                 std::unique_ptr<char> data{new char[fileSize]};
                 Succeeded = (fread(const_cast<char *>(data.get()), 1, fileSize, in) == fileSize);
-                PIV_IF(EncodeType == 2)
+                PIV_IF(sizeof(EncodeType) == 2)
                 {
                     PivW2U utf{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2};
                     pStr->assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetLength());
@@ -1260,9 +1260,9 @@ public:
                 }
             }
         }
-        else if (StrEncodeType == VSET_MBCS)
+        else if (StrEncode == VSET_MBCS)
         {
-            PIV_IF(EncodeType == 0)
+            PIV_IF(sizeof(EncodeType) == 1)
             {
                 pStr->resize(fileSize / sizeof(CharT));
                 Succeeded = (fread(const_cast<CharT *>(pStr->data()), sizeof(CharT), fileSize / sizeof(CharT), in) == fileSize / sizeof(CharT));
@@ -1271,12 +1271,12 @@ public:
             {
                 std::unique_ptr<char> data{new char[fileSize]};
                 Succeeded = (fread(const_cast<char *>(data.get()), 1, fileSize, in) == fileSize);
-                PIV_IF(EncodeType == 2)
+                PIV_IF(sizeof(EncodeType) == 2)
                 {
                     PivW2A mbcs{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2};
                     pStr->assign(reinterpret_cast<const CharT *>(mbcs.GetText()), mbcs.GetLength());
                 }
-                PIV_ELSE_IF(EncodeType == 1)
+                PIV_ELSE_IF(sizeof(EncodeType) == 3)
                 {
                     PivU2A mbcs{reinterpret_cast<const char *>(data.get()), fileSize};
                     pStr->assign(reinterpret_cast<const CharT *>(mbcs.GetText()), mbcs.GetLength());
@@ -1300,31 +1300,31 @@ public:
      * @brief 写出文本文件
      * @param FileName 所欲写到文件名
      * @param WriteDataSize 所欲写出文本长度
-     * @param WriteEncodeType 所欲写出文本编码
+     * @param WriteEncode 所欲写出文本编码
      * @return
      */
-    bool WriteIntoFile(const wchar_t *FileName, const int32_t &WriteDataSize = -1, const VOL_STRING_ENCODE_TYPE &WriteEncodeType = VSET_UTF_16, const bool &with_bom = true)
+    bool WriteIntoFile(const wchar_t *FileName, const int32_t &WriteDataSize = -1, const VOL_STRING_ENCODE_TYPE &WriteEncode = VSET_UTF_16, const bool &with_bom = true)
     {
         ASSERT(WriteDataSize >= -1);
         ASSERT_R_STR(FileName);
-        ASSERT(WriteEncodeType != VSET_UNKNOWN);
+        ASSERT(WriteEncode != VSET_UNKNOWN);
         FILE *out = _wfopen(FileName, L"wb");
         if (out == NULL)
             return false;
         bool Succeeded = false;
         size_t count = (WriteDataSize == -1) ? sv.size() : ((static_cast<size_t>(WriteDataSize) > sv.size()) ? sv.size() : static_cast<size_t>(WriteDataSize));
-        if (WriteEncodeType == VSET_UTF_16)
+        if (WriteEncode == VSET_UTF_16)
         {
             if (with_bom)
             {
                 const byte bom[] = {0xFF, 0xFE};
                 fwrite(bom, 1, 2, out);
             }
-            PIV_IF(EncodeType == 2)
+            PIV_IF(sizeof(EncodeType) == 2)
             {
                 Succeeded = (fwrite(sv.data(), sizeof(CharT), count, out) == count);
             }
-            PIV_ELSE_IF(EncodeType == 1)
+            PIV_ELSE_IF(sizeof(EncodeType) == 3)
             {
                 PivU2W utf{reinterpret_cast<const char *>(sv.data()), count};
                 Succeeded = (fwrite(utf.GetText(), 2, utf.GetLength(), out) == utf.GetLength());
@@ -1335,19 +1335,19 @@ public:
                 Succeeded = (fwrite(utf.GetText(), 2, utf.GetLength(), out) == utf.GetLength());
             }
         }
-        else if (WriteEncodeType == VSET_UTF_8)
+        else if (WriteEncode == VSET_UTF_8)
         {
             if (with_bom)
             {
                 const byte bom[] = {0xEF, 0xBB, 0xBF};
                 fwrite(bom, 1, 3, out);
             }
-            PIV_IF(EncodeType == 2)
+            PIV_IF(sizeof(EncodeType) == 2)
             {
                 PivW2U utf{reinterpret_cast<const wchar_t *>(sv.data()), count};
                 Succeeded = (fwrite(utf.GetText(), 1, utf.GetLength(), out) == utf.GetLength());
             }
-            PIV_ELSE_IF(EncodeType == 1)
+            PIV_ELSE_IF(sizeof(EncodeType) == 3)
             {
                 Succeeded = (fwrite(sv.data(), sizeof(CharT), count, out) == count);
             }
@@ -1357,14 +1357,14 @@ public:
                 Succeeded = (fwrite(utf.GetText(), 1, utf.GetLength(), out) == utf.GetLength());
             }
         }
-        else if (WriteEncodeType == VSET_MBCS)
+        else if (WriteEncode == VSET_MBCS)
         {
-            PIV_IF(EncodeType == 2)
+            PIV_IF(sizeof(EncodeType) == 2)
             {
                 PivW2A mbcs{reinterpret_cast<const wchar_t *>(sv.data()), count};
                 Succeeded = (fwrite(mbcs.GetText(), 1, mbcs.GetLength(), out) == mbcs.GetLength());
             }
-            PIV_ELSE_IF(EncodeType == 1)
+            PIV_ELSE_IF(sizeof(EncodeType) == 3)
             {
                 PivU2A mbcs{reinterpret_cast<const char *>(sv.data()), count};
                 Succeeded = (fwrite(mbcs.GetText(), 1, mbcs.GetLength(), out) == mbcs.GetLength());
@@ -1471,11 +1471,11 @@ public:
     }
     inline bool IsEqual(const CVolString &other, const bool &case_sensitive = false) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return IsEqual(PivStringView{other}, case_sensitive);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return IsEqual(PivStringView{reinterpret_cast<const CharT *>(PivW2U{other}.GetText())}, case_sensitive);
         }
@@ -1508,11 +1508,11 @@ public:
     }
     inline bool IIsEqual(const CVolString &other) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return IIsEqual(PivStringView{other});
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return IIsEqual(PivStringView{reinterpret_cast<const CharT *>(PivW2U{other}.GetText())});
         }
@@ -1596,11 +1596,11 @@ public:
     }
     inline int32_t compare(const CVolString &s, const bool &case_insensitive = true) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return this->compare(reinterpret_cast<const CharT *>(s.GetText()), case_insensitive);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return this->compare(reinterpret_cast<const CharT *>(PivW2U{s}.GetText()), case_insensitive);
         }
@@ -1994,11 +1994,11 @@ public:
     }
     inline size_t FindFirstOf(const CVolString &chars, const size_t &pos = 0) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return FindFirstOf(reinterpret_cast<const CharT *>(chars.GetText()), pos);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return FindFirstOf(reinterpret_cast<const CharT *>(PivW2U{chars}.GetText()), pos);
         }
@@ -2033,11 +2033,11 @@ public:
     }
     inline size_t FindLastOf(const CVolString &chars, const size_t &pos = (size_t)-1) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return FindLastOf(reinterpret_cast<const CharT *>(chars.GetText()), pos);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return FindLastOf(reinterpret_cast<const CharT *>(PivW2U{chars}.GetText()), pos);
         }
@@ -2072,11 +2072,11 @@ public:
     }
     inline size_t FindFirstNotOf(const CVolString &chars, const size_t &pos = 0) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return FindFirstNotOf(reinterpret_cast<const CharT *>(chars.GetText()), pos);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return FindFirstNotOf(reinterpret_cast<const CharT *>(PivW2U{chars}.GetText()), pos);
         }
@@ -2111,11 +2111,11 @@ public:
     }
     inline size_t FindLastNotOf(const CVolString &chars, const size_t &pos = (size_t)-1) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return FindLastNotOf(reinterpret_cast<const CharT *>(chars.GetText()), pos);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return FindLastNotOf(reinterpret_cast<const CharT *>(PivW2U{chars}.GetText()), pos);
         }
@@ -2164,11 +2164,11 @@ public:
     }
     inline size_t SearchText(const CVolString &text, const size_t &pos = 0, const bool &case_insensitive = false, size_t *textlen = nullptr) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return SearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(text.GetText())}, pos, case_insensitive, textlen);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return SearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{text}.GetText())}, pos, case_insensitive, textlen);
         }
@@ -2210,11 +2210,11 @@ public:
     }
     inline size_t ReverseSearchText(const CVolString &text, const size_t &pos = (size_t)-1, const bool &case_insensitive = false, size_t *textlen = nullptr) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return ReverseSearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(text.GetText())}, pos, case_insensitive, textlen);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return ReverseSearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{text}.GetText())}, pos, case_insensitive, textlen);
         }
@@ -2297,11 +2297,11 @@ public:
     }
     inline bool EndOf(const CVolString &s, const bool &case_sensitive = true) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return EndOf(reinterpret_cast<const CharT *>(s.GetText()), case_sensitive);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return EndOf(reinterpret_cast<const CharT *>(PivW2U{s}.GetText()), case_sensitive);
         }
@@ -2415,11 +2415,11 @@ public:
     }
     inline size_t SplitStrings(const CVolString &delimit, std::vector<piv::basic_string_view<CharT>> &svArray, const bool &trimAll = true, const bool &ignoreEmptyStr = true, const size_t &max_count = (size_t)-1) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return SplitStrings(reinterpret_cast<const CharT *>(delimit.GetText()), svArray, trimAll, ignoreEmptyStr, max_count);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return SplitStrings(reinterpret_cast<const CharT *>(PivW2U{delimit}.GetText()), svArray, trimAll, ignoreEmptyStr, max_count);
         }
@@ -2503,11 +2503,11 @@ public:
     }
     inline size_t SplitSubStrings(const CVolString &delimit, std::vector<piv::basic_string_view<CharT>> &svArray, const bool &trimAll = true, const bool &ignoreEmptyStr = true, const size_t &max_count = (size_t)-1) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return SplitSubStrings(reinterpret_cast<const CharT *>(delimit.GetText()), svArray, trimAll, ignoreEmptyStr, max_count);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return SplitSubStrings(reinterpret_cast<const CharT *>(PivW2U{delimit}.GetText()), svArray, trimAll, ignoreEmptyStr, max_count);
         }
@@ -2582,11 +2582,11 @@ public:
      */
     inline std::basic_string<CharT> &ToUsc2(const bool &en_ascii = false, std::basic_string<CharT> &usc2 = std::basic_string<CharT>{}) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return piv::encoding::to_usc2<CharT>(sv, en_ascii, usc2);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return piv::encoding::to_usc2<CharT>(piv::wstring_view{*PivU2W{reinterpret_cast<const char *>(sv.data()), sv.size()}}, en_ascii, usc2);
         }
@@ -2597,11 +2597,11 @@ public:
     }
     inline CVolString &ToUsc2Str(const bool &en_ascii = false, CVolString &usc2 = CVolString{}) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return piv::encoding::to_usc2str(sv, en_ascii, usc2);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return piv::encoding::to_usc2str(piv::wstring_view{*PivU2W{reinterpret_cast<const char *>(sv.data()), sv.size()}}, en_ascii, usc2);
         }
@@ -2724,9 +2724,9 @@ public:
 /*********************************************
  * @brief  标准文本模板类
  * @tparam CharT 字符类型
- * @tparam EncodeType 文本编码,按类型的尺寸区分(0=ANSI; 1=UTF8; 2=UTF-16LE)
+ * @tparam EncodeType 文本编码,按类型的尺寸区分(1=ANSI; 2=UTF-16LE; 3=UTF8;)
  */
-template <typename CharT, uint8_t EncodeType>
+template <typename CharT, typename EncodeType>
 class PivString : public CVolObject
 {
 private:
@@ -2773,11 +2773,11 @@ public:
     }
     PivString(const CVolString &s)
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             str.assign(reinterpret_cast<const CharT *>(s.GetText()));
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             str.assign(reinterpret_cast<const CharT *>(PivW2U{s}.GetText()));
         }
@@ -2910,11 +2910,11 @@ public:
      */
     virtual void GetDumpString(CVolString &strDump, INT nMaxDumpSize) override
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             strDump.SetText(reinterpret_cast<const wchar_t *>(str.c_str()));
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             PivU2Ws{reinterpret_cast<const char *>(str.c_str())}.GetStr(strDump);
         }
@@ -3172,11 +3172,11 @@ public:
     }
     inline int32_t compare(const CVolString &s, const bool &case_insensitive = true) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return this->compare(reinterpret_cast<const CharT *>(s.GetText()), case_insensitive);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return this->compare(reinterpret_cast<const CharT *>(PivW2U{s}.GetText()), case_insensitive);
         }
@@ -3228,11 +3228,11 @@ public:
     }
     inline PivString &SetText(const CVolString &s, const size_t &count = (size_t)-1)
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             str.assign(reinterpret_cast<const CharT *>(s.GetText()), (count == (size_t)-1) ? static_cast<size_t>(s.GetLength()) : count);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             PivW2U utf8{s};
             str.assign(reinterpret_cast<const CharT *>(utf8.GetText()), (count == (size_t)-1) ? utf8.GetLength() : count);
@@ -3375,14 +3375,14 @@ public:
      * @brief 读入文本文件
      * @param FileName 所欲读取文件名
      * @param ReadDataSize 所欲读取数据尺寸
-     * @param ReadEncodeType 所欲读取文本编码
+     * @param ReadEncode 所欲读取文本编码
      * @return
      */
-    bool ReadFromFile(const wchar_t *FileName, const int32_t &ReadDataSize = -1, const VOL_STRING_ENCODE_TYPE &ReadEncodeType = VSET_UTF_16)
+    bool ReadFromFile(const wchar_t *FileName, const int32_t &ReadDataSize = -1, const VOL_STRING_ENCODE_TYPE &ReadEncode = VSET_UTF_16)
     {
         ASSERT(ReadDataSize >= -1);
         ASSERT_R_STR(FileName);
-        VOL_STRING_ENCODE_TYPE StrEncodeType = ReadEncodeType;
+        VOL_STRING_ENCODE_TYPE StrEncode = ReadEncode;
         FILE *in = _wfopen(FileName, L"rb");
         if (in == NULL)
             return false;
@@ -3398,13 +3398,13 @@ public:
             fread(bom, 1, 3, in);
             if (bom[0] == 0xFF && bom[1] == 0xFE)
             {
-                StrEncodeType = VSET_UTF_16;
+                StrEncode = VSET_UTF_16;
                 fseek(in, 2, SEEK_SET);
                 fileSize -= 2;
             }
             else if (bom[0] == 0xEF && bom[1] == 0xBB && bom[2] == 0xBF)
             {
-                StrEncodeType = VSET_UTF_8;
+                StrEncode = VSET_UTF_8;
                 fseek(in, 3, SEEK_SET);
                 fileSize -= 3;
             }
@@ -3413,11 +3413,11 @@ public:
                 fseek(in, 0, SEEK_SET);
             }
         }
-        if (StrEncodeType == VSET_UNKNOWN)
-            StrEncodeType = VSET_MBCS;
-        if (StrEncodeType == VSET_UTF_16)
+        if (StrEncode == VSET_UNKNOWN)
+            StrEncode = VSET_MBCS;
+        if (StrEncode == VSET_UTF_16)
         {
-            PIV_IF(EncodeType == 2)
+            PIV_IF(sizeof(EncodeType) == 2)
             {
                 str.resize(fileSize / sizeof(CharT));
                 Succeeded = (fread(const_cast<CharT *>(str.data()), sizeof(CharT), fileSize / sizeof(CharT), in) == fileSize / sizeof(CharT));
@@ -3426,7 +3426,7 @@ public:
             {
                 std::unique_ptr<char> data{new char[fileSize]};
                 Succeeded = (fread(const_cast<char *>(data.get()), 1, fileSize, in) == fileSize);
-                PIV_IF(EncodeType == 1)
+                PIV_IF(sizeof(EncodeType) == 3)
                 {
                     PivU2W utf{reinterpret_cast<const char *>(data.get()), fileSize};
                     str.assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetLength());
@@ -3438,9 +3438,9 @@ public:
                 }
             }
         }
-        else if (StrEncodeType == VSET_UTF_8)
+        else if (StrEncode == VSET_UTF_8)
         {
-            PIV_IF(EncodeType == 1)
+            PIV_IF(sizeof(EncodeType) == 3)
             {
                 str.resize(fileSize);
                 Succeeded = (fread(const_cast<CharT *>(str.data()), 1, fileSize, in) == fileSize);
@@ -3449,7 +3449,7 @@ public:
             {
                 std::unique_ptr<char> data{new char[fileSize]};
                 Succeeded = (fread(const_cast<char *>(data.get()), 1, fileSize, in) == fileSize);
-                PIV_IF(EncodeType == 2)
+                PIV_IF(sizeof(EncodeType) == 2)
                 {
                     PivW2U utf{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2};
                     str.assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetLength());
@@ -3461,9 +3461,9 @@ public:
                 }
             }
         }
-        else if (StrEncodeType == VSET_MBCS)
+        else if (StrEncode == VSET_MBCS)
         {
-            PIV_IF(EncodeType == 0)
+            PIV_IF(sizeof(EncodeType) == 1)
             {
                 str.resize(fileSize / sizeof(CharT));
                 Succeeded = (fread(const_cast<CharT *>(str.data()), sizeof(CharT), fileSize / sizeof(CharT), in) == fileSize / sizeof(CharT));
@@ -3472,7 +3472,7 @@ public:
             {
                 std::unique_ptr<char> data{new char[fileSize]};
                 Succeeded = (fread(const_cast<char *>(data.get()), 1, fileSize, in) == fileSize);
-                PIV_IF(EncodeType == 2)
+                PIV_IF(sizeof(EncodeType) == 2)
                 {
                     PivW2A mbcs{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2};
                     str.assign(reinterpret_cast<const CharT *>(mbcs.GetText()), mbcs.GetLength());
@@ -3494,31 +3494,31 @@ public:
      * @brief 写出文本文件
      * @param FileName 所欲写到文件名
      * @param WriteDataSize 所欲写出文本长度
-     * @param WriteEncodeType 所欲写出文本编码
+     * @param WriteEncode 所欲写出文本编码
      * @return
      */
-    bool WriteIntoFile(const wchar_t *FileName, const int32_t &WriteDataSize = -1, const VOL_STRING_ENCODE_TYPE &WriteEncodeType = VSET_UTF_16, const bool &with_bom = true)
+    bool WriteIntoFile(const wchar_t *FileName, const int32_t &WriteDataSize = -1, const VOL_STRING_ENCODE_TYPE &WriteEncode = VSET_UTF_16, const bool &with_bom = true)
     {
         ASSERT(WriteDataSize >= -1);
         ASSERT_R_STR(FileName);
-        ASSERT(WriteEncodeType != VSET_UNKNOWN);
+        ASSERT(WriteEncode != VSET_UNKNOWN);
         FILE *out = _wfopen(FileName, L"wb");
         if (out == NULL)
             return false;
         bool Succeeded = false;
         size_t count = (WriteDataSize == -1) ? str.size() : ((static_cast<size_t>(WriteDataSize) > str.size()) ? str.size() : static_cast<size_t>(WriteDataSize));
-        if (WriteEncodeType == VSET_UTF_16)
+        if (WriteEncode == VSET_UTF_16)
         {
             if (with_bom)
             {
                 const byte bom[] = {0xFF, 0xFE};
                 fwrite(bom, 1, 2, out);
             }
-            PIV_IF(EncodeType == 2)
+            PIV_IF(sizeof(EncodeType) == 2)
             {
                 Succeeded = (fwrite(str.data(), sizeof(CharT), count, out) == count);
             }
-            PIV_ELSE_IF(EncodeType == 1)
+            PIV_ELSE_IF(sizeof(EncodeType) == 3)
             {
                 PivU2W utf{reinterpret_cast<const char *>(str.c_str()), count};
                 Succeeded = (fwrite(utf.GetText(), 2, utf.GetLength(), out) == utf.GetLength());
@@ -3529,19 +3529,19 @@ public:
                 Succeeded = (fwrite(utf.GetText(), 2, utf.GetLength(), out) == utf.GetLength());
             }
         }
-        else if (WriteEncodeType == VSET_UTF_8)
+        else if (WriteEncode == VSET_UTF_8)
         {
             if (with_bom)
             {
                 const byte bom[] = {0xEF, 0xBB, 0xBF};
                 fwrite(bom, 1, 3, out);
             }
-            PIV_IF(EncodeType == 2)
+            PIV_IF(sizeof(EncodeType) == 2)
             {
                 PivW2U utf{reinterpret_cast<const wchar_t *>(str.c_str()), count};
                 Succeeded = (fwrite(utf.GetText(), 1, utf.GetLength(), out) == utf.GetLength());
             }
-            PIV_ELSE_IF(EncodeType == 1)
+            PIV_ELSE_IF(sizeof(EncodeType) == 3)
             {
                 Succeeded = (fwrite(str.data(), sizeof(CharT), count, out) == count);
             }
@@ -3551,14 +3551,14 @@ public:
                 Succeeded = (fwrite(utf.GetText(), 1, utf.GetLength(), out) == utf.GetLength());
             }
         }
-        else if (WriteEncodeType == VSET_MBCS)
+        else if (WriteEncode == VSET_MBCS)
         {
-            PIV_IF(EncodeType == 2)
+            PIV_IF(sizeof(EncodeType) == 2)
             {
                 PivW2A mbcs{reinterpret_cast<const wchar_t *>(str.c_str()), count};
                 Succeeded = (fwrite(mbcs.GetText(), 1, mbcs.GetLength(), out) == mbcs.GetLength());
             }
-            PIV_ELSE_IF(EncodeType == 1)
+            PIV_ELSE_IF(sizeof(EncodeType) == 3)
             {
                 PivU2A mbcs{reinterpret_cast<const char *>(str.c_str()), count};
                 Succeeded = (fwrite(mbcs.GetText(), 1, mbcs.GetLength(), out) == mbcs.GetLength());
@@ -3624,11 +3624,11 @@ public:
     }
     inline PivString &AddText(const CVolString &s)
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             str.append(reinterpret_cast<const CharT *>(s.GetText()));
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             PivW2U utf8{s};
             str.append(reinterpret_cast<const CharT *>(utf8.GetText()));
@@ -3642,11 +3642,11 @@ public:
     }
     inline PivString &AddText(const CVolConstString &s)
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             str.append(reinterpret_cast<const CharT *>(s.GetText()));
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             PivW2U utf8{s};
             str.append(reinterpret_cast<const CharT *>(utf8.GetText()));
@@ -3777,11 +3777,11 @@ public:
     }
     inline PivString &Append(const CVolString &s, const size_t &count = (size_t)-1)
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             str.append(reinterpret_cast<const CharT *>(s.GetText()), (count == (size_t)-1) ? static_cast<size_t>(s.GetLength()) : count);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             PivW2U utf8{s};
             str.append(reinterpret_cast<const CharT *>(utf8.GetText()), (count == (size_t)-1) ? utf8.GetLength() : count);
@@ -3842,11 +3842,11 @@ public:
     }
     inline PivString &AddManyText(const CVolString &s, const size_t &times)
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return AddManyText(reinterpret_cast<const CharT *>(s.GetText()), times);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return AddManyText(reinterpret_cast<const CharT *>(PivW2U{s}.GetText()), times);
         }
@@ -3886,11 +3886,11 @@ public:
     }
     inline PivString &AddLowerText(const CVolString &s)
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return AddLowerText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(s.GetText())});
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return AddLowerText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{s}.GetText())});
         }
@@ -3930,11 +3930,11 @@ public:
     }
     inline PivString &AddUpperText(const CVolString &s)
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return AddUpperText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(s.GetText())});
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return AddUpperText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{s}.GetText())});
         }
@@ -3972,11 +3972,11 @@ public:
     template <typename... Ts>
     PivString &AddFormatText(const CVolString &format, const Ts... args)
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             str.append(piv::edit::format(reinterpret_cast<const CharT *>(format.GetText()), args...));
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             str.append(piv::edit::format(reinterpret_cast<const CharT *>(PivW2U{format}.GetText()), args...));
         }
@@ -4036,11 +4036,11 @@ public:
     }
     inline PivString &InsertText(const size_t &index, const CVolString &s, const size_t &count = (size_t)-1)
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return InsertText(index, reinterpret_cast<const CharT *>(s.GetText()), (count == (size_t)-1) ? s.GetLength() : count);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return InsertText(index, reinterpret_cast<const CharT *>(PivW2U{s}.GetText()), count);
         }
@@ -4350,11 +4350,11 @@ public:
     }
     inline size_t FindFirstOf(const CVolString &chars, const size_t &pos = 0) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return FindFirstOf(reinterpret_cast<const CharT *>(chars.GetText()), pos);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return FindFirstOf(reinterpret_cast<const CharT *>(PivW2U{chars}.GetText()), pos);
         }
@@ -4389,11 +4389,11 @@ public:
     }
     inline size_t FindLastOf(const CVolString &chars, const size_t &pos = (size_t)-1) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return FindLastOf(reinterpret_cast<const CharT *>(chars.GetText()), pos);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return FindLastOf(reinterpret_cast<const CharT *>(PivW2U{chars}.GetText()), pos);
         }
@@ -4428,11 +4428,11 @@ public:
     }
     inline size_t FindFirstNotOf(const CVolString &chars, const size_t &pos = 0) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return FindFirstNotOf(reinterpret_cast<const CharT *>(chars.GetText()), pos);
         }
-        PIV_ELSE_Iof(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return FindFirstNotOf(reinterpret_cast<const CharT *>(PivW2U{chars}.GetText()), pos);
         }
@@ -4467,11 +4467,11 @@ public:
     }
     inline size_t FindLastNotOf(const CVolString &chars, const size_t &pos = (size_t)-1) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return FindLastNotOf(reinterpret_cast<const CharT *>(chars.GetText()), pos);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return FindLastNotOf(reinterpret_cast<const CharT *>(PivW2U{chars}.GetText()), pos);
         }
@@ -4518,11 +4518,11 @@ public:
     }
     inline size_t SearchText(const CVolString &text, const size_t &pos = 0, const bool &case_insensitive = false, size_t *textlen = nullptr) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return SearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(text.GetText())}, pos, case_insensitive, textlen);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return SearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{text}.GetText())}, pos, case_insensitive, textlen);
         }
@@ -4564,11 +4564,11 @@ public:
     }
     inline size_t ReverseSearchText(const CVolString &text, const size_t &pos = (size_t)-1, const bool &case_insensitive = false, size_t *textlen = nullptr) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return ReverseSearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(text.GetText())}, pos, case_insensitive, textlen);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return ReverseSearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{text}.GetText())}, pos, case_insensitive, textlen);
         }
@@ -4651,11 +4651,11 @@ public:
     }
     inline bool EndOf(const CVolString &s, const bool &case_sensitive = true) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return EndOf(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(text.GetText())}, case_sensitive);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return EndOf(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{text}.GetText())}, case_sensitive);
         }
@@ -4719,11 +4719,11 @@ public:
     }
     inline PivString &Replace(const size_t &pos, const size_t &count, const CVolString &s)
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return Replace(pos, count, reinterpret_cast<const CharT *>(text.GetText()), -1);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return Replace(pos, count, reinterpret_cast<const CharT *>(PivW2U{text}.GetText()), -1);
         }
@@ -4783,12 +4783,12 @@ public:
     }
     PivString &ReplaceSubText(const CVolString &findStr, const CVolString &repStr, const size_t &pos = 0, const size_t &count = (size_t)-1, const bool &case_sensitive = true)
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return ReplaceSubText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(findStr.GetText())},
                                   piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(repStr.GetText())}, pos, count, case_sensitive);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             PivW2U find_utf8{findStr};
             PivW2U rep_utf8{repStr};
@@ -5066,11 +5066,11 @@ public:
     }
     inline size_t SplitStrings(const CVolString &delimit, std::vector<std::basic_string<CharT>> &strArray, const bool &trimAll = true, const bool &ignoreEmptyStr = true, const size_t &max_count = (size_t)-1) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return SplitStrings(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(delimit.GetText())}, strArray, trimAll, ignoreEmptyStr, max_count);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return SplitStrings(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{delimit}.GetText())}, strArray, trimAll, ignoreEmptyStr, max_count);
         }
@@ -5156,11 +5156,11 @@ public:
     }
     inline size_t SplitStringsView(const CVolString &delimit, std::vector<piv::basic_string_view<CharT>> &svArray, const bool &trimAll = true, const bool &ignoreEmptyStr = true, const size_t &max_count = (size_t)-1) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return SplitStringsView(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(delimit.GetText())}, svArray, trimAll, ignoreEmptyStr, max_count);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return SplitStringsView(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{delimit}.GetText())}, svArray, trimAll, ignoreEmptyStr, max_count);
         }
@@ -5244,11 +5244,11 @@ public:
     }
     inline size_t SplitSubStrings(const CVolString &delimit, std::vector<std::basic_string<CharT>> &strArray, const bool &trimAll = true, const bool &ignoreEmptyStr = true, const size_t &max_count = (size_t)-1) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return SplitSubStrings(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(delimit.GetText())}, strArray, trimAll, ignoreEmptyStr, max_count);
         }
-        PIV_ELSE_IF(EncodeType 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return SplitSubStrings(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{delimit}.GetText())}, strArray, trimAll, ignoreEmptyStr, max_count);
         }
@@ -5333,11 +5333,11 @@ public:
     }
     inline size_t SplitSubStringViews(const CVolString &delimit, std::vector<piv::basic_string_view<CharT>> &svArray, const bool &trimAll = true, const bool &ignoreEmptyStr = true, const size_t &max_count = (size_t)-1) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return SplitSubStringViews(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(delimit.GetText())}, svArray, trimAll, ignoreEmptyStr, max_count);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return SplitSubStringViews(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{delimit}.GetText())}, svArray, trimAll, ignoreEmptyStr, max_count);
         }
@@ -5409,11 +5409,11 @@ public:
      */
     inline CVolString ToVolString() const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return CVolString(reinterpret_cast<const wchar_t *>(str.c_str()));
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return *PivU2Ws{reinterpret_cast<const char *>(str.c_str())};
         }
@@ -5581,11 +5581,11 @@ public:
     }
     inline PivString &FromHexStr(const CVolString &hexstr)
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             piv::encoding::hex_to_str(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(hexstr.GetText())}, str);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             piv::encoding::hex_to_str(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{hexstr}.GetText())}, str);
         }
@@ -5618,11 +5618,11 @@ public:
     }
     inline PivString &AddHexStr(const CVolString &hexstr)
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             str.append(piv::encoding::hex_to_str(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(hexstr.GetText())}));
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             str.append(piv::encoding::hex_to_str(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{hexstr}.GetText())}));
         }
@@ -5640,11 +5640,11 @@ public:
      */
     inline PivString ToUsc2(const bool &en_ascii = false) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return PivString{piv::encoding::to_usc2<CharT>(piv::wstring_view{reinterpret_cast<const wchar_t *>(str.c_str())}, en_ascii)};
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return PivString{piv::encoding::to_usc2<CharT>(piv::wstring_view{*PivU2W{reinterpret_cast<const char *>(str.c_str())}}, en_ascii)};
         }
@@ -5655,11 +5655,11 @@ public:
     }
     inline CVolString &ToUsc2Str(const bool &en_ascii = false, CVolString &usc2 = CVolString{}) const
     {
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             return piv::encoding::to_usc2str(piv::wstring_view{reinterpret_cast<const wchar_t *>(str.c_str())}, en_ascii, usc2);
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             return piv::encoding::to_usc2str(piv::wstring_view{*PivU2W{reinterpret_cast<const char *>(str.c_str())}}, en_ascii, usc2);
         }
@@ -5677,12 +5677,12 @@ public:
     inline PivString &FromUsc2Str(const piv::basic_string_view<CharT> &usc2)
     {
         std::wstring ret;
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             piv::encoding::usc2_to_str(usc2, ret);
             str.assign(reinterpret_cast<const CharT *>(ret.c_str()));
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             piv::encoding::usc2_to_str(piv::wstring_view{*PivU2W{reinterpret_cast<const char *>(usc2.data()), usc2.size()}}, ret);
             str.assign(reinterpret_cast<const CharT *>(PivW2U{ret}.GetText()));
@@ -5706,11 +5706,11 @@ public:
     {
         std::wstring ret;
         piv::encoding::usc2_to_str(piv::wstring_view{usc2.GetText()}, ret);
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             str.assign(reinterpret_cast<const CharT *>(ret.c_str()));
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             str.assign(reinterpret_cast<const CharT *>(PivW2U{ret}.GetText()));
         }
@@ -5729,12 +5729,12 @@ public:
     inline PivString &AddUsc2Str(const piv::basic_string_view<CharT> &usc2)
     {
         std::wstring ret;
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             piv::encoding::usc2_to_str(usc2, ret);
             str.append(reinterpret_cast<const CharT *>(ret.c_str()));
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             piv::encoding::usc2_to_str(piv::wstring_view{*PivU2W{reinterpret_cast<const char *>(usc2.data()), usc2.size()}}, ret);
             str.append(reinterpret_cast<const CharT *>(PivW2U{ret}.GetText()));
@@ -5758,11 +5758,11 @@ public:
     {
         std::wstring ret;
         piv::encoding::usc2_to_str(piv::wstring_view{usc2.GetText()}, ret);
-        PIV_IF(EncodeType == 2)
+        PIV_IF(sizeof(EncodeType) == 2)
         {
             str.append(reinterpret_cast<const CharT *>(ret.c_str()));
         }
-        PIV_ELSE_IF(EncodeType == 1)
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
             str.append(reinterpret_cast<const CharT *>(PivW2U{ret}.GetText()));
         }
@@ -5890,12 +5890,12 @@ public:
     }
 }; // PivString
 
-using PivStringViewA = PivStringView<char, 0>;
-using PivStringViewU = PivStringView<char, 1>;
-using PivStringViewW = PivStringView<wchar_t, 4>;
+using PivStringViewA = PivStringView<char, char>;
+using PivStringViewU = PivStringView<char, piv::utf8>;
+using PivStringViewW = PivStringView<wchar_t, piv::utf16_le>;
 
-using PivStringA = PivString<char, 0>;
-using PivStringU = PivString<char, 1>;
-using PivStringW = PivString<wchar_t, 4>;
+using PivStringA = PivString<char, char>;
+using PivStringU = PivString<char, piv::utf8>;
+using PivStringW = PivString<wchar_t, piv::utf16_le>;
 
 #endif // _PIV_STRING_HPP
