@@ -278,11 +278,11 @@ namespace piv
     static CVolString GetFileMd5(FILE *file, const bool &upper, int64_t off, uint64_t len)
     {
         MD5Checksum md5;
-        char buff[1024];
+        char buff[65536];
         if (off > 0)
             _fseeki64(file, off, SEEK_SET);
         size_t rsize = 0;
-        while ((rsize = fread(buff, sizeof(char), 1024, file)) > 0)
+        while ((rsize = fread(buff, sizeof(char), 65536, file)) > 0)
         {
             if (rsize > len)
             {

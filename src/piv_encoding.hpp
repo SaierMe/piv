@@ -3,7 +3,6 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/04/15                          *
 \*********************************************/
 
 #ifndef _PIV_ENCODING_HPP
@@ -89,7 +88,7 @@ namespace piv
             {
                 if (mbslen == static_cast<size_t>(-1))
                     utf16len -= 1;
-                utf16str.SetLength(utf16len);
+                utf16str.m_mem.Alloc((utf16len + 1) * 2, TRUE);
                 ::MultiByteToWideChar(CP_ACP, 0, mbstr, (mbslen == static_cast<size_t>(-1)) ? -1 : static_cast<int>(mbslen), const_cast<wchar_t *>(utf16str.GetText()), utf16len);
             }
             else
@@ -202,7 +201,7 @@ namespace piv
             }
             else
             {
-                utf16str.SetLength(utf16words);
+                utf16str.m_mem.Alloc((utf16words + 1) * 2, TRUE);
                 utf16words = simdutf::convert_valid_utf8_to_utf16le(utf8str, utf8words, reinterpret_cast<char16_t *>(const_cast<wchar_t *>(utf16str.GetText())));
             }
 #else
@@ -211,7 +210,7 @@ namespace piv
             {
                 if (utf8len == static_cast<size_t>(-1))
                     utf16len -= 1;
-                utf16str.SetLength(utf16len);
+                utf16str.m_mem.Alloc((utf16len + 1) * 2, TRUE);
                 ::MultiByteToWideChar(CP_UTF8, 0, utf8str, (utf8len == static_cast<size_t>(-1)) ? -1 : static_cast<int>(utf8len), const_cast<wchar_t *>(utf16str.GetText()), utf16len);
             }
             else
@@ -655,20 +654,21 @@ namespace piv
         CVolString &value_to_hex(const T &v, CVolString &hex, const bool &upper = true)
         {
             const unsigned char *pValue = reinterpret_cast<const unsigned char *>(&v);
+            wchar_t *pStr = reinterpret_cast<wchar_t *>(hex.m_mem.Alloc(((sizeof(T) * 2) + 1) * 2, TRUE));
             if (upper)
             {
-                for (size_t i = 0; i < sizeof(T); ++i)
+                for (size_t i = 0, n = 0; i < sizeof(T); ++i)
                 {
-                    hex.AddChar(hexUpCh[static_cast<unsigned char>(pValue[i]) >> 4]);
-                    hex.AddChar(hexUpCh[static_cast<unsigned char>(pValue[i]) & 0xF]);
+                    pStr[n++] = hexUpCh[static_cast<unsigned char>(pValue[i]) >> 4];
+                    pStr[n++] = hexUpCh[static_cast<unsigned char>(pValue[i]) & 0xF];
                 }
             }
             else
             {
-                for (size_t i = 0; i < sizeof(T); ++i)
+                for (size_t i = 0, n = 0; i < sizeof(T); ++i)
                 {
-                    hex.AddChar(hexLowCh[static_cast<unsigned char>(pValue[i]) >> 4]);
-                    hex.AddChar(hexLowCh[static_cast<unsigned char>(pValue[i]) & 0xF]);
+                    pStr[n++] = hexLowCh[static_cast<unsigned char>(pValue[i]) >> 4];
+                    pStr[n++] = hexLowCh[static_cast<unsigned char>(pValue[i]) & 0xF];
                 }
             }
             return hex;

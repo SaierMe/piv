@@ -216,10 +216,9 @@
         @     @an<CVolString> szStr;
         @     if (Offset <= 0) return szStr;
         @     INT nLength = @<欲取字符数>;
-        @     szStr.SetLength (nLength);
-        @     std::uniform_int_distribution<size_t> dist (0, Offset);
+        @     wchar_t* pStr = szStr.InitWithChars (nLength, ' ');
         @     for (INT i = 0; i < nLength; i++) {
-        @         wcsncpy ((wchar_t*)szStr.GetText () + i, Buffer + dist (@sn<this>.gen), 1);
+        @         pStr[i] = Buffer[randint (0, Offset)];
         @     }
         @     return szStr;
         @ } ()

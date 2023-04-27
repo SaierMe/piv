@@ -3,7 +3,6 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/04/15                          *
 \*********************************************/
 
 #ifndef _PIV_URL_HPP
@@ -36,7 +35,7 @@ private:
 
 public:
     /**
-     * @brief 默认构造于析构函数
+     * @brief 默认构造与析构函数
      */
     PivUrlParser() {}
     ~PivUrlParser() {}
@@ -1017,7 +1016,7 @@ private:
 
 public:
     /**
-     * @brief 默认构造于析构函数
+     * @brief 默认构造与析构函数
      */
     PivFormParser() {}
     ~PivFormParser() {}
@@ -1434,7 +1433,7 @@ private:
 
 public:
     /**
-     * @brief 默认构造于析构函数
+     * @brief 默认构造与析构函数
      */
     PivUrlCreaterW()
     {

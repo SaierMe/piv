@@ -3,7 +3,6 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/04/15                          *
 \*********************************************/
 
 #ifndef _PIV_STRING_HPP
@@ -1702,15 +1701,15 @@ public:
      * @brief 到整数
      * @return
      */
-    inline int32_t ToInt() const
+    inline int32_t ToInt(const int32_t &radix = 0) const
     {
         PIV_IF(sizeof(CharT) == 2)
         {
-            return _wtoi(reinterpret_cast<const wchar_t *>(std::basic_string<CharT>{sv.data(), sv.size()}.c_str()));
+            return static_cast<int32_t>(wcstoul(reinterpret_cast<const wchar_t *>(std::basic_string<CharT>{sv.data(), sv.size()}.c_str()), nullptr, radix));
         }
         else
         {
-            return atoi(reinterpret_cast<const char *>(std::basic_string<CharT>{sv.data(), sv.size()}.c_str()));
+            return static_cast<int32_t>(strtoul(reinterpret_cast<const char *>(std::basic_string<CharT>{sv.data(), sv.size()}.c_str()), nullptr, radix));
         }
     }
 
@@ -1719,15 +1718,15 @@ public:
      * @param base 进制
      * @return
      */
-    inline int64_t ToInt64() const
+    inline int64_t ToInt64(const int32_t &radix = 0) const
     {
         PIV_IF(sizeof(CharT) == 2)
         {
-            return _wtoi64(reinterpret_cast<const wchar_t *>(std::basic_string<CharT>{sv.data(), sv.size()}.c_str()));
+            return static_cast<int64_t>(wcstoull(reinterpret_cast<const wchar_t *>(std::basic_string<CharT>{sv.data(), sv.size()}.c_str()), nullptr, radix));
         }
         else
         {
-            return _atoi64(reinterpret_cast<const char *>(std::basic_string<CharT>{sv.data(), sv.size()}.c_str()));
+            return static_cast<int64_t>(strtoull(reinterpret_cast<const char *>(std::basic_string<CharT>{sv.data(), sv.size()}.c_str()), nullptr, radix));
         }
     }
 
@@ -3257,74 +3256,100 @@ public:
     }
     inline PivString &SetText(const int64_t &n)
     {
+        CharT buf[32] = {'\0'};
         PIV_IF(sizeof(CharT) == 2)
         {
-            str.assign(reinterpret_cast<const CharT *>(std::to_wstring(n).c_str()));
+            _i64tow(n, reinterpret_cast<wchar_t *>(buf), 10);
         }
         else
         {
-            str.assign(reinterpret_cast<const CharT *>(std::to_string(n).c_str()));
+            _i64toa(n, reinterpret_cast<char *>(buf), 10);
         }
+        str.assign(buf);
         return *this;
     }
     inline PivString &SetText(const int32_t &n)
     {
+        CharT buf[16] = {'\0'};
         PIV_IF(sizeof(CharT) == 2)
         {
-            str.assign(reinterpret_cast<const CharT *>(std::to_wstring(n).c_str()));
+            _ltow(n, reinterpret_cast<wchar_t *>(buf), 10);
         }
         else
         {
-            str.assign(reinterpret_cast<const CharT *>(std::to_string(n).c_str()));
+            _ltoa(n, reinterpret_cast<char *>(buf), 10);
         }
+        str.assign(buf);
         return *this;
     }
     inline PivString &SetText(const wchar_t &n)
     {
+        CharT buf[8] = {'\0'};
         PIV_IF(sizeof(CharT) == 2)
         {
-            str.assign(reinterpret_cast<const CharT *>(std::to_wstring(n).c_str()));
+            _ultow(n, reinterpret_cast<wchar_t *>(buf), 10);
         }
         else
         {
-            str.assign(reinterpret_cast<const CharT *>(std::to_string(n).c_str()));
+            _ultoa(n, reinterpret_cast<char *>(buf), 10);
         }
+        str.assign(buf);
         return *this;
     }
     inline PivString &SetText(const int16_t &n)
     {
+        CharT buf[8] = {'\0'};
         PIV_IF(sizeof(CharT) == 2)
         {
-            str.assign(reinterpret_cast<const CharT *>(std::to_wstring(n).c_str()));
+            _ltow(n, reinterpret_cast<wchar_t *>(buf), 10);
         }
         else
         {
-            str.assign(reinterpret_cast<const CharT *>(std::to_string(n).c_str()));
+            _ltoa(n, reinterpret_cast<char *>(buf), 10);
         }
+        str.assign(buf);
         return *this;
     }
     inline PivString &SetText(const int8_t &n)
     {
+        CharT buf[8] = {'\0'};
         PIV_IF(sizeof(CharT) == 2)
         {
-            str.assign(reinterpret_cast<const CharT *>(std::to_wstring(n).c_str()));
+            _ltow(n, reinterpret_cast<wchar_t *>(buf), 10);
         }
         else
         {
-            str.assign(reinterpret_cast<const CharT *>(std::to_string(n).c_str()));
+            _ltoa(n, reinterpret_cast<char *>(buf), 10);
         }
+        str.assign(buf);
         return *this;
     }
     inline PivString &SetText(const double &n)
     {
+        CharT buf[128] = {'\0'};
         PIV_IF(sizeof(CharT) == 2)
         {
-            str.assign(reinterpret_cast<const CharT *>(std::to_wstring(n).c_str()));
+            wsprintfW(reinterpret_cast<wchar_t *>(buf), L"%lf", n);
         }
         else
         {
-            str.assign(reinterpret_cast<const CharT *>(std::to_string(n).c_str()));
+            sprintf(reinterpret_cast<char *>(buf), "%lf", n);
         }
+        str.assign(buf);
+        return *this;
+    }
+    inline PivString &SetText(const float &n)
+    {
+        CharT buf[128] = {'\0'};
+        PIV_IF(sizeof(CharT) == 2)
+        {
+            wsprintfW(reinterpret_cast<wchar_t *>(buf), L"%f", n);
+        }
+        else
+        {
+            sprintf(reinterpret_cast<char *>(buf), "%f", n);
+        }
+        str.assign(buf);
         return *this;
     }
 
@@ -3685,80 +3710,182 @@ public:
     }
     inline PivString &AddText(const int64_t &n)
     {
+        CharT buf[32] = {'\0'};
         PIV_IF(sizeof(CharT) == 2)
         {
-            str.append(reinterpret_cast<const CharT *>(std::to_wstring(n).c_str()));
+            _i64tow(n, reinterpret_cast<wchar_t *>(buf), 10);
         }
         else
         {
-            str.append(reinterpret_cast<const CharT *>(std::to_string(n).c_str()));
+            _i64toa(n, reinterpret_cast<char *>(buf), 10);
         }
+        str.append(buf);
         return *this;
     }
     inline PivString &AddText(const int32_t &n)
     {
+        CharT buf[16] = {'\0'};
         PIV_IF(sizeof(CharT) == 2)
         {
-            str.append(reinterpret_cast<const CharT *>(std::to_wstring(n).c_str()));
+            _ltow(n, reinterpret_cast<wchar_t *>(buf), 10);
         }
         else
         {
-            str.append(reinterpret_cast<const CharT *>(std::to_string(n).c_str()));
+            _ltoa(n, reinterpret_cast<char *>(buf), 10);
         }
+        str.append(buf);
         return *this;
     }
     inline PivString &AddText(const wchar_t &n)
     {
+        CharT buf[8] = {'\0'};
         PIV_IF(sizeof(CharT) == 2)
         {
-            str.append(reinterpret_cast<const CharT *>(std::to_wstring(n).c_str()));
+            _ultow(n, reinterpret_cast<wchar_t *>(buf), 10);
         }
         else
         {
-            str.append(reinterpret_cast<const CharT *>(std::to_string(n).c_str()));
+            _ultoa(n, reinterpret_cast<wchar_t *>(buf), 10);
         }
+        str.append(buf);
         return *this;
     }
     inline PivString &AddText(const int16_t &n)
     {
+        CharT buf[8] = {'\0'};
         PIV_IF(sizeof(CharT) == 2)
         {
-            str.append(reinterpret_cast<const CharT *>(std::to_wstring(n).c_str()));
+            _ltow(n, reinterpret_cast<wchar_t *>(buf), 10);
         }
         else
         {
-            str.append(reinterpret_cast<const CharT *>(std::to_string(n).c_str()));
+            _ltoa(n, reinterpret_cast<char *>(buf), 10);
         }
+        str.append(buf);
         return *this;
     }
     inline PivString &AddText(const int8_t &n)
     {
+        CharT buf[8] = {'\0'};
         PIV_IF(sizeof(CharT) == 2)
         {
-            str.append(reinterpret_cast<const CharT *>(std::to_wstring(n).c_str()));
+            _ltow(n, reinterpret_cast<wchar_t *>(buf), 10);
         }
         else
         {
-            str.append(reinterpret_cast<const CharT *>(std::to_string(n).c_str()));
+            _ltoa(n, reinterpret_cast<char *>(buf), 10);
         }
+        str.append(buf);
         return *this;
     }
     inline PivString &AddText(const double &n)
     {
+        CharT buf[128] = {'\0'};
         PIV_IF(sizeof(CharT) == 2)
         {
-            str.append(reinterpret_cast<const CharT *>(std::to_wstring(n).c_str()));
+            wsprintfW(reinterpret_cast<wchar_t *>(buf), L"%lf", n);
         }
         else
         {
-            str.append(reinterpret_cast<const CharT *>(std::to_string(n).c_str()));
+            sprintf(reinterpret_cast<char *>(buf), "%lf", n);
         }
+        str.append(buf);
+        return *this;
+    }
+    inline PivString &AddText(const float &n)
+    {
+        CharT buf[128] = {'\0'};
+        PIV_IF(sizeof(CharT) == 2)
+        {
+            wsprintfW(reinterpret_cast<wchar_t *>(buf), L"%lf", n);
+        }
+        else
+        {
+            sprintf(reinterpret_cast<char *>(buf), "%lf", n);
+        }
+        str.append(buf);
         return *this;
     }
     template <typename T, typename... Args>
     PivString &AddText(const T &s, const Args... args)
     {
         return AddText(s).AddText(args...);
+    }
+
+    /**
+     * @brief 加入无符号数值
+     * @param value 所欲加入的无符号数值
+     * @return 
+     */
+    inline PivString &AddUnsignedValue(const int64_t &value)
+    {
+        CharT buf[32] = {0};
+        PIV_IF(sizeof(CharT) == 2)
+        {
+            _ui64tow(static_cast<uint64_t>(value), reinterpret_cast<wchar_t *>(buf), 10);
+        }
+        else
+        {
+            _ui64toa(static_cast<uint64_t>(value), reinterpret_cast<char *>(buf), 10);
+        }
+        str.append(buf);
+        return *this;
+    }
+    inline PivString &AddUnsignedValue(const int32_t &value)
+    {
+        CharT buf[16] = {0};
+        PIV_IF(sizeof(CharT) == 2)
+        {
+            _ultow(static_cast<uint32_t>(value), reinterpret_cast<wchar_t *>(buf), 10);
+        }
+        else
+        {
+            _ultoa(static_cast<uint32_t>(value), reinterpret_cast<char *>(buf), 10);
+        }
+        str.append(buf);
+        return *this;
+    }
+    inline PivString &AddUnsignedValue(const wchar_t &value)
+    {
+        CharT buf[8] = {0};
+        PIV_IF(sizeof(CharT) == 2)
+        {
+            _ultow(value, reinterpret_cast<wchar_t *>(buf), 10);
+        }
+        else
+        {
+            _ultoa(value, reinterpret_cast<char *>(buf), 10);
+        }
+        str.append(buf);
+        return *this;
+    }
+    inline PivString &AddUnsignedValue(const int16_t &value)
+    {
+        CharT buf[8] = {0};
+        PIV_IF(sizeof(CharT) == 2)
+        {
+            _ultow(static_cast<uint16_t>(value), reinterpret_cast<wchar_t *>(buf), 10);
+        }
+        else
+        {
+            _ultoa(static_cast<uint16_t>(value), reinterpret_cast<char *>(buf), 10);
+        }
+        str.append(buf);
+        return *this;
+    }
+    inline PivString &AddUnsignedValue(const int8_t &value)
+    {
+        CharT buf[8] = {0};
+        PIV_IF(sizeof(CharT) == 2)
+        {
+            _ultow(static_cast<uint8_t>(value), reinterpret_cast<wchar_t *>(buf), 10);
+        }
+        else
+        {
+            _ultoa(static_cast<uint8_t>(value), reinterpret_cast<char *>(buf), 10);
+        }
+        str.append(buf);
+        return *this;
     }
 
     /**
@@ -5427,15 +5554,15 @@ public:
      * @brief 到整数
      * @return
      */
-    inline int32_t ToInt() const
+    inline int32_t ToInt(const int32_t &radix = 0) const
     {
         PIV_IF(sizeof(CharT) == 2)
         {
-            return _wtoi(reinterpret_cast<const wchar_t *>(str.c_str()));
+            return static_cast<int32_t>(wcstoul(reinterpret_cast<const wchar_t *>(str.c_str()), nullptr, radix));
         }
         else
         {
-            return _atoi(reinterpret_cast<const char *>(str.c_str()));
+            return static_cast<int32_t>(strtoul(reinterpret_cast<const char *>(str.c_str()), nullptr, radix));
         }
     }
 
@@ -5443,15 +5570,15 @@ public:
      * @brief 到长整数
      * @return
      */
-    inline int64_t ToInt64() const
+    inline int64_t ToInt64(const int32_t &radix = 0) const
     {
         PIV_IF(sizeof(CharT) == 2)
         {
-            return _wtoi64(reinterpret_cast<const wchar_t *>(str.c_str()));
+            return static_cast<int64_t>(wcstoull(reinterpret_cast<const wchar_t *>(str.c_str()), nullptr, radix));
         }
         else
         {
-            return _atoi64(reinterpret_cast<const char *>(str.c_str()));
+            return static_cast<int64_t>(strtoull(reinterpret_cast<const char *>(str.c_str()), nullptr, radix));
         }
     }
 

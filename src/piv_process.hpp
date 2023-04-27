@@ -3,7 +3,6 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/04/07                          *
 \*********************************************/
 
 #ifndef _PIV_PROCESS_HPP
@@ -27,7 +26,6 @@ private:
     const BYTE *ProcessStart = NULL;
     const BYTE *ProcessEnd = NULL;
     DWORD PID;
-    CMArray<HMODULE> hModuleArray;
 
     const uint32_t BLOCKMAXSIZE{409600};
     typedef BOOL(WINAPI *Piv_GetProcessDEPPolicy)(HANDLE, LPDWORD, PBOOL);
@@ -40,9 +38,9 @@ private:
     // 取首模块信息
     BOOL get_base_module_info()
     {
-        hModuleArray.RemoveAll();
         if (hProcess == NULL)
             return FALSE;
+        CMArray<HMODULE> hModuleArray;
         DWORD dwNeeded = 0;
         ::EnumProcessModulesEx(hProcess, NULL, 0, &dwNeeded, 3);
         hModuleArray.InitCount(dwNeeded / sizeof(HMODULE), TRUE);
@@ -92,7 +90,6 @@ public:
             ProcessStart = NULL;
             ProcessEnd = NULL;
             PID = 0;
-            hModuleArray.RemoveAll();
         }
     }
 
@@ -226,11 +223,15 @@ public:
     {
         if (hProcess != NULL)
         {
+            CMArray<HMODULE> hModuleArray;
             DWORD dwNeeded = 0;
+            ::EnumProcessModulesEx(hProcess, NULL, 0, &dwNeeded, 3);
+            hModuleArray.InitCount(dwNeeded / sizeof(HMODULE), TRUE);
+            ::EnumProcessModulesEx(hProcess, hModuleArray.GetData(), dwNeeded, &dwNeeded, 3);
             std::wstring module_name_sv{module_name};
-            WCHAR szBaseName[MAX_PATH + 1]{'\0'};
             if (module_name_sv.empty())
             {
+                WCHAR szBaseName[MAX_PATH + 1]{'\0'};
                 ::GetModuleBaseNameW(hProcess, 0, szBaseName, MAX_PATH);
                 module_name_sv = szBaseName;
             }

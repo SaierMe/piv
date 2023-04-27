@@ -3440,7 +3440,7 @@
     {
         @ return (INT)WinHttpWebSocketShutdown ((HINTERNET)@<WebSocket句柄>, (USHORT)@<关闭状态码>,
         @                                       @<关闭原因>.IsEmpty () ? NULL : (PVOID)@<关闭原因>.GetText (),
-        @                                       @<关闭原因>.IsEmpty () ? 0 : ((DWORD)@<关闭原因>.GetLength () + 1) * 2);
+        @                                       @<关闭原因>.IsEmpty () ? 0 : (DWORD)@<关闭原因>.GetLength ());
     }
 
     方法 关闭WebSocket <公开 静态 类型 = 整数 注释 = "完全关闭WebSocket连接." 注释 = "本方法此为Windows 8新增的API,之前的系统不可用."
@@ -3451,7 +3451,7 @@
     {
         @ return (INT)WinHttpWebSocketClose ((HINTERNET)@<WebSocket句柄>, (USHORT)@<关闭状态码>,
         @                                    @<关闭原因>.IsEmpty () ? NULL : (PVOID)@<关闭原因>.GetText (),
-        @                                    @<关闭原因>.IsEmpty () ? 0 : ((DWORD)@<关闭原因>.GetLength () + 1) * 2);
+        @                                    @<关闭原因>.IsEmpty () ? 0 : (DWORD)@<关闭原因>.GetLength ());
     }
 
     方法 取WebSocket关闭状态 <公开 静态 类型 = 整数 注释 = "获取WebSocket服务器发来的关闭状态码." 返回值注释 = "成功返回0,失败返回错误码." 折叠 @禁止流程检查 = 真>
@@ -4103,7 +4103,7 @@
     参数 用户代理 <类型 = 文本型>
     {
         @ return WinHttpSetOption ((HINTERNET)@<会话句柄>, 41, // WINHTTP_OPTION_USER_AGENT
-        @                          (LPVOID)@<用户代理>.GetText (), ((DWORD)@<用户代理>.GetLength () + 1) * 2);
+        @                          (LPVOID)@<用户代理>.GetText (), (DWORD)@<用户代理>.GetLength ());
     }
 
     方法 取选项_用户代理 <公开 静态 类型 = 文本型 注释 = "获取用户代理(User-Agent)." 返回值注释 = "返回用户代理." 折叠 @禁止流程检查 = 真>
@@ -4501,7 +4501,7 @@
     参数 用户名 <类型 = 文本型>
     {
         @ return WinHttpSetOption ((HINTERNET)@<请求句柄>, WINHTTP_OPTION_USERNAME,
-        @                          (LPVOID)@<用户名>.GetText (), ((DWORD)@<用户名>.GetLength () + 1) * 2);
+        @                          (LPVOID)@<用户名>.GetText (), (DWORD)@<用户名>.GetLength ());
     }
 
     方法 取选项_用户名 <公开 静态 类型 = 文本型 注释 = "获取请求句柄上的用户名." 返回值注释 = "返回用户名." 折叠 @禁止流程检查 = 真>
@@ -4522,7 +4522,7 @@
     参数 密码 <类型 = 文本型>
     {
         @ return WinHttpSetOption ((HINTERNET)@<请求句柄>, WINHTTP_OPTION_PASSWORD,
-        @                          (LPVOID)@<密码>.GetText (), ((DWORD)@<密码>.GetLength () + 1) * 2);
+        @                          (LPVOID)@<密码>.GetText (), (DWORD)@<密码>.GetLength ());
     }
 
     方法 取选项_密码 <公开 静态 类型 = 文本型 注释 = "获取请求句柄上的密码." 返回值注释 = "返回密码." 折叠 @禁止流程检查 = 真>
@@ -4543,7 +4543,7 @@
     参数 用户名 <类型 = 文本型>
     {
         @ return WinHttpSetOption ((HINTERNET)@<请求句柄>, WINHTTP_OPTION_PROXY_USERNAME,
-        @                          (LPVOID)@<用户名>.GetText (), ((DWORD)@<用户名>.GetLength () + 1) * 2);
+        @                          (LPVOID)@<用户名>.GetText (), (DWORD)@<用户名>.GetLength ());
     }
 
     方法 取选项_代理用户名 <公开 静态 类型 = 文本型 注释 = "获取请求句柄上访问代理的用户名." 返回值注释 = "返回用户名." 折叠 @禁止流程检查 = 真>
@@ -4564,7 +4564,7 @@
     参数 密码 <类型 = 文本型>
     {
         @ return WinHttpSetOption ((HINTERNET)@<请求句柄>, WINHTTP_OPTION_PROXY_PASSWORD,
-        @                          (LPVOID)@<密码>.GetText (), ((DWORD)@<密码>.GetLength () + 1) * 2);
+        @                          (LPVOID)@<密码>.GetText (), (DWORD)@<密码>.GetLength ());
     }
 
     方法 取选项_代理密码 <公开 静态 类型 = 文本型 注释 = "获取请求句柄上访问代理的密码." 返回值注释 = "返回代理密码." 折叠 @禁止流程检查 = 真>
@@ -4666,7 +4666,7 @@
     参数 请求句柄 <类型 = 变整数 注释 = "请提供调用\"打开请求\"成功时返回的请求句柄.">
     参数 域名 <类型 = 文本型>
     {
-        @ return WinHttpSetOption ((HINTERNET)@<请求句柄>, 165, (LPVOID)@<域名>.GetText (), ((DWORD)@<域名>.GetLength () + 1) * 2); // WINHTTP_OPTION_RESOLUTION_HOSTNAME
+        @ return WinHttpSetOption ((HINTERNET)@<请求句柄>, 165, (LPVOID)@<域名>.GetText (), (DWORD)@<域名>.GetLength ()); // WINHTTP_OPTION_RESOLUTION_HOSTNAME
     }
 
     方法 置选项_忽略证书吊销 <公开 静态 类型 = 逻辑型 注释 = "设置是否允许安全连接在无法下载证书吊销列表时继续使用安全证书."

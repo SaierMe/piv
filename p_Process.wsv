@@ -621,7 +621,7 @@
         @ }
         @ ::CloseHandle (pi.hThread);
         @ ::CloseHandle (pi.hProcess);
-        @ return static_cast<int32_t>(pi.dwProcessId);
+        @ return static_cast<INT>(pi.dwProcessId);
     }
 
     方法 提升进程权限 <公开 静态 类型 = 逻辑型 注释 = "提升当前进程的用户权限." 返回值注释 = "返回是否提权成功." 折叠 @禁止流程检查 = 真>
@@ -652,7 +652,7 @@
         @ typedef DWORD(WINAPI * NT_RtlAdjustPrivilege)(ULONG Privilege, BOOLEAN Enable, BOOLEAN CurrentThread, PBOOLEAN Enabled);
         @ NT_RtlAdjustPrivilege pfn = reinterpret_cast<NT_RtlAdjustPrivilege>(::GetProcAddress(::GetModuleHandle(L"Ntdll.dll"), "RtlAdjustPrivilege"));
         @ if (pfn) {
-        @     return static_cast<int32_t>(pfn(static_cast<ULONG>(@<权限ID>), @<启用权限>, @<是否仅当前线程>, reinterpret_cast<PBOOLEAN>(&@<原来的权限状态.值>)));
+        @     return static_cast<INT>(pfn(static_cast<ULONG>(@<权限ID>), @<启用权限>, @<是否仅当前线程>, reinterpret_cast<PBOOLEAN>(&@<原来的权限状态.值>)));
         @ }
         @ return -1;
     }
@@ -1160,7 +1160,6 @@
         如果 (是否已注入 ())
         {
             返回 (真)
-
         }
         如果 (文本是否为空 (DLL文件名) == 真)
         {
@@ -1183,14 +1182,14 @@
         {
             返回 (假)
         }
-        如果 (进程操作.写内存数据 (参数地址, 取文本指针 (DLL文件名), 参数大小) == 假)
-        {
-            进程操作.释放虚拟内存 (参数地址, 0, 内存操作类型.释放内存)
-            返回 (假)
-        }
         函数地址 = 进程辅助类.取模块函数地址 ("kernel32.dll", "LoadLibraryW")
         如果 (函数地址 == 0)
         {
+            返回 (假)
+        }
+        如果 (进程操作.写内存数据 (参数地址, 取文本指针 (DLL文件名), 参数大小) == 假)
+        {
+            进程操作.释放虚拟内存 (参数地址, 0, 内存操作类型.释放内存)
             返回 (假)
         }
         注入结果 = 进程操作.创建远程线程 (函数地址, 参数地址, 真)
@@ -1231,17 +1230,14 @@
 
     方法 是否已注入 <公开 类型 = 逻辑型 注释 = "返回是否已经注入DLL模块." 返回值注释 = "已注入返回真." 折叠>
     {
-        如果 (文本是否为空 (模块名称))
-        {
-            返回 (假)
-        }
-        如果 (进程操作.取模块句柄 (模块名称) == 0)
+        如果 (文本是否为空 (模块名称) == 假 && 进程操作.取模块句柄 (模块名称) == 0)
         {
             返回 (假)
         }
         否则
         {
             返回 (真)
+
         }
     }
 
@@ -1265,39 +1261,6 @@
     # static DWORD WINAPI ThreadProcEnd() { return 0; }
     # <> </include>
     # @end
-}
-
-类 "//远程注入类" <公开 注释 = "(待修复)在其他进程中远程注入DLL文件,注入的DLL模块可以被系统检索到." 折叠 @文档 = "category = \"内存注入\""
-        @视窗.外部头文件 = "src\\CRing3Inject.hpp">
-{
-
-    # @ @m<DECLARE_REF_OBJECT_CLASS_WITH_DATA> (CRing3Inject)
-
-    方法 注入DLL_Ring3 <公开 类型 = 逻辑型 注释 = "  Ring3下的DLL注入工具,NtCreateThreadEx + LdrLoadDll方式实现,"
-            注释 = "可以注入系统进程." 注释 = "  自测32位下会崩溃,64位正常,待修复." 返回值注释 = "返回是否成功." 折叠 @嵌入式方法 = "">
-    参数 进程ID <类型 = 整数>
-    参数 DLL文件名 <类型 = 文本型>
-    {
-        @ @sn<this>.data ().InjectDll ((DWORD)@<进程ID>, (LPCWSTR)@<DLL文件名>.GetText ())
-    }
-
-    方法 "//注入DLL" <公开 类型 = 逻辑型 注释 = "在指定的进程中注入DLL模块,NtCreateThreadEx + LoadLibraryW方式实现." 返回值注释 = "返回是否成功."
-            折叠 @嵌入式方法 = "">
-    参数 进程ID <类型 = 整数>
-    参数 DLL文件名 <类型 = 文本型>
-    {
-        @ @sn<this>.data ().InjectDll2 ((DWORD)@<进程ID>, (LPCWSTR)@<DLL文件名>.GetText ())
-    }
-
-    方法 "//释放DLL" <公开 类型 = 逻辑型 注释 = "释放注入的DLL模块,类析构时不会自动调用本方法." 返回值注释 = "返回是否释放成功." 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data ().FreeDll ()
-    }
-
-    方法 "//是否已注入" <公开 类型 = 逻辑型 注释 = "返回是否已经注入DLL模块." 返回值注释 = "已注入返回真." 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data ().IsInjectOk ()
-    }
 }
 
 # ======
