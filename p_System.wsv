@@ -280,7 +280,7 @@
 类 全局内存管理类 <公开 注释 = "  各种内存管理都是在堆中分配内存,但因为分配器的机制不同,不能交叉使用," 注释 = "比如\"分配内存\"的地址不能用\"释放全局内存\"来释放."
         注释 = "  由于部分系统API需要使用\"释放全局内存\"释放,所以本类的封装还是有意义的." 注释 = "  本类只封装了固定地址一种应用方法,未封装另一种可移动内存对象."
         注释 = "  本类的开销比\"分配内存\"大,如非必要不建议使用." 注释 = "  全局内存和本地内存只在Win16系统中有区别,在Win32以上系统中这两者无区别." 折叠
-        @文档 = "category = \"内存操作\"" @禁止创建对象 = 真 "//@全局类" = 真>
+        @文档 = "category = \"内存操作\"" @禁止创建对象 = 真>
 {
     方法 分配全局内存 <公开 静态 类型 = 变整数 注释 = "  在堆中分配一段所指定尺寸的全局内存,返回所分配内存的地址."
             注释 = "  注意: 所返回的内存地址在不再使用后必须使用\"释放全局内存\"" 注释 = "方法将其释放(除非调用了\"重分配全局内存\"方法将其重新分配)."
@@ -320,7 +320,7 @@
 类 本地内存管理类 <公开 注释 = "  各种内存管理都是在堆中分配内存,但因为分配器的机制不同,不能交叉使用," 注释 = "比如\"分配内存\"的地址不能用\"释放本地内存\"来释放."
         注释 = "  由于部分系统API需要使用\"释放本地内存\"释放,所以本类的封装还是有意义的." 注释 = "  本类只封装了固定地址一种应用方法,未封装另一种可移动内存对象."
         注释 = "  本类的开销比\"分配内存\"大,如非必要不建议使用." 注释 = "  全局内存和本地内存只在Win16系统中有区别,在Win32以上系统中这两者无区别." 折叠
-        @文档 = "category = \"内存操作\"" @禁止创建对象 = 真 "//@全局类" = 真>
+        @文档 = "category = \"内存操作\"" @禁止创建对象 = 真>
 {
     方法 分配本地内存 <公开 静态 类型 = 变整数 注释 = "  在堆中分配一段所指定尺寸的本地内存,返回所分配内存的地址."
             注释 = "  注意: 所返回的内存地址在不再使用后必须使用\"释放本地内存\"" 注释 = "方法将其释放(除非调用了\"重分配本地内存\"方法将其重新分配)."
@@ -1010,13 +1010,20 @@
         关闭命令行 ()
     }
 
-    方法 是否已启动 <公开 属性读 类型 = 逻辑型 注释 = "返回当前是否已启动." 折叠 @嵌入式方法 = "">
+    方法 是否已启动 <公开 属性读 类型 = 逻辑型 注释 = "返回当前是否已启动命令行控制台" 折叠 @嵌入式方法 = "">
     {
         @ @sn<this>.m_hProcess != NULL
     }
 
+    方法 是否空闲 <公开 属性读 类型 = 逻辑型 注释 = "返回当前是否处于空闲状态,返回假表示正在执行命令."
+            注释 = "  注意: 本方法通过检查最后输出的字符是否为\'>\'来判断命令是否执行完毕," 注释 = "如果命令在执行的过程中输出了\'>\'字符,将可能无法获取正确的结果." 折叠
+            @嵌入式方法 = "">
+    {
+        @ !@sn<this>.m_bRunning
+    }
+
     方法 收到输出信息 <公开 定义事件 类型 = 整数 注释 = "启动命令行提示符或执行命令后,在此返回命令的输出信息." 返回值注释 = "此返回值无意义" 折叠>
-    参数 输出信息 <类型 = 文本型 注释 = "命令行提示符打印在屏幕上的文本">
+    参数 输出信息 <类型 = 字节集类 注释 = "  命令行提示符打印在屏幕上的文本,请根据命令行的编码" 注释 = "使用\"多字节到文本\"或\"UTF8到文本\"等命令转换到文本型.">
 
     方法 启动命令行 <公开 类型 = 逻辑型 注释 = "启动命令行提示符进程,并建立匿名管道." 注释 = "类初始化时会自动启动,除非你执行过\"关闭命令行\",否则不需要手动调用本方法." 折叠
             @禁止流程检查 = 真 "">
@@ -1024,10 +1031,13 @@
     {
         @ if (m_hProcess) { return FALSE; } // 避免重复启动CMD
         @ // 设定管道的安全属性
+        @ m_bRunning = FALSE;
         @ SECURITY_ATTRIBUTES sa { 0 };
         @ sa.bInheritHandle = TRUE;
         @ sa.nLength = sizeof(sa);
         @ sa.lpSecurityDescriptor = NULL;
+        @ STARTUPINFOW si = { sizeof(STARTUPINFO) };
+        @ PROCESS_INFORMATION pi = { 0 };
         @ // 创建第一条匿名管道
         @ if (!::CreatePipe (&m_hReadPipeHandle, &m_hWritePipeShell, &sa, 0))
         @     goto Fail;
@@ -1035,10 +1045,7 @@
         @ if (!::CreatePipe (&m_hReadPipeShell, &m_hWritePipeHandle, &sa, 0))
         @     goto Fail;
         @ // 设置进程的信息
-        @ STARTUPINFO si { 0 };
-        @ PROCESS_INFORMATION pi { 0 };
-        @ GetStartupInfo (&si);
-        @ si.cb = sizeof(STARTUPINFO);
+        @ GetStartupInfoW (&si);
         @ si.hStdError = m_hWritePipeShell; // 设置命令行错误输出管道
         @ si.hStdOutput = m_hWritePipeShell; // 设置命令行信息输出管道
         @ si.hStdInput = m_hReadPipeShell; // 设置命令行输入管道
@@ -1059,6 +1066,7 @@
         @ // 创建回调线程
         @ m_hThread = ::CreateThread (NULL, 0, (LPTHREAD_START_ROUTINE)&@<读屏显>, this, 0, NULL);
         @ if (m_hThread == NULL) { goto Fail; }
+        @ m_ProcessId = pi.dwProcessId;
         @ return TRUE;
         @ Fail:
         @     if (m_hProcess) { ::CloseHandle (m_hProcess); m_hProcess = NULL; }
@@ -1084,16 +1092,15 @@
         @     ::PeekNamedPipe (pThis->m_hReadPipeHandle, NULL, NULL, NULL, &TotalBytesAvail, NULL);
         @     if (TotalBytesAvail) // 如果管道中有数据
         @     {
-        @         @an<CVolString> ResStr; // 创建文本型变量
-        @         LPBYTE lpBuffer = (LPBYTE)::LocalAlloc (LPTR, TotalBytesAvail + 1); // 分配缓冲区内存
+        @         @an<CVolMem> ReadData;
         @         // 从管道中读取数据,数据读取后会在管道中删除
-        @         ::ReadFile (pThis->m_hReadPipeHandle, lpBuffer, TotalBytesAvail, &BytesRead, NULL);
-        @         // CMD是ANSI文本,这里从缓冲区转换成火山的文本型
-        @         ResStr.SetText (GetWideText ((const CHAR*)lpBuffer, CVolMem (), NULL));
-        @         ::LocalFree (lpBuffer); // 释放缓冲区的内存
-        @         if (ResStr.IsEmpty () == FALSE) // 如果文本不为空
-        @         {   // 执行定义事件
-        @             pThis->@<收到输出信息> (ResStr);
+        @         if (::ReadFile (pThis->m_hReadPipeHandle, ReadData.Alloc (TotalBytesAvail, TRUE), TotalBytesAvail, &BytesRead, NULL))
+        @         {
+        @             if (ReadData.Get_S_BYTE(BytesRead - 1) == '>')
+        @             {
+        @                 pThis->m_bRunning = FALSE;
+        @             }
+        @             pThis->@<收到输出信息> (ReadData);
         @         }
         @     }
         @ }
@@ -1102,20 +1109,42 @@
 
     方法 执行命令 <公开 类型 = 逻辑型 注释 = "在命令行提示符中执行一条命令,如果当前有正在运行的命令,执行会失败." 折叠 @禁止流程检查 = 真>
     参数 执行命令 <类型 = 文本型 注释 = "提供你要执行的命令,后面不需要添加回车符.">
+    参数 是否为UTF8 <类型 = 逻辑型 注释 = "是否以UTF-8编码要执行的命令,否则为ANSI本地多字节编码" @默认值 = 假>
     {
+        @ if (m_bRunning) return FALSE;
         变量 命令行 <类型 = 字节集类>
-        // 命令行是ANSI,所以需要转换,命令后加了换行符,命令的最后不能有结尾0字符
-        命令行 = 文本到多字节 (执行命令 + "\r\n", 假)
+        // 命令行需要转换编码,并在命令后增加换行符,命令的最后不能有结尾0字符
+        如果 (是否为UTF8)
+        {
+            命令行 = 文本到UTF8 (执行命令 + "\r\n", 假)
+        }
+        否则
+        {
+            命令行 = 文本到多字节 (执行命令 + "\r\n", 假)
+
+        }
         @ DWORD BytesWrite = 0;
         @ // 将命令输入给管道
-        @ ::WriteFile (m_hWritePipeHandle, @<命令行>.GetPtr(), @<命令行>.GetSize(), &BytesWrite, NULL);
+        @ ::WriteFile (m_hWritePipeHandle, @<命令行>.GetPtr(), (DWORD)@<命令行>.GetSize(), &BytesWrite, NULL);
         @ if (BytesWrite)
+        @ {
+        @     m_bRunning = TRUE;
         @     return TRUE;
+        @ }
         @ return FALSE;
+    }
+
+    方法 终止命令 <公开 注释 = "在命令行提示符中发出CTRL+C信号,终止正在执行的命令." 折叠>
+    {
+        @ if (!m_ProcessId) return;
+        @ ::AttachConsole (m_ProcessId);
+        @ ::GenerateConsoleCtrlEvent (CTRL_C_EVENT, m_ProcessId);
+        @ ::FreeConsole ();
     }
 
     方法 关闭命令行 <公开 注释 = "关闭命令行提示符" 折叠 @禁止流程检查 = 真>
     {
+        终止命令 ()
         @ if (m_hEvent) { ::SetEvent (m_hEvent); } // 发信号让回调函数退出线程
         @ if (m_hThread)
         @ {   // 等待回调线程结束,然后关闭句柄
@@ -1131,6 +1160,7 @@
         @     }
         @     ::CloseHandle (m_hProcess); m_hProcess = NULL;
         @ }
+        @ m_bRunning = FALSE;
         @ // 关闭匿名管道的读写句柄
         @ if (m_hReadPipeHandle) { ::CloseHandle (m_hReadPipeHandle); m_hReadPipeHandle = NULL; }
         @ if (m_hWritePipeShell) { ::CloseHandle (m_hWritePipeShell); m_hWritePipeShell = NULL; }
@@ -1149,6 +1179,8 @@
     #     HANDLE m_hThread = NULL;
     #     HANDLE m_hEvent = NULL;
     #     DWORD m_dwTime;
+    #     DWORD m_ProcessId;
+    #     BOOL m_bRunning = FALSE;
     # <> </include>
     # @end
 }

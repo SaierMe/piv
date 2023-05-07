@@ -106,6 +106,7 @@
         "buffer.h": "c",
         "minhook.h": "c",
         "limits.h": "c",
-        "cassert": "cpp"
+        "cassert": "cpp",
+        "xxatomic": "cpp"
     }
 }

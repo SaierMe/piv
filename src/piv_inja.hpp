@@ -3,7 +3,6 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/04/07                          *
 \*********************************************/
 
 #ifndef _PIV_INJA_HPP
@@ -12,7 +11,15 @@
 #include "piv_string.hpp"
 #include "inja.hpp"
 
+class PivInja : public CVolObject
+{
+private:
+    inja::Environment env;
 
+public:
+    PivInja() {}
+    ~PivInja() {}
 
+}; // PivInja
 
 #endif // _PIV_INJA_HPP

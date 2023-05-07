@@ -3,7 +3,6 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/03/10                          *
 \*********************************************/
 
 #ifndef _PIV_TOML_PLUS_PLUS_HPP
