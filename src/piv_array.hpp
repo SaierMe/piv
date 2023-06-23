@@ -3,7 +3,6 @@
  * 作者: Xelloss
  * 网站: https://piv.ink
  * 邮箱: xelloss@vip.qq.com
- * 版本: 2023/02/14
  */
 
 #ifndef _PIV_ARRAY_HPP
@@ -26,7 +25,7 @@ namespace piv
     {
         // 数组_求和
         template <typename R, typename T>
-        R Sum(const T &array)
+        R Sum(T &array)
         {
             INT_P Count = array.data().GetCount();
             assert(Count > 0);
@@ -55,7 +54,7 @@ namespace piv
 
         // 数组_求最大值
         template <typename R, typename T>
-        R MaxImum(const T &array)
+        R MaxImum(T &array)
         {
             INT_P Count = array.data().GetCount();
             assert(Count > 0);
@@ -86,7 +85,7 @@ namespace piv
 
         // 数组_求最小值
         template <typename R, typename T>
-        R MinImum(const T &array)
+        R MinImum(T &array)
         {
             INT_P Count = array.data().GetCount();
             assert(Count > 0);
@@ -117,7 +116,7 @@ namespace piv
 
         // 展示数组
         template <typename T>
-        CVolString FormatArray(const T &arr)
+        CVolString FormatArray(T &arr)
         {
             using EleType = std::remove_reference_t<decltype(arr.data().GetAt(0))>;
             CVolString result;
@@ -194,7 +193,7 @@ namespace piv
 
         // 取数组前面
         template <typename T>
-        T GetArrayFront(const T &array, const INT_P &num)
+        T GetArrayFront(T &array, const INT_P &num)
         {
             INT_P Count = 0;
             if constexpr (std::is_same_v<T, CVolObjectArray>)
@@ -231,7 +230,7 @@ namespace piv
 
         // 取数组后面
         template <typename T>
-        T GetArrayBack(const T &array, const INT_P &num)
+        T GetArrayBack(T &array, const INT_P &num)
         {
             INT_P Count = 0;
             if constexpr (std::is_same_v<T, CVolObjectArray>)
@@ -268,20 +267,20 @@ namespace piv
 
         // 取对象数组数据
         template <typename T>
-        CVolMem SaveObjArrToData(const T &array)
+        CVolMem SaveObjArrToData(T &array)
         {
             if constexpr (std::is_same_v<T, CVolObjectArray>)
             {
                 CVolMem memData;
-                INT Count = static_cast<INT>(array.GetCount());
-                memData.AddInt(Count); // 数组成员数
-                for (INT i = 0; i < Count; i++)
+                INT_P Count = array.GetCount();
+                memData.AddInt(static_cast<INT>(Count)); // 数组成员数
+                for (INT_P i = 0; i < Count; i++)
                 {
                     CVolMemoryOutputStream memStream;
                     array.GetAt(i).VolSaveIntoStream(memStream);
                     CVolMem bin = memStream.GetBin(CVolMem());
                     memData.AddInt(static_cast<INT>(bin.GetSize())); // 成员的数据长度
-                    memData.Append(bin);                // 成员的内容数据
+                    memData.Append(bin);                             // 成员的内容数据
                 }
                 return memData;
             }

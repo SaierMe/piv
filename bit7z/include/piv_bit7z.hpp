@@ -3,7 +3,6 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/18                          *
 \*********************************************/
 
 #ifndef _PIV_BIT7Z_HPP
@@ -91,219 +90,6 @@ namespace piv
             }
             return *m_7zLib;
         }
-
-        /**
-         * @brief 返回存档压缩等级
-         * @param value 压缩等级值
-         */
-        static auto GetCompressionLevel(const int32_t &value)
-        {
-            switch (value)
-            {
-            case 0:
-                return bit7z::BitCompressionLevel::None;
-            case 1:
-                return bit7z::BitCompressionLevel::Fastest;
-            case 3:
-                return bit7z::BitCompressionLevel::Fast;
-            case 5:
-                return bit7z::BitCompressionLevel::Normal;
-            case 7:
-                return bit7z::BitCompressionLevel::Max;
-            case 9:
-                return bit7z::BitCompressionLevel::Ultra;
-            }
-            return bit7z::BitCompressionLevel::Normal;
-        }
-
-        /**
-         * @brief 返回存档更新方式
-         * @param value 更新方式值
-         */
-        static auto GetUpdateMode(const int32_t &value)
-        {
-            switch (value)
-            {
-            case 0:
-                return bit7z::UpdateMode::None;
-            case 1:
-                return bit7z::UpdateMode::Append;
-            case 2:
-                return bit7z::UpdateMode::Update;
-            }
-            return bit7z::UpdateMode::None;
-        }
-
-        /**
-         * @brief 返回存档输出格式
-         * @param value 输出格式值
-         */
-        static const bit7z::BitInOutFormat &GetInOutFormat(const int8_t &value)
-        {
-            switch (value)
-            {
-            case 0x01:
-                return bit7z::BitFormat::Zip;
-            case 0x02:
-                return bit7z::BitFormat::BZip2;
-            case 0x07:
-                return bit7z::BitFormat::SevenZip;
-            case 0x0C:
-                return bit7z::BitFormat::Xz;
-            case 0xE6:
-                return bit7z::BitFormat::Wim;
-            case 0xEE:
-                return bit7z::BitFormat::Tar;
-            case 0xEF:
-                return bit7z::BitFormat::GZip;
-            }
-            return bit7z::BitFormat::Zip;
-        }
-
-        /**
-         * @brief 返回存档输入格式
-         * @param value 输入格式值
-         */
-        static const bit7z::BitInFormat &GetInFormat(const int8_t &value)
-        {
-            switch (value)
-            {
-            case 0x00:
-                return bit7z::BitFormat::Auto;
-            case 0x01:
-                return bit7z::BitFormat::Zip;
-            case 0x02:
-                return bit7z::BitFormat::BZip2;
-            case 0x03:
-                return bit7z::BitFormat::Rar;
-            case 0x04:
-                return bit7z::BitFormat::Arj;
-            case 0x05:
-                return bit7z::BitFormat::Z;
-            case 0x06:
-                return bit7z::BitFormat::Lzh;
-            case 0x07:
-                return bit7z::BitFormat::SevenZip;
-            case 0x08:
-                return bit7z::BitFormat::Cab;
-            case 0x09:
-                return bit7z::BitFormat::Nsis;
-            case 0x0A:
-                return bit7z::BitFormat::Lzma;
-            case 0x0B:
-                return bit7z::BitFormat::Lzma86;
-            case 0x0C:
-                return bit7z::BitFormat::Xz;
-            case 0x0D:
-                return bit7z::BitFormat::Ppmd;
-            case 0xC4:
-                return bit7z::BitFormat::Vhdx;
-            case 0xC6:
-                return bit7z::BitFormat::COFF;
-            case 0xC7:
-                return bit7z::BitFormat::Ext;
-            case 0xC8:
-                return bit7z::BitFormat::VMDK;
-            case 0xC9:
-                return bit7z::BitFormat::VDI;
-            case 0xCA:
-                return bit7z::BitFormat::QCow;
-            case 0xCB:
-                return bit7z::BitFormat::GPT;
-            case 0xCC:
-                return bit7z::BitFormat::Rar5;
-            case 0xCD:
-                return bit7z::BitFormat::IHex;
-            case 0xCE:
-                return bit7z::BitFormat::Hxs;
-            case 0xCF:
-                return bit7z::BitFormat::TE;
-            case 0xD0:
-                return bit7z::BitFormat::UEFIc;
-            case 0xD1:
-                return bit7z::BitFormat::UEFIs;
-            case 0xD2:
-                return bit7z::BitFormat::SquashFS;
-            case 0xD3:
-                return bit7z::BitFormat::CramFS;
-            case 0xD4:
-                return bit7z::BitFormat::APM;
-            case 0xD5:
-                return bit7z::BitFormat::Mslz;
-            case 0xD6:
-                return bit7z::BitFormat::Flv;
-            case 0xD9:
-                return bit7z::BitFormat::Ntfs;
-            case 0xDA:
-                return bit7z::BitFormat::Fat;
-            case 0xDC:
-                return bit7z::BitFormat::Vhd;
-            case 0xDD:
-                return bit7z::BitFormat::Pe;
-            case 0xDE:
-                return bit7z::BitFormat::Elf;
-            case 0xDF:
-                return bit7z::BitFormat::Macho;
-            case 0xE0:
-                return bit7z::BitFormat::Udf;
-            case 0xE1:
-                return bit7z::BitFormat::Xar;
-            case 0xE2:
-                return bit7z::BitFormat::Mub;
-            case 0xE3:
-                return bit7z::BitFormat::Hfs;
-            case 0xE4:
-                return bit7z::BitFormat::Dmg;
-            case 0xE5:
-                return bit7z::BitFormat::Compound;
-            case 0xE6:
-                return bit7z::BitFormat::Wim;
-            case 0xE7:
-                return bit7z::BitFormat::Iso;
-            case 0xE9:
-                return bit7z::BitFormat::Chm;
-            case 0xEA:
-                return bit7z::BitFormat::Split;
-            case 0xEB:
-                return bit7z::BitFormat::Rpm;
-            case 0xEC:
-                return bit7z::BitFormat::Deb;
-            case 0xED:
-                return bit7z::BitFormat::Cpio;
-            case 0xEE:
-                return bit7z::BitFormat::Tar;
-            case 0xEF:
-                return bit7z::BitFormat::GZip;
-            }
-            return bit7z::BitFormat::Auto;
-        }
-
-        /**
-         * @brief 返回存档压缩方法
-         * @param value 压缩方法值
-         */
-        static const bit7z::BitCompressionMethod GetCompressionMethod(const int32_t &value)
-        {
-            switch (value)
-            {
-            case 0:
-                return bit7z::BitCompressionMethod::Copy;
-            case 1:
-                return bit7z::BitCompressionMethod::Deflate;
-            case 2:
-                return bit7z::BitCompressionMethod::Deflate64;
-            case 3:
-                return bit7z::BitCompressionMethod::BZip2;
-            case 4:
-                return bit7z::BitCompressionMethod::Lzma;
-            case 5:
-                return bit7z::BitCompressionMethod::Lzma2;
-            case 6:
-                return bit7z::BitCompressionMethod::Ppmd;
-            }
-            return bit7z::BitCompressionMethod::Copy;
-        }
-
     } // namespace Archive
 } // namespace piv
 
@@ -324,7 +110,7 @@ public:
         piv::Archive::g_error = msg;
     }
     // 添加到压缩包
-    static bool CompressPaths(const CMStringArray &paths, const bit7z::tstring &out_file, const bit7z::tstring &password, const int8_t &format, const int32_t &level, const int32_t &update_mode)
+    static bool CompressPaths(const CMStringArray &paths, const bit7z::tstring &out_file, const bit7z::tstring &password, const bit7z::BitInOutFormat &format, const int32_t &level, const int32_t &update_mode)
     {
         if (paths.IsEmpty())
         {
@@ -338,10 +124,10 @@ public:
             {
                 in_paths.push_back(bit7z::tstring{paths.GetAt(i)});
             }
-            bit7z::BitFileCompressor Compressor{piv::Archive::Get7zLib(), piv::Archive::GetInOutFormat(format)};
+            bit7z::BitFileCompressor Compressor{piv::Archive::Get7zLib(), format};
             Compressor.setPassword(password);
-            Compressor.setCompressionLevel(piv::Archive::GetCompressionLevel(level));
-            Compressor.setUpdateMode(piv::Archive::GetUpdateMode(update_mode));
+            Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
+            Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
             Compressor.compress(in_paths, out_file);
             SetError("OK");
             return true;
@@ -353,7 +139,7 @@ public:
         }
     }
     // 添加别名到压缩包
-    static bool CompressPaths(const std::map<CVolString, CVolString> &path_pair, const bit7z::tstring &out_file, const bit7z::tstring &password, const int8_t &format, const int32_t &level, const int32_t &update_mode)
+    static bool CompressPaths(const std::map<CVolString, CVolString> &path_pair, const bit7z::tstring &out_file, const bit7z::tstring &password, const bit7z::BitInOutFormat &format, const int32_t &level, const int32_t &update_mode)
     {
         if (path_pair.empty())
         {
@@ -367,10 +153,10 @@ public:
             {
                 in_paths[bit7z::tstring{iter->first.GetText()}] = bit7z::tstring{iter->second.GetText()};
             }
-            bit7z::BitFileCompressor Compressor{piv::Archive::Get7zLib(), piv::Archive::GetInOutFormat(format)};
+            bit7z::BitFileCompressor Compressor{piv::Archive::Get7zLib(), format};
             Compressor.setPassword(password);
-            Compressor.setCompressionLevel(piv::Archive::GetCompressionLevel(level));
-            Compressor.setUpdateMode(piv::Archive::GetUpdateMode(update_mode));
+            Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
+            Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
             Compressor.compress(in_paths, out_file);
             SetError("OK");
             return true;
@@ -382,7 +168,7 @@ public:
         }
     }
     // 添加文件到压缩包
-    static bool CompressFiles(const CMStringArray &paths, const bit7z::tstring &out_file, const bit7z::tstring &password, const int8_t &format, const int32_t &level, const int32_t &update_mode)
+    static bool CompressFiles(const CMStringArray &paths, const bit7z::tstring &out_file, const bit7z::tstring &password, const bit7z::BitInOutFormat &format, const int32_t &level, const int32_t &update_mode)
     {
         if (paths.IsEmpty())
         {
@@ -396,10 +182,10 @@ public:
             {
                 in_paths.push_back(bit7z::tstring{paths.GetAt(i)});
             }
-            bit7z::BitFileCompressor Compressor{piv::Archive::Get7zLib(), piv::Archive::GetInOutFormat(format)};
+            bit7z::BitFileCompressor Compressor{piv::Archive::Get7zLib(), format};
             Compressor.setPassword(password);
-            Compressor.setCompressionLevel(piv::Archive::GetCompressionLevel(level));
-            Compressor.setUpdateMode(piv::Archive::GetUpdateMode(update_mode));
+            Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
+            Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
             Compressor.compress(in_paths, out_file);
             SetError("OK");
             return true;
@@ -411,14 +197,14 @@ public:
         }
     }
     // 添加匹配文件到压缩包
-    static bool CompressFiles(const bit7z::tstring &in_dir, const bit7z::tstring &out_file, const bit7z::tstring &filter, bool recursive, const bit7z::tstring &password, const int8_t &format, const int32_t &level, const int32_t &update_mode)
+    static bool CompressFiles(const bit7z::tstring &in_dir, const bit7z::tstring &out_file, const bit7z::tstring &filter, bool recursive, const bit7z::tstring &password, const bit7z::BitInOutFormat &format, const int32_t &level, const int32_t &update_mode)
     {
         try
         {
-            bit7z::BitFileCompressor Compressor{piv::Archive::Get7zLib(), piv::Archive::GetInOutFormat(format)};
+            bit7z::BitFileCompressor Compressor{piv::Archive::Get7zLib(), format};
             Compressor.setPassword(password);
-            Compressor.setCompressionLevel(piv::Archive::GetCompressionLevel(level));
-            Compressor.setUpdateMode(piv::Archive::GetUpdateMode(update_mode));
+            Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
+            Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
             Compressor.compressFiles(in_dir, out_file, recursive, filter);
             SetError("OK");
             return true;
@@ -430,14 +216,14 @@ public:
         }
     }
     // 添加目录到压缩包
-    static bool CompressDirectory(const bit7z::tstring &in_dir, const bit7z::tstring &out_file, const bit7z::tstring &password, const int8_t &format, const int32_t &level, const int32_t &update_mode)
+    static bool CompressDirectory(const bit7z::tstring &in_dir, const bit7z::tstring &out_file, const bit7z::tstring &password, const bit7z::BitInOutFormat &format, const int32_t &level, const int32_t &update_mode)
     {
         try
         {
-            bit7z::BitFileCompressor Compressor{piv::Archive::Get7zLib(), piv::Archive::GetInOutFormat(format)};
+            bit7z::BitFileCompressor Compressor{piv::Archive::Get7zLib(), format};
             Compressor.setPassword(password);
-            Compressor.setCompressionLevel(piv::Archive::GetCompressionLevel(level));
-            Compressor.setUpdateMode(piv::Archive::GetUpdateMode(update_mode));
+            Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
+            Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
             Compressor.compressDirectory(in_dir, out_file);
             SetError("OK");
             return true;
@@ -450,11 +236,11 @@ public:
     }
 
     // 解压到
-    static bool Extract(const bit7z::tstring &in_file, const bit7z::tstring &out_dir, const bit7z::tstring &password, const int8_t &format)
+    static bool Extract(const bit7z::tstring &in_file, const bit7z::tstring &out_dir, const bit7z::tstring &password, const bit7z::BitInFormat &format)
     {
         try
         {
-            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), piv::Archive::GetInFormat(format)};
+            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), format};
             extractor.setPassword(password);
             extractor.extract(in_file, out_dir);
             SetError("OK");
@@ -467,12 +253,12 @@ public:
         }
     }
     // 解压到内存
-    static bool Extract(const bit7z::tstring &in_file, std::map<CVolString, CVolMem> &out_buffer, const bit7z::tstring &password, const int8_t &format)
+    static bool Extract(const bit7z::tstring &in_file, std::map<CVolString, CVolMem> &out_buffer, const bit7z::tstring &password, const bit7z::BitInFormat &format)
     {
         out_buffer.clear();
         try
         {
-            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), piv::Archive::GetInFormat(format)};
+            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), format};
             extractor.setPassword(password);
 
             bit7z::BitInputArchive in_archive{extractor, bit7z::tstring{in_file}};
@@ -498,11 +284,11 @@ public:
         }
     }
     // 解压匹配文件
-    static bool Extract(const bit7z::tstring &in_file, const bit7z::tstring &filter, const bit7z::tstring &out_dir, const bit7z::tstring &password, const bool &policy, const int8_t &format)
+    static bool Extract(const bit7z::tstring &in_file, const bit7z::tstring &filter, const bit7z::tstring &out_dir, const bit7z::tstring &password, const bool &policy, const bit7z::BitInFormat &format)
     {
         try
         {
-            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), piv::Archive::GetInFormat(format)};
+            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), format};
             extractor.setPassword(password);
             extractor.extractMatching(in_file, filter, out_dir, policy ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include);
             SetError("OK");
@@ -515,14 +301,14 @@ public:
         }
     }
     // 解压匹配文件到字节集
-    static bool Extract(const bit7z::tstring &in_file, const bit7z::tstring &filter, CVolMem &out_buffer, const bit7z::tstring &password, CVolString &out_file, const bool &policy, const int8_t &format)
+    static bool Extract(const bit7z::tstring &in_file, const bit7z::tstring &filter, CVolMem &out_buffer, const bit7z::tstring &password, CVolString &out_file, const bool &policy, const bit7z::BitInFormat &format)
     {
         out_file.Empty();
         try
         {
             if (filter.empty())
                 throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
-            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), piv::Archive::GetInFormat(format)};
+            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), format};
             extractor.setPassword(password);
             bit7z::BitInputArchive in_archive(extractor, in_file);
             for (const auto &item : in_archive)
@@ -546,11 +332,11 @@ public:
         }
     }
     // 解压正则匹配文件
-    static bool ExtractRegex(const bit7z::tstring &in_file, const bit7z::tstring &regex, const bit7z::tstring &out_dir, const bit7z::tstring &password, const bool &policy, const int8_t &format)
+    static bool ExtractRegex(const bit7z::tstring &in_file, const bit7z::tstring &regex, const bit7z::tstring &out_dir, const bit7z::tstring &password, const bool &policy, const bit7z::BitInFormat &format)
     {
         try
         {
-            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), piv::Archive::GetInFormat(format)};
+            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), format};
             extractor.setPassword(password);
             extractor.extractMatchingRegex(in_file, regex, out_dir, policy ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include);
             SetError("OK");
@@ -568,14 +354,14 @@ public:
         }
     }
     // 解压正则匹配文件到字节集
-    static bool ExtractRegex(const bit7z::tstring &in_file, const bit7z::tstring &regex, CVolMem &out_buffer, const bit7z::tstring &password, CVolString &out_file, const bool &policy, const int8_t &format)
+    static bool ExtractRegex(const bit7z::tstring &in_file, const bit7z::tstring &regex, CVolMem &out_buffer, const bit7z::tstring &password, CVolString &out_file, const bool &policy, const bit7z::BitInFormat &format)
     {
         out_file.Empty();
         try
         {
             if (regex.empty())
                 throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
-            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), piv::Archive::GetInFormat(format)};
+            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), format};
             extractor.setPassword(password);
             bit7z::BitInputArchive in_archive(extractor, in_file);
             const bit7z::tregex regex_filter(regex, bit7z::tregex::ECMAScript | bit7z::tregex::optimize);
@@ -607,11 +393,11 @@ public:
         }
     }
     // 测试
-    static bool Test(const bit7z::tstring &in_file, const bit7z::tstring &password, const int8_t &format)
+    static bool Test(const bit7z::tstring &in_file, const bit7z::tstring &password, const bit7z::BitInFormat &format)
     {
         try
         {
-            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), piv::Archive::GetInFormat(format)};
+            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), format};
             extractor.setPassword(password);
             extractor.test(in_file);
             SetError("OK");
@@ -701,12 +487,12 @@ public:
         }
     }
     // 打开文件
-    bool OpenArchive(const bit7z::tstring &in_file, const bool &feedback, const bit7z::tstring &password, const int8_t &format)
+    bool OpenArchive(const bit7z::tstring &in_file, const bool &feedback, const bit7z::tstring &password, const bit7z::BitInFormat &format)
     {
         CloseArchive();
         try
         {
-            m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), in_file, piv::Archive::GetInFormat(format), password});
+            m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), in_file, format, password});
             if (feedback)
                 EnableFeeback();
             SetError("OK");
@@ -720,12 +506,12 @@ public:
         }
     }
     // 打开vector
-    bool OpenArchive(std::vector<bit7z::byte_t> &in_buffer, const bool &feedback, const bit7z::tstring &password, const int8_t &format)
+    bool OpenArchive(std::vector<bit7z::byte_t> &in_buffer, const bool &feedback, const bit7z::tstring &password, const bit7z::BitInFormat &format)
     {
         CloseArchive();
         try
         {
-            m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), in_buffer, piv::Archive::GetInFormat(format), password});
+            m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), in_buffer, format, password});
             if (feedback)
                 EnableFeeback();
             SetError("OK");
@@ -739,12 +525,12 @@ public:
         }
     }
     // 打开内存输入流
-    bool OpenArchive(std::istream &in_stream, const bool &feedback, const bit7z::tstring &password, const int8_t &format)
+    bool OpenArchive(std::istream &in_stream, const bool &feedback, const bit7z::tstring &password, const bit7z::BitInFormat &format)
     {
         CloseArchive();
         try
         {
-            m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), in_stream, piv::Archive::GetInFormat(format), password});
+            m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), in_stream, format, password});
             if (feedback)
             {
                 EnableFeeback();
@@ -760,7 +546,7 @@ public:
         }
     }
     // 打开字节集
-    bool OpenArchive(CVolMem &in_data, const bool &feedback, const bit7z::tstring &password, const int8_t &format /*, bool copy_data*/)
+    bool OpenArchive(CVolMem &in_data, const bool &feedback, const bit7z::tstring &password, const bit7z::BitInFormat &format /*, bool copy_data*/)
     {
         CloseArchive();
         try
@@ -768,7 +554,7 @@ public:
             // m_in_stream.OpenStream(in_data, copy_data);
             m_buffer.reset(new std::vector<bit7z::byte_t>{reinterpret_cast<bit7z::byte_t *>(in_data.GetPtr()),
                                                           reinterpret_cast<bit7z::byte_t *>(in_data.GetPtr()) + in_data.GetSize()});
-            m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), *m_buffer, piv::Archive::GetInFormat(format), password});
+            m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), *m_buffer, format, password});
             if (feedback)
                 EnableFeeback();
             SetError("OK");
@@ -782,7 +568,7 @@ public:
         }
     }
     // 打开内存
-    bool OpenArchive(ptrdiff_t mem_ptr, ptrdiff_t mem_size, const bool &feedback, const bit7z::tstring &password, const int8_t &format /*, bool copy_data*/)
+    bool OpenArchive(ptrdiff_t mem_ptr, ptrdiff_t mem_size, const bool &feedback, const bit7z::tstring &password, const bit7z::BitInFormat &format /*, bool copy_data*/)
     {
         CloseArchive();
         try
@@ -790,7 +576,7 @@ public:
             // m_in_stream.OpenStream(mem_ptr, mem_size, copy_data);
             m_buffer.reset(new std::vector<bit7z::byte_t>{reinterpret_cast<bit7z::byte_t *>(mem_ptr),
                                                           reinterpret_cast<bit7z::byte_t *>(mem_ptr) + mem_size});
-            m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), *m_buffer, piv::Archive::GetInFormat(format), password});
+            m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), *m_buffer, format, password});
             if (feedback)
                 EnableFeeback();
             SetError("OK");
@@ -805,13 +591,13 @@ public:
     }
     // 打开文件资源
     /*
-    bool OpenArchive(size_t resid, const bool &feedback, const bit7z::tstring &password, const int8_t &format)
+    bool OpenArchive(size_t resid, const bool &feedback, const bit7z::tstring &password, const bit7z::BitInFormat &format)
     {
         CloseArchive();
         try
         {
             m_in_stream.OpenStream(resid);
-            m_archive = new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), m_in_stream.is(), piv::Archive::GetInFormat(format), password};
+            m_archive = new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), m_in_stream.is(), format, password};
             if (feedback)
             {
                 EnableFeeback();
@@ -1351,12 +1137,12 @@ public:
         }
     }
     // 创建空压缩包
-    bool CreateArchive(const bool &feedback, const int8_t &format)
+    bool CreateArchive(const bool &feedback, const bit7z::BitInOutFormat &format)
     {
         CloseArchive();
         try
         {
-            m_archive.reset(new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), piv::Archive::GetInOutFormat(format)});
+            m_archive.reset(new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), format});
             if (feedback)
                 EnableFeeback();
             SetError("OK");
@@ -1370,13 +1156,12 @@ public:
         }
     }
     // 创建自文件
-    bool CreateArchive(const bit7z::tstring &in_file, const bool &feedback, const int8_t &format, const bit7z::tstring &password)
+    bool CreateArchive(const bit7z::tstring &in_file, const bool &feedback, const bit7z::BitInOutFormat &format, const bit7z::tstring &password)
     {
         CloseArchive();
         try
         {
-            m_archive.reset(new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), in_file,
-                                                        piv::Archive::GetInOutFormat(format), password});
+            m_archive.reset(new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), in_file, format, password});
             if (feedback)
                 EnableFeeback();
             SetError("OK");
@@ -1390,13 +1175,12 @@ public:
         }
     }
     // 创建自vector
-    bool CreateArchive(std::vector<bit7z::byte_t> &in_buffer, const bool &feedback, const int8_t &format, const bit7z::tstring &password)
+    bool CreateArchive(std::vector<bit7z::byte_t> &in_buffer, const bool &feedback, const bit7z::BitInOutFormat &format, const bit7z::tstring &password)
     {
         CloseArchive();
         try
         {
-            m_archive.reset(new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), in_buffer,
-                                                        piv::Archive::GetInOutFormat(format), password});
+            m_archive.reset(new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), in_buffer, format, password});
             if (feedback)
                 EnableFeeback();
             SetError("OK");
@@ -1410,13 +1194,12 @@ public:
         }
     }
     // 创建自输入流
-    bool CreateArchive(std::istream &in_stream, const bool &feedback, const int8_t &format, const bit7z::tstring &password)
+    bool CreateArchive(std::istream &in_stream, const bool &feedback, const bit7z::BitInOutFormat &format, const bit7z::tstring &password)
     {
         CloseArchive();
         try
         {
-            m_archive.reset(new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), in_stream,
-                                                        piv::Archive::GetInOutFormat(format), password});
+            m_archive.reset(new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), in_stream, format, password});
             if (feedback)
                 EnableFeeback();
             SetError("OK");
@@ -1430,7 +1213,7 @@ public:
         }
     }
     // 创建自字节集
-    bool CreateArchive(CVolMem &in_buffer, const bool &feedback, const int8_t &format, const bit7z::tstring &password /* , bool copy_data*/)
+    bool CreateArchive(CVolMem &in_buffer, const bool &feedback, const bit7z::BitInOutFormat &format, const bit7z::tstring &password /* , bool copy_data*/)
     {
         CloseArchive();
         try
@@ -1438,8 +1221,7 @@ public:
             // m_in_stream.OpenStream(in_buffer, copy_data);
             m_buffer.reset(new std::vector<bit7z::byte_t>{reinterpret_cast<bit7z::byte_t *>(in_buffer.GetPtr()),
                                                           reinterpret_cast<bit7z::byte_t *>(in_buffer.GetPtr()) + in_buffer.GetSize()});
-            m_archive.reset(new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), *m_buffer,
-                                                        piv::Archive::GetInOutFormat(format), password});
+            m_archive.reset(new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), *m_buffer, format, password});
             if (feedback)
                 EnableFeeback();
             SetError("OK");
@@ -1454,14 +1236,13 @@ public:
     }
     // 创建自文件资源
     /*
-    bool CreateArchive(size_t resid, const bool &feedback, const int8_t &format, const bit7z::tstring &password)
+    bool CreateArchive(size_t resid, const bool &feedback, const bit7z::BitInOutFormat &format, const bit7z::tstring &password)
     {
         CloseArchive();
         try
         {
             m_in_stream.OpenStream(resid);
-            m_archive = new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), m_in_stream.is(),
-                                                    piv::Archive::GetInOutFormat(format), password};
+            m_archive = new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), m_in_stream.is(), format, password};
             if (feedback)
             {
                 EnableFeeback();
@@ -1779,17 +1560,17 @@ public:
     inline void SetCompressionLevel(const int32_t &level)
     {
         if (m_archive)
-            m_archive->setCompressionLevel(piv::Archive::GetCompressionLevel(level));
+            m_archive->setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
     }
     inline int32_t CompressionLevel()
     {
         return m_archive == nullptr ? 0 : static_cast<int32_t>(m_archive->compressionLevel());
     }
     // 压缩方法
-    inline void SetCompressionMethod(int32_t method)
+    inline void SetCompressionMethod(bit7z::BitCompressionMethod method)
     {
         if (m_archive)
-            m_archive->setCompressionMethod(piv::Archive::GetCompressionMethod(method));
+            m_archive->setCompressionMethod(method);
     }
     inline int32_t CompressionMethod()
     {
@@ -1829,7 +1610,7 @@ public:
     inline void SetUpdateMode(int32_t mode)
     {
         if (m_archive)
-            m_archive->setUpdateMode(piv::Archive::GetUpdateMode(mode));
+            m_archive->setUpdateMode(static_cast<bit7z::UpdateMode>(mode));
     }
     inline int32_t UpdateMode()
     {
@@ -1903,14 +1684,13 @@ public:
         m_archive.reset();
     }
     // 打开文件
-    bool OpenFile(const bit7z::tstring &in_file, const bool &feedback, const int8_t &format, const int32_t &update_mode, const bit7z::tstring &password)
+    bool OpenFile(const bit7z::tstring &in_file, const bool &feedback, const bit7z::BitInOutFormat &format, const int32_t &update_mode, const bit7z::tstring &password)
     {
         CloseArchive();
         try
         {
-            m_archive.reset(new bit7z::BitArchiveEditor{piv::Archive::Get7zLib(), in_file,
-                                                        piv::Archive::GetInOutFormat(format), password});
-            m_archive->setUpdateMode(piv::Archive::GetUpdateMode(update_mode));
+            m_archive.reset(new bit7z::BitArchiveEditor{piv::Archive::Get7zLib(), in_file, format, password});
+            m_archive->setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
             if (feedback)
                 EnableFeeback();
             SetError("OK");

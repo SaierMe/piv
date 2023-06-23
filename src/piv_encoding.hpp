@@ -37,6 +37,10 @@ namespace piv
     using nonstd::wstring_view;
 #endif
 
+    struct ansi
+    {
+        unsigned char bom = 0;
+    };
     struct utf8
     {
         unsigned char bom[3] = {0xEF, 0xBB, 0xBF};
@@ -66,30 +70,30 @@ namespace piv
          * @param mbstr 转换前的字符串
          * @param mbslen 转换前的字符串字符长度,-1为自动获取
          */
-        static void A2Wex(std::wstring &utf16str, const char *mbstr, const size_t &mbslen = static_cast<size_t>(-1))
+        static void A2Wex(std::wstring &utf16str, const char *mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t& code_page = CP_ACP)
         {
-            int utf16len = ::MultiByteToWideChar(CP_ACP, 0, mbstr, (mbslen == static_cast<size_t>(-1)) ? -1 : static_cast<int>(mbslen), NULL, 0);
+            int utf16len = ::MultiByteToWideChar(code_page, 0, mbstr, (mbslen == static_cast<size_t>(-1)) ? -1 : static_cast<int>(mbslen), NULL, 0);
             if (utf16len > 0)
             {
                 if (mbslen == static_cast<size_t>(-1))
                     utf16len -= 1;
                 utf16str.resize(utf16len, '\0');
-                ::MultiByteToWideChar(CP_ACP, 0, mbstr, (mbslen == static_cast<size_t>(-1)) ? -1 : static_cast<int>(mbslen), const_cast<wchar_t *>(utf16str.data()), utf16len);
+                ::MultiByteToWideChar(code_page, 0, mbstr, (mbslen == static_cast<size_t>(-1)) ? -1 : static_cast<int>(mbslen), const_cast<wchar_t *>(utf16str.data()), utf16len);
             }
             else
             {
                 utf16str = L"";
             }
         }
-        static void A2Wex(CVolString &utf16str, const char *mbstr, const size_t &mbslen = static_cast<size_t>(-1))
+        static void A2Wex(CVolString &utf16str, const char *mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t& code_page = CP_ACP)
         {
-            int utf16len = ::MultiByteToWideChar(CP_ACP, 0, mbstr, (mbslen == static_cast<size_t>(-1)) ? -1 : static_cast<int>(mbslen), NULL, 0);
+            int utf16len = ::MultiByteToWideChar(code_page, 0, mbstr, (mbslen == static_cast<size_t>(-1)) ? -1 : static_cast<int>(mbslen), NULL, 0);
             if (utf16len > 0)
             {
                 if (mbslen == static_cast<size_t>(-1))
                     utf16len -= 1;
                 utf16str.m_mem.Alloc((utf16len + 1) * 2, TRUE);
-                ::MultiByteToWideChar(CP_ACP, 0, mbstr, (mbslen == static_cast<size_t>(-1)) ? -1 : static_cast<int>(mbslen), const_cast<wchar_t *>(utf16str.GetText()), utf16len);
+                ::MultiByteToWideChar(code_page, 0, mbstr, (mbslen == static_cast<size_t>(-1)) ? -1 : static_cast<int>(mbslen), const_cast<wchar_t *>(utf16str.GetText()), utf16len);
             }
             else
             {
@@ -103,15 +107,15 @@ namespace piv
          * @param utf16str 转换前的字符串
          * @param utf16len 转换前的字符串字符长度,-1为自动获取
          */
-        static void W2Aex(std::string &mbstr, const wchar_t *utf16str, const size_t &utf16len = static_cast<size_t>(-1))
+        static void W2Aex(std::string &mbstr, const wchar_t *utf16str, const size_t &utf16len = static_cast<size_t>(-1), const uint32_t& code_page = CP_ACP)
         {
-            int mbslen = ::WideCharToMultiByte(CP_ACP, 0, utf16str, (utf16len == static_cast<size_t>(-1)) ? -1 : static_cast<int>(utf16len), NULL, 0, NULL, NULL);
+            int mbslen = ::WideCharToMultiByte(code_page, 0, utf16str, (utf16len == static_cast<size_t>(-1)) ? -1 : static_cast<int>(utf16len), NULL, 0, NULL, NULL);
             if (mbslen > 0)
             {
                 if (utf16len == static_cast<size_t>(-1))
                     mbslen -= 1;
                 mbstr.resize(mbslen, '\0');
-                ::WideCharToMultiByte(CP_ACP, 0, utf16str, (utf16len == static_cast<size_t>(-1)) ? -1 : static_cast<int>(utf16len), const_cast<char *>(mbstr.data()), mbslen, NULL, NULL);
+                ::WideCharToMultiByte(code_page, 0, utf16str, (utf16len == static_cast<size_t>(-1)) ? -1 : static_cast<int>(utf16len), const_cast<char *>(mbstr.data()), mbslen, NULL, NULL);
             }
             else
             {
@@ -226,11 +230,11 @@ namespace piv
          * @param utf8str 转换前的字符串
          * @param utf8len 转换前的字符串字符长度,-1为自动获取
          */
-        static void U2Aex(std::string &mbstr, const char *utf8str, const size_t &utf8len = static_cast<size_t>(-1))
+        static void U2Aex(std::string &mbstr, const char *utf8str, const size_t &utf8len = static_cast<size_t>(-1), const uint32_t& code_page = CP_ACP)
         {
             std::wstring utf16str;
             piv::encoding::U2Wex(utf16str, utf8str, utf8len);
-            piv::encoding::W2Aex(mbstr, utf16str.c_str(), 0);
+            piv::encoding::W2Aex(mbstr, utf16str.c_str(), 0, code_page);
         }
 
         /**
@@ -239,10 +243,10 @@ namespace piv
          * @param mbstr 转换前的字符串
          * @param mbslen 转换前的字符串字符长度,-1为自动获取
          */
-        static void A2Uex(std::string &utf8str, const char *mbstr, const size_t &mbslen = static_cast<size_t>(-1))
+        static void A2Uex(std::string &utf8str, const char *mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t& code_page = CP_ACP)
         {
             std::wstring utf16str;
-            piv::encoding::A2Wex(utf16str, mbstr, mbslen);
+            piv::encoding::A2Wex(utf16str, mbstr, mbslen, code_page);
             piv::encoding::W2Uex(utf8str, utf16str.c_str(), 0);
         }
 

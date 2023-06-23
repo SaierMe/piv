@@ -4,7 +4,11 @@
 
 ## 💽 安装
 
+本 GitHub 仓库没有上传 lib 和 dll 等二进制文件，因此请下载安装发布版模块
+
 下载地址：https://saier.lanzoul.com/b016cwvle
+
+在线更新：[火山平台升级工具](https://www.lkuaiy.com/rsdetails?id=16201836568092) by 仰望
 
 安装本模块前，必须将 [火山软件开发平台](http://www.voldp.com/) 更新到最新版本，**及时安装论坛的更新包才是最新版**。
 
@@ -90,18 +94,23 @@
 
 ## 💌 开源项目
 
-- [nlohmann **JSON**](https://github.com/nlohmann/json) `3.11.2` `MIT license`  一个现代 C++ 的 JSON 库
-- **[fmtlog](https://github.com/MengRao/fmtlog)**  `2.2.1`  `MIT license` 一个纳秒级精度的高性能异步日志记录库
-- **[{fmt}](https://github.com/fmtlib/fmt)**  `9.1.0`  `MIT license` 格式化文本库，std::format 的实现 
-- **[md4c](https://github.com/mity/md4c)** `0.4.8`  `MIT license` 一个 CommonMark 0.30 规范 + GFM 的 Markdown 解析库
+- [nlohmann **JSON**](https://github.com/nlohmann/json) `3.11.2` `MIT license`  现代 C++ 的 JSON 库
+- **[fmtlog](https://github.com/MengRao/fmtlog)**  `2.2.1`  `MIT license` 纳秒级精度的高性能异步日志记录库
+- **[{fmt}](https://github.com/fmtlib/fmt)**  `9.1.0`  `MIT license` 格式化文本库，等同 C++20 std::format 的实现 
+- **[md4c](https://github.com/mity/md4c)** `0.4.8`  `MIT license` CommonMark 0.30 规范 + GFM 的 Markdown 解析库
 - **[simpleini](https://github.com/brofield/simpleini)** `4.19` `MIT license` 简易的 INI 配置文件读写库
-- **[simdutf](https://github.com/simdutf/simdutf)** `3.2.8` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
+- **[simdutf](https://github.com/simdutf/simdutf)** `3.2.9` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
 - **[OpenCC](https://github.com/BYVoid/OpenCC)** `1.1.4` `Apache-2.0 license` 中文简繁转换开源项目，支持词汇级别的转换、异体字转换和地区习惯用词转换
+- **[7-zip](https://www.7-zip.org/)** `22.01` `GNU LGPL license` 免费的开源压缩软件（采用GNU LGPL协议，只使用它的 dll 文件不会传染）
 - **[bit7z](https://github.com/rikyoz/bit7z)** `4.0.0-RC` `Mozilla Public License v2.0` 7-zip的封装类
-- **[7-zip](https://www.7-zip.org/)** `22.01` `GNU LGPL license` 完全免费而且开源的压缩软件（采用GNU LGPL协议，只使用它的 dll 文件不会传染）
-- **[MinHook](https://github.com/TsudaKageyu/minhook)** `1.3.3` `BSD-2-Clause License` 一个简约的 x86/x64 API Hook 库
+- **[MinHook](https://github.com/TsudaKageyu/minhook)** `1.3.3` `BSD-2-Clause License` 极简的 x86/x64 API Hook 库
 - **[MMKV](https://github.com/Tencent/MMKV)** `1.2.14` `BSD-3-Clause License` 腾讯的高性能键值表
-- **[xxHash](https://github.com/Cyan4973/xxHash)** `8.0.1` `BSD-2-Clause License` 一个非常快的散列算法，速度接近 RAM 限制
+- **[xxHash](https://github.com/Cyan4973/xxHash)** `8.0.1` `BSD-2-Clause License` 速度接近 RAM 限制的高速散列算法
+- **[Dear ImGui](https://github.com/ocornut/imgui)** `1.89.6` `MIT license` 轻量级的即时渲染界面开发框架
+- **[GLFW](https://www.glfw.org)** `3.3.8` `zlib/libpng license` 跨平台的 OpenGL/Vulkan 桌面应用框架
+- **[glad](https://github.com/Dav1dde/glad)** `2023-04-04` `MIT License` 多语言的Vulkan/GL/GLES/EGL/GLX/WGL加载程序生成器
+- **[SDL](https://github.com/libsdl-org/SDL)** `2.26.5` `Zlib license` Simple DirectMedia Layer 是一个跨平台的多媒体开发库
+- **[Vulkan SDK](https://vulkan.lunarg.com/sdk/home)** `1.3.246.1` `Apache-2.0` 一个跨平台的2D和3D绘图应用程序接口
 
 ※本模块封装的开源项目均采用较宽松的开源协议，如 MIT、BSD、MPLv2 ……
 

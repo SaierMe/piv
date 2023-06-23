@@ -868,102 +868,142 @@
 
 # ======
 
-类 程序信息类 <公开 折叠 @文档 = "category = \"PE文件操作\"" @全局类 = 真 @禁止创建对象 = 真 @视窗.外部库 = "Version.lib">
+类 程序信息类 <公开 注释 = "用于获取程序文件的版本信息" 折叠 折叠2 @文档 = "category = \"PE文件操作\"" @全局类 = 真 @禁止创建对象 = 真
+        @视窗.外部库 = "Version.lib">
 {
-    方法 取程序版本 <公开 静态 类型 = 逻辑型 注释 = "获取程序文件的版本信息" 返回值注释 = "返回是否成功" 折叠 @禁止流程检查 = 真>
+    方法 取程序版本 <公开 静态 类型 = 逻辑型 注释 = "获取程序文件的完整版本信息,取自版本信息资源的StringFileInfo结构."
+            注释 = "注意: 由于火山程序的版本信息比较别扭,本方法只能获取火山程序的\"版本名称\"属性," 注释 = "如果要获取\"版本号\",请使用\"取文件版本\"或\"取产品版本\"."
+            返回值注释 = "返回是否成功" 折叠 @禁止流程检查 = 真>
     参数 文件名 <类型 = 文本型 注释 = "包含完整路径的文件名">
     参数 版本信息 <类型 = 程序版本信息类>
     {
         @ @<版本信息>.ResetToNullObject ();
         @ DWORD bufSize = ::GetFileVersionInfoSizeW (@<文件名>.GetText (), 0);
         @ if (!bufSize) return FALSE;
-        @ BYTE* buffer = new BYTE[bufSize];
-        @ memset (buffer, 0, bufSize);
-        @ if (::GetFileVersionInfoW (@<文件名>.GetText (), 0, bufSize, buffer) == 0) {
-        @     if (buffer) delete[] buffer;
+        @ @an<CVolMem> buffer;
+        @ buffer.Alloc (bufSize, TRUE);
+        @ if (::GetFileVersionInfoW (@<文件名>.GetText (), 0, bufSize, buffer.GetPtr ()) == 0)
         @     return FALSE;
-        @ }
         @ struct LANGANDCODEPAGE {
         @     WORD wLanguage;
         @     WORD wCodePage;
         @ } *lpTranslate;
         @ UINT cbTranslate, data_len;
-        @ if (::VerQueryValueW (buffer, _T ("\\VarFileInfo\\Translation"), (LPVOID*)&lpTranslate, &cbTranslate))
+        @ if (::VerQueryValueW (buffer.GetPtr (), L"\\VarFileInfo\\Translation", (LPVOID*)&lpTranslate, &cbTranslate))
         @ {
         @     for (UINT i = 0; i < (cbTranslate / sizeof (struct LANGANDCODEPAGE)); i++)
         @     {
-        @         WCHAR SubBlock[MAX_PATH] { 0 };
-        @         LPVOID data_ptr;
+        @         WCHAR SubBlock[MAX_PATH] { '\0' };
+        @         const WCHAR* szText = nullptr;
         @         if (::VerLanguageNameW (lpTranslate[i].wLanguage, SubBlock, MAX_PATH)) @<版本信息.语言>.SetText (SubBlock);
-        @         wsprintf (SubBlock, _T ("\\StringFileInfo\\%04x%04x\\Comments"), lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer, SubBlock, &data_ptr, &data_len)) @<版本信息.注释>.SetText ((const WCHAR*)data_ptr);
-        @         wsprintf (SubBlock, _T ("\\StringFileInfo\\%04x%04x\\CompanyName"), lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer, SubBlock, &data_ptr, &data_len)) @<版本信息.公司名称>.SetText ((const WCHAR*)data_ptr);
-        @         wsprintf (SubBlock, _T ("\\StringFileInfo\\%04x%04x\\FileDescription"), lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer, SubBlock, &data_ptr, &data_len)) @<版本信息.文件说明>.SetText ((const WCHAR*)data_ptr);
-        @         wsprintf (SubBlock, _T ("\\StringFileInfo\\%04x%04x\\FileVersion"), lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer, SubBlock, &data_ptr, &data_len)) @<版本信息.文件版本>.SetText ((const WCHAR*)data_ptr);
-        @         wsprintf (SubBlock, _T ("\\StringFileInfo\\%04x%04x\\InternalName"), lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer, SubBlock, &data_ptr, &data_len)) @<版本信息.内部名称>.SetText ((const WCHAR*)data_ptr);
-        @         wsprintf (SubBlock, _T ("\\StringFileInfo\\%04x%04x\\LegalCopyright"), lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer, SubBlock, &data_ptr, &data_len)) @<版本信息.版权>.SetText ((const WCHAR*)data_ptr);
-        @         wsprintf (SubBlock, _T ("\\StringFileInfo\\%04x%04x\\LegalTrademarks"), lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer, SubBlock, &data_ptr, &data_len)) @<版本信息.法律商标>.SetText ((const WCHAR*)data_ptr);
-        @         wsprintf (SubBlock, _T ("\\StringFileInfo\\%04x%04x\\OriginalFilename"), lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer, SubBlock, &data_ptr, &data_len)) @<版本信息.原始文件名>.SetText ((const WCHAR*)data_ptr);
-        @         wsprintf (SubBlock, _T ("\\StringFileInfo\\%04x%04x\\ProductName"), lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer, SubBlock, &data_ptr, &data_len)) @<版本信息.产品名称>.SetText ((const WCHAR*)data_ptr);
-        @         wsprintf (SubBlock, _T ("\\StringFileInfo\\%04x%04x\\ProductVersion"), lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer, SubBlock, &data_ptr, &data_len)) @<版本信息.产品版本>.SetText ((const WCHAR*)data_ptr);
-        @         wsprintf (SubBlock, _T ("\\StringFileInfo\\%04x%04x\\PrivateBuild"), lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer, SubBlock, &data_ptr, &data_len)) @<版本信息.私有版本>.SetText ((const WCHAR*)data_ptr);
-        @         wsprintf (SubBlock, _T ("\\StringFileInfo\\%04x%04x\\SpecialBuild"), lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer, SubBlock, &data_ptr, &data_len)) @<版本信息.特殊版本>.SetText ((const WCHAR*)data_ptr);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\Comments", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.注释>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\CompanyName", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.公司名称>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\FileDescription", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.文件说明>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\FileVersion", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.文件版本>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\InternalName", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.内部名称>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\LegalCopyright", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.版权>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\LegalTrademarks", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.法律商标>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\OriginalFilename", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.原始文件名>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\ProductName", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.产品名称>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\ProductVersion", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.产品版本>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\PrivateBuild", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.私有版本>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\SpecialBuild", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.特殊版本>.SetText (szText);
         @         break; // 跳出循环,只取第一个语言
         @     }
-        @     if (buffer) delete[] buffer;
         @     return TRUE;
-        @ } else {
-        @     if (buffer) delete[] buffer;
-        @     return FALSE;
         @ }
+        @ return FALSE;
     }
 
-    方法 取程序文件版本 <公开 静态 类型 = 文本型 注释 = "获取程序文件的文件版本信息" 返回值注释 = "成功返回文件版本" 折叠 @禁止流程检查 = 真>
+    方法 取程序文件版本 <公开 静态 类型 = 文本型 注释 = "返回程序文件的文件版本字符串,取自版本信息资源的StringFileInfo结构."
+            返回值注释 = "成功返回文件版本(等同火山程序的\"版本名称\"属性)" 折叠 @禁止流程检查 = 真>
     参数 文件名 <类型 = 文本型 注释 = "包含完整路径的文件名">
     {
         @ DWORD bufSize = ::GetFileVersionInfoSizeW (@<文件名>.GetText (), 0);
         @ @an<CVolString> szFileVersion;
         @ if (!bufSize) return szFileVersion;
-        @ BYTE* buffer = new BYTE[bufSize];
-        @ memset (buffer, 0, bufSize);
-        @ if (::GetFileVersionInfoW (@<文件名>.GetText (), 0, bufSize, buffer) == 0) {
-        @     if (buffer) delete[] buffer;
+        @ @an<CVolMem> buffer;
+        @ buffer.Alloc (bufSize, TRUE);
+        @ if (::GetFileVersionInfoW (@<文件名>.GetText(), 0, bufSize, buffer.GetPtr ()) == 0)
         @     return szFileVersion;
-        @ }
         @ struct LANGANDCODEPAGE {
         @     WORD wLanguage;
         @     WORD wCodePage;
         @ } *lpTranslate;
         @ UINT cbTranslate, data_len;
-        @ if (::VerQueryValueW (buffer, _T ("\\VarFileInfo\\Translation"), (LPVOID*)&lpTranslate, &cbTranslate))
+        @ if (::VerQueryValueW (buffer.GetPtr (), L"\\VarFileInfo\\Translation", (LPVOID*)&lpTranslate, &cbTranslate))
         @ {
         @     for (UINT i = 0; i < (cbTranslate / sizeof (struct LANGANDCODEPAGE)); i++)
         @     {
         @         WCHAR SubBlock[MAX_PATH] { 0 };
-        @         LPVOID data_ptr;
-        @         wsprintf (SubBlock, _T ("\\StringFileInfo\\%04x%04x\\FileVersion"), lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer, SubBlock, &data_ptr, &data_len))
-        @             szFileVersion.SetText ((const WCHAR*)data_ptr);
+        @         const WCHAR* szText = nullptr;
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\FileVersion", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len))
+        @             szFileVersion.SetText (szText);
         @         break; // 跳出循环,只取第一个语言
         @     }
         @ }
-        @ if (buffer) delete[] buffer;
         @ return szFileVersion;
+    }
+
+    方法 取文件版本 <公开 静态 类型 = 长整数 注释 = "返回程序文件的文件版本,取自版本信息资源的VS_FIXEDFILEINFO结构."
+            返回值注释 = "调用失败返回-1,长整数的版本号更适合于比较,但非常不直观." 折叠 @禁止流程检查 = 真>
+    参数 文件名 <类型 = 文本型 注释 = "包含完整路径的文件名">
+    参数 返回版本格式文本 <类型 = 文本型 注释 = "在本参数中返回类似\"1.1.0.0\"格式的文本版本号,更适合于展示." @默认值 = 空对象>
+    {
+        @ DWORD bufSize = ::GetFileVersionInfoSizeW (@<文件名>.GetText (), 0);
+        @ if (!bufSize) return -1;
+        @ @an<CVolMem> buffer;
+        @ buffer.Alloc (bufSize, TRUE);
+        @ if (::GetFileVersionInfoW (@<文件名>.GetText(), 0, bufSize, buffer.GetPtr ()) == 0)
+        @     return -1;
+        @ VS_FIXEDFILEINFO* pFileInfo = nullptr;
+        @ UINT cbFileInfo;
+        @ if (::VerQueryValueW (buffer.GetPtr (), L"\\", (LPVOID*)&pFileInfo, &cbFileInfo))
+        @ {
+        @     if (!@<返回版本格式文本>.IsNullObject())
+        @         @<返回版本格式文本>.Format (L"%d.%d.%d.%d", HIWORD(pFileInfo->dwFileVersionMS), LOWORD((DWORD)pFileInfo->dwFileVersionMS), HIWORD(pFileInfo->dwFileVersionLS), LOWORD((DWORD)pFileInfo->dwFileVersionLS));
+        @     return (INT64)(pFileInfo->dwFileVersionMS | ((QWORD)pFileInfo->dwFileVersionLS << 32));
+        @ }
+        @ return -1;
+    }
+
+    方法 取产品版本 <公开 静态 类型 = 长整数 注释 = "返回程序文件的产品版本,取自版本信息资源的VS_FIXEDFILEINFO结构."
+            返回值注释 = "调用失败返回-1,长整数的版本号更适合于比较,但非常不直观." 折叠 @禁止流程检查 = 真>
+    参数 文件名 <类型 = 文本型 注释 = "包含完整路径的文件名">
+    参数 返回版本格式文本 <类型 = 文本型 注释 = "在本参数中返回类似\"1.1.0.0\"格式的文本版本号,更适合于展示." @默认值 = 空对象>
+    {
+        @ DWORD bufSize = ::GetFileVersionInfoSizeW (@<文件名>.GetText (), 0);
+        @ if (!bufSize) return -1;
+        @ @an<CVolMem> buffer;
+        @ buffer.Alloc (bufSize, TRUE);
+        @ if (::GetFileVersionInfoW (@<文件名>.GetText(), 0, bufSize, buffer.GetPtr ()) == 0)
+        @     return -1;
+        @ VS_FIXEDFILEINFO* pFileInfo = nullptr;
+        @ UINT cbFileInfo;
+        @ if (::VerQueryValueW (buffer.GetPtr (), L"\\", (LPVOID*)&pFileInfo, &cbFileInfo))
+        @ {
+        @     if (!@<返回版本格式文本>.IsNullObject())
+        @         @<返回版本格式文本>.Format (L"%d.%d.%d.%d", HIWORD(pFileInfo->dwProductVersionMS), LOWORD((DWORD)pFileInfo->dwProductVersionMS), HIWORD(pFileInfo->dwProductVersionLS), LOWORD((DWORD)pFileInfo->dwProductVersionLS));
+        @     return (INT64)(pFileInfo->dwProductVersionMS | ((QWORD)pFileInfo->dwProductVersionLS << 32));
+        @ }
+        @ return -1;
     }
 }
 
-类 程序版本信息类 <公开 注释 = "程序文件版本信息的辅助类" 折叠 @文档 = "category = \"PE文件操作.辅助类\"">
+类 程序版本信息类 <公开 基础类 = 扩展对象类 注释 = "程序文件版本信息的辅助类" 折叠 @文档 = "category = \"PE文件操作.辅助类\"">
 {
     变量 注释 <公开 类型 = 文本型 注释 = "(可能为空)Comments,与文件关联的注释.">
     变量 公司名称 <公开 类型 = 文本型 注释 = "CompanyName,生成文件的公司的名称.">
@@ -979,8 +1019,7 @@
     变量 特殊版本 <公开 类型 = 文本型 注释 = "(可能为空)SpecialBuild,文件的特殊内部版本信息.">
     变量 语言 <公开 类型 = 文本型 注释 = "程序的语言">
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
-            @视窗.后缀文本 = "override">
+    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖>
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
     {

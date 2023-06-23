@@ -25,7 +25,7 @@ SOFTWARE.
 #ifndef INCLUDE_INJA_INJA_HPP_
 #define INCLUDE_INJA_INJA_HPP_
 
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace inja {
 #ifndef INJA_DATA_TYPE
@@ -677,7 +677,7 @@ public:
 
   void accept(NodeVisitor& v) const {
     v.visit(*this);
-  };
+  }
 };
 
 class BlockStatementNode : public StatementNode {
@@ -690,7 +690,7 @@ public:
 
   void accept(NodeVisitor& v) const {
     v.visit(*this);
-  };
+  }
 };
 
 class SetStatementNode : public StatementNode {

@@ -1,0 +1,765 @@
+<火山程序 类型 = "通常" 版本 = 1 />
+
+包 火山.ImGui <注释 = "例程下载: https://saier.lanzoul.com/b016cwvle">
+
+# ImGui窗口 (已高度封装,更简单易用)
+
+类 IM_窗口模板类 <注释 = "提供了ImGui窗口共同的成员变量和定义事件." 注释 = "\"模板类型1\"为所使用的渲染器类型" 折叠 @模板基础类 = 真>
+{
+    变量 渲染器 <公开 类型 = 模板类型1 注释 = "当前使用的渲染器实例">
+    变量 背景颜色 <公开 类型 = ImVec4 注释 = "x=红色; y=绿色; z=蓝色; w=Alpha">
+
+    方法 类_初始化 <折叠>
+    {
+        背景颜色.置值 (0.45f, 0.55f, 0.60f, 1.00f)
+    }
+
+    方法 创建完毕 <公开 定义事件 类型 = 整数 注释 = "当GLFW窗口创建完毕后发送此事件,用于对GLFW进行额外的设置."
+            注释 = "注意: 此时ImGui尚未初始化,请勿调用相关命令.">
+
+    方法 初始化配置 <公开 定义事件 类型 = 整数 注释 = "在ImGui显示界面之前发送一次此事件,用于设置ImGui的样式和字体等参数."
+            返回值注释 = "返回1表示使用浅色样式,2为经典样式,其他任意值为默认的深色样式." 折叠>
+    参数 样式配置 <类型 = IM样式类 注释 = "当前的样式配置">
+    参数 字体图集 <类型 = IM字体图集类 注释 = "你可以在此添加字体(默认已添加了微软雅黑).">
+
+    方法 即将渲染 <公开 定义事件 类型 = 整数 注释 = "当ImGui帧数据被渲染前发送此事件,请在本事件内设计ImGui的界面布局." 注释 = "注意:"
+            注释 = "  1. 本事件前后已经内部处理好新建帧和渲染等操作,你只需设计布局即可."
+            注释 = "  2. ImGUI的默认帧速率为60fps,即每秒触发本事件60次,因此在此进行耗时操作将"
+            注释 = "导致帧速率降低和界面卡顿,如有必要,请另开线程执行耗时操作." 注释 = "  3. 因为本事件的执行频率足够高,所以键鼠输入等事件也可以在此一起处理.">
+
+    方法 尺寸被改变 <公开 定义事件 类型 = 整数 注释 = "当本窗口的尺寸被改变后发送此事件" 折叠>
+    参数 宽度 <类型 = 整数 注释 = "改变后的窗口宽度">
+    参数 高度 <类型 = 整数 注释 = "改变后的窗口高度">
+
+    方法 位置被改变 <公开 定义事件 类型 = 整数 注释 = "当本窗口的位置被改变后发送此事件" 折叠>
+    参数 左边位置 <类型 = 整数 注释 = "改变后的窗口左边在屏幕上的横向坐标位置">
+    参数 顶边位置 <类型 = 整数 注释 = "改变后的窗口左边在屏幕上的纵向坐标位置">
+
+    方法 最小化被改变 <公开 定义事件 类型 = 整数 注释 = "当本窗口改变最小化状态发送此事件" 折叠>
+    参数 是否最小化 <类型 = 逻辑型 注释 = "是否为最小化状态">
+
+    方法 最大化被改变 <公开 定义事件 类型 = 整数 注释 = "当本窗口改变最大化状态发送此事件" 折叠>
+    参数 是否最大化 <类型 = 逻辑型 注释 = "是否为最大化状态">
+
+    方法 文件被拖放 <公开 定义事件 类型 = 整数 注释 = "当文件被拖放到本窗口上后,将发送本事件." 折叠>
+    参数 所拖放文件 <类型 = 文本数组类 注释 = "提供所有被拖放到本组件上的文件名,数组成员数必定大于0.">
+
+    方法 将被销毁 <公开 定义事件 类型 = 整数 注释 = "当本窗口被销毁前发送此事件">
+}
+
+类 IM_Win32窗口 <公开 基础类 = IM_窗口模板类 注释 = "  基于Windows API的ImGui窗口,本模板类已经处理好ImGui创建和销毁的"
+        注释 = "各种复杂流程,你只需要在\"即将绘制\"事件中完成界面的布局,就能完成" 注释 = "一个简单的ImGui窗口."
+        注释 = "  \"模板类型1\"为所使用的渲染器类型,支持以下的渲染器:" 注释 = "   IM_DX9渲染器   IM_DX10渲染器     IM_DX11渲染器  "
+        注释 = "   IM_DX12渲染器  Im_OpenGL3渲染器" 折叠 @模板基础类 = 真 @文档 = "category = \"窗口框架\"">
+{
+    变量 改变后宽度 <类型 = 整数 值 = 0 @输出名 = "m_ResizeWidth">
+    变量 改变后高度 <类型 = 整数 值 = 0 @输出名 = "m_ResizeHeight">
+
+    方法 创建主窗口 <公开 类型 = 逻辑型 注释 = "创建本窗口类的对象并将其作为程序的主窗口." 注释 = "注意:"
+            注释 = "  1. 程序中必须存在且只能存在一个主窗口,调用本方法后,主窗口将被设置为本窗口;"
+            注释 = "  2. 主窗口必须在程序的\"启动类\"中存在成员变量定义,避免其在程序退出前被释放," 注释 = "否则将可能导致程序运行时崩溃."
+            注释 = "  3. 本方法内实现了消息循环,直到窗口关闭或创建失败才会返回." 返回值注释 = "返回是否成功" 折叠 @禁止流程检查 = 真>
+    参数 标题 <类型 = 文本型 注释 = "提供所创建窗口的标题">
+    参数 宽度 <类型 = 整数 注释 = "提供所创建窗口的宽度" @默认值 = 0x80000000>
+    参数 高度 <类型 = 整数 注释 = "提供所创建窗口的高度" @默认值 = 0x80000000>
+    参数 窗口类名 <类型 = 文本型 注释 = "提供所创建窗口的窗口类名,该名称的类将会在窗口创建时自动登记到Windows系统中." @默认值 = "ImGuiWinClass">
+    参数 透明帧缓冲区 <类型 = 逻辑型 注释 = "是否启用透明帧缓冲区,通过Alpha通道将窗口内容(不包括标题栏和边框)与背景合成," 注释 = "实现透明背景."
+            注释 = "注意: DX9和DX12暂时不支持本参数" @默认值 = 假>
+    {
+        @ if (m_window != NULL) return TRUE;
+        @ m_wc.cbSize = sizeof(WNDCLASSEXW);
+        @ m_wc.style = CS_OWNDC;
+        @ m_wc.lpfnWndProc = WndProc;
+        @ m_wc.cbClsExtra = 0;
+        @ m_wc.cbWndExtra = 0;
+        @ m_wc.hInstance = ::GetModuleHandleW(nullptr);
+        @ m_wc.hIcon = ::LoadIconW(m_wc.hInstance, MAKEINTRESOURCEW(100));
+        @ m_wc.hCursor = nullptr;
+        @ m_wc.hbrBackground = nullptr;
+        @ m_wc.lpszMenuName = nullptr;
+        @ m_wc.lpszClassName = @<窗口类名>.GetText();
+        @ m_wc.hIconSm = ::LoadIconW(m_wc.hInstance, MAKEINTRESOURCEW(100));
+        @ if (::RegisterClassExW(&m_wc) == 0) return FALSE;
+        @ m_window = ::CreateWindowExW(0, m_wc.lpszClassName, @<标题>.GetText(), WS_OVERLAPPEDWINDOW, 0x80000000, 0x80000000, @<宽度>, @<高度>, nullptr, nullptr, m_wc.hInstance, this);
+        变量 窗口句柄 <类型 = 变整数>
+        变量 字体图集 <类型 = IM字体图集类>
+        @ if (m_window == NULL) goto Fail;
+        @ if (@<透明帧缓冲区>) ImGui_ImplWin32_EnableAlphaCompositing(m_window);
+        @ @<窗口句柄> = (INT_P)m_window;
+        如果 (渲染器.创建设备 (窗口句柄) == 假)
+        {
+            渲染器.释放设备 (窗口句柄)
+            @ goto Fail;
+        }
+        @ ::ShowWindow(m_window, SW_SHOWDEFAULT);
+        @ ::UpdateWindow(m_window);
+        本对象.创建完毕 ()
+        ImGui.检查版本 ()
+        ImGui.置当前上下文 (ImGui.创建上下文 ())
+        @ ImGuiIO& io = ImGui::GetIO(); (void)io;
+        @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+        @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+        字体图集 = ImGui.取字体图集 ()
+        字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc", 18.0f, IM字形范围.中文)  // 微软雅黑
+        分支判断 (初始化配置 (ImGui.取样式 (), 字体图集))
+        {
+            分支 (1)
+            {
+                ImGui.浅色样式 ()
+            }
+            分支 (2)
+            {
+                ImGui.经典样式 ()
+            }
+            默认分支 ()
+            {
+                ImGui.深色样式 ()
+            }
+        }
+        字体图集.生成 ()
+        如果 (渲染器.渲染器类型 == 0)
+        {
+            IM_Win32平台.初始化 (窗口句柄)
+        }
+        否则
+        {
+            IM_Win32平台.初始化_OpenGL (窗口句柄)
+        }
+        如果 (渲染器.初始化 () == 假)
+        {
+            IM_Win32平台.关闭 ()
+            ImGui.销毁上下文 ()
+            @ goto Fail;
+        }
+        变量 完成 <类型 = 逻辑型 值 = 假>
+        判断循环 (取反 (完成))
+        {
+            @ MSG msg;
+            @ while (::PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE))
+            @ {
+            @     ::TranslateMessage(&msg);
+            @     ::DispatchMessage(&msg);
+            @     if (msg.message == WM_QUIT) @<完成> = TRUE;
+            @ }
+            如果 (完成 == 真)
+            {
+                跳出循环
+            }
+            如果 (改变后宽度 != 0 && 改变后高度 != 0)
+            {
+                渲染器.重置尺寸 (改变后宽度, 改变后高度)
+            }
+            渲染器.新建帧 ()
+            IM_Win32平台.新建帧 ()
+            ImGui.新建帧 ()
+            本对象.即将渲染 ()
+            渲染器.渲染 (背景颜色)
+        }
+        渲染器.关闭 ()
+        IM_Win32平台.关闭 ()
+        ImGui.销毁上下文 ()
+        渲染器.释放设备 (窗口句柄)
+        @ ::DestroyWindow(m_window);
+        @ m_window = NULL;
+        @ ::UnregisterClassW(m_wc.lpszClassName, m_wc.hInstance);
+        @ ::PostQuitMessage(0); // 投递退出消息
+        @ return TRUE;
+        @ Fail:
+        @ if (m_window) { ::DestroyWindow(m_window); m_window = NULL; }
+        @ if (m_wc.lpszClassName != nullptr) { ::UnregisterClassW(m_wc.lpszClassName, m_wc.hInstance); }
+        @ m_wc = {0};
+        @ return FALSE;
+    }
+
+    方法 关闭窗口 <公开 注释 = "尝试关闭本窗口." 注释 = "注意: 本方法被调用后窗口不会被立即关闭,而会延迟等待到下一次消息循环时才会关闭." 折叠>
+    {
+        @ if (m_window != NULL)
+        @     ::DestroyWindow(m_window);
+    }
+
+    方法 取窗口句柄 <公开 类型 = 变整数 注释 = "返回当前窗口组件的句柄,如果尚未创建或创建失败,则返回0." 折叠 @嵌入式方法 = "">
+    {
+        @ (INT_P)@sn<this>.m_window
+    }
+
+    # 属性
+
+    方法 标题 <公开 属性读 类型 = 文本型 注释 = "返回本窗口的当前标题文本" 折叠 @禁止流程检查 = 真>
+    {
+        @ if (m_window != NULL)
+        @ {
+        @     CVolString strCaption;
+        @     strCaption.SetLength(::GetWindowTextLengthW(m_window));
+        @     ::GetWindowTextW(m_window, (LPWSTR)strCaption.GetText(), strCaption.GetLength());
+        @     return strCaption;
+        @ }
+        @ return _CT("");
+    }
+
+    方法 标题 <公开 属性写 注释 = "设置本窗口的当前标题文本" 折叠>
+    参数 所欲设置的标题 <类型 = 文本型 注释 = "提供所欲设置的标题文本">
+    {
+        @ if (m_window != NULL)
+        @     ::SetWindowTextW(m_window, @<所欲设置的标题>.GetText());
+    }
+
+    #
+    # ---
+    # @begin
+    # <> <include>
+    #     WNDCLASSEXW m_wc = {0};
+    #     HWND m_window = NULL;
+    #     bool m_created = false;
+    #
+    #     static LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+    #     {
+    #         static @sn<current_class>* pThis;
+    #         if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+    #             return 1;
+    #         switch (msg)
+    #         {
+    #         case WM_CREATE:
+    #             if (pThis == nullptr) pThis = (@sn<current_class>*)((CREATESTRUCTW*)lParam)->lpCreateParams;
+    #             return 0;
+    #         case WM_SIZE:
+    #             if (wParam != SIZE_MINIMIZED && pThis != nullptr)
+    #             {
+    #                 pThis->m_ResizeWidth = (INT)LOWORD(lParam); pThis->m_ResizeHeight = (INT)HIWORD(lParam);
+    #                 pThis->@<尺寸被改变>(pThis->m_ResizeWidth, pThis->m_ResizeHeight);
+    #             }
+    #             return 0;
+    #         case WM_SYSCOMMAND:
+    #             if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
+    #                 return 0;
+    #             break;
+    #         case WM_DESTROY:
+    #             if (pThis != nullptr) pThis->@<将被销毁>();
+    #             ::PostQuitMessage(0);
+    #             return 0;
+    #         }
+    #         return ::DefWindowProcW(hWnd, msg, wParam, lParam);
+    #     }
+    # <> </include>
+    # @end
+    # ---
+}
+
+类 IM_GLFW窗口 <公开 基础类 = IM_窗口模板类 注释 = "  基于GLFW的ImGui窗口,本模板类已经处理好ImGui创建和销毁的各种复杂"
+        注释 = "流程,你只需要在\"即将绘制\"事件中完成界面的布局,就能完成一个简单的" 注释 = "ImGui窗口."
+        注释 = "  \"模板类型1\"为所使用的渲染器类型,支持以下的渲染器:" 注释 = "  Im_OpenGL3渲染器  IM_Vulkan渲染器" 折叠 @模板基础类 = 真
+        @文档 = "category = \"窗口框架\"">
+{
+    方法 创建主窗口 <公开 类型 = 逻辑型 注释 = "创建本窗口类的对象并将其作为程序的主窗口." 注释 = "注意:"
+            注释 = "  1. 程序中必须存在且只能存在一个主窗口,调用本方法后,主窗口将被设置为本窗口;"
+            注释 = "  2. 主窗口必须在程序的\"启动类\"中存在成员变量定义,避免其在程序退出前被释放," 注释 = "否则将可能导致程序运行时崩溃."
+            注释 = "  3. 本方法内实现了消息循环,直到窗口关闭或创建失败,本方法才会返回." 返回值注释 = "返回是否成功" 折叠 @禁止流程检查 = 真>
+    参数 标题 <类型 = 文本型 注释 = "提供所创建窗口的标题">
+    参数 宽度 <类型 = 整数 注释 = "提供所创建窗口的宽度" @默认值 = 1280>
+    参数 高度 <类型 = 整数 注释 = "提供所创建窗口的高度" @默认值 = 720>
+    参数 全屏模式 <类型 = 逻辑型 注释 = "默认为窗口模式,如果设置为真,将在主显示器中进入全屏模式,"
+            注释 = "如果想在其他显示器中全屏显示,请在创建主窗口前执行\"置当前显示器\"." @默认值 = 假>
+    参数 高DPI缩放 <类型 = 逻辑型 @默认值 = 真>
+    参数 透明帧缓冲区 <类型 = 逻辑型 注释 = "是否启用透明帧缓冲区." 注释 = "通过Alpha通道将窗口内容(不包括标题栏和边框)与背景合成,实现透明背景." @默认值 = 假>
+    {
+        @ if (m_window) return FALSE;
+        如果 (渲染器.渲染器类型 == 1)
+        {
+            @ glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+            @ glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+            @ glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        }
+        否则 (渲染器.渲染器类型 == 2)
+        {
+            @ glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        }
+        @ glfwWindowHint(GLFW_SCALE_TO_MONITOR, @<高DPI缩放>);
+        @ glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, @<透明帧缓冲区>);
+        @ m_window = glfwCreateWindow(@<宽度>, @<高度>, PivW2U{@<标题>}.GetText(), @<全屏模式> ? m_monitor : nullptr, nullptr);
+        @ if (!m_window) return FALSE;
+        变量 窗口句柄 <类型 = 变整数>
+        @ @<窗口句柄> = (INT_P)m_window;
+        如果 (渲染器.渲染器类型 == 1)
+        {
+            @ glfwMakeContextCurrent(m_window);
+            @ glfwSwapInterval(1); // 启用垂直同步
+            如果 (渲染器.加载_GLFW (0) == 假)
+            {
+                返回 (假)
+            }
+        }
+        否则 (渲染器.渲染器类型 == 2)
+        {
+            如果 (渲染器.加载_GLFW (窗口句柄) == 假)
+            {
+                返回 (假)
+            }
+        }
+        // 设置回调
+        @ glfwSetWindowUserPointer(m_window, this);
+        @ glfwSetWindowPosCallback(m_window, glfw_pos_callback);
+        @ glfwSetWindowSizeCallback(m_window, glfw_size_callback);
+        @ glfwSetWindowCloseCallback(m_window, glfw_close_callback);
+        @ glfwSetWindowIconifyCallback(m_window, glfw_iconify_callback);
+        @ glfwSetWindowMaximizeCallback(m_window, glfw_maximize_callback);
+        @ glfwSetDropCallback(m_window, glfw_drop_callback);
+        // @ glfwSetWindowIcon(m_window, 0, nullptr);
+        本对象.创建完毕 ()
+        ImGui.检查版本 ()
+        ImGui.置当前上下文 (ImGui.创建上下文 ())
+        @ ImGuiIO& io = ImGui::GetIO(); (void)io;
+        @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+        @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+        变量 字体图集 <类型 = IM字体图集类>
+        字体图集 = ImGui.取字体图集 ()
+        字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc", 18.0f)  // 微软雅黑
+        分支判断 (初始化配置 (ImGui.取样式 (), 字体图集))
+        {
+            分支 (1)
+            {
+                ImGui.浅色样式 ()
+            }
+            分支 (2)
+            {
+                ImGui.经典样式 ()
+            }
+            默认分支 ()
+            {
+                ImGui.深色样式 ()
+            }
+        }
+        字体图集.生成 ()
+        如果 (渲染器.渲染器类型 == 1)
+        {
+            IM_GLFW平台.初始化_OpenGL (窗口句柄, 真)
+            如果 (渲染器.初始化 () == 假)
+            {
+                IM_GLFW平台.关闭 ()
+                ImGui.销毁上下文 ()
+                返回 (假)
+            }
+        }
+        否则 (渲染器.渲染器类型 == 2)
+        {
+            IM_GLFW平台.初始化_Vulkan (窗口句柄, 真)
+            如果 (渲染器.初始化 () == 假)
+            {
+                IM_GLFW平台.关闭 ()
+                ImGui.销毁上下文 ()
+                返回 (假)
+            }
+            渲染器.加载字体纹理 ()
+        }
+        // 消息循环
+        判断循环 (_是否需要退出 () == 假)
+        {
+            @ glfwPollEvents();
+            // 界面布局
+            渲染器.新建帧 ()
+            IM_GLFW平台.新建帧 ()
+            ImGui.新建帧 ()
+            本对象.即将渲染 ()
+            // 渲染
+            渲染器.渲染_GLFW (窗口句柄, 背景颜色)
+        }
+        // 清理数据
+        渲染器.关闭 ()
+        IM_GLFW平台.关闭 ()
+        ImGui.销毁上下文 ()
+        渲染器.清理 ()
+        @ glfwDestroyWindow(m_window);
+        @ m_window = nullptr;
+        @ ::PostQuitMessage(0); // 投递退出消息
+        @ return TRUE;
+    }
+
+    方法 关闭窗口 <公开 注释 = "尝试关闭本窗口." 注释 = "注意: 本方法被调用后窗口不会被立即关闭,而会延迟等待到下一次消息循环时才会关闭." 折叠 @嵌入式方法 = "">
+    {
+        @ glfwSetWindowShouldClose(@sn<this>.m_window, 1)
+    }
+
+    方法 取窗口句柄 <公开 类型 = 变整数 注释 = "返回当前窗口的句柄,如果尚未创建或创建失败,则返回0." 折叠 @嵌入式方法 = "">
+    {
+        @ (INT_P)@sn<this>.m_window
+    }
+
+    方法 最小化 <公开 注释 = "将本窗口最小化到任务栏图标" 折叠 @嵌入式方法 = "">
+    {
+        @ glfwIconifyWindow(@sn<this>.m_window)
+    }
+
+    方法 最大化 <公开 注释 = "将本窗口设置为最大化" 折叠 @嵌入式方法 = "">
+    {
+        @ glfwMaximizeWindow(@sn<this>.m_window)
+    }
+
+    方法 还原窗口 <公开 注释 = "将本窗口还原到原来的尺寸" 折叠 @嵌入式方法 = "">
+    {
+        @ glfwRestoreWindow(@sn<this>.m_window)
+    }
+
+    方法 获取焦点 <公开 注释 = "将当前输入焦点设置到本窗口上" 折叠 @嵌入式方法 = "">
+    {
+        @ glfwFocusWindow(@sn<this>.m_window)
+    }
+
+    方法 _是否需要退出 <类型 = 逻辑型 折叠 @嵌入式方法 = "">
+    {
+        @ glfwWindowShouldClose(@sn<this>.m_window)
+    }
+
+    # 显示器
+
+    方法 "// 置当前显示器" <公开 折叠>
+    参数 显示器句柄 <类型 = 变整数>
+
+    # 属性
+
+    方法 标题 <公开 属性写 注释 = "设置本窗口的当前标题文本">
+    参数 所欲设置标题 <类型 = 文本型 注释 = "提供所欲设置的标题文本">
+    {
+        @ glfwSetWindowTitle(m_window, PivW2U{@<所欲设置标题>}.GetText());
+    }
+
+    方法 显示边框 <公开 属性读 类型 = 逻辑型 注释 = "返回窗口是否显示标题栏和边框" 折叠 @禁止流程检查 = 真>
+    {
+        @ return glfwGetWindowAttrib(m_window, GLFW_DECORATED);
+    }
+
+    方法 显示边框 <公开 属性写 注释 = "设置是否显示窗口的标题栏和边框">
+    参数 是否显示 <类型 = 逻辑型>
+    {
+        @ glfwSetWindowAttrib(m_window, GLFW_DECORATED, @<是否显示>);
+    }
+
+    方法 可视 <公开 属性读 类型 = 逻辑型 注释 = "返回本窗口当前是否可视" 折叠 @禁止流程检查 = 真>
+    {
+        @ return glfwGetWindowAttrib(m_window, GLFW_VISIBLE);
+    }
+
+    方法 可视 <公开 属性写 注释 = "设置本窗口当前是否可视,注意会连任务栏图标一起隐藏." 折叠>
+    参数 是否可视 <类型 = 逻辑型 注释 = "指定本组件是否可视">
+    {
+        @ @<是否可视> ? glfwShowWindow(m_window) : glfwHideWindow(m_window);
+    }
+
+    方法 窗口透明度 <公开 属性读 类型 = 小数 注释 = "返回本窗口(包括标题栏和边框)的整体透明度,如果系统不支持窗口透明度将始终返回1" 折叠 折叠2 @禁止流程检查 = 真
+            @视窗.单精度小数 = 真>
+    {
+        @ return glfwGetWindowOpacity(m_window, GLFW_VISIBLE);
+    }
+
+    方法 窗口透明度 <公开 属性写 注释 = "设置本窗口(包括标题栏和边框)的整体透明度" 折叠>
+    参数 透明度 <类型 = 小数 注释 = "请提供0.0f-1.0f之间的值,即完全透明到完全不透明." @视窗.单精度小数 = 真>
+    {
+        @ glfwSetWindowOpacity(m_window, (float)@<透明度>);
+    }
+
+    方法 置于顶层 <公开 属性读 类型 = 逻辑型 注释 = "返回本窗口当前是否已置于顶层" 折叠 @禁止流程检查 = 真>
+    {
+        @ return glfwGetWindowAttrib(m_window, GLFW_FLOATING);
+    }
+
+    方法 置于顶层 <公开 属性写 注释 = "设置本窗口是否置于顶层" 折叠>
+    参数 是否置于顶层 <类型 = 逻辑型 注释 = "指定本窗口是否置于顶层">
+    {
+        @ glfwSetWindowAttrib(m_window, GLFW_FLOATING, @<是否置于顶层>);
+    }
+
+    方法 透明帧缓冲区 <公开 属性读 类型 = 逻辑型 注释 = "返回本窗口是否已启用透明帧缓冲区,如果系统不支持将始终返回假." 折叠 @禁止流程检查 = 真>
+    {
+        @ return glfwGetWindowAttrib(m_window, GLFW_TRANSPARENT_FRAMEBUFFER);
+    }
+
+    # ---
+    # @begin
+    # <> <include>
+    #     static void @an<_sOnBeforeAppInit>()
+    #     {
+    #         glfwSetErrorCallback(glfw_error_callback);
+    #         IM_ASSERT(glfwInit() == GLFW_TRUE);
+    #     }
+    #     static void @an<_sOnAfterAppExit>() { glfwTerminate(); }
+    #     // 成员变量
+    #     GLFWwindow* m_window = nullptr;
+    #     GLFWmonitor* m_monitor = glfwGetPrimaryMonitor();
+    #     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 0.60f);
+    #     // Callback
+    #     static void glfw_error_callback(int error, const char* description)
+    #     {
+    #         PIVDEBUG("S", CVolString().Format(L"GLFW Error %d: %s\n", error, PivU2W(description).GetText()).GetText());
+    #     }
+    #     static void glfw_pos_callback(GLFWwindow* window, int xpos, int ypos)
+    #     {
+    #         ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<位置被改变>(xpos, ypos);
+    #     }
+    #     static void glfw_size_callback(GLFWwindow* window, int width, int height)
+    #     {
+    #         ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<尺寸被改变>(width, height);
+    #     }
+    #     static void glfw_close_callback(GLFWwindow* window)
+    #     {
+    #         ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<将被销毁>();
+    #     }
+    #     static void glfw_iconify_callback(GLFWwindow* window, int iconified)
+    #     {
+    #         ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<最小化被改变>(iconified);
+    #     }
+    #     static void glfw_maximize_callback(GLFWwindow* window, int maximized)
+    #     {
+    #         ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<最大化被改变>(maximized);
+    #     }
+    #     static void glfw_drop_callback(GLFWwindow* window, int path_count, const char* paths[]);
+    # <> </include>
+    #     void @sn<current_class>::glfw_drop_callback(GLFWwindow* window, int path_count, const char* paths[])
+    #     {
+    #         @dt<文本数组类> aryFileNames;
+    #         for (size_t i = 0; i < path_count; i++)
+    #             aryFileNames.data().Add(PivU2W{paths[i]}.GetText());
+    #         ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<文件被拖放>(aryFileNames);
+    #     }
+    # @end
+    # ---
+}
+
+类 IM_SDL2窗口 <公开 基础类 = IM_窗口模板类 注释 = "  基于SDL2的ImGui窗口,本模板类已经处理好ImGui创建和销毁的各种复杂"
+        注释 = "流程,你只需要在\"即将绘制\"事件中完成界面的布局,就能完成一个简单的" 注释 = "ImGui窗口."
+        注释 = "  \"模板类型1\"为所使用的渲染器类型,支持以下的渲染器:" 注释 = "  IM_DX9渲染器   IM_DX10渲染器     IM_DX11渲染器  "
+        注释 = "  IM_DX12渲染器  Im_OpenGL3渲染器  IM_Vulkan渲染器" 折叠 @模板基础类 = 真 @文档 = "category = \"窗口框架\"">
+{
+    方法 创建主窗口 <公开 类型 = 逻辑型 注释 = "创建本窗口类的对象并将其作为程序的主窗口." 注释 = "注意:"
+            注释 = "  1. 程序中必须存在且只能存在一个主窗口,调用本方法后,主窗口将被设置为本窗口;"
+            注释 = "  2. 主窗口必须在程序的\"启动类\"中存在成员变量定义,避免其在程序退出前被释放," 注释 = "否则将可能导致程序运行时崩溃."
+            注释 = "  3. 本方法内实现了消息循环,直到窗口关闭或创建失败,本方法才会返回." 返回值注释 = "返回是否成功" @禁止流程检查 = 真>
+    参数 标题 <类型 = 文本型 注释 = "提供所创建窗口的标题">
+    参数 宽度 <类型 = 整数 注释 = "提供所创建窗口的宽度" @默认值 = 1280>
+    参数 高度 <类型 = 整数 注释 = "提供所创建窗口的高度" @默认值 = 720>
+    参数 全屏模式 <类型 = 逻辑型 注释 = "默认为窗口模式,如果设置为真,将以设置的宽度和高度进入全屏模式" @默认值 = 假>
+    参数 高DPI缩放 <类型 = 逻辑型 @默认值 = 真>
+    参数 "// 透明帧缓冲区" <类型 = 逻辑型 注释 = "是否启用透明帧缓冲区." 注释 = "通过Alpha通道将窗口内容(不包括标题栏和边框)与背景合成,实现透明背景."
+            @默认值 = 假>
+    {
+        @ if (m_window) return FALSE;
+        @ uint32_t window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS;
+        @ if (@<高DPI缩放>) window_flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+        @ if (@<全屏模式>) window_flags |= SDL_WINDOW_FULLSCREEN;
+        如果 (渲染器.渲染器类型 == 1)
+        {
+            @ window_flags |= SDL_WINDOW_OPENGL;
+            @ SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+            @ SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+            @ SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+            @ SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+            @ SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+            @ SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+            @ SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+            // @ SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
+        }
+        否则 (渲染器.渲染器类型 == 2)
+        {
+            @ window_flags |= SDL_WINDOW_VULKAN;
+        }
+        @ m_window = SDL_CreateWindow(PivW2U{@<标题>}.GetText(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, @<宽度>, @<高度>, window_flags);
+        @ if (!m_window) return FALSE;
+        变量 窗口句柄 <类型 = 变整数>
+        @ @<窗口句柄> = (INT_P)m_window;
+        如果 (渲染器.渲染器类型 == 1)
+        {
+            @ gl_context = SDL_GL_CreateContext(m_window);
+            @ SDL_GL_MakeCurrent(m_window, gl_context);
+            @ SDL_GL_SetSwapInterval(1); // 启用垂直同步
+        }
+        如果 (渲染器.加载_SDL (窗口句柄) == 假)
+        {
+            渲染器.清理 ()
+            返回 (假)
+        }
+        本对象.创建完毕 ()
+        ImGui.检查版本 ()
+        ImGui.置当前上下文 (ImGui.创建上下文 ())
+        @ ImGuiIO& io = ImGui::GetIO(); (void)io;
+        @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+        @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+        变量 字体图集 <类型 = IM字体图集类>
+        字体图集 = ImGui.取字体图集 ()
+        字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc", 18.0f, IM字形范围.中文)  // 微软雅黑
+        分支判断 (初始化配置 (ImGui.取样式 (), 字体图集))
+        {
+            分支 (1)
+            {
+                ImGui.浅色样式 ()
+            }
+            分支 (2)
+            {
+                ImGui.经典样式 ()
+            }
+            默认分支 ()
+            {
+                ImGui.深色样式 ()
+            }
+        }
+        字体图集.生成 ()
+        如果 (渲染器.渲染器类型 == 1)
+        {
+            @ ImGui_ImplSDL2_InitForOpenGL(m_window, gl_context);
+        }
+        否则 (渲染器.渲染器类型 == 2)
+        {
+            IM_SDL2平台.初始化_Vulkan (窗口句柄)
+        }
+        否则 (渲染器.渲染器类型 == 0)
+        {
+            IM_SDL2平台.初始化_D3D (窗口句柄)
+        }
+        如果 (渲染器.初始化 () == 假)
+        {
+            渲染器.清理 ()
+            IM_SDL2平台.关闭 ()
+            ImGui.销毁上下文 ()
+            返回 (假)
+        }
+        渲染器.加载字体纹理 ()
+        // 消息循环
+        变量 完成 <类型 = 逻辑型 值 = 假>
+        判断循环 (取反 (完成))
+        {
+            @ SDL_Event event;
+            @ while (SDL_PollEvent(&event))
+            @ {
+            @     ImGui_ImplSDL2_ProcessEvent(&event);
+            @     if (event.type == SDL_QUIT) { this->@<将被销毁>(); @<完成> = TRUE; }
+            @     if (event.window.windowID == SDL_GetWindowID(m_window) && event.type == SDL_WINDOWEVENT)
+            @     {
+            @         switch (event.window.event)
+            @         {
+            @         case SDL_WINDOWEVENT_CLOSE: { @<完成> = TRUE; break; }
+            @         case SDL_WINDOWEVENT_RESIZED: { @<渲染器.重置尺寸>(0, 0); this->@<尺寸被改变>(event.window.data1, event.window.data2); break; }
+            @         }
+            @     }
+            @ }
+            // 界面布局
+            渲染器.新建帧 ()
+            IM_SDL2平台.新建帧 ()
+            ImGui.新建帧 ()
+            本对象.即将渲染 ()
+            // 渲染
+            渲染器.渲染_SDL (窗口句柄, 背景颜色)
+        }
+        // 清理数据
+        渲染器.关闭 ()
+        IM_SDL2平台.关闭 ()
+        ImGui.销毁上下文 ()
+        渲染器.清理 ()
+        @ SDL_GL_DeleteContext(gl_context);
+        @ SDL_DestroyWindow(m_window);
+        @ m_window = nullptr;
+        @ ::PostQuitMessage(0); // 投递退出消息
+        @ return TRUE;
+    }
+
+    方法 关闭窗口 <公开 注释 = "尝试关闭本窗口." 注释 = "注意: 本方法被调用后窗口不会被立即关闭,而会延迟等待到下一次消息循环时才会关闭." 折叠>
+    {
+        @ SDL_Event _event {0};
+        @ _event.type = SDL_QUIT;
+        @ SDL_PushEvent(&_event);
+    }
+
+    方法 取窗口句柄 <公开 类型 = 变整数 注释 = "返回当前窗口的句柄,如果尚未创建或创建失败,则返回0." 折叠 @嵌入式方法 = "">
+    {
+        @ (INT_P)@sn<this>.m_window
+    }
+
+    方法 最小化 <公开 注释 = "将本窗口最小化到任务栏图标" 折叠 @嵌入式方法 = "">
+    {
+        @ SDL_MinimizeWindow(@sn<this>.m_window)
+    }
+
+    方法 最大化 <公开 注释 = "将本窗口设置为最大化" 折叠 @嵌入式方法 = "">
+    {
+        @ SDL_MaximizeWindow(@sn<this>.m_window)
+    }
+
+    方法 还原窗口 <公开 注释 = "将本窗口还原到原来的尺寸" 折叠 @嵌入式方法 = "">
+    {
+        @ SDL_RestoreWindow(@sn<this>.m_window)
+    }
+
+    方法 获取焦点 <公开 注释 = "将当前输入焦点设置到本窗口上" 折叠 @嵌入式方法 = "">
+    {
+        @ SDL_SetWindowInputFocus(@sn<this>.m_window)
+    }
+
+    # 属性
+
+    方法 标题 <公开 属性读 类型 = 文本型 注释 = "返回本窗口的当前标题文本" 折叠 @禁止流程检查 = 真>
+    {
+        @ return *PivU2Ws{SDL_GetWindowTitle(m_window)};
+    }
+
+    方法 标题 <公开 属性写 注释 = "设置本窗口的当前标题文本" 折叠>
+    参数 所欲设置的标题 <类型 = 文本型 注释 = "提供所欲设置的标题文本">
+    {
+        @ SDL_SetWindowTitle(m_window, PivW2U{@<所欲设置的标题>}.GetText());
+    }
+
+    方法 显示边框 <公开 属性读 类型 = 逻辑型 注释 = "返回窗口是否显示标题栏和边框" 折叠 @禁止流程检查 = 真>
+    {
+        @ return (SDL_GetWindowFlags(m_window) & SDL_WINDOW_BORDERLESS) == 0;
+    }
+
+    方法 显示边框 <公开 属性写 注释 = "设置是否显示窗口的标题栏和边框" 折叠>
+    参数 是否显示 <类型 = 逻辑型>
+    {
+        @ SDL_SetWindowBordered(m_window, (SDL_bool)@<是否显示>);
+    }
+
+    方法 可视 <公开 属性读 类型 = 逻辑型 注释 = "返回本窗口当前是否可视" 折叠 @禁止流程检查 = 真>
+    {
+        @ return (SDL_GetWindowFlags(m_window) & SDL_WINDOW_SHOWN) != 0;
+    }
+
+    方法 可视 <公开 属性写 注释 = "设置本窗口当前是否可视,注意会连任务栏图标一起隐藏." 折叠>
+    参数 是否可视 <类型 = 逻辑型 注释 = "指定本组件是否可视">
+    {
+        @ @<是否可视> ? SDL_ShowWindow(m_window) : SDL_HideWindow(m_window);
+    }
+
+    方法 置于顶层 <公开 属性读 类型 = 逻辑型 注释 = "返回本窗口当前是否已置于顶层" 折叠 @禁止流程检查 = 真>
+    {
+        @ return (SDL_GetWindowFlags(m_window) & SDL_WINDOW_ALWAYS_ON_TOP) != 0;
+    }
+
+    方法 置于顶层 <公开 属性写 注释 = "设置本窗口是否置于顶层" 折叠>
+    参数 是否置于顶层 <类型 = 逻辑型 注释 = "指定本窗口是否置于顶层">
+    {
+        @ SDL_SetWindowAlwaysOnTop(m_window, (SDL_bool)@<是否置于顶层>);
+    }
+
+    方法 窗口透明度 <公开 属性读 类型 = 小数 注释 = "返回本窗口(包括标题栏和边框)的整体透明度,如果系统不支持窗口透明度将始终返回1" 折叠 折叠2 @禁止流程检查 = 真
+            @视窗.单精度小数 = 真>
+    {
+        @ float out_opacity = 1.0f;
+        @ SDL_GetWindowOpacity(m_window, &out_opacity);
+        @ return out_opacity;
+    }
+
+    方法 窗口透明度 <公开 属性写 注释 = "设置本窗口(包括标题栏和边框)的整体透明度" 折叠>
+    参数 透明度 <类型 = 小数 注释 = "请提供0.0f-1.0f之间的值,即完全透明到完全不透明." @视窗.单精度小数 = 真>
+    {
+        @ SDL_SetWindowOpacity(m_window, (float)@<透明度>);
+    }
+
+    # ---
+    # @begin
+    # <> <include>
+    #     static void @an<_sOnBeforeAppInit>() { IM_ASSERT(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) == 0); }
+    #     static void @an<_sOnAfterAppExit>() { SDL_Quit(); }
+    #     // 成员变量
+    #     SDL_Window* m_window = nullptr;
+    #     SDL_GLContext gl_context = nullptr;
+    #     // Callback
+    # <> </include>
+    # @end
+    # ---
+}
+
+#

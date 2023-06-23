@@ -619,45 +619,6 @@ namespace piv
         }
 
         /**
-         * @brief 到UTF-8文本
-         */
-        template <typename = void>
-        inline const string_view &ustr(const string_view &s)
-        {
-            return s;
-        }
-        template <typename = void>
-        inline const std::string &ustr(const std::string &s)
-        {
-            return s;
-        }
-        template <typename = void>
-        inline const string_view &ustr(const char *s)
-        {
-            return string_view{s};
-        }
-        template <typename = void>
-        inline const std::string &ustr(const CVolString &s)
-        {
-            return *PivW2U{CVolString};
-        }
-        template <typename = void>
-        inline const std::string &ustr(const CVolMem &s)
-        {
-            return *PivW2U{s};
-        }
-        template <typename = void>
-        inline const std::string &ustr(const wstring_view &s)
-        {
-            return *PivW2U{s};
-        }
-        template <typename = void>
-        inline const std::string &ustr(const std::wstring &s)
-        {
-            return *PivW2U{s};
-        }
-
-        /**
          * @brief 文字长度转换到字符长度
          * @param str 所欲操作文本
          * @param pos 提供文字索引,返回字符索引
@@ -807,6 +768,8 @@ private:
     std::shared_ptr<std::basic_string<CharT>> pStr{nullptr};
 
 public:
+    using EncodeType_t = EncodeType;
+
     /**
      * @brief 默认构造和析构函数
      */
@@ -2732,6 +2695,8 @@ private:
     std::basic_string<CharT> str;
 
 public:
+    using EncodeType_t = EncodeType;
+
     /**
      * @brief 默认构造和析构函数
      */
@@ -2745,30 +2710,194 @@ public:
      */
     PivString(const PivString &s)
     {
-        str = s.str;
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
+            if (s.type() == 2)
+                str = s.str;
+            else if (s.type() == 3)
+                str.assign(reinterpret_cast<const CharT *>(PivU2W{reinterpret_cast<const char *>(s.GetText())}.GetText()));
+            else
+                str.assign(reinterpret_cast<const CharT *>(PivA2W{reinterpret_cast<const char *>(s.GetText())}.GetText()));
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
+        {
+            if (s.type() == 2)
+                str.assign(reinterpret_cast<const CharT *>(PivW2U{reinterpret_cast<const wchar_t *>(s.GetText())}.GetText()));
+            else if (s.type() == 3)
+                str = s.str;
+            else
+                str.assign(reinterpret_cast<const CharT *>(PivA2U{reinterpret_cast<const char *>(s.GetText())}.GetText()));
+        }
+        else
+        {
+            if (s.type() == 2)
+                str.assign(reinterpret_cast<const CharT *>(PivW2A{reinterpret_cast<const wchar_t *>(s.GetText())}.GetText()));
+            else if (s.type() == 3)
+                str.assign(reinterpret_cast<const CharT *>(PivU2A{reinterpret_cast<const char *>(s.GetText())}.GetText()));
+            else
+                str = s.str;
+        }
+        // str = s.str;
     }
     PivString(PivString &&s) noexcept
     {
-        str = std::move(s.str);
-    }
-    PivString(const std::basic_string<CharT> &s)
-    {
-        str = s;
-    }
-    PivString(std::basic_string<CharT> &&s) noexcept
-    {
-        str = std::move(s);
-    }
-    PivString(const piv::basic_string_view<CharT> &s)
-    {
-        str.assign(s.data(), s.size());
-    }
-    PivString(const CharT *s, size_t count = (size_t)-1)
-    {
-        if (count == (size_t)-1)
-            str.assign(s);
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
+            if (s.type() == 2)
+                str = std::move(s.str);
+            else if (s.type() == 3)
+                str.assign(reinterpret_cast<const CharT *>(PivU2W{reinterpret_cast<const char *>(s.GetText())}.GetText()));
+            else
+                str.assign(reinterpret_cast<const CharT *>(PivA2W{reinterpret_cast<const char *>(s.GetText())}.GetText()));
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
+        {
+            if (s.type() == 2)
+                str.assign(reinterpret_cast<const CharT *>(PivW2U{reinterpret_cast<const wchar_t *>(s.GetText())}.GetText()));
+            else if (s.type() == 3)
+                str = std::move(s.str);
+            else
+                str.assign(reinterpret_cast<const CharT *>(PivA2U{reinterpret_cast<const char *>(s.GetText())}.GetText()));
+        }
         else
-            str.assign(s, count);
+        {
+            if (s.type() == 2)
+                str.assign(reinterpret_cast<const CharT *>(PivW2A{reinterpret_cast<const wchar_t *>(s.GetText())}.GetText()));
+            else if (s.type() == 3)
+                str.assign(reinterpret_cast<const CharT *>(PivU2A{reinterpret_cast<const char *>(s.GetText())}.GetText()));
+            else
+                str = std::move(s.str);
+        }
+        // str = std::move(s.str);
+    }
+    PivString(const std::basic_string<char> &s)
+    {
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
+            str.assign(reinterpret_cast<const CharT *>(PivU2W{s}.GetText()));
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
+        {
+            str = s;
+        }
+        else
+        {
+            str = s;
+        }
+    }
+    PivString(std::basic_string<char> &&s)
+    {
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
+            str.assign(reinterpret_cast<const CharT *>(PivU2W{s}.GetText()));
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
+        {
+            str = std::move(s);
+        }
+        else
+        {
+            str = std::move(s);
+        }
+    }
+    PivString(const std::basic_string<wchar_t> &s)
+    {
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
+            str.assign(reinterpret_cast<const CharT *>(s.c_str()));
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
+        {
+            str.assign(reinterpret_cast<const CharT *>(PivW2U{s}.GetText()));
+        }
+        else
+        {
+            str.assign(reinterpret_cast<const CharT *>(PivW2A{s}.GetText()));
+        }
+    }
+    PivString(std::basic_string<wchar_t> &&s)
+    {
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
+            str = std::move(s);
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
+        {
+            str.assign(reinterpret_cast<const CharT *>(PivW2U{s}.GetText()));
+        }
+        else
+        {
+            str.assign(reinterpret_cast<const CharT *>(PivW2A{s}.GetText()));
+        }
+    }
+    PivString(const piv::basic_string_view<char> &s)
+    {
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
+            str.assign(reinterpret_cast<const CharT *>(PivU2W{s}.GetText()));
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
+        {
+            str.assign(reinterpret_cast<const CharT *>(s.data()), s.size());
+        }
+        else
+        {
+            str.assign(reinterpret_cast<const CharT *>(s.data()), s.size());
+        }
+    }
+    PivString(const piv::basic_string_view<wchar_t> &s)
+    {
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
+            str.assign(reinterpret_cast<const CharT *>(s.data()), s.size());
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
+        {
+            str.assign(reinterpret_cast<const CharT *>(PivW2U{s}.GetText()));
+        }
+        else
+        {
+            str.assign(reinterpret_cast<const CharT *>(PivW2A{s}.GetText()));
+        }
+    }
+    PivString(const char *s, size_t count = (size_t)-1)
+    {
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
+            str.assign(reinterpret_cast<const CharT *>(PivU2W{s, count}.GetText()));
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
+        {
+            if (count == (size_t)-1)
+                str.assign(reinterpret_cast<const CharT *>(s));
+            else
+                str.assign(reinterpret_cast<const CharT *>(s), count);
+        }
+        else
+        {
+            if (count == (size_t)-1)
+                str.assign(reinterpret_cast<const CharT *>(s));
+            else
+                str.assign(reinterpret_cast<const CharT *>(s), count);
+        }
+    }
+    PivString(const wchar_t *s, size_t count = (size_t)-1)
+    {
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
+            if (count == (size_t)-1)
+                str.assign(reinterpret_cast<const CharT *>(s));
+            else
+                str.assign(reinterpret_cast<const CharT *>(s), count);
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
+        {
+            str.assign(reinterpret_cast<const CharT *>(PivW2U{s, count}.GetText()));
+        }
+        else
+        {
+            str.assign(reinterpret_cast<const CharT *>(PivW2A{s, count}.GetText()));
+        }
     }
     PivString(const CVolString &s)
     {
@@ -2900,6 +3029,11 @@ public:
     inline const std::basic_string<CharT> *pdata() const
     {
         return &str;
+    }
+
+    inline int32_t type() const
+    {
+        return static_cast<int32_t>(sizeof(EncodeType));
     }
 
     /**
@@ -3815,7 +3949,7 @@ public:
     /**
      * @brief 加入无符号数值
      * @param value 所欲加入的无符号数值
-     * @return 
+     * @return
      */
     inline PivString &AddUnsignedValue(const int64_t &value)
     {
@@ -5318,11 +5452,11 @@ public:
             std::basic_string<CharT> s;
             while (fpos < epos)
             {
-                fpos = str.find(delimit, spos, count);
+                fpos = str.find(delimit, spos);
                 if (fpos != std::basic_string<CharT>::npos && ++n < max_count)
                 {
                     s = str.substr(spos, fpos - spos);
-                    spos = fpos + count;
+                    spos = fpos + delimit.size();
                 }
                 else
                 {
@@ -6017,12 +6151,204 @@ public:
     }
 }; // PivString
 
-using PivStringViewA = PivStringView<char, char>;
+using PivStringViewA = PivStringView<char, piv::ansi>;
 using PivStringViewU = PivStringView<char, piv::utf8>;
 using PivStringViewW = PivStringView<wchar_t, piv::utf16_le>;
 
-using PivStringA = PivString<char, char>;
+using PivStringA = PivString<char, piv::ansi>;
 using PivStringU = PivString<char, piv::utf8>;
 using PivStringW = PivString<wchar_t, piv::utf16_le>;
+
+/**
+ * @brief 任意编码转UTF-8的封装类
+ */
+class PivAny2U
+{
+private:
+    std::unique_ptr<std::string> pStr{nullptr};
+    std::unique_ptr<piv::string_view> pSv{nullptr};
+
+public:
+    PivAny2U() = delete;
+    ~PivAny2U() {}
+
+    /**
+     * @brief 构造的同时将提供的文本转换
+     * @param s 所欲转换的任意编码文本
+     */
+    PivAny2U(const char *s)
+    {
+        if (s == nullptr || strlen(s) == 0)
+            return;
+        pSv.reset(new piv::string_view{s});
+    }
+
+    PivAny2U(const wchar_t *s)
+    {
+        if (s == nullptr || wcslen(s) == 0)
+            return;
+        pStr.reset(new std::string{});
+        piv::encoding::W2Uex(*pStr, s, -1);
+    }
+
+    PivAny2U(const CVolString &s)
+    {
+        if (s.IsEmpty())
+            return;
+        pStr.reset(new std::string{});
+        piv::encoding::W2Uex(*pStr, s.GetText(), static_cast<size_t>(s.GetLength()));
+    }
+
+    PivAny2U(const CVolMem &s)
+    {
+        if (s.IsEmpty())
+            return;
+#ifdef SIMDUTF_H
+        int encodings = simdutf::detect_encodings(reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
+        if ((encodings & 2) == 2) // UTF-16LE
+        {
+            pStr.reset(new std::string{});
+            piv::encoding::W2Uex(*pStr, s.GetTextPtr(), static_cast<size_t>(s.GetSize()) / 2);
+        }
+        else if ((encodings & 1) == 1) // UTF-8
+        {
+            pSv.reset(new piv::string_view{reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize())});
+        }
+        else // ANSI
+        {
+            pStr.reset(std::string{});
+            piv::encoding::A2Uex(*pStr, reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
+        }
+#else
+        pSv.reset(new piv::string_view{reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize())});
+#endif
+    }
+
+    PivAny2U(const PivStringA &s)
+    {
+        if (s.IsEmpty())
+            return;
+        pStr.reset(new std::string{});
+        piv::encoding::A2Uex(*pStr, s.GetText(), s.GetLength());
+    }
+
+    PivAny2U(const PivStringU &s)
+    {
+        if (s.IsEmpty())
+            return;
+        pSv.reset(new piv::string_view{s.GetText()});
+    }
+
+    PivAny2U(const PivStringW &s)
+    {
+        if (s.IsEmpty())
+            return;
+        pStr.reset(new std::string{});
+        piv::encoding::W2Uex(*pStr, s.GetText(), s.GetLength());
+    }
+
+    PivAny2U(const PivStringViewA &s)
+    {
+        if (s.IsEmpty())
+            return;
+        pStr.reset(new std::string{});
+        piv::encoding::A2Uex(*pStr, s.GetText(), s.GetLength());
+    }
+
+    PivAny2U(const PivStringViewU &s)
+    {
+        if (s.IsEmpty())
+            return;
+        pStr.reset(new std::string{s.GetText(), s.GetLength()});
+    }
+
+    PivAny2U(const PivStringViewW &s)
+    {
+        if (s.IsEmpty())
+            return;
+        pStr.reset(new std::string{});
+        piv::encoding::W2Uex(*pStr, s.GetText(), s.GetLength());
+    }
+
+    PivAny2U(int32_t v)
+    {
+        if (v == 0)
+            return;
+        char buf[16] = {'\0'};
+        _ltoa(v, buf, 10);
+        pStr.reset(new std::string{buf});
+    }
+
+    PivAny2U(int64_t v)
+    {
+        if (v == 0)
+            return;
+        char buf[32] = {'\0'};
+        _i64toa(v, buf, 10);
+        pStr.reset(new std::string{buf});
+    }
+
+    /**
+     * @brief 获取转换后的文本指针(至少返回空字符串)
+     * @return 字符串指针
+     */
+    inline const char *GetText() const noexcept
+    {
+        if (pStr)
+            return pStr->c_str();
+        if (pSv)
+            return pSv->data();
+        return "";
+    }
+
+    /**
+     * @brief 获取转换后的文本指针(可能会返回空指针)
+     * @return 字符串指针
+     */
+    inline const char *GetPtr() const noexcept
+    {
+        if (pStr)
+            return pStr->data();
+        if (pSv)
+            return pSv->data();
+        return nullptr;
+    }
+
+    /**
+     * @brief 获取转换后的尾字符指针(可能会返回空指针)
+     * @return 尾字符指针
+     */
+    inline const char *GetEndPtr() const noexcept
+    {
+        if (pStr)
+            return pStr->data() + pStr->size();
+        if (pSv)
+            return pSv->data() + pSv->size();
+        return nullptr;
+    }
+
+    /**
+     * @brief 获取转换后的文本长度
+     * @return 文本的字符长度
+     */
+    inline size_t GetLength() const noexcept
+    {
+        if (pStr)
+            return pStr->size();
+        if (pSv)
+            return pSv->size();
+        return 0;
+    }
+
+    operator const char *() const noexcept
+    {
+        return this->GetText();
+    }
+
+    const char *operator*() const noexcept
+    {
+        return this->GetText();
+    }
+}; // PivAny2U
 
 #endif // _PIV_STRING_HPP

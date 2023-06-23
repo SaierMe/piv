@@ -2,14 +2,6 @@
 
 包 火山.PIV基础类 <注释 = "https://github.com/SaierMe/piv">
 
-# @begin
-# <> <global>
-# <> <include>
-#     #define PIVDEBUG(format, ...) DebugTrace (FALSE, 0, 0, _T (format), __VA_ARGS__)
-# <> </include>
-# <> </global>
-# @end
-
 类 编译参数类 <公开 注释 = "用于设置MSVC的编译参数" 折叠 @文档 = "category = \"编译参数\"" @禁止创建对象 = 真>
 {
     方法 禁用随机基址 <公开 静态 注释 = "禁用随机基址" "@视窗.附加编译参数.release-default" = "link: /DYNAMICBASE:NO">
@@ -43,7 +35,7 @@
     }
 }
 
-类 结构类辅助 <公开 注释 = "结构类转换到结构体的辅助类." 注释 = "火山的结构类不等于结构体,但结构类内有一个名称为\"S\"的C++结构体,"
+类 结构类辅助 <公开 注释 = "结构类转换到结构体的辅助类. " 注释 = "火山的结构类不等于结构体,但结构类内有一个名称为\"S\"的C++结构体,"
         注释 = "本类可以让结构类和结构体互相转换." 折叠 @文档 = "category = \"数据处理\"" @禁止创建对象 = 真>
 {
     方法 分配 <公开 静态 类型 = 变整数 注释 = "分配一个结构体指针" 返回值注释 = "返回结构体指针,内容为空." 折叠 @嵌入式方法 = "">
@@ -74,7 +66,16 @@
     }
 }
 
-类 单精度小数类 <公开 注释 = "  提供对单精度小数数据类型的封装,使用方法请参考\"小数类\",另外增加" 注释 = "一个\"取指针\"方法以获取单精度小数的指针."
+类 单精度小数类 <公开 基础类 = 基本数据封装类 注释 = "  提供对单精度小数数据类型的封装,使用方法请参考\"小数类\"."
+        注释 = "  单精度小数的有效值范围从-3.402823E38到-1.401298E-45,有效浮点数" 注释 = "为7位,占4字节."
+        注释 = "  取值和赋值时会在单精度和双精度之间类型转换,必定造成精度损失." 折叠 @文档 = "category = \"数据类型\"">
+{
+    变量 值 <公开 类型 = 小数 注释 = "提供所封装的单精度小数基本数据类型值" @属性变量 = 真 @视窗.单精度小数 = 真>
+
+    # @ @m<基本数据封装类.DECLARE_BASE_ENVELOPE_CLASS>
+}
+
+类 "// 单精度小数类" <公开 注释 = "  提供对单精度小数数据类型的封装,使用方法请参考\"小数类\",另外增加" 注释 = "一个\"取指针\"方法以获取单精度小数的指针."
         注释 = "  单精度小数的有效值范围从-3.402823E38到-1.401298E-45,有效浮点数" 注释 = "为7位,占4字节."
         注释 = "  取值和赋值时会在单精度和双精度之间类型转换,必定造成精度损失." 折叠 @文档 = "category = \"数据类型\"">
 {
@@ -301,7 +302,7 @@
     }
 }
 
-类 文件枚举类 <公开 注释 = "枚举文件和目录,需要带上类名调用." 折叠 @文档 = "category = \"文件操作\"" @禁止创建对象 = 真>
+类 文件枚举类 <公开 注释 = "枚举文件和目录,需要带上类名调用." 注释 = "" 折叠 @文档 = "category = \"文件操作\"" @禁止创建对象 = 真>
 {
     方法 枚举目录EX <公开 静态 类型 = 整数 注释 = "枚举某个目录下的所有信息." 返回值注释 = "成功返回目录数量,失败返回0." 折叠>
     参数 欲寻找的目录 <类型 = 文本型 注释 = "所欲寻找的文件目录,路径不以反斜杠结尾会自动添加." "">
@@ -489,4 +490,106 @@
 类 目录信息数组类 <公开 基础类 = 对象数组模板类 注释 = "\"文件枚举类.枚举目录EX\"返回的信息" @文档 = "category = \"文件操作.辅助类\""
         @模板实现类 = "目录信息类">
 
-#
+类 数据类型基础类 <公开 基础类 = 扩展对象类 注释 = "本类可以在封装结构体和C++类时作为其基础类,用作提供一些基本的操作功能." 注释 = "注意:"
+        注释 = "  1. 本类唯一可以使用的位置为作为使用 PIV_DECLARE_STRUCT_CLASS 宏进行结构封装的类的基础类."
+        注释 = "  2. 使用指针保存所封装的数据类型,如果置入外部的指针,可以等同于变量参考的作用,"
+        注释 = "支持多个类变量指向同一数据,此时本类不会管理指针的释放,请注意外部指针的生命周期."
+        注释 = "  3. 本类的数据指针默认为空指针,当你执行\"初始化/置指针参考\"或其他一些方法时,它才会创建数据." 折叠 @禁止创建对象 = 真 @视窗.外部头文件 = "<memory>">
+{
+    方法 初始化 <公开 注释 = "如果指针为空,则进行初始化赋值,手动执行本方法可以确保指针非空." 注释 = "本封装类定义变量时默认为空指针,一般执行其他方法会自动初始化赋值或引用外部指针." 折叠
+            @嵌入式方法 = "">
+    {
+        @ @sn<this>.init ()
+    }
+
+    方法 置指针参考 <公开 注释 = "引用外部指针,所引用的指针不由本对象释放,请注意它的生命周期." 注释 = "可以多个对象实例引用同一个指针." 折叠 @嵌入式方法 = "">
+    参数 数据指针 <类型 = 变整数 注释 = "必须是所封装C++类型的指针">
+    {
+        @ @sn<this>.reference ((@sn<current_class_def>::DATA_TYPE*)@<数据指针>)
+    }
+
+    方法 复制 <公开 注释 = "将当前的对象数据复制到另一个对象中" 折叠 @嵌入式方法 = "">
+    参数 目标对象 <类型 = 数据类型基础类>
+    {
+        @ @<目标对象>.Copy(@sn<this>.data())
+    }
+
+    方法 置指针数据 <公开 注释 = "将所指定指针的数据复制到本类中,本类原来的数据将被覆盖." 折叠 @嵌入式方法 = "">
+    参数 数据指针 <类型 = 变整数 注释 = "必须是所封装C++类型的指针">
+    {
+        @ @sn<this>.Copy ((@sn<current_class_def>::DATA_TYPE*)@<数据指针>)
+    }
+
+    方法 是否为参考 <公开 类型 = 逻辑型 注释 = "返回当前对象是否为参考变量,即所封装的C++类型指针由外部管理." 折叠 @嵌入式方法 = "">
+    {
+        @ @sn<this>.is_reference ()
+    }
+
+    方法 取数据指针 <公开 类型 = 变整数 注释 = "返回所封装C++类型的指针地址,如果指针为空将先进行初始化赋值再返回." 折叠 @嵌入式方法 = "">
+    {
+        @ (INT_P)@sn<this>.pdata ()
+    }
+
+    方法 取数据尺寸 <公开 类型 = 整数 注释 = "返回所封装C++类型的尺寸" 折叠 @嵌入式方法 = "">
+    {
+        @ @sn<this>.get_size ()
+    }
+
+    方法 取数据字节集 <公开 类型 = 字节集类 注释 = "返回所封装C++数据所对应的字节集数据" 折叠 @嵌入式方法 = "">
+    {
+        @ @sn<this>.get_bin (CVolMem ())
+    }
+}
+
+# @begin
+# <> <global>
+# <> <include>
+# #define PIVDEBUG(format, ...) _DEBUG_STATMENT (DebugTrace (FALSE, 0, 0, _T (format), __VA_ARGS__))
+# #define PIV_ARRAY_AND_SIZE(_ARR)  (_ARR), sizeof(_ARR) / sizeof(*(_ARR))
+# #define PIV_MEM_PTR_AND_SIZE(_MEM)  (_MEM).GetPtr(), (_MEM).GetSize()
+# namespace piv
+# {
+#     // 取基本数据封装类的值指针,空对象时返回nullptr
+#     static void* GetBaseDataPtr(CVolBaseDataType& data) { return data.IsNullObject() ? nullptr : data.GetDataPtr(); }
+#     // 取文本指针,文本为空时返回nullptr
+#     static const wchar_t* GetText(CVolString& str) { return str.IsEmpty() ? nullptr : str.GetText(); }
+# }
+# <> </include>
+# <> </global>
+# // 用作快捷封装带参考的结构体和C++类  data_type: 所封装的数据类型
+# @def_macro PIV_DECLARE_STRUCT_CLASS(data_type)  \
+# <>     <include>  \
+#     using DATA_TYPE = data_type;  \
+#     std::unique_ptr<DATA_TYPE> m_pData {nullptr}; bool m_Owned = false;  \
+#     @sn<current_class> (const DATA_TYPE& data) { COPY_MEM (pdata (), &data, sizeof (DATA_TYPE)); }  \
+#     @sn<current_class> (DATA_TYPE* pData) { m_pData.reset (pData); m_Owned = false; }  \
+#     @sn<current_class> (const DATA_TYPE* pData) { COPY_MEM (pdata (), pData, sizeof (DATA_TYPE)); }  \
+#     inline @sn<current_class>& init () { if (!m_pData) { m_pData.reset (new DATA_TYPE {}); m_Owned = true; } return *this; }  \
+#     inline void @an<_OnCleanupExtra> () { if (!m_Owned) m_pData.release (); }  \
+#     void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) {  \
+#         if (objCopyFrom.m_Owned) {  \
+#             if (!m_Owned) { m_pData.release (); m_pData.reset (new DATA_TYPE {}); }  \
+#             COPY_MEM (pdata (), objCopyFrom.pdata (), sizeof (DATA_TYPE));  \
+#         } else {  \
+#             if (!m_Owned) m_pData.release ();  \
+#             m_pData.reset ((DATA_TYPE*)objCopyFrom.pdata ()); m_Owned = false;  \
+#         }  \
+#     }  \
+#     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const  \
+#     { if (!m_pData || !objCompare.pdata ()) return FALSE; return (memcmp (pdata (), objCompare.pdata (), sizeof (DATA_TYPE)) == 0); }  \
+#     inline void reference (DATA_TYPE* pData) { if (!m_Owned) m_pData.release (); m_pData.reset (pData); m_Owned = false; }  \
+#     inline @sn<current_class>& Copy (const DATA_TYPE& data)  { COPY_MEM (pdata (), &data, sizeof (DATA_TYPE)); return *this; }  \
+#     inline @sn<current_class>& Copy (const DATA_TYPE* pData)  { COPY_MEM (pdata (), pData, sizeof (DATA_TYPE)); return *this; }  \
+#     inline DATA_TYPE& data ()  { init (); return *m_pData; }  \
+#     inline const DATA_TYPE& data () const { return *m_pData; }  \
+#     inline DATA_TYPE* pdata ()  { init (); return m_pData.get (); }  \
+#     inline const DATA_TYPE* pdata () const { return m_pData.get (); }  \
+#     inline DATA_TYPE* GetPtr () { return IsNullObject () ? nullptr : pdata (); }  \
+#     inline const DATA_TYPE* GetPtr () const { return IsNullObject () ? nullptr : m_pData.get (); }  \
+#     inline BOOL is_reference () const { return !m_Owned; };  \
+#     inline INT get_size () const  { return (INT)sizeof (DATA_TYPE); }  \
+#     inline CVolMem& get_bin (CVolMem& memBuf)  { memBuf.CopyFrom (pdata (), sizeof (DATA_TYPE)); return memBuf; }  \
+#     inline operator DATA_TYPE& () { init (); return *m_pData; }  \
+#     inline operator DATA_TYPE* () { init (); return m_pData.get (); }  \
+# <>     </include>
+# @end
