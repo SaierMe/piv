@@ -5,12 +5,12 @@
         注释 = "GLFW     3.3.8      https://www.glfw.org" 注释 = "SDL      2.26.5     https://www.libsdl.org"
         注释 = "Vulkan   1.3.246.1  https://vulkan.lunarg.com/sdk/home"
         注释 = "glad     2023-04-04 https://github.com/Dav1dde/glad"
-        注释 = "freetype 2.13.0     https://www.freetype.org" @视窗.外部头文件 = "imgui\\piv_imgui.hpp"
+        注释 = "freetype 2.13.0     https://www.freetype.org" 折叠2 @视窗.外部头文件 = "imgui\\piv_imgui.hpp"
         @视窗.外部源文件 = "imgui\\imgui.cpp\r\nimgui\\imgui_draw.cpp\r\nimgui\\imgui_tables.cpp\r\nimgui\\imgui_widgets.cpp\r\nimgui\\imgui_demo.cpp\r\nimgui\\misc\\cpp\\imgui_stdlib.cpp"
         @视窗.头文件搜寻目录 = "imgui\r\nFrameWork">
 
 类 ImGui <公开 注释 = "ImGui是一个即时渲染UI,即每一帧都会重新计算布局和渲染,对CPU和GPU的占用比MFC/WTL高."
-        注释 = "由于采用DirectX、OpenGL、Vulkan等引擎渲染界面，性能和图像质量都很高." 折叠>
+        注释 = "由于采用DirectX、OpenGL、Vulkan等引擎渲染界面，性能和图像质量都很高.">
 {
     方法 检查版本 <公开 静态 注释 = "用于验证调用方代码和Dear ImGui编译版本之间的ABI兼容性" 折叠 @嵌入式方法 = "">
     {
@@ -50,7 +50,7 @@
 
     # 主体 | Main
 
-    方法 取IO <公开 静态 类型 = ImGuiIO类 注释 = "返回ImGui的IO结构体(鼠标/键盘/游戏手柄的输入、时间、各种配置选项和标志)" @嵌入式方法 = "">
+    方法 取IO <公开 静态 类型 = ImGuiIO类 注释 = "返回ImGui的IO结构体(鼠标/键盘/游戏手柄的输入、时间、各种配置选项和标志)" 折叠 @嵌入式方法 = "">
     {
         @ @dt<ImGuiIO类>{&ImGui::GetIO()}
     }
@@ -3359,7 +3359,7 @@
     变量 高度 <公开 类型 = 整数>
 }
 
-类 ImGuiIO类 <公开 基础类 = 数据类型基础类 注释 = "必须接收\"ImGui.取IO()\"的返回结果后,才能使用本类." 折叠 @文档 = "category = \"辅助类\"">
+类 ImGuiIO类 <公开 基础类 = 数据类型基础类 注释 = "必须接收\"ImGui.取IO()\"的返回结果后,才能使用本类." @文档 = "category = \"辅助类\"">
 {
 
     # @ @m<PIV_DECLARE_STRUCT_CLASS> (ImGuiIO)
@@ -3367,6 +3367,12 @@
     方法 帧速率 <公开 属性读 类型 = 小数 注释 = "返回应用程序的平均帧速率" 折叠 @嵌入式方法 = "" @视窗.单精度小数 = 真>
     {
         @ @sn<this>.data().Framerate
+    }
+
+    方法 字体全局缩放 <公开 属性写>
+    参数 新值 <类型 = 小数>
+    {
+        @ data().FontGlobalScale = (float)@<新值>;
     }
 
     方法 标志 <公开 属性读 类型 = 整数 注释 = "IM配置标志" 折叠 @嵌入式方法 = "">
@@ -4431,7 +4437,7 @@
 
 # 平台后端
 
-类 IM_Win32平台 <公开 注释 = "基于Windows API的平台后端,需要配合DirectX、OpenGL、Vulkan渲染器使用." 折叠
+类 IM_Win32平台 <公开 注释 = "基于Windows API的平台后端,需要配合DirectX、OpenGL、Vulkan渲染器使用." 折叠 折叠2
         @文档 = "category = \"平台后端\"" @视窗.外部头文件 = "imgui\\backends\\imgui_impl_win32.h"
         @视窗.外部源文件 = "imgui\\backends\\imgui_impl_win32.cpp">
 {

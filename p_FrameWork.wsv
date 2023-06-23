@@ -14,8 +14,7 @@
         背景颜色.置值 (0.45f, 0.55f, 0.60f, 1.00f)
     }
 
-    方法 创建完毕 <公开 定义事件 类型 = 整数 注释 = "当GLFW窗口创建完毕后发送此事件,用于对GLFW进行额外的设置."
-            注释 = "注意: 此时ImGui尚未初始化,请勿调用相关命令.">
+    方法 创建完毕 <公开 定义事件 类型 = 整数 注释 = "当GLFW窗口创建完毕后发送此事件,用于对GLFW进行额外的设置." 注释 = "注意: 此时ImGui尚未初始化,请勿调用相关命令.">
 
     方法 初始化配置 <公开 定义事件 类型 = 整数 注释 = "在ImGui显示界面之前发送一次此事件,用于设置ImGui的样式和字体等参数."
             返回值注释 = "返回1表示使用浅色样式,2为经典样式,其他任意值为默认的深色样式." 折叠>
@@ -24,8 +23,8 @@
 
     方法 即将渲染 <公开 定义事件 类型 = 整数 注释 = "当ImGui帧数据被渲染前发送此事件,请在本事件内设计ImGui的界面布局." 注释 = "注意:"
             注释 = "  1. 本事件前后已经内部处理好新建帧和渲染等操作,你只需设计布局即可."
-            注释 = "  2. ImGUI的默认帧速率为60fps,即每秒触发本事件60次,因此在此进行耗时操作将"
-            注释 = "导致帧速率降低和界面卡顿,如有必要,请另开线程执行耗时操作." 注释 = "  3. 因为本事件的执行频率足够高,所以键鼠输入等事件也可以在此一起处理.">
+            注释 = "  2. ImGUI的默认帧速率为60fps,即每秒触发本事件60次,因此在此进行耗时操作将" 注释 = "导致帧速率降低和界面卡顿,如有必要,请另开线程执行耗时操作."
+            注释 = "  3. 因为本事件的执行频率足够高,所以键鼠输入等事件也可以在此一起处理.">
 
     方法 尺寸被改变 <公开 定义事件 类型 = 整数 注释 = "当本窗口的尺寸被改变后发送此事件" 折叠>
     参数 宽度 <类型 = 整数 注释 = "改变后的窗口宽度">
@@ -80,6 +79,9 @@
         @ m_wc.lpszClassName = @<窗口类名>.GetText();
         @ m_wc.hIconSm = ::LoadIconW(m_wc.hInstance, MAKEINTRESOURCEW(100));
         @ if (::RegisterClassExW(&m_wc) == 0) return FALSE;
+        关注屏幕DPI (真)
+        宽度 = 乘于屏幕DPI (宽度)
+        高度 = 乘于屏幕DPI (高度)
         @ m_window = ::CreateWindowExW(0, m_wc.lpszClassName, @<标题>.GetText(), WS_OVERLAPPEDWINDOW, 0x80000000, 0x80000000, @<宽度>, @<高度>, nullptr, nullptr, m_wc.hInstance, this);
         变量 窗口句柄 <类型 = 变整数>
         变量 字体图集 <类型 = IM字体图集类>
@@ -99,6 +101,7 @@
         @ ImGuiIO& io = ImGui::GetIO(); (void)io;
         @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
         @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+        ImGui.取IO ().字体全局缩放 = 取屏幕DPI ()
         字体图集 = ImGui.取字体图集 ()
         字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc", 18.0f, IM字形范围.中文)  // 微软雅黑
         分支判断 (初始化配置 (ImGui.取样式 (), 字体图集))
@@ -256,9 +259,8 @@
     参数 标题 <类型 = 文本型 注释 = "提供所创建窗口的标题">
     参数 宽度 <类型 = 整数 注释 = "提供所创建窗口的宽度" @默认值 = 1280>
     参数 高度 <类型 = 整数 注释 = "提供所创建窗口的高度" @默认值 = 720>
-    参数 全屏模式 <类型 = 逻辑型 注释 = "默认为窗口模式,如果设置为真,将在主显示器中进入全屏模式,"
-            注释 = "如果想在其他显示器中全屏显示,请在创建主窗口前执行\"置当前显示器\"." @默认值 = 假>
-    参数 高DPI缩放 <类型 = 逻辑型 @默认值 = 真>
+    参数 全屏模式 <类型 = 逻辑型 注释 = "默认为窗口模式,如果设置为真,将在主显示器中进入全屏模式," 注释 = "如果想在其他显示器中全屏显示,请在创建主窗口前执行\"置当前显示器\"."
+            @默认值 = 假>
     参数 透明帧缓冲区 <类型 = 逻辑型 注释 = "是否启用透明帧缓冲区." 注释 = "通过Alpha通道将窗口内容(不包括标题栏和边框)与背景合成,实现透明背景." @默认值 = 假>
     {
         @ if (m_window) return FALSE;
@@ -272,7 +274,7 @@
         {
             @ glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         }
-        @ glfwWindowHint(GLFW_SCALE_TO_MONITOR, @<高DPI缩放>);
+        @ glfwWindowHint(GLFW_SCALE_TO_MONITOR, GL_TRUE);
         @ glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, @<透明帧缓冲区>);
         @ m_window = glfwCreateWindow(@<宽度>, @<高度>, PivW2U{@<标题>}.GetText(), @<全屏模式> ? m_monitor : nullptr, nullptr);
         @ if (!m_window) return FALSE;
@@ -309,6 +311,8 @@
         @ ImGuiIO& io = ImGui::GetIO(); (void)io;
         @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
         @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+        关注屏幕DPI (真)
+        ImGui.取IO ().字体全局缩放 = 取屏幕DPI ()
         变量 字体图集 <类型 = IM字体图集类>
         字体图集 = ImGui.取字体图集 ()
         字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc", 18.0f)  // 微软雅黑
@@ -414,7 +418,7 @@
 
     # 属性
 
-    方法 标题 <公开 属性写 注释 = "设置本窗口的当前标题文本">
+    方法 标题 <公开 属性写 注释 = "设置本窗口的当前标题文本" 折叠>
     参数 所欲设置标题 <类型 = 文本型 注释 = "提供所欲设置的标题文本">
     {
         @ glfwSetWindowTitle(m_window, PivW2U{@<所欲设置标题>}.GetText());
@@ -425,7 +429,7 @@
         @ return glfwGetWindowAttrib(m_window, GLFW_DECORATED);
     }
 
-    方法 显示边框 <公开 属性写 注释 = "设置是否显示窗口的标题栏和边框">
+    方法 显示边框 <公开 属性写 注释 = "设置是否显示窗口的标题栏和边框" 折叠>
     参数 是否显示 <类型 = 逻辑型>
     {
         @ glfwSetWindowAttrib(m_window, GLFW_DECORATED, @<是否显示>);
@@ -524,7 +528,7 @@
 类 IM_SDL2窗口 <公开 基础类 = IM_窗口模板类 注释 = "  基于SDL2的ImGui窗口,本模板类已经处理好ImGui创建和销毁的各种复杂"
         注释 = "流程,你只需要在\"即将绘制\"事件中完成界面的布局,就能完成一个简单的" 注释 = "ImGui窗口."
         注释 = "  \"模板类型1\"为所使用的渲染器类型,支持以下的渲染器:" 注释 = "  IM_DX9渲染器   IM_DX10渲染器     IM_DX11渲染器  "
-        注释 = "  IM_DX12渲染器  Im_OpenGL3渲染器  IM_Vulkan渲染器" 折叠 @模板基础类 = 真 @文档 = "category = \"窗口框架\"">
+        注释 = "  IM_DX12渲染器  Im_OpenGL3渲染器  IM_Vulkan渲染器" @模板基础类 = 真 @文档 = "category = \"窗口框架\"">
 {
     方法 创建主窗口 <公开 类型 = 逻辑型 注释 = "创建本窗口类的对象并将其作为程序的主窗口." 注释 = "注意:"
             注释 = "  1. 程序中必须存在且只能存在一个主窗口,调用本方法后,主窗口将被设置为本窗口;"
@@ -534,13 +538,10 @@
     参数 宽度 <类型 = 整数 注释 = "提供所创建窗口的宽度" @默认值 = 1280>
     参数 高度 <类型 = 整数 注释 = "提供所创建窗口的高度" @默认值 = 720>
     参数 全屏模式 <类型 = 逻辑型 注释 = "默认为窗口模式,如果设置为真,将以设置的宽度和高度进入全屏模式" @默认值 = 假>
-    参数 高DPI缩放 <类型 = 逻辑型 @默认值 = 真>
-    参数 "// 透明帧缓冲区" <类型 = 逻辑型 注释 = "是否启用透明帧缓冲区." 注释 = "通过Alpha通道将窗口内容(不包括标题栏和边框)与背景合成,实现透明背景."
-            @默认值 = 假>
+    参数 "// 透明帧缓冲区" <类型 = 逻辑型 注释 = "是否启用透明帧缓冲区." 注释 = "通过Alpha通道将窗口内容(不包括标题栏和边框)与背景合成,实现透明背景." @默认值 = 假>
     {
         @ if (m_window) return FALSE;
-        @ uint32_t window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS;
-        @ if (@<高DPI缩放>) window_flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+        @ uint32_t window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS | SDL_WINDOW_ALLOW_HIGHDPI;
         @ if (@<全屏模式>) window_flags |= SDL_WINDOW_FULLSCREEN;
         如果 (渲染器.渲染器类型 == 1)
         {
@@ -558,6 +559,9 @@
         {
             @ window_flags |= SDL_WINDOW_VULKAN;
         }
+        关注屏幕DPI (真)
+        宽度 = 乘于屏幕DPI (宽度)
+        高度 = 乘于屏幕DPI (高度)
         @ m_window = SDL_CreateWindow(PivW2U{@<标题>}.GetText(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, @<宽度>, @<高度>, window_flags);
         @ if (!m_window) return FALSE;
         变量 窗口句柄 <类型 = 变整数>
@@ -579,6 +583,8 @@
         @ ImGuiIO& io = ImGui::GetIO(); (void)io;
         @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
         @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+        ImGui.取IO ().字体全局缩放 = 取屏幕DPI ()
         变量 字体图集 <类型 = IM字体图集类>
         字体图集 = ImGui.取字体图集 ()
         字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc", 18.0f, IM字形范围.中文)  // 微软雅黑
