@@ -3396,6 +3396,25 @@
 {
 
     # @ @m<PIV_DECLARE_STRUCT_CLASS> (ImGuiStyle)
+
+    方法 窗口圆角半径 <公开 属性读 类型 = 小数
+            注释 = "Radius of window corners rounding. Set to 0.0f to have rectangular windows. Large values tend to lead to variety of artifacts and are not recommended."
+            折叠 @嵌入式方法 = "" @视窗.单精度小数 = 真>
+    {
+        @ @sn<this>.data().WindowRounding
+    }
+
+    方法 窗口圆角半径 <公开 属性写 折叠>
+    参数 所欲设置的值 <类型 = 小数>
+    {
+        @ data().WindowRounding = (float)@<所欲设置的值>;
+    }
+
+    方法 颜色 <公开 类型 = ImVec4 折叠 @嵌入式方法 = "">
+    参数 颜色索引 <类型 = IM颜色标识符>
+    {
+        @ @dt<ImVec4>{&@sn<this>.data().Colors[(int)@<颜色索引>]}
+    }
 }
 
 类 IM负载类 <公开 基础类 = 数据类型基础类 注释 = "ImGuiPayload 拖放的负载" 折叠 @文档 = "category = \"辅助类\"">
@@ -3932,6 +3951,9 @@
     常量 不改变鼠标光标 <公开 类型 = 整数 值 = @ImGuiConfigFlags_NoMouseCursorChange
             注释 = "Instruct backend to not alter mouse cursor shape and visibility. Use if the backend cursor changes are interfering with yours and you don\'t want to use SetMouseCursor() to change mouse cursor."
             注释 = "You may want to honor requests from imgui by reading GetMouseCursor() yourself instead.">
+    常量 启用停靠 <公开 类型 = 整数 值 = @ImGuiConfigFlags_DockingEnable 注释 = "Docking enable flags.">
+    常量 启用视口 <公开 类型 = 整数 值 = @ImGuiConfigFlags_ViewportsEnable
+            注释 = "Viewport enable flags (require both ImGuiBackendFlags_PlatformHasViewports + ImGuiBackendFlags_RendererHasViewports set by the respective backends)">
     常量 SRGB颜色 <公开 类型 = 整数 值 = @ImGuiConfigFlags_IsSRGB 注释 = "Application is SRGB-aware.">
     常量 触控屏 <公开 类型 = 整数 值 = @ImGuiConfigFlags_IsTouchScreen
             注释 = "Application is using a touch screen instead of a mouse.">
@@ -3950,6 +3972,12 @@
             注释 = "Backend Platform supports io.WantSetMousePos requests to reposition the OS mouse position (only used if ImGuiConfigFlags_NavEnableSetMousePos is set).">
     常量 渲染器支持VTX偏移 <公开 类型 = 整数 值 = @ImGuiBackendFlags_RendererHasVtxOffset
             注释 = "Backend Renderer supports ImDrawCmd::VtxOffset. This enables output of large meshes (64K+ vertices) while still using 16-bit indices.">
+    常量 平台支持视口 <公开 类型 = 整数 值 = @ImGuiBackendFlags_PlatformHasViewports
+            注释 = "Backend Platform supports multiple viewports.">
+    常量 视口接受鼠标悬停 <公开 类型 = 整数 值 = @ImGuiBackendFlags_HasMouseHoveredViewport
+            注释 = "Backend Platform supports calling io.AddMouseViewportEvent() with the viewport under the mouse. IF POSSIBLE, ignore viewports with the ImGuiViewportFlags_NoInputs flag (Win32 backend, GLFW 3.30+ backend can do this, SDL backend cannot). If this cannot be done, Dear ImGui needs to use a flawed heuristic to find the viewport under.">
+    常量 渲染器支持视口 <公开 类型 = 整数 值 = @ImGuiBackendFlags_RendererHasViewports
+            注释 = "Backend Renderer supports multiple viewports.">
 }
 
 类 IM按钮标志 <公开 注释 = "ImGuiButtonFlags Flags for InvisibleButton() [extended in imgui_internal.h]" 折叠
@@ -4787,11 +4815,18 @@
         @     ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
         @     m_pd3dDevice->EndScene();
         @ }
+        @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        @ {
+        @     ImGui::UpdatePlatformWindows();
+        @     ImGui::RenderPlatformWindowsDefault();
+        @ }
         @ HRESULT result = m_pd3dDevice->Present(nullptr, nullptr, nullptr, nullptr);
         @ // Handle loss of D3D9 device
         @ if (result == D3DERR_DEVICELOST && m_pd3dDevice->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
         @     this->@<重置设备>();
     }
+
+    方法 准备 <公开>
 
     # SDL ---
 
@@ -5080,9 +5115,15 @@
         @ m_pd3dDevice->OMSetRenderTargets(1, &m_mainRenderTargetView, nullptr);
         @ m_pd3dDevice->ClearRenderTargetView(m_mainRenderTargetView, clear_color_with_alpha);
         @ ImGui_ImplDX10_RenderDrawData(ImGui::GetDrawData());
-        @ m_pSwapChain->Present(1, 0); // Present with vsync
-        @ //m_pSwapChain->Present(0, 0); // Present without vsync
+        @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        @ {
+        @     ImGui::UpdatePlatformWindows();
+        @     ImGui::RenderPlatformWindowsDefault();
+        @ }
+        @ m_pSwapChain->Present(1, 0);
     }
+
+    方法 准备 <公开>
 
     # SDL ---
 
@@ -5376,9 +5417,15 @@
         @ m_pd3dDeviceContext->OMSetRenderTargets(1, &m_mainRenderTargetView, nullptr);
         @ m_pd3dDeviceContext->ClearRenderTargetView(m_mainRenderTargetView, clear_color_with_alpha);
         @ ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-        @ m_pSwapChain->Present(1, 0); // Present with vsync
-        @ // m_pSwapChain->Present(0, 0); // Present without vsync
+        @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        @ {
+        @     ImGui::UpdatePlatformWindows();
+        @     ImGui::RenderPlatformWindowsDefault();
+        @ }
+        @ m_pSwapChain->Present(1, 0);
     }
+
+    方法 准备 <公开>
 
     # SDL ---
 
@@ -5874,6 +5921,8 @@
         @ this->@<创建渲染目标>();
     }
 
+    方法 准备 <公开>
+
     方法 渲染 <公开 折叠>
     参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
     {
@@ -5905,6 +5954,12 @@
         @ m_pd3dCommandList->Close();
 
         @ m_pd3dCommandQueue->ExecuteCommandLists(1, (ID3D12CommandList* const*)&m_pd3dCommandList);
+        // Update and Render additional Platform Windows
+        @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        @ {
+        @     ImGui::UpdatePlatformWindows();
+        @     ImGui::RenderPlatformWindowsDefault(nullptr, (void*)m_pd3dCommandList);
+        @ }
         @ m_pSwapChain->Present(1, 0); // Present with vsync
 
         @ UINT64 fenceValue = m_fenceLastSignaledValue + 1;
@@ -5942,16 +5997,48 @@
     }
 }
 
-类 IM_OpenGL渲染器 <公开 注释 = "基于现代OpenGL的渲染器后端,支持桌面OpenGL版本: 2.x 3.x 4.x" 折叠 折叠2 @文档 = "category = \"渲染器\""
+类 IM_OpenGL渲染器 <公开 注释 = "基于现代OpenGL的渲染器后端,支持桌面OpenGL版本: 2.x 3.x 4.x" 折叠 @文档 = "category = \"渲染器\""
         @视窗.外部头文件 = "imgui\\backends\\imgui_impl_opengl3.h\r\nglad\\glad.h"
-        @视窗.外部源文件 = "imgui\\backends\\imgui_impl_opengl3.cpp\r\nFrameWork\\glad\\glad.c">
+        @视窗.外部源文件 = "imgui\\backends\\imgui_impl_opengl3.cpp\r\nFrameWork\\glad\\glad.c"
+        "//@视窗.外部库" = "OpenGL32.lib" "">
 {
 
     # @begin
+    # <> <global>
     # <> <include>
-    # HGLRC  m_hRC = nullptr;
-    # HDC    m_MainWindow = nullptr;
-    # int    m_Width = 0, m_Height = 0;
+    # static HGLRC g_hRC;
+    # <> </include>
+    # <> </global>
+    # <> <include>
+    # struct WGL_WindowData { HDC hDC;};
+    # WGL_WindowData m_MainWindow { 0 };
+    # static void Hook_Renderer_CreateWindow(ImGuiViewport* viewport)
+    # {
+    #     WGL_WindowData* data = IM_NEW(WGL_WindowData);
+    #     @<CreateDeviceWGL>((HWND)viewport->PlatformHandle, data);
+    #     viewport->RendererUserData = data;
+    # }
+    # static void Hook_Renderer_DestroyWindow(ImGuiViewport* viewport)
+    # {
+    #     if (viewport->RendererUserData != NULL)
+    #     {
+    #         WGL_WindowData* data = (WGL_WindowData*)viewport->RendererUserData;
+    #         wglMakeCurrent(NULL, NULL);
+    #         ::ReleaseDC((HWND)viewport->PlatformHandle, data->hDC);
+    #         IM_DELETE(data);
+    #         viewport->RendererUserData = NULL;
+    #     }
+    # }
+    # static void Hook_Platform_RenderWindow(ImGuiViewport* viewport, void*)
+    # {
+    #     if (WGL_WindowData* data = (WGL_WindowData*)viewport->RendererUserData)
+    #         wglMakeCurrent(data->hDC, g_hRC);
+    # }
+    # static void Hook_Renderer_SwapBuffers(ImGuiViewport* viewport, void*)
+    # {
+    #     if (WGL_WindowData* data = (WGL_WindowData*)viewport->RendererUserData)
+    #         ::SwapBuffers(data->hDC);
+    # }
     # <> </include>
     # @end
 
@@ -6107,29 +6194,25 @@
         @ return true;
     }
 
-    方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠 @嵌入式方法 = "">
+    方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠>
     参数 图片信息 <类型 = IM图片信息类 注释 = "提供由\"本对象.加载图片××\"返回的图片信息">
     {
-        @ glDeleteTextures(1, (GLuint*)&@<图片信息.纹理ID>)
+        如果 (图片信息.纹理ID != 0)
+        {
+            @ glDeleteTextures(1, (GLuint*)&@<图片信息.纹理ID>);
+        }
+        图片信息.重置为空对象 ()
     }
 
     # Win32平台 ---
 
-    方法 创建设备 <公开 类型 = 逻辑型 折叠 @视窗.外部库 = "OpenGL32.lib" @禁止流程检查 = 真>
+    方法 创建设备 <公开 类型 = 逻辑型 折叠 折叠2 @视窗.外部库 = "OpenGL32.lib" @禁止流程检查 = 真>
     参数 窗口句柄 <类型 = 变整数>
     {
-        @ HDC hDc = ::GetDC((HWND)@<窗口句柄>);
-        @ PIXELFORMATDESCRIPTOR pfd = { sizeof(pfd), 1, PFD_DRAW_TO_WINDOW | PFD_DRAW_TO_BITMAP | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_STEREO_DONTCARE,
-        @                               PFD_TYPE_RGBA, 32, 8, 16, 8, 8, 8, 0, 8, 24, 64, 16, 16, 16, 32, 8, 4, PFD_MAIN_PLANE, 0, 0, 0, 0};
-        @ const int pf = ::ChoosePixelFormat(hDc, &pfd);
-        @ if (pf == 0 || ::SetPixelFormat(hDc, pf, &pfd) == FALSE)
-        @ {
-        @     ::ReleaseDC((HWND)@<窗口句柄>, hDc);
-        @     return FALSE;
-        @ }
-        @ m_MainWindow = hDc;
-        @ if (!m_hRC) m_hRC = wglCreateContext(m_MainWindow);
-        @ wglMakeCurrent(m_MainWindow, m_hRC);
+        @ @<CreateDeviceWGL>((HWND)@<窗口句柄>, &m_MainWindow);
+        @ if (!g_hRC)
+        @     g_hRC = wglCreateContext(m_MainWindow.hDC);
+        @ wglMakeCurrent(m_MainWindow.hDC, g_hRC);
         @ if (!gladLoadGL())
         @ {
         @     this->@<释放设备>(@<窗口句柄>);
@@ -6142,9 +6225,13 @@
     参数 窗口句柄 <类型 = 变整数>
     {
         @ wglMakeCurrent(NULL, NULL);
-        @ ::ReleaseDC((HWND)@<窗口句柄>, m_MainWindow);
-        @ wglDeleteContext(m_hRC);
-        @ m_MainWindow = nullptr; m_hRC = nullptr;
+        @ ::ReleaseDC((HWND)@<窗口句柄>, m_MainWindow.hDC);
+        @ m_MainWindow.hDC = nullptr;
+        @ if (!g_hRC)
+        @ {
+        @     wglDeleteContext(g_hRC);
+        @     g_hRC = nullptr;
+        @ }
     }
 
     方法 重置尺寸 <公开 折叠>
@@ -6162,7 +6249,40 @@
         @ glClearColor(clear_color->x * clear_color->w, clear_color->y * clear_color->w, clear_color->z * clear_color->w, clear_color->w);
         @ glClear(GL_COLOR_BUFFER_BIT);
         @ ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        @ ::SwapBuffers(m_MainWindow);
+        @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        @ {
+        @     ImGui::UpdatePlatformWindows();
+        @     ImGui::RenderPlatformWindowsDefault();
+        @     wglMakeCurrent(m_MainWindow.hDC, g_hRC);
+        @ }
+        @ ::SwapBuffers(m_MainWindow.hDC);
+    }
+
+    方法 准备 <公开 折叠>
+    {
+        @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        @ {
+        @     ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
+        @     platform_io.Renderer_CreateWindow = Hook_Renderer_CreateWindow;
+        @     platform_io.Renderer_DestroyWindow = Hook_Renderer_DestroyWindow;
+        @     platform_io.Renderer_SwapBuffers = Hook_Renderer_SwapBuffers;
+        @     platform_io.Platform_RenderWindow = Hook_Platform_RenderWindow;
+        @ }
+    }
+
+    方法 CreateDeviceWGL <静态 类型 = 逻辑型 折叠 @禁止流程检查 = 真>
+    参数 hWnd <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/HWND" @输出名 = "hWnd">
+    参数 data <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/WGL_WindowData*" @输出名 = "data">
+    {
+        @ HDC hDc = ::GetDC(hWnd);
+        @ PIXELFORMATDESCRIPTOR pfd = { sizeof(pfd), 1, PFD_DRAW_TO_WINDOW | PFD_DRAW_TO_BITMAP | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_STEREO_DONTCARE,
+        @                               PFD_TYPE_RGBA, 32, 8, 16, 8, 8, 8, 0, 8, 24, 64, 16, 16, 16, 32, 8, 4, PFD_MAIN_PLANE, 0, 0, 0, 0};
+        @ const int pf = ::ChoosePixelFormat(hDc, &pfd);
+        @ if (pf == 0 || ::SetPixelFormat(hDc, pf, &pfd) == FALSE)
+        @     return FALSE;
+        @ ::ReleaseDC(hWnd, hDc);
+        @ data->hDC = ::GetDC(hWnd);
+        @ return TRUE;
     }
 
     # GLFW平台 ---
@@ -6178,10 +6298,20 @@
     参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
     {
         @ ImGui::Render();
+        @ int display_w, display_h;
+        @ glfwGetFramebufferSize((GLFWwindow*)@<窗口句柄>, &display_w, &display_h);
+        @ glViewport(0, 0, display_w, display_h);
         @ ImVec4* clear_color = @<背景颜色>.pdata();
         @ glClearColor(clear_color->x * clear_color->w, clear_color->y * clear_color->w, clear_color->z * clear_color->w, clear_color->w);
         @ glClear(GL_COLOR_BUFFER_BIT);
         @ ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        @ {
+        @     GLFWwindow* backup_current_context = glfwGetCurrentContext();
+        @     ImGui::UpdatePlatformWindows();
+        @     ImGui::RenderPlatformWindowsDefault();
+        @     glfwMakeContextCurrent(backup_current_context);
+        @ }
         @ glfwSwapBuffers((GLFWwindow*)@<窗口句柄>); // 双缓冲: 交换缓冲区
     }
 
@@ -6204,6 +6334,14 @@
         @ glClearColor(clear_color->x * clear_color->w, clear_color->y * clear_color->w, clear_color->z * clear_color->w, clear_color->w);
         @ glClear(GL_COLOR_BUFFER_BIT);
         @ ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        @ {
+        @     SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
+        @     SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
+        @     ImGui::UpdatePlatformWindows();
+        @     ImGui::RenderPlatformWindowsDefault();
+        @     SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
+        @ }
         @ SDL_GL_SwapWindow((SDL_Window*)@<窗口句柄>);
     }
 }
@@ -6357,25 +6495,25 @@
         @ int width, height;
         @ glfwGetFramebufferSize((GLFWwindow*)@<窗口句柄>, &width, &height);
         @ // SetupVulkanWindow
-        @ g_MainWindowData.Surface = surface;
+        @ m_MainWindowData.Surface = surface;
         @ // Check for WSI support
         @ VkBool32 res;
-        @ vkGetPhysicalDeviceSurfaceSupportKHR(g_PhysicalDevice, g_QueueFamily, g_MainWindowData.Surface, &res);
+        @ vkGetPhysicalDeviceSurfaceSupportKHR(g_PhysicalDevice, g_QueueFamily, m_MainWindowData.Surface, &res);
         @ if (res != VK_TRUE) exit(-1);
         @ // Select Surface Format
         @ const VkFormat requestSurfaceImageFormat[] = { VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_B8G8R8_UNORM, VK_FORMAT_R8G8B8_UNORM };
         @ const VkColorSpaceKHR requestSurfaceColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
-        @ g_MainWindowData.SurfaceFormat = ImGui_ImplVulkanH_SelectSurfaceFormat(g_PhysicalDevice, g_MainWindowData.Surface, requestSurfaceImageFormat, (size_t)IM_ARRAYSIZE(requestSurfaceImageFormat), requestSurfaceColorSpace);
+        @ m_MainWindowData.SurfaceFormat = ImGui_ImplVulkanH_SelectSurfaceFormat(g_PhysicalDevice, m_MainWindowData.Surface, requestSurfaceImageFormat, (size_t)IM_ARRAYSIZE(requestSurfaceImageFormat), requestSurfaceColorSpace);
         @ // Select Present Mode
         @ #ifdef IMGUI_UNLIMITED_FRAME_RATE
         @     VkPresentModeKHR present_modes[] = { VK_PRESENT_MODE_MAILBOX_KHR, VK_PRESENT_MODE_IMMEDIATE_KHR, VK_PRESENT_MODE_FIFO_KHR };
         @ #else
         @     VkPresentModeKHR present_modes[] = { VK_PRESENT_MODE_FIFO_KHR };
         @ #endif
-        @ g_MainWindowData.PresentMode = ImGui_ImplVulkanH_SelectPresentMode(g_PhysicalDevice, g_MainWindowData.Surface, &present_modes[0], IM_ARRAYSIZE(present_modes));
+        @ m_MainWindowData.PresentMode = ImGui_ImplVulkanH_SelectPresentMode(g_PhysicalDevice, m_MainWindowData.Surface, &present_modes[0], IM_ARRAYSIZE(present_modes));
         @ // Create SwapChain, RenderPass, Framebuffer, etc.
         @ IM_ASSERT(g_MinImageCount >= 2);
-        @ ImGui_ImplVulkanH_CreateOrResizeWindow(g_Instance, g_PhysicalDevice, g_Device, &g_MainWindowData, g_QueueFamily, g_Allocator, width, height, g_MinImageCount);
+        @ ImGui_ImplVulkanH_CreateOrResizeWindow(g_Instance, g_PhysicalDevice, g_Device, &m_MainWindowData, g_QueueFamily, g_Allocator, width, height, g_MinImageCount);
         @ return TRUE;
     }
 
@@ -6383,9 +6521,9 @@
     {
         @ ImGui_ImplVulkan_InitInfo init_info = {
         @         g_Instance, g_PhysicalDevice, g_Device, g_QueueFamily, g_Queue, g_PipelineCache, g_DescriptorPool, 0,
-        @         g_MinImageCount, g_MainWindowData.ImageCount, VK_SAMPLE_COUNT_1_BIT, g_Allocator, @sn<current_class>::check_vk_result
+        @         g_MinImageCount, m_MainWindowData.ImageCount, VK_SAMPLE_COUNT_1_BIT, g_Allocator, @sn<current_class>::check_vk_result
         @ };
-        @ return ImGui_ImplVulkan_Init(&init_info, g_MainWindowData.RenderPass);
+        @ return ImGui_ImplVulkan_Init(&init_info, m_MainWindowData.RenderPass);
     }
 
     方法 新建帧 <公开 折叠 @嵌入式方法 = "">
@@ -6411,93 +6549,30 @@
     参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
     {
         @ ImGui::Render();
-        @ ImDrawData* draw_data = ImGui::GetDrawData();
+        @ ImDrawData* main_draw_data = ImGui::GetDrawData();
+        @ const bool main_is_minimized = (main_draw_data->DisplaySize.x <= 0.0f || main_draw_data->DisplaySize.y <= 0.0f);
+        @ ImVec4* clear_color = @<背景颜色>.pdata();
+        @ m_MainWindowData.ClearValue.color.float32[0] = clear_color->x * clear_color->w;
+        @ m_MainWindowData.ClearValue.color.float32[1] = clear_color->y * clear_color->w;
+        @ m_MainWindowData.ClearValue.color.float32[2] = clear_color->z * clear_color->w;
+        @ m_MainWindowData.ClearValue.color.float32[3] = clear_color->w;
+        @ if (!main_is_minimized)
+        @     @<_FrameRender>(main_draw_data);
+        // Update and Render additional Platform Windows
+        @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         @ {
-        @     ImVec4* clear_color = @<背景颜色>.pdata();
-        @     g_MainWindowData.ClearValue.color.float32[0] = clear_color->x * clear_color->w;
-        @     g_MainWindowData.ClearValue.color.float32[1] = clear_color->y * clear_color->w;
-        @     g_MainWindowData.ClearValue.color.float32[2] = clear_color->z * clear_color->w;
-        @     g_MainWindowData.ClearValue.color.float32[3] = clear_color->w;
-        @     // FrameRender
-        @     VkResult err;
-        @     VkSemaphore image_acquired_semaphore  = g_MainWindowData.FrameSemaphores[g_MainWindowData.SemaphoreIndex].ImageAcquiredSemaphore;
-        @     VkSemaphore render_complete_semaphore = g_MainWindowData.FrameSemaphores[g_MainWindowData.SemaphoreIndex].RenderCompleteSemaphore;
-        @     err = vkAcquireNextImageKHR(g_Device, g_MainWindowData.Swapchain, UINT64_MAX, image_acquired_semaphore, VK_NULL_HANDLE, &g_MainWindowData.FrameIndex);
-        @     if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR)
-        @     {
-        @         g_SwapChainRebuild = true; return;
-        @     }
-        @     check_vk_result(err);
-        @     ImGui_ImplVulkanH_Frame* fd = &g_MainWindowData.Frames[g_MainWindowData.FrameIndex];
-        @     {
-        @         err = vkWaitForFences(g_Device, 1, &fd->Fence, VK_TRUE, UINT64_MAX);    // wait indefinitely instead of periodically checking
-        @         check_vk_result(err);
-        @         err = vkResetFences(g_Device, 1, &fd->Fence);
-        @         check_vk_result(err);
-        @     }
-        @     {
-        @         err = vkResetCommandPool(g_Device, fd->CommandPool, 0);
-        @         check_vk_result(err);
-        @         VkCommandBufferBeginInfo info = {};
-        @         info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        @         info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-        @         err = vkBeginCommandBuffer(fd->CommandBuffer, &info);
-        @         check_vk_result(err);
-        @     }
-        @     {
-        @         VkRenderPassBeginInfo info = {};
-        @         info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        @         info.renderPass = g_MainWindowData.RenderPass;
-        @         info.framebuffer = fd->Framebuffer;
-        @         info.renderArea.extent.width = g_MainWindowData.Width;
-        @         info.renderArea.extent.height = g_MainWindowData.Height;
-        @         info.clearValueCount = 1;
-        @         info.pClearValues = &g_MainWindowData.ClearValue;
-        @         vkCmdBeginRenderPass(fd->CommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
-        @     }
-        @     // Record dear imgui primitives into command buffer
-        @     ImGui_ImplVulkan_RenderDrawData(draw_data, fd->CommandBuffer);
-        @     // Submit command buffer
-        @     vkCmdEndRenderPass(fd->CommandBuffer);
-        @     {
-        @         VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        @         VkSubmitInfo info = {};
-        @         info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        @         info.waitSemaphoreCount = 1;
-        @         info.pWaitSemaphores = &image_acquired_semaphore;
-        @         info.pWaitDstStageMask = &wait_stage;
-        @         info.commandBufferCount = 1;
-        @         info.pCommandBuffers = &fd->CommandBuffer;
-        @         info.signalSemaphoreCount = 1;
-        @         info.pSignalSemaphores = &render_complete_semaphore;
-        @         err = vkEndCommandBuffer(fd->CommandBuffer);
-        @         check_vk_result(err);
-        @         err = vkQueueSubmit(g_Queue, 1, &info, fd->Fence);
-        @         check_vk_result(err);
-        @     }
-        @     // FramePresent
-        @     if (g_SwapChainRebuild) return;
-        @     VkPresentInfoKHR info = {};
-        @     info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-        @     info.waitSemaphoreCount = 1;
-        @     info.pWaitSemaphores = &render_complete_semaphore;
-        @     info.swapchainCount = 1;
-        @     info.pSwapchains = &g_MainWindowData.Swapchain;
-        @     info.pImageIndices = &g_MainWindowData.FrameIndex;
-        @     err = vkQueuePresentKHR(g_Queue, &info);
-        @     if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR)
-        @     {
-        @         g_SwapChainRebuild = true; return;
-        @     }
-        @     check_vk_result(err);
-        @     g_MainWindowData.SemaphoreIndex = (g_MainWindowData.SemaphoreIndex + 1) % g_MainWindowData.ImageCount; // Now we can use the next set of semaphores
+        @     ImGui::UpdatePlatformWindows();
+        @     ImGui::RenderPlatformWindowsDefault();
         @ }
+        // Present Main Platform Window
+        @ if (!main_is_minimized)
+        @     @<_FramePresent>();
     }
 
     方法 加载字体纹理 <公开 折叠>
     {
-        @ VkCommandPool command_pool = g_MainWindowData.Frames[g_MainWindowData.FrameIndex].CommandPool;
-        @ VkCommandBuffer command_buffer = g_MainWindowData.Frames[g_MainWindowData.FrameIndex].CommandBuffer;
+        @ VkCommandPool command_pool = m_MainWindowData.Frames[m_MainWindowData.FrameIndex].CommandPool;
+        @ VkCommandBuffer command_buffer = m_MainWindowData.Frames[m_MainWindowData.FrameIndex].CommandBuffer;
         @ VkResult err = vkResetCommandPool(g_Device, command_pool, 0);
         @ check_vk_result(err);
         @ VkCommandBufferBeginInfo begin_info = {};
@@ -6521,7 +6596,7 @@
 
     方法 清理 <公开 折叠>
     {
-        @ ImGui_ImplVulkanH_DestroyWindow(g_Instance, g_Device, &g_MainWindowData, g_Allocator);
+        @ ImGui_ImplVulkanH_DestroyWindow(g_Instance, g_Device, &m_MainWindowData, g_Allocator);
         @ vkDestroyDescriptorPool(g_Device, g_DescriptorPool, g_Allocator);
         @ vkDestroyDevice(g_Device, g_Allocator);
         @ vkDestroyInstance(g_Instance, g_Allocator);
@@ -6530,6 +6605,87 @@
     方法 重置尺寸 <公开 折叠>
     参数 宽度 <类型 = 整数>
     参数 高度 <类型 = 整数>
+
+    方法 _FrameRender <注释 = "仅限内部嵌入式使用" 折叠>
+    参数 draw_data <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/ImDrawData*" @输出名 = "draw_data">
+    {
+        @ VkResult err;
+        @ VkSemaphore image_acquired_semaphore  = m_MainWindowData.FrameSemaphores[m_MainWindowData.SemaphoreIndex].ImageAcquiredSemaphore;
+        @ VkSemaphore render_complete_semaphore = m_MainWindowData.FrameSemaphores[m_MainWindowData.SemaphoreIndex].RenderCompleteSemaphore;
+        @ err = vkAcquireNextImageKHR(g_Device, m_MainWindowData.Swapchain, UINT64_MAX, image_acquired_semaphore, VK_NULL_HANDLE, &m_MainWindowData.FrameIndex);
+        @ if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR)
+        @ {
+        @     g_SwapChainRebuild = true; return;
+        @ }
+        @ check_vk_result(err);
+        @ ImGui_ImplVulkanH_Frame* fd = &m_MainWindowData.Frames[m_MainWindowData.FrameIndex];
+        @ {
+        @     err = vkWaitForFences(g_Device, 1, &fd->Fence, VK_TRUE, UINT64_MAX);    // wait indefinitely instead of periodically checking
+        @     check_vk_result(err);
+        @     err = vkResetFences(g_Device, 1, &fd->Fence);
+        @     check_vk_result(err);
+        @ }
+        @ {
+        @     err = vkResetCommandPool(g_Device, fd->CommandPool, 0);
+        @     check_vk_result(err);
+        @     VkCommandBufferBeginInfo info = {};
+        @     info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        @     info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        @     err = vkBeginCommandBuffer(fd->CommandBuffer, &info);
+        @     check_vk_result(err);
+        @ }
+        @ {
+        @     VkRenderPassBeginInfo info = {};
+        @     info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        @     info.renderPass = m_MainWindowData.RenderPass;
+        @     info.framebuffer = fd->Framebuffer;
+        @     info.renderArea.extent.width = m_MainWindowData.Width;
+        @     info.renderArea.extent.height = m_MainWindowData.Height;
+        @     info.clearValueCount = 1;
+        @     info.pClearValues = &m_MainWindowData.ClearValue;
+        @     vkCmdBeginRenderPass(fd->CommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
+        @ }
+        // Record dear imgui primitives into command buffer
+        @ ImGui_ImplVulkan_RenderDrawData(draw_data, fd->CommandBuffer);
+        // Submit command buffer
+        @ vkCmdEndRenderPass(fd->CommandBuffer);
+        @ {
+        @     VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        @     VkSubmitInfo info = {};
+        @     info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        @     info.waitSemaphoreCount = 1;
+        @     info.pWaitSemaphores = &image_acquired_semaphore;
+        @     info.pWaitDstStageMask = &wait_stage;
+        @     info.commandBufferCount = 1;
+        @     info.pCommandBuffers = &fd->CommandBuffer;
+        @     info.signalSemaphoreCount = 1;
+        @     info.pSignalSemaphores = &render_complete_semaphore;
+        @     err = vkEndCommandBuffer(fd->CommandBuffer);
+        @     check_vk_result(err);
+        @     err = vkQueueSubmit(g_Queue, 1, &info, fd->Fence);
+        @     check_vk_result(err);
+        @ }
+    }
+
+    方法 _FramePresent <注释 = "仅限内部嵌入式使用" 折叠>
+    {
+        @ if (g_SwapChainRebuild) return;
+        @ VkSemaphore render_complete_semaphore = m_MainWindowData.FrameSemaphores[m_MainWindowData.SemaphoreIndex].RenderCompleteSemaphore;
+        @ VkPresentInfoKHR info = {};
+        @ info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+        @ info.waitSemaphoreCount = 1;
+        @ info.pWaitSemaphores = &render_complete_semaphore;
+        @ info.swapchainCount = 1;
+        @ info.pSwapchains = &m_MainWindowData.Swapchain;
+        @ info.pImageIndices = &m_MainWindowData.FrameIndex;
+        @ VkResult err = vkQueuePresentKHR(g_Queue, &info);
+        @ if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR)
+        @ {
+        @     g_SwapChainRebuild = true; return;
+        @ }
+        @ check_vk_result(err);
+        @ m_MainWindowData.SemaphoreIndex = (m_MainWindowData.SemaphoreIndex + 1) % m_MainWindowData.ImageCount; // Now we can use the next set of semaphores
+    }
 
     # 纹理图片 ---
 
@@ -6719,7 +6875,7 @@
         @ stbi_image_free(image_data);
         // Create a command buffer that will perform following steps when hit in the command queue.
         // TODO: this works in the example, but may need input if this is an acceptable way to access the pool/create the command buffer.
-        @ VkCommandPool command_pool = g_MainWindowData.Frames[g_MainWindowData.FrameIndex].CommandPool;
+        @ VkCommandPool command_pool = m_MainWindowData.Frames[m_MainWindowData.FrameIndex].CommandPool;
         @ VkCommandBuffer command_buffer;
         @ {
         @     VkCommandBufferAllocateInfo alloc_info{};
@@ -6939,25 +7095,25 @@
         @ int width, height;
         @ SDL_GetWindowSize(window, &width, &height);
         // SetupVulkanWindow
-        @ g_MainWindowData.Surface = surface;
+        @ m_MainWindowData.Surface = surface;
         @ // Check for WSI support
         @ VkBool32 res;
-        @ vkGetPhysicalDeviceSurfaceSupportKHR(g_PhysicalDevice, g_QueueFamily, g_MainWindowData.Surface, &res);
+        @ vkGetPhysicalDeviceSurfaceSupportKHR(g_PhysicalDevice, g_QueueFamily, m_MainWindowData.Surface, &res);
         @ if (res != VK_TRUE) exit(-1);
         @ // Select Surface Format
         @ const VkFormat requestSurfaceImageFormat[] = { VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_B8G8R8_UNORM, VK_FORMAT_R8G8B8_UNORM };
         @ const VkColorSpaceKHR requestSurfaceColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
-        @ g_MainWindowData.SurfaceFormat = ImGui_ImplVulkanH_SelectSurfaceFormat(g_PhysicalDevice, g_MainWindowData.Surface, requestSurfaceImageFormat, (size_t)IM_ARRAYSIZE(requestSurfaceImageFormat), requestSurfaceColorSpace);
+        @ m_MainWindowData.SurfaceFormat = ImGui_ImplVulkanH_SelectSurfaceFormat(g_PhysicalDevice, m_MainWindowData.Surface, requestSurfaceImageFormat, (size_t)IM_ARRAYSIZE(requestSurfaceImageFormat), requestSurfaceColorSpace);
         @ // Select Present Mode
         @ #ifdef IMGUI_UNLIMITED_FRAME_RATE
         @     VkPresentModeKHR present_modes[] = { VK_PRESENT_MODE_MAILBOX_KHR, VK_PRESENT_MODE_IMMEDIATE_KHR, VK_PRESENT_MODE_FIFO_KHR };
         @ #else
         @     VkPresentModeKHR present_modes[] = { VK_PRESENT_MODE_FIFO_KHR };
         @ #endif
-        @ g_MainWindowData.PresentMode = ImGui_ImplVulkanH_SelectPresentMode(g_PhysicalDevice, g_MainWindowData.Surface, &present_modes[0], IM_ARRAYSIZE(present_modes));
+        @ m_MainWindowData.PresentMode = ImGui_ImplVulkanH_SelectPresentMode(g_PhysicalDevice, m_MainWindowData.Surface, &present_modes[0], IM_ARRAYSIZE(present_modes));
         @ // Create SwapChain, RenderPass, Framebuffer, etc.
         @ IM_ASSERT(g_MinImageCount >= 2);
-        @ ImGui_ImplVulkanH_CreateOrResizeWindow(g_Instance, g_PhysicalDevice, g_Device, &g_MainWindowData, g_QueueFamily, g_Allocator, width, height, g_MinImageCount);
+        @ ImGui_ImplVulkanH_CreateOrResizeWindow(g_Instance, g_PhysicalDevice, g_Device, &m_MainWindowData, g_QueueFamily, g_Allocator, width, height, g_MinImageCount);
         @ return TRUE;
     }
 
@@ -6979,7 +7135,7 @@
     # VkDebugReportCallbackEXT g_DebugReport      = VK_NULL_HANDLE;
     # VkPipelineCache          g_PipelineCache    = VK_NULL_HANDLE;
     # VkDescriptorPool         g_DescriptorPool   = VK_NULL_HANDLE;
-    # ImGui_ImplVulkanH_Window g_MainWindowData   = {};
+    # ImGui_ImplVulkanH_Window m_MainWindowData   = {};
     # uint32_t                 g_MinImageCount    = 2;
     # bool                     g_SwapChainRebuild = false;
     # struct MyTextureData // A struct to manage data related to one image in vulkan

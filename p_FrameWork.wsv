@@ -11,17 +11,18 @@
 
     方法 创建完毕 <公开 定义事件 类型 = 整数 注释 = "当GLFW窗口创建完毕后发送此事件,用于对GLFW进行额外的设置." 注释 = "注意: 此时ImGui尚未初始化,请勿调用相关命令.">
 
-    方法 初始化配置 <公开 定义事件 类型 = 整数 注释 = "在ImGui窗口显示之前发送一次此事件,用于设置ImGui的样式和字体等参数."
-            返回值注释 = "返回1表示使用浅色样式,2为经典样式,其他任意值为默认的深色样式." 折叠>
-    参数 样式配置 <类型 = IM样式类 注释 = "当前的样式配置">
+    方法 初始化配置 <公开 定义事件 类型 = 整数 注释 = "在ImGui窗口显示之前发送一次此事件,用于设置ImGui的IO和字体等参数."
+            返回值注释 = "返回1表示使用浅色样式,2为经典样式,其他任意值为默认的深色样式.">
+    参数 IO <类型 = ImGuiIO类 注释 = "ImGui的输入输出结构">
     参数 字体图集 <类型 = IM字体图集类 注释 = "你可以在此添加字体(默认已添加了微软雅黑).">
 
     方法 准备渲染 <公开 定义事件 类型 = 整数 注释 = "在ImGui开始渲染前发送一次此事件,可用于加载图片(部分渲染器不能在其他位置加载图片).">
+    参数 样式配置 <类型 = IM样式类 注释 = "ImGui的样式配置">
 
     方法 即将渲染 <公开 定义事件 类型 = 整数 注释 = "当ImGui帧数据被渲染前发送此事件,请在本事件内设计ImGui的界面布局." 注释 = "注意:"
             注释 = "  1. 本事件前后已经内部处理好新建帧和渲染等操作,你只需设计布局即可."
             注释 = "  2. ImGUI的默认帧速率为60fps,即每秒触发本事件60次,因此在此进行耗时操作将" 注释 = "导致帧速率降低和界面卡顿,如有必要,请另开线程执行耗时操作."
-            注释 = "  3. 因为本事件的执行频率足够高,所以键鼠输入等事件也可以在此一起处理.">
+            注释 = "  3. 因为本事件的执行频率足够高,所以键鼠输入等事件也可以在此一起处理." 折叠2>
 
     方法 渲染结束 <公开 定义事件 类型 = 整数 注释 = "在ImGui停止渲染后发送一次此事件,可用于释放资源.">
 
@@ -84,6 +85,8 @@
         @ m_window = ::CreateWindowExW(0, m_wc.lpszClassName, @<标题>.GetText(), WS_OVERLAPPEDWINDOW, 0x80000000, 0x80000000, @<宽度>, @<高度>, nullptr, nullptr, m_wc.hInstance, this);
         变量 窗口句柄 <类型 = 变整数>
         变量 字体图集 <类型 = IM字体图集类>
+        变量 IO <类型 = ImGuiIO类>
+        变量 样式 <类型 = IM样式类>
         @ if (m_window == NULL) goto Fail;
         @ if (@<透明帧缓冲区>) ImGui_ImplWin32_EnableAlphaCompositing(m_window);
         @ @<窗口句柄> = (INT_P)m_window;
@@ -97,10 +100,9 @@
         本对象.创建完毕 ()
         ImGui.检查版本 ()
         ImGui.置当前上下文 (ImGui.创建上下文 ())
-        @ ImGuiIO& io = ImGui::GetIO(); (void)io;
-        @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-        @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-        ImGui.取IO ().字体全局缩放 = 取屏幕DPI ()
+        IO = ImGui.取IO ()
+        IO.字体全局缩放 = 取屏幕DPI ()
+        IO.标志 = 连续位或 (IO.标志, IM配置标志.键盘导航, IM配置标志.游戏手柄导航, IM配置标志.启用停靠, IM配置标志.启用视口)
         字体图集 = ImGui.取字体图集 ()
         如果 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc"))
         {
@@ -114,7 +116,7 @@
         {
             字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "simsun.ttc", 16.0f)  // 宋体
         }
-        分支判断 (初始化配置 (ImGui.取样式 (), 字体图集))
+        分支判断 (初始化配置 (IO, 字体图集))
         {
             分支 (1)
             {
@@ -128,6 +130,12 @@
             {
                 ImGui.深色样式 ()
             }
+        }
+        样式 = ImGui.取样式 ()
+        如果 (位与 (IO.标志, IM配置标志.启用视口) != 0)
+        {
+            样式.窗口圆角半径 = 0.0f
+            样式.颜色 (IM颜色标识符.窗口背景).w = 1.0f
         }
         字体图集.生成 ()
         如果 (渲染器.渲染器类型 == 0)
@@ -144,7 +152,8 @@
             ImGui.销毁上下文 ()
             @ goto Fail;
         }
-        本对象.准备渲染 ()
+        渲染器.准备 ()
+        本对象.准备渲染 (样式)
         变量 完成 <类型 = 逻辑型 值 = 假>
         @ MSG msg;
         @ RECT rt;
@@ -167,10 +176,10 @@
             @ }
             如果 (改变后宽度 != 0 && 改变后高度 != 0)
             {
-                渲染器.重置尺寸 (改变后宽度, 改变后高度)
                 渲染器.新建帧 ()
                 IM_Win32平台.新建帧 ()
                 ImGui.新建帧 ()
+                渲染器.重置尺寸 (改变后宽度, 改变后高度)
                 本对象.即将渲染 ()
                 渲染器.渲染 (背景颜色)
             }
@@ -250,6 +259,24 @@
         @ }
     }
 
+    方法 显示边框 <公开 属性读 类型 = 逻辑型 注释 = "返回窗口是否显示标题栏和边框" 折叠 @禁止流程检查 = 真>
+    {
+        @ LONG_PTR lStyle = ::GetWindowLongPtrW(m_window, GWL_STYLE);
+        @ return (lStyle & WS_CAPTION);
+    }
+
+    方法 显示边框 <公开 属性写 注释 = "设置是否显示窗口的标题栏和边框" 折叠>
+    参数 是否显示 <类型 = 逻辑型>
+    {
+        @ LONG_PTR lStyle = ::GetWindowLongPtrW(m_window, GWL_STYLE);
+        @ if (!@<是否显示>)
+        @     lStyle = lStyle & ~(WS_CAPTION | WS_SIZEBOX);
+        @ else
+        @     lStyle = lStyle | WS_CAPTION | WS_SIZEBOX;
+        @ ::SetWindowLongPtrW(m_window, GWL_STYLE, lStyle);
+        @ ::SetWindowPos(m_window, NULL, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+    }
+
     # ---
     # @begin
     # <> <include>
@@ -282,6 +309,13 @@
     #         if (pThis != nullptr) pThis->@<将被销毁>();
     #         ::PostQuitMessage(0);
     #         return 0;
+    #     case 0x02E0: // WM_DPICHANGED
+    #         if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DpiEnableScaleViewports)
+    #         {
+    #             const RECT* suggested_rect = (RECT*)lParam;
+    #             ::SetWindowPos(hWnd, nullptr, suggested_rect->left, suggested_rect->top, suggested_rect->right - suggested_rect->left, suggested_rect->bottom - suggested_rect->top, SWP_NOZORDER | SWP_NOACTIVATE);
+    #         }
+    #         break;
     #     }
     #     return ::DefWindowProcW(hWnd, msg, wParam, lParam);
     # }
@@ -356,12 +390,13 @@
         本对象.创建完毕 ()
         ImGui.检查版本 ()
         ImGui.置当前上下文 (ImGui.创建上下文 ())
-        @ ImGuiIO& io = ImGui::GetIO(); (void)io;
-        @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-        @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-        关注屏幕DPI (真)
-        ImGui.取IO ().字体全局缩放 = 取屏幕DPI ()
+        变量 IO <类型 = ImGuiIO类>
+        变量 样式 <类型 = IM样式类>
         变量 字体图集 <类型 = IM字体图集类>
+        IO = ImGui.取IO ()
+        IO.标志 = 连续位或 (IO.标志, IM配置标志.键盘导航, IM配置标志.游戏手柄导航, IM配置标志.启用停靠, IM配置标志.启用视口)
+        关注屏幕DPI (真)
+        IO.字体全局缩放 = 取屏幕DPI ()
         字体图集 = ImGui.取字体图集 ()
         如果 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc"))
         {
@@ -375,7 +410,7 @@
         {
             字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "simsun.ttc", 16.0f)  // 宋体
         }
-        分支判断 (初始化配置 (ImGui.取样式 (), 字体图集))
+        分支判断 (初始化配置 (IO, 字体图集))
         {
             分支 (1)
             {
@@ -389,6 +424,13 @@
             {
                 ImGui.深色样式 ()
             }
+        }
+        样式 = ImGui.取样式 ()
+        // 启用视口后调整WindowRounding/WindowBg,使平台窗口看起来与常规窗口相同
+        如果 (位与 (IO.标志, IM配置标志.启用视口) != 0)
+        {
+            样式.窗口圆角半径 = 0.0f
+            样式.颜色 (IM颜色标识符.窗口背景).w = 1.0f
         }
         字体图集.生成 ()
         如果 (渲染器.渲染器类型 == 1)
@@ -412,34 +454,18 @@
             }
             渲染器.加载字体纹理 ()
         }
-        本对象.准备渲染 ()
+        本对象.准备渲染 (样式)
         // 消息循环
-        变量 _宽度 <类型 = 整数>
-        变量 _高度 <类型 = 整数>
-        @ RECT rt;
         判断循环 (_是否需要退出 () == 假)
         {
             @ glfwPollEvents();
-            @ if (::GetClientRect(hWnd, &rt))
-            @ {
-            @     @<_宽度> = rt.right - rt.left;
-            @     @<_高度> = rt.bottom - rt.top;
-            @ }
-            如果 (_宽度 != 0 && _高度 != 0)
-            {
-                // 界面布局
-                渲染器.重置尺寸 (_宽度, _高度)
-                渲染器.新建帧 ()
-                IM_GLFW平台.新建帧 ()
-                ImGui.新建帧 ()
-                本对象.即将渲染 ()
-                // 渲染
-                渲染器.渲染_GLFW (窗口句柄, 背景颜色)
-            }
-            否则
-            {
-                延时 (50)  // 窗口不显示时,增加延时以减少CPU占用
-            }
+            // 界面布局
+            渲染器.新建帧 ()
+            IM_GLFW平台.新建帧 ()
+            ImGui.新建帧 ()
+            本对象.即将渲染 ()
+            // 渲染
+            渲染器.渲染_GLFW (窗口句柄, 背景颜色)
         }
         // 清理数据
         本对象.渲染结束 ()
@@ -703,11 +729,12 @@
         本对象.创建完毕 ()
         ImGui.检查版本 ()
         ImGui.置当前上下文 (ImGui.创建上下文 ())
-        @ ImGuiIO& io = ImGui::GetIO(); (void)io;
-        @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-        @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-        ImGui.取IO ().字体全局缩放 = 取屏幕DPI ()
         变量 字体图集 <类型 = IM字体图集类>
+        变量 IO <类型 = ImGuiIO类>
+        变量 样式 <类型 = IM样式类>
+        IO = ImGui.取IO ()
+        IO.标志 = 连续位或 (IO.标志, IM配置标志.键盘导航, IM配置标志.游戏手柄导航, IM配置标志.启用停靠, IM配置标志.启用视口)
+        IO.字体全局缩放 = 取屏幕DPI ()
         字体图集 = ImGui.取字体图集 ()
         如果 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc"))
         {
@@ -721,7 +748,7 @@
         {
             字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "simsun.ttc", 16.0f)  // 宋体
         }
-        分支判断 (初始化配置 (ImGui.取样式 (), 字体图集))
+        分支判断 (初始化配置 (IO, 字体图集))
         {
             分支 (1)
             {
@@ -735,6 +762,12 @@
             {
                 ImGui.深色样式 ()
             }
+        }
+        样式 = ImGui.取样式 ()
+        如果 (位与 (IO.标志, IM配置标志.启用视口) != 0)
+        {
+            样式.窗口圆角半径 = 0.0f
+            样式.颜色 (IM颜色标识符.窗口背景).w = 1.0f
         }
         字体图集.生成 ()
         如果 (渲染器.渲染器类型 == 1)
@@ -757,13 +790,9 @@
             返回 (假)
         }
         渲染器.加载字体纹理 ()
-        本对象.准备渲染 ()
+        本对象.准备渲染 (样式)
         // 消息循环
         变量 完成 <类型 = 逻辑型 值 = 假>
-        变量 _宽度 <类型 = 整数>
-        变量 _高度 <类型 = 整数>
-        @ HWND hWnd = (HWND)ImGui::GetMainViewport()->PlatformHandleRaw;
-        @ RECT rt;
         判断循环 (取反 (完成))
         {
             @ SDL_Event event;
@@ -776,29 +805,17 @@
             @         switch (event.window.event)
             @         {
             @         case SDL_WINDOWEVENT_CLOSE: { @<完成> = TRUE; break; }
-            @         case SDL_WINDOWEVENT_RESIZED: { this->@<尺寸被改变>(event.window.data1, event.window.data2); break; }
+            @         case SDL_WINDOWEVENT_RESIZED: { @<渲染器.重置尺寸>(event.window.data1, event.window.data2); this->@<尺寸被改变>(event.window.data1, event.window.data2); break; }
             @         }
             @     }
             @ }
-            @ if (::GetClientRect(hWnd, &rt))
-            @ {
-            @     @<_宽度> = rt.right - rt.left;
-            @     @<_高度> = rt.bottom - rt.top;
-            @ }
-            如果 (_宽度 != 0 && _高度 != 0)
-            {
-                // 界面布局
-                渲染器.新建帧 ()
-                IM_SDL2平台.新建帧 ()
-                ImGui.新建帧 ()
-                本对象.即将渲染 ()
-                // 渲染
-                渲染器.渲染_SDL (窗口句柄, 背景颜色)
-            }
-            否则
-            {
-                延时 (50)  // 窗口不显示时,增加延时以减少CPU占用
-            }
+            // 界面布局
+            渲染器.新建帧 ()
+            IM_SDL2平台.新建帧 ()
+            ImGui.新建帧 ()
+            本对象.即将渲染 ()
+            // 渲染
+            渲染器.渲染_SDL (窗口句柄, 背景颜色)
         }
         // 清理数据
         本对象.渲染结束 ()
