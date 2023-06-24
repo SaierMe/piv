@@ -1171,16 +1171,16 @@
     # ---
     # @begin
     # <> <include>
-    #     HANDLE m_hReadPipeHandle = NULL;
-    #     HANDLE m_hWritePipeShell = NULL;
-    #     HANDLE m_hReadPipeShell = NULL;
-    #     HANDLE m_hWritePipeHandle = NULL;
-    #     HANDLE m_hProcess = NULL;
-    #     HANDLE m_hThread = NULL;
-    #     HANDLE m_hEvent = NULL;
-    #     DWORD m_dwTime;
-    #     DWORD m_ProcessId;
-    #     BOOL m_bRunning = FALSE;
+    # HANDLE m_hReadPipeHandle = NULL;
+    # HANDLE m_hWritePipeShell = NULL;
+    # HANDLE m_hReadPipeShell = NULL;
+    # HANDLE m_hWritePipeHandle = NULL;
+    # HANDLE m_hProcess = NULL;
+    # HANDLE m_hThread = NULL;
+    # HANDLE m_hEvent = NULL;
+    # DWORD m_dwTime;
+    # DWORD m_ProcessId;
+    # BOOL m_bRunning = FALSE;
     # <> </include>
     # @end
 }
@@ -1418,10 +1418,9 @@
     # ---
     # @begin
     # <> <include>
-    # private:
-    #     PVOID m_pvFile;
-    #     HANDLE hFile;
-    #     HANDLE hFileMap;
+    # PVOID m_pvFile;
+    # HANDLE hFile;
+    # HANDLE hFileMap;
     # <> </include>
     # @end
 }

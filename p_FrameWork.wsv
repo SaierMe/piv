@@ -7,24 +7,23 @@
 类 IM_窗口模板类 <注释 = "提供了ImGui窗口共同的成员变量和定义事件." 注释 = "\"模板类型1\"为所使用的渲染器类型" 折叠 @模板基础类 = 真>
 {
     变量 渲染器 <公开 类型 = 模板类型1 注释 = "当前使用的渲染器实例">
-    变量 背景颜色 <公开 类型 = ImVec4 注释 = "x=红色; y=绿色; z=蓝色; w=Alpha">
-
-    方法 类_初始化 <折叠>
-    {
-        背景颜色.置值 (0.45f, 0.55f, 0.60f, 1.00f)
-    }
+    变量 背景颜色 <公开 类型 = ImVec4 注释 = "x=红色; y=绿色; z=蓝色; w=Alpha" x = 0.45f y = 0.55f z = 0.60f w = 1.00f>
 
     方法 创建完毕 <公开 定义事件 类型 = 整数 注释 = "当GLFW窗口创建完毕后发送此事件,用于对GLFW进行额外的设置." 注释 = "注意: 此时ImGui尚未初始化,请勿调用相关命令.">
 
-    方法 初始化配置 <公开 定义事件 类型 = 整数 注释 = "在ImGui显示界面之前发送一次此事件,用于设置ImGui的样式和字体等参数."
+    方法 初始化配置 <公开 定义事件 类型 = 整数 注释 = "在ImGui窗口显示之前发送一次此事件,用于设置ImGui的样式和字体等参数."
             返回值注释 = "返回1表示使用浅色样式,2为经典样式,其他任意值为默认的深色样式." 折叠>
     参数 样式配置 <类型 = IM样式类 注释 = "当前的样式配置">
     参数 字体图集 <类型 = IM字体图集类 注释 = "你可以在此添加字体(默认已添加了微软雅黑).">
+
+    方法 准备渲染 <公开 定义事件 类型 = 整数 注释 = "在ImGui开始渲染前发送一次此事件,可用于加载图片(部分渲染器不能在其他位置加载图片).">
 
     方法 即将渲染 <公开 定义事件 类型 = 整数 注释 = "当ImGui帧数据被渲染前发送此事件,请在本事件内设计ImGui的界面布局." 注释 = "注意:"
             注释 = "  1. 本事件前后已经内部处理好新建帧和渲染等操作,你只需设计布局即可."
             注释 = "  2. ImGUI的默认帧速率为60fps,即每秒触发本事件60次,因此在此进行耗时操作将" 注释 = "导致帧速率降低和界面卡顿,如有必要,请另开线程执行耗时操作."
             注释 = "  3. 因为本事件的执行频率足够高,所以键鼠输入等事件也可以在此一起处理.">
+
+    方法 渲染结束 <公开 定义事件 类型 = 整数 注释 = "在ImGui停止渲染后发送一次此事件,可用于释放资源.">
 
     方法 尺寸被改变 <公开 定义事件 类型 = 整数 注释 = "当本窗口的尺寸被改变后发送此事件" 折叠>
     参数 宽度 <类型 = 整数 注释 = "改变后的窗口宽度">
@@ -103,7 +102,18 @@
         @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
         ImGui.取IO ().字体全局缩放 = 取屏幕DPI ()
         字体图集 = ImGui.取字体图集 ()
-        字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc", 18.0f, IM字形范围.中文)  // 微软雅黑
+        如果 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc"))
+        {
+            字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc", 18.0f)  // 微软雅黑
+        }
+        否则 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "msyh.ttf"))
+        {
+            字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttf", 18.0f)  // 微软雅黑(老系统)
+        }
+        否则 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "simsun.ttc"))
+        {
+            字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "simsun.ttc", 16.0f)  // 宋体
+        }
         分支判断 (初始化配置 (ImGui.取样式 (), 字体图集))
         {
             分支 (1)
@@ -134,10 +144,12 @@
             ImGui.销毁上下文 ()
             @ goto Fail;
         }
+        本对象.准备渲染 ()
         变量 完成 <类型 = 逻辑型 值 = 假>
+        @ MSG msg;
+        @ RECT rt;
         判断循环 (取反 (完成))
         {
-            @ MSG msg;
             @ while (::PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE))
             @ {
             @     ::TranslateMessage(&msg);
@@ -148,16 +160,27 @@
             {
                 跳出循环
             }
+            @ if (::GetClientRect((HWND)@<窗口句柄>, &rt))
+            @ {
+            @     @<改变后宽度> = rt.right - rt.left;
+            @     @<改变后高度> = rt.bottom - rt.top;
+            @ }
             如果 (改变后宽度 != 0 && 改变后高度 != 0)
             {
                 渲染器.重置尺寸 (改变后宽度, 改变后高度)
+                渲染器.新建帧 ()
+                IM_Win32平台.新建帧 ()
+                ImGui.新建帧 ()
+                本对象.即将渲染 ()
+                渲染器.渲染 (背景颜色)
             }
-            渲染器.新建帧 ()
-            IM_Win32平台.新建帧 ()
-            ImGui.新建帧 ()
-            本对象.即将渲染 ()
-            渲染器.渲染 (背景颜色)
+            否则
+            {
+                延时 (50)  // 窗口不显示时,增加延时以减少CPU占用
+            }
         }
+        // 清理数据
+        本对象.渲染结束 ()
         渲染器.关闭 ()
         IM_Win32平台.关闭 ()
         ImGui.销毁上下文 ()
@@ -206,42 +229,62 @@
         @     ::SetWindowTextW(m_window, @<所欲设置的标题>.GetText());
     }
 
-    #
+    方法 图标 <公开 属性写 注释 = "设置显示在本窗口左上角的图标" 折叠>
+    参数 所欲设置的图标 <类型 = 图标资源 注释 = "  本参数提供具体所欲设置的图标,如果该资源值为\"空资源.空图标\"" 注释 = "或载入失败,则将使用默认图标.">
+    {
+        @ HICON hIcon = (HICON)g_objVolApp.LoadResImage(VRIT_ICON, @<所欲设置的图标>);
+        @ if (hIcon) {
+        @     ::SendMessage(m_window, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+        @     ::SendMessage(m_window, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+        @ }
+    }
+
+    方法 图标对象 <公开 属性写 注释 = "设置显示在本窗口左上角的图标" 折叠>
+    参数 所欲设置的图标 <类型 = 图标对象类 注释 = "  本参数提供具体所欲设置的图标对象."
+            注释 = "  注意: 在窗口存在期间必须保证本图标对象不被释放(可以将此对象保存在窗口类的成员变量中)," 注释 = "否则所置入图标将失效.">
+    {
+        @ HICON hIcon = (HICON)@<所欲设置的图标>.GetGDIHandle();
+        @ if (hIcon) {
+        @     ::SendMessage(m_window, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+        @     ::SendMessage(m_window, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+        @ }
+    }
+
     # ---
     # @begin
     # <> <include>
-    #     WNDCLASSEXW m_wc = {0};
-    #     HWND m_window = NULL;
-    #     bool m_created = false;
+    # WNDCLASSEXW m_wc = {0};
+    # HWND m_window = NULL;
+    # bool m_created = false;
     #
-    #     static LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+    # static LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+    # {
+    #     static @sn<current_class>* pThis;
+    #     if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+    #         return 1;
+    #     switch (msg)
     #     {
-    #         static @sn<current_class>* pThis;
-    #         if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
-    #             return 1;
-    #         switch (msg)
+    #     case WM_CREATE:
+    #         if (pThis == nullptr) pThis = (@sn<current_class>*)((CREATESTRUCTW*)lParam)->lpCreateParams;
+    #             return 0;
+    #     case WM_SIZE:
+    #         if (wParam != SIZE_MINIMIZED && pThis != nullptr)
     #         {
-    #         case WM_CREATE:
-    #             if (pThis == nullptr) pThis = (@sn<current_class>*)((CREATESTRUCTW*)lParam)->lpCreateParams;
-    #             return 0;
-    #         case WM_SIZE:
-    #             if (wParam != SIZE_MINIMIZED && pThis != nullptr)
-    #             {
-    #                 pThis->m_ResizeWidth = (INT)LOWORD(lParam); pThis->m_ResizeHeight = (INT)HIWORD(lParam);
-    #                 pThis->@<尺寸被改变>(pThis->m_ResizeWidth, pThis->m_ResizeHeight);
-    #             }
-    #             return 0;
-    #         case WM_SYSCOMMAND:
-    #             if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
-    #                 return 0;
-    #             break;
-    #         case WM_DESTROY:
-    #             if (pThis != nullptr) pThis->@<将被销毁>();
-    #             ::PostQuitMessage(0);
-    #             return 0;
+    #             pThis->m_ResizeWidth = (INT)LOWORD(lParam); pThis->m_ResizeHeight = (INT)HIWORD(lParam);
+    #             pThis->@<尺寸被改变>(pThis->m_ResizeWidth, pThis->m_ResizeHeight);
     #         }
-    #         return ::DefWindowProcW(hWnd, msg, wParam, lParam);
+    #         return 0;
+    #     case WM_SYSCOMMAND:
+    #         if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
+    #             return 0;
+    #         break;
+    #     case WM_DESTROY:
+    #         if (pThis != nullptr) pThis->@<将被销毁>();
+    #         ::PostQuitMessage(0);
+    #         return 0;
     #     }
+    #     return ::DefWindowProcW(hWnd, msg, wParam, lParam);
+    # }
     # <> </include>
     # @end
     # ---
@@ -274,10 +317,16 @@
         {
             @ glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         }
-        @ glfwWindowHint(GLFW_SCALE_TO_MONITOR, GL_TRUE);
+        @ glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
         @ glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, @<透明帧缓冲区>);
         @ m_window = glfwCreateWindow(@<宽度>, @<高度>, PivW2U{@<标题>}.GetText(), @<全屏模式> ? m_monitor : nullptr, nullptr);
         @ if (!m_window) return FALSE;
+        @ HWND hWnd = glfwGetWin32Window(m_window);
+        @ HICON hIcon = ::LoadIconW(::GetModuleHandle(NULL), MAKEINTRESOURCEW(100));
+        @ if (hIcon) {
+        @     ::SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+        @     ::SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+        @ }
         变量 窗口句柄 <类型 = 变整数>
         @ @<窗口句柄> = (INT_P)m_window;
         如果 (渲染器.渲染器类型 == 1)
@@ -304,7 +353,6 @@
         @ glfwSetWindowIconifyCallback(m_window, glfw_iconify_callback);
         @ glfwSetWindowMaximizeCallback(m_window, glfw_maximize_callback);
         @ glfwSetDropCallback(m_window, glfw_drop_callback);
-        // @ glfwSetWindowIcon(m_window, 0, nullptr);
         本对象.创建完毕 ()
         ImGui.检查版本 ()
         ImGui.置当前上下文 (ImGui.创建上下文 ())
@@ -315,7 +363,18 @@
         ImGui.取IO ().字体全局缩放 = 取屏幕DPI ()
         变量 字体图集 <类型 = IM字体图集类>
         字体图集 = ImGui.取字体图集 ()
-        字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc", 18.0f)  // 微软雅黑
+        如果 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc"))
+        {
+            字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc", 18.0f)  // 微软雅黑
+        }
+        否则 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "msyh.ttf"))
+        {
+            字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttf", 18.0f)  // 微软雅黑(老系统)
+        }
+        否则 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "simsun.ttc"))
+        {
+            字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "simsun.ttc", 16.0f)  // 宋体
+        }
         分支判断 (初始化配置 (ImGui.取样式 (), 字体图集))
         {
             分支 (1)
@@ -353,19 +412,37 @@
             }
             渲染器.加载字体纹理 ()
         }
+        本对象.准备渲染 ()
         // 消息循环
+        变量 _宽度 <类型 = 整数>
+        变量 _高度 <类型 = 整数>
+        @ RECT rt;
         判断循环 (_是否需要退出 () == 假)
         {
             @ glfwPollEvents();
-            // 界面布局
-            渲染器.新建帧 ()
-            IM_GLFW平台.新建帧 ()
-            ImGui.新建帧 ()
-            本对象.即将渲染 ()
-            // 渲染
-            渲染器.渲染_GLFW (窗口句柄, 背景颜色)
+            @ if (::GetClientRect(hWnd, &rt))
+            @ {
+            @     @<_宽度> = rt.right - rt.left;
+            @     @<_高度> = rt.bottom - rt.top;
+            @ }
+            如果 (_宽度 != 0 && _高度 != 0)
+            {
+                // 界面布局
+                渲染器.重置尺寸 (_宽度, _高度)
+                渲染器.新建帧 ()
+                IM_GLFW平台.新建帧 ()
+                ImGui.新建帧 ()
+                本对象.即将渲染 ()
+                // 渲染
+                渲染器.渲染_GLFW (窗口句柄, 背景颜色)
+            }
+            否则
+            {
+                延时 (50)  // 窗口不显示时,增加延时以减少CPU占用
+            }
         }
         // 清理数据
+        本对象.渲染结束 ()
         渲染器.关闭 ()
         IM_GLFW平台.关闭 ()
         ImGui.销毁上下文 ()
@@ -404,6 +481,29 @@
     方法 获取焦点 <公开 注释 = "将当前输入焦点设置到本窗口上" 折叠 @嵌入式方法 = "">
     {
         @ glfwFocusWindow(@sn<this>.m_window)
+    }
+
+    方法 取窗口尺寸 <公开 注释 = "获取本窗口的当前宽度和高度" 折叠 @嵌入式方法 = "">
+    参数 宽度 <类型 = 整数 @需求类型 = 可写入变量>
+    参数 高度 <类型 = 整数 @需求类型 = 可写入变量>
+    {
+        @ glfwGetWindowSize(@sn<this>.m_window, &@<宽度>, &@<高度>)
+    }
+
+    方法 置窗口尺寸 <公开 注释 = "设置本窗口的宽度和高度" 折叠 @嵌入式方法 = "">
+    参数 宽度 <类型 = 整数>
+    参数 高度 <类型 = 整数>
+    {
+        @ glfwSetWindowSize(@sn<this>.m_window, @<宽度>, @<高度>)
+    }
+
+    方法 限制窗口尺寸 <公开 注释 = "限制本窗口的宽度和高度,只能在限制的范围内调整大小" 折叠 @嵌入式方法 = "">
+    参数 最小宽度 <类型 = 整数>
+    参数 最大宽度 <类型 = 整数>
+    参数 最小高度 <类型 = 整数>
+    参数 最大高度 <类型 = 整数>
+    {
+        @ glfwSetWindowSizeLimits(@sn<this>.m_window, @<最小宽度>, @<最大宽度>, @<最小高度>, @<最大高度>)
     }
 
     方法 _是否需要退出 <类型 = 逻辑型 折叠 @嵌入式方法 = "">
@@ -474,53 +574,76 @@
         @ return glfwGetWindowAttrib(m_window, GLFW_TRANSPARENT_FRAMEBUFFER);
     }
 
+    方法 图标 <公开 属性写 注释 = "设置显示在本窗口左上角的图标" 折叠>
+    参数 所欲设置的图标 <类型 = 图标资源 注释 = "  本参数提供具体所欲设置的图标,如果该资源值为\"空资源.空图标\"" 注释 = "或载入失败,则将使用默认图标.">
+    {
+        @ HWND hWnd = glfwGetWin32Window(m_window);
+        @ HICON hIcon = (HICON)g_objVolApp.LoadResImage(VRIT_ICON, @<所欲设置的图标>);
+        @ if (hIcon) {
+        @     ::SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+        @     ::SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+        @ }
+    }
+
+    方法 图标对象 <公开 属性写 注释 = "设置显示在本窗口左上角的图标" 折叠>
+    参数 所欲设置的图标 <类型 = 图标对象类 注释 = "  本参数提供具体所欲设置的图标对象."
+            注释 = "  注意: 在窗口存在期间必须保证本图标对象不被释放(可以将此对象保存在窗口类的成员变量中)," 注释 = "否则所置入图标将失效.">
+    {
+        @ HWND hWnd = glfwGetWin32Window(m_window);
+        @ HICON hIcon = (HICON)@<所欲设置的图标>.GetGDIHandle();
+        @ if (hIcon) {
+        @     ::SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+        @     ::SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+        @ }
+    }
+
     # ---
     # @begin
     # <> <include>
-    #     static void @an<_sOnBeforeAppInit>()
-    #     {
-    #         glfwSetErrorCallback(glfw_error_callback);
-    #         IM_ASSERT(glfwInit() == GLFW_TRUE);
-    #     }
-    #     static void @an<_sOnAfterAppExit>() { glfwTerminate(); }
-    #     // 成员变量
-    #     GLFWwindow* m_window = nullptr;
-    #     GLFWmonitor* m_monitor = glfwGetPrimaryMonitor();
-    #     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 0.60f);
-    #     // Callback
-    #     static void glfw_error_callback(int error, const char* description)
-    #     {
-    #         PIVDEBUG("S", CVolString().Format(L"GLFW Error %d: %s\n", error, PivU2W(description).GetText()).GetText());
-    #     }
-    #     static void glfw_pos_callback(GLFWwindow* window, int xpos, int ypos)
-    #     {
-    #         ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<位置被改变>(xpos, ypos);
-    #     }
-    #     static void glfw_size_callback(GLFWwindow* window, int width, int height)
-    #     {
-    #         ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<尺寸被改变>(width, height);
-    #     }
-    #     static void glfw_close_callback(GLFWwindow* window)
-    #     {
-    #         ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<将被销毁>();
-    #     }
-    #     static void glfw_iconify_callback(GLFWwindow* window, int iconified)
-    #     {
-    #         ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<最小化被改变>(iconified);
-    #     }
-    #     static void glfw_maximize_callback(GLFWwindow* window, int maximized)
-    #     {
-    #         ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<最大化被改变>(maximized);
-    #     }
-    #     static void glfw_drop_callback(GLFWwindow* window, int path_count, const char* paths[]);
+    # static void @an<_sOnBeforeAppInit>()
+    # {
+    #     glfwSetErrorCallback(glfw_error_callback);
+    #     glfwInit();
+    # }
+    # static void @an<_sOnAfterAppExit>() { glfwTerminate(); }
+    # // 成员变量
+    # GLFWwindow* m_window = nullptr;
+    # GLFWmonitor* m_monitor = glfwGetPrimaryMonitor();
+    # ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 0.60f);
+    # // Callback
+    # static void glfw_error_callback(int error, const char* description)
+    # {
+    #     PIVDEBUG("S", CVolString().Format(L"GLFW Error %d: %s\n", error, PivU2W(description).GetText()).GetText());
+    # }
+    # static void glfw_pos_callback(GLFWwindow* window, int xpos, int ypos)
+    # {
+    #     ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<位置被改变>(xpos, ypos);
+    # }
+    # static void glfw_size_callback(GLFWwindow* window, int width, int height)
+    # {
+    #     ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<尺寸被改变>(width, height);
+    # }
+    # static void glfw_close_callback(GLFWwindow* window)
+    # {
+    #     ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<将被销毁>();
+    # }
+    # static void glfw_iconify_callback(GLFWwindow* window, int iconified)
+    # {
+    #     ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<最小化被改变>(iconified);
+    # }
+    # static void glfw_maximize_callback(GLFWwindow* window, int maximized)
+    # {
+    #     ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<最大化被改变>(maximized);
+    # }
+    # static void glfw_drop_callback(GLFWwindow* window, int path_count, const char* paths[]);
     # <> </include>
-    #     void @sn<current_class>::glfw_drop_callback(GLFWwindow* window, int path_count, const char* paths[])
-    #     {
-    #         @dt<文本数组类> aryFileNames;
-    #         for (size_t i = 0; i < path_count; i++)
-    #             aryFileNames.data().Add(PivU2W{paths[i]}.GetText());
-    #         ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<文件被拖放>(aryFileNames);
-    #     }
+    # void @sn<current_class>::glfw_drop_callback(GLFWwindow* window, int path_count, const char* paths[])
+    # {
+    #     @dt<文本数组类> aryFileNames;
+    #     for (size_t i = 0; i < path_count; i++)
+    #         aryFileNames.data().Add(PivU2W{paths[i]}.GetText());
+    #     ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<文件被拖放>(aryFileNames);
+    # }
     # @end
     # ---
 }
@@ -528,12 +651,12 @@
 类 IM_SDL2窗口 <公开 基础类 = IM_窗口模板类 注释 = "  基于SDL2的ImGui窗口,本模板类已经处理好ImGui创建和销毁的各种复杂"
         注释 = "流程,你只需要在\"即将绘制\"事件中完成界面的布局,就能完成一个简单的" 注释 = "ImGui窗口."
         注释 = "  \"模板类型1\"为所使用的渲染器类型,支持以下的渲染器:" 注释 = "  IM_DX9渲染器   IM_DX10渲染器     IM_DX11渲染器  "
-        注释 = "  IM_DX12渲染器  Im_OpenGL3渲染器  IM_Vulkan渲染器" @模板基础类 = 真 @文档 = "category = \"窗口框架\"">
+        注释 = "  IM_DX12渲染器  Im_OpenGL3渲染器  IM_Vulkan渲染器" 折叠 @模板基础类 = 真 @文档 = "category = \"窗口框架\"">
 {
     方法 创建主窗口 <公开 类型 = 逻辑型 注释 = "创建本窗口类的对象并将其作为程序的主窗口." 注释 = "注意:"
             注释 = "  1. 程序中必须存在且只能存在一个主窗口,调用本方法后,主窗口将被设置为本窗口;"
             注释 = "  2. 主窗口必须在程序的\"启动类\"中存在成员变量定义,避免其在程序退出前被释放," 注释 = "否则将可能导致程序运行时崩溃."
-            注释 = "  3. 本方法内实现了消息循环,直到窗口关闭或创建失败,本方法才会返回." 返回值注释 = "返回是否成功" @禁止流程检查 = 真>
+            注释 = "  3. 本方法内实现了消息循环,直到窗口关闭或创建失败,本方法才会返回." 返回值注释 = "返回是否成功" 折叠 @禁止流程检查 = 真>
     参数 标题 <类型 = 文本型 注释 = "提供所创建窗口的标题">
     参数 宽度 <类型 = 整数 注释 = "提供所创建窗口的宽度" @默认值 = 1280>
     参数 高度 <类型 = 整数 注释 = "提供所创建窗口的高度" @默认值 = 720>
@@ -583,11 +706,21 @@
         @ ImGuiIO& io = ImGui::GetIO(); (void)io;
         @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
         @ io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
         ImGui.取IO ().字体全局缩放 = 取屏幕DPI ()
         变量 字体图集 <类型 = IM字体图集类>
         字体图集 = ImGui.取字体图集 ()
-        字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc", 18.0f, IM字形范围.中文)  // 微软雅黑
+        如果 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc"))
+        {
+            字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc", 18.0f)  // 微软雅黑
+        }
+        否则 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "msyh.ttf"))
+        {
+            字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttf", 18.0f)  // 微软雅黑(老系统)
+        }
+        否则 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "simsun.ttc"))
+        {
+            字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "simsun.ttc", 16.0f)  // 宋体
+        }
         分支判断 (初始化配置 (ImGui.取样式 (), 字体图集))
         {
             分支 (1)
@@ -624,8 +757,13 @@
             返回 (假)
         }
         渲染器.加载字体纹理 ()
+        本对象.准备渲染 ()
         // 消息循环
         变量 完成 <类型 = 逻辑型 值 = 假>
+        变量 _宽度 <类型 = 整数>
+        变量 _高度 <类型 = 整数>
+        @ HWND hWnd = (HWND)ImGui::GetMainViewport()->PlatformHandleRaw;
+        @ RECT rt;
         判断循环 (取反 (完成))
         {
             @ SDL_Event event;
@@ -638,19 +776,32 @@
             @         switch (event.window.event)
             @         {
             @         case SDL_WINDOWEVENT_CLOSE: { @<完成> = TRUE; break; }
-            @         case SDL_WINDOWEVENT_RESIZED: { @<渲染器.重置尺寸>(0, 0); this->@<尺寸被改变>(event.window.data1, event.window.data2); break; }
+            @         case SDL_WINDOWEVENT_RESIZED: { this->@<尺寸被改变>(event.window.data1, event.window.data2); break; }
             @         }
             @     }
             @ }
-            // 界面布局
-            渲染器.新建帧 ()
-            IM_SDL2平台.新建帧 ()
-            ImGui.新建帧 ()
-            本对象.即将渲染 ()
-            // 渲染
-            渲染器.渲染_SDL (窗口句柄, 背景颜色)
+            @ if (::GetClientRect(hWnd, &rt))
+            @ {
+            @     @<_宽度> = rt.right - rt.left;
+            @     @<_高度> = rt.bottom - rt.top;
+            @ }
+            如果 (_宽度 != 0 && _高度 != 0)
+            {
+                // 界面布局
+                渲染器.新建帧 ()
+                IM_SDL2平台.新建帧 ()
+                ImGui.新建帧 ()
+                本对象.即将渲染 ()
+                // 渲染
+                渲染器.渲染_SDL (窗口句柄, 背景颜色)
+            }
+            否则
+            {
+                延时 (50)  // 窗口不显示时,增加延时以减少CPU占用
+            }
         }
         // 清理数据
+        本对象.渲染结束 ()
         渲染器.关闭 ()
         IM_SDL2平台.关闭 ()
         ImGui.销毁上下文 ()
@@ -754,15 +905,46 @@
         @ SDL_SetWindowOpacity(m_window, (float)@<透明度>);
     }
 
+    方法 图标 <公开 属性写 注释 = "设置显示在本窗口左上角的图标" 折叠>
+    参数 所欲设置的图标 <类型 = 图标资源 注释 = "  本参数提供具体所欲设置的图标,如果该资源值为\"空资源.空图标\"" 注释 = "或载入失败,则将使用默认图标.">
+    {
+        @ SDL_SysWMinfo info;
+        @ SDL_VERSION(&info.version);
+        @ if (SDL_GetWindowWMInfo(m_window, &info))
+        @ {
+        @     HICON hIcon = (HICON)g_objVolApp.LoadResImage(VRIT_ICON, @<所欲设置的图标>);
+        @     if (hIcon) {
+        @         ::SendMessage(info.info.win.window, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+        @         ::SendMessage(info.info.win.window, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+        @     }
+        @ }
+    }
+
+    方法 图标对象 <公开 属性写 注释 = "设置显示在本窗口左上角的图标" 折叠>
+    参数 所欲设置的图标 <类型 = 图标对象类 注释 = "  本参数提供具体所欲设置的图标对象."
+            注释 = "  注意: 在窗口存在期间必须保证本图标对象不被释放(可以将此对象保存在窗口类的成员变量中)," 注释 = "否则所置入图标将失效.">
+    {
+        @ SDL_SysWMinfo info;
+        @ SDL_VERSION(&info.version);
+        @ if (SDL_GetWindowWMInfo(m_window, &info))
+        @ {
+        @     HICON hIcon = (HICON)@<所欲设置的图标>.GetGDIHandle();
+        @     if (hIcon) {
+        @         ::SendMessage(info.info.win.window, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+        @         ::SendMessage(info.info.win.window, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+        @     }
+        @ }
+    }
+
     # ---
     # @begin
     # <> <include>
-    #     static void @an<_sOnBeforeAppInit>() { IM_ASSERT(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) == 0); }
-    #     static void @an<_sOnAfterAppExit>() { SDL_Quit(); }
-    #     // 成员变量
-    #     SDL_Window* m_window = nullptr;
-    #     SDL_GLContext gl_context = nullptr;
-    #     // Callback
+    # static void @an<_sOnBeforeAppInit>() { IM_ASSERT(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) == 0); }
+    # static void @an<_sOnAfterAppExit>() { SDL_Quit(); }
+    # // 成员变量
+    # SDL_Window* m_window = nullptr;
+    # SDL_GLContext gl_context = nullptr;
+    # // Callback
     # <> </include>
     # @end
     # ---

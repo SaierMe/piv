@@ -166,18 +166,18 @@
     # ---
     # @begin
     # <> <include>
-    #     static INT CALLBACK ThreadPoolWorkerProc (@sn<current_class>* pThis, @sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
-    #         return pThis->@<任务回调> (lpThreadParam->nUserMark, lpThreadParam->lUserParam, lpThreadParam->lpUserData);
-    #     }
-    #     static INT CALLBACK ThreadPoolObjWorkerProc (@sn<current_class>* pThis, @sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
-    #         return pThis->@<对象任务回调> (lpThreadParam->nUserMark, *lpThreadParam->lpUserObj, lpThreadParam->lpUserData);
-    #     }
-    #     static INT CALLBACK ThreadObjWorkerProc (@sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
-    #         ((@sn<current_class>*)lpThreadParam->lpThis)->@<对象任务回调> (lpThreadParam->nUserMark, *lpThreadParam->lpUserObj, lpThreadParam->lpUserData);
-    #         lpThreadParam->lpUserObj->Destroy();
-    #         delete lpThreadParam;
-    #         return 0;
-    #     }
+    # static INT CALLBACK ThreadPoolWorkerProc (@sn<current_class>* pThis, @sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
+    #     return pThis->@<任务回调> (lpThreadParam->nUserMark, lpThreadParam->lUserParam, lpThreadParam->lpUserData);
+    # }
+    # static INT CALLBACK ThreadPoolObjWorkerProc (@sn<current_class>* pThis, @sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
+    #     return pThis->@<对象任务回调> (lpThreadParam->nUserMark, *lpThreadParam->lpUserObj, lpThreadParam->lpUserData);
+    # }
+    # static INT CALLBACK ThreadObjWorkerProc (@sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
+    #     ((@sn<current_class>*)lpThreadParam->lpThis)->@<对象任务回调> (lpThreadParam->nUserMark, *lpThreadParam->lpUserObj, lpThreadParam->lpUserData);
+    #     lpThreadParam->lpUserObj->Destroy();
+    #     delete lpThreadParam;
+    #     return 0;
+    # }
     # <> </include>
     # @end
     # ---
@@ -360,18 +360,18 @@
     # ---
     # @begin
     # <> <include>
-    #     static INT CALLBACK ThreadPoolWorkerProc (@sn<current_class>* pThis, @sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
-    #         return pThis->@<任务回调> (lpThreadParam->nUserMark, lpThreadParam->lUserParam, lpThreadParam->lpUserData);
-    #     }
-    #     static INT CALLBACK ThreadPoolObjWorkerProc (@sn<current_class>* pThis, @sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
-    #         return pThis->@<对象任务回调> (lpThreadParam->nUserMark, *lpThreadParam->lpUserObj, lpThreadParam->lpUserData);
-    #     }
-    #     static INT CALLBACK ThreadObjWorkerProc (@sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
-    #         ((@sn<current_class>*)lpThreadParam->lpThis)->@<对象任务回调> (lpThreadParam->nUserMark, *lpThreadParam->lpUserObj, lpThreadParam->lpUserData);
-    #         lpThreadParam->lpUserObj->Destroy();
-    #         delete lpThreadParam;
-    #         return 0;
-    #     }
+    # static INT CALLBACK ThreadPoolWorkerProc (@sn<current_class>* pThis, @sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
+    #     return pThis->@<任务回调> (lpThreadParam->nUserMark, lpThreadParam->lUserParam, lpThreadParam->lpUserData);
+    # }
+    # static INT CALLBACK ThreadPoolObjWorkerProc (@sn<current_class>* pThis, @sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
+    #     return pThis->@<对象任务回调> (lpThreadParam->nUserMark, *lpThreadParam->lpUserObj, lpThreadParam->lpUserData);
+    # }
+    # static INT CALLBACK ThreadObjWorkerProc (@sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
+    #     ((@sn<current_class>*)lpThreadParam->lpThis)->@<对象任务回调> (lpThreadParam->nUserMark, *lpThreadParam->lpUserObj, lpThreadParam->lpUserData);
+    #     lpThreadParam->lpUserObj->Destroy();
+    #     delete lpThreadParam;
+    #     return 0;
+    # }
     # <> </include>
     # @end
     # ---

@@ -10,8 +10,8 @@
 
     # 均匀分布
 
-    方法 取随机数 <公开 注释 = "产生在一个范围内均匀分布的伪随机数." 注释 = "本方法可以自定义返回的整数类型." 返回值注释 = "返回产生的随机数,类型与参数\"数值类型\"相同."
-            折叠 @嵌入式方法 = "">
+    方法 取随机数 <公开 注释 = "产生在一个范围内均匀分布的伪随机数." 注释 = "本方法可以自定义返回的整数类型." 返回值注释 = "返回产生的随机数,类型与参数\"数值类型\"相同." 折叠
+            @嵌入式方法 = "">
     参数 数值类型 <注释 = "请填写\"字节\"、\"短整数\"、\"字符\"、\"整数\"、\"长整数\"等基本整数型." @匹配类型 = 通用整数型 @需求类型 = 数据类型 @返回值类型 = 0>
     参数 最小值 <注释 = "指定取值范围的最小值,可使用\"数值范围\"中的常量." @匹配类型 = 匹配前参数值类型>
     参数 最大值 <注释 = "指定取值范围的最大值,必须大于等于最小值,可使用\"数值范围\"中的常量." @匹配类型 = 匹配前参数值类型>
@@ -107,8 +107,8 @@
         @ } ()
     }
 
-    方法 取指数分布小数 <公开 类型 = 小数 注释 = "根据指数分布离散概率函数产生随机正小数值."
-            注释 = "若随机事件在每个时间或距离单位发生的频率为λ,返回的值为到一次随机事件的时间或距离." 返回值注释 = "返回随机的时间或距离小数." 折叠 @嵌入式方法 = "">
+    方法 取指数分布小数 <公开 类型 = 小数 注释 = "根据指数分布离散概率函数产生随机正小数值." 注释 = "若随机事件在每个时间或距离单位发生的频率为λ,返回的值为到一次随机事件的时间或距离."
+            返回值注释 = "返回随机的时间或距离小数." 折叠 @嵌入式方法 = "">
     参数 事件频率 <类型 = 小数 注释 = "定义为λ,取值范围为0 < λ,为每单位事件发生的频率." @默认值 = 1.0>
     {
         @ [&] {
@@ -117,8 +117,7 @@
         @ } ()
     }
 
-    方法 取伽玛分布小数 <公开 类型 = 小数 注释 = "根据伽玛分布离散概率函数产生随机正小数值." 注释 = "返回α个独立指数分布的随机变量的和,每个的平均值为β." 折叠
-            @嵌入式方法 = "">
+    方法 取伽玛分布小数 <公开 类型 = 小数 注释 = "根据伽玛分布离散概率函数产生随机正小数值." 注释 = "返回α个独立指数分布的随机变量的和,每个的平均值为β." 折叠 @嵌入式方法 = "">
     参数 形状 <类型 = 小数 注释 = "定义为α,为形状参数." @默认值 = 1.0>
     参数 尺度 <类型 = 小数 注释 = "定义为β,为尺度参数." @默认值 = 1.0>
     {
@@ -203,10 +202,10 @@
     方法 取随机字符 <公开 类型 = 文本型 注释 = "获取由指定数量和类型的随机ASCII字符,适合用来生成密码." 返回值注释 = "成功返回指定字符数的随机文本,失败返回空文本." 折叠
             @嵌入式方法 = "">
     参数 欲取字符数 <类型 = 整数 注释 = "要取的字符个数">
-    参数 字符类型 <类型 = 整数 注释 = "为以下数值相加值或位或值,默认为1+2+4;" 注释 = "  1、数字" 注释 = "  2、小写字母"
-            注释 = "  4、大写字母" 注释 = "  8、特殊符号" @默认值 = 7>
+    参数 字符类型 <类型 = 整数 注释 = "为以下数值相加值或位或值,默认为1+2+4;" 注释 = "  1、数字" 注释 = "  2、小写字母" 注释 = "  4、大写字母"
+            注释 = "  8、特殊符号" @默认值 = 7>
     {
-        @ [&] {
+        @ [&](int nLength) {
         @     TCHAR Buffer[96] { 0 };
         @     INT nFlags = @<字符类型>;
         @     if ((nFlags & 1) == 1) wcscat (Buffer, L"0123456789");
@@ -216,20 +215,18 @@
         @     size_t Offset = wcslen (Buffer) - 1;
         @     @an<CVolString> szStr;
         @     if (Offset <= 0) return szStr;
-        @     INT nLength = @<欲取字符数>;
         @     wchar_t* pStr = szStr.InitWithChars (nLength, ' ');
         @     for (INT i = 0; i < nLength; i++) {
         @         pStr[i] = Buffer[randint (0, Offset)];
         @     }
         @     return szStr;
-        @ } ()
+        @ } (@<欲取字符数>)
     }
 
     方法 取随机汉字 <公开 类型 = 文本型 注释 = "获取指定数量的随机汉字." 注释 = "注: 从20902个汉字中获取,有大量非常用汉字,看起来非常像乱码." 折叠 @嵌入式方法 = "">
     参数 汉字数量 <类型 = 整数 注释 = "提供随机汉字的数量">
     {
-        @ [&] {
-        @     INT nSize = @<汉字数量>;
+        @ [&](int nSize) {
         @     @an<CVolString> szStr;
         @     szStr.SetNumAlignChars (nSize);
         @     std::uniform_int_distribution<TCHAR> dist (0x4E00, 0x9FA5);
@@ -237,12 +234,12 @@
         @         szStr.AddChar (dist (@sn<this>.gen));
         @     }
         @     return szStr;
-        @ } ()
+        @ } (@<汉字数量>)
     }
 
     方法 取随机百家姓 <公开 类型 = 文本型 注释 = "获取随机的百家姓." 返回值注释 = "成功返回指定字符数的随机文本,失败返回空文本." 折叠 @嵌入式方法 = "">
     {
-        @ [&] {
+        @ [&]() {
         @     const TCHAR* surname[] {_T("赵"),_T("钱"),_T("孙"),_T("李"),_T("周"),_T("吴"),_T("郑"),_T("王"),_T("冯"),_T("陈"),
         @                             _T("褚"),_T("卫"),_T("蒋"),_T("沈"),_T("韩"),_T("杨"),_T("朱"),_T("秦"),_T("尤"),_T("许"),
         @                             _T("何"),_T("吕"),_T("施"),_T("张"),_T("孔"),_T("曹"),_T("严"),_T("华"),_T("金"),_T("魏"),
@@ -304,8 +301,7 @@
     参数 字节集长度 <类型 = 整数 注释 = "提供随机字节集的长度">
     参数 去除零值 <类型 = 逻辑型 注释 = "返回的字节集中是否包含0值" @默认值 = 真>
     {
-        @ [&] {
-        @     INT nSize = @<字节集长度>;
+        @ [&](int nSize) {
         @     @an<CVolMem> memBuf;
         @     memBuf.SetMemAlignSize (nSize);
         @     std::uniform_int_distribution<BYTE> dist (@<去除零值> ? 1 : 0, 255);
@@ -313,7 +309,7 @@
         @         memBuf.AddByte (dist (@sn<this>.gen));
         @     }
         @     return memBuf;
-        @ } ()
+        @ } (@<字节集长度>)
     }
 }
 
@@ -328,11 +324,11 @@
 
     # @begin
     # <> <include>
-    #     std::random_device rd;
-    #     std::mt19937 gen;
-    #     inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
+    # std::random_device rd;
+    # std::mt19937 gen;
+    # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
     # <> </include>
     # @end
 }
@@ -348,11 +344,11 @@
 
     # @begin
     # <> <include>
-    #     std::random_device rd;
-    #     std::mt19937_64 gen;
-    #     inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
+    # std::random_device rd;
+    # std::mt19937_64 gen;
+    # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
     # <> </include>
     # @end
 }
@@ -368,11 +364,11 @@
 
     # @begin
     # <> <include>
-    #     std::random_device rd;
-    #     std::minstd_rand0 gen;
-    #     inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
+    # std::random_device rd;
+    # std::minstd_rand0 gen;
+    # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
     # <> </include>
     # @end
 }
@@ -388,11 +384,11 @@
 
     # @begin
     # <> <include>
-    #     std::random_device rd;
-    #     std::minstd_rand gen;
-    #     inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
+    # std::random_device rd;
+    # std::minstd_rand gen;
+    # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
     # <> </include>
     # @end
 }
@@ -409,11 +405,11 @@
 
     # @begin
     # <> <include>
-    #     std::random_device rd;
-    #     std::ranlux24_base gen;
-    #     inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
+    # std::random_device rd;
+    # std::ranlux24_base gen;
+    # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
     # <> </include>
     # @end
 }
@@ -430,11 +426,11 @@
 
     # @begin
     # <> <include>
-    #     std::random_device rd;
-    #     std::ranlux48_base gen;
-    #     inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
+    # std::random_device rd;
+    # std::ranlux48_base gen;
+    # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
     # <> </include>
     # @end
 }
@@ -450,11 +446,11 @@
 
     # @begin
     # <> <include>
-    #     std::random_device rd;
-    #     std::ranlux24 gen;
-    #     inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
+    # std::random_device rd;
+    # std::ranlux24 gen;
+    # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
     # <> </include>
     # @end
 }
@@ -470,11 +466,11 @@
 
     # @begin
     # <> <include>
-    #     std::random_device rd;
-    #     std::ranlux48 gen;
-    #     inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
+    # std::random_device rd;
+    # std::ranlux48 gen;
+    # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
     # <> </include>
     # @end
 }
@@ -490,11 +486,11 @@
 
     # @begin
     # <> <include>
-    #     std::random_device rd;
-    #     std::knuth_b gen;
-    #     inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
+    # std::random_device rd;
+    # std::knuth_b gen;
+    # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
     # <> </include>
     # @end
 }
@@ -529,8 +525,8 @@
         @ @sn<this>.data ().IsEmpty ()
     }
 
-    方法 是否允许重复键名 <公开 属性写 注释 = "  设置是否允许存在重复的键名,即一个键名允许存在多个键值."
-            注释 = "  如果开启本属性,使用\"取XX键值\"时只获取到第一个键值,只有" 注释 = "\"取所有键值\"能获取全部键值." 折叠>
+    方法 是否允许重复键名 <公开 属性写 注释 = "  设置是否允许存在重复的键名,即一个键名允许存在多个键值." 注释 = "  如果开启本属性,使用\"取XX键值\"时只获取到第一个键值,只有"
+            注释 = "\"取所有键值\"能获取全部键值." 折叠>
     参数 是否允许 <类型 = 逻辑型 注释 = "默认为假">
     {
         @ data ().SetMultiKey (@<是否允许>);
@@ -606,8 +602,7 @@
     方法 创建自字节集 <公开 类型 = 整数 注释 = "从字节集数据中读入ini配置数据,本方法会覆盖本类之前的数据." 返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠
             @禁止流程检查 = 真>
     参数 配置内容 <类型 = 字节集类>
-    参数 文本编码 <类型 = 文本编码类型 注释 = "  指定字节集文本编码,文本编码必须对应,否则可能会乱码." 注释 = "  其中\"未知\"等同多字节."
-            @默认值 = 文本编码类型.UTF8>
+    参数 文本编码 <类型 = 文本编码类型 注释 = "  指定字节集文本编码,文本编码必须对应,否则可能会乱码." 注释 = "  其中\"未知\"等同多字节." @默认值 = 文本编码类型.UTF8>
     {
         @ data ().Reset ();
         @ if (@<文本编码> == VSET_UTF_8) {
@@ -996,10 +991,10 @@
     # @begin
     # @m<DECLARE_REF_OBJECT_CLASS_WITH_DATA> (CSimpleIniW)
     # <> <include>
-    #     #define SI_UTF16_SIGNATURE     "\xFF\xFE"
-    #     CVolString m_szIniFile;
-    #     BOOL m_bAutoSave;
-    #     INT m_nType = VSET_UNKNOWN;
+    # #define SI_UTF16_SIGNATURE     "\xFF\xFE"
+    # CVolString m_szIniFile;
+    # BOOL m_bAutoSave;
+    # INT m_nType = VSET_UNKNOWN;
     # <> </include>
     # @end
 }
@@ -1224,8 +1219,7 @@
     变量 访问时间 <公开 类型 = 长整数 注释 = "(可空)快捷方式文件的上一次访问时间">
     变量 目标文件长度 <公开 类型 = 整数 注释 = "(可空)目标文件的字节长度">
     变量 图标个数 <公开 类型 = 整数 注释 = "(可空)快捷方式的自定义图标个数">
-    变量 运行方式 <公开 类型 = 整数 注释 = "(可空)目标文件执行时窗口显示方式：" 注释 = "  1. 常规窗口" 注释 = "  2. 最小化"
-            注释 = "  3. 最大化">
+    变量 运行方式 <公开 类型 = 整数 注释 = "(可空)目标文件执行时窗口显示方式：" 注释 = "  1. 常规窗口" 注释 = "  2. 最小化" 注释 = "  3. 最大化">
     变量 快捷键 <公开 类型 = 整数 注释 = "(可空)快捷方式的快捷键">
     变量 GUID <公开 类型 = GUID类 注释 = "快捷方式文件的GUID">
 
@@ -1335,8 +1329,7 @@
     常量 系统文件 <公开 类型 = 整数 值 = 4 注释 = "快捷方式所指目标文件是系统文件">
     常量 卷标 <公开 类型 = 整数 值 = 8 注释 = "快捷方式所指目标是卷标">
     常量 文件夹 <公开 类型 = 整数 值 = 16 注释 = "快捷方式所指目标是文件夹">
-    常量 可以存档文件 <公开 类型 = 整数 值 = 32 注释 = "快捷方式所指目标文件在上次存档后被修改过."
-            注释 = "(跟系统备份有关,系统备份文件后会取消这个属性,之后修改文件就会加回来)">
+    常量 可以存档文件 <公开 类型 = 整数 值 = 32 注释 = "快捷方式所指目标文件在上次存档后被修改过." 注释 = "(跟系统备份有关,系统备份文件后会取消这个属性,之后修改文件就会加回来)">
     常量 加密文件 <公开 类型 = 整数 值 = 64 注释 = "快捷方式所指目标文件被加密(加密内容以便保护数据)">
     常量 常规文件 <公开 类型 = 整数 值 = 128 注释 = "快捷方式所指目标文件属性为一般">
     常量 临时文件 <公开 类型 = 整数 值 = 256 注释 = "快捷方式所指目标文件为临时">

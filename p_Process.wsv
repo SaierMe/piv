@@ -1564,16 +1564,15 @@
 
     # @begin
     # <> <include>
-    # public:
-    #     inline void SetInfo (PROCESSENTRY32W* stInfo) {
-    #         this->ResetObject ();
-    #         th32ProcessID = (INT)stInfo->th32ProcessID;
-    #         cntThreads = (INT)stInfo->cntThreads;
-    #         th32ParentProcessID = (INT)stInfo->th32ParentProcessID;
-    #         pcPriClassBase = (INT)stInfo->pcPriClassBase;
-    #         if (stInfo->szExeFile) szExeFile.SetText (stInfo->szExeFile);
-    #     }
-    #     inline @sn<current_class> (PROCESSENTRY32W* stInfo) : @sn<current_class>()  { this->SetInfo(stInfo); }
+    # inline void SetInfo (PROCESSENTRY32W* stInfo) {
+    #     this->ResetObject ();
+    #     th32ProcessID = (INT)stInfo->th32ProcessID;
+    #     cntThreads = (INT)stInfo->cntThreads;
+    #     th32ParentProcessID = (INT)stInfo->th32ParentProcessID;
+    #     pcPriClassBase = (INT)stInfo->pcPriClassBase;
+    #     if (stInfo->szExeFile) szExeFile.SetText (stInfo->szExeFile);
+    # }
+    # inline @sn<current_class> (PROCESSENTRY32W* stInfo) : @sn<current_class>()  { this->SetInfo(stInfo); }
     # <> </include>
     # @end
 }
@@ -1604,17 +1603,16 @@
 
     # @begin
     # <> <include>
-    # public:
-    #     inline void SetInfo (MODULEENTRY32W* stInfo) {
-    #         this->ResetObject ();
-    #         th32ProcessID = (INT)stInfo->th32ProcessID;
-    #         modBaseAddr = (INT_P)stInfo->modBaseAddr;
-    #         modBaseSize = (INT)stInfo->modBaseSize;
-    #         hModule = (INT_P)stInfo->hModule;
-    #         if (stInfo->szModule) szModule.SetText (stInfo->szModule);
-    #         if (stInfo->szExePath) szExePath.SetText (stInfo->szExePath);
-    #     }
-    #     inline @sn<current_class> (MODULEENTRY32W* stInfo) : @sn<current_class>()  { this->SetInfo(stInfo); }
+    # inline void SetInfo (MODULEENTRY32W* stInfo) {
+    #     this->ResetObject ();
+    #     th32ProcessID = (INT)stInfo->th32ProcessID;
+    #     modBaseAddr = (INT_P)stInfo->modBaseAddr;
+    #     modBaseSize = (INT)stInfo->modBaseSize;
+    #     hModule = (INT_P)stInfo->hModule;
+    #     if (stInfo->szModule) szModule.SetText (stInfo->szModule);
+    #     if (stInfo->szExePath) szExePath.SetText (stInfo->szExePath);
+    # }
+    # inline @sn<current_class> (MODULEENTRY32W* stInfo) : @sn<current_class>()  { this->SetInfo(stInfo); }
     # <> </include>
     # @end
 }
@@ -1639,13 +1637,12 @@
 
     # @begin
     # <> <include>
-    # public:
-    #     inline void SetInfo (THREADENTRY32* stInfo) {
-    #         th32ThreadID = (INT)stInfo->th32ThreadID;
-    #         th32OwnerProcessID = (INT_P)stInfo->th32OwnerProcessID;
-    #         tpBasePri = (INT)stInfo->tpBasePri;
-    #     }
-    #     inline @sn<current_class> (THREADENTRY32* stInfo) : @sn<current_class>()  { this->SetInfo(stInfo); }
+    # inline void SetInfo (THREADENTRY32* stInfo) {
+    #     th32ThreadID = (INT)stInfo->th32ThreadID;
+    #     th32OwnerProcessID = (INT_P)stInfo->th32OwnerProcessID;
+    #     tpBasePri = (INT)stInfo->tpBasePri;
+    # }
+    # inline @sn<current_class> (THREADENTRY32* stInfo) : @sn<current_class>()  { this->SetInfo(stInfo); }
     # <> </include>
     # @end
 }

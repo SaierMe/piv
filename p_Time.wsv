@@ -390,13 +390,13 @@
     # ---
     # @begin
     # <> <include>
-    #     std::chrono::system_clock::time_point m_tp;
-    #     void @an<_OnInitExtra> () { m_tp = std::chrono::system_clock::now (); }
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_tp = objCopyFrom.m_tp; }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_tp == objCompare.m_tp); }
-    #     inline @sn<current_class> (std::chrono::system_clock::time_point tp) : @sn<current_class>()  { m_tp = tp; }
-    #     inline std::chrono::system_clock::time_point& data () { return m_tp; }
-    #     inline std::chrono::system_clock::time_point* pdata ()  { return &m_tp; }
+    # std::chrono::system_clock::time_point m_tp;
+    # void @an<_OnInitExtra> () { m_tp = std::chrono::system_clock::now (); }
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_tp = objCopyFrom.m_tp; }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_tp == objCompare.m_tp); }
+    # inline @sn<current_class> (std::chrono::system_clock::time_point tp) : @sn<current_class>()  { m_tp = tp; }
+    # inline std::chrono::system_clock::time_point& data () { return m_tp; }
+    # inline std::chrono::system_clock::time_point* pdata ()  { return &m_tp; }
     # <> </include>
     # @end
     # ===
@@ -486,25 +486,25 @@
     # ---
     # @begin
     # <> <include>
-    #     std::vector<std::chrono::steady_clock::time_point> m_tpArray;
-    #     void @an<_OnInitExtra> () { m_tpArray.push_back (std::chrono::steady_clock::now ()); }
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_tpArray = objCopyFrom.m_tpArray; }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_tpArray == objCompare.m_tpArray); }
-    #     inline std::vector<std::chrono::steady_clock::time_point>& data () { return m_tpArray; }
-    #     inline std::vector<std::chrono::steady_clock::time_point>* pdata ()  { return &m_tpArray; }
-    #     INT64 GetDurationCount (INT nTimeField, std::chrono::steady_clock::duration dtnDiff) {
-    #         switch (nTimeField) {
-    #             case 0 : { return (INT64)std::chrono::duration_cast<std::chrono::nanoseconds> (dtnDiff).count (); }
-    #             case 1 : { return (INT64)std::chrono::duration_cast<std::chrono::microseconds> (dtnDiff).count (); }
-    #             case 2 : { return (INT64)std::chrono::duration_cast<std::chrono::milliseconds> (dtnDiff).count (); }
-    #             case 3 : { return (INT64)std::chrono::duration_cast<std::chrono::seconds> (dtnDiff).count (); }
-    #             case 4 : { return (INT64)std::chrono::duration_cast<std::chrono::minutes> (dtnDiff).count (); }
-    #             case 5 : { return (INT64)std::chrono::duration_cast<std::chrono::hours> (dtnDiff).count (); }
-    #             case 6 : { return (INT64)std::chrono::duration_cast<std::chrono::duration<INT64, std::ratio<86400,1>>> (dtnDiff).count (); }
-    #             case 7 : { return (INT64)std::chrono::duration_cast<std::chrono::duration<INT64, std::ratio<604800,1>>> (dtnDiff).count (); }
-    #             default: { return _VOL_INT64_MIN;}
-    #         }
+    # std::vector<std::chrono::steady_clock::time_point> m_tpArray;
+    # void @an<_OnInitExtra> () { m_tpArray.push_back (std::chrono::steady_clock::now ()); }
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_tpArray = objCopyFrom.m_tpArray; }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_tpArray == objCompare.m_tpArray); }
+    # inline std::vector<std::chrono::steady_clock::time_point>& data () { return m_tpArray; }
+    # inline std::vector<std::chrono::steady_clock::time_point>* pdata ()  { return &m_tpArray; }
+    # INT64 GetDurationCount (INT nTimeField, std::chrono::steady_clock::duration dtnDiff) {
+    #     switch (nTimeField) {
+    #         case 0 : { return (INT64)std::chrono::duration_cast<std::chrono::nanoseconds> (dtnDiff).count (); }
+    #         case 1 : { return (INT64)std::chrono::duration_cast<std::chrono::microseconds> (dtnDiff).count (); }
+    #         case 2 : { return (INT64)std::chrono::duration_cast<std::chrono::milliseconds> (dtnDiff).count (); }
+    #         case 3 : { return (INT64)std::chrono::duration_cast<std::chrono::seconds> (dtnDiff).count (); }
+    #         case 4 : { return (INT64)std::chrono::duration_cast<std::chrono::minutes> (dtnDiff).count (); }
+    #         case 5 : { return (INT64)std::chrono::duration_cast<std::chrono::hours> (dtnDiff).count (); }
+    #         case 6 : { return (INT64)std::chrono::duration_cast<std::chrono::duration<INT64, std::ratio<86400,1>>> (dtnDiff).count (); }
+    #         case 7 : { return (INT64)std::chrono::duration_cast<std::chrono::duration<INT64, std::ratio<604800,1>>> (dtnDiff).count (); }
+    #         default: { return _VOL_INT64_MIN;}
     #     }
+    # }
     # <> </include>
     # @end
     # ===
@@ -603,10 +603,10 @@
 
     # @begin
     # <> <include>
-    #     LARGE_INTEGER m_Frequency, m_StartingTime;
-    #     void @an<_OnInitExtra> () { ::QueryPerformanceFrequency(&m_Frequency); ::QueryPerformanceCounter(&m_StartingTime); }
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_Frequency = objCopyFrom.m_Frequency; m_StartingTime = objCopyFrom.m_StartingTime; }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_StartingTime.QuadPart == objCompare.m_StartingTime.QuadPart); }
+    # LARGE_INTEGER m_Frequency, m_StartingTime;
+    # void @an<_OnInitExtra> () { ::QueryPerformanceFrequency(&m_Frequency); ::QueryPerformanceCounter(&m_StartingTime); }
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_Frequency = objCopyFrom.m_Frequency; m_StartingTime = objCopyFrom.m_StartingTime; }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_StartingTime.QuadPart == objCompare.m_StartingTime.QuadPart); }
     # <> </include>
 }
 

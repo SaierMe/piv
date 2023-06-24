@@ -132,8 +132,7 @@
     # #define PIV_VECTOR_FOR_FORWARD(cThis) for (cThis.m_index = 0; cThis.m_index < cThis.data ().size (); cThis.m_index++)
     # #define PIV_VECTOR_FOR_REVERSE(cThis) for (cThis.m_index = cThis.data ().size () - 1; cThis.m_index >= 0; cThis.m_index--)
     # #define PIV_VECTOR_FOR_GET_VALUES(cThis) cThis.data ()[cThis.m_index]
-    # public:
-    #     size_t m_index;
+    # size_t m_index;
     # <> </include>
     # @end
 }
@@ -263,12 +262,12 @@
     # --
     # @begin
     # <> <include>
-    #     std::vector<@dt<模板类型1>> m_vecData;
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_vecData = objCopyFrom.m_vecData; }
-    #     inline void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom) { m_vecData = std::move(objCopyFrom.m_vecData); }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_vecData == objCompare.m_vecData); }
-    #     inline std::vector<@dt<模板类型1>> &data () { return m_vecData; }
-    #     inline std::vector<@dt<模板类型1>> *pdata () { return &m_vecData; }
+    # std::vector<@dt<模板类型1>> m_vecData;
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_vecData = objCopyFrom.m_vecData; }
+    # inline void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom) { m_vecData = std::move(objCopyFrom.m_vecData); }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_vecData == objCompare.m_vecData); }
+    # inline std::vector<@dt<模板类型1>> &data () { return m_vecData; }
+    # inline std::vector<@dt<模板类型1>> *pdata () { return &m_vecData; }
     # <> </include>
     # @end
 }
@@ -499,18 +498,19 @@
 
     # @begin
     # <> <include>
-    #     std::vector<std::remove_pointer<@dt<模板类型1> *>::type> m_vecData;
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_vecData = objCopyFrom.m_vecData; }
-    #     inline void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom) { m_vecData = std::move(objCopyFrom.m_vecData); }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_vecData == objCompare.m_vecData); }
-    #     inline std::vector<std::remove_pointer<@dt<模板类型1> *>::type> &data () { return m_vecData; }
-    #     inline std::vector<std::remove_pointer<@dt<模板类型1> *>::type> *pdata () { return &m_vecData; }
+    # std::vector<std::remove_pointer<@dt<模板类型1> *>::type> m_vecData;
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_vecData = objCopyFrom.m_vecData; }
+    # inline void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom) { m_vecData = std::move(objCopyFrom.m_vecData); }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_vecData == objCompare.m_vecData); }
+    # inline std::vector<std::remove_pointer<@dt<模板类型1> *>::type> &data () { return m_vecData; }
+    # inline std::vector<std::remove_pointer<@dt<模板类型1> *>::type> *pdata () { return &m_vecData; }
     # <> </include>
     # @end
 }
 
 类 数据容器模板类 <公开 基础类 = 容器基础操作类 注释 = "  使用本模板可封装对象中的C++数据成员的容器数组." 注释 = "  注意: 请勿直接继承本类来设置模板实现类."
-        注释 = "  模板类型1: 容器成员的对象类型,必须是可以通过" 注释 = "data() 获取对象内的C++数据成员." 折叠 @文档 = "category = \"容器操作\""
+        注释 = "  模板类型1: 容器成员的对象类型,必须是可以通过" 注释 = "data() 获取对象内的C++数据成员."
+        注释 = "  本类唯一可以使用的位置为作为使用 PIV_DECLARE_VECTOR_CLASS" 注释 = "宏进行封装的类的基础类." 折叠 @文档 = "category = \"容器操作\""
         @模板基础类 = 真>
 {
     方法 枚举循环 <公开 注释 = "  启动一个循环来枚举容器数组的每一个成员,在循环中可以调用" 注释 = "\"取枚举值\"方法来获取当前所枚举到的成员值,调用\"取枚举索引\""
@@ -612,6 +612,18 @@
     }
 }
 
+# @begin
+# @def_macro PIV_DECLARE_VECTOR_CLASS(data_type)  \
+# <>     <include>  \
+#     using DATA_TYPE = std::vector<data_type>;  \
+#     DATA_TYPE m_vecData;  \
+#     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_vecData = objCopyFrom.m_vecData; }  \
+#     inline void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom) { m_vecData = std::move(objCopyFrom.m_vecData); }  \
+#     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_vecData == objCompare.m_vecData); }  \
+#     inline DATA_TYPE &data () { return m_vecData; }  \
+#     inline DATA_TYPE *pdata () { return &m_vecData; }  \
+# <>     </include>
+# @end
 # std::vector 基本容器类 ===
 
 类 字节容器类 <公开 基础类 = 基本容器模板类 折叠 @文档 = "category = \"容器操作\"" @模板实现类 = "字节">
@@ -815,12 +827,12 @@
 
     # @begin
     # <> <include>
-    #     std::vector<float> m_vecData;
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_vecData = objCopyFrom.m_vecData; }
-    #     inline void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom) { m_vecData = std::move(objCopyFrom.m_vecData); }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_vecData == objCompare.m_vecData); }
-    #     inline std::vector<float> &data () { return m_vecData; }
-    #     inline std::vector<float> *pdata () { return &m_vecData; }
+    # std::vector<float> m_vecData;
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_vecData = objCopyFrom.m_vecData; }
+    # inline void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom) { m_vecData = std::move(objCopyFrom.m_vecData); }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_vecData == objCompare.m_vecData); }
+    # inline std::vector<float> &data () { return m_vecData; }
+    # inline std::vector<float> *pdata () { return &m_vecData; }
     # <> </include>
     # @end
 }
@@ -828,6 +840,9 @@
 类 标准文本容器类 <公开 基础类 = 数据容器模板类 注释 = "提供基于<std::vector>容器的<std::wstring>文本数组封装."
         注释 = "文本编码为Unicode(UTF-16LE)" 折叠 @文档 = "category = \"容器操作\"" @模板实现类 = "标准文本类">
 {
+
+    # @ @m<PIV_DECLARE_VECTOR_CLASS> (std::wstring)
+
     方法 取文本成员 <公开 类型 = 文本型 注释 = "返回所指定索引位置处的成员值." 注释 = "高效率,不检查边界,不抛出异常,索引无效直接崩溃." 折叠 @嵌入式方法 = "">
     参数 索引位置 <类型 = 变整数 注释 = "提供所欲操作成员的索引位置,必须大于等于0且小于容器数组成员数目.">
     {
@@ -858,22 +873,14 @@
 
         }
     }
-
-    # @begin
-    # <> <include>
-    #     std::vector<std::wstring> m_vecData;
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_vecData = objCopyFrom.m_vecData; }
-    #     inline void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom) { m_vecData = std::move(objCopyFrom.m_vecData); }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_vecData == objCompare.m_vecData); }
-    #     inline std::vector<std::wstring> &data () { return m_vecData; }
-    #     inline std::vector<std::wstring> *pdata () { return &m_vecData; }
-    # <> </include>
-    # @end
 }
 
 类 标准文本容器类U <公开 基础类 = 数据容器模板类 注释 = "提供基于<std::vector>容器的<std::string>文本数组封装." 注释 = "文本编码为UTF-8" 折叠
         @文档 = "category = \"容器操作\"" @模板实现类 = "标准文本类U">
 {
+
+    # @ @m<PIV_DECLARE_VECTOR_CLASS> (std::string)
+
     方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖>
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
@@ -885,22 +892,14 @@
 
         }
     }
-
-    # @begin
-    # <> <include>
-    #     std::vector<std::string> m_vecData;
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_vecData = objCopyFrom.m_vecData; }
-    #     inline void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom) { m_vecData = std::move(objCopyFrom.m_vecData); }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_vecData == objCompare.m_vecData); }
-    #     inline std::vector<std::string> &data () { return m_vecData; }
-    #     inline std::vector<std::string> *pdata () { return &m_vecData; }
-    # <> </include>
-    # @end
 }
 
 类 标准文本容器类A <公开 基础类 = 数据容器模板类 注释 = "提供基于<std::vector>容器的<std::string>文本数组封装." 注释 = "文本编码为ANSI本地多字节" 折叠
         @文档 = "category = \"容器操作\"" @模板实现类 = "标准文本类A">
 {
+
+    # @ @m<PIV_DECLARE_VECTOR_CLASS> (std::string)
+
     方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖>
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
@@ -912,22 +911,14 @@
 
         }
     }
-
-    # @begin
-    # <> <include>
-    #     std::vector<std::string> m_vecData;
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_vecData = objCopyFrom.m_vecData; }
-    #     inline void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom) { m_vecData = std::move(objCopyFrom.m_vecData); }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_vecData == objCompare.m_vecData); }
-    #     inline std::vector<std::string> &data () { return m_vecData; }
-    #     inline std::vector<std::string> *pdata () { return &m_vecData; }
-    # <> </include>
-    # @end
 }
 
 类 文本视图容器类 <公开 基础类 = 数据容器模板类 注释 = "提供基于<std::vector>容器的<std::string>文本数组封装." 注释 = "文本编码为ANSI本地多字节" 折叠
         @文档 = "category = \"容器操作\"" @模板实现类 = "文本视图类">
 {
+
+    # @ @m<PIV_DECLARE_VECTOR_CLASS> (std::basic_string_view<wchar_t>)
+
     方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖>
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
@@ -939,21 +930,13 @@
 
         }
     }
-
-    # @begin
-    # <> <include>
-    #     std::vector<std::basic_string_view<wchar_t>> m_vecData;
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_vecData = objCopyFrom.m_vecData; }
-    #     inline void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom) { m_vecData = std::move(objCopyFrom.m_vecData); }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_vecData == objCompare.m_vecData); }
-    #     inline std::vector<std::basic_string_view<wchar_t>> &data () { return m_vecData; }
-    #     inline std::vector<std::basic_string_view<wchar_t>> *pdata () { return &m_vecData; }
-    # <> </include>
-    # @end
 }
 
 类 文本视图容器类U <公开 基础类 = 数据容器模板类 折叠 @文档 = "category = \"容器操作\"" @模板实现类 = "文本视图类U">
 {
+
+    # @ @m<PIV_DECLARE_VECTOR_CLASS> (std::basic_string_view<char>)
+
     方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖>
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
@@ -965,21 +948,13 @@
 
         }
     }
-
-    # @begin
-    # <> <include>
-    #     std::vector<std::basic_string_view<char>> m_vecData;
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_vecData = objCopyFrom.m_vecData; }
-    #     inline void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom) { m_vecData = std::move(objCopyFrom.m_vecData); }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_vecData == objCompare.m_vecData); }
-    #     inline std::vector<std::basic_string_view<char>> &data () { return m_vecData; }
-    #     inline std::vector<std::basic_string_view<char>> *pdata () { return &m_vecData; }
-    # <> </include>
-    # @end
 }
 
 类 文本视图容器类A <公开 基础类 = 数据容器模板类 折叠 @文档 = "category = \"容器操作\"" @模板实现类 = "文本视图类A">
 {
+
+    # @ @m<PIV_DECLARE_VECTOR_CLASS> (std::basic_string_view<char>)
+
     方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖>
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
@@ -991,17 +966,6 @@
 
         }
     }
-
-    # @begin
-    # <> <include>
-    #     std::vector<std::basic_string_view<char>> m_vecData;
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_vecData = objCopyFrom.m_vecData; }
-    #     inline void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom) { m_vecData = std::move(objCopyFrom.m_vecData); }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_vecData == objCompare.m_vecData); }
-    #     inline std::vector<std::basic_string_view<char>> &data () { return m_vecData; }
-    #     inline std::vector<std::basic_string_view<char>> *pdata () { return &m_vecData; }
-    # <> </include>
-    # @end
 }
 
 # std::vector 参考容器类 ===

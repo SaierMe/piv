@@ -1,16 +1,16 @@
 <火山程序 类型 = "通常" 版本 = 1 />
 
-包 火山.ImGui <注释 = "例程下载: https://saier.lanzoul.com/b016cwvle" 注释 = ""
+包 火山.ImGui <注释 = "例程下载: https://saier.lanzoul.com/b016cwvle"
         注释 = "ImGui    1.89.6     https://github.com/ocornut/imgui"
         注释 = "GLFW     3.3.8      https://www.glfw.org" 注释 = "SDL      2.26.5     https://www.libsdl.org"
         注释 = "Vulkan   1.3.246.1  https://vulkan.lunarg.com/sdk/home"
         注释 = "glad     2023-04-04 https://github.com/Dav1dde/glad"
-        注释 = "freetype 2.13.0     https://www.freetype.org" 折叠2 @视窗.外部头文件 = "imgui\\piv_imgui.hpp"
+        注释 = "freetype 2.13.0     https://www.freetype.org" @视窗.外部头文件 = "imgui\\piv_imgui.hpp"
         @视窗.外部源文件 = "imgui\\imgui.cpp\r\nimgui\\imgui_draw.cpp\r\nimgui\\imgui_tables.cpp\r\nimgui\\imgui_widgets.cpp\r\nimgui\\imgui_demo.cpp\r\nimgui\\misc\\cpp\\imgui_stdlib.cpp"
         @视窗.头文件搜寻目录 = "imgui\r\nFrameWork">
 
 类 ImGui <公开 注释 = "ImGui是一个即时渲染UI,即每一帧都会重新计算布局和渲染,对CPU和GPU的占用比MFC/WTL高."
-        注释 = "由于采用DirectX、OpenGL、Vulkan等引擎渲染界面，性能和图像质量都很高.">
+        注释 = "由于采用DirectX、OpenGL、Vulkan等引擎渲染界面，性能和图像质量都很高." 折叠>
 {
     方法 检查版本 <公开 静态 注释 = "用于验证调用方代码和Dear ImGui编译版本之间的ABI兼容性" 折叠 @嵌入式方法 = "">
     {
@@ -2281,7 +2281,7 @@
 
     # 视口 | Viewports
 
-    方法 取主视口 <公开 静态 类型 = IM视口类 注释 = "返回主视口" 折叠 @嵌入式方法 = "">
+    方法 取主视口 <公开 静态 类型 = IM视口类 注释 = "返回主视口" @嵌入式方法 = "">
     {
         @ @dt<IM视口类>{ImGui::GetMainViewport()}
     }
@@ -2368,7 +2368,7 @@
         @ (INT)ImGui::ColorConvertFloat4ToU32(@<颜色>)
     }
 
-    方法 RBG到HSV <公开 静态 注释 = "将RBG颜色值转换到HSV" 折叠 @嵌入式方法 = "">
+    方法 RGB到HSV <公开 静态 注释 = "将RGB颜色值转换到HSV" 折叠 @嵌入式方法 = "">
     参数 R <类型 = 小数 注释 = "所欲转换的红色分量">
     参数 G <类型 = 小数 注释 = "所欲转换的绿色分量">
     参数 B <类型 = 小数 注释 = "所欲转换的蓝色分量">
@@ -2379,7 +2379,7 @@
         @ ImGui::ColorConvertRGBtoHSV((float)@<R>, (float)@<G>, (float)@<B>, &@<H>, &@<S>, &@<V>)
     }
 
-    方法 HSV到RGB <公开 静态 注释 = "将HSV颜色值转换到RBG" 折叠 @嵌入式方法 = "">
+    方法 HSV到RGB <公开 静态 注释 = "将HSV颜色值转换到RGB" 折叠 @嵌入式方法 = "">
     参数 H <类型 = 小数 注释 = "所欲转换的色相">
     参数 S <类型 = 小数 注释 = "所欲转换的饱和度">
     参数 V <类型 = 小数 注释 = "所欲转换的明度">
@@ -3098,30 +3098,30 @@
     # #define IM_VECTOR_FOR_FORWARD(cThis) for (cThis.m_index = 0; cThis.m_index < cThis.data().size(); cThis.m_index++)
     # #define IM_VECTOR_FOR_REVERSE(cThis) for (cThis.m_index = cThis.data().size() - 1; cThis.m_index >= 0; cThis.m_index--)
     # #define IM_VECTOR_FOR_GET_VALUES(cThis) cThis.data()[cThis.m_index]
-    #     size_t m_index;
-    #     std::vector<PivStringU> m_vecData;
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_vecData = objCopyFrom.m_vecData; }
-    #     inline void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom) { m_vecData = std::move(objCopyFrom.m_vecData); }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_vecData == objCompare.m_vecData); }
-    #     inline std::vector<PivStringU> &data () { return m_vecData; }
-    #     inline std::vector<PivStringU> *pdata () { return &m_vecData; }
-    #     inline void push_backs(const std::string &s) { m_vecData.push_back(PivStringU{s}); }
-    #     inline void push_backs(const std::wstring &s) { m_vecData.push_back(PivStringU{s}); }
-    #     inline void push_backs(const piv::string_view &s) { m_vecData.push_back(PivStringU{s}); }
-    #     inline void push_backs(const piv::wstring_view &s) { m_vecData.push_back(PivStringU{s}); }
-    #     template <typename T>
-    #     inline void push_backs(const T &s) { m_vecData.push_back(PivStringU{s}); }
-    #     template <typename T, typename... Args>
-    #     inline void push_backs(const T &s, const Args... args)
-    #     {
-    #         push_backs(s); push_backs(args...);
-    #     }
-    #     static bool ItemGetter(void* data, int n, const char** out_str)
-    #     {
-    #         std::vector<PivStringU>* arr = (std::vector<PivStringU>*)data;
-    #         *out_str = arr->at(n).data().c_str();
-    #         return true;
-    #     }
+    # size_t m_index;
+    # std::vector<PivStringU> m_vecData;
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_vecData = objCopyFrom.m_vecData; }
+    # inline void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom) { m_vecData = std::move(objCopyFrom.m_vecData); }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_vecData == objCompare.m_vecData); }
+    # inline std::vector<PivStringU> &data () { return m_vecData; }
+    # inline std::vector<PivStringU> *pdata () { return &m_vecData; }
+    # inline void push_backs(const std::string &s) { m_vecData.push_back(PivStringU{s}); }
+    # inline void push_backs(const std::wstring &s) { m_vecData.push_back(PivStringU{s}); }
+    # inline void push_backs(const piv::string_view &s) { m_vecData.push_back(PivStringU{s}); }
+    # inline void push_backs(const piv::wstring_view &s) { m_vecData.push_back(PivStringU{s}); }
+    # template <typename T>
+    # inline void push_backs(const T &s) { m_vecData.push_back(PivStringU{s}); }
+    # template <typename T, typename... Args>
+    # inline void push_backs(const T &s, const Args... args)
+    # {
+    #     push_backs(s); push_backs(args...);
+    # }
+    # static bool ItemGetter(void* data, int n, const char** out_str)
+    # {
+    #     std::vector<PivStringU>* arr = (std::vector<PivStringU>*)data;
+    #     *out_str = arr->at(n).data().c_str();
+    #     return true;
+    # }
     # <> </include>
     # @end
 }
@@ -3272,7 +3272,11 @@
     }
 }
 
-类 ImVec2数组类 <公开 基础类 = 数据容器模板类 @文档 = "category = \"辅助类\"" @模板实现类 = "ImVec2">
+类 ImVec2数组类 <公开 基础类 = 数据容器模板类 折叠 @文档 = "category = \"辅助类\"" @模板实现类 = "ImVec2">
+{
+
+    # @ @m<PIV_DECLARE_VECTOR_CLASS> (ImVec2)
+}
 
 类 ImVec4 <公开 基础类 = 数据类型基础类 注释 = "ImVec4" 折叠 @文档 = "category = \"辅助类\"">
 {
@@ -3357,9 +3361,10 @@
     变量 纹理ID <公开 类型 = 变整数>
     变量 宽度 <公开 类型 = 整数>
     变量 高度 <公开 类型 = 整数>
+    变量 _内部数据 <公开 类型 = 变整数>
 }
 
-类 ImGuiIO类 <公开 基础类 = 数据类型基础类 注释 = "必须接收\"ImGui.取IO()\"的返回结果后,才能使用本类." @文档 = "category = \"辅助类\"">
+类 ImGuiIO类 <公开 基础类 = 数据类型基础类 注释 = "必须接收\"ImGui.取IO()\"的返回结果后,才能使用本类." 折叠 @文档 = "category = \"辅助类\"">
 {
 
     # @ @m<PIV_DECLARE_STRUCT_CLASS> (ImGuiIO)
@@ -3369,7 +3374,7 @@
         @ @sn<this>.data().Framerate
     }
 
-    方法 字体全局缩放 <公开 属性写>
+    方法 字体全局缩放 <公开 属性写 折叠>
     参数 新值 <类型 = 小数>
     {
         @ data().FontGlobalScale = (float)@<新值>;
@@ -3429,7 +3434,7 @@
 类 IM视口类 <公开 基础类 = 数据类型基础类 注释 = "ImGuiViewport 用于接收\"ImGui.取主视口()\"的返回结果" 折叠 @文档 = "category = \"辅助类\"">
 {
 
-    # @ @m<PIV_DECLARE_STRUCT_CLASS> (ImGuiPayload)
+    # @ @m<PIV_DECLARE_STRUCT_CLASS> (ImGuiViewport)
 
     方法 标志 <公开 属性读 类型 = 整数 注释 = "请参考\"IM视口标志\" " 折叠 @嵌入式方法 = "">
     {
@@ -4498,15 +4503,16 @@
 
     # @begin
     # <> <include>
-    # <>     <global>
-    #     extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-    # <>     </global>
+    # <> <global>
+    # extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+    # <> </global>
     # <> </include>
     # @end
 }
 
 类 IM_GLFW平台 <公开 注释 = "基于GLFW的平台后端,GLFW是一个OpenGL应用框架,需要配合OpenGL、Vulkan渲染器使用." 折叠 折叠2
-        @文档 = "category = \"平台后端\"" @视窗.预定义宏 = "GLFW_INCLUDE_NONE" @视窗.头文件搜寻目录 = "FrameWork\\glfw\\include"
+        @文档 = "category = \"平台后端\"" @视窗.预定义宏 = "GLFW_INCLUDE_NONE\r\nGLFW_EXPOSE_NATIVE_WIN32"
+        @视窗.头文件搜寻目录 = "FrameWork\\glfw\\include"
         @视窗.外部头文件 = "imgui\\backends\\imgui_impl_glfw.h\r\nGLFW\\glfw3.h\r\nGLFW\\glfw3native.h"
         @视窗.外部源文件 = "imgui\\backends\\imgui_impl_glfw.cpp"
         "@视窗.外部库.mt-non_dynamic" = "FrameWork\\glfw\\$(p)\\$(vs)\\glfw3_mt.lib"
@@ -4616,9 +4622,9 @@
 
     # @begin
     # <> <include>
-    #     LPDIRECT3D9            m_pD3D = nullptr;
-    #     LPDIRECT3DDEVICE9      m_pd3dDevice = nullptr;
-    #     D3DPRESENT_PARAMETERS  m_d3dpp = {};
+    # LPDIRECT3D9            m_pD3D = nullptr;
+    # LPDIRECT3DDEVICE9      m_pd3dDevice = nullptr;
+    # D3DPRESENT_PARAMETERS  m_d3dpp = {};
     # <> </include>
     # @end
 
@@ -4660,7 +4666,7 @@
 
     # 纹理图片 ---
 
-    方法 加载图片文件 <公开 类型 = 逻辑型 注释 = "从指定的图片文件加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 折叠2 @禁止流程检查 = 真
+    方法 加载图片文件 <公开 类型 = 逻辑型 注释 = "从指定的图片文件加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真
             @视窗.外部头文件 = "<D3dx9tex.h>" @视窗.外部库 = "D3dx9.lib"
             @视窗.需求系统头文件 = "<D3dx9tex.h>|需要安装 DirectX SDK 9 https://www.microsoft.com/zh-CN/download/details.aspx?id=6812">
     参数 文件名 <类型 = 文本型 注释 = "支持格式: .bmp、.dds、.dib、.hdr、.jpg、.pfm、.png、.ppm 和 .tga">
@@ -4711,10 +4717,14 @@
         @ return true;
     }
 
-    方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠 @嵌入式方法 = "">
-    参数 纹理ID <类型 = 变整数 注释 = "提供由\"本对象.加载图片××\"返回的纹理ID.">
+    方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠>
+    参数 图片信息 <类型 = IM图片信息类 注释 = "提供由\"本对象.加载图片××\"返回的图片信息,释放后会清空信息.">
     {
-        @ ((PDIRECT3DTEXTURE9)@<纹理ID>)->Release()
+        如果 (图片信息.纹理ID != 0)
+        {
+            @ ((PDIRECT3DTEXTURE9)@<图片信息.纹理ID>)->Release();
+        }
+        图片信息.重置为空对象 ()
     }
 
     # Win32 ---
@@ -4820,9 +4830,9 @@
 
     # @begin
     # <> <include>
-    #     ID3D10Device*            m_pd3dDevice = nullptr;
-    #     IDXGISwapChain*          m_pSwapChain = nullptr;
-    #     ID3D10RenderTargetView*  m_mainRenderTargetView = nullptr;
+    # ID3D10Device*            m_pd3dDevice = nullptr;
+    # IDXGISwapChain*          m_pSwapChain = nullptr;
+    # ID3D10RenderTargetView*  m_mainRenderTargetView = nullptr;
     # <> </include>
     # @end
 
@@ -4991,10 +5001,14 @@
         @ return true;
     }
 
-    方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠 @嵌入式方法 = "">
-    参数 纹理ID <类型 = 变整数 注释 = "提供由\"本对象.加载图片××\"返回的纹理ID.">
+    方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠>
+    参数 图片信息 <类型 = IM图片信息类 注释 = "提供由\"本对象.加载图片××\"返回的图片信息,释放后会清空信息.">
     {
-        @ ((ID3D10ShaderResourceView*)@<纹理ID>)->Release()
+        如果 (图片信息.纹理ID != 0)
+        {
+            @ ((ID3D10ShaderResourceView*)@<图片信息.纹理ID>)->Release();
+        }
+        图片信息.重置为空对象 ()
     }
 
     # Win32 ---
@@ -5107,10 +5121,10 @@
 
     # @begin
     # <> <include>
-    #     ID3D11Device*            m_pd3dDevice = nullptr;
-    #     ID3D11DeviceContext*     m_pd3dDeviceContext = nullptr;
-    #     IDXGISwapChain*          m_pSwapChain = nullptr;
-    #     ID3D11RenderTargetView*  m_mainRenderTargetView = nullptr;
+    # ID3D11Device*            m_pd3dDevice = nullptr;
+    # ID3D11DeviceContext*     m_pd3dDeviceContext = nullptr;
+    # IDXGISwapChain*          m_pSwapChain = nullptr;
+    # ID3D11RenderTargetView*  m_mainRenderTargetView = nullptr;
     # <> </include>
     # @end
 
@@ -5279,10 +5293,14 @@
         @ return true;
     }
 
-    方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠 @嵌入式方法 = "">
-    参数 纹理ID <类型 = 变整数 注释 = "提供由\"本对象.加载图片××\"返回的纹理ID.">
+    方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠>
+    参数 图片信息 <类型 = IM图片信息类 注释 = "提供由\"本对象.加载图片××\"返回的图片信息,释放后会清空信息.">
     {
-        @ ((ID3D11ShaderResourceView*)@<纹理ID>)->Release()
+        如果 (图片信息.纹理ID != 0)
+        {
+            @ ((ID3D11ShaderResourceView*)@<图片信息.纹理ID>)->Release();
+        }
+        图片信息.重置为空对象 ()
     }
 
     # Win32 ---
@@ -5401,25 +5419,26 @@
     # <> <include>
     # #define NUM_FRAMES_IN_FLIGHT  3
     # #define NUM_BACK_BUFFERS  3
-    #     struct FrameContext
-    #     {
-    #         ID3D12CommandAllocator*  CommandAllocator;
-    #         UINT64                   FenceValue;
-    #     };
-    #     FrameContext                 m_frameContext[NUM_FRAMES_IN_FLIGHT] = {};
-    #     UINT                         m_frameIndex = 0;
-    #     ID3D12Device*                m_pd3dDevice = nullptr;
-    #     ID3D12DescriptorHeap*        m_pd3dRtvDescHeap = nullptr;
-    #     ID3D12DescriptorHeap*        m_pd3dSrvDescHeap = nullptr;
-    #     ID3D12CommandQueue*          m_pd3dCommandQueue = nullptr;
-    #     ID3D12GraphicsCommandList*   m_pd3dCommandList = nullptr;
-    #     ID3D12Fence*                 m_fence = nullptr;
-    #     HANDLE                       m_fenceEvent = nullptr;
-    #     UINT64                       m_fenceLastSignaledValue = 0;
-    #     IDXGISwapChain3*             m_pSwapChain = nullptr;
-    #     HANDLE                       m_hSwapChainWaitableObject = nullptr;
-    #     ID3D12Resource*              m_mainRenderTargetResource[NUM_BACK_BUFFERS] = {};
-    #     D3D12_CPU_DESCRIPTOR_HANDLE  m_mainRenderTargetDescriptor[NUM_BACK_BUFFERS] = {};
+    # struct FrameContext
+    # {
+    #     ID3D12CommandAllocator*  CommandAllocator;
+    #     UINT64                   FenceValue;
+    # };
+    # FrameContext                 m_frameContext[NUM_FRAMES_IN_FLIGHT] = {};
+    # UINT                         m_frameIndex = 0;
+    # ID3D12Device*                m_pd3dDevice = nullptr;
+    # ID3D12DescriptorHeap*        m_pd3dRtvDescHeap = nullptr;
+    # ID3D12DescriptorHeap*        m_pd3dSrvDescHeap = nullptr;
+    # ID3D12CommandQueue*          m_pd3dCommandQueue = nullptr;
+    # ID3D12GraphicsCommandList*   m_pd3dCommandList = nullptr;
+    # ID3D12Fence*                 m_fence = nullptr;
+    # HANDLE                       m_fenceEvent = nullptr;
+    # UINT64                       m_fenceLastSignaledValue = 0;
+    # IDXGISwapChain3*             m_pSwapChain = nullptr;
+    # HANDLE                       m_hSwapChainWaitableObject = nullptr;
+    # ID3D12Resource*              m_mainRenderTargetResource[NUM_BACK_BUFFERS] = {};
+    # D3D12_CPU_DESCRIPTOR_HANDLE  m_mainRenderTargetDescriptor[NUM_BACK_BUFFERS] = {};
+    # int                          descriptor_index = 0;
     # <> </include>
     # @end
 
@@ -5461,6 +5480,242 @@
         @ ImGui_ImplDX12_InvalidateDeviceObjects()
     }
 
+    # 纹理图片 ---
+
+    方法 加载图片文件 <公开 类型 = 逻辑型 注释 = "从指定的图片文件加载纹理到渲染器中,不再使用时请调用\"释放纹理\"."
+            注释 = "注意: 只能在\"IM_DX12渲染器.初始化\"之后使用,即\"准备渲染\"事件中." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
+    参数 文件名 <类型 = 文本型 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ if (!m_pd3dDevice) return false;
+        @ FILE* file = _wfopen(@<文件名>.GetText(), L"rb");
+        @ if (!file) return false;
+        @ unsigned char* image_data = stbi_load_from_file(file, &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
+        @ fclose(file);
+        @ if (!image_data) return false;
+        @ ID3D12Resource* my_texture = NULL;
+        @ UINT handle_increment = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        @ descriptor_index++;
+        @ D3D12_CPU_DESCRIPTOR_HANDLE my_texture_srv_cpu_handle = m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart();
+        @ my_texture_srv_cpu_handle.ptr += (handle_increment * descriptor_index);
+        @ D3D12_GPU_DESCRIPTOR_HANDLE my_texture_srv_gpu_handle = m_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart();
+        @ my_texture_srv_gpu_handle.ptr += (handle_increment * descriptor_index);
+        @ this->@<_加载图片>(image_data, my_texture_srv_cpu_handle, &my_texture, @<图片信息.宽度>, @<图片信息.高度>);
+        @ @<图片信息.纹理ID> = (INT_P)my_texture_srv_gpu_handle.ptr;
+        @ @<图片信息._内部数据> = (INT_P)my_texture;
+        @ return true;
+    }
+
+    方法 加载图片资源 <公开 类型 = 逻辑型 注释 = "将程序文件中的图片资源加载到渲染器中,不再使用时请调用\"释放纹理\"."
+            注释 = "注意: 只能在\"IM_DX12渲染器.初始化\"之后使用,即\"准备渲染\"事件中." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
+    参数 图片资源 <类型 = 视窗文件资源 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ if (!m_pd3dDevice) return false;
+        @ HMODULE hModule = g_objVolApp.GetInstanceHandle();
+        @ HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE((WORD)@<图片资源>), RT_RCDATA);
+        @ if (!hSrc) return false;
+        @ HGLOBAL resdata = ::LoadResource(hModule, hSrc);
+        @ if (!resdata) return false;
+        @ unsigned char* data = (unsigned char*)::LockResource(resdata);
+        @ int len = (int)::SizeofResource(hModule, hSrc);
+        @ unsigned char* image_data = stbi_load_from_memory(data, len, &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
+        @ if (!image_data) return false;
+        @ ID3D12Resource* my_texture = NULL;
+        @ UINT handle_increment = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        @ descriptor_index++;
+        @ D3D12_CPU_DESCRIPTOR_HANDLE my_texture_srv_cpu_handle = m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart();
+        @ my_texture_srv_cpu_handle.ptr += (handle_increment * descriptor_index);
+        @ D3D12_GPU_DESCRIPTOR_HANDLE my_texture_srv_gpu_handle = m_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart();
+        @ my_texture_srv_gpu_handle.ptr += (handle_increment * descriptor_index);
+        @ this->@<_加载图片>(image_data, my_texture_srv_cpu_handle, &my_texture, @<图片信息.宽度>, @<图片信息.高度>);
+        @ @<图片信息.纹理ID> = (INT_P)my_texture_srv_gpu_handle.ptr;
+        @ @<图片信息._内部数据> = (INT_P)my_texture;
+        @ return true;
+    }
+
+    方法 加载图片字节集 <公开 类型 = 逻辑型 注释 = "从指定的图片字节集加载纹理到渲染器中,不再使用时请调用\"释放纹理\"."
+            注释 = "注意: 只能在\"IM_DX12渲染器.初始化\"之后使用,即\"准备渲染\"事件中." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
+    参数 图片数据 <类型 = 字节集类 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ if (!m_pd3dDevice) return false;
+        @ unsigned char* image_data = stbi_load_from_memory(@<图片数据>.GetPtr(), (int)@<图片数据>.GetSize(), &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
+        @ if (!image_data) return false;
+        @ ID3D12Resource* my_texture = NULL;
+        @ UINT handle_increment = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        @ descriptor_index++;
+        @ D3D12_CPU_DESCRIPTOR_HANDLE my_texture_srv_cpu_handle = m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart();
+        @ my_texture_srv_cpu_handle.ptr += (handle_increment * descriptor_index);
+        @ D3D12_GPU_DESCRIPTOR_HANDLE my_texture_srv_gpu_handle = m_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart();
+        @ my_texture_srv_gpu_handle.ptr += (handle_increment * descriptor_index);
+        @ this->@<_加载图片>(image_data, my_texture_srv_cpu_handle, &my_texture, @<图片信息.宽度>, @<图片信息.高度>);
+        @ @<图片信息.纹理ID> = (INT_P)my_texture_srv_gpu_handle.ptr;
+        @ @<图片信息._内部数据> = (INT_P)my_texture;
+        @ return true;
+    }
+
+    方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠>
+    参数 图片信息 <类型 = IM图片信息类 注释 = "提供由\"本对象.加载图片××\"返回图片的信息,释放后会清空信息.">
+    {
+        如果 (图片信息._内部数据 != 0)
+        {
+            @ ((ID3D12Resource*)@<图片信息._内部数据>)->Release();
+        }
+        图片信息.重置为空对象 ()
+    }
+
+    方法 _加载图片 <注释 = "仅限内部嵌入式使用" 折叠>
+    参数 图片指针 <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/unsigned char*" @输出名 = "image_data">
+    参数 srv_cpu_handle <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/D3D12_CPU_DESCRIPTOR_HANDLE"
+            @输出名 = "srv_cpu_handle">
+    参数 out_tex_resource <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/ID3D12Resource**" @输出名 = "out_tex_resource">
+    参数 宽度 <类型 = 整数 @输出名 = "image_width">
+    参数 高度 <类型 = 整数 @输出名 = "image_height">
+    {
+        // Create texture resource
+        @ D3D12_HEAP_PROPERTIES props;
+        @ memset(&props, 0, sizeof(D3D12_HEAP_PROPERTIES));
+        @ props.Type = D3D12_HEAP_TYPE_DEFAULT;
+        @ props.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+        @ props.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+
+        @ D3D12_RESOURCE_DESC desc;
+        @ ZeroMemory(&desc, sizeof(desc));
+        @ desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+        @ desc.Alignment = 0;
+        @ desc.Width = image_width;
+        @ desc.Height = image_height;
+        @ desc.DepthOrArraySize = 1;
+        @ desc.MipLevels = 1;
+        @ desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ desc.SampleDesc.Count = 1;
+        @ desc.SampleDesc.Quality = 0;
+        @ desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+        @ desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+        @ ID3D12Resource* pTexture = NULL;
+        @ m_pd3dDevice->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &desc,
+        @     D3D12_RESOURCE_STATE_COPY_DEST, NULL, IID_PPV_ARGS(&pTexture));
+
+        // Create a temporary upload resource to move the data in
+        @ UINT uploadPitch = (image_width * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
+        @ UINT uploadSize = image_height * uploadPitch;
+        @ desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        @ desc.Alignment = 0;
+        @ desc.Width = uploadSize;
+        @ desc.Height = 1;
+        @ desc.DepthOrArraySize = 1;
+        @ desc.MipLevels = 1;
+        @ desc.Format = DXGI_FORMAT_UNKNOWN;
+        @ desc.SampleDesc.Count = 1;
+        @ desc.SampleDesc.Quality = 0;
+        @ desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+        @ desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+        @ props.Type = D3D12_HEAP_TYPE_UPLOAD;
+        @ props.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+        @ props.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+
+        @ ID3D12Resource* uploadBuffer = NULL;
+        @ HRESULT hr = m_pd3dDevice->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &desc,
+        @     D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(&uploadBuffer));
+        @ IM_ASSERT(SUCCEEDED(hr));
+
+        // Write pixels into the upload resource
+        @ void* mapped = NULL;
+        @ D3D12_RANGE range = { 0, uploadSize };
+        @ hr = uploadBuffer->Map(0, &range, &mapped);
+        @ IM_ASSERT(SUCCEEDED(hr));
+        @ for (int y = 0; y < image_height; y++)
+        @     memcpy((void*)((uintptr_t)mapped + y * uploadPitch), image_data + y * image_width * 4, image_width * 4);
+        @ uploadBuffer->Unmap(0, &range);
+
+        // Copy the upload resource content into the real resource
+        @ D3D12_TEXTURE_COPY_LOCATION srcLocation = {};
+        @ srcLocation.pResource = uploadBuffer;
+        @ srcLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+        @ srcLocation.PlacedFootprint.Footprint.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ srcLocation.PlacedFootprint.Footprint.Width = image_width;
+        @ srcLocation.PlacedFootprint.Footprint.Height = image_height;
+        @ srcLocation.PlacedFootprint.Footprint.Depth = 1;
+        @ srcLocation.PlacedFootprint.Footprint.RowPitch = uploadPitch;
+
+        @ D3D12_TEXTURE_COPY_LOCATION dstLocation = {};
+        @ dstLocation.pResource = pTexture;
+        @ dstLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+        @ dstLocation.SubresourceIndex = 0;
+
+        @ D3D12_RESOURCE_BARRIER barrier = {};
+        @ barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        @ barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        @ barrier.Transition.pResource = pTexture;
+        @ barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        @ barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+        @ barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+
+        // Create a temporary command queue to do the copy with
+        @ ID3D12Fence* fence = NULL;
+        @ hr = m_pd3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+        @ IM_ASSERT(SUCCEEDED(hr));
+
+        @ HANDLE event = CreateEvent(0, 0, 0, 0);
+        @ IM_ASSERT(event != NULL);
+
+        @ D3D12_COMMAND_QUEUE_DESC queueDesc = {};
+        @ queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+        @ queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+        @ queueDesc.NodeMask = 1;
+
+        @ ID3D12CommandQueue* cmdQueue = NULL;
+        @ hr = m_pd3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&cmdQueue));
+        @ IM_ASSERT(SUCCEEDED(hr));
+
+        @ ID3D12CommandAllocator* cmdAlloc = NULL;
+        @ hr = m_pd3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&cmdAlloc));
+        @ IM_ASSERT(SUCCEEDED(hr));
+
+        @ ID3D12GraphicsCommandList* cmdList = NULL;
+        @ hr = m_pd3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc, NULL, IID_PPV_ARGS(&cmdList));
+        @ IM_ASSERT(SUCCEEDED(hr));
+
+        @ cmdList->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocation, NULL);
+        @ cmdList->ResourceBarrier(1, &barrier);
+
+        @ hr = cmdList->Close();
+        @ IM_ASSERT(SUCCEEDED(hr));
+
+        // Execute the copy
+        @ cmdQueue->ExecuteCommandLists(1, (ID3D12CommandList* const*)&cmdList);
+        @ hr = cmdQueue->Signal(fence, 1);
+        @ IM_ASSERT(SUCCEEDED(hr));
+
+        // Wait for everything to complete
+        @ fence->SetEventOnCompletion(1, event);
+        @ WaitForSingleObject(event, INFINITE);
+
+        // Tear down our temporary command queue and release the upload resource
+        @ cmdList->Release();
+        @ cmdAlloc->Release();
+        @ cmdQueue->Release();
+        @ CloseHandle(event);
+        @ fence->Release();
+        @ uploadBuffer->Release();
+
+        // Create a shader resource view for the texture
+        @ D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
+        @ ZeroMemory(&srvDesc, sizeof(srvDesc));
+        @ srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+        @ srvDesc.Texture2D.MipLevels = desc.MipLevels;
+        @ srvDesc.Texture2D.MostDetailedMip = 0;
+        @ srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        @ m_pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, srv_cpu_handle);
+        // Return results
+        @ *out_tex_resource = pTexture;
+        @ stbi_image_free(image_data);
+    }
+
     # Win32 ---
 
     方法 创建设备 <公开 类型 = 逻辑型 折叠 @禁止流程检查 = 真>
@@ -5500,7 +5755,7 @@
         @ {
         @     D3D12_DESCRIPTOR_HEAP_DESC desc = {};
         @     desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-        @     desc.NumDescriptors = 1;
+        @     desc.NumDescriptors = 2;
         @     desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
         @     if (m_pd3dDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_pd3dSrvDescHeap)) != S_OK)
         @         return FALSE;
@@ -5694,9 +5949,9 @@
 
     # @begin
     # <> <include>
-    #     HGLRC  m_hRC = nullptr;
-    #     HDC    m_MainWindow = nullptr;
-    #     int    m_Width = 0, m_Height = 0;
+    # HGLRC  m_hRC = nullptr;
+    # HDC    m_MainWindow = nullptr;
+    # int    m_Width = 0, m_Height = 0;
     # <> </include>
     # @end
 
@@ -5853,9 +6108,9 @@
     }
 
     方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠 @嵌入式方法 = "">
-    参数 纹理ID <类型 = 变整数 注释 = "提供由\"本对象.加载图片××\"返回的纹理ID.">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "提供由\"本对象.加载图片××\"返回的图片信息">
     {
-        @ glDeleteTextures(1, (GLuint*)&@<纹理ID>)
+        @ glDeleteTextures(1, (GLuint*)&@<图片信息.纹理ID>)
     }
 
     # Win32平台 ---
@@ -5896,16 +6151,14 @@
     参数 宽度 <类型 = 整数>
     参数 高度 <类型 = 整数>
     {
-        @ m_Width = @<宽度>;
-        @ m_Height = @<高度>;
+        @ glViewport(0, 0, @<宽度>, @<高度>);
     }
 
     方法 渲染 <公开 折叠>
     参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
     {
-        @ ImVec4* clear_color = @<背景颜色>.pdata();
         @ ImGui::Render();
-        @ glViewport(0, 0, m_Width, m_Height);
+        @ ImVec4* clear_color = @<背景颜色>.pdata();
         @ glClearColor(clear_color->x * clear_color->w, clear_color->y * clear_color->w, clear_color->z * clear_color->w, clear_color->w);
         @ glClear(GL_COLOR_BUFFER_BIT);
         @ ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -5914,8 +6167,7 @@
 
     # GLFW平台 ---
 
-    方法 加载_GLFW <公开 类型 = 逻辑型 注释 = "*适用于GLFW平台" 折叠 折叠2 @视窗.外部头文件 = "glad\\glad.h"
-            @视窗.外部源文件 = "FrameWork\\glad\\glad.c" @嵌入式方法 = "">
+    方法 加载_GLFW <公开 类型 = 逻辑型 注释 = "*适用于GLFW平台" 折叠 @嵌入式方法 = "">
     参数 窗口句柄 <类型 = 变整数 @默认值 = 0>
     {
         @ (BOOL)gladLoadGL()
@@ -5925,23 +6177,19 @@
     参数 窗口句柄 <类型 = 变整数>
     参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
     {
-        @ ImVec4* clear_color = @<背景颜色>.pdata();
         @ ImGui::Render();
-        @ glfwGetFramebufferSize((GLFWwindow*)@<窗口句柄>, &m_Width, &m_Height);
-        @ glViewport(0, 0, m_Width, m_Height);
+        @ ImVec4* clear_color = @<背景颜色>.pdata();
         @ glClearColor(clear_color->x * clear_color->w, clear_color->y * clear_color->w, clear_color->z * clear_color->w, clear_color->w);
         @ glClear(GL_COLOR_BUFFER_BIT);
         @ ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        @ if (m_Width > 0 && m_Height > 0 && glfwGetWindowAttrib((GLFWwindow*)@<窗口句柄>, GLFW_VISIBLE)) // 窗口隐藏时不刷新缓冲区,降低GPU占用
-        @     glfwSwapBuffers((GLFWwindow*)@<窗口句柄>); // 双缓冲: 交换缓冲区
+        @ glfwSwapBuffers((GLFWwindow*)@<窗口句柄>); // 双缓冲: 交换缓冲区
     }
 
     方法 清理 <公开>
 
     # SDL2平台 ---
 
-    方法 加载_SDL <公开 类型 = 逻辑型 注释 = "*适用于GLFW平台" 折叠 @视窗.外部头文件 = "glad\\glad.h"
-            @视窗.外部源文件 = "FrameWork\\glad\\glad.c" @嵌入式方法 = "">
+    方法 加载_SDL <公开 类型 = 逻辑型 注释 = "*适用于GLFW平台" 折叠 @嵌入式方法 = "">
     参数 窗口句柄 <类型 = 变整数 @默认值 = 0>
     {
         @ (BOOL)gladLoadGL()
@@ -5951,10 +6199,8 @@
     参数 窗口句柄 <类型 = 变整数>
     参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
     {
-        @ ImVec4* clear_color = @<背景颜色>.pdata();
-        @ ImGuiIO& io = ImGui::GetIO();
         @ ImGui::Render();
-        @ glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
+        @ ImVec4* clear_color = @<背景颜色>.pdata();
         @ glClearColor(clear_color->x * clear_color->w, clear_color->y * clear_color->w, clear_color->z * clear_color->w, clear_color->w);
         @ glClear(GL_COLOR_BUFFER_BIT);
         @ ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -6166,8 +6412,6 @@
     {
         @ ImGui::Render();
         @ ImDrawData* draw_data = ImGui::GetDrawData();
-        @ const bool is_minimized = (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f);
-        @ if (!is_minimized)
         @ {
         @     ImVec4* clear_color = @<背景颜色>.pdata();
         @     g_MainWindowData.ClearValue.color.float32[0] = clear_color->x * clear_color->w;
@@ -6289,42 +6533,33 @@
 
     # 纹理图片 ---
 
-    方法 "// 加载图片文件" <公开 类型 = 逻辑型 注释 = "从指定的图片文件加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠
-            @禁止流程检查 = 真>
+    方法 加载图片文件 <公开 类型 = 逻辑型 注释 = "从指定的图片文件加载纹理到渲染器中,不再使用时请调用\"释放纹理\"."
+            注释 = "注意: 只能在\"IM_Vulkan渲染器.初始化\"之后使用,即\"准备渲染\"事件中." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
     参数 文件名 <类型 = 文本型 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
+        @ if (g_Device == VK_NULL_HANDLE) return false;
         @ FILE* file = _wfopen(@<文件名>.GetText(), L"rb");
         @ if (!file) return false;
-        @ int image_width = 0, image_height = 0;
-        @ unsigned char* image_data = stbi_load_from_file(file, &image_width, &image_height, nullptr, 4);
+        @ unsigned char* image_data = stbi_load_from_file(file, &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
         @ fclose(file);
         @ if (!image_data) return false;
-        @ GLuint image_texture;
-        @ glGenTextures(1, &image_texture);
-        @ glBindTexture(GL_TEXTURE_2D, image_texture);
-        // Setup filtering parameters for display
-        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
-        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
-        // Upload pixels into texture
-        @ #if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
-        @     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-        @ #endif
-        @ glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
-        @ stbi_image_free(image_data);
-        @ @<图片信息.纹理ID> = (INT_P)image_texture;
-        @ @<图片信息.宽度> = image_width;
-        @ @<图片信息.高度> = image_height;
+        @ MyTextureData* tex_data = new MyTextureData{};
+        @ @<图片信息._内部数据> = (INT_P)tex_data;
+        @ tex_data->Width = @<图片信息.宽度>;
+        @ tex_data->Height = @<图片信息.高度>;
+        @ tex_data->Channels = 4;
+        @ @<_加载图片>(image_data, tex_data);
+        @ @<图片信息.纹理ID> = (INT_P)tex_data->DS;
         @ return true;
     }
 
-    方法 "// 加载图片资源" <公开 类型 = 逻辑型 注释 = "将程序文件中的图片资源加载到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠
-            @禁止流程检查 = 真>
+    方法 加载图片资源 <公开 类型 = 逻辑型 注释 = "将程序文件中的图片资源加载到渲染器中,不再使用时请调用\"释放纹理\"."
+            注释 = "注意: 只能在\"IM_Vulkan渲染器.初始化\"之后使用,即\"准备渲染\"事件中." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
     参数 图片资源 <类型 = 视窗文件资源 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
+        @ if (g_Device == VK_NULL_HANDLE) return false;
         @ HMODULE hModule = g_objVolApp.GetInstanceHandle();
         @ HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE((WORD)@<图片资源>), RT_RCDATA);
         @ if (!hSrc) return false;
@@ -6332,61 +6567,235 @@
         @ if (!resdata) return false;
         @ unsigned char* data = (unsigned char*)::LockResource(resdata);
         @ int len = (int)::SizeofResource(hModule, hSrc);
-        @ int image_width = 0, image_height = 0;
-        @ unsigned char* image_data = stbi_load_from_memory(data, len, &image_width, &image_height, nullptr, 4);
+        @ unsigned char* image_data = stbi_load_from_memory(data, len, &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
         @ if (!image_data) return false;
-        @ GLuint image_texture;
-        @ glGenTextures(1, &image_texture);
-        @ glBindTexture(GL_TEXTURE_2D, image_texture);
-        // Setup filtering parameters for display
-        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
-        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
-        // Upload pixels into texture
-        @ #if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
-        @     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-        @ #endif
-        @ glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
-        @ stbi_image_free(image_data);
-        @ @<图片信息.纹理ID> = (INT_P)image_texture;
-        @ @<图片信息.宽度> = image_width;
-        @ @<图片信息.高度> = image_height;
+        @ MyTextureData* tex_data = new MyTextureData{};
+        @ tex_data->Width = @<图片信息.宽度>;
+        @ tex_data->Height = @<图片信息.高度>;
+        @ tex_data->Channels = 4;
+        @ @<图片信息._内部数据> = (INT_P)tex_data;
+        @ @<_加载图片>(image_data, tex_data);
+        @ @<图片信息.纹理ID> = (INT_P)tex_data->DS;
         @ return true;
     }
 
-    方法 "// 加载图片字节集" <公开 类型 = 逻辑型 注释 = "从指定的图片字节集加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠
-            @禁止流程检查 = 真>
+    方法 加载图片字节集 <公开 类型 = 逻辑型 注释 = "从指定的图片字节集加载纹理到渲染器中,不再使用时请调用\"释放纹理\"."
+            注释 = "注意: 只能在\"IM_Vulkan渲染器.初始化\"之后使用,即\"准备渲染\"事件中." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
     参数 图片数据 <类型 = 字节集类 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
-        @ int image_width = 0, image_height = 0;
-        @ unsigned char* image_data = stbi_load_from_memory(@<图片数据>.GetPtr(), (int)@<图片数据>.GetSize(), &image_width, &image_height, nullptr, 4);
+        @ if (g_Device == VK_NULL_HANDLE) return false;
+        @ unsigned char* image_data = stbi_load_from_memory(@<图片数据>.GetPtr(), (int)@<图片数据>.GetSize(), &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
         @ if (!image_data) return false;
-        @ GLuint image_texture;
-        @ glGenTextures(1, &image_texture);
-        @ glBindTexture(GL_TEXTURE_2D, image_texture);
-        // Setup filtering parameters for display
-        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
-        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
-        // Upload pixels into texture
-        @ #if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
-        @ glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-        @ #endif
-        @ glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
-        @ stbi_image_free(image_data);
-        @ @<图片信息.纹理ID> = (INT_P)image_texture;
-        @ @<图片信息.宽度> = image_width;
-        @ @<图片信息.高度> = image_height;
+        @ MyTextureData* tex_data = new MyTextureData{};
+        @ @<图片信息._内部数据> = (INT_P)tex_data;
+        @ tex_data->Width = @<图片信息.宽度>;
+        @ tex_data->Height = @<图片信息.高度>;
+        @ tex_data->Channels = 4;
+        @ @<_加载图片>(image_data, tex_data);
+        @ @<图片信息.纹理ID> = (INT_P)tex_data->DS;
         @ return true;
     }
 
-    方法 "// 释放纹理" <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠 @嵌入式方法 = "">
-    参数 纹理ID <类型 = 变整数 注释 = "提供由\"本对象.加载图片××\"返回的纹理ID.">
+    方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠>
+    参数 图片信息 <类型 = IM图片信息类 注释 = "提供由\"本对象.加载图片××\"返回图片的信息,释放后会清空信息.">
     {
-        @ glDeleteTextures((GLuint)@<纹理ID>)
+        如果 (图片信息._内部数据 != 0)
+        {
+            @ MyTextureData* tex_data = (MyTextureData*)@<图片信息._内部数据>;
+            @ vkFreeMemory(g_Device, tex_data->UploadBufferMemory, nullptr);
+            @ vkDestroyBuffer(g_Device, tex_data->UploadBuffer, nullptr);
+            @ vkDestroySampler(g_Device, tex_data->Sampler, nullptr);
+            @ vkDestroyImageView(g_Device, tex_data->ImageView, nullptr);
+            @ vkDestroyImage(g_Device, tex_data->Image, nullptr);
+            @ vkFreeMemory(g_Device, tex_data->ImageMemory, nullptr);
+            @ ImGui_ImplVulkan_RemoveTexture(tex_data->DS);
+        }
+        图片信息.重置为空对象 ()
+    }
+
+    方法 _加载图片 <注释 = "仅限内部嵌入式使用" 折叠>
+    参数 image_data <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/unsigned char*" @输出名 = "image_data">
+    参数 tex_data <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/MyTextureData*" @输出名 = "tex_data">
+    {
+        // Calculate allocation size (in number of bytes)
+        @ size_t image_size = tex_data->Width * tex_data->Height * tex_data->Channels;
+        @ VkResult err;
+        // Create the Vulkan image.
+        @ {
+        @     VkImageCreateInfo info = {};
+        @     info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        @     info.imageType = VK_IMAGE_TYPE_2D;
+        @     info.format = VK_FORMAT_R8G8B8A8_UNORM;
+        @     info.extent.width = tex_data->Width;
+        @     info.extent.height = tex_data->Height;
+        @     info.extent.depth = 1;
+        @     info.mipLevels = 1;
+        @     info.arrayLayers = 1;
+        @     info.samples = VK_SAMPLE_COUNT_1_BIT;
+        @     info.tiling = VK_IMAGE_TILING_OPTIMAL;
+        @     info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        @     info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        @     info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        @     err = vkCreateImage(g_Device, &info, g_Allocator, &tex_data->Image);
+        @     check_vk_result(err);
+        @     VkMemoryRequirements req;
+        @     vkGetImageMemoryRequirements(g_Device, tex_data->Image, &req);
+        @     VkMemoryAllocateInfo alloc_info = {};
+        @     alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        @     alloc_info.allocationSize = req.size;
+        @     alloc_info.memoryTypeIndex = @<_findMemoryType>(req.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        @     err = vkAllocateMemory(g_Device, &alloc_info, g_Allocator, &tex_data->ImageMemory);
+        @     check_vk_result(err);
+        @     err = vkBindImageMemory(g_Device, tex_data->Image, tex_data->ImageMemory, 0);
+        @     check_vk_result(err);
+        @ }
+        // Create the Image View
+        @ {
+        @     VkImageViewCreateInfo info = {};
+        @     info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        @     info.image = tex_data->Image;
+        @     info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        @     info.format = VK_FORMAT_R8G8B8A8_UNORM;
+        @     info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        @     info.subresourceRange.levelCount = 1;
+        @     info.subresourceRange.layerCount = 1;
+        @     err = vkCreateImageView(g_Device, &info, g_Allocator, &tex_data->ImageView);
+        @     check_vk_result(err);
+        @ }
+        // Create Sampler
+        @ {
+        @     VkSamplerCreateInfo sampler_info{};
+        @     sampler_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        @     sampler_info.magFilter = VK_FILTER_LINEAR;
+        @     sampler_info.minFilter = VK_FILTER_LINEAR;
+        @     sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+        @     sampler_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT; // outside image bounds just use border color
+        @     sampler_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        @     sampler_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        @     sampler_info.minLod = -1000;
+        @     sampler_info.maxLod = 1000;
+        @     sampler_info.maxAnisotropy = 1.0f;
+        @     err = vkCreateSampler(g_Device, &sampler_info, g_Allocator, &tex_data->Sampler);
+        @     check_vk_result(err);
+        @ }
+        // Create Descriptor Set using ImGUI's implementation
+        @ tex_data->DS = ImGui_ImplVulkan_AddTexture(tex_data->Sampler, tex_data->ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        // Create Upload Buffer
+        @ {
+        @     VkBufferCreateInfo buffer_info = {};
+        @     buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        @     buffer_info.size = image_size;
+        @     buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+        @     buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        @     err = vkCreateBuffer(g_Device, &buffer_info, g_Allocator, &tex_data->UploadBuffer);
+        @     check_vk_result(err);
+        @     VkMemoryRequirements req;
+        @     vkGetBufferMemoryRequirements(g_Device, tex_data->UploadBuffer, &req);
+        @     VkMemoryAllocateInfo alloc_info = {};
+        @     alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        @     alloc_info.allocationSize = req.size;
+        @     alloc_info.memoryTypeIndex = @<_findMemoryType>(req.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+        @     err = vkAllocateMemory(g_Device, &alloc_info, g_Allocator, &tex_data->UploadBufferMemory);
+        @     check_vk_result(err);
+        @     err = vkBindBufferMemory(g_Device, tex_data->UploadBuffer, tex_data->UploadBufferMemory, 0);
+        @     check_vk_result(err);
+        @ }
+        // Upload to Buffer:
+        @ {
+        @     void* map = NULL;
+        @     err = vkMapMemory(g_Device, tex_data->UploadBufferMemory, 0, image_size, 0, &map);
+        @     check_vk_result(err);
+        @     memcpy(map, image_data, image_size);
+        @     VkMappedMemoryRange range[1] = {};
+        @     range[0].sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+        @     range[0].memory = tex_data->UploadBufferMemory;
+        @     range[0].size = image_size;
+        @     err = vkFlushMappedMemoryRanges(g_Device, 1, range);
+        @     check_vk_result(err);
+        @     vkUnmapMemory(g_Device, tex_data->UploadBufferMemory);
+        @ }
+        // Release image memory using stb
+        @ stbi_image_free(image_data);
+        // Create a command buffer that will perform following steps when hit in the command queue.
+        // TODO: this works in the example, but may need input if this is an acceptable way to access the pool/create the command buffer.
+        @ VkCommandPool command_pool = g_MainWindowData.Frames[g_MainWindowData.FrameIndex].CommandPool;
+        @ VkCommandBuffer command_buffer;
+        @ {
+        @     VkCommandBufferAllocateInfo alloc_info{};
+        @     alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        @     alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        @     alloc_info.commandPool = command_pool;
+        @     alloc_info.commandBufferCount = 1;
+        @     err = vkAllocateCommandBuffers(g_Device, &alloc_info, &command_buffer);
+        @     check_vk_result(err);
+        @     VkCommandBufferBeginInfo begin_info = {};
+        @     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        @     begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        @     err = vkBeginCommandBuffer(command_buffer, &begin_info);
+        @     check_vk_result(err);
+        @ }
+        // Copy to Image
+        @ {
+        @     VkImageMemoryBarrier copy_barrier[1] = {};
+        @     copy_barrier[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        @     copy_barrier[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        @     copy_barrier[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        @     copy_barrier[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        @     copy_barrier[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        @     copy_barrier[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        @     copy_barrier[0].image = tex_data->Image;
+        @     copy_barrier[0].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        @     copy_barrier[0].subresourceRange.levelCount = 1;
+        @     copy_barrier[0].subresourceRange.layerCount = 1;
+        @     vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_HOST_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, NULL, 0, NULL, 1, copy_barrier);
+        @     VkBufferImageCopy region = {};
+        @     region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        @     region.imageSubresource.layerCount = 1;
+        @     region.imageExtent.width = tex_data->Width;
+        @     region.imageExtent.height = tex_data->Height;
+        @     region.imageExtent.depth = 1;
+        @     vkCmdCopyBufferToImage(command_buffer, tex_data->UploadBuffer, tex_data->Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+        @     VkImageMemoryBarrier use_barrier[1] = {};
+        @     use_barrier[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        @     use_barrier[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        @     use_barrier[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        @     use_barrier[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        @     use_barrier[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        @     use_barrier[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        @     use_barrier[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        @     use_barrier[0].image = tex_data->Image;
+        @     use_barrier[0].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        @     use_barrier[0].subresourceRange.levelCount = 1;
+        @     use_barrier[0].subresourceRange.layerCount = 1;
+        @     vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, NULL, 0, NULL, 1, use_barrier);
+        @ }
+        // End command buffer
+        @ {
+        @     VkSubmitInfo end_info = {};
+        @     end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        @     end_info.commandBufferCount = 1;
+        @     end_info.pCommandBuffers = &command_buffer;
+        @     err = vkEndCommandBuffer(command_buffer);
+        @     check_vk_result(err);
+        @     err = vkQueueSubmit(g_Queue, 1, &end_info, VK_NULL_HANDLE);
+        @     check_vk_result(err);
+        @     err = vkDeviceWaitIdle(g_Device);
+        @     check_vk_result(err);
+        @ }
+    }
+
+    方法 _findMemoryType <类型 = 整数 注释 = "仅限内部嵌入式使用" 折叠 @禁止流程检查 = 真>
+    参数 type_filter <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/uint32_t" @输出名 = "type_filter">
+    参数 properties <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/VkMemoryPropertyFlags" @输出名 = "properties">
+    参数 ""
+    {
+        @ VkPhysicalDeviceMemoryProperties mem_properties;
+        @ vkGetPhysicalDeviceMemoryProperties(g_PhysicalDevice, &mem_properties);
+        @ for (uint32_t i = 0; i < mem_properties.memoryTypeCount; i++)
+        @     if ((type_filter & (1 << i)) && (mem_properties.memoryTypes[i].propertyFlags & properties) == properties)
+        @         return i;
+        @ return 0xFFFFFFFF; // Unable to find memoryType
     }
 
     # SDL2
@@ -6561,24 +6970,39 @@
 
     # @begin
     # <> <include>
-    #     VkAllocationCallbacks*   g_Allocator        = nullptr;
-    #     VkInstance               g_Instance         = VK_NULL_HANDLE;
-    #     VkPhysicalDevice         g_PhysicalDevice   = VK_NULL_HANDLE;
-    #     VkDevice                 g_Device           = VK_NULL_HANDLE;
-    #     uint32_t                 g_QueueFamily      = (uint32_t)-1;
-    #     VkQueue                  g_Queue            = VK_NULL_HANDLE;
-    #     VkDebugReportCallbackEXT g_DebugReport      = VK_NULL_HANDLE;
-    #     VkPipelineCache          g_PipelineCache    = VK_NULL_HANDLE;
-    #     VkDescriptorPool         g_DescriptorPool   = VK_NULL_HANDLE;
-    #     ImGui_ImplVulkanH_Window g_MainWindowData   = {};
-    #     uint32_t                 g_MinImageCount    = 2;
-    #     bool                     g_SwapChainRebuild = false;
+    # VkAllocationCallbacks*   g_Allocator        = nullptr;
+    # VkInstance               g_Instance         = VK_NULL_HANDLE;
+    # VkPhysicalDevice         g_PhysicalDevice   = VK_NULL_HANDLE;
+    # VkDevice                 g_Device           = VK_NULL_HANDLE;
+    # uint32_t                 g_QueueFamily      = (uint32_t)-1;
+    # VkQueue                  g_Queue            = VK_NULL_HANDLE;
+    # VkDebugReportCallbackEXT g_DebugReport      = VK_NULL_HANDLE;
+    # VkPipelineCache          g_PipelineCache    = VK_NULL_HANDLE;
+    # VkDescriptorPool         g_DescriptorPool   = VK_NULL_HANDLE;
+    # ImGui_ImplVulkanH_Window g_MainWindowData   = {};
+    # uint32_t                 g_MinImageCount    = 2;
+    # bool                     g_SwapChainRebuild = false;
+    # struct MyTextureData // A struct to manage data related to one image in vulkan
+    # {
+    #     VkDescriptorSet DS;         // Descriptor set: this is what you'll pass to Image()
+    #     int             Width;
+    #     int             Height;
+    #     int             Channels;
     #
-    #     static void check_vk_result(VkResult err)
-    #     {
-    #         if (err == 0) return;
-    #         if (err < 0) abort();
-    #     }
+    #     // Need to keep track of these to properly cleanup
+    #     VkImageView     ImageView;
+    #     VkImage         Image;
+    #     VkDeviceMemory  ImageMemory;
+    #     VkSampler       Sampler;
+    #     VkBuffer        UploadBuffer;
+    #     VkDeviceMemory  UploadBufferMemory;
+    #     MyTextureData() { memset(this, 0, sizeof(*this)); }
+    # };
+    # static void check_vk_result(VkResult err)
+    # {
+    #     if (err == 0) return;
+    #     if (err < 0) abort();
+    # }
     # <> </include>
     # @end
 }

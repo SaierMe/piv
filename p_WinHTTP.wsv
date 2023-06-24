@@ -4691,48 +4691,49 @@
 
     # @begin
     # <> <include>
-    # public:
-    #     inline void SetInfo (LPURL_COMPONENTS urlComp) {
-    #         this->ResetObject ();
-    #         if (urlComp->dwSchemeLength)    szScheme.SetText (urlComp->lpszScheme, urlComp->dwSchemeLength);
-    #         if (urlComp->dwHostNameLength)  szHostName.SetText (urlComp->lpszHostName, urlComp->dwHostNameLength);
-    #         if (urlComp->dwUserNameLength)  szUserName.SetText (urlComp->lpszUserName, urlComp->dwUserNameLength);
-    #         if (urlComp->dwPasswordLength)  szPassword.SetText (urlComp->lpszPassword, urlComp->dwPasswordLength);
-    #         if (urlComp->dwUrlPathLength)   szUrlPath.SetText (urlComp->lpszUrlPath, urlComp->dwUrlPathLength);
-    #         if (urlComp->dwExtraInfoLength) szExtraInfo.SetText (urlComp->lpszExtraInfo, urlComp->dwExtraInfoLength);
-    #         nScheme = (INT)urlComp->nScheme; nPort = (INT)urlComp->nPort;
+    # inline void SetInfo (LPURL_COMPONENTS urlComp)
+    # {
+    #     this->ResetObject ();
+    #     if (urlComp->dwSchemeLength)    szScheme.SetText (urlComp->lpszScheme, urlComp->dwSchemeLength);
+    #     if (urlComp->dwHostNameLength)  szHostName.SetText (urlComp->lpszHostName, urlComp->dwHostNameLength);
+    #     if (urlComp->dwUserNameLength)  szUserName.SetText (urlComp->lpszUserName, urlComp->dwUserNameLength);
+    #     if (urlComp->dwPasswordLength)  szPassword.SetText (urlComp->lpszPassword, urlComp->dwPasswordLength);
+    #     if (urlComp->dwUrlPathLength)   szUrlPath.SetText (urlComp->lpszUrlPath, urlComp->dwUrlPathLength);
+    #     if (urlComp->dwExtraInfoLength) szExtraInfo.SetText (urlComp->lpszExtraInfo, urlComp->dwExtraInfoLength);
+    #     nScheme = (INT)urlComp->nScheme; nPort = (INT)urlComp->nPort;
+    # }
+    # inline LPURL_COMPONENTS GetInfo (LPURL_COMPONENTS urlComp)
+    # {
+    #     ZeroMemory (urlComp, sizeof(URL_COMPONENTS));
+    #     urlComp->dwStructSize = sizeof (URL_COMPONENTS);
+    #     if (!szScheme.IsEmpty()) {
+    #         urlComp->lpszScheme = (LPWSTR)szScheme.GetText ();
+    #         urlComp->dwSchemeLength = (DWORD)szScheme.GetLength ();
     #     }
-    #     inline LPURL_COMPONENTS GetInfo (LPURL_COMPONENTS urlComp) {
-    #         ZeroMemory (urlComp, sizeof(URL_COMPONENTS));
-    #         urlComp->dwStructSize = sizeof (URL_COMPONENTS);
-    #         if (!szScheme.IsEmpty()) {
-    #             urlComp->lpszScheme = (LPWSTR)szScheme.GetText ();
-    #             urlComp->dwSchemeLength = (DWORD)szScheme.GetLength ();
-    #         }
-    #         urlComp->nScheme = (INTERNET_SCHEME)nScheme;
-    #         if (!szHostName.IsEmpty()) {
-    #             urlComp->lpszHostName = (LPWSTR)szHostName.GetText ();
-    #             urlComp->dwHostNameLength = (DWORD)szHostName.GetLength ();
-    #         }
-    #         urlComp->nPort = (INTERNET_PORT)nPort;
-    #         if (!szUserName.IsEmpty()) {
-    #             urlComp->lpszUserName = (LPWSTR)szUserName.GetText ();
-    #             urlComp->dwUserNameLength = (DWORD)szUserName.GetLength ();
-    #         }
-    #         if (!szPassword.IsEmpty()) {
-    #             urlComp->lpszPassword = (LPWSTR)szPassword.GetText ();
-    #             urlComp->dwPasswordLength = (DWORD)szPassword.GetLength ();
-    #         }
-    #         if (!szUrlPath.IsEmpty()) {
-    #             urlComp->lpszUrlPath = (LPWSTR)szUrlPath.GetText ();
-    #             urlComp->dwUrlPathLength = (DWORD)szUrlPath.GetLength ();
-    #         }
-    #         if (!szExtraInfo.IsEmpty()) {
-    #             urlComp->lpszExtraInfo = (LPWSTR)szExtraInfo.GetText ();
-    #             urlComp->dwExtraInfoLength = (DWORD)szExtraInfo.GetLength ();
-    #         }
-    #         return urlComp;
+    #     urlComp->nScheme = (INTERNET_SCHEME)nScheme;
+    #     if (!szHostName.IsEmpty()) {
+    #         urlComp->lpszHostName = (LPWSTR)szHostName.GetText ();
+    #         urlComp->dwHostNameLength = (DWORD)szHostName.GetLength ();
     #     }
+    #     urlComp->nPort = (INTERNET_PORT)nPort;
+    #     if (!szUserName.IsEmpty()) {
+    #         urlComp->lpszUserName = (LPWSTR)szUserName.GetText ();
+    #         urlComp->dwUserNameLength = (DWORD)szUserName.GetLength ();
+    #     }
+    #     if (!szPassword.IsEmpty()) {
+    #         urlComp->lpszPassword = (LPWSTR)szPassword.GetText ();
+    #         urlComp->dwPasswordLength = (DWORD)szPassword.GetLength ();
+    #     }
+    #     if (!szUrlPath.IsEmpty()) {
+    #         urlComp->lpszUrlPath = (LPWSTR)szUrlPath.GetText ();
+    #         urlComp->dwUrlPathLength = (DWORD)szUrlPath.GetLength ();
+    #     }
+    #     if (!szExtraInfo.IsEmpty()) {
+    #         urlComp->lpszExtraInfo = (LPWSTR)szExtraInfo.GetText ();
+    #         urlComp->dwExtraInfoLength = (DWORD)szExtraInfo.GetLength ();
+    #     }
+    #     return urlComp;
+    # }
     # <> </include>
     # @end
 }
@@ -4763,15 +4764,15 @@
 
     # @begin
     # <> <include>
-    # public:
-    #     inline PWINHTTP_AUTOPROXY_OPTIONS GetInfo (PWINHTTP_AUTOPROXY_OPTIONS stInfo) {
-    #         ZeroMemory (stInfo, sizeof(WINHTTP_AUTOPROXY_OPTIONS));
-    #         stInfo->dwFlags = (DWORD)dwFlags;
-    #         stInfo->dwAutoDetectFlags = (DWORD)dwAutoDetectFlags;
-    #         stInfo->lpszAutoConfigUrl = szAutoConfigUrl.IsEmpty () ? NULL : (LPCWSTR)szAutoConfigUrl.GetText ();
-    #         stInfo->fAutoLogonIfChallenged = fAutoLogonIfChallenged;
-    #         return stInfo;
-    #     }
+    # inline PWINHTTP_AUTOPROXY_OPTIONS GetInfo (PWINHTTP_AUTOPROXY_OPTIONS stInfo)
+    # {
+    #     ZeroMemory (stInfo, sizeof(WINHTTP_AUTOPROXY_OPTIONS));
+    #     stInfo->dwFlags = (DWORD)dwFlags;
+    #     stInfo->dwAutoDetectFlags = (DWORD)dwAutoDetectFlags;
+    #     stInfo->lpszAutoConfigUrl = szAutoConfigUrl.IsEmpty () ? NULL : (LPCWSTR)szAutoConfigUrl.GetText ();
+    #     stInfo->fAutoLogonIfChallenged = fAutoLogonIfChallenged;
+    #     return stInfo;
+    # }
     # <> </include>
     # @end
 }
@@ -4798,16 +4799,16 @@
 
     # @begin
     # <> <include>
-    # public:
-    #     inline void SetInfo (WINHTTP_PROXY_RESULT_ENTRY stInfo) {
-    #         this->ResetObject ();
-    #         fProxy = stInfo.fProxy;
-    #         fBypass = stInfo.fBypass;
-    #         ProxyScheme = (INT)stInfo.ProxyScheme;
-    #         if (stInfo.pwszProxy) pwszProxy.SetText (stInfo.pwszProxy);
-    #         ProxyPort = (INT)stInfo.ProxyPort;
-    #     }
-    #     inline @sn<current_class> (WINHTTP_PROXY_RESULT_ENTRY stInfo) : @sn<current_class>() { this->SetInfo(stInfo); }
+    # inline void SetInfo (WINHTTP_PROXY_RESULT_ENTRY stInfo)
+    # {
+    #     this->ResetObject ();
+    #     fProxy = stInfo.fProxy;
+    #     fBypass = stInfo.fBypass;
+    #     ProxyScheme = (INT)stInfo.ProxyScheme;
+    #     if (stInfo.pwszProxy) pwszProxy.SetText (stInfo.pwszProxy);
+    #     ProxyPort = (INT)stInfo.ProxyPort;
+    # }
+    # inline @sn<current_class> (WINHTTP_PROXY_RESULT_ENTRY stInfo) : @sn<current_class>() { this->SetInfo(stInfo); }
     # <> </include>
     # @end
 }
@@ -4840,26 +4841,27 @@
 
     # @begin
     # <> <include>
-    # public:
-    #     inline void SetInfo (LPWINHTTP_PROXY_INFO stInfo) {
-    #         this->ResetObject ();
-    #         dwAccessType = (@dt<访问类型_WinHTTP>)stInfo->dwAccessType;
-    #         if (stInfo->lpszProxy) {
-    #             lpszProxy.SetText (stInfo->lpszProxy);
-    #             GlobalFree (stInfo->lpszProxy);
-    #         }
-    #         if (stInfo->lpszProxyBypass) {
-    #             lpszProxyBypass.SetText (stInfo->lpszProxyBypass);
-    #             GlobalFree (stInfo->lpszProxyBypass);
-    #         }
+    # inline void SetInfo (LPWINHTTP_PROXY_INFO stInfo)
+    # {
+    #     this->ResetObject ();
+    #     dwAccessType = (@dt<访问类型_WinHTTP>)stInfo->dwAccessType;
+    #     if (stInfo->lpszProxy) {
+    #         lpszProxy.SetText (stInfo->lpszProxy);
+    #         GlobalFree (stInfo->lpszProxy);
     #     }
-    #     inline LPWINHTTP_PROXY_INFO GetInfo (LPWINHTTP_PROXY_INFO stInfo) {
-    #         ZeroMemory (stInfo, sizeof(WINHTTP_PROXY_INFO));
-    #         stInfo->dwAccessType = (DWORD)dwAccessType;
-    #         stInfo->lpszProxy = (LPWSTR)lpszProxy.GetText ();
-    #         stInfo->lpszProxyBypass = (LPWSTR)lpszProxyBypass.GetText ();
-    #         return stInfo;
+    #     if (stInfo->lpszProxyBypass) {
+    #         lpszProxyBypass.SetText (stInfo->lpszProxyBypass);
+    #         GlobalFree (stInfo->lpszProxyBypass);
     #     }
+    # }
+    # inline LPWINHTTP_PROXY_INFO GetInfo (LPWINHTTP_PROXY_INFO stInfo)
+    # {
+    #     ZeroMemory (stInfo, sizeof(WINHTTP_PROXY_INFO));
+    #     stInfo->dwAccessType = (DWORD)dwAccessType;
+    #     stInfo->lpszProxy = (LPWSTR)lpszProxy.GetText ();
+    #     stInfo->lpszProxyBypass = (LPWSTR)lpszProxyBypass.GetText ();
+    #     return stInfo;
+    # }
     # <> </include>
     # @end
 }
@@ -4891,28 +4893,29 @@
 
     # @begin
     # <> <include>
-    # public:
-    #     inline void SetInfo (PWINHTTP_CREDS_EX stInfo) {
-    #         this->ResetObject ();
-    #         if (stInfo->lpszUserName) lpszUserName.SetText (stInfo->lpszUserName);
-    #         if (stInfo->lpszPassword) lpszPassword.SetText (stInfo->lpszPassword);
-    #         if (stInfo->lpszRealm) lpszRealm.SetText (stInfo->lpszRealm);
-    #         dwAuthScheme = (INT)stInfo->dwAuthScheme;
-    #         if (stInfo->lpszHostName) lpszHostName.SetText (stInfo->lpszHostName);
-    #         dwPort = (INT)stInfo->dwPort;
-    #         if (stInfo->lpszUrl) lpszUrl.SetText (stInfo->lpszUrl);
-    #     }
-    #     inline PWINHTTP_CREDS_EX GetInfo (PWINHTTP_CREDS_EX stInfo) {
-    #         ZeroMemory (stInfo, sizeof(WINHTTP_CREDS_EX));
-    #         stInfo->lpszUserName = (LPSTR)lpszUserName.GetText ();
-    #         stInfo->lpszPassword = (LPSTR)lpszPassword.GetText ();
-    #         stInfo->lpszRealm    = (LPSTR)lpszRealm.GetText ();
-    #         stInfo->dwAuthScheme = (DWORD)dwAuthScheme;
-    #         stInfo->lpszHostName = (LPSTR)lpszHostName.GetText ();
-    #         stInfo->dwPort       = (DWORD)dwPort;
-    #         stInfo->lpszUrl      = (LPSTR)lpszUrl.GetText ();
-    #         return stInfo;
-    #     }
+    # inline void SetInfo (PWINHTTP_CREDS_EX stInfo)
+    # {
+    #     this->ResetObject ();
+    #     if (stInfo->lpszUserName) lpszUserName.SetText (stInfo->lpszUserName);
+    #     if (stInfo->lpszPassword) lpszPassword.SetText (stInfo->lpszPassword);
+    #     if (stInfo->lpszRealm) lpszRealm.SetText (stInfo->lpszRealm);
+    #     dwAuthScheme = (INT)stInfo->dwAuthScheme;
+    #     if (stInfo->lpszHostName) lpszHostName.SetText (stInfo->lpszHostName);
+    #     dwPort = (INT)stInfo->dwPort;
+    #     if (stInfo->lpszUrl) lpszUrl.SetText (stInfo->lpszUrl);
+    # }
+    # inline PWINHTTP_CREDS_EX GetInfo (PWINHTTP_CREDS_EX stInfo)
+    # {
+    #     ZeroMemory (stInfo, sizeof(WINHTTP_CREDS_EX));
+    #     stInfo->lpszUserName = (LPSTR)lpszUserName.GetText ();
+    #     stInfo->lpszPassword = (LPSTR)lpszPassword.GetText ();
+    #     stInfo->lpszRealm    = (LPSTR)lpszRealm.GetText ();
+    #     stInfo->dwAuthScheme = (DWORD)dwAuthScheme;
+    #     stInfo->lpszHostName = (LPSTR)lpszHostName.GetText ();
+    #     stInfo->dwPort       = (DWORD)dwPort;
+    #     stInfo->lpszUrl      = (LPSTR)lpszUrl.GetText ();
+    #     return stInfo;
+    # }
     # <> </include>
     # @end
 }
@@ -4945,33 +4948,33 @@
 
     # @begin
     # <> <include>
-    # public:
-    #     inline void SetInfo (PWINHTTP_CERTIFICATE_INFO stInfo) {
-    #         this->ResetObject ();
-    #         ftExpiry = ((INT64) stInfo->ftExpiry.dwLowDateTime | ((INT64) stInfo->ftExpiry.dwHighDateTime << 32)) / 10000000 - 11644473600;
-    #         ftStart = ((INT64) stInfo->ftStart.dwLowDateTime | ((INT64) stInfo->ftStart.dwHighDateTime << 32)) / 10000000 - 11644473600;
-    #         if (stInfo->lpszSubjectInfo) {
-    #             lpszSubjectInfo.SetText (stInfo->lpszSubjectInfo);
-    #             LocalFree (stInfo->lpszSubjectInfo);
-    #         }
-    #         if (stInfo->lpszIssuerInfo) {
-    #             lpszIssuerInfo.SetText (stInfo->lpszIssuerInfo);
-    #             LocalFree (&stInfo->lpszIssuerInfo);
-    #         }
-    #         if (stInfo->lpszProtocolName) {
-    #             lpszProtocolName.SetText (stInfo->lpszProtocolName);
-    #             LocalFree (stInfo->lpszProtocolName);
-    #         }
-    #         if (stInfo->lpszSignatureAlgName) {
-    #             lpszSignatureAlgName.SetText (stInfo->lpszSignatureAlgName);
-    #             LocalFree (stInfo->lpszSignatureAlgName);
-    #         }
-    #         if (stInfo->lpszEncryptionAlgName) {
-    #             lpszEncryptionAlgName.SetText (stInfo->lpszEncryptionAlgName);
-    #             LocalFree (stInfo->lpszEncryptionAlgName);
-    #         }
-    #         dwKeySize = (INT)stInfo->dwKeySize;
+    # inline void SetInfo (PWINHTTP_CERTIFICATE_INFO stInfo)
+    # {
+    #     this->ResetObject ();
+    #     ftExpiry = ((INT64) stInfo->ftExpiry.dwLowDateTime | ((INT64) stInfo->ftExpiry.dwHighDateTime << 32)) / 10000000 - 11644473600;
+    #     ftStart = ((INT64) stInfo->ftStart.dwLowDateTime | ((INT64) stInfo->ftStart.dwHighDateTime << 32)) / 10000000 - 11644473600;
+    #     if (stInfo->lpszSubjectInfo) {
+    #         lpszSubjectInfo.SetText (stInfo->lpszSubjectInfo);
+    #         LocalFree (stInfo->lpszSubjectInfo);
     #     }
+    #     if (stInfo->lpszIssuerInfo) {
+    #         lpszIssuerInfo.SetText (stInfo->lpszIssuerInfo);
+    #         LocalFree (&stInfo->lpszIssuerInfo);
+    #     }
+    #     if (stInfo->lpszProtocolName) {
+    #         lpszProtocolName.SetText (stInfo->lpszProtocolName);
+    #         LocalFree (stInfo->lpszProtocolName);
+    #     }
+    #     if (stInfo->lpszSignatureAlgName) {
+    #         lpszSignatureAlgName.SetText (stInfo->lpszSignatureAlgName);
+    #         LocalFree (stInfo->lpszSignatureAlgName);
+    #     }
+    #     if (stInfo->lpszEncryptionAlgName) {
+    #         lpszEncryptionAlgName.SetText (stInfo->lpszEncryptionAlgName);
+    #         LocalFree (stInfo->lpszEncryptionAlgName);
+    #     }
+    #     dwKeySize = (INT)stInfo->dwKeySize;
+    # }
     # <> </include>
     # @end
 }
@@ -4995,13 +4998,13 @@
 
     # @begin
     # <> <include>
-    # public:
-    #     inline void SetInfo (PWINHTTP_REQUEST_STATS stInfo) {
-    #         this->ResetObject ();
-    #         ullFlags = (INT64)stInfo->ullFlags;
-    #         ulIndex = (INT)stInfo->ulIndex;
-    #         rgullStats.data ().Copy ((const INT64*)&stInfo->rgullStats[0], (INT)stInfo->cStats);
-    #     }
+    # inline void SetInfo (PWINHTTP_REQUEST_STATS stInfo)
+    # {
+    #     this->ResetObject ();
+    #     ullFlags = (INT64)stInfo->ullFlags;
+    #     ulIndex = (INT)stInfo->ulIndex;
+    #     rgullStats.data ().Copy ((const INT64*)&stInfo->rgullStats[0], (INT)stInfo->cStats);
+    # }
     # <> </include>
     # @end
 }
@@ -5034,17 +5037,17 @@
 
     # @begin
     # <> <include>
-    # public:
-    #     inline void SetInfo (PSecPkgContext_ConnectionInfo stInfo) {
-    #         this->ResetObject ();
-    #         dwProtocol = (INT)stInfo->dwProtocol;
-    #         aiCipher = (INT)stInfo->aiCipher;
-    #         dwCipherStrength = (INT)stInfo->dwCipherStrength;
-    #         aiHash = (INT)stInfo->aiHash;
-    #         dwHashStrength = (INT)stInfo->dwHashStrength;
-    #         aiExch = (INT)stInfo->aiExch;
-    #         dwExchStrength = (INT)stInfo->dwExchStrength;
-    #     }
+    # inline void SetInfo (PSecPkgContext_ConnectionInfo stInfo)
+    # {
+    #     this->ResetObject ();
+    #     dwProtocol = (INT)stInfo->dwProtocol;
+    #     aiCipher = (INT)stInfo->aiCipher;
+    #     dwCipherStrength = (INT)stInfo->dwCipherStrength;
+    #     aiHash = (INT)stInfo->aiHash;
+    #     dwHashStrength = (INT)stInfo->dwHashStrength;
+    #     aiExch = (INT)stInfo->aiExch;
+    #     dwExchStrength = (INT)stInfo->dwExchStrength;
+    # }
     # <> </include>
     # @end
 }
@@ -5092,25 +5095,25 @@
 
     # @begin
     # <> <include>
-    # public:
-    #     inline void SetInfo (PSecPkgContext_CipherInfo stInfo) {
-    #         this->ResetObject ();
-    #         dwVersion = (INT)stInfo->dwVersion;
-    #         dwProtocol = (INT)stInfo->dwProtocol;
-    #         dwCipherSuite = (INT)stInfo->dwCipherSuite;
-    #         dwBaseCipherSuite = (INT)stInfo->dwBaseCipherSuite;
-    #         if (stInfo->szCipherSuite) szCipherSuite.SetText (stInfo->szCipherSuite);
-    #         if (stInfo->szCipher) szCipher.SetText (stInfo->szCipher);
-    #         dwCipherLen = (INT)stInfo->dwCipherLen;
-    #         dwCipherBlockLen = (INT)stInfo->dwCipherBlockLen;
-    #         if (stInfo->szHash) szHash.SetText (stInfo->szHash);
-    #         dwHashLen = (INT)stInfo->dwHashLen;
-    #         if (stInfo->szExchange) szExchange.SetText (stInfo->szExchange);
-    #         dwMinExchangeLen = (INT)stInfo->dwMinExchangeLen;
-    #         dwMaxExchangeLen = (INT)stInfo->dwMaxExchangeLen;
-    #         if (stInfo->szCertificate) szCertificate.SetText (stInfo->szCertificate);
-    #         dwKeyType = (INT)stInfo->dwKeyType;
-    #     }
+    # inline void SetInfo (PSecPkgContext_CipherInfo stInfo)
+    # {
+    #     this->ResetObject ();
+    #     dwVersion = (INT)stInfo->dwVersion;
+    #     dwProtocol = (INT)stInfo->dwProtocol;
+    #     dwCipherSuite = (INT)stInfo->dwCipherSuite;
+    #     dwBaseCipherSuite = (INT)stInfo->dwBaseCipherSuite;
+    #     if (stInfo->szCipherSuite) szCipherSuite.SetText (stInfo->szCipherSuite);
+    #     if (stInfo->szCipher) szCipher.SetText (stInfo->szCipher);
+    #     dwCipherLen = (INT)stInfo->dwCipherLen;
+    #     dwCipherBlockLen = (INT)stInfo->dwCipherBlockLen;
+    #     if (stInfo->szHash) szHash.SetText (stInfo->szHash);
+    #     dwHashLen = (INT)stInfo->dwHashLen;
+    #     if (stInfo->szExchange) szExchange.SetText (stInfo->szExchange);
+    #     dwMinExchangeLen = (INT)stInfo->dwMinExchangeLen;
+    #     dwMaxExchangeLen = (INT)stInfo->dwMaxExchangeLen;
+    #     if (stInfo->szCertificate) szCertificate.SetText (stInfo->szCertificate);
+    #     dwKeyType = (INT)stInfo->dwKeyType;
+    # }
     # <> </include>
     # @end
 }
@@ -5131,12 +5134,12 @@
 
     # @begin
     # <> <include>
-    # public:
-    #     inline void SetInfo (PWINHTTP_SECURITY_INFO stInfo) {
-    #         this->ResetObject ();
-    #         ConnectionInfo.SetInfo (&stInfo->ConnectionInfo);
-    #         CipherInfo.SetInfo (&stInfo->CipherInfo);
-    #     }
+    # inline void SetInfo (PWINHTTP_SECURITY_INFO stInfo)
+    # {
+    #     this->ResetObject ();
+    #     ConnectionInfo.SetInfo (&stInfo->ConnectionInfo);
+    #     CipherInfo.SetInfo (&stInfo->CipherInfo);
+    # }
     # <> </include>
     # @end
 }
@@ -5163,12 +5166,12 @@
 
     # @begin
     # <> <include>
-    # public:
-    #     inline void SetInfo (LPWINHTTP_ASYNC_RESULT stInfo) {
-    #         this->ResetObject ();
-    #         dwResult = (INT)stInfo->dwResult;
-    #         dwError = (INT)stInfo->dwError;
-    #     }
+    # inline void SetInfo (LPWINHTTP_ASYNC_RESULT stInfo)
+    # {
+    #     this->ResetObject ();
+    #     dwResult = (INT)stInfo->dwResult;
+    #     dwError = (INT)stInfo->dwError;
+    # }
     # <> </include>
     # @end
 }
@@ -5196,12 +5199,12 @@
 
     # @begin
     # <> <include>
-    # public:
-    #     inline void SetInfo (WINHTTP_WEB_SOCKET_STATUS* stInfo) {
-    #         this->ResetObject ();
-    #         dwBytesTransferred =  (INT)*stInfo->dwBytesTransferred;
-    #         eBufferType =  (INT)stInfo->eBufferType;
-    #     }
+    # inline void SetInfo (WINHTTP_WEB_SOCKET_STATUS* stInfo)
+    # {
+    #     this->ResetObject ();
+    #     dwBytesTransferred =  (INT)*stInfo->dwBytesTransferred;
+    #     eBufferType =  (INT)stInfo->eBufferType;
+    # }
     # <> </include>
     # @end
 }
@@ -5225,16 +5228,16 @@
 
     # @begin
     # <> <include>
-    # public:
-    #     inline void SetInfo (PWINHTTP_CONNECTION_GROUP stInfo) {
-    #         this->ResetObject ();
-    #         cConnections = (INT)stInfo->cConnections;
-    #         WCHAR acGUID [64];
-    #         acGUID [0] = '\0';
-    #         ::StringFromGUID2 (stInfo->guidGroup, acGUID, NUM_ELEMENTS_OF (acGUID));
-    #         guidGroup.SetText (acGUID);
-    #     }
-    #     inline @sn<current_class> (PWINHTTP_CONNECTION_GROUP stInfo) : @sn<current_class>() { this->SetInfo(stInfo); }
+    # inline void SetInfo (PWINHTTP_CONNECTION_GROUP stInfo)
+    # {
+    #     this->ResetObject ();
+    #     cConnections = (INT)stInfo->cConnections;
+    #     WCHAR acGUID [64];
+    #     acGUID [0] = '\0';
+    #     ::StringFromGUID2 (stInfo->guidGroup, acGUID, NUM_ELEMENTS_OF (acGUID));
+    #     guidGroup.SetText (acGUID);
+    # }
+    # inline @sn<current_class> (PWINHTTP_CONNECTION_GROUP stInfo) : @sn<current_class>() { this->SetInfo(stInfo); }
     # <> </include>
     # @end
 }

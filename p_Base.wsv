@@ -97,12 +97,12 @@
 
     # @begin
     # <> <include>
-    #     float m_data;
-    #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_data = objCopyFrom.m_data; }
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_data == objCompare.m_data); }
-    #     inline float& data () { return m_data; }
-    #     inline float* GetDataPtr () { return &m_data; }
-    #     virtual void GetDumpString (CVolString& strDump, INT nMaxDumpSize) override { strDump.SetValueText ((DOUBLE)m_data); }
+    # float m_data;
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_data = objCopyFrom.m_data; }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_data == objCompare.m_data); }
+    # inline float& data () { return m_data; }
+    # inline float* GetDataPtr () { return &m_data; }
+    # virtual void GetDumpString (CVolString& strDump, INT nMaxDumpSize) override { strDump.SetValueText ((DOUBLE)m_data); }
     # <> </include>
     # @end
 }
