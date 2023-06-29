@@ -106,7 +106,7 @@
 - **[MinHook](https://github.com/TsudaKageyu/minhook)** `1.3.3` `BSD-2-Clause License` 极简的 x86/x64 API Hook 库
 - **[MMKV](https://github.com/Tencent/MMKV)** `1.2.14` `BSD-3-Clause License` 腾讯的高性能键值表
 - **[xxHash](https://github.com/Cyan4973/xxHash)** `8.0.1` `BSD-2-Clause License` 速度接近 RAM 限制的高速散列算法
-- **[Dear ImGui](https://github.com/ocornut/imgui)** `1.89.6` `MIT license` 轻量级的即时渲染界面开发框架
+- **[Dear ImGui](https://github.com/ocornut/imgui)** `1.89.7` `MIT license` 轻量级的即时渲染界面开发框架
 - **[GLFW](https://www.glfw.org)** `3.3.8` `zlib/libpng license` 跨平台的 OpenGL/Vulkan 桌面应用框架
 - **[glad](https://github.com/Dav1dde/glad)** `2023-04-04` `MIT License` 多语言的Vulkan/GL/GLES/EGL/GLX/WGL加载程序生成器
 - **[SDL](https://github.com/libsdl-org/SDL)** `2.26.5` `Zlib license` Simple DirectMedia Layer 是一个跨平台的多媒体开发库

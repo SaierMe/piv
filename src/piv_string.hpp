@@ -9,7 +9,6 @@
 #define _PIV_STRING_HPP
 
 #include "piv_encoding.hpp"
-#include "detail/piv_base.hpp"
 #include <vector>
 #include <memory>
 

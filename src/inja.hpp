@@ -25,7 +25,7 @@ SOFTWARE.
 #ifndef INCLUDE_INJA_INJA_HPP_
 #define INCLUDE_INJA_INJA_HPP_
 
-#include <nlohmann/json.hpp>
+#include "json.hpp"
 
 namespace inja {
 #ifndef INJA_DATA_TYPE

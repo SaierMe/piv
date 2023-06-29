@@ -206,6 +206,11 @@
         @ @dt<IM绘制列表类>{ImGui::GetWindowDrawList()}
     }
 
+    方法 取窗口DPI缩放 <公开 静态 类型 = 小数 注释 = "返回与当前窗口视口关联的DPI缩放" 折叠 @嵌入式方法 = "" @视窗.单精度小数 = 真>
+    {
+        @ ImGui::GetWindowDpiScale()
+    }
+
     方法 取窗口位置 <公开 静态 类型 = ImVec2 注释 = "返回当前窗口的位置" 折叠 @嵌入式方法 = "">
     {
         @ @dt<ImVec2>{ImGui::GetWindowPos()}
@@ -226,6 +231,11 @@
         @ ImGui::GetWindowHeight()
     }
 
+    方法 取窗口视口 <公开 静态 类型 = IM视口类 注释 = "返回与当前窗口关联的视口" @嵌入式方法 = "">
+    {
+        @ @dt<IM视口类>{ImGui::GetWindowViewport()}
+    }
+
     # 窗口操作 | Window manipulation
 
     方法 置下一窗口位置 <公开 静态 注释 = "设置下一个窗口的位置,请在\"窗口/窗口开端\"之前调用." 折叠 @嵌入式方法 = "">
@@ -236,18 +246,17 @@
         @ ImGui::SetNextWindowPos(@<窗口位置>, (ImGuiCond)@<执行条件>, @<窗口中心点>)
     }
 
-    方法 置下一窗口尺寸 <公开 静态
-            注释 = "设置下一个窗口的尺寸,请在\"窗口/窗口开端\"之前调用. set axis to 0.0f to force an auto-fit on this axis. call before Begin()"
-            折叠 @嵌入式方法 = "">
+    方法 置下一窗口尺寸 <公开 静态 注释 = "设置下一个窗口的尺寸,请在\"窗口/窗口开端\"之前调用."
+            注释 = "set axis to 0.0f to force an auto-fit on this axis. call before Begin()" 折叠 @嵌入式方法 = "">
     参数 窗口尺寸 <类型 = ImVec2>
     参数 执行条件 <类型 = IM执行条件 @默认值 = IM执行条件.无>
     {
         @ ImGui::SetNextWindowSize(@<窗口尺寸>, (ImGuiCond)@<执行条件>)
     }
 
-    方法 置下一窗口尺寸限制 <公开 静态
-            注释 = "设置下一个窗口的尺寸限制,请在\"窗口/窗口开端\"之前调用. use -1,-1 on either X/Y axis to preserve the current size. Sizes will be rounded down. Use callback to apply non-trivial programmatic constraints."
-            折叠 @嵌入式方法 = "">
+    方法 置下一窗口尺寸限制 <公开 静态 注释 = "设置下一个窗口的尺寸限制,请在\"窗口/窗口开端\"之前调用."
+            注释 = "use -1,-1 on either X/Y axis to preserve the current size. Sizes will be rounded down."
+            注释 = "Use callback to apply non-trivial programmatic constraints." 折叠 @嵌入式方法 = "">
     参数 最小尺寸 <类型 = ImVec2>
     参数 最大尺寸 <类型 = ImVec2>
     {
@@ -280,11 +289,17 @@
     }
 
     方法 置下一窗口背景透明度 <公开 静态 注释 = "设置下一个窗口的背景颜色透明度,请在\"窗口开端\"之前调用."
-            注释 = "helper to easily override the Alpha component of ImGuiCol_WindowBg/ChildBg/PopupBg. you may also use ImGuiWindowFlags_NoBackground."
-            折叠 @嵌入式方法 = "">
+            注释 = "helper to easily override the Alpha component of ImGuiCol_WindowBg/ChildBg/PopupBg."
+            注释 = "you may also use ImGuiWindowFlags_NoBackground." 折叠 @嵌入式方法 = "">
     参数 Alpha值 <类型 = 小数 注释 = "0.0f-1.0f">
     {
         @ ImGui::SetNextWindowBgAlpha((float)@<Alpha值>)
+    }
+
+    方法 置下一窗口视口 <公开 静态 注释 = "设置下一个窗口的视口" 折叠 @嵌入式方法 = "">
+    参数 视口ID <类型 = 整数>
+    {
+        @ ImGui::SetNextWindowViewport((ImGuiID)@<视口ID>)
     }
 
     方法 置窗口位置 <公开 静态 注释 = "设置指定窗口的位置" 折叠 @嵌入式方法 = "">
@@ -395,7 +410,8 @@
     }
 
     方法 水平滚动至此 <公开 静态
-            注释 = "adjust scrolling amount to make current cursor position visible. center_x_ratio=0.0: left, 0.5: center, 1.0: right. When using to make a \"default/current item\" visible, consider using SetItemDefaultFocus() instead."
+            注释 = "adjust scrolling amount to make current cursor position visible. center_x_ratio=0.0: left, 0.5: center, 1.0: right."
+            注释 = "When using to make a \"default/current item\" visible, consider using SetItemDefaultFocus() instead."
             折叠 @嵌入式方法 = "">
     参数 水平中心比例 <类型 = 小数 @默认值 = 0.5>
     {
@@ -403,7 +419,8 @@
     }
 
     方法 垂直滚动至此 <公开 静态
-            注释 = "adjust scrolling amount to make current cursor position visible. center_y_ratio=0.0: top, 0.5: center, 1.0: bottom. When using to make a \"default/current item\" visible, consider using SetItemDefaultFocus() instead."
+            注释 = "adjust scrolling amount to make current cursor position visible. center_y_ratio=0.0: top, 0.5: center, 1.0: bottom."
+            注释 = "When using to make a \"default/current item\" visible, consider using SetItemDefaultFocus() instead."
             折叠 @嵌入式方法 = "">
     参数 垂直中心比例 <类型 = 小数 @默认值 = 0.5>
     {
@@ -494,7 +511,8 @@
     # 参数堆栈(当前窗口) | Parameters stacks (current window)
 
     方法 设置项目宽度 <公开 静态 注释 = "子语句体中创建的项目将统一为所指定的项目宽度."
-            注释 = "push width of items for common large \"item+label\" widgets. >0.0f: width in pixels, <0.0f align xx pixels to the right of window (so -FLT_MIN always align width to the right side)."
+            注释 = "push width of items for common large \"item+label\" widgets. >0.0f: width in pixels,"
+            注释 = "<0.0f align xx pixels to the right of window (so -FLT_MIN always align width to the right side)."
             折叠 隐藏值属性 = "0" @嵌入式方法 = "has_body = true\r\nbody_tail = \"}\\r\\nImGui::PopItemWidth();\"">
     参数 项目宽度 <类型 = 小数>
     {
@@ -502,7 +520,8 @@
     }
 
     方法 置下一项目宽度 <公开 静态
-            注释 = "set width of the _next_ common large \"item+label\" widget. >0.0f: width in pixels, <0.0f align xx pixels to the right of window (so -FLT_MIN always align width to the right side)"
+            注释 = "set width of the _next_ common large \"item+label\" widget. >0.0f: width in pixels,"
+            注释 = "<0.0f align xx pixels to the right of window (so -FLT_MIN always align width to the right side)"
             折叠 @嵌入式方法 = "">
     参数 新项目宽度 <类型 = 小数>
     {
@@ -543,8 +562,8 @@
     }
 
     方法 取32位颜色 <公开 静态 类型 = 整数
-            注释 = "retrieve given style color with style alpha applied and optional extra alpha multiplier, packed as a 32-bit value suitable for ImDrawList"
-            折叠 @嵌入式方法 = "">
+            注释 = "retrieve given style color with style alpha applied and optional extra alpha multiplier,"
+            注释 = "packed as a 32-bit value suitable for ImDrawList" 折叠 @嵌入式方法 = "">
     参数 颜色ID <类型 = IM颜色标识符>
     参数 Alpha乘数 <类型 = 小数 @默认值 = 1.0>
     {
@@ -568,8 +587,8 @@
     }
 
     方法 取样式颜色 <公开 静态 类型 = ImVec4
-            注释 = "retrieve style color as stored in ImGuiStyle structure. use to feed back into PushStyleColor(), otherwise use GetColorU32() to get style color with style alpha baked in."
-            折叠 @嵌入式方法 = "">
+            注释 = "retrieve style color as stored in ImGuiStyle structure. use to feed back into PushStyleColor(),"
+            注释 = "otherwise use GetColorU32() to get style color with style alpha baked in." 折叠 @嵌入式方法 = "">
     参数 颜色ID <类型 = IM颜色标识符>
     {
         @ @dt<ImVec4>{ImGui::GetStyleColorVec4((ImGuiCol)@<颜色ID>)}
@@ -663,8 +682,9 @@
     }
 
     方法 取光标屏幕位置 <公开 静态 类型 = ImVec2 注释 = "返回绝对坐标的光标位置"
-            注释 = "enerally top-left == GetMainViewport()->Pos == (0,0) in single viewport mode, and bottom-right == GetMainViewport()->Pos+Size == io.DisplaySize in single-viewport mode."
-            折叠 @嵌入式方法 = "">
+            注释 = "enerally top-left == GetMainViewport()->Pos == (0,0) in single viewport mode,"
+            注释 = "and bottom-right == GetMainViewport()->Pos+Size == io.DisplaySize in single-viewport mode." 折叠
+            @嵌入式方法 = "">
     {
         @ @dt<ImVec2>{ImGui::GetCursorScreenPos()}
     }
@@ -922,8 +942,8 @@
 
     # 组件: 组合框(下拉) | Widgets: Combo Box (Dropdown)
 
-    方法 创建组合框 <公开 静态 注释 = "创建一个组合框(下拉列表框)组件,可以在子语句体中使用\"可选项\"自定义内容." 注释 = "创建失败将不执行子语句体中的代码." 折叠
-            隐藏值属性 = "0" @嵌入式方法 = "has_body = true\r\nbody_tail = \"ImGui::EndCombo();\\r\\n}\"">
+    方法 创建组合框 <公开 静态 注释 = "创建一个组合框(下拉列表框)组件,可以在子语句体中使用\"可选项\"自定义内容." 注释 = "创建失败将不执行子语句体中的代码." 折叠 隐藏值属性 = "0"
+            @嵌入式方法 = "has_body = true\r\nbody_tail = \"ImGui::EndCombo();\\r\\n}\"">
     参数 标签文本 <注释 = "提供显示在组合框旁边的标签文本;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;"
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
@@ -1433,8 +1453,8 @@
         @                              (float)@<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, (ImGuiSliderFlags)@<滑块标志>)
     }
 
-    方法 单浮点垂直滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一个垂直滑块条,可以在指定的的范围内拖动更改一个32位整数变量的值."
-            注释 = "注: Ctrl+点击滑块可以切换到手动输入数值." 返回值注释 = "值变量被更改后返回真" 折叠 @嵌入式方法 = "">
+    方法 单浮点垂直滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一个垂直滑块条,可以在指定的的范围内拖动更改一个32位整数变量的值." 注释 = "注: Ctrl+点击滑块可以切换到手动输入数值."
+            返回值注释 = "值变量被更改后返回真" 折叠 @嵌入式方法 = "">
     参数 标签文本 <注释 = "提供显示在滑块旁边的标签文本;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;"
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
@@ -1449,8 +1469,8 @@
         @                     u8@sn<quot>@pvpt<显示格式>@sn<quot>, (ImGuiSliderFlags)@<滑块标志>)
     }
 
-    方法 小数垂直滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一个垂直滑块条,可以在指定的的范围内拖动更改一个32位整数变量的值."
-            注释 = "注: Ctrl+点击滑块可以切换到手动输入数值." 返回值注释 = "值变量被更改后返回真" 折叠 @嵌入式方法 = "">
+    方法 小数垂直滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一个垂直滑块条,可以在指定的的范围内拖动更改一个32位整数变量的值." 注释 = "注: Ctrl+点击滑块可以切换到手动输入数值."
+            返回值注释 = "值变量被更改后返回真" 折叠 @嵌入式方法 = "">
     参数 标签文本 <注释 = "提供显示在滑块旁边的标签文本;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;"
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
@@ -1497,8 +1517,8 @@
         @                              @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, (ImGuiSliderFlags)@<滑块标志>)
     }
 
-    方法 整数垂直滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一个垂直滑块条,可以在指定的的范围内拖动更改一个32位整数变量的值."
-            注释 = "注: Ctrl+点击滑块可以切换到手动输入数值." 返回值注释 = "值变量被更改后返回真" 折叠 @嵌入式方法 = "">
+    方法 整数垂直滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一个垂直滑块条,可以在指定的的范围内拖动更改一个32位整数变量的值." 注释 = "注: Ctrl+点击滑块可以切换到手动输入数值."
+            返回值注释 = "值变量被更改后返回真" 折叠 @嵌入式方法 = "">
     参数 标签文本 <注释 = "提供显示在滑块旁边的标签文本;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;"
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
@@ -1513,8 +1533,8 @@
         @                   u8@sn<quot>@pvpt<显示格式>@sn<quot>, (ImGuiSliderFlags)@<滑块标志>)
     }
 
-    方法 长整数垂直滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一个垂直滑块条,可以在指定的的范围内拖动更改一个32位整数变量的值."
-            注释 = "注: Ctrl+点击滑块可以切换到手动输入数值." 返回值注释 = "值变量被更改后返回真" 折叠 @嵌入式方法 = "">
+    方法 长整数垂直滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一个垂直滑块条,可以在指定的的范围内拖动更改一个32位整数变量的值." 注释 = "注: Ctrl+点击滑块可以切换到手动输入数值."
+            返回值注释 = "值变量被更改后返回真" 折叠 @嵌入式方法 = "">
     参数 标签文本 <注释 = "提供显示在滑块旁边的标签文本;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;"
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
@@ -1851,8 +1871,8 @@
 
     # 组件: 可选项 | Widgets: Selectables
 
-    方法 可选项 <公开 静态 类型 = 逻辑型 注释 = "创建一个可选择的项目(悬停时会高亮显示,选中后会变成另一种颜色)."
-            注释 = "本方法创建的选项,单击后不能切换选中状态,需要另外写代码实现." 返回值注释 = "项目被单击时返回真" 折叠 @嵌入式方法 = "">
+    方法 可选项 <公开 静态 类型 = 逻辑型 注释 = "创建一个可选择的项目(悬停时会高亮显示,选中后会变成另一种颜色)." 注释 = "本方法创建的选项,单击后不能切换选中状态,需要另外写代码实现."
+            返回值注释 = "项目被单击时返回真" 折叠 @嵌入式方法 = "">
     参数 标签文本 <注释 = "提供可选项的文本;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;"
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
@@ -1953,18 +1973,31 @@
 
     方法 创建工具提示 <公开 静态 注释 = "创建一个功能齐全的工具提示窗口,可以在子语句体中使用任意项目." 注释 = "工具提示窗口将跟随鼠标显示,它不会获得焦点." 折叠 隐藏值属性 = "0"
             @嵌入式方法 = "has_body = true\r\nbody_tail = \"ImGui::EndTooltip();\\r\\n}\"">
-    参数 是否显示 <类型 = 逻辑型 注释 = "设置是否显示工具提示窗口,建议使用\"是否为悬停项目\"来判断">
+    参数 是否显示 <类型 = 逻辑型 注释 = "设置是否显示工具提示窗口,建议使用\"可有悬停项目\"来判断" @默认值 = 真>
     {
         @ if (@<是否显示> && ImGui::BeginTooltip())
     }
 
-    方法 置工具提示 <公开 静态 注释 = "创建一个仅显示文本的工具提示窗口,通常配合\"是否为悬停项目\"使用." 注释 = "工具提示窗口将跟随鼠标显示,它不会获得焦点." 折叠
-            @嵌入式方法 = "">
+    方法 置工具提示 <公开 静态 注释 = "创建一个仅显示文本的工具提示窗口,通常配合\"可有悬停项目\"使用." 注释 = "工具提示窗口将跟随鼠标显示,它不会获得焦点." 折叠 @嵌入式方法 = "">
     参数 格式文本 <注释 = "提供显示在工具提示窗口中的格式文本;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" 注释 = "文本格式请参考\"取格式文本()\""
             @匹配类型 = 通用型>
     参数 替换数据 <注释 = "用作给格式文本中的格式替换符提供替换数据,格式替换符的数目和数据类型必须与替换数据保持一致." @匹配类型 = 通用基本型 @可扩展 = "" @默认值 = 0>
     {
         @ ImGui::SetTooltip(*PivAny2U{@<格式文本>}, @<替换数据>)
+    }
+
+    方法 创建项目工具提示 <公开 静态 注释 = "创建一个功能齐全的工具提示窗口,可以在子语句体中使用任意项目." 注释 = "跟\"创建工具提示\"不同,只要有项目悬停它就会自动弹出." 折叠
+            隐藏值属性 = "0" @嵌入式方法 = "has_body = true\r\nbody_tail = \"ImGui::EndTooltip();\\r\\n}\"">
+    {
+        @ if (ImGui::BeginItemTooltip())
+    }
+
+    方法 置项目工具提示 <公开 静态 注释 = "创建一个仅显示文本的工具提示窗口,只要有项目悬停它就会自动弹出." 注释 = "工具提示窗口将跟随鼠标显示,它不会获得焦点." 折叠 @嵌入式方法 = "">
+    参数 格式文本 <注释 = "提供显示在工具提示窗口中的格式文本;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" 注释 = "文本格式请参考\"取格式文本()\""
+            @匹配类型 = 通用型>
+    参数 替换数据 <注释 = "用作给格式文本中的格式替换符提供替换数据,格式替换符的数目和数据类型必须与替换数据保持一致." @匹配类型 = 通用基本型 @可扩展 = "" @默认值 = 0>
+    {
+        @ ImGui::SetItemTooltip(*PivAny2U{@<格式文本>}, @<替换数据>)
     }
 
     方法 提示文本框 <公开 静态 注释 = "创建一个文本框,鼠标悬停时可以弹出工具提示窗口." 折叠 @嵌入式方法 = "">
@@ -2084,6 +2117,52 @@
         @ ImGui::SetTabItemClosed(*PivAny2U{@<标签文本>})
     }
 
+    # 停靠 | Docking
+
+    方法 停靠空间 <公开 静态 类型 = 整数 注释 = "创建一个停靠空间"
+            注释 = "create an explicit dock node _within_ an existing window. See Docking demo for details." 折叠
+            @嵌入式方法 = "">
+    参数 ID <类型 = 整数>
+    参数 尺寸 <类型 = ImVec2 @默认值 = 空对象>
+    参数 标志 <类型 = 整数 @默认值 = IM停靠节点标志.无>
+    参数 窗口类 <类型 = IM窗口类 @默认值 = 空对象>
+    {
+        @ (INT)ImGui::DockSpace((ImGuiID)@<ID>, @<尺寸>, (ImGuiDockNodeFlags)@<标志>, @<窗口类>.GetPtr())
+    }
+
+    方法 覆盖视口的停靠空间 <公开 静态 类型 = 整数 注释 = "创建一个覆盖屏幕或特定视口的显式停靠节点。" 折叠 @嵌入式方法 = "">
+    参数 视口 <类型 = IM视口类 @默认值 = 空对象>
+    参数 标志 <类型 = 整数 @默认值 = IM停靠节点标志.无>
+    参数 窗口类 <类型 = IM窗口类 @默认值 = 空对象>
+    {
+        @ (INT)ImGui::DockSpaceOverViewport(@<视口>.GetPtr(), (ImGuiDockNodeFlags)@<标志>, @<窗口类>.GetPtr())
+    }
+
+    方法 置下一窗口停靠ID <公开 静态 折叠 @嵌入式方法 = "">
+    参数 停靠ID <类型 = 整数 "">
+    参数 执行条件 <类型 = IM执行条件 @默认值 = IM执行条件.无>
+    {
+        @ ImGui::SetNextWindowDockID((ImGuiID)@<停靠ID>, (ImGuiCond)@<执行条件>)
+    }
+
+    方法 置下一窗口类 <公开 静态 注释 = "set next window class (control docking compatibility +"
+            注释 = "provide hints to platform backend via custom viewport flags and platform parent/child relationship)"
+            @嵌入式方法 = "">
+    参数 窗口类 <类型 = IM窗口类 @默认值 = 空对象>
+    {
+        @ ImGui::SetNextWindowClass(@<窗口类>.GetPtr())
+    }
+
+    方法 取窗口停靠ID <公开 静态 类型 = 整数 折叠 @嵌入式方法 = "">
+    {
+        @ (INT)ImGui::GetWindowDockID()
+    }
+
+    方法 窗口是否停靠 <公开 静态 类型 = 逻辑型 注释 = "is current window docked into another window?" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui::IsWindowDocked()
+    }
+
     # 日志记录 | Logging/Capture
 
     方法 记录到控制台 <公开 静态 注释 = "开始记录日志,之后会记录界面中显示的文本数据,直到执行\"结束记录\"后一并输出到控制台(stdout)." 折叠 @嵌入式方法 = "">
@@ -2191,8 +2270,8 @@
         @ ImGui::IsItemHovered((ImGuiHoveredFlags)@<标志>)
     }
 
-    方法 项目是否活动 <公开 静态 类型 = 逻辑型 注释 = "返回最后一个项目是否为活动状态.例如按住按钮、编辑文本等." 注释 = "在项目上按住鼠标按钮时会持续返回真,不交互的项目是在返回假."
-            折叠 @嵌入式方法 = "">
+    方法 项目是否活动 <公开 静态 类型 = 逻辑型 注释 = "返回最后一个项目是否为活动状态.例如按住按钮、编辑文本等." 注释 = "在项目上按住鼠标按钮时会持续返回真,不交互的项目是在返回假." 折叠
+            @嵌入式方法 = "">
     {
         @ ImGui::IsItemActive()
     }
@@ -2281,7 +2360,7 @@
 
     # 视口 | Viewports
 
-    方法 取主视口 <公开 静态 类型 = IM视口类 注释 = "返回主视口" @嵌入式方法 = "">
+    方法 取主视口 <公开 静态 类型 = IM视口类 注释 = "返回主视口" 折叠 @嵌入式方法 = "">
     {
         @ @dt<IM视口类>{ImGui::GetMainViewport()}
     }
@@ -2523,6 +2602,52 @@
     参数 捕获键盘 <类型 = 逻辑型>
     {
         @ ImGui::SetNextFrameWantCaptureMouse((bool)@<捕获键盘>)
+    }
+
+    # (Optional) Platform/OS interface for multi-viewport support
+
+    方法 取平台IO <公开 静态 类型 = IM平台IO类 注释 = "platform/renderer functions, for backend to setup + viewports list."
+            折叠 @嵌入式方法 = "">
+    {
+        @ @dt<IM平台IO类>{&ImGui::GetPlatformIO()}
+    }
+
+    方法 更新平台窗口 <公开 静态 注释 = "call in main loop. will call CreateWindow/ResizeWindow/etc."
+            注释 = "platform functions for each secondary viewport, and DestroyWindow for each inactive viewport."
+            折叠 @嵌入式方法 = "">
+    {
+        @ ImGui::UpdatePlatformWindows()
+    }
+
+    方法 渲染平台默认窗口 <公开 静态 注释 = "call in main loop."
+            注释 = "will call RenderWindow/SwapBuffers platform functions for each"
+            注释 = "secondary viewport which doesn\'t have the ImGuiViewportFlags_Minimized flag set."
+            注释 = "May be reimplemented by user for custom rendering needs." 折叠 @嵌入式方法 = "">
+    参数 平台渲染参数 <类型 = 变整数 @默认值 = 0>
+    参数 渲染器参数 <类型 = 变整数 @默认值 = 0>
+    {
+        @ ImGui::RenderPlatformWindowsDefault((void)@<平台渲染参数>,(void)@<渲染器参数>)
+    }
+
+    方法 销毁平台窗口 <公开 静态 注释 = "call DestroyWindow platform functions for all viewports."
+            注释 = "call from backend Shutdown() if you need to close platform windows before imgui shutdown."
+            注释 = "otherwise will be called by DestroyContext()." 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui::DestroyPlatformWindows()
+    }
+
+    方法 寻找视口_ID <公开 静态 类型 = IM视口类 注释 = "this is a helper for backends." 折叠 @嵌入式方法 = "">
+    参数 视口ID <类型 = 整数>
+    {
+        @ @dt<IM视口类>{&ImGui::FindViewportByID((ImGuiID)@<视口ID>)}
+    }
+
+    方法 寻找视口_平台句柄 <公开 静态 类型 = IM视口类
+            注释 = "this is a helper for backends. the type platform_handle is decided by the backend"
+            注释 = "(e.g. HWND, MyWindow*, GLFWwindow* etc.)" 折叠 @嵌入式方法 = "">
+    参数 平台句柄 <类型 = 变整数>
+    {
+        @ @dt<IM视口类>{&ImGui::FindViewportByPlatformHandle((void*)@<平台句柄>)}
     }
 }
 
@@ -2962,9 +3087,8 @@
 
 # 辅助类
 
-类 IM文本数组类 <公开 基础类 = 扩展对象类 注释 = "  成员类型为\"标准文本类U\"的数组类,内部文本编码是UTF-8,"
-        注释 = "加入成员时支持多种文本类型,如有必要会自动转换编码." 注释 = "  主要供\"组合框\"、\"列表框\"等ImGUI窗口组件使用." 折叠
-        @文档 = "category = \"辅助类\"" @视窗.外部头文件 = "<vector>">
+类 IM文本数组类 <公开 基础类 = 扩展对象类 注释 = "  成员类型为\"标准文本类U\"的数组类,内部文本编码是UTF-8," 注释 = "加入成员时支持多种文本类型,如有必要会自动转换编码."
+        注释 = "  主要供\"组合框\"、\"列表框\"等ImGUI窗口组件使用." 折叠 @文档 = "category = \"辅助类\"" @视窗.外部头文件 = "<vector>">
 {
     方法 枚举循环 <公开 注释 = "  启动一个循环来枚举数组的每一个成员,在循环中可以调用" 注释 = "\"取枚举值\"方法来获取当前所枚举到的成员值,调用\"取枚举索引\""
             注释 = "方法来获取当前所枚举到成员的索引位置." 折叠 @嵌入式方法 = "name = counter\r\nhas_loop_body = true">
@@ -3038,8 +3162,8 @@
         @ static_cast<INT_P>(@sn<this>.data().size())
     }
 
-    方法 取成员 <公开 类型 = 标准文本类U 注释 = "返回所指定索引位置处的\"标准文本类U\"成员值." 注释 = "高效率,不检查边界,不抛出异常,索引无效直接崩溃." 折叠
-            @嵌入式方法 = "" @视窗.返回参考 = 真>
+    方法 取成员 <公开 类型 = 标准文本类U 注释 = "返回所指定索引位置处的\"标准文本类U\"成员值." 注释 = "高效率,不检查边界,不抛出异常,索引无效直接崩溃." 折叠 @嵌入式方法 = ""
+            @视窗.返回参考 = 真>
     参数 索引位置 <类型 = 变整数 注释 = "提供所欲操作成员的索引位置,必须大于等于0且小于数组成员数目.">
     {
         @ @sn<this>.data()[static_cast<size_t>(@<索引位置>)]
@@ -3455,14 +3579,49 @@
 
     # @ @m<PIV_DECLARE_STRUCT_CLASS> (ImGuiViewport)
 
-    方法 标志 <公开 属性读 类型 = 整数 注释 = "请参考\"IM视口标志\" " 折叠 @嵌入式方法 = "">
+    方法 ID <公开 属性读 类型 = 整数 折叠 @嵌入式方法 = "">
+    {
+        @ (INT)@sn<this>.data().ID
+    }
+
+    方法 标志 <公开 属性读 类型 = 整数 注释 = "请参考\"IM视口标志\"" 折叠 @嵌入式方法 = "">
     {
         @ (INT)@sn<this>.data().Flags
+    }
+
+    方法 标志 <公开 属性写 注释 = "请参考\"IM视口标志\"" 折叠>
+    参数 所欲设置的值 <类型 = 整数>
+    {
+        @ data().Flags = (ImGuiViewportFlags)@<所欲设置的值>;
     }
 
     方法 平台句柄 <公开 属性读 类型 = 变整数 注释 = "Windows平台下返回Win32的窗口句柄" 折叠 @嵌入式方法 = "">
     {
         @ (INT_P)@sn<this>.data().PlatformHandleRaw
+    }
+
+    方法 DPI缩放 <公开 属性读 类型 = 小数 注释 = "1.0f = 96 DPI,即没有额外缩放." 折叠 @嵌入式方法 = "" @视窗.单精度小数 = 真>
+    {
+        @ @sn<this>.data().DpiScale
+    }
+
+    方法 DPI缩放 <公开 属性写 注释 = "1.0f = 96 DPI,即没有额外缩放." 折叠>
+    参数 所欲设置的值 <类型 = 小数>
+    {
+        @ data().DpiScale = (float)@<所欲设置的值>;
+    }
+
+    方法 父视口ID <公开 属性读 类型 = 整数
+            注释 = "(Advanced) 0: no parent. Instruct the platform backend to setup a parent/child relationship between platform windows."
+            折叠 @嵌入式方法 = "">
+    {
+        @ (INT)@sn<this>.data().ParentViewportId
+    }
+
+    方法 父视口ID <公开 属性写 折叠>
+    参数 所欲设置的值 <类型 = 整数>
+    {
+        @ data().ParentViewportId = (ImGuiID)@<所欲设置的值>;
     }
 
     方法 取位置 <公开 类型 = ImVec2 注释 = "返回主区域的视口位置,坐标与操作系统桌面/本地坐标相同." 折叠 @嵌入式方法 = "">
@@ -3496,6 +3655,18 @@
     }
 }
 
+类 IM窗口类 <公开 基础类 = 数据类型基础类 折叠 @文档 = "category = \"辅助类\"">
+{
+
+    # @ @m<PIV_DECLARE_STRUCT_CLASS> (ImGuiWindowClass)
+}
+
+类 IM平台IO类 <公开 基础类 = 数据类型基础类 折叠 @文档 = "category = \"辅助类\"">
+{
+
+    # @ @m<PIV_DECLARE_STRUCT_CLASS> (ImGuiPlatformIO)
+}
+
 # 标志常量
 
 类 IM窗口标志 <公开 注释 = "ImGui.窗口开端()" 注释 = "ImGuiWindowFlags" 折叠 @文档 = "category = \"标志类\"">
@@ -3524,15 +3695,19 @@
             注释 = "Ensure child windows without border uses style.WindowPadding (ignored by default for non-bordered child windows, because more convenient)">
     常量 禁止导航输入 <公开 类型 = 整数 值 = @ImGuiWindowFlags_NoNavInputs 注释 = "禁止使用游戏手柄和鼠标导航窗口(控制窗口的前进、后退、刷新等)">
     常量 禁止导航焦点 <公开 类型 = 整数 值 = @ImGuiWindowFlags_NoNavFocus 注释 = "使用游戏手柄和鼠标导航窗口将无法焦点到此窗口,除了CTRL+TAB">
-    常量 未保存文档 <公开 类型 = 整数 值 = @ImGuiWindowFlags_UnsavedDocument 注释 = "在窗口标题后面显示一个小圆点">
+    常量 未保存文档 <公开 类型 = 整数 值 = @ImGuiWindowFlags_UnsavedDocument 注释 = "在窗口标题后面显示一个小圆点"
+            注释 = "When used in a tab/docking context, tab is selected when clicking the X + closure is not assumed (will wait for user to stop submitting the tab)."
+            注释 = "Otherwise closure is assumed when pressing the X, so if you keep submitting the tab may reappear at end of tab bar.">
+    常量 禁止停靠 <公开 类型 = 整数 值 = @ImGuiWindowFlags_NoDocking 注释 = "禁止窗口使用停靠">
     常量 禁止导航 <公开 类型 = 整数 值 = @ImGuiWindowFlags_NoNav 注释 = "连续位或(禁止导航输入, 禁止导航焦点)">
     常量 禁止窗口装饰 <公开 类型 = 整数 值 = @ImGuiWindowFlags_NoDecoration 注释 = "连续位或(禁止标题栏, 禁止调整大小, 禁止滚动条, 禁止折叠)">
     常量 禁止输入 <公开 类型 = 整数 值 = @ImGuiWindowFlags_NoInputs 注释 = "连续位或(禁止鼠标输入, 禁止导航输入, 禁止导航焦点)">
 }
 
 类 IM输入框标志 <公开 注释 = "ImGuiInputTextFlags" 注释 = "Flags for ImGui::InputText()"
-        注释 = "(Those are per-item flags. There are shared flags in ImGuiIO: io.ConfigInputTextCursorBlink and io.ConfigInputTextEnterKeepActive)"
-        折叠 @文档 = "category = \"标志类\"">
+        注释 = "(Those are per-item flags."
+        注释 = "There are shared flags in ImGuiIO: io.ConfigInputTextCursorBlink"
+        注释 = "and io.ConfigInputTextEnterKeepActive)" 折叠 @文档 = "category = \"标志类\"">
 {
     常量 无 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_None>
     常量 十进制数字 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_CharsDecimal 注释 = "允许输入 0123456789.+-*/">
@@ -3868,37 +4043,69 @@
     常量 任意窗口 <公开 类型 = 整数 值 = @ImGuiFocusedFlags_AnyWindow 注释 = "任意窗口获得焦点都会返回真">
     常量 无弹出层级 <公开 类型 = 整数 值 = @ImGuiFocusedFlags_NoPopupHierarchy
             注释 = "不考虑弹出层级结构(不将触发弹出的窗口视为弹出项的父级,与\"子窗口\"或\"根窗口\"一起使用）">
+    常量 停靠层级 <公开 类型 = 整数 值 = @ImGuiFocusedFlags_DockHierarchy
+            注释 = "考虑停靠的层次结构,将停靠空间的宿主视为停靠窗口的父级(与\"子窗口\"和\"根窗口\"组合使用)">
     常量 根和子窗口 <公开 类型 = 整数 值 = @ImGuiFocusedFlags_RootAndChildWindows
             注释 = "ImGuiFocusedFlags_RootWindow | ImGuiFocusedFlags_ChildWindows">
 }
 
-类 IM悬停标志 <公开 注释 = "ImGuiHoveredFlags ImGui.当前窗口是否有悬停()、ImGui.当前项目是否有悬停()" 折叠 @文档 = "category = \"标志类\"">
+类 IM悬停标志 <公开 注释 = "ImGuiHoveredFlags ImGui.窗口可有悬停()、ImGui.项目可有悬停()" 折叠 @文档 = "category = \"标志类\"">
 {
     常量 无 <公开 类型 = 整数 值 = @ImGuiHoveredFlags_None 注释 = "当鼠标直接悬停于项目/窗口,未被另一个窗口遮挡,且未被活动弹出项或模态输入框遮挡,则返回真.">
-    常量 子窗口 <公开 类型 = 整数 值 = @ImGuiHoveredFlags_ChildWindows 注释 = "仅限\"当前窗口是否有悬停\": 在此窗口的任意子窗口上悬停时返回真.">
-    常量 根窗口 <公开 类型 = 整数 值 = @ImGuiHoveredFlags_RootWindow 注释 = "仅限\"当前窗口是否有悬停\": 从根窗口测试(当前层级结构的最顶端父级)">
-    常量 任意窗口 <公开 类型 = 整数 值 = @ImGuiHoveredFlags_AnyWindow 注释 = "仅限\"当前窗口是否有悬停\": 在任意窗口上悬停时返回真">
+    常量 子窗口 <公开 类型 = 整数 值 = @ImGuiHoveredFlags_ChildWindows 注释 = "仅限\"窗口可有悬停\": 在此窗口的任意子窗口上悬停时返回真.">
+    常量 根窗口 <公开 类型 = 整数 值 = @ImGuiHoveredFlags_RootWindow 注释 = "仅限\"窗口可有悬停\": 从根窗口测试(当前层级结构的最顶端父级)">
+    常量 任意窗口 <公开 类型 = 整数 值 = @ImGuiHoveredFlags_AnyWindow 注释 = "仅限\"窗口可有悬停\": 在任意窗口上悬停时返回真">
     常量 无弹出层级 <公开 类型 = 整数 值 = @ImGuiHoveredFlags_NoPopupHierarchy
-            注释 = "仅限\"当前窗口是否有悬停\": 不考虑弹出层级结构(不将触发弹出的窗口视为弹出项的父级,与\"子窗口\"或\"根窗口\"一起使用）">
+            注释 = "仅限\"窗口可有悬停\": 不考虑弹出层级结构(不将触发弹出的窗口视为弹出项的父级,与\"子窗口\"或\"根窗口\"一起使用）">
+    常量 停靠层级 <公开 类型 = 整数 值 = @ImGuiHoveredFlags_DockHierarchy
+            注释 = "仅限\"窗口可有悬停\": 考虑停靠的层次结构,将停靠空间的宿主视为停靠窗口的父级(与\"子窗口\"和\"根窗口\"组合使用)">
     常量 "" <公开 类型 = 整数 值 = @ImGuiHoveredFlags_AllowWhenBlockedByPopup
             注释 = "Return true even if a popup window is normally blocking access to this item/window">
     常量 "" <公开 类型 = 整数 值 = @ImGuiHoveredFlags_AllowWhenBlockedByActiveItem
             注释 = "Return true even if an active item is blocking access to this item/window. Useful for Drag and Drop patterns.">
     常量 "" <公开 类型 = 整数 值 = @ImGuiHoveredFlags_AllowWhenOverlapped
-            注释 = "仅限\"当前项目是否有悬停\": Return true even if the position is obstructed or overlapped by another window">
+            注释 = "仅限\"项目可有悬停\": Return true even if the position is obstructed or overlapped by another window">
     常量 "" <公开 类型 = 整数 值 = @ImGuiHoveredFlags_AllowWhenDisabled
-            注释 = "仅限\"当前项目是否有悬停\": Return true even if the item is disabled">
+            注释 = "仅限\"项目可有悬停\": Return true even if the item is disabled">
     常量 "" <公开 类型 = 整数 值 = @ImGuiHoveredFlags_NoNavOverride
-            注释 = "Disable using gamepad/keyboard navigation state when active, always query mouse.">
+            注释 = "仅限\"项目可有悬停\": only: Disable using gamepad/keyboard navigation state when active, always query mouse">
     常量 "" <公开 类型 = 整数 值 = @ImGuiHoveredFlags_RectOnly
             注释 = "ImGuiHoveredFlags_AllowWhenBlockedByPopup | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem | ImGuiHoveredFlags_AllowWhenOverlapped">
-    常量 跟和子窗口 <公开 类型 = 整数 值 = @ImGuiHoveredFlags_RootAndChildWindows 注释 = "连续位或 (根窗口, 子窗口)">
+    常量 根和子窗口 <公开 类型 = 整数 值 = @ImGuiHoveredFlags_RootAndChildWindows 注释 = "连续位或 (根窗口, 子窗口)">
+    常量 "" <类型 = 整数 值 = @ImGuiHoveredFlags_ForTooltip
+            注释 = "Shortcut for standard flags when using IsItemHovered() + SetTooltip() sequence.">
+    常量 "" <类型 = 整数 值 = @ImGuiHoveredFlags_Stationary
+            注释 = "Require mouse to be stationary for style.HoverStationaryDelay (~0.15 sec) _at least one time_."
+            注释 = "After this, can move on same item/window. Using the stationary test tends to reduces the need for a long delay.">
+    常量 无延迟 <公开 类型 = 整数 值 = @ImGuiHoveredFlags_DelayNone 注释 = "仅限\"工具提示\": 立即返回真(默认),因为它是默认的,你可以忽略它.">
     常量 正常延迟 <公开 类型 = 整数 值 = @ImGuiHoveredFlags_DelayNormal
             注释 = "仅限\"工具提示\": 经过 io.HoverDelayNormal (约0.30秒)的时间后返回真">
     常量 快速延迟 <公开 类型 = 整数 值 = @ImGuiHoveredFlags_DelayShort
             注释 = "仅限\"工具提示\": 经过 io.HoverDelayShort  (约0.10秒)的时间后返回真">
     常量 禁止共用延迟 <公开 类型 = 整数 值 = @ImGuiHoveredFlags_NoSharedDelay
             注释 = "仅限\"工具提示\": 禁止共用延迟系统(即从一个项目移动到另一个项目,会继续使用之前的计时,以缩短延迟时间.这是长延迟工具提示的标准设置.)">
+}
+
+类 IM停靠节点标志 <公开 注释 = "ImGuiDockNodeFlags" 折叠 @文档 = "category = \"标志类\"">
+{
+    常量 无 <公开 类型 = 整数 值 = @ImGuiDockNodeFlags_None>
+    常量 "" <公开 类型 = 整数 值 = @ImGuiDockNodeFlags_KeepAliveOnly
+            注释 = "Don\'t display the dockspace node but keep it alive. Windows docked into this dockspace node won\'t be undocked.">
+    常量 "" <公开 类型 = 整数 值 = @ImGuiDockNodeFlags_NoDockingInCentralNode
+            注释 = "Disable docking inside the Central Node, which will be always kept empty.">
+    常量 "" <公开 类型 = 整数 值 = @ImGuiDockNodeFlags_PassthruCentralNode 注释 = "Enable passthru dockspace:"
+            注释 = "1) DockSpace() will render a ImGuiCol_WindowBg background covering everything excepted the Central Node when empty."
+            注释 = "Meaning the host window should probably use SetNextWindowBgAlpha(0.0f) prior to Begin() when using this."
+            注释 = "2) When Central Node is empty: let inputs pass-through + won\'t display a DockingEmptyBg background. See demo for details.">
+    常量 "" <公开 类型 = 整数 值 = @ImGuiDockNodeFlags_NoSplit 注释 = "Disable splitting the node into smaller nodes."
+            注释 = "Useful e.g. when embedding dockspaces into a main root one (the root one may have splitting disabled to reduce confusion)."
+            注释 = "Note: when turned off, existing splits will be preserved.">
+    常量 "" <公开 类型 = 整数 值 = @ImGuiDockNodeFlags_NoResize
+            注释 = "Disable resizing node using the splitter/separators. Useful with programmatically setup dockspaces.">
+    常量 "" <公开 类型 = 整数 值 = @ImGuiDockNodeFlags_AutoHideTabBar
+            注释 = "Tab bar will automatically hide when there is a single window in the dock node.">
+
+    #
 }
 
 类 IM拖放标志 <公开
@@ -4073,7 +4280,33 @@
     常量 无 <公开 类型 = 整数 值 = @ImGuiViewportFlags_None>
     常量 平台窗口 <公开 类型 = 整数 值 = @ImGuiViewportFlags_IsPlatformWindow 注释 = "显示一个平台窗口">
     常量 平台显示器 <公开 类型 = 整数 值 = @ImGuiViewportFlags_IsPlatformMonitor 注释 = "显示一个平台显示器,目前未使用">
-    常量 属于应用程序 <公开 类型 = 整数 值 = @ImGuiViewportFlags_OwnedByApp 注释 = "平台窗口：由应用程序创建和管理,而不是一个ImGui后端.">
+    常量 属于应用程序 <公开 类型 = 整数 值 = @ImGuiViewportFlags_OwnedByApp 注释 = "平台窗口：由应用程序创建和管理,而不是一个ImGui后端."
+            注释 = "Platform Window: Was created/managed by the user application? (rather than our backend)">
+    常量 "" <公开 类型 = 整数 值 = @ImGuiViewportFlags_NoDecoration
+            注释 = "Platform Window: Disable platform decorations: title bar, borders, etc. (generally set all windows, but if ImGuiConfigFlags_ViewportsDecoration is set we only set this on popups/tooltips)">
+    常量 "" <公开 类型 = 整数 值 = @ImGuiViewportFlags_NoTaskBarIcon
+            注释 = "Platform Window: Disable platform task bar icon (generally set on popups/tooltips, or all windows if ImGuiConfigFlags_ViewportsNoTaskBarIcon is set)">
+    常量 "" <公开 类型 = 整数 值 = @ImGuiViewportFlags_NoFocusOnAppearing
+            注释 = "Platform Window: Don\'t take focus when created.">
+    常量 "" <公开 类型 = 整数 值 = @ImGuiViewportFlags_NoFocusOnClick
+            注释 = "Platform Window: Don\'t take focus when clicked on.">
+    常量 "" <公开 类型 = 整数 值 = @ImGuiViewportFlags_NoInputs
+            注释 = "Platform Window: Make mouse pass through so we can drag this window while peaking behind it.">
+    常量 "" <公开 类型 = 整数 值 = @ImGuiViewportFlags_NoRendererClear
+            注释 = "Platform Window: Renderer doesn\'t need to clear the framebuffer ahead (because we will fill it entirely).">
+    常量 "" <公开 类型 = 整数 值 = @ImGuiViewportFlags_NoAutoMerge
+            注释 = "Platform Window: Avoid merging this window into another host window."
+            注释 = "This can only be set via ImGuiWindowClass viewport flags override (because we need to now ahead if we are going to create a viewport in the first place!).">
+    常量 "" <公开 类型 = 整数 值 = @ImGuiViewportFlags_TopMost
+            注释 = "Platform Window: Display on top (for tooltips only).">
+    常量 "" <公开 类型 = 整数 值 = @ImGuiViewportFlags_CanHostOtherWindows
+            注释 = "Viewport can host multiple imgui windows (secondary viewports are associated to a single window)."
+            注释 = "// FIXME: In practice there\'s still probably code making the assumption that this is always and only on the MainViewport. Will fix once we add support for \"no main viewport\".">
+    常量 "" <公开 类型 = 整数 值 = @ImGuiViewportFlags_IsMinimized
+            注释 = "Platform Window: Window is minimized, can skip render."
+            注释 = "When minimized we tend to avoid using the viewport pos/size for clipping window or testing if they are contained in the viewport.">
+    常量 "" <公开 类型 = 整数 值 = @ImGuiViewportFlags_IsFocused
+            注释 = "Platform Window: Window is focused (last call to Platform_GetWindowFocus() returned true)">
 }
 
 类 IM绘制标志 <公开 注释 = "ImDrawFlags" 折叠 @文档 = "category = \"标志类\"">
@@ -4343,6 +4576,8 @@
     常量 选项卡_活动 <公开 值 = @ImGuiCol_TabActive>
     常量 选项卡_失去焦点 <公开 值 = @ImGuiCol_TabUnfocused>
     常量 选项卡_失去焦点_活动 <公开 值 = @ImGuiCol_TabUnfocusedActive>
+    常量 停靠_预览色 <公开 值 = @ImGuiCol_DockingPreview 注释 = "将要停靠某些内容时预览覆盖颜色">
+    常量 停靠_空节点背景 <公开 值 = @ImGuiCol_DockingEmptyBg 注释 = "空节点的背景颜色(例如没有停靠窗口的节点)">
     常量 线形图 <公开 值 = @ImGuiCol_PlotLines>
     常量 线形图_悬停 <公开 值 = @ImGuiCol_PlotLinesHovered>
     常量 直方图 <公开 值 = @ImGuiCol_PlotHistogram>
@@ -5997,10 +6232,9 @@
     }
 }
 
-类 IM_OpenGL渲染器 <公开 注释 = "基于现代OpenGL的渲染器后端,支持桌面OpenGL版本: 2.x 3.x 4.x" 折叠 @文档 = "category = \"渲染器\""
+类 IM_OpenGL渲染器 <公开 注释 = "基于现代OpenGL的渲染器后端,支持桌面OpenGL版本: 2.x 3.x 4.x" 折叠 折叠2 @文档 = "category = \"渲染器\""
         @视窗.外部头文件 = "imgui\\backends\\imgui_impl_opengl3.h\r\nglad\\glad.h"
-        @视窗.外部源文件 = "imgui\\backends\\imgui_impl_opengl3.cpp\r\nFrameWork\\glad\\glad.c"
-        "//@视窗.外部库" = "OpenGL32.lib" "">
+        @视窗.外部源文件 = "imgui\\backends\\imgui_impl_opengl3.cpp\r\nFrameWork\\glad\\glad.c">
 {
 
     # @begin
@@ -6049,11 +6283,10 @@
 
     方法 初始化 <公开 类型 = 逻辑型 注释 = "在\"创建设备\"和\"ImGui.创建环境()\"后才能调用." 折叠 @禁止流程检查 = 真>
     参数 GLSL版本 <类型 = 文本型 注释 = "请提供一个\"#version XXX\"的GLSL版本,留空为默认值\"#version 130\"."
-            注释 = "下列是OpenGL和GLSL版本的对应表:" 注释 = "// OpenGL    GLSL      GLSL"
-            注释 = "// version   version   string" 注释 = "//----------------------------------------"
-            注释 = "//  2.0       110       \"#version 110\"" 注释 = "//  2.1       120       \"#version 120\""
-            注释 = "//  3.0       130       \"#version 130\"" 注释 = "//  3.1       140       \"#version 140\""
-            注释 = "//  3.2       150       \"#version 150\""
+            注释 = "下列是OpenGL和GLSL版本的对应表:" 注释 = "// OpenGL    GLSL      GLSL" 注释 = "// version   version   string"
+            注释 = "//----------------------------------------" 注释 = "//  2.0       110       \"#version 110\""
+            注释 = "//  2.1       120       \"#version 120\"" 注释 = "//  3.0       130       \"#version 130\""
+            注释 = "//  3.1       140       \"#version 140\"" 注释 = "//  3.2       150       \"#version 150\""
             注释 = "//  3.3       330       \"#version 330 core\""
             注释 = "//  4.0       400       \"#version 400 core\""
             注释 = "//  4.1       410       \"#version 410 core\""

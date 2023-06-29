@@ -105,6 +105,14 @@
 
 ※我经常反复修改已封装好的代码，比如修正bug、优化效率、规范格式、修订备注等，但如果功能和用法没有改变，一般不会写在更新日志里，所以每次更新改动的地方其实还是有不少的。
 
+### 📅 2023/06/29
+
+1. 新增「线程对象类」，为 std::thread 的封装，支持任意格式参数和返回值类型的方法，还支持绑定类的非静态方法，线程中调用类的非静态成员不再需要接收事件。
+2. 新增「线程池对象类」，跟旧版线程池类一样是 IOCP 模型，但线程实现改用了 C++11 标准库，支持任意格式参数和返回值类型，也不限静态和非静态方法。
+3. 新增「互斥对象类」，为 std::mutex 的封装，主要使用其中的全局方法「互斥自动锁」，即使线程异常结束，也能保证不会出现死锁。
+4. 新增「线程池对象」和「线程操作」两个例程，简单演示以上新增功能。
+5. 新增全局方法「取现行纳秒时间戳」
+
 ### 📅 2023/06/25
 
 1. 优化 ImGui：补全 DX12 和 Vulkan 的图片加载；降低窗口不显示时的资源占用；完善例程，特别是完全重写了 WTL/MFC 的例程。
@@ -452,7 +460,7 @@
 - **[MinHook](https://github.com/TsudaKageyu/minhook)** `1.3.3` `BSD-2-Clause License` 极简的 x86/x64 API Hook 库
 - **[MMKV](https://github.com/Tencent/MMKV)** `1.2.14` `BSD-3-Clause License` 腾讯的高性能键值表
 - **[xxHash](https://github.com/Cyan4973/xxHash)** `8.0.1` `BSD-2-Clause License` 速度接近 RAM 限制的高速散列算法
-- **[Dear ImGui](https://github.com/ocornut/imgui)** `1.89.6` `MIT license` 轻量级的即时渲染界面开发框架
+- **[Dear ImGui](https://github.com/ocornut/imgui)** `1.89.7` `MIT license` 轻量级的即时渲染界面开发框架
 - **[GLFW](https://www.glfw.org)** `3.3.8` `zlib/libpng license` 跨平台的 OpenGL/Vulkan 桌面应用框架
 - **[glad](https://github.com/Dav1dde/glad)** `2023-04-04` `MIT License` 多语言的Vulkan/GL/GLES/EGL/GLX/WGL加载程序生成器
 - **[SDL](https://github.com/libsdl-org/SDL)** `2.26.5` `Zlib license` Simple DirectMedia Layer 是一个跨平台的多媒体开发库
