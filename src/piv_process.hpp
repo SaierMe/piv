@@ -753,7 +753,7 @@ public:
         if (hProcess != NULL)
         {
             MODULEINFO ModuleInfo{0};
-            if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && start_off < ModuleInfo.SizeOfImage && end_off < ModuleInfo.SizeOfImage)
+            if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && start_off <= ModuleInfo.SizeOfImage && end_off <= ModuleInfo.SizeOfImage)
             {
                 const BYTE *module_base = static_cast<const BYTE *>(ModuleInfo.lpBaseOfDll);
                 result = find_signatures(signatures, module_base + start_off,
@@ -764,13 +764,13 @@ public:
     }
 
     // 寻找所有模块特征码
-    ptrdiff_t find_module_signatures(const HMODULE &hModule, const wchar_t *signatures, CMArray<INT_P> &address_array, const size_t &start_off, const size_t &end_off)
+    int32_t find_module_signatures(const HMODULE &hModule, const wchar_t *signatures, CMArray<INT_P> &address_array, const size_t &start_off, const size_t &end_off)
     {
-        ptrdiff_t result = 0;
+        int32_t result = 0;
         if (hProcess != NULL)
         {
             MODULEINFO ModuleInfo{0};
-            if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && start_off < ModuleInfo.SizeOfImage && end_off < ModuleInfo.SizeOfImage)
+            if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && start_off <= ModuleInfo.SizeOfImage && end_off <= ModuleInfo.SizeOfImage)
             {
                 const BYTE *module_base = static_cast<const BYTE *>(ModuleInfo.lpBaseOfDll);
                 result = find_signatures(signatures, address_array, module_base + start_off, module_base + (end_off ? end_off : ModuleInfo.SizeOfImage));
@@ -795,10 +795,10 @@ public:
         return result;
     }
 
-    // 寻找模块字节集
-    ptrdiff_t find_module_memory(const HMODULE &hModule, const CVolMem &mem_data, CMArray<INT_P> &address_array, const size_t &start_off, const size_t &end_off)
+    // 寻找所有模块字节集
+    int32_t find_module_memory(const HMODULE &hModule, const CVolMem &mem_data, CMArray<INT_P> &address_array, const size_t &start_off, const size_t &end_off)
     {
-        ptrdiff_t result = 0;
+        int32_t result = 0;
         if (hProcess != NULL)
         {
             MODULEINFO ModuleInfo{0};

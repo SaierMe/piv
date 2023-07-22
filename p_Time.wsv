@@ -218,9 +218,9 @@
 
     # 格式化时间
 
-    方法 取格式时间 <公开 类型 = 文本型 注释 = "将时间格式化为指定格式的文本,本方法不依赖{fmt},更轻量一些." 返回值注释 = "  格式文本不正确会崩溃,成功返回指定格式的日期时间."
-            返回值注释 = "  输出的日期时间必定不会低于1970年1月1日0点." 折叠 @禁止流程检查 = 真>
-    参数 格式文本 <类型 = 文本型 注释 = "  默认格式为: \"2022-04-01 16:15:05\",转换后不能超过256个字符." 注释 = "  下列为可用的格式替换符:"
+    方法 取格式时间 <公开 类型 = 文本型 注释 = "将时间格式化为指定格式的文本,本方法不依赖{fmt},更轻量一些." 返回值注释 = "格式文本不正确会崩溃,成功返回指定格式的日期时间;"
+            返回值注释 = "输出的日期时间必定不会低于1970年1月1日0点;" 折叠 @禁止流程检查 = 真>
+    参数 格式文本 <类型 = 文本型 注释 = "默认格式为: \"2022-04-01 16:15:05\",转换后不能超过256个字符." 注释 = "下列为可用的格式替换符:"
             注释 = "   %%  %字符  |  %n 换行符  |  %t 水平制表符" 注释 = "   %C  年份向下整除100          例: 20"
             注释 = "   %y  年份的后2位              例: 22" 注释 = "   %Y  完整的4位年份            例: 2022"
             注释 = "   %h  缩写的月份名称           例: Apr" 注释 = "   %b  缩写的月份名称           例: Apr"
@@ -389,12 +389,17 @@
     # @begin
     # <> <include>
     # std::chrono::system_clock::time_point m_tp;
-    # void @an<_OnInitExtra> () { m_tp = std::chrono::system_clock::now (); }
+    # inline void @an<_OnInitExtra> () { m_tp = std::chrono::system_clock::now (); }
+    # inline @sn<current_class> (const std::chrono::system_clock::time_point& rhs) { m_tp = rhs; }
+    # inline @sn<current_class> (std::chrono::system_clock::time_point&& rhs) { m_tp = std::move(rhs); }
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_tp = objCopyFrom.m_tp; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_tp = std::move(rhs.m_tp); return *this; }
+    # inline @sn<current_class>& operator= (const std::chrono::system_clock::time_point& rhs) { m_tp = rhs; return *this; }
+    # inline @sn<current_class>& operator= (std::chrono::system_clock::time_point&& rhs) { m_tp = std::move(rhs); return *this; }
     # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_tp == objCompare.m_tp); }
-    # inline @sn<current_class> (std::chrono::system_clock::time_point tp) : @sn<current_class>()  { m_tp = tp; }
     # inline std::chrono::system_clock::time_point& data () { return m_tp; }
     # inline std::chrono::system_clock::time_point* pdata ()  { return &m_tp; }
+    # inline operator std::chrono::system_clock::time_point& ()  { return m_tp; }
     # <> </include>
     # @end
     # ===

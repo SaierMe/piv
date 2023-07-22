@@ -70,12 +70,12 @@
         @ m_wc.cbClsExtra = 0;
         @ m_wc.cbWndExtra = 0;
         @ m_wc.hInstance = ::GetModuleHandleW(nullptr);
-        @ m_wc.hIcon = ::LoadIconW(m_wc.hInstance, MAKEINTRESOURCEW(100));
+        @ m_wc.hIcon = ::LoadIconW(m_wc.hInstance, MAKEINTRESOURCEW(_VOL_USER_APP_ICON_RES_ID));
         @ m_wc.hCursor = nullptr;
         @ m_wc.hbrBackground = nullptr;
         @ m_wc.lpszMenuName = nullptr;
         @ m_wc.lpszClassName = @<窗口类名>.GetText();
-        @ m_wc.hIconSm = ::LoadIconW(m_wc.hInstance, MAKEINTRESOURCEW(100));
+        @ m_wc.hIconSm = ::LoadIconW(m_wc.hInstance, MAKEINTRESOURCEW(_VOL_USER_APP_ICON_RES_ID));
         @ if (::RegisterClassExW(&m_wc) == 0) return FALSE;
         关注屏幕DPI (真)
         宽度 = 乘于屏幕DPI (宽度)
@@ -324,11 +324,11 @@
 
 类 IM_GLFW窗口 <公开 基础类 = IM_窗口模板类 注释 = "  基于GLFW的ImGui窗口,本模板类已经处理好ImGui创建和销毁的各种复杂"
         注释 = "流程,你只需要在\"即将绘制\"事件中完成界面的布局,就能完成一个简单的" 注释 = "ImGui窗口." 注释 = "  \"模板类型1\"为所使用的渲染器类型,支持以下的渲染器:"
-        注释 = "  Im_OpenGL3渲染器  IM_Vulkan渲染器" @模板基础类 = 真 @文档 = "category = \"窗口框架\"">
+        注释 = "  Im_OpenGL3渲染器  IM_Vulkan渲染器" 折叠 @模板基础类 = 真 @文档 = "category = \"窗口框架\"">
 {
     方法 创建主窗口 <公开 类型 = 逻辑型 注释 = "创建本窗口类的对象并将其作为程序的主窗口." 注释 = "注意:"
             注释 = "  1. 程序中必须存在且只能存在一个主窗口,调用本方法后,主窗口将被设置为本窗口;" 注释 = "  2. 主窗口必须在程序的\"启动类\"中存在成员变量定义,避免其在程序退出前被释放,"
-            注释 = "否则将可能导致程序运行时崩溃." 注释 = "  3. 本方法内实现了消息循环,直到窗口关闭或创建失败,本方法才会返回." 返回值注释 = "返回是否成功" @禁止流程检查 = 真>
+            注释 = "否则将可能导致程序运行时崩溃." 注释 = "  3. 本方法内实现了消息循环,直到窗口关闭或创建失败,本方法才会返回." 返回值注释 = "返回是否成功" 折叠 @禁止流程检查 = 真>
     参数 标题 <类型 = 文本型 注释 = "提供所创建窗口的标题">
     参数 宽度 <类型 = 整数 注释 = "提供所创建窗口的宽度" @默认值 = 1280>
     参数 高度 <类型 = 整数 注释 = "提供所创建窗口的高度" @默认值 = 720>
@@ -352,7 +352,7 @@
         @ m_window = glfwCreateWindow(@<宽度>, @<高度>, PivW2U{@<标题>}.GetText(), @<全屏模式> ? m_monitor : nullptr, nullptr);
         @ if (!m_window) return FALSE;
         @ HWND hWnd = glfwGetWin32Window(m_window);
-        @ HICON hIcon = ::LoadIconW(::GetModuleHandle(NULL), MAKEINTRESOURCEW(100));
+        @ HICON hIcon = ::LoadIconW(::GetModuleHandle(NULL), MAKEINTRESOURCEW(_VOL_USER_APP_ICON_RES_ID));
         @ if (hIcon) {
         @     ::SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
         @     ::SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);

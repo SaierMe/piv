@@ -10,16 +10,6 @@
         @文档 = "category = \"HOOK\"" @视窗.外部头文件 = "minhook\\include\\MinHook.h"
         @视窗.外部源文件 = "minhook\\include\\MultiHook.c">
 {
-    方法 类_初始化 <折叠>
-    {
-        @ MH_Initialize (); // 初始化MinHook库,必须在HOOK之前执行一次.
-    }
-
-    方法 类_清理 <折叠>
-    {
-        @ MH_Uninitialize (); // 取消初始化MinHook库,必须在退出程序前执行一次.
-    }
-
     方法 置线程释放方法 <公开 类型 = MH状态码 注释 = "设置\"启用钩子\"和\"停用钩子\"时,挂起和恢复线程的方法." 返回值注释 = "返回0表示成功,其他值为失败." 折叠
             @嵌入式方法 = "">
     参数 释放方法 <类型 = MH线程释放方法 注释 = "所欲设置的方法." @默认值 = MH线程释放方法.快速释放>
@@ -111,21 +101,18 @@
     {
         @ MH_ApplyQueued ()
     }
+
+    # @begin
+    # <> <include>
+    # static void @an<_sOnBeforeAppInit> () { MH_Initialize (); }
+    # static void @an<_sOnAfterAppExit> () { MH_Uninitialize (); }
+    # <> </include>
+    # @end
 }
 
 类 多重HOOK类 <公开 注释 = "  MultiHook 这个分支在原版的基础上增加了给同一个函数" 注释 = "安装多个钩子的功能,这些多重钩子可以同时启用和生效." 折叠
         @文档 = "category = \"HOOK\"" @强制依赖 = "简易HOOK类">
 {
-    方法 类_初始化 <折叠>
-    {
-        @ MH_Initialize (); // 初始化MinHook库,必须在HOOK之前执行一次.
-    }
-
-    方法 类_清理 <折叠>
-    {
-        @ MH_Uninitialize (); // 取消初始化MinHook库,必须在退出程序前执行一次.
-    }
-
     方法 置线程释放方法 <公开 类型 = MH状态码 注释 = "设置\"启用钩子\"和\"停用钩子\"时,挂起和恢复线程的方法." 返回值注释 = "返回0表示成功,其他值为失败." 折叠
             @嵌入式方法 = "">
     参数 释放方法 <类型 = MH线程释放方法 注释 = "所欲设置的方法." @默认值 = MH线程释放方法.快速释放>
@@ -202,6 +189,13 @@
     {
         @ MH_ApplyQueuedEx ((ULONG_PTR)@<钩子ID>)
     }
+
+    # @begin
+    # <> <include>
+    # static void @an<_sOnBeforeAppInit> () { MH_Initialize (); }
+    # static void @an<_sOnAfterAppExit> () { MH_Uninitialize (); }
+    # <> </include>
+    # @end
 }
 
 类 MH状态码 <公开 注释 = "执行函数返回的状态码(MH_STATUS),0表示成功,其他表示失败." 折叠 @文档 = "category = \"HOOK.辅助类\"" @常量类 = 整数

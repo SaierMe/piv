@@ -12,6 +12,7 @@ file
     name = "p_BassPlugin.wsv"
     name = "p_Bcrypt.wsv"
     name = "p_Container.wsv"
+    name = "p_Coroutine.wsv"
     name = "p_Encoding.wsv"
     name = "p_FrameWork.wsv"
     name = "p_Json.wsv"

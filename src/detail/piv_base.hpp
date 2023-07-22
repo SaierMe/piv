@@ -13,6 +13,7 @@
 #include <sys/base/libs/win_base/vol_base.h>
 #endif
 
+#include <cstddef>
 #include <cstdint>
 #include <algorithm>
 

@@ -152,8 +152,8 @@
     }
 }
 
-类 数组类辅助操作 <公开 注释 = "建议使用\"数组P\"里的方法,本类可能在数个版本后标记为废弃." 注释 = "全局方法,可以在火山的数组类中一次连续加入成员." 折叠
-        @文档 = "category = \"数组操作\"" @全局类 = 真>
+类 数组类辅助操作 <公开 注释 = "本类是过时功能,请改用\"数组P\"." 注释 = "  如想使用本类,请在项目属性的编译时预定义宏中添加" 注释 = "PIV_ENABLE_OBSOLETE"
+        折叠 @文档 = "category = \"数组操作\"" @全局类 = 真 @编译条件 = "PIV_ENABLE_OBSOLETE">
 {
     方法 创建文本型数组类 <公开 静态 类型 = 文本数组类 注释 = "创建一个文本型数组类,并连续加入多个成员." 折叠
             @嵌入式方法 = "req_str_param_text_pointer = true">
@@ -192,70 +192,63 @@
         @ for (auto&& v : { @<值> }) { @<所欲操作数组>().Add (v, NULL); }
     }
 
-    # 以下废弃 ===
-
-    方法 数组连续加入字节 <公开 静态 注释 = "!!!数组类的\"加入成员\"已经支持可扩展!!!" 注释 = "可一次性加入多个成员到字节数组类尾部." 折叠 @嵌入式方法 = "" @废弃 = 警告>
+    方法 数组连续加入字节 <公开 静态 注释 = "可一次性加入多个成员到字节数组类尾部." 折叠 @嵌入式方法 = "">
     参数 所欲操作数组 <类型 = 字节数组类>
     参数 值 <类型 = 字节 @可扩展 = "">
     {
         @ for (auto&& v : { @<值> }) { @<所欲操作数组>.data ().Add (v); }
     }
 
-    方法 数组连续加入短整数 <公开 静态 注释 = "!!!数组类的\"加入成员\"已经支持可扩展!!!" 注释 = "可一次性加入多个成员到短整数数组类尾部." 折叠 @嵌入式方法 = ""
-            @废弃 = 警告>
+    方法 数组连续加入短整数 <公开 静态 注释 = "可一次性加入多个成员到短整数数组类尾部." 折叠 @嵌入式方法 = "">
     参数 所欲操作数组 <类型 = 短整数数组类>
     参数 值 <类型 = 短整数 @可扩展 = "">
     {
         @ for (auto&& v : { @<值> }) { @<所欲操作数组>.data ().Add (v); }
     }
 
-    方法 数组连续加入字符 <公开 静态 注释 = "!!!数组类的\"加入成员\"已经支持可扩展!!!" 注释 = "可一次性加入多个成员到字符数组类尾部." 折叠 @嵌入式方法 = "" @废弃 = 警告>
+    方法 数组连续加入字符 <公开 静态 注释 = "可一次性加入多个成员到字符数组类尾部." 折叠 @嵌入式方法 = "">
     参数 所欲操作数组 <类型 = 字符数组类>
     参数 值 <类型 = 字符 @可扩展 = "">
     {
         @ for (auto&& v : { @<值> }) { @<所欲操作数组>.data ().Add (v); }
     }
 
-    方法 数组连续加入整数 <公开 静态 注释 = "!!!数组类的\"加入成员\"已经支持可扩展!!!" 注释 = "可一次性加入多个成员到整数数组类尾部." 折叠 @嵌入式方法 = "" @废弃 = 警告>
+    方法 数组连续加入整数 <公开 静态 注释 = "可一次性加入多个成员到整数数组类尾部." 折叠 @嵌入式方法 = "">
     参数 所欲操作数组 <类型 = 整数数组类>
     参数 值 <类型 = 整数 @可扩展 = "">
     {
         @ for (auto&& v : { @<值> }) { @<所欲操作数组>.data ().Add (v); }
     }
 
-    方法 数组连续加入变整数 <公开 静态 注释 = "!!!数组类的\"加入成员\"已经支持可扩展!!!" 注释 = "可一次性加入多个成员到变整数数组类尾部." 折叠 @嵌入式方法 = ""
-            @废弃 = 警告>
+    方法 数组连续加入变整数 <公开 静态 注释 = "可一次性加入多个成员到变整数数组类尾部." 折叠 @嵌入式方法 = "">
     参数 所欲操作数组 <类型 = 变整数数组类>
     参数 值 <类型 = 变整数 @可扩展 = "">
     {
         @ for (auto&& v : { @<值> }) { @<所欲操作数组>.data ().Add (v); }
     }
 
-    方法 数组连续加入长整数 <公开 静态 注释 = "!!!数组类的\"加入成员\"已经支持可扩展!!!" 注释 = "可一次性加入多个成员到长整数数组类尾部." 折叠 @嵌入式方法 = ""
-            @废弃 = 警告>
+    方法 数组连续加入长整数 <公开 静态 注释 = "可一次性加入多个成员到长整数数组类尾部." 折叠 @嵌入式方法 = "">
     参数 所欲操作数组 <类型 = 长整数数组类>
     参数 值 <类型 = 长整数 @可扩展 = "">
     {
         @ for (auto&& v : { @<值> }) { @<所欲操作数组>.data ().Add (v); }
     }
 
-    方法 数组连续加入小数 <公开 静态 注释 = "!!!数组类的\"加入成员\"已经支持可扩展!!!" 注释 = "可一次性加入多个成员到小数数组类尾部." 折叠 @嵌入式方法 = "" @废弃 = 警告>
+    方法 数组连续加入小数 <公开 静态 注释 = "可一次性加入多个成员到小数数组类尾部." 折叠 @嵌入式方法 = "">
     参数 所欲操作数组 <类型 = 小数数组类>
     参数 值 <类型 = 小数 @可扩展 = "">
     {
         @ for (auto&& v : { @<值> }) { @<所欲操作数组>.data ().Add (v); }
     }
 
-    方法 数组连续加入逻辑型 <公开 静态 注释 = "!!!数组类的\"加入成员\"已经支持可扩展!!!" 注释 = "可一次性加入多个成员到逻辑型数组类尾部." 折叠 @嵌入式方法 = ""
-            @废弃 = 警告>
+    方法 数组连续加入逻辑型 <公开 静态 注释 = "可一次性加入多个成员到逻辑型数组类尾部." 折叠 @嵌入式方法 = "">
     参数 所欲操作数组 <类型 = 逻辑型数组类>
     参数 值 <类型 = 逻辑型 @可扩展 = "">
     {
         @ for (auto&& v : { @<值> }) { @<所欲操作数组>.data ().Add (v); }
     }
 
-    方法 数组连续加入文本 <公开 静态 注释 = "!!!数组类的\"加入成员\"已经支持可扩展!!!" 注释 = "可一次性加入多个成员到文本数组类尾部." 折叠
-            @嵌入式方法 = "req_str_param_text_pointer = true" @废弃 = 警告>
+    方法 数组连续加入文本 <公开 静态 注释 = "可一次性加入多个成员到文本数组类尾部." 折叠 @嵌入式方法 = "req_str_param_text_pointer = true">
     参数 所欲操作数组 <类型 = 文本数组类>
     参数 值 <类型 = 文本型 @可扩展 = "">
     {
@@ -451,9 +444,10 @@
         @模板实现类 = "目录信息类">
 
 类 数据类型基础类 <公开 基础类 = 扩展对象类 注释 = "本类可以在封装结构体和C++类时作为其基础类,用作提供一些基本的操作功能." 注释 = "注意:"
-        注释 = "  1. 本类唯一可以使用的位置为作为使用 PIV_DECLARE_STRUCT_CLASS 宏进行结构封装的类的基础类."
-        注释 = "  2. 使用指针保存所封装的数据类型,如果置入外部的指针,可以等同于变量参考的作用," 注释 = "支持多个类变量指向同一数据,此时本类不会管理指针的释放,请注意外部指针的生命周期."
-        注释 = "  3. 本类的数据指针默认为空指针,当你执行\"初始化/置指针参考\"或其他一些方法时,它才会创建数据." 折叠 @禁止创建对象 = 真 @视窗.外部头文件 = "<memory>">
+        注释 = "  1. 本类需要配合 PIV_DECLARE_STRUCT_CLASS 宏使用,宏的参数为所欲封装的结构体或C++类型;" 注释 = "  2. 本类使用指针保存所封装的数据类型;"
+        注释 = "  3. \"是否为参考\"为真时,表示引用了外部指针,复制的类变量指向同一数据," 注释 = "此时本类不会管理指针的释放,请注意外部指针的生命周期;"
+        注释 = "  4. \"是否为参考\"为假时,本类可以复制赋值;" 注释 = "  5. 本类的数据指针默认为空指针,当你执行\"初始化/置指针参考\"或其他一些方法时,才实际拥有数据;" 折叠
+        @禁止创建对象 = 真>
 {
     方法 初始化 <公开 注释 = "如果指针为空,则进行初始化赋值,手动执行本方法可以确保指针非空." 注释 = "本封装类定义变量时默认为空指针,一般执行其他方法会自动初始化赋值或引用外部指针." 折叠
             @嵌入式方法 = "">
@@ -519,36 +513,37 @@
 # @def_macro PIV_DECLARE_STRUCT_CLASS(data_type)  \
 # <>     <include>  \
 #     using DATA_TYPE = data_type;  \
-#     std::unique_ptr<DATA_TYPE> m_pData {nullptr}; bool m_Owned = false;  \
-#     @sn<current_class> (const DATA_TYPE& data) { COPY_MEM (pdata (), &data, sizeof (DATA_TYPE)); }  \
-#     @sn<current_class> (DATA_TYPE* pData) { m_pData.reset (pData); m_Owned = false; }  \
-#     @sn<current_class> (const DATA_TYPE* pData) { COPY_MEM (pdata (), pData, sizeof (DATA_TYPE)); }  \
-#     inline @sn<current_class>& init () { if (!m_pData) { m_pData.reset (new DATA_TYPE {}); m_Owned = true; } return *this; }  \
-#     inline void @an<_OnCleanupExtra> () { if (!m_Owned) m_pData.release (); }  \
+#     DATA_TYPE* m_pData = nullptr; bool m_Owned = false;  \
+#     @sn<current_class> (const DATA_TYPE& rhs) { COPY_MEM (pdata (), &rhs, sizeof (DATA_TYPE)); }  \
+#     @sn<current_class> (DATA_TYPE* rhs) { m_pData = rhs; m_Owned = false; }  \
+#     @sn<current_class> (const DATA_TYPE* rhs) { COPY_MEM (pdata (), rhs, sizeof (DATA_TYPE)); }  \
+#     inline @sn<current_class>& init () { if (!m_pData) { m_pData = new DATA_TYPE{}; m_Owned = true; } return *this; }  \
+#     inline void cleanup () { if (m_Owned && m_pData) { delete m_pData; m_pData = nullptr; m_Owned = false; } }  \
+#     inline void @an<_OnCleanupExtra> () { cleanup (); }  \
 #     void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom)  {  \
 #         if (objCopyFrom.m_Owned) {  \
-#             if (!m_Owned) { m_pData.release (); m_pData.reset (new DATA_TYPE {}); }  \
-#             COPY_MEM (pdata (), objCopyFrom.pdata (), sizeof (DATA_TYPE));  \
+#             if (!m_Owned) { m_pData = new DATA_TYPE{}; }  \
+#             COPY_MEM (m_pData, objCopyFrom.pdata (), sizeof (DATA_TYPE)); m_Owned = true;  \
 #         } else {  \
-#             if (!m_Owned) m_pData.release ();  \
-#             m_pData.reset ((DATA_TYPE*)objCopyFrom.pdata ()); m_Owned = false;  \
+#             cleanup (); m_pData = (DATA_TYPE*)objCopyFrom.pdata (); m_Owned = false;  \
 #         }  \
 #     }  \
 #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const  \
 #     { if (!m_pData || !objCompare.pdata ()) return FALSE; return (memcmp (pdata (), objCompare.pdata (), sizeof (DATA_TYPE)) == 0); }  \
-#     inline void reference (DATA_TYPE* pData) { if (!m_Owned) m_pData.release (); m_pData.reset (pData); m_Owned = false; }  \
+#     inline void reference (DATA_TYPE* pData) { if (m_Owned && m_pData) { delete m_pData; } m_pData = pData; m_Owned = false; }  \
 #     inline @sn<current_class>& Copy (const DATA_TYPE& data)  { COPY_MEM (pdata (), &data, sizeof (DATA_TYPE)); return *this; }  \
 #     inline @sn<current_class>& Copy (const DATA_TYPE* pData)  { COPY_MEM (pdata (), pData, sizeof (DATA_TYPE)); return *this; }  \
 #     inline DATA_TYPE& data ()  { init (); return *m_pData; }  \
 #     inline const DATA_TYPE& data () const { return *m_pData; }  \
-#     inline DATA_TYPE* pdata ()  { init (); return m_pData.get (); }  \
-#     inline const DATA_TYPE* pdata () const { return m_pData.get (); }  \
+#     inline DATA_TYPE* pdata ()  { init (); return m_pData; }  \
+#     inline const DATA_TYPE* pdata () const { return m_pData; }  \
 #     inline DATA_TYPE* GetPtr () { return IsNullObject () ? nullptr : pdata (); }  \
-#     inline const DATA_TYPE* GetPtr () const { return IsNullObject () ? nullptr : m_pData.get (); }  \
+#     inline const DATA_TYPE* GetPtr () const { return IsNullObject () ? nullptr : m_pData; }  \
 #     inline BOOL is_reference () const { return !m_Owned; };  \
 #     inline INT get_size () const  { return (INT)sizeof (DATA_TYPE); }  \
 #     inline CVolMem& get_bin (CVolMem& memBuf)  { memBuf.CopyFrom (pdata (), sizeof (DATA_TYPE)); return memBuf; }  \
 #     inline operator DATA_TYPE& () { init (); return *m_pData; }  \
-#     inline operator DATA_TYPE* () { init (); return m_pData.get (); }  \
+#     inline operator DATA_TYPE* () { init (); return m_pData; }  \
 # <>     </include>
+#
 # @end

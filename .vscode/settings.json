@@ -108,6 +108,8 @@
         "limits.h": "c",
         "cassert": "cpp",
         "xxatomic": "cpp",
-        "*.rh": "cpp"
+        "*.rh": "cpp",
+        "cstdbool": "cpp",
+        "cinttypes": "cpp"
     }
 }

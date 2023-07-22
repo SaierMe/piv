@@ -111,6 +111,7 @@
 - **[glad](https://github.com/Dav1dde/glad)** `2023-04-04` `MIT License` 多语言的Vulkan/GL/GLES/EGL/GLX/WGL加载程序生成器
 - **[SDL](https://github.com/libsdl-org/SDL)** `2.26.5` `Zlib license` Simple DirectMedia Layer 是一个跨平台的多媒体开发库
 - **[Vulkan SDK](https://vulkan.lunarg.com/sdk/home)** `1.3.246.1` `Apache-2.0` 一个跨平台的2D和3D绘图应用程序接口
+- **[libgo](https://github.com/yyzybb537/libgo)** `3.0` `MIT license` Golang 风格的 C++11 协程库
 
 ※本模块封装的开源项目均采用较宽松的开源协议，如 MIT、BSD、MPLv2 ……
 

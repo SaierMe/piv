@@ -867,7 +867,7 @@
 
 # ======
 
-类 程序信息类 <公开 注释 = "用于获取程序文件的版本信息" 折叠 折叠2 @文档 = "category = \"PE文件操作\"" @全局类 = 真 @禁止创建对象 = 真
+类 程序信息类 <公开 注释 = "用于获取程序文件的版本信息" 折叠2 @文档 = "category = \"PE文件操作\"" @全局类 = 真 @禁止创建对象 = 真
         @视窗.外部库 = "Version.lib">
 {
     方法 取程序版本 <公开 静态 类型 = 逻辑型 注释 = "获取程序文件的完整版本信息,取自版本信息资源的StringFileInfo结构."
@@ -958,7 +958,7 @@
     }
 
     方法 取文件版本 <公开 静态 类型 = 长整数 注释 = "返回程序文件的文件版本,取自版本信息资源的VS_FIXEDFILEINFO结构."
-            返回值注释 = "调用失败返回-1,长整数的版本号更适合于比较,但非常不直观." 折叠 @禁止流程检查 = 真>
+            注释 = "调用失败返回-1,长整数的版本号更适合比较,但不直观." 折叠 @禁止流程检查 = 真>
     参数 文件名 <类型 = 文本型 注释 = "包含完整路径的文件名">
     参数 返回版本格式文本 <类型 = 文本型 注释 = "在本参数中返回类似\"1.1.0.0\"格式的文本版本号,更适合于展示." @默认值 = 空对象>
     {
@@ -974,13 +974,13 @@
         @ {
         @     if (!@<返回版本格式文本>.IsNullObject())
         @         @<返回版本格式文本>.Format (L"%d.%d.%d.%d", HIWORD(pFileInfo->dwFileVersionMS), LOWORD((DWORD)pFileInfo->dwFileVersionMS), HIWORD(pFileInfo->dwFileVersionLS), LOWORD((DWORD)pFileInfo->dwFileVersionLS));
-        @     return (INT64)(pFileInfo->dwFileVersionMS | ((QWORD)pFileInfo->dwFileVersionLS << 32));
+        @     return (INT64)(pFileInfo->dwFileVersionMS | ((UINT64)pFileInfo->dwFileVersionLS << 32));
         @ }
         @ return -1;
     }
 
     方法 取产品版本 <公开 静态 类型 = 长整数 注释 = "返回程序文件的产品版本,取自版本信息资源的VS_FIXEDFILEINFO结构."
-            返回值注释 = "调用失败返回-1,长整数的版本号更适合于比较,但非常不直观." 折叠 @禁止流程检查 = 真>
+            注释 = "调用失败返回-1,长整数的版本号更适合比较,但不直观." 折叠 @禁止流程检查 = 真>
     参数 文件名 <类型 = 文本型 注释 = "包含完整路径的文件名">
     参数 返回版本格式文本 <类型 = 文本型 注释 = "在本参数中返回类似\"1.1.0.0\"格式的文本版本号,更适合于展示." @默认值 = 空对象>
     {
@@ -996,7 +996,7 @@
         @ {
         @     if (!@<返回版本格式文本>.IsNullObject())
         @         @<返回版本格式文本>.Format (L"%d.%d.%d.%d", HIWORD(pFileInfo->dwProductVersionMS), LOWORD((DWORD)pFileInfo->dwProductVersionMS), HIWORD(pFileInfo->dwProductVersionLS), LOWORD((DWORD)pFileInfo->dwProductVersionLS));
-        @     return (INT64)(pFileInfo->dwProductVersionMS | ((QWORD)pFileInfo->dwProductVersionLS << 32));
+        @     return (INT64)(pFileInfo->dwProductVersionMS | ((UINT64)pFileInfo->dwProductVersionLS << 32));
         @ }
         @ return -1;
     }

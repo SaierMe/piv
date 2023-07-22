@@ -189,23 +189,15 @@ public:
         return ::PostQueuedCompletionStatus(m_ThreadPool->hCompletionPort, 1, 0, reinterpret_cast<LPOVERLAPPED>(task));
     }
 
-    /*
-    template <typename R, class Fun, typename... Args>
-    inline BOOL PostTaskGetBack(R &ret, Fun &&fun, Args &&...args)
+    template <typename Fun>
+    inline BOOL PostTask2(Fun &fun)
     {
         if (!m_ThreadPool || m_ThreadPool->state < ThreadPoolState_Normal)
             return FALSE;
-#ifdef PIV_HAS_CPP17
-        using return_type = std::invoke_result_t<Fun, Args...>;
-#else
-        using return_type = std::result_of<Fun(Args...)>::type;
-#endif
-        std::packaged_task<return_type()> *task = new std::packaged_task<return_type()>(std::bind(std::forward<Fun>(fun), std::forward<Args>(args)...));
-        std::future<return_type> future = task->get_future();
+        std::packaged_task<void()> *task = new std::packaged_task<void()>(std::forward<Fun>(fun));
         m_ThreadPool->QueueTask++;
         return ::PostQueuedCompletionStatus(m_ThreadPool->hCompletionPort, 1, 0, reinterpret_cast<LPOVERLAPPED>(task));
     }
-    */
 
     /**
      * @brief 清空任务
