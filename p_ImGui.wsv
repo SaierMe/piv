@@ -2761,10 +2761,10 @@
     }
 }
 
-类 IM绘制列表类 <公开 基础类 = 数据类型基础类 注释 = "ImDrawList" 折叠>
+类 IM绘制列表类 <公开 基础类 = 结构指针基础类 注释 = "ImDrawList">
 {
 
-    # @ @m<PIV_DECLARE_STRUCT_CLASS> (ImDrawList)
+    # @ @m<PIV_DECLARE_STRUCT_PTR> (ImDrawList)
 
     方法 标志 <公开 属性读 类型 = 整数 注释 = "返回绘制列表标志,为\"IM绘制列表标志\"的组合值." 折叠 @嵌入式方法 = "">
     {

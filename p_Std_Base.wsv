@@ -153,7 +153,7 @@
             注释 = "如果有多层本类或本类继承类的\"枚举循环\"/\"逆向枚举循环\"嵌套,本方法将返回最近层\"枚举循环\"/" 注释 = "\"逆向枚举循环\"所枚举到的成员值." 折叠
             @嵌入式方法 = "parent = \"iter, r_iter\"">
     {
-        @ *_vsetitr
+        @ (@dt<模板类型1>&)*_vsetitr
     }
 
     # @begin
@@ -225,7 +225,7 @@
 
     # --
     # @begin
-    # @ @def_macro set std::set<std::remove_pointer<@dt<模板类型1> *>::type>, NocaseLess>
+    # @ @def_macro set std::set<std::remove_pointer<@dt<模板类型1> *>::type>, @sn<current_class_def>::NocaseLess>
     # <> <include>
     # using ValueType = std::remove_pointer<@dt<模板类型1> *>::type;
     # struct NocaseLess
@@ -342,7 +342,7 @@
 
     # --
     # @begin
-    # @ @def_macro set std::multiset<std::remove_pointer<@dt<模板类型1> *>::type>, NocaseLess>
+    # @ @def_macro set std::multiset<std::remove_pointer<@dt<模板类型1> *>::type>, @sn<current_class_def>::NocaseLess>
     # <> <include>
     # using ValueType = std::remove_pointer<@dt<模板类型1> *>::type;
     # struct NocaseLess
@@ -435,7 +435,7 @@
 
     # --
     # @begin
-    # @def_macro set std::unordered_set<std::remove_pointer<@dt<模板类型1> *>::type, HashFunc>
+    # @def_macro set std::unordered_set<std::remove_pointer<@dt<模板类型1> *>::type, @sn<current_class_def>::HashFunc>
     # <> <include>
     # using ValueType = std::remove_pointer<@dt<模板类型1> *>::type;
     # struct HashFunc
@@ -473,7 +473,7 @@
 
     # --
     # @begin
-    # @def_macro set std::unordered_set<std::remove_pointer<@dt<模板类型1> *>::type, HashFunc, KeyEqualFunc>
+    # @def_macro set std::unordered_set<std::remove_pointer<@dt<模板类型1> *>::type, @sn<current_class_def>::HashFunc, @sn<current_class_def>::KeyEqualFunc>
     # <> <include>
     # using ValueType = std::remove_pointer<@dt<模板类型1> *>::type;
     # struct HashFunc
@@ -492,9 +492,6 @@
 
 类 字节集哈希集 <公开 基础类 = 文本哈希集模板类 注释 = "  哈希集是一种无序容器,因为键的唯一性,天然具有去重功能." 注释 = "插入键时会计算键的哈希值,之后将键的哈希值作为下标,实现"
         注释 = "快速访问." @文档 = "category = \"数据处理.哈希集\"" @模板实现类 = "字节集类">
-
-类 文本哈希集 <公开 基础类 = 文本哈希集模板类 注释 = "  哈希集是一种无序容器,因为键的唯一性,天然具有去重功能." 注释 = "插入键时会计算键的哈希值,之后将键的哈希值作为下标,实现"
-        注释 = "快速访问." @文档 = "category = \"数据处理.哈希集\"" @模板实现类 = "文本型">
 
 # 非独有哈希集(std::unordered_multiset) ===
 
@@ -564,7 +561,7 @@
 
     # --
     # @begin
-    # @def_macro set std::unordered_multiset<std::remove_pointer<@dt<模板类型1> *>::type>, HashFunc>
+    # @def_macro set std::unordered_multiset<std::remove_pointer<@dt<模板类型1> *>::type>, @sn<current_class_def>::HashFunc>
     # <> <include>
     # using ValueType = std::remove_pointer<@dt<模板类型1> *>::type;
     # struct HashFunc
@@ -608,7 +605,7 @@
 
     # --
     # @begin
-    # @def_macro set std::unordered_multiset<std::remove_pointer<@dt<模板类型1> *>::type, HashFunc, KeyEqualFunc>
+    # @def_macro set std::unordered_multiset<std::remove_pointer<@dt<模板类型1> *>::type, HashFunc, @sn<current_class_def>::KeyEqualFunc>
     # <> <include>
     # using ValueType = std::remove_pointer<@dt<模板类型1> *>::type;
     # struct HashFunc
@@ -731,7 +728,7 @@
             注释 = "成员的值,如果有多层本类或本类继承类的\"枚举循环\"嵌套,本方法将返回最近层" 注释 = "\"枚举循环\"所枚举到键值对成员的值." 折叠
             @嵌入式方法 = "parent = \"iter,riter\"" @视窗.返回参考 = 真>
     {
-        @ _pivmapitr_@dt<模板类型1>->second
+        @ (@dt<模板类型2>&)_pivmapitr_@dt<模板类型1>->second
     }
 
     # @begin
@@ -788,7 +785,7 @@
 
     # --
     # @begin
-    # @def_macro map std::mapstd::remove_pointer<@dt<模板类型1> *>::type, std::remove_pointer<@dt<模板类型2> *>::type, NocaseLess>
+    # @def_macro map std::mapstd::remove_pointer<@dt<模板类型1> *>::type, std::remove_pointer<@dt<模板类型2> *>::type, @sn<current_class_def>::NocaseLess>
     # <> <include>
     # using KeyType = std::remove_pointer<@dt<模板类型1> *>::type;
     # using ValueType = std::remove_pointer<@dt<模板类型2> *>::type;
@@ -843,8 +840,10 @@
 
     # --
     # @begin
-    # @def_macro map std::unordered_map<std::remove_pointer<@dt<模板类型1> *>::type, std::remove_pointer<@dt<模板类型2> *>::type, HashFunc>
+    # @def_macro map std::unordered_map<std::remove_pointer<@dt<模板类型1> *>::type, std::remove_pointer<@dt<模板类型2> *>::type, @sn<current_class_def>::HashFunc>
     # <> <include>
+    # using KeyType = std::remove_pointer<@dt<模板类型1> *>::type;
+    # using ValueType = std::remove_pointer<@dt<模板类型2> *>::type;
     # struct HashFunc
     # {
     #     size_t operator()(const KeyType& key) const { return key.GetHash(); }
@@ -874,7 +873,7 @@
 
     # --
     # @begin
-    # @def_macro map std::unordered_map<std::remove_pointer<@dt<模板类型1> *>::type, std::remove_pointer<@dt<模板类型2> *>::type, HashFunc, KeyEqualFunc>
+    # @def_macro map std::unordered_map<std::remove_pointer<@dt<模板类型1> *>::type, std::remove_pointer<@dt<模板类型2> *>::type, @sn<current_class_def>::HashFunc, KeyEqualFunc>
     # <> <include>
     # using KeyType = std::remove_pointer<@dt<模板类型1> *>::type;
     # using ValueType = std::remove_pointer<@dt<模板类型2> *>::type;

@@ -5273,7 +5273,7 @@ public:
             std::basic_string<CharT> s;
             while (fpos < epos)
             {
-                fpos = str.find_first_of(delimit, spos, count);
+                fpos = str.find_first_of(delimit.data(), spos, delimit.size());
                 if (fpos != std::basic_string<CharT>::npos)
                 {
                     s = str.substr(spos, fpos - spos);
@@ -5451,7 +5451,7 @@ public:
             std::basic_string<CharT> s;
             while (fpos < epos)
             {
-                fpos = str.find(delimit, spos);
+                fpos = str.find(delimit.data(), spos, delimit.size());
                 if (fpos != std::basic_string<CharT>::npos && ++n < max_count)
                 {
                     s = str.substr(spos, fpos - spos);

@@ -5,7 +5,7 @@
 类 Markdown解析器 <公开 注释 = "md4c 0.4.8" 注释 = "在CommonMark规范的基础上兼容GitHub Flavored Markdown和LaTeX数学公式"
         注释 = "源代码 https://github.com/mity/md4c" 注释 = "" 注释 = "CommonMark 规范"
         注释 = "https://spec.commonmark.org/" 注释 = "GitHub Flavored Markdown 规范"
-        注释 = "https://github.github.com/gfm/" 折叠 编辑时信息 = "4987E, 0, 0, 0" @文档 = "category = \"Markdown\""
+        注释 = "https://github.github.com/gfm/" 编辑时信息 = "4987E, 0, 0, 0" @文档 = "category = \"Markdown\""
         @视窗.外部头文件 = "src\\md4c\\entity.h\nsrc\\md4c\\md4c.h\nsrc\\md4c\\md4c-html.h"
         @视窗.外部源文件 = "src\\md4c\\entity.c\nsrc\\md4c\\md4c.c\nsrc\\md4c\\md4c-html.c">
 {
@@ -32,14 +32,14 @@
         }
     }
 
-    方法 渲染2 <公开 类型 = 逻辑型 注释 = "将Markdown字节集转换到HTML字节集(UTF8编码)." 返回值注释 = "返回是否成功" 折叠 @禁止流程检查 = 真>
+    方法 渲染2 <公开 类型 = 逻辑型 注释 = "将Markdown字节集转换到HTML字节集(UTF8编码)." 返回值注释 = "返回是否成功" @禁止流程检查 = 真>
     参数 Markdown <类型 = 字节集类 注释 = "欲解析的Markdown字节集(UTF8编码)">
     参数 HTML <类型 = 字节集类 注释 = "保存转换后的HTML字节集(UTF8编码)">
     参数 解析器标志 <类型 = 整数 注释 = "为\"MD解析器选项\"的组合值(用\"位或\"组合)." @默认值 = MD解析器标志.GitHub规范>
     参数 渲染器标志 <类型 = 整数 注释 = "为\"MD渲染器选项\"的组合值(用\"位或\"组合)." @默认值 = MD渲染器标志.跳过UTF8签名>
     {
         @ @<HTML>.Empty (); // 清空字节集,防止用户传入了非空的字节集参数
-        @ @<HTML>.SetMemAlignSize (@<Markdown>.GetSize () * 3); // 置字节集预分配字尺寸,加快处理速度
+        @ @<HTML>.SetMemAlignSize (@<Markdown>.GetSize () * 2); // 置字节集预分配字尺寸,加快处理速度
         @ return !md_html ((const MD_CHAR*)@<Markdown>.GetPtr (), (MD_SIZE)@<Markdown>.GetSize (), &MdRenderProc, (void*)&@<HTML>, (unsigned)@<解析器标志>, (unsigned)@<渲染器标志>);
     }
 

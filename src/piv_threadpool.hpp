@@ -81,7 +81,7 @@ public:
         // 创建线程
         for (int32_t i = 0; i < m_ThreadPool->Capacity; i++)
         {
-            std::thread(&ThreadPoolWorkerThread, &m_ThreadPool).detach();
+            std::thread(&ThreadPoolWorkerThread, m_ThreadPool).detach();
         }
         // 所有线程创建失败时退出
         if (m_ThreadPool->ThreadsCount == 0)
@@ -140,7 +140,7 @@ public:
         // 清空所有任务
         if (m_ThreadPool->QueueTask > 0)
         {
-            std::thread(&ThreadPoolClearTask, &m_ThreadPool).join();
+            std::thread(&ThreadPoolClearTask, m_ThreadPool).join();
         }
         m_ThreadPool.reset();
         return TRUE;
@@ -211,7 +211,7 @@ public:
             return TRUE;
         if (m_ThreadPool->state == ThreadPoolState_Suspend)
         {
-            std::thread(&ThreadPoolClearTask, &m_ThreadPool).join();
+            std::thread(&ThreadPoolClearTask, m_ThreadPool).join();
             return TRUE;
         }
         if (m_ThreadPool->state != ThreadPoolState_Normal)
@@ -240,7 +240,7 @@ public:
         if (m_ThreadPool->ThreadsCount < nNewThreadNum)
         {
             for (int32_t i = m_ThreadPool->ThreadsCount; i < nNewThreadNum; i++)
-                std::thread(&ThreadPoolWorkerThread, &m_ThreadPool).detach();
+                std::thread(&ThreadPoolWorkerThread, m_ThreadPool).detach();
         }
         else
         {
@@ -356,9 +356,8 @@ protected:
      * @param lpThreadPool 线程池参数
      * @return
      */
-    static INT CALLBACK ThreadPoolWorkerThread(std::shared_ptr<THREADPOOL_INFO> *lpThreadPool)
+    static INT CALLBACK ThreadPoolWorkerThread(std::shared_ptr<THREADPOOL_INFO> &ThreadPool)
     {
-        std::shared_ptr<THREADPOOL_INFO> ThreadPool = *lpThreadPool;
         ThreadPool->ThreadsCount++;
         DWORD dwStatus = 0;
         ULONG_PTR CompletionKey = 0;
@@ -415,7 +414,7 @@ protected:
                 }
                 else
                 {
-                    std::thread(&ThreadPoolWorkerThread, &ThreadPool).detach();
+                    std::thread(&ThreadPoolWorkerThread, ThreadPool).detach();
                 }
             }
         }
@@ -428,9 +427,8 @@ protected:
      * @param lpThreadPool 线程池参数
      * @return
      */
-    static int32_t CALLBACK ThreadPoolClearTask(std::shared_ptr<THREADPOOL_INFO> *lpThreadPool)
+    static int32_t CALLBACK ThreadPoolClearTask(std::shared_ptr<THREADPOOL_INFO> &ThreadPool)
     {
-        std::shared_ptr<THREADPOOL_INFO> ThreadPool = *lpThreadPool;
         DWORD dwStatus = 0;
         ULONG_PTR CompletionKey = 0;
         std::packaged_task<void()> *task = nullptr;

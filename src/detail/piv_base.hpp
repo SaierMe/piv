@@ -15,6 +15,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <algorithm>
 
 #if defined(_MSVC_LANG) && (_MSVC_LANG >= 201703L)

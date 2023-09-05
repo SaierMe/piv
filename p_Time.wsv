@@ -6,7 +6,7 @@
 
 类 标准时间类 <公开 基础类 = 扩展对象类 注释 = "  封装了标准库的std::chrono::system_clock,比视窗基本类的\"时间操作类\"快."
         注释 = "  system_clock是系统范畴的实时壁钟,可以转换成日期时间,最高精度为100纳秒." 注释 = "  本类初始化时会自动获取当前的系统时间." 折叠
-        @文档 = "category = \"时间操作\"" "@视窗.外部头文件.全局-100" = "<chrono>">
+        @文档 = "category = \"时间操作\"" "@视窗.外部头文件.全局-100" = "<malloc.h>\r\n<chrono>">
 {
 
     # 设置时间
@@ -408,7 +408,7 @@
 类 标准计时器类 <公开 基础类 = 扩展对象类 注释 = "  封装了标准库的std::chrono::steady_clock,steady_clock是单调时钟,"
         注释 = "时间只能向前走,不能转换到日期时间,类似体育比赛中的秒表.另外还有一" 注释 = "个high_resolution_clock时钟,跟steady_clock是一致的,就不封装了."
         注释 = "  本类的主要用途是用来计算各种运行耗时,最高精度为100纳秒." 折叠 @文档 = "category = \"时间操作\""
-        "@视窗.外部头文件.全局-100" = "<chrono>" @视窗.外部头文件 = "<vector>">
+        "@视窗.外部头文件.全局-100" = "<malloc.h>\r\n<chrono>" @视窗.外部头文件 = "<vector>">
 {
     方法 计时 <公开 类型 = 整数 注释 = "新增记录当前的时间点,并返回计时索引." 注释 = "计时索引从0开始,但0保留为对象初始化时的时间点,所以返回的值必定大于等于1."
             返回值注释 = "返回计时索引." 折叠 @禁止流程检查 = 真>
@@ -750,7 +750,7 @@
 }
 
 类 纳秒时钟类 <公开 注释 = "一个基于x86 CPU时钟周期的低开销纳秒级精度时钟." 注释 = "源码: https://github.com/MengRao/tscns" 折叠
-        @文档 = "category = \"时间操作\"" @视窗.外部头文件 = "src\\tscns.h" "@视窗.外部头文件.全局-100" = "<chrono>">
+        @文档 = "category = \"时间操作\"" @视窗.外部头文件 = "src\\tscns.h" "@视窗.外部头文件.全局-100" = "<malloc.h>\r\n<chrono>">
 {
 
     # @ @m<DECLARE_REF_OBJECT_CLASS_WITH_DATA> (TSCNS)
@@ -787,7 +787,7 @@
 }
 
 类 全局纳秒时钟 <公开 注释 = "  为\"纳秒时钟类\"的二次封装,内部维护了一个全局的纳秒时钟," 注释 = "并进行周期性的校时."
-        注释 = "  只需要调用全局方法\"取现行纳秒时间戳\"即可获取高精度的计时." 折叠 @文档 = "category = \"时间操作\"" @强制依赖 = "纳秒时钟类" @全局类 = 真>
+        注释 = "  只需要调用全局方法\"取现行纳秒时间戳\"即可获取高精度的计时." @文档 = "category = \"时间操作\"" @强制依赖 = "纳秒时钟类" @全局类 = 真>
 {
     方法 取现行纳秒时间戳 <公开 静态 类型 = 长整数 注释 = "获取当前的纳秒时间戳" 折叠 @禁止流程检查 = 真>
     {
@@ -1239,7 +1239,60 @@
     # ---
 }
 
-类 线程时钟类 <公开 注释 = "时钟事件以线程的方式运行." 注释 = "由于系统限制,最多只能创建16个多媒体时钟." 注释 = "注意: 时钟的计时精度比较差,最大有15毫秒的误差" 折叠
+类 多媒体时钟类 <公开 注释 = "多媒体时钟不容易丢失窗口消息." 注释 = "  1. 由于系统限制,最多只能创建16个多媒体时钟;"
+        注释 = "  2. 时钟的计时精度比较差,最大有15毫秒的误差;" 注释 = "  3. 尽量不要在周期事件中操作界面组件,需要操作界面的请用\"时钟\"组件;"
+        注释 = "  4. 所有时钟事件均在同一个子线程中运行,耗时的周期事件会阻塞周期时间;" 折叠 @文档 = "category = \"多线程\"" @视窗.外部头文件 = "Mmsystem.h"
+        @视窗.外部库 = "winmm.lib">
+{
+    方法 类_初始化 <折叠>
+    {
+        结束时钟 ()
+    }
+
+    方法 启动时钟 <公开 类型 = 逻辑型 注释 = "启动一个时钟,重复启动会先销毁之前创建的时钟." 折叠 @禁止流程检查 = 真>
+    参数 周期时间 <类型 = 整数 注释 = "时钟运行的周期时间,以毫秒为单位">
+    {
+        @ if (m_nIDTimer) timeKillEvent (m_nIDTimer);
+        @ m_nIDTimer = timeSetEvent (@<周期时间>, 1, @sn<current_class>::onTimeFunc, (DWORD_PTR)this, TIME_PERIODIC | TIME_CALLBACK_FUNCTION | TIME_KILL_SYNCHRONOUS);
+        @ return m_nIDTimer != NULL;
+    }
+
+    方法 结束时钟 <公开 注释 = "结束时钟周期." 折叠>
+    {
+        @ if (m_nIDTimer)
+        @ {
+        @     timeKillEvent (m_nIDTimer);
+        @     m_nIDTimer = NULL;
+        @ }
+    }
+
+    方法 是否正在任务 <公开 属性读 类型 = 逻辑型 注释 = "返回时钟是否正在运行." 折叠 @禁止流程检查 = 真>
+    {
+        @ return m_nIDTimer != NULL;
+    }
+
+    方法 时钟事件 <公开 定义事件 类型 = 整数 注释 = "每当经过了指定的时钟周期,将发送本事件." 注释 = "请注意是本事件运行完毕后才开始下一次的计时." 返回值注释 = "此返回值无意义" 折叠>
+    {
+
+    }
+
+    # ---
+    # @begin
+    # <> <include>
+    # UINT m_nIDTimer = NULL;
+    # static void CALLBACK onTimeFunc (UINT uID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2) {
+    #     ((@sn<current_class>*)dwUser)->@<时钟事件> ();
+    # }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const {
+    #     return (this->m_nIDTimer == objCompare.m_nIDTimer);
+    # }
+    # <> </include>
+    # @end
+    # ---
+}
+
+类 线程时钟类 <公开 注释 = "多媒体时钟的二次封装." 注释 = "  1. 由于系统限制,最多只能创建16个多媒体时钟;" 注释 = "  2. 时钟的计时精度比较差,最大有15毫秒的误差;"
+        注释 = "  3. 尽量不要在周期事件中操作界面组件,需要操作界面的请用\"时钟\"组件;" 注释 = "  4. 每次触发的时钟事件以新建线程的方式运行,不会阻塞时钟的触发周期;" 折叠
         @文档 = "category = \"多线程\"" @视窗.外部头文件 = "Mmsystem.h" @视窗.外部库 = "winmm.lib">
 {
     方法 类_初始化 <折叠>
@@ -1277,71 +1330,17 @@
     # ---
     # @begin
     # <> <include>
-    # private:
-    #     UINT m_nIDTimer = NULL;
-    #     static void CALLBACK onTimeFunc (UINT uID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2) {
-    #         HANDLE hThread = ::CreateThread (NULL, 8192, (LPTHREAD_START_ROUTINE)ThreadProc, (LPVOID)dwUser, 0, NULL);
-    #         if (hThread) { ::CloseHandle (hThread); }
-    #     }
-    #     static void CALLBACK ThreadProc (LPVOID lpTis) {
-    #         ((@sn<current_class>*)lpTis)->@<时钟事件> ();
-    #     }
-    # public:
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const {
-    #         return ( this->m_nIDTimer == objCompare.m_nIDTimer );
-    #     }
-    # <> </include>
-    # @end
-    # ---
-}
-
-类 多媒体时钟类 <公开 注释 = "多媒体时钟不容易丢失窗口消息." 注释 = "由于系统限制,最多只能创建16个多媒体时钟." 注释 = "注意: 时钟的计时精度比较差,最大有15毫秒的误差" 折叠
-        @文档 = "category = \"多线程\"" @视窗.外部头文件 = "Mmsystem.h" @视窗.外部库 = "winmm.lib">
-{
-    方法 类_初始化 <折叠>
-    {
-        结束时钟 ()
-    }
-
-    方法 启动时钟 <公开 类型 = 逻辑型 注释 = "启动一个时钟,重复启动会先销毁之前创建的时钟." 折叠 @禁止流程检查 = 真>
-    参数 周期时间 <类型 = 整数 注释 = "时钟运行的周期时间,以毫秒为单位">
-    {
-        @ if (m_nIDTimer) timeKillEvent (m_nIDTimer);
-        @ m_nIDTimer = timeSetEvent (@<周期时间>, 1, @sn<current_class>::onTimeFunc, (DWORD_PTR)this, TIME_PERIODIC | TIME_CALLBACK_FUNCTION | TIME_KILL_SYNCHRONOUS);
-        @ return m_nIDTimer != NULL;
-    }
-
-    方法 结束时钟 <公开 注释 = "结束时钟周期." 折叠>
-    {
-        @ if (m_nIDTimer)
-        @ {
-        @     timeKillEvent (m_nIDTimer);
-        @     m_nIDTimer = NULL;
-        @ }
-    }
-
-    方法 是否正在任务 <公开 属性读 类型 = 逻辑型 注释 = "返回时钟是否正在运行." 折叠 @禁止流程检查 = 真>
-    {
-        @ return m_nIDTimer != NULL;
-    }
-
-    方法 时钟事件 <公开 定义事件 类型 = 整数 注释 = "每当经过了指定的时钟周期,将发送本事件." 注释 = "请注意是本事件运行完毕后才开始下一次的计时." 返回值注释 = "此返回值无意义" 折叠>
-    {
-
-    }
-
-    # ---
-    # @begin
-    # <> <include>
-    # private:
-    #     UINT m_nIDTimer = NULL;
-    #     static void CALLBACK onTimeFunc (UINT uID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2) {
-    #         ((@sn<current_class>*)dwUser)->@<时钟事件> ();
-    #     }
-    # public:
-    #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const {
-    #         return ( this->m_nIDTimer == objCompare.m_nIDTimer );
-    #     }
+    # UINT m_nIDTimer = NULL;
+    # static void CALLBACK onTimeFunc (UINT uID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2) {
+    #     HANDLE hThread = ::CreateThread (NULL, 8192, (LPTHREAD_START_ROUTINE)ThreadProc, (LPVOID)dwUser, 0, NULL);
+    #     if (hThread) { ::CloseHandle (hThread); }
+    # }
+    # static void CALLBACK ThreadProc (LPVOID lpTis) {
+    #     ((@sn<current_class>*)lpTis)->@<时钟事件> ();
+    # }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const {
+    #     return (this->m_nIDTimer == objCompare.m_nIDTimer);
+    # }
     # <> </include>
     # @end
     # ---

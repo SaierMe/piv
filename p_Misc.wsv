@@ -2,9 +2,103 @@
 
 包 火山.PIV基础类 <注释 = "https://github.com/SaierMe/piv" "">
 
+类 ULID类 <公开 基础类 = 扩展对象类 注释 = "ULID(可排序的唯一标识符);"
+        注释 = "它结合毫秒时间戳和随机数生成32个字节长度的标识符,并通过Base32转换到26个字符的ULID文本."
+        注释 = "  1. ULID前6个字节是毫秒时间戳,后10个字节通过std::mt19937算法生成的随机数;"
+        注释 = "  2. ULID跟UUID/GUID相比,最大的区别是可以按字典序排序,先比较前面的时间戳," 注释 = "如果时间戳相等则继续比较后面的随机数;"
+        注释 = "  3. ULID可以提取出时间戳;" 注释 = "  4. ULID文本无特殊字符,可直接用于URL、JSON、SQL语句..."
+        注释 = "https://github.com/suyash/ulid" 折叠 @文档 = "category = \"伪随机数\""
+        @视窗.外部头文件 = "src\\detail\\ulid_struct.hh" "@视窗.外部头文件.全局-100" = "<malloc.h>\r\n<chrono>">
+{
+    方法 创建 <公开 注释 = "从现行时间创建一个ULID并填入本对象" 折叠 @嵌入式方法 = "">
+    {
+        @ @sn<this>.Create()
+    }
+
+    方法 从文本创建 <公开 类型 = 逻辑型 注释 = "从所指定的ULID文本创建对应的ULID并填入本对象中,返回是否成功." 折叠 @禁止流程检查 = 真>
+    参数 ULID文本 <类型 = 文本型 注释 = "提供所欲转换的文本格式的ULID,格式类似: \"01H5Z4KY89BKVEWY9CVW2Y3EHB\"">
+    {
+        @ if (@<ULID文本>.GetLength() != 26)
+        @     return FALSE;
+        @ ulid::UnmarshalFrom<wchar_t>(@<ULID文本>.GetText(), data());
+        @ return TRUE;
+    }
+
+    方法 从字节集创建 <公开 类型 = 逻辑型 注释 = "从所指定的ULID字节集创建对应的ULID并填入本对象中,返回是否成功." 折叠 @禁止流程检查 = 真>
+    参数 ULID字节集 <类型 = 字节集类 注释 = "提供所欲转换的字节集格式的GUID,该字节集应由本类的\"取字节集\"方法返回.">
+    {
+        @ if (@<ULID字节集>.GetSize() != sizeof(ulid::ULID))
+        @     return FALSE;
+        @ ulid::UnmarshalBinaryFrom(@<ULID字节集>.GetPtr(), data());
+        @ return TRUE;
+    }
+
+    方法 取文本 <公开 类型 = 文本型 注释 = "返回本对象中所保存ULID对应的文本,所返回文本格式类似:" 注释 = "\"01H5Z4KY89BKVEWY9CVW2Y3EHB\"" 折叠
+            @禁止流程检查 = 真>
+    {
+        @ wchar_t data[27];
+        @ data[26] = '\0';
+        @ ulid::MarshalTo<wchar_t>(m_ulid, data);
+        @ return @an<CVolString>(data);
+    }
+
+    方法 取文本U <公开 类型 = 标准文本类U 注释 = "返回本对象中所保存ULID对应的文本,所返回文本格式类似:" 注释 = "\"01H5Z4KY89BKVEWY9CVW2Y3EHB\"" 折叠
+            @禁止流程检查 = 真>
+    {
+        @ char data[27];
+        @ data[26] = '\0';
+        @ ulid::MarshalTo<char>(m_ulid, data);
+        @ return @dt<标准文本类U>(data);
+    }
+
+    方法 取字节集 <公开 类型 = 字节集类 注释 = "返回本对象中所保存ULID对应的字节集数据" 折叠 @嵌入式方法 = "">
+    {
+        @ @an<CVolMem>(@sn<this>.pdata(), sizeof(ulid::ULID))
+    }
+
+    方法 比较 <公开 类型 = 整数 注释 = "比较两个ULID的字典序大小,返回比较结果." 返回值注释 = "返回-1,表示本ULID小于所比较的ULID;"
+            返回值注释 = "返回0,表示本ULID等于所比较的ULID;" 返回值注释 = "返回1,表示本ULID大于所比较的ULID;" 折叠 @嵌入式方法 = "">
+    参数 欲比较对象 <类型 = ULID类>
+    {
+        @ ulid::CompareULIDs(@sn<this>.data(), @<欲比较对象>.data())
+    }
+
+    方法 取时间戳 <公开 类型 = 长整数 注释 = "返回ULID中的毫秒时间戳" 折叠 @嵌入式方法 = "">
+    {
+        @ (INT64)ulid::Time(@sn<this>.data())
+    }
+
+    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 注释 = "" 折叠 @虚拟方法 = 可覆盖>
+    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
+    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    {
+        展示内容 = 本对象.取文本 ()
+    }
+
+    # @begin
+    # <> <include>
+    # ulid::ULID m_ulid;
+    # inline void Create() {
+    #     ulid::EncodeTimeSystemClockNow(m_ulid);
+    #     ulid::EncodeEntropyMt19937(std::mt19937{std::random_device{}()}, m_ulid);
+    # }
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_ulid = objCopyFrom.m_ulid; }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const {
+    #     return (ulid::CompareULIDs(m_ulid, objCompare.m_ulid) == 0);
+    # }
+    # inline bool operator< (const @sn<current_class>& objCompare) const { return (ulid::CompareULIDs(m_ulid, objCompare.m_ulid) == -1); }
+    # inline ulid::ULID& data() { return m_ulid; }
+    # inline ulid::ULID* pdata() { return &m_ulid; }
+    # <> </include>
+    # @end
+}
+
+类 ULID排序集 <公开 基础类 = 通用型排序集模板类 注释 = "可用于对ULID类(可排序的唯一标识符)进行排序存储" 注释 = "" @文档 = "category = \"数据处理.排序集\""
+        @模板实现类 = "ULID类">
+
 # 随机数 ===
 
-类 标准随机数基本类 <公开 注释 = "封装了<std::random>的基本操作" 编辑时信息 = "36FA5, 0, 0, 0" @文档 = "category = \"伪随机数\""
+类 标准随机数基本类 <公开 注释 = "封装了<std::random>的基本操作" 折叠 编辑时信息 = "36FA5, 0, 0, 0" @文档 = "category = \"伪随机数\""
         @视窗.外部头文件 = "<random>">
 {
 

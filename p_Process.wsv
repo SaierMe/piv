@@ -549,7 +549,7 @@
     }
 }
 
-类 进程辅助类 <公开 注释 = "进程相关的一些辅助方法." 折叠 @文档 = "category = \"进程操作\"" @禁止创建对象 = 真>
+类 进程辅助类 <公开 注释 = "进程相关的一些辅助方法" @文档 = "category = \"进程操作\"" @禁止创建对象 = 真>
 {
     方法 取物理内存尺寸 <公开 静态 类型 = 长整数 注释 = "获取系统安装的物理内存大小(单位为KB),该尺寸直接从SMBIOS中获取," 注释 = "必定大于等于系统可使用的内存量." 折叠
             @禁止流程检查 = 真>
@@ -637,7 +637,7 @@
         @ return result;
     }
 
-    方法 调整当前权限 <公开 静态 类型 = 整数 注释 = "(RtlAdjustPrivilege)启用或取消当前线程或进程的某个权限." 返回值注释 = "返回0表示成功,其他为错误码." 折叠
+    方法 调整当前权限 <公开 静态 类型 = 整数 注释 = "(RtlAdjustPrivilege)启用或取消当前线程或进程的某个权限." 返回值注释 = "返回0表示成功,其他为错误码."
             @禁止流程检查 = 真>
     参数 权限ID <类型 = 用户权限ID 注释 = "所需的权限ID.">
     参数 启用权限 <类型 = 逻辑型 注释 = "真为启用该权限,假为取消." @默认值 = 真>
@@ -647,7 +647,7 @@
         @ typedef DWORD(WINAPI * NT_RtlAdjustPrivilege)(ULONG Privilege, BOOLEAN Enable, BOOLEAN CurrentThread, PBOOLEAN Enabled);
         @ NT_RtlAdjustPrivilege pfn = reinterpret_cast<NT_RtlAdjustPrivilege>(::GetProcAddress(::GetModuleHandle(L"Ntdll.dll"), "RtlAdjustPrivilege"));
         @ if (pfn) {
-        @     return static_cast<INT>(pfn(static_cast<ULONG>(@<权限ID>), @<启用权限>, @<是否仅当前线程>, reinterpret_cast<PBOOLEAN>(&@<原来的权限状态.值>)));
+        @     return static_cast<INT>(pfn(static_cast<ULONG>(@<权限ID>), static_cast<BOOLEAN>(@<启用权限>), static_cast<BOOLEAN>(@<是否仅当前线程>), reinterpret_cast<PBOOLEAN>(&@<原来的权限状态.值>)));
         @ }
         @ return -1;
     }
@@ -704,7 +704,7 @@
     }
 
     方法 进程ID取窗口句柄 <公开 静态 类型 = 变整数 注释 = "根据进程ID获取窗口句柄." 注释 = "本方法通过枚举系统的所有窗口句柄,然后对比其进程ID实现."
-            返回值注释 = "成功返回窗口句柄,失败返回0." 折叠 @禁止流程检查 = 真>
+            返回值注释 = "成功返回找到的第一个窗口句柄(不能保证是主窗口句柄),失败返回0." 折叠 @禁止流程检查 = 真>
     参数 进程ID <类型 = 整数 注释 = "所欲取窗口句柄的进程ID,0为当前进程." @默认值 = 0>
     {
         @ HWND hWnd = ::GetTopWindow(NULL);
@@ -719,6 +719,26 @@
         @     hWnd = ::GetNextWindow(hWnd, GW_HWNDNEXT);
         @ }
         @ return 0;
+    }
+
+    方法 进程ID取窗口句柄2 <公开 静态 类型 = 变整数 注释 = "根据进程ID获取窗口句柄." 注释 = "本方法通过枚举系统的所有窗口句柄,然后对比其进程ID实现."
+            返回值注释 = "成功返回找到的第一个窗口句柄(不能保证是主窗口句柄),失败返回0." 折叠 @禁止流程检查 = 真>
+    参数 进程ID <类型 = 整数 注释 = "所欲取窗口句柄的进程ID,0为当前进程." @默认值 = 0>
+    参数 窗口句柄数组 <类型 = 变整数数组类 注释 = "所有获取到的窗口句柄都保存在此数组中,并返回找到的第一个窗口句柄;" @默认值 = 空对象>
+    {
+        窗口句柄数组.删除所有成员 ()
+        @ HWND hWnd = ::GetTopWindow(NULL);
+        @ DWORD dwFindPID = @<进程ID> ? static_cast<DWORD>(@<进程ID>) : ::GetCurrentProcessId();
+        @ while (hWnd) {
+        @     DWORD dwPID = 0;
+        @     DWORD dwTheardId = ::GetWindowThreadProcessId(hWnd, &dwPID);
+        @     if (dwTheardId) {
+        @         if (dwPID == dwFindPID)
+        @             @<窗口句柄数组>.data().Add((INT_P)hWnd);
+        @     }
+        @     hWnd = ::GetNextWindow(hWnd, GW_HWNDNEXT);
+        @ }
+        返回 (选择 (窗口句柄数组.取成员数 () > 0, 窗口句柄数组.取成员 (0), (变整数)0))
     }
 
     方法 窗口句柄取进程ID <公开 静态 类型 = 整数 注释 = "根据窗口句柄获取进程ID." 返回值注释 = "成功返回进程ID,失败返回0." 折叠 @禁止流程检查 = 真>
@@ -890,8 +910,8 @@
     }
 }
 
-类 快照辅助类 <公开 注释 = "通过Toolhelp API获取进程、模块和线程的运行状况." 折叠 @文档 = "category = \"进程操作\""
-        @视窗.外部头文件 = "tlhelp32.h" @禁止创建对象 = 真>
+类 快照辅助类 <公开 注释 = "通过Toolhelp API获取进程、模块和线程的运行状况." @文档 = "category = \"进程操作\"" @视窗.外部头文件 = "tlhelp32.h"
+        @禁止创建对象 = 真>
 {
     方法 枚举进程信息 <公开 静态 类型 = 整数 注释 = "通过系统快照获取当前所有进程的基本信息(ID、名称等)." 返回值注释 = "成功返回进程数量,失败返回0." 折叠 @禁止流程检查 = 真>
     参数 进程信息数组 <类型 = 进程快照数组类 注释 = "获取的进程信息保存在此数组中">
@@ -1029,7 +1049,7 @@
         @     }
         @ } while (::Process32NextW (hProcessSnap, &pe32));
         @ ::CloseHandle (hProcessSnap);
-        @ return aProcessID.data ().GetCount ();
+        @ return (INT)aProcessID.data ().GetCount ();
     }
 
     方法 取进程线程信息 <公开 静态 类型 = 整数 注释 = "通过系统快照获取指定进程的所有线程的基本信息." 返回值注释 = "成功返回线程数量,失败返回0." 折叠 @禁止流程检查 = 真>
