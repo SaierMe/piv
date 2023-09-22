@@ -1,15 +1,13 @@
 ﻿/*********************************************\
- * 火山视窗PIV模块 - simdutf 包装类          *
+ * 火山视窗PIV模块 - simdutf包装类           *
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/14                          *
 \*********************************************/
 
 #ifndef _PIV_SIMDUTF_HPP
 #define _PIV_SIMDUTF_HPP
 
-// 包含火山视窗基本类,它在火山里的包含顺序比较靠前(全局-110)
 #ifndef __VOL_BASE_H__
 #include <sys/base/libs/win_base/vol_base.h>
 #endif

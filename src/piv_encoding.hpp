@@ -84,6 +84,7 @@ namespace piv
          * @param utf16str 转换后的字符串在此参数中返回
          * @param mbstr 转换前的字符串
          * @param mbslen 转换前的字符串字符长度,-1为自动获取
+         * @param code_page 编码页
          */
         static void A2Wex(std::wstring &utf16str, const char *mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
         {
@@ -121,6 +122,7 @@ namespace piv
          * @param mbstr 转换后的字符串在此参数中返回
          * @param utf16str 转换前的字符串
          * @param utf16len 转换前的字符串字符长度,-1为自动获取
+         * @param code_page 编码页
          */
         static void W2Aex(std::string &mbstr, const wchar_t *utf16str, const size_t &utf16len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
         {
@@ -249,7 +251,7 @@ namespace piv
         {
             std::wstring utf16str;
             piv::encoding::U2Wex(utf16str, utf8str, utf8len);
-            piv::encoding::W2Aex(mbstr, utf16str.c_str(), 0, code_page);
+            piv::encoding::W2Aex(mbstr, utf16str.c_str(), utf16str.size(), code_page);
         }
 
         /**
@@ -262,7 +264,7 @@ namespace piv
         {
             std::wstring utf16str;
             piv::encoding::A2Wex(utf16str, mbstr, mbslen, code_page);
-            piv::encoding::W2Uex(utf8str, utf16str.c_str(), 0);
+            piv::encoding::W2Uex(utf8str, utf16str.c_str(), utf16str.size());
         }
 
         /**

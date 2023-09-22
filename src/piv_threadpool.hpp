@@ -77,14 +77,16 @@ public:
             return FALSE;
         }
         m_ThreadPool->state = ThreadPoolState_Starting;
-        m_ThreadPool->Capacity = (Capacity <= 0) ? GetProcessorsCount() + 1 : Capacity;
+        m_ThreadPool->Capacity = (Capacity <= 0) ? (GetProcessorsCount() + 1) : Capacity;
         // 创建线程
-        for (int32_t i = 0; i < m_ThreadPool->Capacity; i++)
+        try
         {
-            std::thread(&ThreadPoolWorkerThread, m_ThreadPool).detach();
+            for (int32_t i = 0; i < m_ThreadPool->Capacity; i++)
+            {
+                std::thread(&ThreadPoolWorkerThread, m_ThreadPool).detach();
+            }
         }
-        // 所有线程创建失败时退出
-        if (m_ThreadPool->ThreadsCount == 0)
+        catch (const std::system_error &e)
         {
             m_ThreadPool.reset();
             return FALSE;

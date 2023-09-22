@@ -1,6 +1,6 @@
 /*
  * bit7z - A C++ static library to interface with the 7-zip shared libraries.
- * Copyright (c) 2014-2022 Riccardo Ostani - All Rights Reserved.
+ * Copyright (c) 2014-2023 Riccardo Ostani - All Rights Reserved.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -50,8 +50,17 @@ class BitException final : public system_error {
          * @brief Constructs a BitException object with the given message, and the specific file that failed.
          *
          * @param message   the message associated with the exception object.
-         * @param file      the file that failed during the operation.
          * @param code      the HRESULT code associated with the exception object.
+         * @param file      the file that failed during the operation.
+         */
+        BitException( const char* message, std::error_code code, tstring&& file );
+
+        /**
+         * @brief Constructs a BitException object with the given message, and the specific file that failed.
+         *
+         * @param message   the message associated with the exception object.
+         * @param code      the HRESULT code associated with the exception object.
+         * @param file      the file that failed during the operation.
          */
         BitException( const char* message, std::error_code code, const tstring& file );
 

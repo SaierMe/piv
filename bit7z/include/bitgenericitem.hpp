@@ -1,6 +1,6 @@
 /*
  * bit7z - A C++ static library to interface with the 7-zip shared libraries.
- * Copyright (c) 2014-2022 Riccardo Ostani - All Rights Reserved.
+ * Copyright (c) 2014-2023 Riccardo Ostani - All Rights Reserved.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -23,6 +23,11 @@ class BitGenericItem {
          * @return true if and only if the item is a directory (i.e., it has the property BitProperty::IsDir).
          */
         BIT7Z_NODISCARD virtual auto isDir() const -> bool = 0;
+
+        /**
+         * @return true if and only if the item is a symbolic link.
+         */
+        BIT7Z_NODISCARD virtual auto isSymLink() const -> bool = 0;
 
         /**
          * @return the uncompressed size of the item.

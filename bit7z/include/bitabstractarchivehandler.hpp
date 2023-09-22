@@ -1,6 +1,6 @@
 /*
  * bit7z - A C++ static library to interface with the 7-zip shared libraries.
- * Copyright (c) 2014-2022 Riccardo Ostani - All Rights Reserved.
+ * Copyright (c) 2014-2023 Riccardo Ostani - All Rights Reserved.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -59,6 +59,15 @@ enum struct OverwriteMode {
     Skip, ///< The handler will skip writing to the output file or buffer.
 //TODO:    RenameOutput,
 //TODO:    RenameExisting
+};
+
+/**
+ * @brief Enumeration representing the policy according to which the archive handler should treat
+ *        the items that match the pattern given by the user.
+ */
+enum struct FilterPolicy {
+    Include, ///< Extract/compress the items that match the pattern.
+    Exclude  ///< Do not extract/compress the items that match the pattern.
 };
 
 /**

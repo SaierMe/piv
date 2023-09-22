@@ -1,6 +1,6 @@
 /*
  * bit7z - A C++ static library to interface with the 7-zip shared libraries.
- * Copyright (c) 2014-2022 Riccardo Ostani - All Rights Reserved.
+ * Copyright (c) 2014-2023 Riccardo Ostani - All Rights Reserved.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -12,6 +12,7 @@
 
 #include "bitabstractarchiveopener.hpp"
 #include "bitarchiveiteminfo.hpp"
+#include "bitexception.hpp"
 #include "bitinputarchive.hpp"
 
 struct IInArchive;
@@ -29,7 +30,7 @@ class BitArchiveReader final : public BitAbstractArchiveOpener, public BitInputA
          * @brief Constructs a BitArchiveReader object, opening the input file archive.
          *
          * @note When bit7z is compiled using the `BIT7Z_AUTO_FORMAT` option, the format
-         * argument has default value BitFormat::Auto (automatic format detection of the input archive).
+         * argument has the default value BitFormat::Auto (automatic format detection of the input archive).
          * On the contrary, when `BIT7Z_AUTO_FORMAT` is not defined (i.e., no auto format detection available),
          * the format argument must be specified.
          *
@@ -47,7 +48,7 @@ class BitArchiveReader final : public BitAbstractArchiveOpener, public BitInputA
          * @brief Constructs a BitArchiveReader object, opening the archive in the input buffer.
          *
          * @note When bit7z is compiled using the `BIT7Z_AUTO_FORMAT` option, the format
-         * argument has default value BitFormat::Auto (automatic format detection of the input archive).
+         * argument has the default value BitFormat::Auto (automatic format detection of the input archive).
          * On the contrary, when `BIT7Z_AUTO_FORMAT` is not defined (i.e., no auto format detection available),
          * the format argument must be specified.
          *
@@ -65,7 +66,7 @@ class BitArchiveReader final : public BitAbstractArchiveOpener, public BitInputA
          * @brief Constructs a BitArchiveReader object, opening the archive from the standard input stream.
          *
          * @note When bit7z is compiled using the `BIT7Z_AUTO_FORMAT` option, the format
-         * argument has default value BitFormat::Auto (automatic format detection of the input archive).
+         * argument has the default value BitFormat::Auto (automatic format detection of the input archive).
          * On the contrary, when `BIT7Z_AUTO_FORMAT` is not defined (i.e., no auto format detection available),
          * the format argument must be specified.
          *
@@ -130,6 +131,11 @@ class BitArchiveReader final : public BitAbstractArchiveOpener, public BitInputA
         BIT7Z_NODISCARD auto hasEncryptedItems() const -> bool;
 
         /**
+         * @return true if and only if the archive has only encrypted items.
+         */
+        BIT7Z_NODISCARD auto isEncrypted() const -> bool;
+
+        /**
          * @return the number of volumes composing the archive.
          */
         BIT7Z_NODISCARD auto volumesCount() const -> uint32_t;
@@ -143,6 +149,62 @@ class BitArchiveReader final : public BitAbstractArchiveOpener, public BitInputA
          * @return true if and only if the archive was created using solid compression.
          */
         BIT7Z_NODISCARD auto isSolid() const -> bool;
+
+        /**
+         * Checks if the given archive is header-encrypted or not.
+         *
+         * @tparam T The input type of the archive (i.e., file path, buffer, or standard stream).
+         *
+         * @param lib           the 7z library used.
+         * @param in_archive    the archive to be read.
+         * @param format        the format of the input archive.
+         *
+         * @return true if and only if the archive has at least one encrypted item.
+         */
+        template< typename T >
+        BIT7Z_NODISCARD
+        static auto isHeaderEncrypted( const Bit7zLibrary& lib,
+                                       T&& in_archive,
+                                       const BitInFormat& format BIT7Z_DEFAULT_FORMAT ) -> bool {
+            try {
+                const BitArchiveReader reader{ lib, std::forward< T >( in_archive ), format };
+                return false;
+            } catch ( const BitException& ex ) {
+                return isOpenEncryptedError( ex.code() );
+            }
+        }
+
+        /**
+         * Checks if the given archive contains only encrypted items.
+         *
+         * @note A header-encrypted archive is also encrypted, but the contrary is not generally true.
+         *
+         * @note An archive might contain both plain and encrypted files; in this case, this function will
+         * return false.
+         *
+         * @tparam T The input type of the archive (i.e., file path, buffer, or standard stream).
+         *
+         * @param lib           the 7z library used.
+         * @param in_archive    the archive to be read.
+         * @param format        the format of the input archive.
+         *
+         * @return true if and only if the archive has only encrypted items.
+         */
+        template< typename T >
+        BIT7Z_NODISCARD
+        static auto isEncrypted( const Bit7zLibrary& lib,
+                                 T&& in_archive,
+                                 const BitInFormat& format BIT7Z_DEFAULT_FORMAT ) -> bool {
+            try {
+                const BitArchiveReader reader{ lib, std::forward< T >( in_archive ), format };
+                return reader.isEncrypted();
+            } catch ( const BitException& ex ) {
+                return isOpenEncryptedError( ex.code() );
+            }
+        }
+
+    private:
+        static auto isOpenEncryptedError( std::error_code error ) -> bool;
 };
 
 using BitArchiveInfo BIT7Z_MAYBE_UNUSED BIT7Z_DEPRECATED_MSG("Since v4.0; please use BitArchiveReader.") = BitArchiveReader;

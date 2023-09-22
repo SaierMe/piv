@@ -24,11 +24,11 @@
 
   如果安装失败，请对火山主程序按鼠标右键打开「属性」，勾选「兼容性」选项卡里的「以管理员身份运行此程序」。
 
-- ##### 可执行安装文件 [.exe]
+- ##### 静态库文件 [.7z]
 
-  仅**PIV静态库**使用这种安装包。
+  由于部分静态库文件太大，而且不会经常更新，所以另外用 7z 格式压缩。
 
-  使用 [Inno Setup 6](https://jrsoftware.org/isinfo.php) 打包，压缩率比较高，自动检测安装路径，本安装包为便携式安装，无注册表写入和卸载程序。
+  请手动解压安装到 `火山目录\plugins\vprj_win\classlib\user\piv\`
 
 
 
@@ -77,11 +77,19 @@
   
   随着基础功能的广泛应用，类库之间耦合度增大，已经难以解耦了。
 
-**PIV** 是什么意思？
+#### **PIV** 是什么意思？
 
 > 我也不知道，作为起名废，这名称是沿用了我注册的一个域名，而当初注册这三个字母域名的时候，拼凑的思路上比较靠近 pic、pixiv。
 >
 > 有人说 PIV 是 VIP 的取反，虽然不是我本意，但这的确很恰当，因为PIV模块会一直免费开源。
+
+#### 关于过时功能
+
+> 本模块已有一定的历史，一些早期功能已经不合时宜，但为了兼容用户较早前写的源码，我一直有保留
+>
+> 为了让用户尝试新的东西，所以从 2023/07 版开始，我通过火山的条件编译功能屏蔽了一些过时功能
+>
+> 如果你有旧源码不想改的话，请在项目属性的「编译时预定义宏」中添加 PIV_ENABLE_OBSOLETE
 
 
 
@@ -96,16 +104,16 @@
 
 - [nlohmann **JSON**](https://github.com/nlohmann/json) `3.11.2` `MIT license`  现代 C++ 的 JSON 库
 - **[fmtlog](https://github.com/MengRao/fmtlog)**  `2.2.1`  `MIT license` 纳秒级精度的高性能异步日志记录库
-- **[{fmt}](https://github.com/fmtlib/fmt)**  `9.1.0`  `MIT license` 格式化文本库，等同 C++20 std::format 的实现 
+- **[{fmt}](https://github.com/fmtlib/fmt)**  `10.1.1`  `MIT license` 格式化文本库，等同 C++20 std::format 的实现 
 - **[md4c](https://github.com/mity/md4c)** `0.4.8`  `MIT license` CommonMark 0.30 规范 + GFM 的 Markdown 解析库
-- **[simpleini](https://github.com/brofield/simpleini)** `4.19` `MIT license` 简易的 INI 配置文件读写库
-- **[simdutf](https://github.com/simdutf/simdutf)** `3.2.9` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
-- **[OpenCC](https://github.com/BYVoid/OpenCC)** `1.1.4` `Apache-2.0 license` 中文简繁转换开源项目，支持词汇级别的转换、异体字转换和地区习惯用词转换
-- **[7-zip](https://www.7-zip.org/)** `22.01` `GNU LGPL license` 免费的开源压缩软件（采用GNU LGPL协议，只使用它的 dll 文件不会传染）
-- **[bit7z](https://github.com/rikyoz/bit7z)** `4.0.0-RC` `Mozilla Public License v2.0` 7-zip的封装类
+- **[simpleini](https://github.com/brofield/simpleini)** `4.20` `MIT license` 简易的 INI 配置文件读写库
+- **[simdutf](https://github.com/simdutf/simdutf)** `3.2.15` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
+- **[OpenCC](https://github.com/BYVoid/OpenCC)** `1.1.6` `Apache-2.0 license` 中文简繁转换开源项目，支持词汇级别的转换、异体字转换和地区习惯用词转换
+- **[7-zip](https://www.7-zip.org/)** `23.01` `GNU LGPL license` 免费的开源压缩软件（采用GNU LGPL协议，只使用它的 dll 文件不会传染）
+- **[bit7z](https://github.com/rikyoz/bit7z)** `4.0.0` `Mozilla Public License v2.0` 7-zip 的封装类
 - **[MinHook](https://github.com/TsudaKageyu/minhook)** `1.3.3` `BSD-2-Clause License` 极简的 x86/x64 API Hook 库
-- **[MMKV](https://github.com/Tencent/MMKV)** `1.2.14` `BSD-3-Clause License` 腾讯的高性能键值表
-- **[xxHash](https://github.com/Cyan4973/xxHash)** `8.0.1` `BSD-2-Clause License` 速度接近 RAM 限制的高速散列算法
+- **[MMKV](https://github.com/Tencent/MMKV)** `1.3.1` `BSD-3-Clause License` 腾讯的高性能键值表
+- **[xxHash](https://github.com/Cyan4973/xxHash)** `8.0.2` `BSD-2-Clause License` 速度接近 RAM 限制的高速散列算法
 - **[Dear ImGui](https://github.com/ocornut/imgui)** `1.89.7` `MIT license` 轻量级的即时渲染界面开发框架
 - **[GLFW](https://www.glfw.org)** `3.3.8` `zlib/libpng license` 跨平台的 OpenGL/Vulkan 桌面应用框架
 - **[glad](https://github.com/Dav1dde/glad)** `2023-04-04` `MIT License` 多语言的Vulkan/GL/GLES/EGL/GLX/WGL加载程序生成器

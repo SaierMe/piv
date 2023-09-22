@@ -22,8 +22,8 @@
 #define MMKV_SRC_MMKVPREDEF_H
 
 // disable encryption & decryption to reduce some code
-// #define MMKV_DISABLE_CRYPT
-// #define MMKV_DISABLE_FLUTTER
+//#define MMKV_DISABLE_CRYPT
+//#define MMKV_DISABLE_FLUTTER
 
 // using POSIX implementation
 //#define FORCE_POSIX
@@ -34,7 +34,7 @@
 #include <vector>
 #include <unordered_map>
 
-constexpr auto MMKV_VERSION = "v1.2.14";
+constexpr auto MMKV_VERSION = "v1.3.1";
 
 #ifdef DEBUG
 #    define MMKV_DEBUG
@@ -73,7 +73,6 @@ constexpr auto MMKV_VERSION = "v1.2.14";
 #endif
 
 #ifdef MMKV_WIN32
-/*
 #    if !defined(_WIN32_WINNT)
 #        define _WIN32_WINNT _WIN32_WINNT_WINXP
 #    endif
@@ -83,10 +82,9 @@ constexpr auto MMKV_VERSION = "v1.2.14";
 #    define WIN32_LEAN_AND_MEAN
 // Windows Header Files
 #    include <windows.h>
-*/
 
 constexpr auto MMKV_PATH_SLASH = L"\\";
-#    define MMKV_PATH_FORMAT "%ws"
+#    define MMKV_PATH_FORMAT "%ls"
 using MMKVFileHandle_t = HANDLE;
 using MMKVPath_t = std::wstring;
 extern MMKVPath_t string2MMKVPath_t(const std::string &str);

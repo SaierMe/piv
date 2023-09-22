@@ -1,6 +1,6 @@
 /*
  * bit7z - A C++ static library to interface with the 7-zip shared libraries.
- * Copyright (c) 2014-2022 Riccardo Ostani - All Rights Reserved.
+ * Copyright (c) 2014-2023 Riccardo Ostani - All Rights Reserved.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -246,6 +246,15 @@ class BitInputArchive {
          */
         void test() const;
 
+        /**
+         * @brief Tests the item at the given index inside the archive without extracting it.
+         *
+         * If the archive is not valid, or there's no item at the given index, a BitException is thrown!
+         *
+         * @param index  the index of the file to be tested.
+         */
+        void testItem( uint32_t index ) const;
+
     protected:
         auto openArchiveStream( const fs::path& name, IInStream* in_stream ) -> IInArchive*;
 
@@ -374,6 +383,15 @@ class BitInputArchive {
          * @return true if and only if an item with the given path exists in the archive.
          */
         BIT7Z_NODISCARD auto contains( const tstring& path ) const noexcept -> bool;
+
+        /**
+         * @brief Retrieve the item at the given index.
+         *
+         * @param index the index of the item to be retrieved.
+         *
+         * @return the item at the given index within the archive.
+         */
+        BIT7Z_NODISCARD auto itemAt( uint32_t index ) const -> BitArchiveItemOffset;
 };
 
 }  // namespace bit7z

@@ -1,6 +1,6 @@
 /*
  * bit7z - A C++ static library to interface with the 7-zip shared libraries.
- * Copyright (c) 2014-2022 Riccardo Ostani - All Rights Reserved.
+ * Copyright (c) 2014-2023 Riccardo Ostani - All Rights Reserved.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -18,7 +18,12 @@
 #include "bitexception.hpp" //for FailedFiles
 #include "bitpropvariant.hpp"
 
+//! @cond IGNORE_BLOCK_IN_DOXYGEN
 struct ISequentialInStream;
+
+template< typename T >
+class CMyComPtr;
+//! @endcond
 
 namespace bit7z {
 
@@ -166,7 +171,21 @@ class BitOutputArchive {
          *                  and all of its subdirectories.
          */
         void addFiles( const tstring& in_dir,
-                       const tstring& filter = BIT7Z_STRING( "*.*" ),
+                       const tstring& filter = BIT7Z_STRING( "*" ),
+                       bool recursive = true );
+
+        /**
+         * @brief Adds all the files inside the given directory path that match the given wildcard filter.
+         *
+         * @param in_dir    the directory where to search for files to be added to the output archive.
+         * @param filter    (optional) the wildcard filter to be used for searching the files.
+         * @param recursive (optional) recursively search the files in the given directory
+         *                  and all of its subdirectories.
+         * @param policy    (optional) the filtering policy to be applied to the matched items.
+         */
+        void addFiles( const tstring& in_dir,
+                       const tstring& filter = BIT7Z_STRING( "*" ),
+                       FilterPolicy policy = FilterPolicy::Include,
                        bool recursive = true );
 
         /**
@@ -210,6 +229,12 @@ class BitOutputArchive {
          *         settings for writing the output archive.
          */
         auto handler() const noexcept -> const BitAbstractArchiveHandler&;
+
+        /**
+         * @return a constant reference to the BitAbstractArchiveHandler object containing the
+         *         settings for writing the output archive.
+         */
+        auto creator() const noexcept -> const BitAbstractArchiveCreator&;
 
         /**
          * @brief Default destructor.

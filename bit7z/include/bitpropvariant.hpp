@@ -1,6 +1,6 @@
 /*
  * bit7z - A C++ static library to interface with the 7-zip shared libraries.
- * Copyright (c) 2014-2022 Riccardo Ostani - All Rights Reserved.
+ * Copyright (c) 2014-2023 Riccardo Ostani - All Rights Reserved.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -249,7 +249,7 @@ struct BitPropVariant final : public PROPVARIANT {
          *
          * @param value the FILETIME value of the BitPropVariant
          */
-        explicit BitPropVariant( const FILETIME& value ) noexcept;
+        explicit BitPropVariant( FILETIME value ) noexcept;
 
         /**
          * @brief BitPropVariant destructor.
@@ -302,6 +302,12 @@ struct BitPropVariant final : public PROPVARIANT {
          * (it throws an exception if the variant is not a string).
          */
         BIT7Z_NODISCARD auto getString() const -> tstring;
+
+        /**
+         * @return the native string value of this variant
+         * (it throws an exception if the variant is not a string).
+         */
+        BIT7Z_NODISCARD auto getNativeString() const -> native_string;
 
         /**
          * @return the 8-bit unsigned integer value of this variant

@@ -1,6 +1,6 @@
 /*
  * bit7z - A C++ static library to interface with the 7-zip shared libraries.
- * Copyright (c) 2014-2022 Riccardo Ostani - All Rights Reserved.
+ * Copyright (c) 2014-2023 Riccardo Ostani - All Rights Reserved.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -33,15 +33,21 @@
  * We will use only this header and avoid including "MyWindows.h" or similar headers (e.g., StdAfx.h). */
 #include <cerrno>
 #include <cstdint>
+#include <cstddef>
 
 // Avoiding accidentally including p7zip's MyWindows.h, so that its inclusion is not needed in client code!
 #ifndef __MYWINDOWS_H
-#define __MYWINDOWS_H
+#define __MYWINDOWS_H // NOLINT
 #endif
 
 // Avoiding accidentally including 7-zip's MyWindows.h, so that its inclusion is not needed in client code!
 #ifndef __MY_WINDOWS_H
-#define __MY_WINDOWS_H
+#define __MY_WINDOWS_H // NOLINT
+#endif
+
+// Avoiding accidentally including 7-zip's MyWindows.h, so that its inclusion is not needed in client code!
+#ifndef ZIP7_INC_MY_WINDOWS_H // 7-zip 23.01+
+#define ZIP7_INC_MY_WINDOWS_H
 #endif
 
 using std::size_t;
@@ -51,6 +57,7 @@ using std::size_t;
 namespace bit7z {
 
 // Win32 type aliases
+using FARPROC = void*;
 using HMODULE = void*;
 using HRESULT = int;
 using OLECHAR = wchar_t;

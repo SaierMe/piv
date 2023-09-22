@@ -5,7 +5,7 @@
 类 BASS_WASAPI类 <公开 注释 = "BASSWASAPI 2.4.3.1" 注释 = "支持在Windows Vista及更高版本上使用WASAPI输入和输出的扩展,支持独占和共享模式."
         注释 = "\"BASS音频类\"在Vista及更高版本的系统默认就是使用WASAPI,但只支持共享模式,真玩Hifi的,还是得开独占模式."
         注释 = "独占模式可以绕过系统的混合器直接输出,打开后其他应用就不能发声,理论上独占模式的音质更好."
-        注释 = "本扩展不能在Windows XP之类的旧系统使用,旧系统默认的是DirectSound." 折叠 @视窗.外部头文件 = "BASS\\include\\basswasapi.h"
+        注释 = "本扩展不能在Windows XP之类的旧系统使用,旧系统默认的是DirectSound." @视窗.外部头文件 = "BASS\\include\\basswasapi.h"
         @视窗.外部库 = "BASS\\$(p)\\basswasapi.lib" @视窗.附属文件 = "BASS\\$(p)\\basswasapi.dll"
         @文档 = "category = \"WASAPI支持\"">
 {
@@ -66,8 +66,8 @@
         @     if (info.id) @<设备信息.驱动ID>.SetText (info.id);
         @     @<设备信息.设备类型> = (INT)info.type;
         @     @<设备信息.标志> = (INT)info.flags;
-        @     @<设备信息.最小周期> = (DOUBLE)info.minperiod;
-        @     @<设备信息.默认周期> = (DOUBLE)info.defperiod;
+        @     @<设备信息.最小周期> = info.minperiod;
+        @     @<设备信息.默认周期> = info.defperiod;
         @     @<设备信息.最低采样率> = (INT)info.mixfreq;
         @     @<设备信息.最低声道> = (INT)info.mixchans;
         @     return TRUE;
@@ -112,12 +112,12 @@
         返回 (真)
     }
 
-    方法 取设备电平 <公开 类型 = 小数 注释 = "获取设备的电平(峰值振幅)."
+    方法 取设备电平 <公开 类型 = 单精度小数 注释 = "获取设备的电平(峰值振幅)."
             返回值注释 = "成功返回电平级别,失败返回-1,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息" 折叠 @嵌入式方法 = "">
     参数 设备号 <类型 = 整数 注释 = "要获取电平的设备,从0开始">
     参数 通道 <类型 = 整数 注释 = "获取电平的声道,0=第一个通道,-1=所有通道." @默认值 = 0>
     {
-        @ (DOUBLE)BASS_WASAPI_GetDeviceLevel ((DWORD)@<设备号>, (int)@<通道>)
+        @ BASS_WASAPI_GetDeviceLevel ((DWORD)@<设备号>, (int)@<通道>)
     }
 
     方法 置设备 <公开 类型 = 逻辑型 注释 = "设置当前线程后续使用的设备"
@@ -213,14 +213,14 @@
     参数 采样率 <类型 = 整数 注释 = "采样率,0=\"混合格式\"采样率." @默认值 = 0>
     参数 声道 <类型 = 整数 注释 = "声道数量,1=单声道,2=立体声,以此类推." @默认值 = 0>
     参数 标志 <类型 = 整数 注释 = "使用\"BASS_WASAPI_标志\"的组合值" @默认值 = 0>
-    参数 缓冲长度 <类型 = 小数 注释 = "  设备缓冲区长度(以秒或样本为单位,取决于\"BASS_WASAPI_SAMPLES\"标志)."
+    参数 缓冲长度 <类型 = 单精度小数 注释 = "  设备缓冲区长度(以秒或样本为单位,取决于\"BASS_WASAPI_SAMPLES\"标志)."
             注释 = "  这里设置的是最小值,驱动程序可以选择使用更大的缓冲区. 可用\"取信息\"确认缓冲区的大小."
             注释 = "  对于输出设备,缓冲区大小决定了延迟.在事件驱动独占模式下,将有两个此长度的缓冲区,因此总缓冲区长度也是原来的两倍." @默认值 = 0.1>
-    参数 周期 <类型 = 小数 注释 = "  调用回调函数的间隔(以秒或样本为单位,取决于\"BASS_WASAPI_SAMPLES\"标志).0=使用默认值."
+    参数 周期 <类型 = 单精度小数 注释 = "  调用回调函数的间隔(以秒或样本为单位,取决于\"BASS_WASAPI_SAMPLES\"标志).0=使用默认值."
             注释 = "  如果指定的周期低于最小更新周期,将自动升高."
             注释 = "  当指定BASS_WASAPI_EVENT标志时,此选项将被忽略,但在Windows 10且\"缓冲长度\"=0的共享模式下除外." @默认值 = 0>
     {
-        @ return BASS_WASAPI_Init ((INT)@<设备号>, (DWORD)@<采样率>, (DWORD)@<声道>, (DWORD)@<标志>, (float)@<缓冲长度>, (float)@<周期>, (WASAPIPROC*)&@<输出输入回调>, this);
+        @ return BASS_WASAPI_Init ((INT)@<设备号>, (DWORD)@<采样率>, (DWORD)@<声道>, (DWORD)@<标志>, @<缓冲长度>, @<周期>, (WASAPIPROC*)&@<输出输入回调>, this);
     }
 
     方法 初始化_通道 <公开 类型 = 逻辑型 注释 = "初始化设备,本方法不启用接收事件\"输出输入\",而是从BASS通道交换数据."
@@ -231,14 +231,14 @@
             注释 = "  必须是输出设备的解码通道(使用BASS_STREAM_DECODE),或输入设备的\"push\"或\"dummy\"流(使用STREAMPROC_PUSH或STREAMPROC_DUMMY)."
             注释 = "  通道的采样格式必须是浮点(BASS_SAMPLE_FLOAT).">
     参数 标志 <类型 = 整数 注释 = "使用\"BASS_WASAPI_标志\"的组合值" @默认值 = 0>
-    参数 缓冲长度 <类型 = 小数 注释 = "  设备缓冲区长度(以秒或样本为单位,取决于\"BASS_WASAPI_SAMPLES\"标志)."
+    参数 缓冲长度 <类型 = 单精度小数 注释 = "  设备缓冲区长度(以秒或样本为单位,取决于\"BASS_WASAPI_SAMPLES\"标志)."
             注释 = "  这里设置的是最小值,驱动程序可以选择使用更大的缓冲区. 可用\"取信息\"确认缓冲区的大小."
             注释 = "  对于输出设备,缓冲区大小决定了延迟.在事件驱动独占模式下,将有两个此长度的缓冲区,因此总缓冲区长度也是原来的两倍." @默认值 = 0.1>
-    参数 周期 <类型 = 小数 注释 = "  调用回调函数的间隔(以秒或样本为单位,取决于\"BASS_WASAPI_SAMPLES\"标志).0=使用默认值."
+    参数 周期 <类型 = 单精度小数 注释 = "  调用回调函数的间隔(以秒或样本为单位,取决于\"BASS_WASAPI_SAMPLES\"标志).0=使用默认值."
             注释 = "  如果指定的周期低于最小更新周期,将自动升高."
             注释 = "  当指定BASS_WASAPI_EVENT标志时,此选项将被忽略,但在Windows 10且\"缓冲长度\"=0的共享模式下除外." @默认值 = 0>
     {
-        @ BASS_WASAPI_Init ((int)@<设备号>, 0, 0, (DWORD)@<标志>, (float)@<缓冲长度>, (float)@<周期>, WASAPIPROC_BASS, (void*)@<BASS通道>)
+        @ BASS_WASAPI_Init ((int)@<设备号>, 0, 0, (DWORD)@<标志>, @<缓冲长度>, @<周期>, WASAPIPROC_BASS, (void*)@<BASS通道>)
     }
 
     方法 初始化_推送 <公开 类型 = 逻辑型
@@ -250,14 +250,14 @@
     参数 采样率 <类型 = 整数 注释 = "采样率,0=\"混合格式\"采样率." @默认值 = 0>
     参数 声道 <类型 = 整数 注释 = "声道数量,1=单声道,2=立体声,以此类推." @默认值 = 0>
     参数 标志 <类型 = 整数 注释 = "使用\"BASS_WASAPI_标志\"的组合值" @默认值 = 0>
-    参数 缓冲长度 <类型 = 小数 注释 = "  设备缓冲区长度(以秒或样本为单位,取决于\"BASS_WASAPI_SAMPLES\"标志)."
+    参数 缓冲长度 <类型 = 单精度小数 注释 = "  设备缓冲区长度(以秒或样本为单位,取决于\"BASS_WASAPI_SAMPLES\"标志)."
             注释 = "  这里设置的是最小值,驱动程序可以选择使用更大的缓冲区. 可用\"取信息\"确认缓冲区的大小."
             注释 = "  对于输出设备,缓冲区大小决定了延迟.在事件驱动独占模式下,将有两个此长度的缓冲区,因此总缓冲区长度也是原来的两倍." @默认值 = 0.1>
-    参数 周期 <类型 = 小数 注释 = "  调用回调函数的间隔(以秒或样本为单位,取决于\"BASS_WASAPI_SAMPLES\"标志).0=使用默认值."
+    参数 周期 <类型 = 单精度小数 注释 = "  调用回调函数的间隔(以秒或样本为单位,取决于\"BASS_WASAPI_SAMPLES\"标志).0=使用默认值."
             注释 = "  如果指定的周期低于最小更新周期,将自动升高."
             注释 = "  当指定BASS_WASAPI_EVENT标志时,此选项将被忽略,但在Windows 10且\"缓冲长度\"=0的共享模式下除外." @默认值 = 0>
     {
-        @ BASS_WASAPI_Init ((int)@<设备号>, (DWORD)@<采样率>, (DWORD)@<声道>, (DWORD)@<标志>, (float)@<缓冲长度>, (float)@<周期>, (WASAPIPROC*)WASAPIPROC_PUSH, NULL);
+        @ BASS_WASAPI_Init ((int)@<设备号>, (DWORD)@<采样率>, (DWORD)@<声道>, (DWORD)@<标志>, @<缓冲长度>, @<周期>, (WASAPIPROC*)WASAPIPROC_PUSH, NULL);
     }
 
     方法 释放 <公开 类型 = 逻辑型 注释 = "释放输出输入设备. 退出程序前应该释放设备,但不需要用户手段调用,类析构的时候会自动调用."
@@ -279,9 +279,9 @@
         @ return FALSE;
     }
 
-    方法 取CPU使用率 <公开 类型 = 小数 注释 = "获取BASSWASAPI当前的CPU使用率" 返回值注释 = "返回CPU使用率" 折叠 @嵌入式方法 = "">
+    方法 取CPU使用率 <公开 类型 = 单精度小数 注释 = "获取BASSWASAPI当前的CPU使用率" 返回值注释 = "返回CPU使用率" 折叠 @嵌入式方法 = "">
     {
-        @ (DOUBLE)BASS_WASAPI_GetCPU ()
+        @ BASS_WASAPI_GetCPU ()
     }
 
     方法 锁定设备 <公开 类型 = 逻辑型 注释 = "将设备锁定到当前线程. 锁定设备会阻止其他线程访问设备缓冲区,包括WASAPIPROC回调函数."
@@ -318,20 +318,20 @@
             注释 = "  1=BASS_WASAPI_CURVE_LINEAR 使用线性曲线."
             注释 = "  2=BASS_WASAPI_CURVE_WINDOWS 使用WINDOWS的Hybrid曲线,跟WINDOWS的音量控制一样."
             注释 = "  8=BASS_WASAPI_VOL_SESSION 获取会话的音量,其他为设备音量." @默认值 = 0>
-    参数 音量 <类型 = 小数 注释 = "  使用线性或Windows曲线时音量范围为0(静音)到1(最大值). 其他为dB级别."
+    参数 音量 <类型 = 单精度小数 注释 = "  使用线性或Windows曲线时音量范围为0(静音)到1(最大值). 其他为dB级别."
             注释 = "  设备的有效dB级别范围请用\"取输出信息/BASS_WASAPI_GetInfo\"获取.">
     {
-        @ BASS_WASAPI_SetVolume ((DWORD)@<模式>, (float)@<音量>)
+        @ BASS_WASAPI_SetVolume ((DWORD)@<模式>, @<音量>)
     }
 
-    方法 取音量 <公开 类型 = 小数 注释 = "获取当前的主音量级别" 返回值注释 = "成功返回音量值,失败返回-1,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
-            折叠 @嵌入式方法 = "">
+    方法 取音量 <公开 类型 = 单精度小数 注释 = "获取当前的主音量级别"
+            返回值注释 = "成功返回音量值,失败返回-1,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 模式 <类型 = 整数 注释 = "  获取的音量类型和使用的曲线." 注释 = "  0=BASS_WASAPI_CURVE_DB 使用对数曲线,如果未指定曲线,此项则为默认值."
             注释 = "  1=BASS_WASAPI_CURVE_LINEAR 使用线性曲线."
             注释 = "  2=BASS_WASAPI_CURVE_WINDOWS 使用WINDOWS的Hybrid曲线,跟WINDOWS的音量控制一样."
             注释 = "  8=BASS_WASAPI_VOL_SESSION 获取会话的音量,其他为设备音量." @默认值 = 2>
     {
-        @ (DOUBLE)BASS_WASAPI_GetVolume ((DWORD)@<模式>)
+        @ BASS_WASAPI_GetVolume ((DWORD)@<模式>)
     }
 
     方法 置静音 <公开 类型 = 逻辑型 注释 = "使设备静音或取消静音" 返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
@@ -445,35 +445,29 @@
     }
 
     方法 取电平EX <公开 类型 = 逻辑型 注释 = "获取电平(峰值振幅)" 返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
-            折叠 @禁止流程检查 = 真>
-    参数 电平 <类型 = 小数数组类 注释 = "用于接收电平级别的数组">
-    参数 数据长度 <类型 = 小数 注释 = "计算电平的观察数据量,单位为秒,除解码通道外,最大值为1秒.">
+            @禁止流程检查 = 真>
+    参数 电平数据 <类型 = 单精度小数数组类 注释 = "用于接收电平级别的数组">
+    参数 数据长度 <类型 = 单精度小数 注释 = "计算电平的观察数据量,单位为秒,除解码通道外,最大值为1秒.">
     参数 声道 <类型 = 整数 注释 = "0=全部声道, 1=单声道, 2=立体声" @默认值 = 2>
     参数 是否RMS级别 <类型 = 逻辑型 注释 = "假为获取电平级别,真为获取RMS(均方根值)级别." @默认值 = 假>
     参数 应用属性 <类型 = 逻辑型 注释 = "为真时将当前的BASS_ATTRIB_VOL和BASS_ATTRIB_PAN值应用于电平级别中." @默认值 = 假>
     {
-        电平.删除所有成员 ()
+        电平数据.删除所有成员 ()
         @ bool ret;
         @ DWORD flags = @<声道>;
         @ if (@<是否RMS级别>) flags |= BASS_LEVEL_RMS;
         @ if (@<应用属性>) flags |= BASS_LEVEL_VOLPAN;
         @ if (@<声道> == 1) {
-        @     float level;
-        @     ret = BASS_WASAPI_GetLevelEx (&level, (float)@<数据长度>, flags);
-        @     @<电平>.data ().Add ((DOUBLE)level);
+        @     @<电平数据>.data().InitCount (1, TRUE);
+        @     ret = BASS_WASAPI_GetLevelEx ((float*)@<电平数据>.data().GetData(), @<数据长度>, flags);
         @ } else if (@<声道> == 2) {
-        @     float levels[2];
-        @     ret = BASS_WASAPI_GetLevelEx (levels, (float)@<数据长度>, flags);
-        @     @<电平>.data ().Add ((DOUBLE)levels[0]);
-        @     @<电平>.data ().Add ((DOUBLE)levels[1]);
+        @     @<电平数据>.data().InitCount (2, TRUE);
+        @     ret = BASS_WASAPI_GetLevelEx ((float*)@<电平数据>.data().GetData(), @<数据长度>, flags);
         @ } else {
         @     BASS_WASAPI_INFO ci;
         @     BASS_WASAPI_GetInfo (&ci);
-        @     float *levels = (float*)malloc (ci.chans * sizeof (float));
-        @     ret = BASS_WASAPI_GetLevelEx (levels, (float)@<数据长度>, flags);
-        @     for (DWORD i = 0; i < ci.chans; ++i) {
-        @         @<电平>.data ().Add ((DOUBLE)levels[i]);
-        @     }
+        @     @<电平数据>.data().InitCount (ci.chans, TRUE);
+        @     ret = BASS_WASAPI_GetLevelEx ((float*)@<电平数据>.data().GetData(), @<数据长度>, flags);
         @ }
         @ return ret;
     }
@@ -498,7 +492,7 @@
 }
 
 类 BASS混合器类 <公开 注释 = "BASSmix 2.4.11.2" 注释 = "提供合并或分离BASS通道、重采样和矩阵混音功能."
-        注释 = "注: 本类新增了几个配置选项,需要使用BASS音频类的\"置配置选项\"进行设置." 注释 = "本类新增了两个属性,需要使用BASS音频类的\"置通道属性\"使用." 折叠
+        注释 = "注: 本类新增了几个配置选项,需要使用BASS音频类的\"置配置选项\"进行设置." 注释 = "本类新增了两个属性,需要使用BASS音频类的\"置通道属性\"使用."
         @视窗.外部头文件 = "BASS\\include\\bassmix.h" @视窗.外部库 = "BASS\\$(p)\\bassmix.lib"
         @视窗.附属文件 = "BASS\\$(p)\\bassmix.dll" @文档 = "category = \"BASS混合器\"">
 {
@@ -653,36 +647,30 @@
     }
 
     方法 取通道电平EX <公开 类型 = 逻辑型 注释 = "获取混合器源通道的电平级别(峰值振幅)."
-            返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
+            返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." @禁止流程检查 = 真>
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM或HRECORD句柄.">
-    参数 电平 <类型 = 小数数组类 注释 = "用于接收电平级别的数组">
-    参数 数据长度 <类型 = 小数 注释 = "计算电平的观察数据量,单位为秒,除解码通道外,最大值为1秒.">
+    参数 电平数据 <类型 = 单精度小数数组类 注释 = "用于接收电平级别的数组">
+    参数 数据长度 <类型 = 单精度小数 注释 = "计算电平的观察数据量,单位为秒,除解码通道外,最大值为1秒.">
     参数 声道 <类型 = 整数 注释 = "0=全部声道, 1=单声道, 2=立体声" @默认值 = 2>
     参数 是否RMS级别 <类型 = 逻辑型 注释 = "假为获取电平级别,真为获取RMS(均方根值)级别." @默认值 = 假>
     参数 应用属性 <类型 = 逻辑型 注释 = "为真时将当前的BASS_ATTRIB_VOL和BASS_ATTRIB_PAN值应用于电平级别中." @默认值 = 假>
     {
-        电平.删除所有成员 ()
+        电平数据.删除所有成员 ()
         @ bool ret;
         @ DWORD flags = @<声道>;
         @ if (@<是否RMS级别>) flags |= BASS_LEVEL_RMS;
         @ if (@<应用属性>) flags |= BASS_LEVEL_VOLPAN;
         @ if (@<声道> == 1) {
-        @     float level;
-        @     ret = BASS_Mixer_ChannelGetLevelEx ((DWORD)@<通道句柄>, &level, (float)@<数据长度>, flags);
-        @     @<电平>.data ().Add ((DOUBLE)level);
+        @     @<电平数据>.data().InitCount (1, TRUE);
+        @     ret = BASS_Mixer_ChannelGetLevelEx ((DWORD)@<通道句柄>, (float*)@<电平数据>.data().GetData(), @<数据长度>, flags);
         @ } else if (@<声道> == 2) {
-        @     float levels[2];
-        @     ret = BASS_Mixer_ChannelGetLevelEx ((DWORD)@<通道句柄>, levels, (float)@<数据长度>, flags);
-        @     @<电平>.data ().Add ((DOUBLE)levels[0]);
-        @     @<电平>.data ().Add ((DOUBLE)levels[1]);
+        @     @<电平数据>.data().InitCount (2, TRUE);
+        @     ret = BASS_Mixer_ChannelGetLevelEx ((DWORD)@<通道句柄>, (float*)@<电平数据>.data().GetData(), @<数据长度>, flags);
         @ } else {
         @     BASS_CHANNELINFO ci;
         @     BASS_ChannelGetInfo (@<通道句柄>, &ci);
-        @     float *levels = (float*)malloc (ci.chans * sizeof (float));
-        @     ret = BASS_Mixer_ChannelGetLevelEx ((DWORD)@<通道句柄>, levels, (float)@<数据长度>, flags);
-        @     for (DWORD i = 0; i < ci.chans; ++i) {
-        @         @<电平>.data ().Add ((DOUBLE)levels[i]);
-        @     }
+        @     @<电平数据>.data().InitCount (ci.chans, TRUE);
+        @     ret = BASS_Mixer_ChannelGetLevelEx ((DWORD)@<通道句柄>, (float*)@<电平数据>.data().GetData(), @<数据长度>, flags);
         @ }
         @ return ret;
     }
@@ -720,104 +708,41 @@
         @ BASS_Mixer_ChannelRemoveSync ((DWORD)@<通道句柄>, (HSYNC)@<同步句柄>)
     }
 
-    方法 置通道矩阵 <公开 类型 = 逻辑型 注释 = "设置通道的混合矩阵." 注释 = "目前火山的语法不支持矩阵,这可能得用嵌入式语句."
-            返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
+    方法 置通道矩阵 <公开 类型 = 逻辑型 注释 = "设置通道的混合矩阵." 返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
+            折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道的句柄">
-    参数 矩阵 <类型 = BASS_MIXER_矩阵 注释 = "矩阵,为二维小数数组.">
+    参数 矩阵 <类型 = "单精度小数 [][]" 注释 = "矩阵,为二维单精度小数数组.">
     {
-        @ int m = @<矩阵>.GetCount ();
-        @ float **matrix;
-        @ matrix = new float *[m];
-        @ for (int x = 0; x < m; ++x) {
-        @     @dt<小数数组类> rank = (@dt<小数数组类>&)@<矩阵>.GetAt (x);
-        @     int n = rank.data ().GetCount ();
-        @     matrix[x] = new float [n];
-        @     for (int y = 0; y < n; ++y) {
-        @         matrix[x][y] = (float)rank.data ().GetAt (y);
-        @     }
-        @ }
-        @ BOOL ret = BASS_Mixer_ChannelSetMatrix ((DWORD)@<通道句柄>, matrix);
-        @ for (int i = 0; i < m; ++i) {
-        @     delete[] matrix[i];
-        @ }
-        @ delete matrix;
-        @ return ret;
+        @ BASS_Mixer_ChannelSetMatrix ((DWORD)@<通道句柄>, @<矩阵>)
     }
 
-    方法 置通道矩阵EX <公开 类型 = 逻辑型 注释 = "设置通道的混合矩阵,从当前矩阵转换." 注释 = "目前火山的语法不支持矩阵,这可能得用嵌入式语句."
-            返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
+    方法 置通道矩阵EX <公开 类型 = 逻辑型 注释 = "设置通道的混合矩阵,从当前矩阵转换."
+            返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道的句柄">
-    参数 矩阵 <类型 = BASS_MIXER_矩阵 注释 = "矩阵,为二维小数数组.">
-    参数 时间 <类型 = 小数 注释 = "从当前矩阵转换到指定矩阵所需的时间(秒)">
+    参数 矩阵 <类型 = "单精度小数 [][]" 注释 = "矩阵,为二维单精度小数数组.">
+    参数 时间 <类型 = 单精度小数 注释 = "从当前矩阵转换到指定矩阵所需的时间(秒)">
     {
-        @ int m = @<矩阵>.GetCount ();
-        @ float **matrix;
-        @ matrix = new float *[m];
-        @ for (int x = 0; x < m; ++x) {
-        @     @dt<小数数组类> rank = (@dt<小数数组类>&)@<矩阵>.GetAt (x);
-        @     int n = rank.data ().GetCount ();
-        @     matrix[x] = new float [n];
-        @     for (int y = 0; y < n; ++y) {
-        @         matrix[x][y] = (float)rank.data ().GetAt (y);
-        @     }
-        @ }
-        @ BOOL ret = BASS_Mixer_ChannelSetMatrixEx ((DWORD)@<通道句柄>, matrix, (float)@<时间>);
-        @ for (int i = 0; i < m; ++i) {
-        @     delete[] matrix[i];
-        @ }
-        @ delete matrix;
-        @ return ret;
+        @ BASS_Mixer_ChannelSetMatrixEx ((DWORD)@<通道句柄>, @<矩阵>, @<时间>)
     }
 
-    方法 取通道矩阵 <公开 类型 = 逻辑型 注释 = "获取存在的通道的混合矩阵." 注释 = "目前火山的语法不支持矩阵,这可能得用嵌入式语句."
-            返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
+    方法 取通道矩阵 <公开 类型 = 逻辑型 注释 = "获取存在的通道的混合矩阵."
+            返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道的句柄">
-    参数 矩阵 <类型 = BASS_MIXER_矩阵 注释 = "返回的矩阵,为二维小数数组.">
-    参数 矩阵行数 <类型 = 整数 注释 = "所返回矩阵的行数(数组维数)" @默认值 = 4>
-    参数 矩阵列数 <类型 = 整数 注释 = "所返回矩阵的列数" @默认值 = 2>
+    参数 矩阵 <类型 = "单精度小数 [][]" 注释 = "返回的矩阵,为二维单精度小数数组.">
     {
-        @ float **matrix;
-        @ matrix = new float *[@<矩阵行数>];
-        @ for (int x = 0; x < @<矩阵行数>; ++x) {
-        @     matrix[x] = new float [@<矩阵列数>];
-        @ }
-        @ BOOL ret = (BOOL)BASS_Mixer_ChannelGetMatrix ((DWORD)@<通道句柄>, matrix);
-        @ @<矩阵>.RemoveAll ();
-        @ for (int x = @<矩阵行数>; x >= 0; --x) {
-        @     @dt<小数数组类> rank;
-        @     for (int y = 0; y < @<矩阵列数>; ++y) {
-        @         rank.data ().Add ((DOUBLE)matrix[x][y]);
-        @     }
-        @     @<矩阵>.data ().InsertAt (0, rank);
-        @     delete[] matrix[x];
-        @ }
-        @ delete matrix;
-        @ return ret;
+        @ BASS_Mixer_ChannelGetMatrix ((DWORD)@<通道句柄>, @<矩阵>)
     }
 
     方法 置通道包络线 <公开 类型 = 逻辑型 注释 = "设置包络线以在一个周期时间内修改通道的采样率、音量或声像."
-            返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
+            返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道的句柄">
     参数 类型 <类型 = 整数 注释 = "  要使用包络线修改的属性(请直接填左边的数值),为下列选项之一:" 注释 = "  1 BASS_MIXER_ENV_FREQ  采样率"
             注释 = "  2 BASS_MIXER_ENV_VOL   音量" 注释 = "  3 BASS_MIXER_ENV_PAN   声像" 注释 = "  可选标志(请与选项位或):"
             注释 = "  0x10000 BASS_MIXER_ENV_LOOP   循环包络线"
             注释 = "  0x20000 BASS_MIXER_ENV_REMOVE 到达包络线的结尾时从混合器移除源通道">
-    参数 节点 <类型 = BASS_MIXER_节点数组 注释 = "包络线节点的数组,应具有序列位置.">
+    参数 节点数组 <类型 = BASS_MIXER_节点数组 注释 = "包络线节点的数组,应具有序列位置.">
     {
-        @ INT_P count = @<节点>.data ().GetCount ();
-        @ BASS_MIXER_NODE* nodes = new BASS_MIXER_NODE[count];
-        变量 索引 <类型 = 整数>
-        循环 (0, 节点.取成员数 (), 索引, 1)
-        {
-            变量 _节点 <类型 = BASS_MIXER_节点>
-            _节点 = 节点.取成员 (索引)
-            @ nodes[@<索引>].pos = (QWORD)@<_节点.位置>;
-            @ nodes[@<索引>].val = (float)@<_节点.值>;
-
-        }
-        @ BOOL ret = BASS_Mixer_ChannelSetEnvelope ((DWORD)@<通道句柄>, (DWORD)@<类型>, nodes, (DWORD)count);
-        @ delete[] nodes;
-        @ return ret;
+        @ BASS_Mixer_ChannelSetEnvelope ((DWORD)@<通道句柄>, (DWORD)@<类型>, (BASS_MIXER_NODE*)@<节点数组.取数组指针>(), (DWORD)@<节点数组.取成员数>())
     }
 
     方法 置通道包络线位置 <公开 类型 = 逻辑型 注释 = "设置通道包络线的当前位置."
@@ -831,16 +756,13 @@
     }
 
     方法 取通道包络线位置 <公开 类型 = 长整数 注释 = "获取通道包络线的当前位置和值."
-            返回值注释 = "成功返回包络线的位置,失败返回-1,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
+            返回值注释 = "成功返回包络线的位置,失败返回-1,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道的句柄">
     参数 类型 <类型 = 整数 注释 = "  要设置位置的包络线属性(请直接填左边的数值),为下列选项之一:" 注释 = "  1 BASS_MIXER_ENV_FREQ  采样率"
             注释 = "  2 BASS_MIXER_ENV_VOL   音量" 注释 = "  3 BASS_MIXER_ENV_PAN   声像">
-    参数 值 <类型 = 小数类 注释 = "返回包络线当前位置的值" @默认值 = 空对象>
+    参数 值 <类型 = 单精度小数类 注释 = "返回包络线当前位置的值" @默认值 = 空对象>
     {
-        @ float value;
-        @ INT64 ret = (INT64)BASS_Mixer_ChannelGetEnvelopePos ((DWORD)@<通道句柄>, (DWORD)@<类型>, &value);
-        @ @<值.值> = (DOUBLE)value;
-        @ return ret
+        @ (INT64)BASS_Mixer_ChannelGetEnvelopePos ((DWORD)@<通道句柄>, (DWORD)@<类型>, &@<值.值>)
     }
 
     # 分割流
@@ -1248,7 +1170,7 @@
         @视窗.结构类 = 0>
 {
     变量 位置 <公开 类型 = 长整数 @输出名 = "pos">
-    变量 值 <公开 类型 = 小数 @视窗.单精度小数 = 真 @输出名 = "val">
+    变量 值 <公开 类型 = 单精度小数 @输出名 = "val">
 
     方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖>
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
@@ -1260,12 +1182,5 @@
     }
 }
 
-类 BASS_MIXER_节点数组 <公开 基础类 = 对象数组模板类 注释 = "BASS混合器类::置通道包络线" @文档 = "category = \"BASS混合器.辅助类\""
+类 BASS_MIXER_节点数组 <公开 基础类 = 结构数组模板类 注释 = "BASS混合器类::置通道包络线" @文档 = "category = \"BASS混合器.辅助类\""
         @模板实现类 = "BASS_MIXER_节点">
-
-类 BASS_MIXER_矩阵 <公开 基础类 = 对象数组模板类 注释 = "相当于二位小数数组类" 折叠 @文档 = "category = \"BASS混合器.辅助类\""
-        @模板实现类 = "小数数组类">
-{
-
-    #
-}

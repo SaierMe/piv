@@ -29,7 +29,7 @@ namespace piv
         {
             CVolMem secret;
             secret.Alloc(secretSize, TRUE);
-            if (XXH_INLINE_XXH3_generateSecret(secret.GetPtr(), secretSize, customSeed.GetPtr(), static_cast<size_t>(customSeed.GetSize())) == XXH_OK)
+            if (XXH3_generateSecret(secret.GetPtr(), secretSize, customSeed.GetPtr(), static_cast<size_t>(customSeed.GetSize())) == XXH_OK)
                 return secret;
             return CVolMem();
         }
@@ -43,7 +43,7 @@ namespace piv
         {
             CVolMem secret;
             secret.Alloc(192, TRUE);
-            XXH_INLINE_XXH3_generateSecret_fromSeed(secret.GetPtr(), seed);
+            XXH3_generateSecret_fromSeed(secret.GetPtr(), seed);
             return secret;
         }
 
@@ -59,7 +59,7 @@ namespace piv
         template <typename T>
         T &Get_XXH128(const void *input, const size_t &len, const uint64_t &seed = 0, T &rethash = T{})
         {
-            return piv::encoding::value_to_hex(XXH_INLINE_XXH3_128bits_withSeed(input, len, seed), rethash);
+            return piv::encoding::value_to_hex(XXH3_128bits_withSeed(input, len, seed), rethash);
         }
         template <typename T>
         T &Get_XXH128(const ptrdiff_t &input, const size_t &len, const uint64_t &seed = 0, T &rethash = T{})
@@ -101,9 +101,9 @@ namespace piv
         T &Get_XXH128_withSecret(const void *input, const size_t &len, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0, T &rethash = T{})
         {
             if (secret.GetSize() > 0)
-                return piv::encoding::value_to_hex(XXH_INLINE_XXH3_128bits_withSecretandSeed(input, len, secret.GetPtr(), static_cast<size_t>(secret.GetSize()), seed), rethash);
+                return piv::encoding::value_to_hex(XXH3_128bits_withSecretandSeed(input, len, secret.GetPtr(), static_cast<size_t>(secret.GetSize()), seed), rethash);
             else
-                return piv::encoding::value_to_hex(XXH_INLINE_XXH3_128bits_withSeed(input, len, seed), rethash);
+                return piv::encoding::value_to_hex(XXH3_128bits_withSeed(input, len, seed), rethash);
         }
         template <typename T>
         T &Get_XXH128_withSecret(const ptrdiff_t &input, const size_t &len, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0, T &rethash = T{})
@@ -152,25 +152,25 @@ namespace piv
             {
                 if (off > 0)
                     _fseeki64(file, off, SEEK_SET);
-                XXH3_state_t *state = XXH_INLINE_XXH3_createState();
+                XXH3_state_t *state = XXH3_createState();
                 if (secret.GetSize() >= 136)
-                    XXH_INLINE_XXH3_128bits_reset_withSecretandSeed(state, secret.GetPtr(), static_cast<size_t>(secret.GetSize()), seed);
+                    XXH3_128bits_reset_withSecretandSeed(state, secret.GetPtr(), static_cast<size_t>(secret.GetSize()), seed);
                 else
-                    XXH_INLINE_XXH3_128bits_reset_withSeed(state, seed);
+                    XXH3_128bits_reset_withSeed(state, seed);
                 unsigned char buff[65536];
                 size_t rsize = 0;
                 while ((rsize = fread(buff, 1, 65536, file)) > 0)
                 {
                     if (rsize > len)
                     {
-                        XXH_INLINE_XXH3_128bits_update(state, buff, static_cast<size_t>(len));
+                        XXH3_128bits_update(state, buff, static_cast<size_t>(len));
                         break;
                     }
-                    XXH_INLINE_XXH3_128bits_update(state, buff, rsize);
+                    XXH3_128bits_update(state, buff, rsize);
                     len -= rsize;
                 }
-                hash = XXH_INLINE_XXH3_128bits_digest(state);
-                XXH_INLINE_XXH3_freeState(state);
+                hash = XXH3_128bits_digest(state);
+                XXH3_freeState(state);
                 fclose(file);
             }
             return piv::encoding::value_to_hex(hash, rethash);
@@ -185,29 +185,29 @@ namespace piv
          */
         static XXH64_hash_t Get_XXH3(const void *input, const size_t &len, const uint64_t &seed = 0)
         {
-            return XXH_INLINE_XXH3_64bits_withSeed(input, len, seed);
+            return XXH3_64bits_withSeed(input, len, seed);
         }
         static XXH64_hash_t Get_XXH3(const ptrdiff_t &input, const size_t &len, const uint64_t &seed = 0)
         {
-            return XXH_INLINE_XXH3_64bits_withSeed(reinterpret_cast<const void *>(input), len, seed);
+            return XXH3_64bits_withSeed(reinterpret_cast<const void *>(input), len, seed);
         }
         static XXH64_hash_t Get_XXH3(const CVolMem &input, const size_t &len = (size_t)-1, const uint64_t &seed = 0)
         {
-            return XXH_INLINE_XXH3_64bits_withSeed(input.GetPtr(), len == (size_t)-1 ? static_cast<size_t>(input.GetSize()) : len, seed);
+            return XXH3_64bits_withSeed(input.GetPtr(), len == (size_t)-1 ? static_cast<size_t>(input.GetSize()) : len, seed);
         }
         static XXH64_hash_t Get_XXH3(const CVolString &input, const size_t &len = (size_t)-1, const uint64_t &seed = 0)
         {
-            return XXH_INLINE_XXH3_64bits_withSeed(input.GetText(), len == (size_t)-1 ? input.GetLength() * 2 : len, seed);
+            return XXH3_64bits_withSeed(input.GetText(), len == (size_t)-1 ? input.GetLength() * 2 : len, seed);
         }
         template <typename CharT>
         static XXH64_hash_t Get_XXH3(const std::basic_string<CharT> &input, const size_t &len = -1, const uint64_t &seed = 0)
         {
-            return XXH_INLINE_XXH3_64bits_withSeed(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed);
+            return XXH3_64bits_withSeed(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed);
         }
         template <typename CharT>
         XXH64_hash_t Get_XXH3(const basic_string_view<CharT> &input, const size_t &len = -1, const uint64_t &seed = 0)
         {
-            return XXH_INLINE_XXH3_64bits_withSeed(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed);
+            return XXH3_64bits_withSeed(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed);
         }
 
         /**
@@ -221,9 +221,9 @@ namespace piv
         static XXH64_hash_t Get_XXH3_withSecret(const void *input, const size_t &len, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0)
         {
             if (secret.GetSize() > 0)
-                return XXH_INLINE_XXH3_64bits_withSecretandSeed(input, len, secret.GetPtr(), static_cast<size_t>(secret.GetSize()), seed);
+                return XXH3_64bits_withSecretandSeed(input, len, secret.GetPtr(), static_cast<size_t>(secret.GetSize()), seed);
             else
-                return XXH_INLINE_XXH3_64bits_withSeed(input, len, seed);
+                return XXH3_64bits_withSeed(input, len, seed);
         }
         static XXH64_hash_t Get_XXH3_withSecret(const ptrdiff_t &input, const size_t &len = (size_t)-1, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0)
         {
@@ -266,25 +266,25 @@ namespace piv
             {
                 if (off > 0)
                     _fseeki64(file, off, SEEK_SET);
-                XXH3_state_t *state = XXH_INLINE_XXH3_createState();
+                XXH3_state_t *state = XXH3_createState();
                 if (secret.GetSize() >= 136)
-                    XXH_INLINE_XXH3_64bits_reset_withSecretandSeed(state, secret.GetPtr(), static_cast<size_t>(secret.GetSize()), seed);
+                    XXH3_64bits_reset_withSecretandSeed(state, secret.GetPtr(), static_cast<size_t>(secret.GetSize()), seed);
                 else
-                    XXH_INLINE_XXH3_64bits_reset_withSeed(state, seed);
+                    XXH3_64bits_reset_withSeed(state, seed);
                 unsigned char buff[65536];
                 size_t rsize = 0;
                 while ((rsize = fread(buff, 1, 65536, file)) > 0)
                 {
                     if (rsize > len)
                     {
-                        XXH_INLINE_XXH3_64bits_update(state, buff, static_cast<size_t>(len));
+                        XXH3_64bits_update(state, buff, static_cast<size_t>(len));
                         break;
                     }
-                    XXH_INLINE_XXH3_64bits_update(state, buff, rsize);
+                    XXH3_64bits_update(state, buff, rsize);
                     len -= rsize;
                 }
-                hash = XXH_INLINE_XXH3_64bits_digest(state);
-                XXH_INLINE_XXH3_freeState(state);
+                hash = XXH3_64bits_digest(state);
+                XXH3_freeState(state);
                 fclose(file);
             }
             return hash;
@@ -299,29 +299,29 @@ namespace piv
          */
         static XXH64_hash_t Get_XXH64(const void *input, const size_t &len, const uint64_t &seed = 0)
         {
-            return XXH_INLINE_XXH64(input, len, seed);
+            return XXH64(input, len, seed);
         }
         static XXH64_hash_t Get_XXH64(const ptrdiff_t &input, const size_t &len, const uint64_t &seed = 0)
         {
-            return XXH_INLINE_XXH64(reinterpret_cast<const void *>(input), len, seed);
+            return XXH64(reinterpret_cast<const void *>(input), len, seed);
         }
         static XXH64_hash_t Get_XXH64(const CVolMem &input, const size_t &len = (size_t)-1, const uint64_t &seed = 0)
         {
-            return XXH_INLINE_XXH64(input.GetPtr(), len == (size_t)-1 ? static_cast<size_t>(input.GetSize()) : len, seed);
+            return XXH64(input.GetPtr(), len == (size_t)-1 ? static_cast<size_t>(input.GetSize()) : len, seed);
         }
         static XXH64_hash_t Get_XXH64(const CVolString &input, const size_t &len = (size_t)-1, const uint64_t &seed = 0)
         {
-            return XXH_INLINE_XXH64(input.GetText(), len == (size_t)-1 ? input.GetLength() * 2 : len, seed);
+            return XXH64(input.GetText(), len == (size_t)-1 ? input.GetLength() * 2 : len, seed);
         }
         template <typename CharT>
         static XXH64_hash_t Get_XXH64(const std::basic_string<CharT> &input, const size_t &len = -1, const uint64_t &seed = 0)
         {
-            return XXH_INLINE_XXH64(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed);
+            return XXH64(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed);
         }
         template <typename CharT>
         XXH64_hash_t Get_XXH64(const basic_string_view<CharT> &input, const size_t &len = -1, const uint64_t &seed = 0)
         {
-            return XXH_INLINE_XXH64(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed);
+            return XXH64(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed);
         }
 
         /**
@@ -341,22 +341,22 @@ namespace piv
             {
                 if (off > 0)
                     _fseeki64(file, off, SEEK_SET);
-                XXH64_state_t *state = XXH_INLINE_XXH64_createState();
-                XXH_INLINE_XXH64_reset(state, seed);
+                XXH64_state_t *state = XXH64_createState();
+                XXH64_reset(state, seed);
                 unsigned char buff[65536];
                 size_t rsize = 0;
                 while ((rsize = fread(buff, 1, 65536, file)) > 0)
                 {
                     if (rsize > len)
                     {
-                        XXH_INLINE_XXH64_update(state, buff, static_cast<size_t>(len));
+                        XXH64_update(state, buff, static_cast<size_t>(len));
                         break;
                     }
-                    XXH_INLINE_XXH64_update(state, buff, rsize);
+                    XXH64_update(state, buff, rsize);
                     len -= rsize;
                 }
-                hash = XXH_INLINE_XXH64_digest(state);
-                XXH_INLINE_XXH64_freeState(state);
+                hash = XXH64_digest(state);
+                XXH64_freeState(state);
                 fclose(file);
             }
             return hash;
@@ -371,29 +371,29 @@ namespace piv
          */
         static XXH32_hash_t Get_XXH32(const void *input, const size_t &len, const uint32_t &seed = 0)
         {
-            return XXH_INLINE_XXH32(input, len, seed);
+            return XXH32(input, len, seed);
         }
         static XXH32_hash_t Get_XXH32(const ptrdiff_t &input, const size_t &len, const uint32_t &seed = 0)
         {
-            return XXH_INLINE_XXH32(reinterpret_cast<const void *>(input), len, seed);
+            return XXH32(reinterpret_cast<const void *>(input), len, seed);
         }
         static XXH32_hash_t Get_XXH32(const CVolMem &input, const size_t &len = (size_t)-1, const uint32_t &seed = 0)
         {
-            return XXH_INLINE_XXH32(input.GetPtr(), len == (size_t)-1 ? static_cast<size_t>(input.GetSize()) : len, seed);
+            return XXH32(input.GetPtr(), len == (size_t)-1 ? static_cast<size_t>(input.GetSize()) : len, seed);
         }
         static XXH32_hash_t Get_XXH32(const CVolString &input, const size_t &len = (size_t)-1, const uint32_t &seed = 0)
         {
-            return XXH_INLINE_XXH32(input.GetText(), len == (size_t)-1 ? input.GetLength() * 2 : len, seed);
+            return XXH32(input.GetText(), len == (size_t)-1 ? input.GetLength() * 2 : len, seed);
         }
         template <typename CharT>
         static XXH32_hash_t Get_XXH32(const std::basic_string<CharT> &input, const size_t &len = -1, const uint32_t &seed = 0)
         {
-            return XXH_INLINE_XXH32(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed);
+            return XXH32(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed);
         }
         template <typename CharT>
         XXH32_hash_t Get_XXH32(const basic_string_view<CharT> &input, const size_t &len = -1, const uint32_t &seed = 0)
         {
-            return XXH_INLINE_XXH32(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed);
+            return XXH32(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed);
         }
 
         /**
@@ -413,22 +413,22 @@ namespace piv
             {
                 if (off > 0)
                     _fseeki64(file, off, SEEK_SET);
-                XXH32_state_t *state = XXH_INLINE_XXH32_createState();
-                XXH_INLINE_XXH32_reset(state, seed);
+                XXH32_state_t *state = XXH32_createState();
+                XXH32_reset(state, seed);
                 unsigned char buff[65536];
                 size_t rsize = 0;
                 while ((rsize = fread(buff, 1, 65536, file)) > 0)
                 {
                     if (rsize > len)
                     {
-                        XXH_INLINE_XXH32_update(state, buff, static_cast<size_t>(len));
+                        XXH32_update(state, buff, static_cast<size_t>(len));
                         break;
                     }
-                    XXH_INLINE_XXH32_update(state, buff, rsize);
+                    XXH32_update(state, buff, rsize);
                     len -= rsize;
                 }
-                hash = XXH_INLINE_XXH32_digest(state);
-                XXH_INLINE_XXH32_freeState(state);
+                hash = XXH32_digest(state);
+                XXH32_freeState(state);
                 fclose(file);
             }
             return hash;

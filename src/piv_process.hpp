@@ -8,7 +8,6 @@
 #ifndef _PIV_PROCESS_HPP
 #define _PIV_PROCESS_HPP
 
-// 包含火山视窗基本类,它在火山里的包含顺序比较靠前(全局-110)
 #ifndef __VOL_BASE_H__
 #include <sys/base/libs/win_base/vol_base.h>
 #endif
@@ -231,9 +230,8 @@ public:
             std::wstring module_name_sv{module_name};
             if (module_name_sv.empty())
             {
-                WCHAR szBaseName[MAX_PATH + 1]{'\0'};
-                ::GetModuleBaseNameW(hProcess, 0, szBaseName, MAX_PATH);
-                module_name_sv = szBaseName;
+                module_name_sv.resize(MAX_PATH);
+                ::GetModuleBaseNameW(hProcess, 0, const_cast<wchar_t *>(module_name_sv.data()), MAX_PATH);
             }
             std::wstring sFileName;
             sFileName.resize(MAX_PATH);
@@ -327,10 +325,11 @@ public:
     {
         if (hProcess != NULL)
         {
-            WCHAR szBaseName[MAX_PATH + 1]{'\0'};
-            if (::GetModuleBaseNameW(hProcess, hModule, szBaseName, MAX_PATH) > 0)
+            CVolString BaseName;
+            BaseName.m_mem.Alloc((MAX_PATH + 1) * 2, TRUE);
+            if (::GetModuleBaseNameW(hProcess, hModule, const_cast<wchar_t *>(BaseName.GetText()), MAX_PATH) > 0)
             {
-                return CVolString(szBaseName);
+                return BaseName;
             }
         }
         return _CT("");
@@ -341,10 +340,30 @@ public:
     {
         if (hProcess != NULL)
         {
-            WCHAR szFilename[MAX_PATH + 1]{'\0'};
-            if (::GetModuleFileNameExW(hProcess, hModule, szFilename, MAX_PATH) > 0)
+            CVolString FileName;
+            FileName.m_mem.Alloc((MAX_PATH + 1) * 2, TRUE);
+            if (::GetModuleFileNameExW(hProcess, hModule, const_cast<wchar_t *>(FileName.GetText()), MAX_PATH) > 0)
             {
-                return CVolString(szFilename);
+                return FileName;
+            }
+        }
+        return _CT("");
+    }
+
+    // 取模块路径
+    CVolString get_module_path(const HMODULE &hModule)
+    {
+        if (hProcess != NULL)
+        {
+            CVolString BaseName, FileName;
+            BaseName.m_mem.Alloc((MAX_PATH + 1) * 2, TRUE);
+            FileName.m_mem.Alloc((MAX_PATH + 1) * 2, TRUE);
+            if (::GetModuleFileNameExW(hProcess, hModule, const_cast<wchar_t *>(FileName.GetText()), MAX_PATH) > 0 &&
+                ::GetModuleBaseNameW(hProcess, hModule, const_cast<wchar_t *>(BaseName.GetText()), MAX_PATH) > 0)
+            {
+                INT_P pos = FileName.SearchText(BaseName.GetText(), -1, FALSE, TRUE);
+                if (pos != -1)
+                    return FileName.Left(pos);
             }
         }
         return _CT("");
@@ -355,10 +374,11 @@ public:
     {
         if (hProcess != NULL)
         {
-            WCHAR szFilename[MAX_PATH + 1]{'\0'};
-            if (::GetMappedFileNameW(hProcess, mem_ptr, szFilename, MAX_PATH) > 0)
+            CVolString FileName;
+            FileName.m_mem.Alloc((MAX_PATH + 1) * 2, TRUE);
+            if (::GetMappedFileNameW(hProcess, mem_ptr, const_cast<wchar_t *>(FileName.GetText()), MAX_PATH) > 0)
             {
-                return CVolString(szFilename);
+                return FileName;
             }
         }
         return _CT("");
@@ -369,10 +389,11 @@ public:
     {
         if (hProcess != NULL)
         {
-            WCHAR szImageFilename[MAX_PATH + 1]{'\0'};
-            if (::GetProcessImageFileNameW(hProcess, szImageFilename, MAX_PATH) > 0)
+            CVolString ImageFilename;
+            ImageFilename.m_mem.Alloc((MAX_PATH + 1) * 2, TRUE);
+            if (::GetProcessImageFileNameW(hProcess, const_cast<wchar_t *>(ImageFilename.GetText()), MAX_PATH) > 0)
             {
-                return CVolString(szImageFilename);
+                return ImageFilename;
             }
         }
         return _CT("");

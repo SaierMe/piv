@@ -1,6 +1,6 @@
 /*
  * bit7z - A C++ static library to interface with the 7-zip shared libraries.
- * Copyright (c) 2014-2022 Riccardo Ostani - All Rights Reserved.
+ * Copyright (c) 2014-2023 Riccardo Ostani - All Rights Reserved.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -13,6 +13,7 @@
 #include <map>
 #include <memory>
 
+#include "bitabstractarchivehandler.hpp"
 #include "bitfs.hpp"
 #include "bittypes.hpp"
 
@@ -37,6 +38,7 @@ struct IndexingOptions {
     bool recursive = true;
     bool retain_folder_structure = false;
     bool only_files = false;
+    bool follow_symlinks = true;
 };
 /** @endcond **/
 
@@ -64,10 +66,14 @@ class BitItemsVector final {
          * @param in_dir    the directory to be indexed.
          * @param filter    (optional) the wildcard filter to be used for indexing;
          *                  empty string means "index all files".
+         * @param policy    (optional) the filtering policy to be applied to the matched items.
          * @param options   (optional) the settings to be used while indexing the given directory
          *                  and all of its subdirectories.
          */
-        void indexDirectory( const fs::path& in_dir, const tstring& filter = {}, IndexingOptions options = {} );
+        void indexDirectory( const fs::path& in_dir,
+                             const tstring& filter = {},
+                             FilterPolicy policy = FilterPolicy::Include,
+                             IndexingOptions options = {} );
 
         /**
          * @brief Indexes the given vector of filesystem paths, adding to the item vector all the files.
@@ -96,10 +102,11 @@ class BitItemsVector final {
          *
          * @note If a directory path is given, a BitException is thrown.
          *
-         * @param in_file the path to the filesystem file to be indexed in the vector.
-         * @param name    (optional) user-defined path to be used inside archives.
+         * @param in_file         the path to the filesystem file to be indexed in the vector.
+         * @param name            (optional) user-defined path to be used inside archives.
+         * @param follow_symlinks (optional) whether to follow symbolic links or not.
          */
-        void indexFile( const tstring& in_file, const tstring& name = {} );
+        void indexFile( const tstring& in_file, const tstring& name = {}, bool follow_symlinks = true );
 
         /**
          * @brief Indexes the given buffer, using the given name as a path when compressed in archives.

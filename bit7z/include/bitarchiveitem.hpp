@@ -1,6 +1,6 @@
 /*
  * bit7z - A C++ static library to interface with the 7-zip shared libraries.
- * Copyright (c) 2014-2022 Riccardo Ostani - All Rights Reserved.
+ * Copyright (c) 2014-2023 Riccardo Ostani - All Rights Reserved.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -20,11 +20,6 @@ namespace bit7z {
 class BitArchiveItem : public BitGenericItem {
     public:
         /**
-         * @brief BitArchiveItem destructor.
-         */
-        ~BitArchiveItem() override = default;
-
-        /**
          * @return the index of the item in the archive.
          */
         BIT7Z_NODISCARD auto index() const noexcept -> uint32_t;
@@ -33,6 +28,12 @@ class BitArchiveItem : public BitGenericItem {
          * @return true if and only if the item is a directory (i.e., it has the property BitProperty::IsDir).
          */
         BIT7Z_NODISCARD auto isDir() const -> bool override;
+
+        /**
+         * @return true if and only if the item is a symbolic link (either has a non-empty BitProperty::SymLink,
+         *         or it has POSIX/Win32 symbolic link file attributes).
+         */
+        BIT7Z_NODISCARD auto isSymLink() const -> bool override;
 
         /**
          * @return the item's name; if not available, it tries to get it from the element's path or,

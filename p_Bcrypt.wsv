@@ -1340,8 +1340,8 @@
         @     }
         @ }
         // 导入密钥
-        @ Status = ::BCryptImportKeyPair (phAlgorithm, NULL, keyType, &phKey,
-        @                       (PUCHAR)@<密钥>.GetPtr (), (ULONG)@<密钥>.GetSize (), BCRYPT_NO_KEY_VALIDATION);
+        @ Status = ::BCryptImportKeyPair (phAlgorithm, NULL, keyType, &phKey, (PUCHAR)@<密钥>.GetPtr (),
+        @                                 (ULONG)@<密钥>.GetSize (), BCRYPT_NO_KEY_VALIDATION);
         @ if (!BCRYPT_SUCCESS(Status)) {
         @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
         @     return CVolMem ();
@@ -1404,7 +1404,7 @@
     }
 
     方法 解密_RSA_私钥 <公开 静态 类型 = 字节集类 注释 = "使用私钥对指定RSA公钥/私钥加密的数据进行解密" 返回值注释 = "成功返回解密后的数据,失败返回空字节集" 折叠
-            编辑时信息 = "11B3A, 0, 0, 0" @禁止流程检查 = 真>
+            @禁止流程检查 = 真>
     参数 数据 <类型 = 字节集类 注释 = "提供待解密的数据" 编辑时信息 = "11B3A, 0, 0, 0">
     参数 指定私钥 <类型 = 字节集类 注释 = "提供本次解密所欲使用的BLOB格式私钥数据" 编辑时信息 = "11B3A, 0, 0, 0">
     {
@@ -1441,7 +1441,8 @@
     # 密钥对格式转换
     # 参考源码: https://github.com/xiangyuecn/RSA-csharp
 
-    方法 PEM密钥到BLOB <公开 静态 类型 = 字节集类 注释 = "将PEM格式的RSA密钥转换为CNG加解密专用的BLOB格式,然后以字节集返回." 返回值注释 = "失败返回空字节集" 折叠>
+    方法 PEM密钥到BLOB <公开 静态 类型 = 字节集类 注释 = "将PEM格式的RSA密钥转换为CNG加解密专用的BLOB格式,然后以字节集返回."
+            注释 = "注意: 非CNG生成的RSA密钥对,可能无法在CNG里进行RSA加解密." 返回值注释 = "失败返回空字节集" 折叠>
     参数 PEM密钥 <类型 = 文本型 注释 = "所欲转换的PEM格式密钥,自动识别PKCS#1和PKCS#8版本.">
     参数 是否为私钥 <类型 = 逻辑型 注释 = "指定提供的密钥是否为私钥,否则为公钥." @默认值 = 真>
     {
@@ -2684,7 +2685,7 @@
             注释 = "BCryptVerifySignature">
 }
 
-类 CNG_密钥类型 <公开 注释 = "CNG的密钥类型" 折叠 @文档 = "category = \"CNG加解密.辅助类\"" @常量类 = 文本型>
+类 CNG_密钥类型 <公开 注释 = "CNG的密钥类型" @文档 = "category = \"CNG加解密.辅助类\"" @常量类 = 文本型>
 {
     常量 AES_WRAP_KEY <公开 值 = "Rfc3565KeyWrapBlob" 注释 = "Export an AES key wrapped key."
             注释 = "The hExportKey parameter must reference a valid BCRYPT_KEY_HANDLE pointer to the key encryption key,"

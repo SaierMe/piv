@@ -1,6 +1,6 @@
 /*
  * bit7z - A C++ static library to interface with the 7-zip shared libraries.
- * Copyright (c) 2014-2022 Riccardo Ostani - All Rights Reserved.
+ * Copyright (c) 2014-2023 Riccardo Ostani - All Rights Reserved.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -21,18 +21,9 @@ namespace bit7z {
 
 namespace filesystem { // NOLINT(modernize-concat-nested-namespaces)
 namespace fsutil {
-auto wildcardMatch( const tstring& pattern, const tstring& str ) -> bool;
+auto wildcard_match( const tstring& pattern, const tstring& str ) -> bool;
 } // namespace fsutil
 } // namespace filesystem
-
-/**
- * @brief Enumeration representing the policy according to which the extractor should handle
- * the items that match the pattern given by the user.
- */
-enum struct FilterPolicy {
-    Include, ///< Extract the items that match the pattern.
-    Exclude  ///< Do not extract the items that match the pattern.
-};
 
 /**
  * @brief The BitExtractor template class allows extracting the content of archives from supported input types.
@@ -50,7 +41,7 @@ class BitExtractor final : public BitAbstractArchiveOpener {
          * format of the in_file archives.
          *
          * @note When bit7z is compiled using the BIT7Z_AUTO_FORMAT macro define, the format
-         * argument has default value BitFormat::Auto (automatic format detection of the in_file archive).
+         * argument has the default value BitFormat::Auto (automatic format detection of the in_file archive).
          * Otherwise, when BIT7Z_AUTO_FORMAT is not defined (i.e., no auto format detection available),
          * the format argument must be specified.
          *
@@ -126,7 +117,7 @@ class BitExtractor final : public BitAbstractArchiveOpener {
             }
 
             extractMatchingFilter( in_archive, out_dir, policy, [ &item_filter ]( const tstring& item_path ) -> bool {
-                return fsutil::wildcardMatch( item_filter, item_path );
+                return fsutil::wildcard_match( item_filter, item_path );
             } );
         }
 
@@ -150,7 +141,7 @@ class BitExtractor final : public BitAbstractArchiveOpener {
 
             extractMatchingFilter( in_archive, out_buffer, policy,
                                    [ &item_filter ]( const tstring& item_path ) -> bool {
-                                       return fsutil::wildcardMatch( item_filter, item_path );
+                                       return fsutil::wildcard_match( item_filter, item_path );
                                    } );
         }
 
@@ -262,7 +253,7 @@ class BitExtractor final : public BitAbstractArchiveOpener {
             for ( const auto& item : input_archive ) {
                 const bool item_matches = filter( item.path() );
                 if ( item_matches == should_extract_matched_items ) {
-                    /* The if-condition is equivalent to an exclusive NOR (negated XOR) between
+                    /* The if-condition is equivalent to an exclusive XNOR (negated XOR) between
                      * item_matches and should_extract_matched_items.
                      * In other words, it is true only if the current item either:
                      *  - matches the filter, and we must include any matching item; or

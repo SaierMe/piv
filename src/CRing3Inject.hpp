@@ -1,6 +1,8 @@
 ﻿#ifndef AFX_PROCESS_H__3BA1E2EE_BD39_483B_A298_73FAD53A51BE__INCLUDED_
 #define AFX_PROCESS_H__3BA1E2EE_BD39_483B_A298_73FAD53A51BE__INCLUDED_
-#pragma once
+#ifndef __VOL_BASE_H__
+#include <sys/base/libs/win_base/vol_base.h>
+#endif
 #include <winternl.h>
 /**************************************************************\
  * CRing3Inject
@@ -10,19 +12,18 @@
 class CRing3Inject
 {
 private:
-	typedef NTSTATUS(NTAPI* pfnNtCreateThreadEx)
-	(
-		OUT PHANDLE hThread,
-		IN ACCESS_MASK DesiredAccess,
-		IN PVOID ObjectAttributes,
-		IN HANDLE ProcessHandle,
-		IN PVOID lpStartAddress,
-		IN PVOID lpParameter,
-		IN ULONG Flags,
-		IN SIZE_T StackZeroBits,
-		IN SIZE_T SizeOfStackCommit,
-		IN SIZE_T SizeOfStackReserve,
-		OUT PVOID lpBytesBuffer);
+	typedef NTSTATUS(NTAPI *pfnNtCreateThreadEx)(
+		PHANDLE hThread,
+		ACCESS_MASK DesiredAccess,
+		PVOID ObjectAttributes,
+		HANDLE ProcessHandle,
+		PVOID lpStartAddress,
+		PVOID lpParameter,
+		ULONG Flags,
+		SIZE_T StackZeroBits,
+		SIZE_T SizeOfStackCommit,
+		SIZE_T SizeOfStackReserve,
+		PVOID lpBytesBuffer);
 
 	typedef struct _LSA_UNICODE_STRING
 	{
@@ -43,7 +44,7 @@ private:
 		PWCHAR DllPath;
 		ULONG Flags;
 		HANDLE ModuleHandle;
-	} THREAD_DATA,*PTHREAD_DATA;
+	} THREAD_DATA, *PTHREAD_DATA;
 
 public:
 	CRing3Inject()
@@ -60,13 +61,13 @@ public:
 		LPVOID pThreadData = NULL;
 		__try
 		{
-			if( !EnableDebugPrivilege() )
+			if (!EnableDebugPrivilege())
 				return -1;
-			//打开目标进程;
+			// 打开目标进程;
 			hProcess = OpenProcess(PROCESS_ALL_ACCESS, TRUE, dwProcessId);
 			if (hProcess == NULL)
 				__leave;
-			//申请空间，把我们的代码和数据写入目标进程空间里;
+			// 申请空间，把我们的代码和数据写入目标进程空间里;
 			THREAD_DATA data;
 			HMODULE hNtdll = GetModuleHandleW(L"ntdll.dll");
 			data.fnRtlInitUnicodeString = (pRtlInitUnicodeString)GetProcAddress(hNtdll, "RtlInitUnicodeString");
@@ -81,7 +82,7 @@ public:
 			BOOL bWriteOK = WriteProcessMemory(hProcess, pThreadData, &data, sizeof(data), NULL);
 			if (!bWriteOK)
 				__leave;
-			//写入代码;
+			// 写入代码;
 			SIZE_T SizeOfCode = (SIZE_T)ThreadProcEnd - (SIZE_T)ThreadProc;
 			pCode = VirtualAllocEx(hProcess, NULL, SizeOfCode, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 			if (pCode == NULL)
@@ -89,11 +90,11 @@ public:
 			bWriteOK = WriteProcessMemory(hProcess, pCode, (PVOID)ThreadProc, SizeOfCode, NULL);
 			if (!bWriteOK)
 				__leave;
-			//创建远程线程,把ThreadProc作为线程起始函数,pThreadData作为参数;
+			// 创建远程线程,把ThreadProc作为线程起始函数,pThreadData作为参数;
 			hThread = MyCreateRemoteThread(hProcess, (LPTHREAD_START_ROUTINE)pCode, pThreadData);
 			if (hThread == NULL)
 				__leave;
-			//等待完成;
+			// 等待完成;
 			WaitForSingleObject(hThread, INFINITE);
 			bRet = TRUE;
 		}
@@ -111,7 +112,6 @@ public:
 		return bRet;
 	}
 
-
 private:
 	static HANDLE __stdcall ThreadProc(PTHREAD_DATA data)
 	{
@@ -123,13 +123,13 @@ private:
 	{
 		return 0;
 	}
-	//提升到Debug权限
+	// 提升到Debug权限
 	BOOL EnableDebugPrivilege()
 	{
 		HANDLE hToken;
 		TOKEN_PRIVILEGES tkp;
-		if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))  
-			return(FALSE);
+		if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
+			return (FALSE);
 		LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &tkp.Privileges[0].Luid);
 		tkp.PrivilegeCount = 1;
 		tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
@@ -138,23 +138,22 @@ private:
 			return FALSE;
 		return TRUE;
 	}
-	//创建远程线程
+	// 创建远程线程
 	HANDLE MyCreateRemoteThread(HANDLE hProcess, LPTHREAD_START_ROUTINE pThreadProc, LPVOID pRemoteBuf)
 	{
 		HANDLE hThread = NULL;
-		pfnNtCreateThreadEx fnNtCreateThreadEx = NULL;
-		fnNtCreateThreadEx = (pfnNtCreateThreadEx)GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "NtCreateThreadEx");
-		if (pFunc)
+		pfnNtCreateThreadEx fnNtCreateThreadEx = (pfnNtCreateThreadEx)GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "NtCreateThreadEx");
+		if (fnNtCreateThreadEx)
 		{
 			fnNtCreateThreadEx(&hThread, 0x1FFFFF, NULL, hProcess, pThreadProc, pRemoteBuf,
-											FALSE, NULL, NULL, NULL, NULL);
-			if( hThread == NULL )
+							   FALSE, NULL, NULL, NULL, NULL);
+			if (hThread == NULL)
 				return NULL;
 		}
 		else
 		{
 			hThread = CreateRemoteThread(hProcess, NULL, 0, pThreadProc, pRemoteBuf, 0, NULL);
-			if( hThread == NULL )
+			if (hThread == NULL)
 				return NULL;
 		}
 		if (WAIT_FAILED == WaitForSingleObject(hThread, INFINITE))

@@ -3,7 +3,6 @@
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
- * 版本: 2023/02/27                          *
 \*********************************************/
 
 #ifndef _PIV_NLOHMANN_JSON_H
@@ -12,8 +11,8 @@
 #include "piv_string.hpp"
 #include "json.hpp"
 
-using PivJSON = nlohmann::basic_json<>;
-using PivOrderJSON = nlohmann::basic_json<nlohmann::ordered_map>;
+using PivJSON = nlohmann::basic_json<nlohmann::ordered_map>;
+using PivJSON_Unordered = nlohmann::basic_json<>;
 
 namespace piv
 {
@@ -69,6 +68,7 @@ namespace piv
             else
                 return AcceptFile<J>(PivU2W{test.data(), test.size()}.GetText(), ignore_comments);
         }
+
         template <typename J>
         bool Accept(const wstring_view &input, const bool &ignore_comments, const int32_t &encoding = 1)
         {
@@ -82,11 +82,13 @@ namespace piv
             else
                 return AcceptFile<J>(std::wstring{test.data(), test.size()}.c_str(), ignore_comments);
         }
+
         template <typename J>
         inline bool Accept(const std::string &input, const bool &ignore_comments, const int32_t &encoding = 1)
         {
             return Accept<J>(string_view{input}, ignore_comments, encoding);
         }
+
         template <typename J>
         bool Accept(const std::wstring &input, const bool &ignore_comments, const int32_t &encoding = 1)
         {
@@ -100,11 +102,13 @@ namespace piv
             else
                 return AcceptFile<J>(input.c_str(), ignore_comments);
         }
+
         template <typename J>
         inline bool Accept(const wchar_t *input, const bool &ignore_comments, const int32_t &encoding = 1)
         {
             return Accept(wstring_view{input}, ignore_comments, encoding);
         }
+
         template <typename J>
         bool Accept(const CVolString &input, const bool &ignore_comments, const int32_t &encoding = 1)
         {
@@ -118,6 +122,7 @@ namespace piv
             else
                 return AcceptFile<J>(input.GetText(), ignore_comments);
         }
+
         template <typename J>
         bool Accept(const CVolMem &input, const bool &ignore_comments, const int32_t &encoding = 1)
         {
@@ -214,6 +219,7 @@ namespace piv
             else
                 return ParseFile(json, PivU2W{test.data(), test.size()}.GetText(), cb, allow_exceptions, ignore_comments);
         }
+
         template <typename J, typename F>
         bool Parse(J &json, const wstring_view &input, const F cb, const bool &allow_exceptions, const bool &ignore_comments, const int32_t &encoding = 1)
         {
@@ -227,11 +233,13 @@ namespace piv
             else
                 return ParseFile(json, std::wstring{test.data(), test.size()}.c_str(), cb, allow_exceptions, ignore_comments);
         }
+
         template <typename J, typename F>
         inline bool Parse(J &json, const std::string &input, const F cb, const bool &allow_exceptions, const bool &ignore_comments, const int32_t &encoding = 1)
         {
             return Parse(json, string_view{input}, cb, allow_exceptions, ignore_comments);
         }
+
         template <typename J, typename F>
         bool Parse(J &json, const std::wstring &input, const F cb, const bool &allow_exceptions, const bool &ignore_comments, const int32_t &encoding = 1)
         {
@@ -245,6 +253,7 @@ namespace piv
             else
                 return ParseFile(json, input.c_str(), cb, allow_exceptions, ignore_comments);
         }
+
         template <typename J, typename F>
         bool Parse(J &json, const CVolString &input, const F cb, const bool &allow_exceptions, const bool &ignore_comments, const int32_t &encoding = 1)
         {
@@ -258,11 +267,13 @@ namespace piv
             else
                 return ParseFile(json, input.GetText(), cb, allow_exceptions, ignore_comments);
         }
+
         template <typename J, typename F>
         inline bool Parse(J &json, const wchar_t *input, const F cb, const bool &allow_exceptions, const bool &ignore_comments, const int32_t &encoding = 1)
         {
             return Parse(json, wstring_view{input}, cb, allow_exceptions, ignore_comments, encoding);
         }
+
         template <typename J, typename F>
         inline bool Parse(J &json, const CVolMem &input, const F cb, const bool &allow_exceptions, const bool &ignore_comments, const int32_t &encoding = 1)
         {
@@ -313,14 +324,17 @@ namespace piv
         {
             return string_view{reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize())};
         }
+
         inline const std::vector<uint8_t> &input_t(const std::vector<uint8_t> &input)
         {
             return input;
         }
+
         inline const string_view &input_t(const string_view &input)
         {
             return input;
         }
+
         inline const std::string &input_t(const std::string &input)
         {
             return input;
@@ -428,6 +442,7 @@ namespace piv
         {
             return json.dump(indent, IndentWcharToChar(indent_char), ensure_ascii, static_cast<J::error_handler_t>(error_handler));
         }
+
         template <typename R, typename J>
         inline R DumpTo(J &json, const int32_t indent, const wchar_t &indent_char, const bool &ensure_ascii, const int32_t &error_handler)
         {
@@ -449,6 +464,7 @@ namespace piv
             J::to_bjdata(json, bin, use_size, use_type);
             return CVolMem(bin.data(), bin.size());
         }
+
         template <typename J> // 到BSON
         inline CVolMem To_bson(J &json)
         {
@@ -456,6 +472,7 @@ namespace piv
             J::to_bson(json, bin);
             return CVolMem(bin.data(), bin.size());
         }
+
         template <typename J> // 到CBOR
         inline CVolMem To_cbor(J &json)
         {
@@ -463,6 +480,7 @@ namespace piv
             J::to_cbor(json, bin);
             return CVolMem(bin.data(), bin.size());
         }
+
         template <typename J> // 到MsgPack
         inline CVolMem To_msgpack(J &json)
         {
@@ -470,6 +488,7 @@ namespace piv
             J::to_msgpack(json, bin);
             return CVolMem(bin.data(), bin.size());
         }
+
         template <typename J> // 到UBJSON
         inline CVolMem To_ubjson(J &json, const bool &use_size, const bool &use_type)
         {
@@ -489,56 +508,67 @@ namespace piv
         {
             return num;
         }
+
         template <typename = void>
         const int32_t &to_value(const int32_t &num)
         {
             return num;
         }
+
         template <typename = void>
         const int64_t &to_value(const int64_t &num)
         {
             return num;
         }
+
         template <typename = void>
         const double &to_value(const double &num)
         {
             return num;
         }
+
         template <typename = void>
         const std::string to_value(const wchar_t *str)
         {
             return PivW2U{str}.String();
         }
+
         template <typename = void>
         const string_view &to_value(const char *str)
         {
             return string_view{str};
         }
+
         template <typename = void>
         const std::string to_value(const CVolString &str)
         {
             return PivW2U{str}.String();
         }
+
         template <typename = void>
         const std::string &to_value(const std::string &str)
         {
             return str;
         }
+
         template <typename = void>
         const string_view &to_value(const string_view &str)
         {
             return str;
         }
+
         template <typename = void>
         const std::string to_value(const std::wstring &str)
         {
             return PivW2U{str}.String();
         }
+
         template <typename = void>
         const std::string to_value(const wstring_view &str)
         {
             return PivW2U{str.data(), str.size()}.String();
         }
+
         template <typename = void>
         const string_view to_value(const CVolMem &str)
         {
@@ -556,46 +586,55 @@ namespace piv
         {
             return static_cast<uint32_t>(idx);
         }
+
         template <typename = void>
         const uint64_t to_key(const int64_t &idx)
         {
             return static_cast<uint64_t>(idx);
         }
+
         template <typename = void>
         const std::string to_key(const wchar_t *key)
         {
             return PivW2U{key}.String();
         }
+
         template <typename = void>
         const string_view to_key(const char *key)
         {
             return string_view{key};
         }
+
         template <typename = void>
         const std::string to_key(const CVolString &key)
         {
             return PivW2U{key}.String();
         }
+
         template <typename = void>
         const std::string &to_key(const std::string &key)
         {
             return key;
         }
+
         template <typename = void>
         const string_view &to_key(const string_view &key)
         {
             return key;
         }
+
         template <typename = void>
         const std::string to_key(const std::wstring &key)
         {
             return PivW2U{key}.String();
         }
+
         template <typename = void>
         const std::string to_key(const wstring_view &key)
         {
             return PivW2U{key.data(), key.size()}.String();
         }
+
         template <typename = void>
         const string_view to_key(const CVolMem &key)
         {
@@ -612,36 +651,43 @@ namespace piv
         {
             return J::json_pointer{*PivW2U{path}};
         }
+
         template <typename J>
         auto to_pointer(const char *path)
         {
             return J::json_pointer{path};
         }
+
         template <typename J>
         auto to_pointer(const CVolString &path)
         {
             return J::json_pointer{*PivW2U{path}};
         }
+
         template <typename J>
         auto to_pointer(const std::string &path)
         {
             return J::json_pointer{path};
         }
+
         template <typename J>
         auto &to_pointer(const string_view &path)
         {
             return J::json_pointer{path};
         }
+
         template <typename J>
         auto to_pointer(const std::wstring &path)
         {
             return J::json_pointer{*PivW2U{path}};
         }
+
         template <typename J>
         auto to_pointer(const wstring_view &path)
         {
             return J::json_pointer{*PivW2U{path.data(), path.size()}};
         }
+
         template <typename J>
         auto to_pointer(const CVolMem &path)
         {
@@ -663,6 +709,7 @@ namespace piv
                 json = J::array();
             return json[static_cast<uint32_t>(idx)];
         }
+
         template <typename J>
         inline J &At(J &json, const int64_t &idx, const bool &allow_exceptions = false)
         {
@@ -670,6 +717,7 @@ namespace piv
                 json = J::array();
             return json[static_cast<uint64_t>(idx)];
         }
+
         template <typename J, typename T>
         inline J &At(J &json, const T &key, const bool &allow_exceptions = false)
         {
@@ -688,12 +736,14 @@ namespace piv
         inline void PushBack(J &json)
         {
         }
+
         template <typename J, typename T, typename... Args>
         inline void PushBack(J &json, const T &val, const Args... args)
         {
             json.push_back(to_value(val));
             PushBack(json, args...);
         }
+
         template <typename J, typename... Args>
         inline void PushBack(J &json, const J &val, const Args... args)
         {
@@ -711,21 +761,25 @@ namespace piv
         inline void Emplace(J &json)
         {
         }
+
         template <typename J>
         inline void Emplace(J &json, const J &val)
         {
         }
+
         template <typename J, typename K>
         inline void Emplace(J &json, const K &key)
         {
             json[to_key(key)] = nullptr;
         }
+
         template <typename J, typename K, typename V, typename... Args>
         inline void Emplace(J &json, const K &key, const V &val, const Args... args)
         {
             json[to_key(key)] = to_value(val);
             Emplace(json, args...);
         }
+
         template <typename J, typename K, typename... Args>
         inline void Emplace(J &json, const K &key, const J &val, const Args... args)
         {
@@ -787,6 +841,7 @@ namespace piv
             json.insert(json.begin() + pos, cnt, val);
             return json;
         }
+
         template <typename J, typename T>
         inline J &Insert(J &json, const ptrdiff_t &pos, const T &val, const size_t &cnt = 1)
         {
@@ -1018,6 +1073,7 @@ namespace piv
             }
             return default_value;
         }
+
         template <typename J, typename K>
         CVolString ValueStr(const J &json, const K &key, const CVolString &default_value)
         {
@@ -1030,7 +1086,7 @@ namespace piv
             }
             return default_value;
         }
-    
+
         /**
          * @brief 取成员对象
          * @param json JSON对象
@@ -1167,11 +1223,13 @@ namespace piv
         {
             return EmplaceAtIdx(json, static_cast<uint32_t>(idx), to_value(val), replace);
         }
+
         template <typename J, typename V>
         inline bool EmplaceAt(J &json, const int64_t &idx, const V &val, const bool &replace = false)
         {
             return EmplaceAtIdx(json, static_cast<uint64_t>(idx), to_value(val), replace);
         }
+
         template <typename J, typename V>
         inline bool EmplaceAt(J &json, const wchar_t *path, const V &val, const bool &replace = false)
         {
@@ -1180,6 +1238,7 @@ namespace piv
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
+
         template <typename J, typename V>
         inline bool EmplaceAt(J &json, const char *path, const V &val, const bool &replace = false)
         {
@@ -1188,6 +1247,7 @@ namespace piv
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
+
         template <typename J, typename V>
         inline bool EmplaceAt(J &json, const CVolString &path, const V &val, const bool &replace = false)
         {
@@ -1198,6 +1258,7 @@ namespace piv
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
+
         template <typename J, typename V>
         inline bool EmplaceAt(J &json, const std::string &path, const V &val, const bool &replace = false)
         {
@@ -1208,6 +1269,7 @@ namespace piv
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
+
         template <typename J, typename V>
         inline bool EmplaceAt(J &json, const std::wstring &path, const V &val, const bool &replace = false)
         {
@@ -1218,6 +1280,7 @@ namespace piv
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
+
         template <typename J, typename V>
         inline bool EmplaceAt(J &json, const string_view &path, const V &val, const bool &replace = false)
         {
@@ -1228,6 +1291,7 @@ namespace piv
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
+
         template <typename J, typename V>
         inline bool EmplaceAt(J &json, const wstring_view &path, const V &val, const bool &replace = false)
         {
@@ -1238,6 +1302,7 @@ namespace piv
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
+
         template <typename J, typename V>
         inline bool EmplaceAt(J &json, const CVolMem &path, const V &val, const bool &replace = false)
         {
@@ -1254,11 +1319,13 @@ namespace piv
         {
             return EmplaceAtIdx(json, static_cast<uint32_t>(idx), val, replace);
         }
+
         template <typename J>
         inline bool EmplaceAt(J &json, const int64_t &idx, const J &val, const bool &replace = false)
         {
             return EmplaceAtIdx(json, static_cast<uint64_t>(idx), val, replace);
         }
+
         template <typename J>
         inline bool EmplaceAt(J &json, const wchar_t *path, const J &val, const bool &replace = false)
         {
@@ -1267,6 +1334,7 @@ namespace piv
             else
                 return EmplaceAtKey(json, to_key(path), val, replace);
         }
+
         template <typename J>
         inline bool EmplaceAt(J &json, const char *path, const J &val, const bool &replace = false)
         {
@@ -1275,6 +1343,7 @@ namespace piv
             else
                 return EmplaceAtKey(json, to_key(path), val, replace);
         }
+
         template <typename J>
         inline bool EmplaceAt(J &json, const CVolString &path, const J &val, const bool &replace = false)
         {
@@ -1285,6 +1354,7 @@ namespace piv
             else
                 return EmplaceAtKey(json, to_key(path), val, replace);
         }
+
         template <typename J>
         inline bool EmplaceAt(J &json, const std::string &path, const J &val, const bool &replace = false)
         {
@@ -1295,6 +1365,7 @@ namespace piv
             else
                 return EmplaceAtKey(json, to_key(path), val, replace);
         }
+
         template <typename J>
         inline bool EmplaceAt(J &json, const std::wstring &path, const J &val, const bool &replace = false)
         {
@@ -1305,6 +1376,7 @@ namespace piv
             else
                 return EmplaceAtKey(json, to_key(path), val, replace);
         }
+
         template <typename J>
         inline bool EmplaceAt(J &json, const string_view &path, const J &val, const bool &replace = false)
         {
@@ -1315,6 +1387,7 @@ namespace piv
             else
                 return EmplaceAtKey(json, to_key(path), val, replace);
         }
+
         template <typename J>
         inline bool EmplaceAt(J &json, const wstring_view &path, const J &val, const bool &replace = false)
         {
@@ -1325,6 +1398,7 @@ namespace piv
             else
                 return EmplaceAtKey(json, to_key(path), val, replace);
         }
+
         template <typename J>
         inline bool EmplaceAt(J &json, const CVolMem &path, const J &val, const bool &replace = false)
         {
@@ -1355,6 +1429,7 @@ namespace piv
             }
             return static_cast<int32_t>(keyArray.size());
         }
+
         template <typename J>
         int32_t EnumKey(const J &json, std::vector<string_view> &keyArray)
         {

@@ -110,6 +110,8 @@
         "xxatomic": "cpp",
         "*.rh": "cpp",
         "cstdbool": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "vol_base.h": "c",
+        "piv_bit7z copy.C": "cpp"
     }
 }

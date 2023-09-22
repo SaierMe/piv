@@ -1188,13 +1188,13 @@ public:
                 Succeeded = (fread(const_cast<char *>(data.get()), 1, fileSize, in) == fileSize);
                 PIV_IF(sizeof(EncodeType) == 3)
                 {
-                    PivU2W utf{reinterpret_cast<const char *>(data.get()), fileSize};
-                    pStr->assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetLength());
+                    PivW2U convert{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2};
+                    pStr->assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
                 }
                 else
                 {
-                    PivA2W utf{reinterpret_cast<const char *>(data.get()), fileSize};
-                    pStr->assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetLength());
+                    PivW2A convert{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2};
+                    pStr->assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
                 }
             }
         }
@@ -1211,13 +1211,13 @@ public:
                 Succeeded = (fread(const_cast<char *>(data.get()), 1, fileSize, in) == fileSize);
                 PIV_IF(sizeof(EncodeType) == 2)
                 {
-                    PivW2U utf{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2};
-                    pStr->assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetLength());
+                    PivU2W convert{reinterpret_cast<const char *>(data.get()), fileSize};
+                    pStr->assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
                 }
                 else
                 {
-                    PivA2U utf{reinterpret_cast<const char *>(data.get()), fileSize};
-                    pStr->assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetLength());
+                    PivU2A convert{reinterpret_cast<const char *>(data.get()), fileSize};
+                    pStr->assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
                 }
             }
         }
@@ -1234,13 +1234,13 @@ public:
                 Succeeded = (fread(const_cast<char *>(data.get()), 1, fileSize, in) == fileSize);
                 PIV_IF(sizeof(EncodeType) == 2)
                 {
-                    PivW2A mbcs{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2};
-                    pStr->assign(reinterpret_cast<const CharT *>(mbcs.GetText()), mbcs.GetLength());
+                    PivA2W convert{reinterpret_cast<const char *>(data.get()), fileSize};
+                    pStr->assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
                 }
                 PIV_ELSE_IF(sizeof(EncodeType) == 3)
                 {
-                    PivU2A mbcs{reinterpret_cast<const char *>(data.get()), fileSize};
-                    pStr->assign(reinterpret_cast<const CharT *>(mbcs.GetText()), mbcs.GetLength());
+                    PivA2U convert{reinterpret_cast<const char *>(data.get()), fileSize};
+                    pStr->assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
                 }
             }
         }
@@ -1287,13 +1287,13 @@ public:
             }
             PIV_ELSE_IF(sizeof(EncodeType) == 3)
             {
-                PivU2W utf{reinterpret_cast<const char *>(sv.data()), count};
-                Succeeded = (fwrite(utf.GetText(), 2, utf.GetLength(), out) == utf.GetLength());
+                PivU2W convert{reinterpret_cast<const char *>(sv.data()), count};
+                Succeeded = (fwrite(convert.GetText(), 2, convert.GetLength(), out) == convert.GetLength());
             }
             else
             {
-                PivA2W utf{reinterpret_cast<const char *>(sv.data()), count};
-                Succeeded = (fwrite(utf.GetText(), 2, utf.GetLength(), out) == utf.GetLength());
+                PivA2W convert{reinterpret_cast<const char *>(sv.data()), count};
+                Succeeded = (fwrite(convert.GetText(), 2, convert.GetLength(), out) == convert.GetLength());
             }
         }
         else if (WriteEncode == VSET_UTF_8)
@@ -1305,8 +1305,8 @@ public:
             }
             PIV_IF(sizeof(EncodeType) == 2)
             {
-                PivW2U utf{reinterpret_cast<const wchar_t *>(sv.data()), count};
-                Succeeded = (fwrite(utf.GetText(), 1, utf.GetLength(), out) == utf.GetLength());
+                PivW2U convert{reinterpret_cast<const wchar_t *>(sv.data()), count};
+                Succeeded = (fwrite(convert.GetText(), 1, convert.GetLength(), out) == convert.GetLength());
             }
             PIV_ELSE_IF(sizeof(EncodeType) == 3)
             {
@@ -1314,21 +1314,21 @@ public:
             }
             else
             {
-                PivA2U utf{reinterpret_cast<const char *>(sv.data()), count};
-                Succeeded = (fwrite(utf.GetText(), 1, utf.GetLength(), out) == utf.GetLength());
+                PivA2U convert{reinterpret_cast<const char *>(sv.data()), count};
+                Succeeded = (fwrite(convert.GetText(), 1, convert.GetLength(), out) == convert.GetLength());
             }
         }
         else if (WriteEncode == VSET_MBCS)
         {
             PIV_IF(sizeof(EncodeType) == 2)
             {
-                PivW2A mbcs{reinterpret_cast<const wchar_t *>(sv.data()), count};
-                Succeeded = (fwrite(mbcs.GetText(), 1, mbcs.GetLength(), out) == mbcs.GetLength());
+                PivW2A convert{reinterpret_cast<const wchar_t *>(sv.data()), count};
+                Succeeded = (fwrite(convert.GetText(), 1, convert.GetLength(), out) == convert.GetLength());
             }
             PIV_ELSE_IF(sizeof(EncodeType) == 3)
             {
-                PivU2A mbcs{reinterpret_cast<const char *>(sv.data()), count};
-                Succeeded = (fwrite(mbcs.GetText(), 1, mbcs.GetLength(), out) == mbcs.GetLength());
+                PivU2A convert{reinterpret_cast<const char *>(sv.data()), count};
+                Succeeded = (fwrite(convert.GetText(), 1, convert.GetLength(), out) == convert.GetLength());
             }
             else
             {
@@ -1720,7 +1720,7 @@ public:
     /**
      * @brief 取字符
      */
-    inline const CharT &At(const size_t &pos) const
+    inline CharT At(const size_t &pos) const
     {
         // 判断索引是否有效和视图是否为空
         ASSERT(pos >= 0 && pos < sv.size() && sv.empty() == false);
@@ -1730,7 +1730,7 @@ public:
     /**
      * @brief 取首字符
      */
-    inline const CharT &Front() const
+    inline CharT Front() const
     {
         return sv.empty() ? 0 : sv.front();
     }
@@ -1738,7 +1738,7 @@ public:
     /**
      * @brief 取尾字符
      */
-    inline const CharT &Back() const
+    inline CharT Back() const
     {
         return sv.empty() ? 0 : sv.back();
     }
@@ -2736,7 +2736,6 @@ public:
             else
                 str = s.str;
         }
-        // str = s.str;
     }
     PivString(PivString &&s) noexcept
     {
@@ -2767,7 +2766,6 @@ public:
             else
                 str = std::move(s.str);
         }
-        // str = std::move(s.str);
     }
     PivString(const std::basic_string<char> &s)
     {
@@ -3586,13 +3584,13 @@ public:
                 Succeeded = (fread(const_cast<char *>(data.get()), 1, fileSize, in) == fileSize);
                 PIV_IF(sizeof(EncodeType) == 3)
                 {
-                    PivU2W utf{reinterpret_cast<const char *>(data.get()), fileSize};
-                    str.assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetLength());
+                    PivW2U convert{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2};
+                    str.assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
                 }
                 else
                 {
-                    PivA2W utf{reinterpret_cast<const char *>(data.get()), fileSize};
-                    str.assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetLength());
+                    PivW2A convert{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2};
+                    str.assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
                 }
             }
         }
@@ -3609,13 +3607,13 @@ public:
                 Succeeded = (fread(const_cast<char *>(data.get()), 1, fileSize, in) == fileSize);
                 PIV_IF(sizeof(EncodeType) == 2)
                 {
-                    PivW2U utf{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2};
-                    str.assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetLength());
+                    PivU2W convert{reinterpret_cast<const char *>(data.get()), fileSize};
+                    str.assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
                 }
                 else
                 {
-                    PivA2U utf{reinterpret_cast<const char *>(data.get()), fileSize};
-                    str.assign(reinterpret_cast<const CharT *>(utf.GetText()), utf.GetLength());
+                    PivU2A convert{reinterpret_cast<const char *>(data.get()), fileSize};
+                    str.assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
                 }
             }
         }
@@ -3632,13 +3630,13 @@ public:
                 Succeeded = (fread(const_cast<char *>(data.get()), 1, fileSize, in) == fileSize);
                 PIV_IF(sizeof(EncodeType) == 2)
                 {
-                    PivW2A mbcs{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2};
-                    str.assign(reinterpret_cast<const CharT *>(mbcs.GetText()), mbcs.GetLength());
+                    PivA2W convert{reinterpret_cast<const char *>(data.get()), fileSize};
+                    str.assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
                 }
                 else
                 {
-                    PivU2A mbcs{reinterpret_cast<const char *>(data.get()), fileSize};
-                    str.assign(reinterpret_cast<const CharT *>(mbcs.GetText()), mbcs.GetLength());
+                    PivA2U convert{reinterpret_cast<const char *>(data.get()), fileSize};
+                    str.assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
                 }
             }
         }
@@ -3678,13 +3676,13 @@ public:
             }
             PIV_ELSE_IF(sizeof(EncodeType) == 3)
             {
-                PivU2W utf{reinterpret_cast<const char *>(str.c_str()), count};
-                Succeeded = (fwrite(utf.GetText(), 2, utf.GetLength(), out) == utf.GetLength());
+                PivU2W convert{reinterpret_cast<const char *>(str.c_str()), count};
+                Succeeded = (fwrite(convert.GetText(), 2, convert.GetLength(), out) == convert.GetLength());
             }
             else
             {
-                PivA2W utf{reinterpret_cast<const char *>(str.c_str()), count};
-                Succeeded = (fwrite(utf.GetText(), 2, utf.GetLength(), out) == utf.GetLength());
+                PivA2W convert{reinterpret_cast<const char *>(str.c_str()), count};
+                Succeeded = (fwrite(convert.GetText(), 2, convert.GetLength(), out) == convert.GetLength());
             }
         }
         else if (WriteEncode == VSET_UTF_8)
@@ -3696,8 +3694,8 @@ public:
             }
             PIV_IF(sizeof(EncodeType) == 2)
             {
-                PivW2U utf{reinterpret_cast<const wchar_t *>(str.c_str()), count};
-                Succeeded = (fwrite(utf.GetText(), 1, utf.GetLength(), out) == utf.GetLength());
+                PivW2U convert{reinterpret_cast<const wchar_t *>(str.c_str()), count};
+                Succeeded = (fwrite(convert.GetText(), 1, convert.GetLength(), out) == convert.GetLength());
             }
             PIV_ELSE_IF(sizeof(EncodeType) == 3)
             {
@@ -3705,21 +3703,21 @@ public:
             }
             else
             {
-                PivA2U utf{reinterpret_cast<const char *>(str.c_str()), count};
-                Succeeded = (fwrite(utf.GetText(), 1, utf.GetLength(), out) == utf.GetLength());
+                PivA2U convert{reinterpret_cast<const char *>(str.c_str()), count};
+                Succeeded = (fwrite(convert.GetText(), 1, convert.GetLength(), out) == convert.GetLength());
             }
         }
         else if (WriteEncode == VSET_MBCS)
         {
             PIV_IF(sizeof(EncodeType) == 2)
             {
-                PivW2A mbcs{reinterpret_cast<const wchar_t *>(str.c_str()), count};
-                Succeeded = (fwrite(mbcs.GetText(), 1, mbcs.GetLength(), out) == mbcs.GetLength());
+                PivW2A convert{reinterpret_cast<const wchar_t *>(str.c_str()), count};
+                Succeeded = (fwrite(convert.GetText(), 1, convert.GetLength(), out) == convert.GetLength());
             }
             PIV_ELSE_IF(sizeof(EncodeType) == 3)
             {
-                PivU2A mbcs{reinterpret_cast<const char *>(str.c_str()), count};
-                Succeeded = (fwrite(mbcs.GetText(), 1, mbcs.GetLength(), out) == mbcs.GetLength());
+                PivU2A convert{reinterpret_cast<const char *>(str.c_str()), count};
+                Succeeded = (fwrite(convert.GetText(), 1, convert.GetLength(), out) == convert.GetLength());
             }
             else
             {
@@ -4352,7 +4350,7 @@ public:
      * @param count 欲删除字符数目
      * @return
      */
-    inline size_t &RemoveChars(const size_t &pos, const size_t &count)
+    inline size_t RemoveChars(const size_t &pos, const size_t &count)
     {
         ASSERT(pos >= 0 && pos < str.size() && count >= 0);
         size_t ret = str.size();
@@ -4375,7 +4373,7 @@ public:
     /**
      * @brief 取字符
      */
-    inline const CharT &At(const size_t &pos) const
+    inline CharT At(const size_t &pos) const
     {
         // 判断索引是否有效和文本是否为空
         ASSERT(pos >= 0 && pos < str.size() && str.empty() == false);
@@ -4385,7 +4383,7 @@ public:
     /**
      * @brief 取首字符
      */
-    inline const CharT &Front() const
+    inline CharT Front() const
     {
         return str.empty() ? 0 : str.front();
     }
@@ -4393,7 +4391,7 @@ public:
     /**
      * @brief 取尾字符
      */
-    inline const CharT &Back() const
+    inline CharT Back() const
     {
         return str.empty() ? 0 : str.back();
     }
@@ -4506,7 +4504,7 @@ public:
             epos = SearchText(rstr, epos, case_insensitive, &strlen);
             if (epos == -1)
                 break;
-            array.push_back(sv.substr(spos, epos - spos + (include_rstr ? strlen : 0)));
+            array.push_back(str.substr(spos, epos - spos + (include_rstr ? strlen : 0)));
         }
         return array.size();
     }
@@ -6159,7 +6157,7 @@ using PivStringU = PivString<char, piv::utf8>;
 using PivStringW = PivString<wchar_t, piv::utf16_le>;
 
 /**
- * @brief 任意编码转UTF-8的封装类
+ * @brief 任意编码转UTF-8的封装类(输出文本指针)
  */
 class PivAny2U
 {
@@ -6349,5 +6347,185 @@ public:
         return this->GetText();
     }
 }; // PivAny2U
+
+/**
+ * @brief 任意编码转UTF-8 std::string的封装类(输出std::string)
+ */
+class PivAny2Us
+{
+private:
+    std::string u8str;
+
+public:
+    PivAny2Us() = delete;
+    ~PivAny2Us() {}
+
+    /**
+     * @brief 构造的同时将提供的文本转换
+     * @param s 所欲转换的任意编码文本
+     */
+    PivAny2Us(const char *s)
+    {
+        if (s == nullptr || strlen(s) == 0)
+            return;
+        u8str.assign(s);
+    }
+
+    PivAny2Us(const wchar_t *s)
+    {
+        if (s == nullptr || wcslen(s) == 0)
+            return;
+        piv::encoding::W2Uex(u8str, s, -1);
+    }
+
+    PivAny2Us(const CVolString &s)
+    {
+        if (s.IsEmpty())
+            return;
+        piv::encoding::W2Uex(u8str, s.GetText(), static_cast<size_t>(s.GetLength()));
+    }
+
+    PivAny2Us(const CVolMem &s)
+    {
+        if (s.IsEmpty())
+            return;
+#ifdef SIMDUTF_H
+        int encodings = simdutf::detect_encodings(reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
+        if ((encodings & 2) == 2) // UTF-16LE
+        {
+            piv::encoding::W2Uex(u8str, s.GetTextPtr(), static_cast<size_t>(s.GetSize()) / 2);
+        }
+        else if ((encodings & 1) == 1) // UTF-8
+        {
+            u8str.assign(reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
+        }
+        else // ANSI
+        {
+            piv::encoding::A2Uex(u8str, reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
+        }
+#else
+        u8str.assign(reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
+#endif
+    }
+
+    PivAny2Us(const PivStringA &s)
+    {
+        if (s.IsEmpty())
+            return;
+        piv::encoding::A2Uex(u8str, s.GetText(), s.GetLength());
+    }
+
+    PivAny2Us(const PivStringU &s)
+    {
+        if (s.IsEmpty())
+            return;
+        u8str.assign(s.data());
+    }
+
+    PivAny2Us(const PivStringW &s)
+    {
+        if (s.IsEmpty())
+            return;
+        piv::encoding::W2Uex(u8str, s.GetText(), s.GetLength());
+    }
+
+    PivAny2Us(const PivStringViewA &s)
+    {
+        if (s.IsEmpty())
+            return;
+        piv::encoding::A2Uex(u8str, s.GetText(), s.GetLength());
+    }
+
+    PivAny2Us(const PivStringViewU &s)
+    {
+        if (s.IsEmpty())
+            return;
+        u8str.assign(s.GetText(), s.GetLength());
+    }
+
+    PivAny2Us(const PivStringViewW &s)
+    {
+        if (s.IsEmpty())
+            return;
+        piv::encoding::W2Uex(u8str, s.GetText(), s.GetLength());
+    }
+
+    PivAny2Us(int32_t v)
+    {
+        if (v == 0)
+            return;
+        char buf[16] = {'\0'};
+        _ltoa(v, buf, 10);
+        u8str.assign(buf);
+    }
+
+    PivAny2Us(int64_t v)
+    {
+        if (v == 0)
+            return;
+        char buf[32] = {'\0'};
+        _i64toa(v, buf, 10);
+        u8str.assign(buf);
+    }
+
+    /**
+     * @brief 判断转换后的文本是否为空
+     * @return 为空时返回真,未执行转换前始终为真
+     */
+    inline bool IsEmpty() const noexcept
+    {
+        return u8str.empty();
+    }
+
+    /**
+     * @brief 获取转换后的文本指针(至少返回空字符串)
+     * @return 字符串指针
+     */
+    inline const char *GetText() const noexcept
+    {
+        return u8str.c_str();
+    }
+
+    /**
+     * @brief 获取转换后的尾字符指针
+     * @return 尾字符指针
+     */
+    inline const char *GetEndPtr() const noexcept
+    {
+        return u8str.data() + u8str.size();
+    }
+
+    /**
+     * @brief 获取转换后的文本长度
+     * @return 文本的字符长度
+     */
+    inline size_t GetLength() const noexcept
+    {
+        return u8str.size();
+    }
+
+    operator const std::string &() const noexcept
+    {
+        return u8str;
+    }
+
+    const std::string &operator*() const noexcept
+    {
+        return u8str;
+    }
+
+    /**
+     * @brief 返回内部文本(转换后)的参考
+     * @return 转换后的std::basic_string参考
+     */
+    inline std::string &String() noexcept
+    {
+        return u8str;
+    }
+    inline const std::string &String() const noexcept
+    {
+        return u8str;
+    }
+}; // PivAny2Us
 
 #endif // _PIV_STRING_HPP
