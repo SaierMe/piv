@@ -2527,7 +2527,7 @@ public:
      * @param hexstr 返回的十六进制文本
      * @return
      */
-    inline std::basic_string<CharT> &ToHex(const bool &separator = false, std::basic_string<CharT> &hexstr = std::basic_string<CharT>{}) const
+    inline std::basic_string<CharT> &ToHexStr2(const bool &separator = false, std::basic_string<CharT> &hexstr = std::basic_string<CharT>{}) const
     {
         return piv::encoding::str_to_hex(sv, separator, hexstr);
     }
@@ -5808,7 +5808,7 @@ public:
      * @param hexstr 返回的十六进制文本
      * @return
      */
-    inline PivString ToHex(const bool &separator = false, std::basic_string<CharT> &hexstr = std::basic_string<CharT>{}) const
+    inline PivString ToHexStr2(const bool &separator = false, std::basic_string<CharT> &hexstr = std::basic_string<CharT>{}) const
     {
         return PivString{piv::encoding::str_to_hex(piv::basic_string_view<CharT>{str}, separator, hexstr)};
     }
