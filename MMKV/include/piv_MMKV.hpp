@@ -311,7 +311,7 @@ public:
     {
         if (!m_MMKV)
             return false;
-        mmkv::MMBuffer buffer{const_cast<wchar_t *>(value.GetText()), value.GetLength() * 2, mmkv::MMBufferNoCopy};
+        mmkv::MMBuffer buffer{const_cast<wchar_t *>(value.GetText()), static_cast<size_t>(value.GetLength() * 2), mmkv::MMBufferNoCopy};
         return expireDuration == -1 ? m_MMKV->set(buffer, PivAny2Us{key}) : m_MMKV->set(buffer, PivAny2Us{key}, static_cast<uint32_t>(expireDuration));
     }
 

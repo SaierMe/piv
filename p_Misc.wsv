@@ -98,7 +98,7 @@
 
 # 随机数 ===
 
-类 标准随机数基本类 <公开 注释 = "封装了<std::random>的基本操作" 编辑时信息 = "36FA5, 0, 0, 0" @文档 = "category = \"伪随机数\""
+类 标准随机数基本类 <公开 注释 = "封装了<std::random>的基本操作" 折叠 编辑时信息 = "36FA5, 0, 0, 0" @文档 = "category = \"伪随机数\""
         @视窗.外部头文件 = "<random>">
 {
 
@@ -603,7 +603,7 @@
 
 类 配置文件操作类 <公开 注释 = "  提供简易的ini配置文件读写操作,支持多字节、UTF-8和UTF-16LE编码."
         注释 = "  所有属性写的方法,都必须在\"打开文件\"、\"创建自文件\"、\"创建自字节集\"" 注释 = "之前设置,后续设置无效."
-        注释 = "  源码: https://github.com/brofield/simpleini" @文档 = "category = \"配置文件.INI\""
+        注释 = "  源码: https://github.com/brofield/simpleini" 折叠 @文档 = "category = \"配置文件.INI\""
         @视窗.外部头文件 = "src\\SimpleIni.h\r\nsrc\\piv_encoding.hpp">
 {
     方法 类_初始化 <折叠>

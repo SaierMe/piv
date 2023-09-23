@@ -115,7 +115,7 @@ public:
         // 非强制模式时限时等待队列的任务执行完成
         if (!ForceDestroy)
         {
-            WaitTime = MAX(WaitTime, -1);
+            WaitTime = (std::max)(WaitTime, -1);
             std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
             // 循环到线程都退出或超时
             while (m_ThreadPool->ThreadsCount > 0)
