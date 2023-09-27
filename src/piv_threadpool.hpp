@@ -20,7 +20,7 @@ protected:
     struct THREADPOOL_INFO // 线程池信息
     {
         HANDLE hCompletionPort = NULL;                               // IOCP完成端口
-        HANDLE hResumeSemaphore = NULL;                              // 是否需要退出信号灯
+        HANDLE hResumeSemaphore = NULL;                              // 暂停继续的信号灯
         HANDLE hExitSemaphore = NULL;                                // 是否需要退出信号灯
         std::mutex lock;                                             // 互斥锁
         std::atomic<ThreadPoolState> state = ThreadPoolState_Closed; // 工作状态(ThreadPoolState)

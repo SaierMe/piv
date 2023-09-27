@@ -245,6 +245,22 @@ public:
     PivArchiveOperate() {}
     ~PivArchiveOperate() {}
 
+    static bool LoadResIdData(int32_t resId, std::vector<bit7z::byte_t> &buffer)
+    {
+        if (resId == 0)
+            return false;
+        HMODULE hModule = g_objVolApp.GetInstanceHandle();
+        HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE(static_cast<WORD>(resId)), RT_RCDATA);
+        if (hSrc == NULL)
+            return false;
+        HGLOBAL resdata = ::LoadResource(hModule, hSrc);
+        if (resdata == NULL)
+            return false;
+        bit7z::byte_t *data = reinterpret_cast<bit7z::byte_t *>(::LockResource(resdata));
+        buffer.assign(data, data + ::SizeofResource(hModule, hSrc));
+        return !buffer.empty();
+    }
+
     /**
      * @brief 取最后错误
      * @return
@@ -463,6 +479,7 @@ public:
     /**
      * @brief 解压到
      * @param in_file 压缩文件
+     * @param resId 资源文件ID
      * @param out_dir 输出路径
      * @param password 密码
      * @param format 解压格式
@@ -485,9 +502,30 @@ public:
         }
     }
 
+    static bool Extract(int32_t resId, const bit7z::tstring &out_dir, const bit7z::tstring &password, const bit7z::BitInFormat &format)
+    {
+        std::vector<bit7z::byte_t> buffer;
+        if (!LoadResIdData(resId, buffer))
+            return false;
+        try
+        {
+            bit7z::BitMemExtractor extractor{piv::Archive::Get7zLib(), format};
+            extractor.setPassword(password);
+            extractor.extract(buffer, out_dir);
+            SetError("OK");
+            return true;
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            SetError(ex.what());
+            return false;
+        }
+    }
+
     /**
      * @brief 解压到内存
      * @param in_file 压缩文件
+     * @param resId 资源文件ID
      * @param out_buffer 解压结果
      * @param password 密码
      * @param format 解压格式
@@ -500,8 +538,40 @@ public:
         {
             bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), format};
             extractor.setPassword(password);
+            bit7z::BitInputArchive in_archive{extractor, in_file};
+            for (auto itr = in_archive.begin(); itr != in_archive.end(); itr++)
+            {
+                if (!itr->isDir())
+                {
+                    CVolString strPath;
+                    strPath.SetText(itr->path().c_str());
+                    out_buffer[strPath] = CVolMem();
+                    out_buffer[strPath].Alloc(static_cast<INT_P>(itr->size()), true);
+                    in_archive.extractTo(reinterpret_cast<bit7z::byte_t *>(out_buffer[strPath].GetPtr()), static_cast<std::size_t>(itr->size()), itr->index());
+                }
+            }
+            SetError("OK");
+            return true;
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            out_buffer.clear();
+            SetError(ex.what());
+            return false;
+        }
+    }
 
-            bit7z::BitInputArchive in_archive{extractor, bit7z::tstring{in_file}};
+    static bool Extract(int32_t resId, std::map<CVolString, CVolMem> &out_buffer, const bit7z::tstring &password, const bit7z::BitInFormat &format)
+    {
+        out_buffer.clear();
+        std::vector<bit7z::byte_t> buffer;
+        if (!LoadResIdData(resId, buffer))
+            return false;
+        try
+        {
+            bit7z::BitMemExtractor extractor{piv::Archive::Get7zLib(), format};
+            extractor.setPassword(password);
+            bit7z::BitInputArchive in_archive{extractor, buffer};
             for (auto itr = in_archive.begin(); itr != in_archive.end(); itr++)
             {
                 if (!itr->isDir())
@@ -527,6 +597,7 @@ public:
     /**
      * @brief 解压匹配文件
      * @param in_file 压缩文件
+     * @param resId 资源文件ID
      * @param filter 筛选器
      * @param out_dir 输出路径
      * @param password 密码
@@ -551,9 +622,30 @@ public:
         }
     }
 
+    static bool Extract(int32_t resId, const bit7z::tstring &filter, const bit7z::tstring &out_dir, const bit7z::tstring &password, bool policy, const bit7z::BitInFormat &format)
+    {
+        std::vector<bit7z::byte_t> buffer;
+        if (!LoadResIdData(resId, buffer))
+            return false;
+        try
+        {
+            bit7z::BitMemExtractor extractor{piv::Archive::Get7zLib(), format};
+            extractor.setPassword(password);
+            extractor.extractMatching(buffer, filter, out_dir, policy ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include);
+            SetError("OK");
+            return true;
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            SetError(ex.what());
+            return false;
+        }
+    }
+
     /**
      * @brief 解压匹配文件到字节集
      * @param in_file 压缩文件
+     * @param resId 资源文件ID
      * @param filter 筛选器
      * @param out_buffer 输出数据
      * @param password 密码
@@ -593,9 +685,44 @@ public:
         }
     }
 
+    static bool Extract(int32_t resId, const bit7z::tstring &filter, CVolMem &out_buffer, const bit7z::tstring &password, CVolString &out_file, bool policy, const bit7z::BitInFormat &format)
+    {
+        out_file.Empty();
+        std::vector<bit7z::byte_t> buffer;
+        if (!LoadResIdData(resId, buffer))
+            return false;
+        try
+        {
+            if (filter.empty())
+                throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
+            bit7z::BitMemExtractor extractor{piv::Archive::Get7zLib(), format};
+            extractor.setPassword(password);
+            bit7z::BitInputArchive in_archive(extractor, buffer);
+            for (const auto &item : in_archive)
+            {
+                bool item_matches = bit7z::filesystem::fsutil::wildcard_match(filter, item.path());
+                if (item_matches != policy)
+                {
+                    out_buffer.Alloc(static_cast<INT_P>(item.size()), true);
+                    in_archive.extractTo(reinterpret_cast<bit7z::byte_t *>(out_buffer.GetPtr()), static_cast<std::size_t>(out_buffer.GetSize()), item.index());
+                    out_file.SetText(item.path().c_str());
+                    SetError("OK");
+                    return true;
+                }
+            }
+            throw bit7z::BitException("Failed to extract items", bit7z::make_error_code(bit7z::BitError::NoMatchingItems));
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            SetError(ex.what());
+            return false;
+        }
+    }
+
     /**
      * @brief 解压正则匹配文件
      * @param in_file 压缩文件
+     * @param resId 资源文件ID
      * @param regex 正则表达式
      * @param out_dir 输出路径
      * @param password 密码
@@ -625,9 +752,35 @@ public:
         }
     }
 
+    static bool ExtractRegex(int32_t resId, const bit7z::tstring &regex, const bit7z::tstring &out_dir, const bit7z::tstring &password, bool policy, const bit7z::BitInFormat &format)
+    {
+        std::vector<bit7z::byte_t> buffer;
+        if (!LoadResIdData(resId, buffer))
+            return false;
+        try
+        {
+            bit7z::BitMemExtractor extractor{piv::Archive::Get7zLib(), format};
+            extractor.setPassword(password);
+            extractor.extractMatchingRegex(buffer, regex, out_dir, policy ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include);
+            SetError("OK");
+            return true;
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            SetError(ex.what());
+            return false;
+        }
+        catch (const std::regex_error &r)
+        {
+            SetError(r.what());
+            return false;
+        }
+    }
+
     /**
      * @brief 解压正则匹配文件到字节集
      * @param in_file 压缩文件
+     * @param resId 资源文件ID
      * @param regex 正则表达式
      * @param out_buffer 输出数据
      * @param password 密码
@@ -646,6 +799,48 @@ public:
             bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), format};
             extractor.setPassword(password);
             bit7z::BitInputArchive in_archive(extractor, in_file);
+            const bit7z::tregex regex_filter(regex, bit7z::tregex::ECMAScript | bit7z::tregex::optimize);
+            for (const auto &item : in_archive)
+            {
+                bool item_matches = std::regex_match(item.path(), regex_filter);
+                if (item_matches != policy)
+                {
+                    out_buffer.Alloc(static_cast<INT_P>(item.size()), true);
+                    in_archive.extractTo(reinterpret_cast<bit7z::byte_t *>(out_buffer.GetPtr()), static_cast<std::size_t>(out_buffer.GetSize()), item.index());
+                    out_file.SetText(item.path().c_str());
+                    SetError("OK");
+                    return true;
+                }
+            }
+            throw bit7z::BitException("Failed to extract items", bit7z::make_error_code(bit7z::BitError::NoMatchingItems));
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            out_buffer.Empty();
+            SetError(ex.what());
+            return false;
+        }
+        catch (const std::regex_error &r)
+        {
+            out_buffer.Empty();
+            SetError(r.what());
+            return false;
+        }
+    }
+
+    static bool ExtractRegex(int32_t resId, const bit7z::tstring &regex, CVolMem &out_buffer, const bit7z::tstring &password, CVolString &out_file, bool policy, const bit7z::BitInFormat &format)
+    {
+        out_file.Empty();
+        std::vector<bit7z::byte_t> buffer;
+        if (!LoadResIdData(resId, buffer))
+            return false;
+        try
+        {
+            if (regex.empty())
+                throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
+            bit7z::BitMemExtractor extractor{piv::Archive::Get7zLib(), format};
+            extractor.setPassword(password);
+            bit7z::BitInputArchive in_archive(extractor, buffer);
             const bit7z::tregex regex_filter(regex, bit7z::tregex::ECMAScript | bit7z::tregex::optimize);
             for (const auto &item : in_archive)
             {
@@ -709,11 +904,9 @@ private:
     std::unique_ptr<bit7z::BitArchiveReader> m_archive{nullptr};
     std::unique_ptr<std::vector<bit7z::byte_t>> m_buffer{nullptr};
     std::string m_error;
-#ifdef _WIN64
-    CVolString m_progress_file;
     uint64_t m_total_size = 0;
     int32_t m_ratio = 0;
-#endif
+    std::wstring m_progress_file;
 
     /**
      * @brief 置最后错误
@@ -722,6 +915,29 @@ private:
     inline void SetError(const CHAR *Error)
     {
         m_error = Error;
+    }
+
+    void TotalSizeCB(uint64_t total_size)
+    {
+        m_total_size = total_size;
+    }
+
+    void RatioCB(uint64_t input, uint64_t output)
+    {
+        m_ratio = static_cast<int32_t>(100.0 * input / output);
+    }
+
+    bool ProgressCB(uint64_t progress_size)
+    {
+        if (progress_size == 0)
+            return true;
+        return !this->ExtractProgress(m_progress_file.c_str(), static_cast<int32_t>(100.0 * progress_size / m_total_size),
+                                      static_cast<int64_t>(m_total_size), static_cast<int64_t>(progress_size), m_ratio);
+    }
+
+    void FileNameCB(bit7z::tstring fileName)
+    {
+        m_progress_file = fileName;
     }
 
 public:
@@ -765,50 +981,50 @@ public:
         m_archive.reset();
     }
 
-    // CallBack
-
-    virtual int32_t ExtractProgress(CVolString &progressFile, int32_t progress, int64_t totalSize, int64_t progress_size, int32_t ratio) { return 0; }
-
- #ifdef _WIN64
-    void FileNameCB(bit7z::tstring fileName)
-    {
-        m_progress_file.SetText(fileName.c_str());
-    }
-    void TotalSizeCB(uint64_t total_size)
-    {
-        m_total_size = total_size;
-    }
-    void RatioCB(uint64_t input, uint64_t output)
-    {
-        m_ratio = static_cast<int32_t>(100.0 * input / output);
-    }
-    bool ProgressCB(uint64_t progress_size)
-    {
-        if (progress_size == 0)
-            return true;
-        return !this->ExtractProgress(m_progress_file, static_cast<int32_t>(100.0 * progress_size / m_total_size),
-                                      static_cast<int64_t>(m_total_size), static_cast<int64_t>(progress_size), m_ratio);
-    }
-#endif
+    /**
+     * @brief 解压进度改变(虚拟方法)
+     * @param progressFile 文件路径
+     * @param progress 解压进度
+     * @param totalSize 总解压大小
+     * @param progress_size 已解压大小
+     * @param ratio 整体压缩比
+     * @return
+     */
+    virtual int32_t ExtractProgress(const wchar_t *progressFile, int32_t progress, int64_t totalSize, int64_t progress_size, int32_t ratio) { return 0; }
 
     /**
      * @brief 启用进度反馈
      */
-    void EnableFeeback()
+    void EnableFeeback(bool enable)
     {
-#ifdef _WIN64
+        if (!m_archive)
+            return;
+        if (enable)
+        {
+            m_archive->setTotalCallback(std::bind(&PivArchiveReader::TotalSizeCB, this, std::placeholders::_1));
+            m_archive->setRatioCallback(std::bind(&PivArchiveReader::RatioCB, this, std::placeholders::_1, std::placeholders::_2));
+            m_archive->setProgressCallback(std::bind(&PivArchiveReader::ProgressCB, this, std::placeholders::_1));
+            m_archive->setFileCallback(std::bind(&PivArchiveReader::FileNameCB, this, std::placeholders::_1));
+        }
+        else
+        {
+            m_archive->setTotalCallback(nullptr);
+            m_archive->setProgressCallback(nullptr);
+            m_archive->setRatioCallback(nullptr);
+            m_archive->setFileCallback(nullptr);
+        }
+    }
+
+    /**
+     * @brief 是否启动进度反馈
+     */
+    bool HasFeeback()
+    {
         if (m_archive)
         {
-            const bit7z::FileCallback cbFileName = std::bind(&PivArchiveReader::FileNameCB, this, std::placeholders::_1);
-            m_archive->setFileCallback(cbFileName);
-            const bit7z::TotalCallback cbTotalSize = std::bind(&PivArchiveReader::TotalSizeCB, this, std::placeholders::_1);
-            m_archive->setTotalCallback(cbTotalSize);
-            const bit7z::RatioCallback cbRatio = std::bind(&PivArchiveReader::RatioCB, this, std::placeholders::_1, std::placeholders::_2);
-            m_archive->setRatioCallback(cbRatio);
-            const bit7z::ProgressCallback cbProgress = std::bind(&PivArchiveReader::ProgressCB, this, std::placeholders::_1);
-            m_archive->setProgressCallback(cbProgress);
+            return !!m_archive->progressCallback();
         }
-#endif
+        return false;
     }
 
     /**
@@ -825,8 +1041,7 @@ public:
         try
         {
             m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), in_file, format, password});
-            if (feedback)
-                EnableFeeback();
+            EnableFeeback(feedback);
             SetError("OK");
             return true;
         }
@@ -852,10 +1067,7 @@ public:
         try
         {
             m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), in_stream, format, password});
-            if (feedback)
-            {
-                EnableFeeback();
-            }
+            EnableFeeback(feedback);
             SetError("OK");
             return true;
         }
@@ -881,8 +1093,7 @@ public:
         try
         {
             m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), in_buffer, format, password});
-            if (feedback)
-                EnableFeeback();
+            EnableFeeback(feedback);
             SetError("OK");
             return true;
         }
@@ -925,30 +1136,29 @@ public:
         return OpenArchive(*m_buffer, feedback, password, format);
     }
 
-    // 打开文件资源
-    /*
-    bool OpenArchive(size_t resid, bool feedback, const bit7z::tstring &password, const bit7z::BitInFormat &format)
+    /**
+     * @brief 打开文件资源
+     * @param resId 文件资源ID
+     * @param feedback 是否启用进度反馈
+     * @param password 密码
+     * @param format 解压格式
+     * @return
+     */
+    bool OpenArchive(int32_t resId, bool feedback, const bit7z::tstring &password, const bit7z::BitInFormat &format)
     {
-        CloseArchive();
-        try
-        {
-            m_in_stream.OpenStream(resid);
-            m_archive = new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), m_in_stream.is(), format, password};
-            if (feedback)
-            {
-                EnableFeeback();
-            }
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            CloseArchive();
-            SetError(ex.what());
+        if (resId == 0)
             return false;
-        }
+        HMODULE hModule = g_objVolApp.GetInstanceHandle();
+        HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE(static_cast<WORD>(resId)), RT_RCDATA);
+        if (hSrc == NULL)
+            return false;
+        HGLOBAL resdata = ::LoadResource(hModule, hSrc);
+        if (resdata == NULL)
+            return false;
+        bit7z::byte_t *data = reinterpret_cast<bit7z::byte_t *>(::LockResource(resdata));
+        m_buffer.reset(new std::vector<bit7z::byte_t>{data, data + ::SizeofResource(hModule, hSrc)});
+        return OpenArchive(*m_buffer, feedback, password, format);
     }
-    */
 
     /**
      * @brief 解压到
@@ -1600,11 +1810,9 @@ protected:
     std::unique_ptr<std::vector<bit7z::byte_t>> m_buffer{nullptr};
     std::vector<std::vector<bit7z::byte_t>> m_buffer_array;
     std::string m_error;
- #ifdef _WIN64
-    CVolString m_progress_file;
     uint64_t m_total_size = 0;
     int32_t m_ratio = 0;
-#endif
+    std::wstring m_progress_file;
 
     /**
      * @brief 置最后错误
@@ -1613,6 +1821,29 @@ protected:
     inline void SetError(const CHAR *Error)
     {
         m_error = Error;
+    }
+
+    void TotalSizeCB(uint64_t total_size)
+    {
+        m_total_size = total_size;
+    }
+
+    void RatioCB(uint64_t input, uint64_t output)
+    {
+        m_ratio = static_cast<int32_t>(100.0 * output / input);
+    }
+
+    bool ProgressCB(uint64_t progress_size)
+    {
+        if (progress_size == 0)
+            return true;
+        return !this->WriterProgress(m_progress_file.c_str(), static_cast<int32_t>(100.0 * progress_size / m_total_size),
+                                     static_cast<int64_t>(m_total_size), static_cast<int64_t>(progress_size), m_ratio);
+    }
+
+    void FileNameCB(bit7z::tstring fileName)
+    {
+        m_progress_file = fileName;
     }
 
 public:
@@ -1657,48 +1888,50 @@ public:
         return CVolString(GetWideText(m_error.c_str(), CVolMem(), NULL));
     }
 
-    // CallBack
-    virtual int32_t WriterProgress(CVolString &progressFile, int32_t progress, int64_t totalSize, int64_t progress_size, int32_t ratio) { return 0; }
- #ifdef _WIN64
-    void FileNameCB(bit7z::tstring fileName)
-    {
-        m_progress_file.SetText(fileName.c_str());
-    }
-    void TotalSizeCB(uint64_t total_size)
-    {
-        m_total_size = total_size;
-    }
-    void RatioCB(uint64_t input, uint64_t output)
-    {
-        m_ratio = static_cast<int32_t>(100.0 * input / output);
-    }
-    bool ProgressCB(uint64_t progress_size)
-    {
-        if (progress_size == 0)
-            return true;
-        return !this->WriterProgress(m_progress_file, static_cast<int32_t>(100.0 * progress_size / m_total_size),
-                                     static_cast<int64_t>(m_total_size), static_cast<int64_t>(progress_size), m_ratio);
-    }
-#endif
+    /**
+     * @brief 压缩进度改变(虚拟方法)
+     * @param progressFile 文件路径
+     * @param progress 压缩进度
+     * @param totalSize 总压缩大小
+     * @param progress_size 已压缩大小
+     * @param ratio 整体压缩比
+     * @return
+     */
+    virtual int32_t WriterProgress(const wchar_t *progressFile, int32_t progress, int64_t totalSize, int64_t progress_size, int32_t ratio) { return 0; }
 
     /**
      * @brief 启用进度反馈
      */
-    void EnableFeeback()
+    void EnableFeeback(bool enable)
     {
- #ifdef _WIN64
+        if (!m_archive)
+            return;
+        if (enable)
+        {
+            m_archive->setTotalCallback(std::bind(&PivArchiveWirter::TotalSizeCB, this, std::placeholders::_1));
+            m_archive->setProgressCallback(std::bind(&PivArchiveWirter::ProgressCB, this, std::placeholders::_1));
+            m_archive->setRatioCallback(std::bind(&PivArchiveWirter::RatioCB, this, std::placeholders::_1, std::placeholders::_2));
+            m_archive->setFileCallback(std::bind(&PivArchiveWirter::FileNameCB, this, std::placeholders::_1));
+        }
+        else
+        {
+            m_archive->setTotalCallback(nullptr);
+            m_archive->setProgressCallback(nullptr);
+            m_archive->setRatioCallback(nullptr);
+            m_archive->setFileCallback(nullptr);
+        }
+    }
+
+    /**
+     * @brief 是否启用进度反馈
+     */
+    bool HasFeeback()
+    {
         if (m_archive)
         {
-            const bit7z::FileCallback cbFileName = std::bind(&PivArchiveWirter::FileNameCB, this, std::placeholders::_1);
-            m_archive->setFileCallback(cbFileName);
-            const bit7z::TotalCallback cbTotalSize = std::bind(&PivArchiveWirter::TotalSizeCB, this, std::placeholders::_1);
-            m_archive->setTotalCallback(cbTotalSize);
-            const bit7z::RatioCallback cbRatio = std::bind(&PivArchiveWirter::RatioCB, this, std::placeholders::_1, std::placeholders::_2);
-            m_archive->setRatioCallback(cbRatio);
-            const bit7z::ProgressCallback cbProgress = std::bind(&PivArchiveWirter::ProgressCB, this, std::placeholders::_1);
-            m_archive->setProgressCallback(cbProgress);
+            return !!m_archive->progressCallback();
         }
-#endif
+        return false;
     }
 
     /**
@@ -1713,8 +1946,7 @@ public:
         try
         {
             m_archive.reset(new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), format});
-            if (feedback)
-                EnableFeeback();
+            EnableFeeback(feedback);
             SetError("OK");
             return true;
         }
@@ -1740,8 +1972,7 @@ public:
         try
         {
             m_archive.reset(new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), in_file, format, password});
-            if (feedback)
-                EnableFeeback();
+            EnableFeeback(feedback);
             SetError("OK");
             return true;
         }
@@ -1767,8 +1998,7 @@ public:
         try
         {
             m_archive.reset(new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), in_buffer, format, password});
-            if (feedback)
-                EnableFeeback();
+            EnableFeeback(feedback);
             SetError("OK");
             return true;
         }
@@ -1794,8 +2024,7 @@ public:
         try
         {
             m_archive.reset(new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), in_stream, format, password});
-            if (feedback)
-                EnableFeeback();
+            EnableFeeback(feedback);
             SetError("OK");
             return true;
         }
@@ -1831,10 +2060,7 @@ public:
         {
             m_in_stream.OpenStream(resid);
             m_archive = new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), m_in_stream.is(), format, password};
-            if (feedback)
-            {
-                EnableFeeback();
-            }
+            EnableFeeback(feedback);
             SetError("OK");
             return true;
         }
@@ -2406,11 +2632,9 @@ protected:
     std::unique_ptr<std::vector<bit7z::byte_t>> m_buffer{nullptr};
     std::vector<std::vector<bit7z::byte_t>> m_buffer_array;
     std::string m_error;
- #ifdef _WIN64
-    CVolString m_progress_file;
     uint64_t m_total_size = 0;
     int32_t m_ratio = 0;
- #endif
+    std::wstring m_progress_file;
 
     /**
      * @brief 置最后错误
@@ -2419,6 +2643,29 @@ protected:
     inline void SetError(const CHAR *Error)
     {
         m_error = Error;
+    }
+
+    void RatioCB(uint64_t input, uint64_t output)
+    {
+        m_ratio = static_cast<int32_t>(100.0 * output / input);
+    }
+
+    bool ProgressCB(uint64_t progress_size)
+    {
+        if (progress_size == 0)
+            return true;
+        return !this->WriterProgress(m_progress_file.c_str(), static_cast<int32_t>(100.0 * progress_size / m_total_size),
+                                     static_cast<int64_t>(m_total_size), static_cast<int64_t>(progress_size), m_ratio);
+    }
+
+    void TotalSizeCB(uint64_t total_size)
+    {
+        m_total_size = total_size;
+    }
+
+    void FileNameCB(bit7z::tstring fileName)
+    {
+        m_progress_file = fileName;
     }
 
 public:
@@ -2460,8 +2707,7 @@ public:
         {
             m_archive.reset(new bit7z::BitArchiveEditor{piv::Archive::Get7zLib(), in_file, format, password});
             m_archive->setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
-            if (feedback)
-                EnableFeeback();
+            EnableFeeback(feedback);
             SetError("OK");
             return true;
         }
@@ -2772,50 +3018,51 @@ public:
         return CVolString(GetWideText(m_error.c_str(), CVolMem(), NULL));
     }
 
-    // CallBack
-    virtual int32_t WriterProgress(CVolString &progressFile, int32_t progress, int64_t totalSize, int64_t progress_size, int32_t ratio) { return 0; }
- #ifdef _WIN64
-    void FileNameCB(bit7z::tstring fileName)
-    {
-        m_progress_file.SetText(fileName.c_str());
-    }
-    void TotalSizeCB(uint64_t total_size)
-    {
-        m_total_size = total_size;
-    }
-    void RatioCB(uint64_t input, uint64_t output)
-    {
-        m_ratio = static_cast<int32_t>(100.0 * input / output);
-    }
-    bool ProgressCB(uint64_t progress_size)
-    {
-        if (progress_size == 0)
-            return true;
-        return !this->WriterProgress(m_progress_file, static_cast<int32_t>(100.0 * progress_size / m_total_size),
-                                     static_cast<int64_t>(m_total_size), static_cast<int64_t>(progress_size), m_ratio);
-    }
-#endif
+    /**
+     * @brief 压缩进度改变(虚拟方法)
+     * @param progressFile 文件路径
+     * @param progress 压缩进度
+     * @param totalSize 总压缩大小
+     * @param progress_size 已压缩大小
+     * @param ratio 整体压缩比
+     * @return
+     */
+    virtual int32_t WriterProgress(const wchar_t *progressFile, int32_t progress, int64_t totalSize, int64_t progress_size, int32_t ratio) { return 0; }
 
     /**
      * @brief 启用进度反馈
      */
-    void EnableFeeback()
+    void EnableFeeback(bool enable)
     {
- #ifdef _WIN64
-        if (m_archive)
+        if (!m_archive)
+            return;
+        if (enable)
         {
-            const bit7z::FileCallback cbFileName = std::bind(&PivArchiveEditor::FileNameCB, this, std::placeholders::_1);
-            m_archive->setFileCallback(cbFileName);
-            const bit7z::TotalCallback cbTotalSize = std::bind(&PivArchiveEditor::TotalSizeCB, this, std::placeholders::_1);
-            m_archive->setTotalCallback(cbTotalSize);
-            const bit7z::RatioCallback cbRatio = std::bind(&PivArchiveEditor::RatioCB, this, std::placeholders::_1, std::placeholders::_2);
-            m_archive->setRatioCallback(cbRatio);
-            const bit7z::ProgressCallback cbProgress = std::bind(&PivArchiveEditor::ProgressCB, this, std::placeholders::_1);
-            m_archive->setProgressCallback(cbProgress);
+            m_archive->setTotalCallback(std::bind(&PivArchiveEditor::TotalSizeCB, this, std::placeholders::_1));
+            m_archive->setProgressCallback(std::bind(&PivArchiveEditor::ProgressCB, this, std::placeholders::_1));
+            m_archive->setRatioCallback(std::bind(&PivArchiveEditor::RatioCB, this, std::placeholders::_1, std::placeholders::_2));
+            m_archive->setFileCallback(std::bind(&PivArchiveEditor::FileNameCB, this, std::placeholders::_1));
         }
-#endif
+        else
+        {
+            m_archive->setTotalCallback(nullptr);
+            m_archive->setProgressCallback(nullptr);
+            m_archive->setRatioCallback(nullptr);
+            m_archive->setFileCallback(nullptr);
+        }
     }
 
+    /**
+     * @brief 是否启动进度反馈
+     */
+    bool HasFeeback()
+    {
+        if (m_archive)
+        {
+            return !!m_archive->progressCallback();
+        }
+        return false;
+    }
     /**
      * @brief 添加项目
      * @param path_array 路径数组

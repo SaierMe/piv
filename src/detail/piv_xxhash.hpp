@@ -177,6 +177,49 @@ namespace piv
         }
 
         /**
+         * @brief 取资源_XXH128
+         * @tparam T 返回类型(字节集类、文本型)
+         * @param resId 文件资源ID
+         * @param off 文件偏移
+         * @param len 数据长度
+         * @param secret 密码
+         * @param seed 种子
+         * @param rethash 返回的hash值
+         * @return hash值
+         */
+        template <typename T>
+        T &GetRes_XXH128(int32_t resId, int64_t off, uint64_t len, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0, T &rethash = T{})
+        {
+            XXH128_hash_t hash = {0};
+            if (resId == 0)
+                return piv::encoding::value_to_hex(hash, rethash);
+            HMODULE hModule = g_objVolApp.GetInstanceHandle();
+            HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE(static_cast<WORD>(resId)), RT_RCDATA);
+            if (hSrc == NULL)
+                return piv::encoding::value_to_hex(hash, rethash);
+            HGLOBAL resdata = ::LoadResource(hModule, hSrc);
+            if (resdata == NULL)
+                return piv::encoding::value_to_hex(hash, rethash);
+            const byte *buffer = reinterpret_cast<const byte *>(::LockResource(resdata));
+            size_t _size = ::SizeofResource(hModule, hSrc);
+            XXH3_state_t *state = XXH3_createState();
+            if (secret.GetSize() >= 136)
+                XXH3_128bits_reset_withSecretandSeed(state, secret.GetPtr(), static_cast<size_t>(secret.GetSize()), seed);
+            else
+                XXH3_128bits_reset_withSeed(state, seed);
+            if (off > 0 && buffer != nullptr)
+            {
+                size_t fileOff = static_cast<size_t>(off);
+                buffer = (fileOff < _size) ? (buffer + fileOff) : (buffer + size);
+                _size = (fileOff < _size) ? _size - fileOff : 0;
+            }
+            XXH3_128bits_update(state, buffer, _size > static_cast<size_t>(len) ? static_cast<size_t>(len) : _size);
+            hash = XXH3_128bits_digest(state);
+            XXH3_freeState(state);
+            return piv::encoding::value_to_hex(hash, rethash);
+        }
+
+        /**
          * @brief 取数据XXH3(64位)
          * @param input 所欲摘要的数据
          * @param len 数据字节长度
@@ -291,6 +334,46 @@ namespace piv
         }
 
         /**
+         * @brief 取资源_XXH3(64位)
+         * @param resId 文件资源ID
+         * @param off 文件偏移
+         * @param len 数据长度
+         * @param secret 密码
+         * @param seed 种子
+         * @return hash值
+         */
+        static XXH64_hash_t GetRes_XXH3(int32_t resId, int64_t off, uint64_t len, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0)
+        {
+            XXH64_hash_t hash = 0;
+            if (resId == 0)
+                return hash;
+            HMODULE hModule = g_objVolApp.GetInstanceHandle();
+            HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE(static_cast<WORD>(resId)), RT_RCDATA);
+            if (hSrc == NULL)
+                return hash;
+            HGLOBAL resdata = ::LoadResource(hModule, hSrc);
+            if (resdata == NULL)
+                return hash;
+            const byte *buffer = reinterpret_cast<const byte *>(::LockResource(resdata));
+            size_t _size = ::SizeofResource(hModule, hSrc);
+            XXH3_state_t *state = XXH3_createState();
+            if (secret.GetSize() >= 136)
+                XXH3_64bits_reset_withSecretandSeed(state, secret.GetPtr(), static_cast<size_t>(secret.GetSize()), seed);
+            else
+                XXH3_64bits_reset_withSeed(state, seed);
+            if (off > 0 && buffer != nullptr)
+            {
+                size_t fileOff = static_cast<size_t>(off);
+                buffer = (fileOff < _size) ? (buffer + fileOff) : (buffer + _size);
+                _size = (fileOff < _size) ? _size - fileOff : 0;
+            }
+            XXH3_64bits_update(state, buffer, _size > static_cast<size_t>(len) ? static_cast<size_t>(len) : _size);
+            hash = XXH3_64bits_digest(state);
+            XXH3_freeState(state);
+            return hash;
+        }
+
+        /**
          * @brief 取数据XXH64
          * @param input 所欲摘要的数据
          * @param len 数据字节长度
@@ -363,6 +446,42 @@ namespace piv
         }
 
         /**
+         * @brief 取资源_XXH64
+         * @param resId 文件资源ID
+         * @param off 文件偏移
+         * @param len 数据长度
+         * @param seed 种子
+         * @return hash值
+         */
+        static XXH64_hash_t GetRes_XXH64(int32_t resId, int64_t off, uint64_t len, const uint64_t &seed = 0)
+        {
+            XXH64_hash_t hash = 0;
+            if (resId == 0)
+                return hash;
+            HMODULE hModule = g_objVolApp.GetInstanceHandle();
+            HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE(static_cast<WORD>(resId)), RT_RCDATA);
+            if (hSrc == NULL)
+                return hash;
+            HGLOBAL resdata = ::LoadResource(hModule, hSrc);
+            if (resdata == NULL)
+                return hash;
+            const byte *buffer = reinterpret_cast<const byte *>(::LockResource(resdata));
+            size_t _size = ::SizeofResource(hModule, hSrc);
+            XXH64_state_t *state = XXH64_createState();
+            XXH64_reset(state, seed);
+            if (off > 0 && buffer != nullptr)
+            {
+                size_t fileOff = static_cast<size_t>(off);
+                buffer = (fileOff < _size) ? (buffer + fileOff) : (buffer + _size);
+                _size = (fileOff < _size) ? _size - fileOff : 0;
+            }
+            XXH64_update(state, buffer, _size > static_cast<size_t>(len) ? static_cast<size_t>(len) : _size);
+            hash = XXH64_digest(state);
+            XXH64_freeState(state);
+            return hash;
+        }
+
+        /**
          * @brief 取数据XXH32
          * @param input 所欲摘要的数据
          * @param len 数据字节长度
@@ -431,6 +550,42 @@ namespace piv
                 XXH32_freeState(state);
                 fclose(file);
             }
+            return hash;
+        }
+
+        /**
+         * @brief 取资源_XXH32
+         * @param resId 文件资源ID
+         * @param off 文件偏移
+         * @param len 数据长度
+         * @param seed 种子
+         * @return hash值
+         */
+        static XXH32_hash_t GetRes_XXH32(int32_t resId, int64_t off, uint64_t len, const uint64_t &seed = 0)
+        {
+            XXH32_hash_t hash = 0;
+            if (resId == 0)
+                return hash;
+            HMODULE hModule = g_objVolApp.GetInstanceHandle();
+            HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE(static_cast<WORD>(resId)), RT_RCDATA);
+            if (hSrc == NULL)
+                return hash;
+            HGLOBAL resdata = ::LoadResource(hModule, hSrc);
+            if (resdata == NULL)
+                return hash;
+            const byte *buffer = reinterpret_cast<const byte *>(::LockResource(resdata));
+            size_t _size = ::SizeofResource(hModule, hSrc);
+            XXH32_state_t *state = XXH32_createState();
+            XXH32_reset(state, seed);
+            if (off > 0 && buffer != nullptr)
+            {
+                size_t fileOff = static_cast<size_t>(off);
+                buffer = (fileOff < _size) ? (buffer + fileOff) : (buffer + _size);
+                _size = (fileOff < _size) ? _size - fileOff : 0;
+            }
+            XXH32_update(state, buffer, _size > static_cast<size_t>(len) ? static_cast<size_t>(len) : _size);
+            hash = XXH32_digest(state);
+            XXH32_freeState(state);
             return hash;
         }
     } // namespace hash

@@ -1085,7 +1085,7 @@ public:
      * @param storeBuf 缓存文本数据
      * @return
      */
-    bool LoadResData(const size_t resId, const bool &storeBuf = false)
+    bool LoadResData(int32_t resId, const bool &storeBuf = false)
     {
         Clear();
         if (resId == 0)
@@ -3490,7 +3490,7 @@ public:
      * @param storeBuf 缓存文本数据
      * @return
      */
-    bool LoadResData(const size_t &resId)
+    bool LoadResData(int32_t resId)
     {
         str.clear();
         if (resId == 0)

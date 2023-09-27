@@ -41,5 +41,7 @@ DEL /F /Q  "%PATH%src\piv_base.hpp"
 DEL /F /Q  "%PATH%src\string_view.hpp"
 DEL /F /Q  "%PATH%src\piv_tomlplusplus.hpp"
 
-ECHO 已删除 2023-04-12 版之前的PIV模块残留文件。
+DEL /F /Q  "%PATH%piv_lib.vgrp"
+
+ECHO 已删除 2023-09-27 版之前的PIV模块残留文件。
 PAUSE
