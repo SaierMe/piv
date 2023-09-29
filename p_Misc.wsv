@@ -726,11 +726,21 @@
     {
         @ m_szIniFile.Empty (); m_bAutoSave = false;
         @ data ().Reset ();
-        @ INT nRet;
+        @ INT nRet = 0;
         @ FILE* fp = _wfopen (@<文件名>.GetText (), L"ab+");
         @ if (!fp) return -3;
         @ fseek (fp, 0, SEEK_END);
         @ int nSize = ftell (fp);
+        @ if (nSize == 0) {
+        @     fclose (fp); m_nType = @<文本编码>;
+        @     if (m_nType == VSET_UTF_8 || m_nType == VSET_UTF_16)
+        @         data ().SetUnicode (true);
+        @     else
+        @         data ().SetUnicode (false);
+        @     m_szIniFile = @<文件名>;
+        @     m_bAutoSave = (bool)@<自动保存>;
+        @     return 0;
+        @ }
         @ fseek (fp, 0, SEEK_SET);
         @ char* szData = new char [nSize] { 0 };
         @ if (!szData) { fclose (fp); return -2; }

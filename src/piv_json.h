@@ -945,8 +945,9 @@ namespace piv
             {
                 return json.at(to_pointer<J>(path)).get<R>();
             }
-            catch (J::exception &)
+            catch (const J::exception &e)
             {
+                (void)e;
             }
             return default_value;
         }
@@ -965,8 +966,9 @@ namespace piv
             {
                 return *PivU2Ws{json.at(to_pointer<J>(path)).get_ref<const std::string &>()};
             }
-            catch (J::exception &)
+            catch (const J::exception &e)
             {
+                (void)e;
             }
             return default_value;
         }
@@ -985,8 +987,9 @@ namespace piv
             {
                 return string_view{json.at(to_pointer<J>(path)).get_ref<const J::string_t &>()};
             }
-            catch (J::exception &)
+            catch (const J::exception &e)
             {
+                (void)e;
             }
             return string_view{default_value};
         }
@@ -1006,8 +1009,9 @@ namespace piv
                 if (ret.is_object())
                     return ret;
             }
-            catch (J::exception &)
+            catch (const J::exception &e)
             {
+                (void)e;
             }
             return J::object();
         }
@@ -1027,8 +1031,9 @@ namespace piv
                 if (ret.is_array())
                     return ret;
             }
-            catch (J::exception &)
+            catch (const J::exception &e)
             {
+                (void)e;
             }
             return J::array();
         }
@@ -1048,8 +1053,9 @@ namespace piv
             {
                 return json.at(to_key(key)).get<R>();
             }
-            catch (J::exception &)
+            catch (const J::exception &e)
             {
+                (void)e;
             }
             return default_value;
         }
@@ -1068,8 +1074,9 @@ namespace piv
             {
                 return json.at(to_key(key)).get_ref<const std::string &>();
             }
-            catch (J::exception &)
+            catch (const J::exception &e)
             {
+                (void)e;
             }
             return default_value;
         }
@@ -1081,8 +1088,9 @@ namespace piv
             {
                 return *PivU2Ws{json.at(to_key(key)).get_ref<const std::string &>()};
             }
-            catch (J::exception &)
+            catch (const J::exception &e)
             {
+                (void)e;
             }
             return default_value;
         }
@@ -1102,8 +1110,9 @@ namespace piv
                 if (ret.is_object())
                     return ret;
             }
-            catch (J::exception &)
+            catch (J::exception &e)
             {
+                (void)e;
             }
             return J::object();
         }
@@ -1123,8 +1132,9 @@ namespace piv
                 if (ret.is_array())
                     return ret;
             }
-            catch (J::exception &)
+            catch (const J::exception &e)
             {
+                (void)e;
             }
             return J::array();
         }
@@ -1152,8 +1162,9 @@ namespace piv
                 json[idx] = val;
                 return true;
             }
-            catch (const J::exception &)
+            catch (const J::exception &e)
             {
+                (void)e;
                 return false;
             }
         }
@@ -1181,8 +1192,9 @@ namespace piv
                 json[key] = val;
                 return true;
             }
-            catch (const J::exception &)
+            catch (const J::exception &e)
             {
+                (void)e;
                 return false;
             }
         }
@@ -1202,8 +1214,9 @@ namespace piv
                 json[path] = val;
                 return true;
             }
-            catch (const J::exception &)
+            catch (const J::exception &e)
             {
+                (void)e;
                 return false;
             }
         }

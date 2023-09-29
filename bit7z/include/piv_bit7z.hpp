@@ -601,17 +601,17 @@ public:
      * @param filter 筛选器
      * @param out_dir 输出路径
      * @param password 密码
-     * @param policy 是否排除匹配项
+     * @param isExclude 是否排除匹配项
      * @param format 解压格式
      * @return
      */
-    static bool Extract(const bit7z::tstring &in_file, const bit7z::tstring &filter, const bit7z::tstring &out_dir, const bit7z::tstring &password, bool policy, const bit7z::BitInFormat &format)
+    static bool Extract(const bit7z::tstring &in_file, const bit7z::tstring &filter, const bit7z::tstring &out_dir, const bit7z::tstring &password, bool isExclude, const bit7z::BitInFormat &format)
     {
         try
         {
             bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), format};
             extractor.setPassword(password);
-            extractor.extractMatching(in_file, filter, out_dir, policy ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include);
+            extractor.extractMatching(in_file, filter, out_dir, isExclude ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include);
             SetError("OK");
             return true;
         }
@@ -622,7 +622,7 @@ public:
         }
     }
 
-    static bool Extract(int32_t resId, const bit7z::tstring &filter, const bit7z::tstring &out_dir, const bit7z::tstring &password, bool policy, const bit7z::BitInFormat &format)
+    static bool Extract(int32_t resId, const bit7z::tstring &filter, const bit7z::tstring &out_dir, const bit7z::tstring &password, bool isExclude, const bit7z::BitInFormat &format)
     {
         std::vector<bit7z::byte_t> buffer;
         if (!LoadResIdData(resId, buffer))
@@ -631,7 +631,7 @@ public:
         {
             bit7z::BitMemExtractor extractor{piv::Archive::Get7zLib(), format};
             extractor.setPassword(password);
-            extractor.extractMatching(buffer, filter, out_dir, policy ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include);
+            extractor.extractMatching(buffer, filter, out_dir, isExclude ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include);
             SetError("OK");
             return true;
         }
@@ -650,11 +650,11 @@ public:
      * @param out_buffer 输出数据
      * @param password 密码
      * @param out_file 输出文件名
-     * @param policy 是否排除匹配项
+     * @param isExclude 是否排除匹配项
      * @param format 解压格式
      * @return
      */
-    static bool Extract(const bit7z::tstring &in_file, const bit7z::tstring &filter, CVolMem &out_buffer, const bit7z::tstring &password, CVolString &out_file, bool policy, const bit7z::BitInFormat &format)
+    static bool Extract(const bit7z::tstring &in_file, const bit7z::tstring &filter, CVolMem &out_buffer, const bit7z::tstring &password, CVolString &out_file, bool isExclude, const bit7z::BitInFormat &format)
     {
         out_file.Empty();
         try
@@ -667,7 +667,7 @@ public:
             for (const auto &item : in_archive)
             {
                 bool item_matches = bit7z::filesystem::fsutil::wildcard_match(filter, item.path());
-                if (item_matches != policy)
+                if (item_matches != isExclude)
                 {
                     out_buffer.Alloc(static_cast<INT_P>(item.size()), true);
                     in_archive.extractTo(reinterpret_cast<bit7z::byte_t *>(out_buffer.GetPtr()), static_cast<std::size_t>(out_buffer.GetSize()), item.index());
@@ -685,7 +685,7 @@ public:
         }
     }
 
-    static bool Extract(int32_t resId, const bit7z::tstring &filter, CVolMem &out_buffer, const bit7z::tstring &password, CVolString &out_file, bool policy, const bit7z::BitInFormat &format)
+    static bool Extract(int32_t resId, const bit7z::tstring &filter, CVolMem &out_buffer, const bit7z::tstring &password, CVolString &out_file, bool isExclude, const bit7z::BitInFormat &format)
     {
         out_file.Empty();
         std::vector<bit7z::byte_t> buffer;
@@ -701,7 +701,7 @@ public:
             for (const auto &item : in_archive)
             {
                 bool item_matches = bit7z::filesystem::fsutil::wildcard_match(filter, item.path());
-                if (item_matches != policy)
+                if (item_matches != isExclude)
                 {
                     out_buffer.Alloc(static_cast<INT_P>(item.size()), true);
                     in_archive.extractTo(reinterpret_cast<bit7z::byte_t *>(out_buffer.GetPtr()), static_cast<std::size_t>(out_buffer.GetSize()), item.index());
@@ -726,17 +726,17 @@ public:
      * @param regex 正则表达式
      * @param out_dir 输出路径
      * @param password 密码
-     * @param policy 是否排除匹配项
+     * @param isExclude 是否排除匹配项
      * @param format 解压格式
      * @return
      */
-    static bool ExtractRegex(const bit7z::tstring &in_file, const bit7z::tstring &regex, const bit7z::tstring &out_dir, const bit7z::tstring &password, bool policy, const bit7z::BitInFormat &format)
+    static bool ExtractRegex(const bit7z::tstring &in_file, const bit7z::tstring &regex, const bit7z::tstring &out_dir, const bit7z::tstring &password, bool isExclude, const bit7z::BitInFormat &format)
     {
         try
         {
             bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), format};
             extractor.setPassword(password);
-            extractor.extractMatchingRegex(in_file, regex, out_dir, policy ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include);
+            extractor.extractMatchingRegex(in_file, regex, out_dir, isExclude ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include);
             SetError("OK");
             return true;
         }
@@ -752,7 +752,7 @@ public:
         }
     }
 
-    static bool ExtractRegex(int32_t resId, const bit7z::tstring &regex, const bit7z::tstring &out_dir, const bit7z::tstring &password, bool policy, const bit7z::BitInFormat &format)
+    static bool ExtractRegex(int32_t resId, const bit7z::tstring &regex, const bit7z::tstring &out_dir, const bit7z::tstring &password, bool isExclude, const bit7z::BitInFormat &format)
     {
         std::vector<bit7z::byte_t> buffer;
         if (!LoadResIdData(resId, buffer))
@@ -761,7 +761,7 @@ public:
         {
             bit7z::BitMemExtractor extractor{piv::Archive::Get7zLib(), format};
             extractor.setPassword(password);
-            extractor.extractMatchingRegex(buffer, regex, out_dir, policy ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include);
+            extractor.extractMatchingRegex(buffer, regex, out_dir, isExclude ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include);
             SetError("OK");
             return true;
         }
@@ -785,11 +785,11 @@ public:
      * @param out_buffer 输出数据
      * @param password 密码
      * @param out_file 输出文件名
-     * @param policy 是否排除匹配项
+     * @param isExclude 是否排除匹配项
      * @param format 解压格式
      * @return
      */
-    static bool ExtractRegex(const bit7z::tstring &in_file, const bit7z::tstring &regex, CVolMem &out_buffer, const bit7z::tstring &password, CVolString &out_file, bool policy, const bit7z::BitInFormat &format)
+    static bool ExtractRegex(const bit7z::tstring &in_file, const bit7z::tstring &regex, CVolMem &out_buffer, const bit7z::tstring &password, CVolString &out_file, bool isExclude, const bit7z::BitInFormat &format)
     {
         out_file.Empty();
         try
@@ -803,7 +803,7 @@ public:
             for (const auto &item : in_archive)
             {
                 bool item_matches = std::regex_match(item.path(), regex_filter);
-                if (item_matches != policy)
+                if (item_matches != isExclude)
                 {
                     out_buffer.Alloc(static_cast<INT_P>(item.size()), true);
                     in_archive.extractTo(reinterpret_cast<bit7z::byte_t *>(out_buffer.GetPtr()), static_cast<std::size_t>(out_buffer.GetSize()), item.index());
@@ -828,7 +828,7 @@ public:
         }
     }
 
-    static bool ExtractRegex(int32_t resId, const bit7z::tstring &regex, CVolMem &out_buffer, const bit7z::tstring &password, CVolString &out_file, bool policy, const bit7z::BitInFormat &format)
+    static bool ExtractRegex(int32_t resId, const bit7z::tstring &regex, CVolMem &out_buffer, const bit7z::tstring &password, CVolString &out_file, bool isExclude, const bit7z::BitInFormat &format)
     {
         out_file.Empty();
         std::vector<bit7z::byte_t> buffer;
@@ -845,7 +845,7 @@ public:
             for (const auto &item : in_archive)
             {
                 bool item_matches = std::regex_match(item.path(), regex_filter);
-                if (item_matches != policy)
+                if (item_matches != isExclude)
                 {
                     out_buffer.Alloc(static_cast<INT_P>(item.size()), true);
                     in_archive.extractTo(reinterpret_cast<bit7z::byte_t *>(out_buffer.GetPtr()), static_cast<std::size_t>(out_buffer.GetSize()), item.index());
@@ -924,14 +924,15 @@ private:
 
     void RatioCB(uint64_t input, uint64_t output)
     {
-        m_ratio = static_cast<int32_t>(100.0 * input / output);
+        if (output != 0)
+            m_ratio = static_cast<int32_t>(100 * input / output);
     }
 
     bool ProgressCB(uint64_t progress_size)
     {
-        if (progress_size == 0)
+        if (progress_size == 0 || m_total_size == 0)
             return true;
-        return !this->ExtractProgress(m_progress_file.c_str(), static_cast<int32_t>(100.0 * progress_size / m_total_size),
+        return !this->ExtractProgress(m_progress_file.c_str(), static_cast<int32_t>(100 * progress_size / m_total_size),
                                       static_cast<int64_t>(m_total_size), static_cast<int64_t>(progress_size), m_ratio);
     }
 
@@ -1337,10 +1338,10 @@ public:
      * @brief 解压匹配文件
      * @param filter 筛选器
      * @param out_dir 输出路径
-     * @param policy 是否排除匹配项
+     * @param isExclude 是否排除匹配项
      * @return
      */
-    bool Extract(const bit7z::tstring &filter, const bit7z::tstring &out_dir, bool policy)
+    bool Extract(const bit7z::tstring &filter, const bit7z::tstring &out_dir, bool isExclude)
     {
         if (!m_archive)
         {
@@ -1355,7 +1356,7 @@ public:
             for (const auto &item : *m_archive)
             {
                 bool item_matches = bit7z::filesystem::fsutil::wildcard_match(filter, item.path());
-                if (item_matches != policy)
+                if (item_matches != isExclude)
                     matched_indices.push_back(item.index());
             }
             if (matched_indices.empty())
@@ -1376,10 +1377,10 @@ public:
      * @param filter 筛选器
      * @param out_buffer 输出数据
      * @param out_path 输出文件名
-     * @param policy 是否排除匹配项
+     * @param isExclude 是否排除匹配项
      * @return
      */
-    bool Extract(const bit7z::tstring &filter, CVolMem &out_buffer, CVolString &out_path, bool policy)
+    bool Extract(const bit7z::tstring &filter, CVolMem &out_buffer, CVolString &out_path, bool isExclude)
     {
         out_path.Empty();
         if (!m_archive)
@@ -1394,7 +1395,7 @@ public:
             for (const auto &item : *m_archive)
             {
                 bool item_matches = bit7z::filesystem::fsutil::wildcard_match(filter, item.path());
-                if (item_matches != policy)
+                if (item_matches != isExclude)
                 {
                     out_buffer.Alloc(static_cast<ptrdiff_t>(item.size()), true);
                     m_archive->extractTo(reinterpret_cast<bit7z::byte_t *>(out_buffer.GetPtr()), static_cast<std::size_t>(out_buffer.GetSize()), item.index());
@@ -1416,10 +1417,10 @@ public:
      * @brief 解压正则匹配文件
      * @param regex 正则表达式
      * @param out_dir 输出路径
-     * @param policy 是否排除匹配项
+     * @param isExclude 是否排除匹配项
      * @return
      */
-    bool ExtractRegex(const bit7z::tstring &regex, const bit7z::tstring &out_dir, bool policy)
+    bool ExtractRegex(const bit7z::tstring &regex, const bit7z::tstring &out_dir, bool isExclude)
     {
         if (!m_archive)
         {
@@ -1435,7 +1436,7 @@ public:
             for (const auto &item : *m_archive)
             {
                 bool item_matches = std::regex_match(item.path(), regex_filter);
-                if (item_matches != policy)
+                if (item_matches != isExclude)
                     matched_indices.push_back(item.index());
             }
             if (matched_indices.empty())
@@ -1461,10 +1462,10 @@ public:
      * @param regex 正则表达式
      * @param out_buffer 输出数据
      * @param out_path 输出文件名
-     * @param policy 是否排除匹配项
+     * @param isExclude 是否排除匹配项
      * @return
      */
-    bool ExtractRegex(const bit7z::tstring &regex, CVolMem &out_buffer, CVolString &out_path, bool policy)
+    bool ExtractRegex(const bit7z::tstring &regex, CVolMem &out_buffer, CVolString &out_path, bool isExclude)
     {
         out_path.Empty();
         if (!m_archive)
@@ -1481,7 +1482,7 @@ public:
             for (const auto &item : *m_archive)
             {
                 bool item_matches = std::regex_match(item.path(), regex_filter);
-                if (item_matches != policy)
+                if (item_matches != isExclude)
                 {
                     out_buffer.Alloc(static_cast<ptrdiff_t>(item.size()), true);
                     m_archive->extractTo(reinterpret_cast<bit7z::byte_t *>(out_buffer.GetPtr()), static_cast<std::size_t>(out_buffer.GetSize()), item.index());
@@ -1830,14 +1831,15 @@ protected:
 
     void RatioCB(uint64_t input, uint64_t output)
     {
-        m_ratio = static_cast<int32_t>(100.0 * output / input);
+        if (input != 0)
+            m_ratio = static_cast<int32_t>(100 * output / input);
     }
 
     bool ProgressCB(uint64_t progress_size)
     {
-        if (progress_size == 0)
+        if (progress_size == 0 || m_total_size == 0)
             return true;
-        return !this->WriterProgress(m_progress_file.c_str(), static_cast<int32_t>(100.0 * progress_size / m_total_size),
+        return !this->WriterProgress(m_progress_file.c_str(), static_cast<int32_t>(100 * progress_size / m_total_size),
                                      static_cast<int64_t>(m_total_size), static_cast<int64_t>(progress_size), m_ratio);
     }
 
@@ -2309,11 +2311,11 @@ public:
      * @brief 添加匹配文件
      * @param in_dir 输入目录
      * @param filter 筛选器
-     * @param policy 是否排除匹配项
+     * @param isExclude 是否排除匹配项
      * @param recursion 递归子目录
      * @return
      */
-    bool AddFiles(const bit7z::tstring &in_dir, const bit7z::tstring &filter, bool policy, bool recursion)
+    bool AddFiles(const bit7z::tstring &in_dir, const bit7z::tstring &filter, bool isExclude, bool recursion)
     {
         if (!m_archive)
         {
@@ -2322,7 +2324,7 @@ public:
         }
         try
         {
-            m_archive->addFiles(in_dir, filter, policy ? bit7z::FilterPolicy::Include : bit7z::FilterPolicy::Exclude, recursion);
+            m_archive->addFiles(in_dir, filter, isExclude ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include, recursion);
             SetError("OK");
             return true;
         }
@@ -2647,14 +2649,15 @@ protected:
 
     void RatioCB(uint64_t input, uint64_t output)
     {
-        m_ratio = static_cast<int32_t>(100.0 * output / input);
+        if (input != 0)
+            m_ratio = static_cast<int32_t>(100 * output / input);
     }
 
     bool ProgressCB(uint64_t progress_size)
     {
-        if (progress_size == 0)
+        if (progress_size == 0 || m_total_size == 0)
             return true;
-        return !this->WriterProgress(m_progress_file.c_str(), static_cast<int32_t>(100.0 * progress_size / m_total_size),
+        return !this->WriterProgress(m_progress_file.c_str(), static_cast<int32_t>(100 * progress_size / m_total_size),
                                      static_cast<int64_t>(m_total_size), static_cast<int64_t>(progress_size), m_ratio);
     }
 
@@ -3297,11 +3300,11 @@ public:
      * @brief 添加匹配文件
      * @param in_dir 输入目录
      * @param filter 筛选器
-     * @param policy 是否排除匹配项
+     * @param isExclude 是否排除匹配项
      * @param recursion 递归子目录
      * @return
      */
-    bool AddFiles(const bit7z::tstring &in_dir, const bit7z::tstring &filter, bool policy, bool recursion)
+    bool AddFiles(const bit7z::tstring &in_dir, const bit7z::tstring &filter, bool isExclude, bool recursion)
     {
         if (!m_archive)
         {
@@ -3310,7 +3313,7 @@ public:
         }
         try
         {
-            m_archive->addFiles(in_dir, filter, policy ? bit7z::FilterPolicy::Include : bit7z::FilterPolicy::Exclude, recursion);
+            m_archive->addFiles(in_dir, filter, isExclude ? bit7z::FilterPolicy::Exclude: bit7z::FilterPolicy::Include, recursion);
             SetError("OK");
             return true;
         }

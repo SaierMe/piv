@@ -88,6 +88,7 @@ public:
         }
         catch (const std::system_error &e)
         {
+            (void)e;
             m_ThreadPool.reset();
             return FALSE;
         }
@@ -191,12 +192,20 @@ public:
         return ::PostQueuedCompletionStatus(m_ThreadPool->hCompletionPort, 1, 0, reinterpret_cast<LPOVERLAPPED>(task));
     }
 
-    template <typename Fun>
-    inline BOOL PostTask2(Fun &fun)
+    inline BOOL PostTask2(std::function<void()> &&fun)
     {
         if (!m_ThreadPool || m_ThreadPool->state < ThreadPoolState_Normal)
             return FALSE;
-        std::packaged_task<void()> *task = new std::packaged_task<void()>(std::forward<Fun>(fun));
+        std::packaged_task<void()> *task = new std::packaged_task<void()>(std::forward<std::function<void()>>(fun));
+        m_ThreadPool->QueueTask++;
+        return ::PostQueuedCompletionStatus(m_ThreadPool->hCompletionPort, 1, 0, reinterpret_cast<LPOVERLAPPED>(task));
+    }
+
+    inline BOOL PostTask2(const std::function<void()> &fun)
+    {
+        if (!m_ThreadPool || m_ThreadPool->state < ThreadPoolState_Normal)
+            return FALSE;
+        std::packaged_task<void()> *task = new std::packaged_task<void()>(fun);
         m_ThreadPool->QueueTask++;
         return ::PostQueuedCompletionStatus(m_ThreadPool->hCompletionPort, 1, 0, reinterpret_cast<LPOVERLAPPED>(task));
     }
@@ -396,13 +405,7 @@ protected:
             if (WorkProc != nullptr && WorkProc->valid())
             {
                 ThreadPool->WorkerTask++; // 原子锁递增执行任务数
-                try
-                {
-                    (*WorkProc)(); // 执行任务
-                }
-                catch (...)
-                {
-                }
+                (*WorkProc)(); // 执行任务
                 ThreadPool->ComplateTask++; // 原子锁递增已完成任务数
                 ThreadPool->WorkerTask--;   // 原子锁递减执行任务数
             }
