@@ -21,15 +21,16 @@
 #ifndef BIT7Z_USE_NATIVE_STRING
 #define BIT7Z_USE_NATIVE_STRING
 #endif
-#ifndef BIT7Z_USE_STD_BYTE
-#define BIT7Z_USE_STD_BYTE
-#endif
 #ifndef BITWINDOWS_HPP
 #define BITWINDOWS_HPP
 #endif
 #ifndef BIT7Z_AUTO_PREFIX_LONG_PATHS
 #define BIT7Z_AUTO_PREFIX_LONG_PATHS
 #endif
+#ifndef BIT7Z_PATH_SANITIZATION
+#define BIT7Z_PATH_SANITIZATION
+#endif
+
 #include "bit7z.hpp"
 #include "bitarchiveeditor.hpp"
 
@@ -49,7 +50,7 @@ namespace piv
          * @param library_path 7z.dll的路径
          * @return 是否加载成功
          */
-        static bool Load7zLib(const bit7z::tstring &library_path = bit7z::default_library)
+        static bool Load7zLib(const bit7z::tstring &library_path = bit7z::kDefaultLibrary)
         {
             try
             {

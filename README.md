@@ -35,7 +35,7 @@
 
 ## 🎯 简介
 
-本模块总共有三个子模块，三个子模块之间功能不重叠，主要是收录标准有以下差别：
+本模块总共有两个子模块，子模块之间功能不重叠，主要是收录标准有以下差别：
 
 - **PIV基础类**
 
@@ -43,11 +43,8 @@
 
 - **PIV扩展类**
 
-  会依赖部分官方模块，但不会依赖MFC界面和其他第三方模块。
+  会依赖部分官方模块，但不会依赖界面库和其他第三方模块。
   
-- **PIV静态库**
-
-  由于 lib 静态库占用的体积比较大，特别增加本子模块，需要携带静态库的类库均已移动到该子模块。
 
 本模块封装遵从以下标准：
 
@@ -110,7 +107,7 @@
 - **[simdutf](https://github.com/simdutf/simdutf)** `3.2.15` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
 - **[OpenCC](https://github.com/BYVoid/OpenCC)** `1.1.6` `Apache-2.0 license` 中文简繁转换开源项目，支持词汇级别的转换、异体字转换和地区习惯用词转换
 - **[7-zip](https://www.7-zip.org/)** `23.01` `GNU LGPL license` 免费的开源压缩软件（采用GNU LGPL协议，只使用它的 dll 文件不会传染）
-- **[bit7z](https://github.com/rikyoz/bit7z)** `4.0.0` `Mozilla Public License v2.0` 7-zip 的封装类
+- **[bit7z](https://github.com/rikyoz/bit7z)** `4.0.1` `Mozilla Public License v2.0` 7-zip 的封装类
 - **[MinHook](https://github.com/TsudaKageyu/minhook)** `1.3.3` `BSD-2-Clause License` 极简的 x86/x64 API Hook 库
 - **[MMKV](https://github.com/Tencent/MMKV)** `1.3.1` `BSD-3-Clause License` 腾讯的高性能键值表
 - **[xxHash](https://github.com/Cyan4973/xxHash)** `8.0.2` `BSD-2-Clause License` 速度接近 RAM 限制的高速散列算法

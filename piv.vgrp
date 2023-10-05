@@ -5,7 +5,7 @@ name ="PIV扩展类"
 version = 1
 unique_mark = pivink
 explain = "[PIV扩展类]模块，会依赖部分官方模块，但不会依赖MFC界面和其他第三方模块。"
-dependence = "piv_base.vgrp, *\\sys\\curl\\w_curl.vgrp, *\\sys\\regex\\w_regex.vgrp"
+dependence = "piv_base.vgrp, *\\sys\\curl\\w_curl.vgrp"
 file
 {
     name = "p_Helper.wsv"

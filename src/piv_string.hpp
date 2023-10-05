@@ -17,6 +17,26 @@ namespace piv
     namespace edit
     {
         /**
+         * @brief ASCII字符到小写
+         * @param c
+         * @return
+         */
+        static inline int tolower(int c) noexcept
+        {
+            return (c >= 'A' && c <= 'Z') ? (c + 32U) : c;
+        }
+
+        /**
+         * @brief ASCII字符到大写
+         * @param c
+         * @return
+         */
+        static inline int toupper(int c) noexcept
+        {
+            return (c >= 'a' && c <= 'z') ? (c - 32U) : c;
+        }
+
+        /**
          * @brief 寻找文本(不区分大小写)
          * @tparam CharT 字符类型
          * @param suc 被寻找的文本
@@ -35,7 +55,7 @@ namespace piv
                 auto SubstrIt = des.begin();
                 for (; InnerIt != suc.end() && SubstrIt != des.end(); ++InnerIt, ++SubstrIt)
                 {
-                    if (std::tolower(static_cast<unsigned char>(*InnerIt)) != std::tolower(static_cast<unsigned char>(*SubstrIt)))
+                    if (piv::edit::tolower(static_cast<uint16_t>(*InnerIt)) != piv::edit::tolower(static_cast<uint16_t>(*SubstrIt)))
                         break;
                 }
                 if (SubstrIt == des.end())
@@ -63,7 +83,7 @@ namespace piv
                 auto SubstrIt = des.begin();
                 for (; InnerIt != suc.end() && SubstrIt != des.end(); ++InnerIt, ++SubstrIt)
                 {
-                    if (std::tolower(static_cast<unsigned char>(*InnerIt)) != std::tolower(static_cast<unsigned char>(*SubstrIt)))
+                    if (piv::edit::tolower(static_cast<uint16_t>(*InnerIt)) != piv::edit::tolower(static_cast<uint16_t>(*SubstrIt)))
                         break;
                 }
                 if (SubstrIt == des.end())
@@ -139,17 +159,6 @@ namespace piv
         }
 
         /**
-         * @brief ASCII字符到小写
-         * @param c
-         * @return
-         */
-        template <typename CharT>
-        inline CharT ascii_tolower(const CharT &c) noexcept
-        {
-            return CharT(((static_cast<unsigned>(c) - 65U) < 26) ? c + 'a' - 'A' : c);
-        }
-
-        /**
          * @brief 不区分大小写比较文本
          * @param lhs 所欲比较的文本1
          * @param rhs 所欲比较的文本2
@@ -175,7 +184,7 @@ namespace piv
         slow:
             do
             {
-                if (ascii_tolower<CharT>(a) != ascii_tolower<CharT>(b))
+                if (piv::edit::tolower(static_cast<uint16_t>(a)) != piv::edit::tolower(static_cast<uint16_t>(b)))
                     return false;
                 a = *p1++;
                 b = *p2++;
@@ -717,7 +726,7 @@ namespace piv
             {
                 bool operator()(const int &c1, const int &c2) const
                 {
-                    return (tolower(c1) < tolower(c2));
+                    return (piv::edit::tolower(static_cast<uint16_t>(c1)) < piv::edit::tolower(static_cast<uint16_t>(c2)));
                 }
             };
             bool operator()(const KeyT &s1, const KeyT &s2) const
@@ -2200,7 +2209,7 @@ public:
         if (case_sensitive)
             return (sv.front() == ch);
         else
-            return (std::tolower(static_cast<unsigned char>(sv.front())) == std::tolower(static_cast<unsigned char>(ch)));
+            return (piv::edit::tolower(static_cast<uint16_t>(sv.front())) == piv::edit::tolower(static_cast<uint16_t>(ch)));
     }
     inline bool LeadOf(const piv::basic_string_view<CharT> &s, const bool &case_sensitive = true) const
     {
@@ -2238,7 +2247,7 @@ public:
         if (case_sensitive)
             return (sv.back() == ch);
         else
-            return (std::tolower(static_cast<unsigned char>(sv.back())) == std::tolower(static_cast<unsigned char>(ch)));
+            return (piv::edit::tolower(static_cast<uint16_t>(sv.back())) == piv::edit::tolower(static_cast<uint16_t>(ch)));
     }
     inline bool EndOf(const piv::basic_string_view<CharT> &s, const bool &case_sensitive = true) const
     {
@@ -2486,7 +2495,8 @@ public:
     {
         std::basic_string<CharT> lower;
         lower.resize(sv.size());
-        std::transform(sv.begin(), sv.end(), lower.begin(), (int (*)(int))std::tolower);
+        std::transform(sv.begin(), sv.end(), lower.begin(), [](CharT c) -> CharT
+                       { return (CharT)piv::edit::tolower(static_cast<uint16_t>(c)); });
         return lower;
     }
 
@@ -2498,7 +2508,8 @@ public:
     {
         std::basic_string<CharT> upper;
         upper.resize(sv.size());
-        std::transform(sv.begin(), sv.end(), upper.begin(), (int (*)(int))std::toupper);
+        std::transform(sv.begin(), sv.end(), upper.begin(), [](CharT c) -> CharT
+                       { return (CharT)piv::edit::toupper(static_cast<uint16_t>(c)); });
         return upper;
     }
 
@@ -4123,7 +4134,8 @@ public:
     {
         std::basic_string<CharT> lower;
         lower.resize(s.size());
-        std::transform(s.begin(), s.end(), lower.begin(), (int (*)(int))std::tolower);
+        std::transform(s.begin(), s.end(), lower.begin(), [](CharT c) -> CharT
+                       { return (CharT)piv::edit::tolower(static_cast<uint16_t>(c)); });
         str.append(lower);
         return *this;
     }
@@ -4167,7 +4179,8 @@ public:
     {
         std::basic_string<CharT> lower;
         lower.resize(s.size());
-        std::transform(s.begin(), s.end(), lower.begin(), (int (*)(int))std::toupper);
+        std::transform(s.begin(), s.end(), lower.begin(), [](CharT c) -> CharT
+                       { return (CharT)piv::edit::toupper(static_cast<uint16_t>(c)); });
         str.append(lower);
         return *this;
     }
@@ -4851,7 +4864,7 @@ public:
         if (case_sensitive)
             return (str.front() == ch);
         else
-            return (std::tolower(static_cast<unsigned char>(str.front())) == std::tolower(static_cast<unsigned char>(ch)));
+            return (piv::edit::tolower(static_cast<uint16_t>(str.front())) == piv::edit::tolower(static_cast<uint16_t>(ch)));
     }
     inline bool LeadOf(const CharT *s, const bool &case_sensitive = true, const size_t &count = (size_t)-1) const
     {
@@ -4889,7 +4902,7 @@ public:
         if (case_sensitive)
             return (str.back() == ch);
         else
-            return (std::tolower(static_cast<unsigned char>(str.back())) == std::tolower(static_cast<unsigned char>(ch)));
+            return (piv::edit::tolower(static_cast<uint16_t>(str.back())) == piv::edit::tolower(static_cast<uint16_t>(ch)));
     }
     inline bool EndOf(const piv::basic_string_view<CharT> &s, const bool &case_sensitive = true) const
     {
@@ -5746,12 +5759,14 @@ public:
     {
         std::basic_string<CharT> lower;
         lower.resize(str.size());
-        std::transform(str.begin(), str.end(), lower.begin(), (int (*)(int))std::tolower);
+        std::transform(str.begin(), str.end(), lower.begin(), [](CharT c) -> CharT
+                       { return (CharT)piv::edit::tolower(static_cast<uint16_t>(c)); });
         return PivString{lower};
     }
     inline PivString &ToLower()
     {
-        std::transform(str.begin(), str.end(), str.begin(), (int (*)(int))std::tolower);
+        std::transform(str.begin(), str.end(), str.begin(), [](CharT c) -> CharT
+                       { return (CharT)piv::edit::tolower(static_cast<uint16_t>(c)); });
         return *this;
     }
 
@@ -5763,12 +5778,14 @@ public:
     {
         std::basic_string<CharT> upper;
         upper.resize(str.size());
-        std::transform(str.begin(), str.end(), upper.begin(), (int (*)(int))std::toupper);
+        std::transform(str.begin(), str.end(), upper.begin(), [](CharT c) -> CharT
+                       { return (CharT)piv::edit::toupper(static_cast<uint16_t>(c)); });
         return PivString{upper};
     }
     inline PivString &ToUpper()
     {
-        std::transform(str.begin(), str.end(), str.begin(), (int (*)(int))std::toupper);
+        std::transform(str.begin(), str.end(), str.begin(), [](CharT c) -> CharT
+                       { return (CharT)piv::edit::toupper(static_cast<uint16_t>(c)); });
         return *this;
     }
 

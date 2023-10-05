@@ -2342,6 +2342,72 @@ public:
     }
 }; // PivU2Ws
 
+/**
+ * @brief 取指定编码的文本指针,只有CVolString可能会产生编码转换,其他取指针输出.
+ */
+template <typename CharT>
+class PivFromAny
+{
+private:
+    std::unique_ptr<std::string> m_str{nullptr};
+    const CharT *m_cstr = nullptr;
+
+public:
+    PivFromAny() = delete;
+    ~PivFromAny() {}
+
+    PivFromAny(const CVolString &s)
+    {
+        PIV_IF(sizeof(CharT) == 2)
+        {
+            m_cstr = s.GetText();
+        }
+        else
+        {
+            m_str.reset(new std::string{});
+            piv::encoding::W2Uex(*m_str, s.GetText(), s.GetLength());
+        }
+    }
+
+    PivFromAny(const std::basic_string<CharT> &s)
+    {
+        m_cstr = s.c_str();
+    }
+
+    PivFromAny(const CVolMem &s)
+    {
+        m_cstr = static_cast<const CharT *>(s.GetPtr());
+    }
+
+    PivFromAny(const CharT *s)
+    {
+        m_cstr = s;
+    }
+
+    /**
+     * @brief 获取转换后的文本指针(至少返回空字符串)
+     * @return 字符串指针
+     */
+    inline const CharT *GetText() const noexcept
+    {
+        if (m_cstr)
+            return m_cstr;
+        if (m_str)
+            return reinterpret_cast<const CharT *>(m_str->c_str());
+        return nullptr;
+    }
+
+    operator const CharT *() const noexcept
+    {
+        return this->GetText();
+    }
+
+    const CharT *operator*() const noexcept
+    {
+        return this->GetText();
+    }
+}; // PivFromAny
+
 namespace piv
 {
     namespace encoding

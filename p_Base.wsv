@@ -520,6 +520,7 @@
 # #define PIVDEBUG(format, ...) _DEBUG_STATMENT (DebugTrace (FALSE, 0, 0, _T (format), __VA_ARGS__))
 # #define PIV_ARRAY_AND_SIZE(_ARR)  (_ARR), sizeof(_ARR) / sizeof(*(_ARR))
 # #define PIV_MEM_PTR_AND_SIZE(_MEM)  (_MEM).GetPtr(), (_MEM).GetSize()
+# #define PIV_TEXT_AND_SIZE(_STR)  (_STR).GetText(), (_STR).GetLength()
 # #define PIV_GET_TEXT(_STR)  (_STR).IsEmpty() ? nullptr : (_STR).GetText()
 # namespace piv
 # {
