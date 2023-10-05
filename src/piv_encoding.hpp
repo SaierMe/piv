@@ -8,11 +8,6 @@
 #ifndef _PIV_ENCODING_HPP
 #define _PIV_ENCODING_HPP
 
-// 包含火山视窗基本类,它在火山里的包含顺序比较靠前(全局-110)
-#ifndef __VOL_BASE_H__
-#include <sys/base/libs/win_base/vol_base.h>
-#endif
-
 #include "detail/piv_base.hpp"
 
 #include <string>

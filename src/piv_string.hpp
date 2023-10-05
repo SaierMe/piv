@@ -10,7 +10,6 @@
 
 #include "piv_encoding.hpp"
 #include <vector>
-#include <memory>
 
 namespace piv
 {

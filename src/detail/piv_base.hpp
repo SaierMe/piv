@@ -17,6 +17,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <algorithm>
+#include <memory>
 
 #if defined(_MSVC_LANG) && (_MSVC_LANG >= 201703L)
 #define PIV_HAS_CPP17
