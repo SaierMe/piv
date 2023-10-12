@@ -1117,9 +1117,22 @@ public:
      */
     bool OpenArchive(CVolMem &in_data, bool feedback, const bit7z::tstring &password, const bit7z::BitInFormat &format /*, bool copy_data*/)
     {
+        CloseArchive();
         m_buffer.reset(new std::vector<bit7z::byte_t>{reinterpret_cast<bit7z::byte_t *>(in_data.GetPtr()),
                                                       reinterpret_cast<bit7z::byte_t *>(in_data.GetPtr()) + in_data.GetSize()});
-        return OpenArchive(*m_buffer, feedback, password, format);
+        try
+        {
+            m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), *m_buffer, format, password});
+            EnableFeeback(feedback);
+            SetError("OK");
+            return true;
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            CloseArchive();
+            SetError(ex.what());
+            return false;
+        }
     }
 
     /**
@@ -1133,9 +1146,22 @@ public:
      */
     bool OpenArchive(ptrdiff_t mem_ptr, ptrdiff_t mem_size, bool feedback, const bit7z::tstring &password, const bit7z::BitInFormat &format /*, bool copy_data*/)
     {
+        CloseArchive();
         m_buffer.reset(new std::vector<bit7z::byte_t>{reinterpret_cast<bit7z::byte_t *>(mem_ptr),
                                                       reinterpret_cast<bit7z::byte_t *>(mem_ptr) + mem_size});
-        return OpenArchive(*m_buffer, feedback, password, format);
+        try
+        {
+            m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), *m_buffer, format, password});
+            EnableFeeback(feedback);
+            SetError("OK");
+            return true;
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            CloseArchive();
+            SetError(ex.what());
+            return false;
+        }
     }
 
     /**
@@ -1148,6 +1174,7 @@ public:
      */
     bool OpenArchive(int32_t resId, bool feedback, const bit7z::tstring &password, const bit7z::BitInFormat &format)
     {
+        CloseArchive();
         if (resId == 0)
             return false;
         HMODULE hModule = g_objVolApp.GetInstanceHandle();
@@ -1159,7 +1186,19 @@ public:
             return false;
         bit7z::byte_t *data = reinterpret_cast<bit7z::byte_t *>(::LockResource(resdata));
         m_buffer.reset(new std::vector<bit7z::byte_t>{data, data + ::SizeofResource(hModule, hSrc)});
-        return OpenArchive(*m_buffer, feedback, password, format);
+        try
+        {
+            m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), *m_buffer, format, password});
+            EnableFeeback(feedback);
+            SetError("OK");
+            return true;
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            CloseArchive();
+            SetError(ex.what());
+            return false;
+        }
     }
 
     /**
@@ -2049,9 +2088,22 @@ public:
      */
     bool CreateArchive(CVolMem &in_buffer, bool feedback, const bit7z::BitInOutFormat &format, const bit7z::tstring &password)
     {
+        CloseArchive();
         m_buffer.reset(new std::vector<bit7z::byte_t>{reinterpret_cast<bit7z::byte_t *>(in_buffer.GetPtr()),
                                                       reinterpret_cast<bit7z::byte_t *>(in_buffer.GetPtr()) + in_buffer.GetSize()});
-        return CreateArchive(*m_buffer, feedback, format, password);
+        try
+        {
+            m_archive.reset(new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), *m_buffer, format, password});
+            EnableFeeback(feedback);
+            SetError("OK");
+            return true;
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            CloseArchive();
+            SetError(ex.what());
+            return false;
+        }
     }
 
     // 创建自文件资源
