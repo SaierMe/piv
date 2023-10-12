@@ -2,7 +2,7 @@
 
 包 火山.VMProtect <注释 = "VMProtect 3.7.2" 注释 = "https://vmpsoft.com" 注释 = "封装: Xelloss">
 
-类 VMProtect <公开 注释 = "封装了VMProtect SDK的函数." 折叠 @文档 = "category = \"VMProtect加密\"" @禁止创建对象 = 真
+类 VMProtect <公开 注释 = "封装了VMProtect SDK的函数" 折叠 @文档 = "category = \"VMProtect加密\"" @禁止创建对象 = 真
         @视窗.外部头文件 = "VMProtect\\include\\VMProtectSDK.h" @视窗.外部库.x64 = "VMProtect\\lib\\VMProtectSDK64.lib"
         @视窗.外部库.win32 = "VMProtect\\lib\\VMProtectSDK32.lib"
         @视窗.附属文件.x64 = "VMProtect\\lib\\VMProtectSDK64.dll"
@@ -276,7 +276,7 @@
     }
 }
 
-类 VMProtect全局辅助类 <公开 注释 = "一些常用的VMProtect全局方法." 折叠 @文档 = "category = \"VMProtect加密\"" @全局类 = 真
+类 VMProtect全局辅助类 <公开 注释 = "一些常用的VMProtect全局方法" 折叠 @文档 = "category = \"VMProtect加密\"" @全局类 = 真
         @强制依赖 = "VMProtect">
 {
     方法 VMP保护 <公开 静态 注释 = "  标记VMP保护的范围,具体的保护模式在VMProtect程序中设置(VMProtectBegin),"
@@ -389,7 +389,7 @@
     常量 版本号太新 <公开 类型 = 整数 值 = 64 注释 = "此序列号不支持当前的软件版本,可以调用\"取序列号数据\"获取此序列号能使用的最大程序生成日期.">
 }
 
-类 VMProtect日期 <公开 注释 = "VMProtectDate为序列号数据中的日期数据." 折叠 @文档 = "category = \"VMProtect加密.辅助类\""
+类 VMProtect日期 <公开 注释 = "VMProtectDate为序列号数据中的日期数据" 折叠 @文档 = "category = \"VMProtect加密.辅助类\""
         @视窗.结构类 = 1>
 {
     变量 年 <公开 类型 = 短整数 注释 = "4位数年份">
@@ -408,7 +408,7 @@
     }
 }
 
-类 VMProtect序列号数据 <公开 注释 = "VMProtectSerialNumberData为\"取序列号数据\"返回的结构类." 折叠
+类 VMProtect序列号数据 <公开 注释 = "VMProtectSerialNumberData为\"取序列号数据\"返回的结构类" 折叠
         @文档 = "category = \"VMProtect加密.辅助类\"" @视窗.结构类 = 1>
 {
     变量 状态 <公开 类型 = 整数 注释 = "序列号的激活状态,0表示激活成功,其他含义请参考\"VMProtect序列号状态\".">
@@ -438,7 +438,7 @@
     }
 }
 
-类 VMProtect序列号数据类 <公开 注释 = "\"取序列号数据2\"返回的火山对象类." 折叠 @文档 = "category = \"VMProtect加密.辅助类\"">
+类 VMProtect序列号数据类 <公开 注释 = "\"取序列号数据2\"返回的火山对象类" 折叠 @文档 = "category = \"VMProtect加密.辅助类\"">
 {
     变量 状态 <公开 类型 = 整数 注释 = "序列号的激活状态,0表示激活成功,其他含义请参考\"VMProtect序列号状态\".">
     变量 用户名 <公开 类型 = 文本型 注释 = "用户名称">
@@ -465,7 +465,7 @@
     }
 }
 
-类 VMProtect激活结果 <公开 注释 = "VMProtectActivationFlags为服务器激活/解绑的返回值." 折叠
+类 VMProtect激活结果 <公开 注释 = "VMProtectActivationFlags为服务器激活/解绑的返回值" 折叠
         @文档 = "category = \"VMProtect加密.辅助类\"">
 {
     常量 激活成功 <公开 类型 = 整数 值 = 0 注释 = "激活成功.当前的序列号将加入到序列号变量中.">
@@ -484,7 +484,7 @@
     常量 不可用 <公开 类型 = 整数 值 = 10 注释 = "此错误意味着激活和解绑功能不可用.">
 }
 
-类 HWID信息类 <公开 注释 = "\"VMP取机器码信息\"的解析结果." 折叠 @文档 = "category = \"VMProtect加密.辅助类\"">
+类 HWID信息类 <公开 注释 = "\"VMP取机器码信息\"的解析结果" 折叠 @文档 = "category = \"VMProtect加密.辅助类\"">
 {
     变量 CPU <公开 类型 = 文本型 注释 = "处理器识别码">
     变量 HOST <公开 类型 = 文本型 注释 = "主机名识别码">
@@ -513,7 +513,7 @@
 {
     变量 产品信息 <类型 = VMProtect产品信息>
 
-    方法 导入密钥对 <公开 类型 = 逻辑型 注释 = "导入VMProtect生成的密钥对." 返回值注释 = "返回是否成功" 折叠>
+    方法 导入密钥对 <公开 类型 = 逻辑型 注释 = "导入VMProtect生成的密钥对,返回是否成功." 返回值注释 = "返回是否成功" 折叠>
     参数 密钥对 <类型 = 文本型 注释 = "请输入从VMProtect导出的密钥对">
     参数 密钥对格式 <类型 = 整数 注释 = "VMProtect的密钥对导出格式,建议使用后两种格式:" 注释 = " 0 = KeyGen.dll(MSVC)"
             注释 = " 1 = KeyGen.dll(Delphi)" 注释 = " 2 = KeyGen.Net/PayPro Global" 注释 = " 3 = Keygen.php" @默认值 = 2>
@@ -526,12 +526,12 @@
             变量 模数文本 <类型 = 文本型>
             变量 产品代码文本 <类型 = 文本型>
             产品信息.算法 = 0
-            产品信息.位数 = 文本到整数 (VMP_取文本中间 (密钥对, "g_nBits = ", ";"))
-            搜寻位置 = 寻找文本 (密钥对, "g_vPrivate")
+            产品信息.位数 = 文本到整数 (VMP_取文本中间 (密钥对, "g_nBits = ", ";", , 真))
+            搜寻位置 = 寻找文本 (密钥对, "g_vPrivate", , 真)
             私钥文本 = VMP_取文本中间 (密钥对, "{", "};", 搜寻位置)
-            搜寻位置 = 寻找文本 (密钥对, "g_vModulus")
+            搜寻位置 = 寻找文本 (密钥对, "g_vModulus", , 真)
             模数文本 = VMP_取文本中间 (密钥对, "{", "};", 搜寻位置)
-            搜寻位置 = 寻找文本 (密钥对, "g_vProductCode")
+            搜寻位置 = 寻找文本 (密钥对, "g_vProductCode", , 真)
             产品代码文本 = VMP_取文本中间 (密钥对, "{", "};", 搜寻位置)
             变量 文本数组 <类型 = 文本数组类>
             变量 字节数组 <类型 = 字节数组类>
@@ -539,9 +539,8 @@
             文本数组.枚举循环 ()
             {
                 字节数组.加入成员 ((字节)文本到整数 (文本数组.取枚举值 ()))
-
             }
-            产品信息.私钥 = 指针到字节集 (字节数组.取数组指针 (), 字节数组.取成员数 ())
+            产品信息.私钥 = 字节数组.取字节集 ()
 
             文本数组.删除所有成员 ()
             字节数组.删除所有成员 ()
@@ -549,9 +548,8 @@
             文本数组.枚举循环 ()
             {
                 字节数组.加入成员 ((字节)文本到整数 (文本数组.取枚举值 ()))
-
             }
-            产品信息.模数 = 指针到字节集 (字节数组.取数组指针 (), 字节数组.取成员数 ())
+            产品信息.模数 = 字节数组.取字节集 ()
 
             文本数组.删除所有成员 ()
             字节数组.删除所有成员 ()
@@ -559,9 +557,8 @@
             文本数组.枚举循环 ()
             {
                 字节数组.加入成员 ((字节)文本到整数 (文本数组.取枚举值 ()))
-
             }
-            产品信息.产品代码 = 指针到字节集 (字节数组.取数组指针 (), 字节数组.取成员数 ())
+            产品信息.产品代码 = 字节数组.取字节集 ()
 
         }
         否则 (密钥对格式 == 1)
@@ -571,10 +568,10 @@
             变量 模数文本 <类型 = 文本型>
             变量 产品代码文本 <类型 = 文本型>
             产品信息.算法 = 0
-            产品信息.位数 = 文本到整数 (VMP_取文本中间 (密钥对, "g_nBits: Longword = ", ";"))
-            搜寻位置 = 寻找文本 (密钥对, "g_vPrivate")
-            私钥文本 = VMP_取文本中间 (密钥对, "(", ");", 搜寻位置)
-            搜寻位置 = 寻找文本 (密钥对, "g_vModulus")
+            产品信息.位数 = 文本到整数 (VMP_取文本中间 (密钥对, "g_nBits: Longword = ", ";", , 真))
+            搜寻位置 = 寻找文本 (密钥对, "g_vPrivate", , 真)
+            私钥文本 = VMP_取文本中间 (密钥对, "(", ");", 搜寻位置, 真)
+            搜寻位置 = 寻找文本 (密钥对, "g_vModulus", , 真)
             模数文本 = VMP_取文本中间 (密钥对, "(", ");", 搜寻位置)
             搜寻位置 = 寻找文本 (密钥对, "g_vProductCode")
             产品代码文本 = VMP_取文本中间 (密钥对, "(", ");", 搜寻位置)
@@ -584,9 +581,8 @@
             文本数组.枚举循环 ()
             {
                 字节数组.加入成员 ((字节)文本到整数 (文本数组.取枚举值 ()))
-
             }
-            产品信息.私钥 = 指针到字节集 (字节数组.取数组指针 (), 字节数组.取成员数 ())
+            产品信息.私钥 = 字节数组.取字节集 ()
 
             文本数组.删除所有成员 ()
             字节数组.删除所有成员 ()
@@ -594,9 +590,8 @@
             文本数组.枚举循环 ()
             {
                 字节数组.加入成员 ((字节)文本到整数 (文本数组.取枚举值 ()))
-
             }
-            产品信息.模数 = 指针到字节集 (字节数组.取数组指针 (), 字节数组.取成员数 ())
+            产品信息.模数 = 字节数组.取字节集 ()
 
             文本数组.删除所有成员 ()
             字节数组.删除所有成员 ()
@@ -604,9 +599,8 @@
             文本数组.枚举循环 ()
             {
                 字节数组.加入成员 ((字节)文本到整数 (文本数组.取枚举值 ()))
-
             }
-            产品信息.产品代码 = 指针到字节集 (字节数组.取数组指针 (), 字节数组.取成员数 ())
+            产品信息.产品代码 = 字节数组.取字节集 ()
 
         }
         否则 (密钥对格式 == 2)
@@ -614,19 +608,19 @@
             变量 密钥对明文 <类型 = 文本型>
             密钥对明文 = 多字节到文本 (BASE64文本到字节集 (密钥对))
             产品信息.算法 = 0
-            产品信息.位数 = 文本到整数 (VMP_取文本中间 (密钥对明文, "bits=\"", "\""))
-            产品信息.私钥 = BASE64文本到字节集 (VMP_取文本中间 (密钥对明文, "exp=\"", "\""))
-            产品信息.模数 = BASE64文本到字节集 (VMP_取文本中间 (密钥对明文, "mod=\"", "\""))
-            产品信息.产品代码 = BASE64文本到字节集 (VMP_取文本中间 (密钥对明文, "product=\"", "\""))
+            产品信息.位数 = 文本到整数 (VMP_取文本中间 (密钥对明文, "bits=\"", "\"", , 真))
+            产品信息.私钥 = BASE64文本到字节集 (VMP_取文本中间 (密钥对明文, "exp=\"", "\"", , 真))
+            产品信息.模数 = BASE64文本到字节集 (VMP_取文本中间 (密钥对明文, "mod=\"", "\"", , 真))
+            产品信息.产品代码 = BASE64文本到字节集 (VMP_取文本中间 (密钥对明文, "product=\"", "\"", , 真))
 
         }
         否则 (密钥对格式 == 3)
         {
             产品信息.算法 = 0
-            产品信息.位数 = 文本到整数 (VMP_取文本中间 (密钥对, "$exported_bits = ", ";"))
-            产品信息.私钥 = BASE64文本到字节集 (VMP_取文本中间 (密钥对, "$exported_private = \"", "\";"))
-            产品信息.模数 = BASE64文本到字节集 (VMP_取文本中间 (密钥对, "$exported_modulus = \"", "\";"))
-            产品信息.产品代码 = BASE64文本到字节集 (VMP_取文本中间 (密钥对, "$exported_product_code = \"", "\";"))
+            产品信息.位数 = 文本到整数 (VMP_取文本中间 (密钥对, "$exported_bits = ", ";", , 真))
+            产品信息.私钥 = BASE64文本到字节集 (VMP_取文本中间 (密钥对, "$exported_private = \"", "\";", , 真))
+            产品信息.模数 = BASE64文本到字节集 (VMP_取文本中间 (密钥对, "$exported_modulus = \"", "\";", , 真))
+            产品信息.产品代码 = BASE64文本到字节集 (VMP_取文本中间 (密钥对, "$exported_product_code = \"", "\";", , 真))
 
         }
         否则
@@ -641,14 +635,32 @@
             @ memset (&ProductInfo, 0, sizeof(ProductInfo));
             返回 (假)
         }
-        @ ProductInfo.algorithm = ALGORITHM_RSA;
-        @ ProductInfo.nBits = (size_t)@<产品信息.位数>;
-        @ ProductInfo.nPrivateSize = @<产品信息.私钥>.GetSize ();
-        @ ProductInfo.pPrivate = (byte*)@<产品信息.私钥>.GetPtr ();
-        @ ProductInfo.nModulusSize = @<产品信息.模数>.GetSize ();
-        @ ProductInfo.pModulus = (byte*)@<产品信息.模数>.GetPtr ();
-        @ ProductInfo.nProductCodeSize = @<产品信息.产品代码>.GetSize ();
-        @ ProductInfo.pProductCode = (byte*)@<产品信息.产品代码>.GetPtr ();
+        @ @<产品信息>.GetInfo(&ProductInfo);
+        返回 (真)
+    }
+
+    方法 导入密钥对文件 <公开 类型 = 逻辑型 注释 = "从VMProtect工程文件导入密钥对,返回是否成功." 折叠>
+    参数 工程文件 <类型 = 文本型 注释 = "提供.vmp格式的VMProtect工程文件">
+    {
+        变量 文件内容 <类型 = 文本型>
+        如果 (读入文本文件2 (文件内容, 工程文件, -1, 文本编码类型.UTF8) == 假)
+        {
+            返回 (假)
+        }
+        产品信息.重置为空对象 ()
+        变量 搜寻位置 <类型 = 整数>
+        搜寻位置 = 寻找文本 (文件内容, "<LicenseManager", 0, 真)
+        产品信息.产品代码 = BASE64文本到字节集 (VMP_取文本中间 (文件内容, "ProductCode=\"", "\"", 搜寻位置, 真))
+        产品信息.位数 = 文本到整数 (VMP_取文本中间 (文件内容, "Bits=\"", "\"", 搜寻位置, 真))
+        产品信息.私钥 = BASE64文本到字节集 (VMP_取文本中间 (文件内容, "PrivateExp=\"", "\"", 搜寻位置, 真))
+        产品信息.模数 = BASE64文本到字节集 (VMP_取文本中间 (文件内容, "Modulus=\"", "\"", 搜寻位置, 真))
+        如果 (产品信息.位数 == 0 || 产品信息.私钥.字节集是否为空 () || 产品信息.模数.字节集是否为空 () || 产品信息.产品代码.字节集是否为空 ())
+        {
+            产品信息.重置为空对象 ()
+            @ memset (&ProductInfo, 0, sizeof(ProductInfo));
+            返回 (假)
+        }
+        @ @<产品信息>.GetInfo(&ProductInfo);
         返回 (真)
     }
 
@@ -715,14 +727,7 @@
         @     return FALSE;
         @ }
         产品信息.置对象数据 (数据)
-        @ ProductInfo.algorithm = ALGORITHM_RSA;
-        @ ProductInfo.nBits = (size_t)@<产品信息.位数>;
-        @ ProductInfo.nPrivateSize = @<产品信息.私钥>.GetSize ();
-        @ ProductInfo.pPrivate = (byte*)@<产品信息.私钥>.GetPtr ();
-        @ ProductInfo.nModulusSize = @<产品信息.模数>.GetSize ();
-        @ ProductInfo.pModulus = (byte*)@<产品信息.模数>.GetPtr ();
-        @ ProductInfo.nProductCodeSize = @<产品信息.产品代码>.GetSize ();
-        @ ProductInfo.pProductCode = (byte*)@<产品信息.产品代码>.GetPtr ();
+        @ @<产品信息>.GetInfo(&ProductInfo);
         @ return TRUE;
     }
 
@@ -731,10 +736,10 @@
         返回 (产品信息.取对象数据 ())
     }
 
-    方法 密钥对是否有效 <公开 类型 = 逻辑型 注释 = "检查是否已经导入了密钥对." 返回值注释 = "密钥对有效返回真" 折叠 @禁止流程检查 = 真>
+    方法 密钥对是否有效 <公开 类型 = 逻辑型 注释 = "检查是否已经导入了密钥对" 返回值注释 = "密钥对有效返回真" 折叠 @禁止流程检查 = 真>
     {
-        @ return (@<产品信息>.IsNullObject() == FALSE) || (ProductInfo.nBits != 0) || (ProductInfo.pPrivate != @<产品信息.私钥>.GetPtr ()) ||
-        @        (ProductInfo.pModulus != @<产品信息.模数>.GetPtr ()) || (ProductInfo.pProductCode != @<产品信息.产品代码>.GetPtr ());
+        @ return (@<产品信息>.IsNullObject() == FALSE) || (ProductInfo.nBits != 0) || (ProductInfo.pPrivate != @<产品信息.私钥>.GetPtr()) ||
+        @        (ProductInfo.pModulus != @<产品信息.模数>.GetPtr()) || (ProductInfo.pProductCode != @<产品信息.产品代码>.GetPtr());
     }
 
     方法 取VMP日期 <公开 类型 = 整数 注释 = "返回VMProtect序列号信息的整数型日期" 折叠 @嵌入式方法 = "">
@@ -800,7 +805,7 @@
 
 # ------
 
-类 VMProtect错误代码 <公开 注释 = "VMProtectErrors为生成注册码时返回的错误代码." 折叠 @文档 = "category = \"VMProtect注册机.辅助类\"">
+类 VMProtect错误代码 <公开 注释 = "VMProtectErrors为生成注册码时返回的错误代码" 折叠 @文档 = "category = \"VMProtect注册机.辅助类\"">
 {
     常量 无错误 <公开 类型 = 整数 值 = 0 注释 = "无任何错误,序列号生成成功">
     常量 不支持的算法 <公开 类型 = 整数 值 = 1 注释 = "函数的第一个参数传递了错误的密钥加密算法">
@@ -819,7 +824,7 @@
     常量 模数错误 <公开 类型 = 整数 值 = 14 注释 = "函数的第一个参数包含不正确的模数数值">
 }
 
-类 VMProtect产品信息 <公开 折叠 @文档 = "category = \"VMProtect注册机.辅助类\"">
+类 VMProtect产品信息 <公开 基础类 = 扩展对象类 折叠 @文档 = "category = \"VMProtect注册机.辅助类\"">
 {
     变量 算法 <公开 类型 = 整数 注释 = "algorithm" 注释 = "  ALGORITHM_RSA = 0," 注释 = "  ALGORITHM_PADDING = 0xFFFFFFFF">
     变量 位数 <公开 类型 = 变整数 注释 = "RSA密钥对的位数">
@@ -827,8 +832,7 @@
     变量 模数 <公开 类型 = 字节集类>
     变量 产品代码 <公开 类型 = 字节集类>
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
-            @视窗.后缀文本 = "override">
+    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 注释 = "" 折叠 @虚拟方法 = 可覆盖>
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
     {
@@ -839,9 +843,26 @@
         加入文本 (展示内容, "4. 模数: " + 取调试文本2 (最大展示数据尺寸, 模数) + "\r\n")
         加入文本 (展示内容, "5. 产品代码: " + 取调试文本2 (最大展示数据尺寸, 产品代码) + "\r\n")
     }
+
+    # @begin
+    # <> <include>
+    # VMProtectProductInfo* GetInfo(VMProtectProductInfo* stInfo)
+    # {
+    #     stInfo->algorithm = ALGORITHM_RSA;
+    #     stInfo->nBits = static_cast<size_t>(@<位数>);
+    #     stInfo->nPrivateSize = static_cast<size_t>(@<私钥>.GetSize());
+    #     stInfo->pPrivate = @<私钥>.GetPtr();
+    #     stInfo->nModulusSize = static_cast<size_t>(@<模数>.GetSize());
+    #     stInfo->pModulus = @<模数>.GetPtr();
+    #     stInfo->nProductCodeSize = static_cast<size_t>(@<产品代码>.GetSize());
+    #     stInfo->pProductCode = @<产品代码>.GetPtr();
+    #     return stInfo;
+    # }
+    # <> </include>
+    # @end
 }
 
-类 VMProtectSerialNumberFlags <公开 注释 = "  \"VMP注册机类\"的方法已使用嵌入式语句高度封装," 注释 = "一般用户不需要使用本常量类." 折叠
+类 VMProtectSerialNumberFlags <公开 注释 = "\"VMP注册机类\"的方法已使用嵌入式语句高度封装," 注释 = "一般用户不需要使用本常量类." 折叠
         @文档 = "category = \"VMProtect注册机.辅助类\"" @强制依赖 = "VMP注册机类">
 {
     常量 有用户名 <公开 类型 = 整数 值 = @HAS_USER_NAME 注释 = "将pUserName变量中的用户名置入到序列号" 编辑时信息 = "33FFC, 0, 0, 0">
@@ -855,7 +876,7 @@
     常量 有用户数据 <公开 类型 = 整数 值 = @HAS_USER_DATA 注释 = "将pUserData地址的自定义用户数据置入到序列号" 编辑时信息 = "33FFC, 0, 0, 0">
 }
 
-类 VMProtectProductInfo <公开 注释 = "  \"VMP注册机类\"的方法已使用嵌入式语句高度封装," 注释 = "一般用户不需要使用本结构类." 折叠
+类 VMProtectProductInfo <公开 注释 = "\"VMP注册机类\"的方法已使用嵌入式语句高度封装," 注释 = "一般用户不需要使用本结构类." 折叠
         @文档 = "category = \"VMProtect注册机.辅助类\"" @视窗.结构类 = 1>
 {
     变量 algorithm <公开 类型 = 整数 注释 = "ALGORITHM_RSA = 0," 注释 = "ALGORITHM_PADDING = 0xFFFFFFFF">
@@ -868,10 +889,10 @@
     变量 pProductCode <公开 类型 = 变整数>
 }
 
-类 VMProtectSerialNumberInfo <公开 注释 = "  \"VMP注册机类\"的方法已使用嵌入式语句高度封装," 注释 = "一般用户不需要使用本结构类." 折叠
+类 VMProtectSerialNumberInfo <公开 注释 = "\"VMP注册机类\"的方法已使用嵌入式语句高度封装," 注释 = "一般用户不需要使用本结构类." 折叠
         @文档 = "category = \"VMProtect注册机.辅助类\"" @视窗.结构类 = 1>
 {
-    变量 标志 <公开 类型 = 整数 注释 = "\"VMProtect序列号标志\"中常量的位或值.">
+    变量 标志 <公开 类型 = 整数 注释 = "\"VMProtect序列号标志\"中常量的位或值">
     变量 用户名 <公开 类型 = 变整数 注释 = "用户名称的Unicode文本指针">
     变量 邮箱 <公开 类型 = 变整数 注释 = "用户的邮箱的Unicode文本指针">
     变量 到期日期 <公开 类型 = 整数 注释 = "序列号的有效日期">

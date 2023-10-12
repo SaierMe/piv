@@ -6229,7 +6229,7 @@ public:
         }
         else // ANSI
         {
-            pStr.reset(std::string{});
+            pStr.reset(new std::string{});
             piv::encoding::A2Uex(*pStr, reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
         }
 #else

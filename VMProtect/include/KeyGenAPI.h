@@ -1,9 +1,5 @@
 #pragma once
 
-#ifndef byte
-	typedef unsigned char byte;
-#endif
-
 enum VMProtectErrors
 {
 	ALL_RIGHT = 0,
@@ -48,11 +44,11 @@ struct VMProtectProductInfo
 	VMProtectAlgorithms	algorithm;
 	size_t		nBits;
 	size_t		nPrivateSize;
-	byte		*pPrivate;
+	BYTE		*pPrivate;
 	size_t		nModulusSize;
-	byte		*pModulus;
+	BYTE		*pModulus;
 	size_t		nProductCodeSize;
-	byte		*pProductCode;
+	BYTE		*pProductCode;
 };
 struct VMProtectSerialNumberInfo
 {
