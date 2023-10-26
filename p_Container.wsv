@@ -264,7 +264,7 @@
     # <> <include>
     # std::vector<@dt<模板类型1>> m_vecData;
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_vecData = objCopyFrom.m_vecData; }
-    # inline void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom) { m_vecData = std::move(objCopyFrom.m_vecData); }
+    # inline @sn<current_class>& operator=(@sn<current_class>&& rhs) { m_vecData = std::move(rhs.m_vecData); return *this; }
     # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_vecData == objCompare.m_vecData); }
     # inline std::vector<@dt<模板类型1>> &data () { return m_vecData; }
     # inline std::vector<@dt<模板类型1>> *pdata () { return &m_vecData; }
@@ -500,7 +500,7 @@
     # <> <include>
     # std::vector<std::remove_pointer<@dt<模板类型1> *>::type> m_vecData;
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_vecData = objCopyFrom.m_vecData; }
-    # inline void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom) { m_vecData = std::move(objCopyFrom.m_vecData); }
+    # inline @sn<current_class>& operator=(@sn<current_class>&& rhs) { m_vecData = std::move(rhs.m_vecData); return *this; }
     # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_vecData == objCompare.m_vecData); }
     # inline std::vector<std::remove_pointer<@dt<模板类型1> *>::type> &data () { return m_vecData; }
     # inline std::vector<std::remove_pointer<@dt<模板类型1> *>::type> *pdata () { return &m_vecData; }
@@ -618,7 +618,7 @@
 #     using DATA_TYPE = std::vector<data_type>;  \
 #     DATA_TYPE m_vecData;  \
 #     inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_vecData = objCopyFrom.m_vecData; }  \
-#     inline void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom) { m_vecData = std::move(objCopyFrom.m_vecData); }  \
+#     inline @sn<current_class>& operator=(@sn<current_class>&& rhs) { m_vecData = std::move(rhs.m_vecData); return *this; }  \
 #     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_vecData == objCompare.m_vecData); }  \
 #     inline DATA_TYPE &data () { return m_vecData; }  \
 #     inline DATA_TYPE *pdata () { return &m_vecData; }  \

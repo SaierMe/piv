@@ -67,7 +67,7 @@
 }
 
 类 数组P <公开 注释 = "\"数组类辅助操作\"的上位替代,部分参考了\"龙纹\"的\"FP函数扩展\"模块."
-        注释 = "本类需要求std:++17,最低VS版本要求为Visual Studio 2017." @文档 = "category = \"数组操作\"" @禁止创建对象 = 真
+        注释 = "本类需要求std:++17,最低VS版本要求为Visual Studio 2017." 折叠 @文档 = "category = \"数组操作\"" @禁止创建对象 = 真
         @视窗.外部头文件 = "src\\piv_array.hpp" @视窗.附加编译参数 = "cpp: /std:c++17" @视窗.需求VS版本 = "15-">
 {
     方法 创建数组类 <公开 静态 注释 = "语法糖,快速创建一个任意类型的数组类." 注释 = "例: 整数数组 = 数组P.创建数组类 (整数数组类, 1, 2, 3)" 折叠 @嵌入式方法 = "">
@@ -438,20 +438,13 @@
 类 数据类型基础类 <公开 基础类 = 扩展对象类 注释 = "本类可以在封装结构体和C++类时作为其基础类,用作提供一些基本的操作功能." 注释 = "注意:"
         注释 = "  1. 本类需要配合 PIV_DECLARE_STRUCT_CLASS 宏使用,宏的参数为所欲封装的结构体或C++类型;" 注释 = "  2. 本类使用指针存储所封装的数据类型;"
         注释 = "  3. 所封装的结构体和类必须有默认构造函数;" 注释 = "  4. \"是否为参考\"为真时,表示引用了外部指针,复制的类变量指向同一数据,"
-        注释 = "此时本类不会管理指针的释放,请注意外部指针的生命周期;" 注释 = "  5. \"是否为参考\"为假时,本类可以复制赋值;"
-        注释 = "  6. 本类的数据指针默认为空指针,当你执行\"初始化/置指针参考\"或其他一些方法时,才实际拥有数据;" 折叠 @文档 = "category = \"数据处理\""
-        @禁止创建对象 = 真>
+        注释 = "此时本类不会管理指针的释放,请注意外部指针的生命周期;" 注释 = "  5. \"是否为参考\"为假时,本类可以复制赋值;" 折叠 @文档 = "category = \"数据处理\""
+        @视窗.外部头文件 = "<memory>" @禁止创建对象 = 真>
 {
-    方法 初始化 <公开 注释 = "如果指针为空,则进行初始化赋值,手动执行本方法可以确保指针非空." 注释 = "本封装类定义变量时默认为空指针,一般执行其他方法会自动初始化赋值或引用外部指针." 折叠
-            @嵌入式方法 = "">
-    {
-        @ @sn<this>.init ()
-    }
-
     方法 置指针参考 <公开 注释 = "引用外部指针,所引用的指针不由本对象释放,请注意它的生命周期." 注释 = "可以多个对象实例引用同一个指针." 折叠 @嵌入式方法 = "">
     参数 数据指针 <类型 = 变整数 注释 = "必须是所封装C++类型的指针">
     {
-        @ @sn<this>.reference ((@sn<current_class_def>::DATA_TYPE*)@<数据指针>)
+        @ @sn<this>.reference(reinterpret_cast<@sn<current_class_def>::DATA_TYPE*>(@<数据指针>))
     }
 
     方法 复制 <公开 注释 = "将当前的对象数据复制到另一个对象中" 折叠 @嵌入式方法 = "">
@@ -463,34 +456,34 @@
     方法 置指针数据 <公开 注释 = "将所指定指针的数据复制到本类中,本类原来的数据将被覆盖." 折叠 @嵌入式方法 = "">
     参数 数据指针 <类型 = 变整数 注释 = "必须是所封装C++类型的指针">
     {
-        @ @sn<this>.Copy ((@sn<current_class_def>::DATA_TYPE*)@<数据指针>)
+        @ @sn<this>.Copy((@sn<current_class_def>::DATA_TYPE*)@<数据指针>)
     }
 
     方法 是否为参考 <公开 类型 = 逻辑型 注释 = "返回当前对象是否为参考变量,即所封装的C++类型指针由外部管理." 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.is_reference ()
+        @ @sn<this>.is_reference()
     }
 
     方法 取数据指针 <公开 类型 = 变整数 注释 = "返回所封装C++类型的指针地址,如果指针为空将先进行初始化赋值再返回." 折叠 @嵌入式方法 = "">
     {
-        @ (INT_P)@sn<this>.pdata ()
+        @ static_cast<INT_P>(@sn<this>.pdata())
     }
 
     方法 取数据尺寸 <公开 类型 = 整数 注释 = "返回所封装C++类型的尺寸" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.get_size ()
+        @ @sn<this>.get_size()
     }
 
     方法 取数据字节集 <公开 类型 = 字节集类 注释 = "返回所封装C++数据所对应的字节集数据" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.get_bin (CVolMem ())
+        @ @sn<this>.get_bin(CVolMem())
     }
 }
 
 类 结构指针基础类 <公开 基础类 = 扩展对象类 注释 = "本类可以在封装结构体和C++类时作为其基础类,用作提供一些基本的操作功能." 注释 = "注意:"
         注释 = "  1. 本类需要配合 PIV_DECLARE_STRUCT_PTR 宏使用,宏的参数为所欲封装的结构体或C++类型;" 注释 = "  2. 本类使用指针存储所封装的数据类型;"
         注释 = "  3. 本类只能引用外部指针,复制的类变量指向同一数据,且不会管理指针的释放,请注意外部指针的生命周期;"
-        注释 = "  4. 本类的数据指针默认为空指针,当你执行赋值、\"置指针参考\"等方法时,才实际拥有数据;" @文档 = "category = \"数据处理\"" @禁止创建对象 = 真>
+        注释 = "  4. 本类的数据指针默认为空指针,当你执行赋值、\"置指针参考\"等方法时,才实际拥有数据;" 折叠 @文档 = "category = \"数据处理\"" @禁止创建对象 = 真>
 {
     方法 置指针参考 <公开 注释 = "引用外部指针,所引用的指针不由本对象释放,请注意它的生命周期." 注释 = "可以多个对象实例引用同一个指针." 折叠 @嵌入式方法 = "">
     参数 数据指针 <类型 = 变整数 注释 = "必须是所封装C++类型的指针">
@@ -498,7 +491,7 @@
         @ @sn<this>.reference ((@sn<current_class_def>::DATA_TYPE*)@<数据指针>)
     }
 
-    方法 取数据指针 <公开 类型 = 变整数 注释 = "返回所封装C++类型的指针地址,如果指针为空则返回0." @嵌入式方法 = "">
+    方法 取数据指针 <公开 类型 = 变整数 注释 = "返回所封装C++类型的指针地址,如果指针为空则返回0." 折叠 @嵌入式方法 = "">
     {
         @ (INT_P)@sn<this>.pdata ()
     }
@@ -522,6 +515,7 @@
 # #define PIV_MEM_PTR_AND_SIZE(_MEM)  (_MEM).GetPtr(), (_MEM).GetSize()
 # #define PIV_TEXT_AND_SIZE(_STR)  (_STR).GetText(), (_STR).GetLength()
 # #define PIV_GET_TEXT(_STR)  (_STR).IsEmpty() ? nullptr : (_STR).GetText()
+# #define PIV_GET_GLOBAL_OBJ(_OBJ_TYPE)  dynamic_cast<_OBJ_TYPE&>(g_objVolApp.GetRefGlobalObject (VOL_RUNTIME_CLASS (_OBJ_TYPE)))
 # namespace piv
 # {
 #     // 取基本数据封装类的值指针,空对象时返回nullptr
@@ -531,58 +525,98 @@
 # }
 # <> </include>
 # <> </global>
-# // 用作快捷封装带参考的结构体和C++类  data_type: 所封装的数据类型
-# @def_macro PIV_DECLARE_STRUCT_CLASS(data_type)  \
+#
+# // 用作快捷封装带参考的C++类  class_data_type: 所封装的数据类型
+# @def_macro PIV_DECLARE_BASE_CLASS(class_data_type)  \
 # <>     <include>  \
-#     using DATA_TYPE = data_type;  \
-#     DATA_TYPE* m_pData = nullptr; bool m_Owned = false;  \
-#     @sn<current_class> (const DATA_TYPE& rhs) { COPY_MEM (pdata (), &rhs, sizeof (DATA_TYPE)); }  \
-#     @sn<current_class> (DATA_TYPE* rhs) { m_pData = rhs; m_Owned = false; }  \
-#     @sn<current_class> (const DATA_TYPE* rhs) { COPY_MEM (pdata (), rhs, sizeof (DATA_TYPE)); }  \
-#     inline @sn<current_class>& init () { if (!m_pData) { m_pData = new DATA_TYPE{}; m_Owned = true; } return *this; }  \
-#     inline void cleanup () { if (m_Owned && m_pData) { delete m_pData; m_pData = nullptr; m_Owned = false; } }  \
-#     inline void @an<_OnCleanupExtra> () { cleanup (); }  \
-#     void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom)  {  \
-#         if (objCopyFrom.m_Owned) {  \
-#             if (!m_Owned) { m_pData = new DATA_TYPE{}; }  \
-#             COPY_MEM (m_pData, objCopyFrom.pdata (), sizeof (DATA_TYPE)); m_Owned = true;  \
+#     using DATA_TYPE = class_data_type;  \
+#     std::unique_ptr<DATA_TYPE> m_ptr = nullptr;  \
+#     bool m_ref = false;  \
+#     @sn<current_class>(const DATA_TYPE& rhs) { m_ptr.reset(new DATA_TYPE{}); *m_ptr = rhs; m_ref = false; }  \
+#     @sn<current_class>(DATA_TYPE&& rhs) { m_ptr.reset(new DATA_TYPE{}); *m_ptr = std::move(rhs); m_ref = false; }  \
+#     @sn<current_class>(DATA_TYPE* rhs) { m_ptr.reset(rhs); m_ref = true; }  \
+#     @sn<current_class>(const DATA_TYPE* rhs) { m_ptr.reset(new DATA_TYPE{}); *m_ptr = *rhs; m_ref = false; }  \
+#     inline @sn<current_class>& operator=(const DATA_TYPE& rhs) {  \
+#         if (m_ref) { m_ptr.release(); m_ptr.reset(new DATA_TYPE{}); }  \
+#         *m_ptr = rhs; m_ref = false; return *this;  \
+#     }  \
+#     inline @sn<current_class>& operator=(DATA_TYPE&& rhs) {  \
+#         if (m_ref) { m_ptr.release(); m_ptr.reset(new DATA_TYPE{}); }  \
+#         *m_ptr = std::move(rhs); m_ref = false; return *this;  \
+#     }  \
+#     inline @sn<current_class>& operator=(DATA_TYPE* rhs) {  \
+#         if (m_ref) { m_ptr.release(); }  \
+#         m_ptr.reset(rhs); m_ref = true; return *this;  \
+#     }  \
+#     inline @sn<current_class>& operator=(const DATA_TYPE* rhs) {  \
+#         if (m_ref) { m_ptr.release(); m_ptr.reset(new DATA_TYPE{}); }  \
+#         *m_ptr = *rhs; m_ref = false; return *this;  \
+#     }  \
+#     inline @sn<current_class>& operator=(@sn<current_class>&& rhs) {  \
+#         if (m_ref) { m_ptr.release(); }  \
+#         m_ptr = std::move(rhs.m_ptr); m_ref = rhs.m_ref;  \
+#         return *this;  \
+#     }  \
+#     inline void @an<_OnInitExtra>() { if(!m_ptr) m_ptr.reset(new DATA_TYPE{}); }  \
+#     inline void @an<_OnCleanupExtra>() { if(m_ref) { m_ptr.release(); } }  \
+#     inline void @an<_CopySelfFromExtra>(const @sn<current_class>& objCopyFrom) {  \
+#         if (m_ref) { m_ptr.release(); } m_ref = objCopyFrom.m_ref;  \
+#         if (objCopyFrom.m_ref) {  \
+#             m_ptr.reset(const_cast<DATA_TYPE*>(objCopyFrom.pdata()));  \
 #         } else {  \
-#             cleanup (); m_pData = (DATA_TYPE*)objCopyFrom.pdata (); m_Owned = false;  \
+#             m_ptr.reset(new DATA_TYPE{}); *m_ptr = objCopyFrom.data();  \
 #         }  \
 #     }  \
-#     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const  \
-#     { if (!m_pData || !objCompare.pdata ()) return FALSE; return (memcmp (pdata (), objCompare.pdata (), sizeof (DATA_TYPE)) == 0); }  \
-#     inline void reference (DATA_TYPE* pData) { if (m_Owned && m_pData) { delete m_pData; } m_pData = pData; m_Owned = false; }  \
-#     inline @sn<current_class>& Copy (const DATA_TYPE& data)  { COPY_MEM (pdata (), &data, sizeof (DATA_TYPE)); return *this; }  \
-#     inline @sn<current_class>& Copy (const DATA_TYPE* pData)  { COPY_MEM (pdata (), pData, sizeof (DATA_TYPE)); return *this; }  \
-#     inline DATA_TYPE& data ()  { init (); return *m_pData; }  \
-#     inline const DATA_TYPE& data () const { return *m_pData; }  \
-#     inline DATA_TYPE* pdata ()  { init (); return m_pData; }  \
-#     inline const DATA_TYPE* pdata () const { return m_pData; }  \
-#     inline DATA_TYPE* GetPtr () { return IsNullObject () ? nullptr : pdata (); }  \
-#     inline const DATA_TYPE* GetPtr () const { return IsNullObject () ? nullptr : m_pData; }  \
-#     inline BOOL is_reference () const { return !m_Owned; };  \
-#     inline INT get_size () const  { return (INT)sizeof (DATA_TYPE); }  \
-#     inline CVolMem& get_bin (CVolMem& memBuf)  { memBuf.CopyFrom (pdata (), sizeof (DATA_TYPE)); return memBuf; }  \
-#     inline operator DATA_TYPE& () { init (); return *m_pData; }  \
-#     inline operator DATA_TYPE* () { init (); return m_pData; }  \
+#     inline DATA_TYPE& data() { return *m_ptr; }  \
+#     inline const DATA_TYPE& data() const { return *m_ptr; }  \
+#     inline DATA_TYPE* pdata() { return m_ptr.get(); }  \
+#     inline const DATA_TYPE* pdata() const { return m_ptr.get(); }  \
+#     inline operator DATA_TYPE&() { return data(); }  \
+#     inline operator const DATA_TYPE&() const { return data(); }  \
+#     inline operator DATA_TYPE*() { return pdata(); }  \
+#     inline operator const DATA_TYPE*() const { return pdata(); }  \
 # <>     </include>
 #
-# @def_macro PIV_DECLARE_STRUCT_PTR(data_type)  \
+# // 用作快捷封装带参考的结构体和C++类  struct_data_type: 所封装的数据类型
+# @def_macro PIV_DECLARE_STRUCT_CLASS(struct_data_type)  \
+#     @m<PIV_DECLARE_BASE_CLASS> (struct_data_type)  \
 # <>     <include>  \
-#     using DATA_TYPE = data_type;  \
-#     DATA_TYPE* m_pData = nullptr;  \
-#     @sn<current_class> (DATA_TYPE* rhs) { m_pData = rhs; }  \
-#     void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom)  { m_pData = objCopyFrom.m_pData; }  \
-#     inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return m_pData == objCompare.m_pData; }  \
-#     inline void reference (DATA_TYPE* pData) { m_pData = pData; }  \
-#     inline DATA_TYPE& data ()  { return *m_pData; }  \
-#     inline const DATA_TYPE& data () const { return *m_pData; }  \
-#     inline DATA_TYPE* pdata ()  { return m_pData; }  \
-#     inline const DATA_TYPE* pdata () const { return m_pData; }  \
-#     inline operator DATA_TYPE& () { return *m_pData; }  \
-#     inline operator DATA_TYPE* () { return m_pData; }  \
-#     inline INT get_size () const  { return (INT)sizeof (DATA_TYPE); }  \
-#     inline CVolMem& get_bin (CVolMem& memBuf)  { memBuf.CopyFrom (pdata (), sizeof (DATA_TYPE)); return memBuf; }  \
+#     inline void reference(DATA_TYPE* rhs) { if (m_ref) { m_ptr.release(); } m_ptr.reset(rhs); m_ref = true; }  \
+#     inline @sn<current_class>& Copy(const DATA_TYPE& rhs) {  \
+#         if (m_ref) { m_ptr.release(); m_ptr.reset(new DATA_TYPE{}); m_ref = false; }  \
+#         *m_ptr = rhs; return *this;  \
+#     }  \
+#     inline @sn<current_class>& Copy(const DATA_TYPE* rhs) {  \
+#         if (m_ref) { m_ptr.release(); m_ptr.reset(new DATA_TYPE{}); m_ref = false; }  \
+#         *m_ptr = *rhs; return *this;  \
+#     }  \
+#     inline DATA_TYPE* GetPtr() { return IsNullObject () ? nullptr : m_ptr.get(); }  \
+#     inline const DATA_TYPE* GetPtr() const { return IsNullObject () ? nullptr : m_ptr.get(); }  \
+#     inline BOOL is_reference() const { return m_ref; };  \
+#     inline INT get_size() const { return static_cast<INT>(sizeof(DATA_TYPE)); }  \
+#     inline CVolMem& get_bin (CVolMem& memBuf) { memBuf.CopyFrom(m_ptr.get(), sizeof(DATA_TYPE)); return memBuf; }  \
 # <>     </include>
+#
+# // 结构指针基础类
+# @def_macro PIV_DECLARE_STRUCT_PTR(DATA_TYPE)  \
+# <>     <include>  \
+#     DATA_TYPE* m_ptr = nullptr;  \
+#     @sn<current_class>(DATA_TYPE* rhs) { m_ptr = rhs; }  \
+#     void @an<_CopySelfFromExtra>(const @sn<current_class>& objCopyFrom)  { m_ptr = objCopyFrom.m_ptr; }  \
+#     inline BOOL @an<_IsSelfEqualExtra>(const @sn<current_class>& objCompare) const { return m_ptr == objCompare.m_ptr; }  \
+#     inline @sn<current_class>& operator=(@sn<current_class>&& rhs) {  \
+#         m_ptr = std::move(rhs.m_ptr);  \
+#         return *this;  \
+#     }  \
+#     inline void reference(DATA_TYPE* pData) { m_ptr = m_ptr; }  \
+#     inline DATA_TYPE& data() { return *m_ptr; }  \
+#     inline const DATA_TYPE& data() const { return *m_ptr; }  \
+#     inline DATA_TYPE* pdata() { return m_ptr; }  \
+#     inline const DATA_TYPE* pdata() const { return m_ptr; }  \
+#     inline operator DATA_TYPE&() { return *m_ptr; }  \
+#     inline operator DATA_TYPE*() { return m_ptr; }  \
+#     inline INT get_size() const { return static_cast<INT>(sizeof(DATA_TYPE)); }  \
+#     inline CVolMem& get_bin(CVolMem& memBuf) { if (m_ptr) { memBuf.CopyFrom(m_ptr, sizeof(DATA_TYPE)); } return memBuf; }  \
+# <>     </include>
+#
 # @end

@@ -112,6 +112,7 @@
         "cstdbool": "cpp",
         "cinttypes": "cpp",
         "vol_base.h": "c",
-        "piv_bit7z copy.C": "cpp"
+        "piv_bit7z copy.C": "cpp",
+        "cerrno": "cpp"
     }
 }

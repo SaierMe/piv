@@ -61,6 +61,8 @@
 
   会依赖部分官方模块，但不会依赖界面库和其他第三方模块。
 
+> PIV静态库已经合并到PIV基础类，请自行删除旧源码的相关模块配置
+
 本模块封装遵从以下标准：
 
 - **不重复造轮子**
@@ -109,6 +111,14 @@
 ## 📝 更新日志
 
 ※我经常修改现有的代码，比如修正bug、优化效率、规范格式、修订备注等……如果功能和用法没有改变，一般不会写在更新日志里，所以每次更新改动的地方其实还是有不少的。
+
+### 📅 2023/10/28
+
+1. 新增子模块「PIV网络库」；
+1. 新增支持库「Asio2网络」以及相关例程，目前已封装 Ping 和 TCP、HTTP 客户端，更多功能待更新；
+1. 新增全局方法 _u8 和 _sv，为「创建文本对象U」和「创建文本视图U」的别名；
+1. 新增全局方法「取全局单例、构造对象、带参构造对象」，前两个相比系统的「取全局对象、新建对象」，返回值即为所提供的对象类型，无需做类型转换；
+1. 其他优化和修正；
 
 ### 📅 2023/10/12
 
@@ -493,7 +503,7 @@
 - **[{fmt}](https://github.com/fmtlib/fmt)**  `10.1.1`  `MIT license` 格式化文本库，等同 C++20 std::format 的实现 
 - **[md4c](https://github.com/mity/md4c)** `0.4.8`  `MIT license` CommonMark 0.30 规范 + GFM 的 Markdown 解析库
 - **[simpleini](https://github.com/brofield/simpleini)** `4.20` `MIT license` 简易的 INI 配置文件读写库
-- **[simdutf](https://github.com/simdutf/simdutf)** `3.2.15` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
+- **[simdutf](https://github.com/simdutf/simdutf)** `4.0.3` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
 - **[OpenCC](https://github.com/BYVoid/OpenCC)** `1.1.6` `Apache-2.0 license` 中文简繁转换开源项目，支持词汇级别的转换、异体字转换和地区习惯用词转换
 - **[7-zip](https://www.7-zip.org/)** `23.01` `GNU LGPL license` 免费的开源压缩软件（采用GNU LGPL协议，只使用它的 dll 文件不会传染）
 - **[bit7z](https://github.com/rikyoz/bit7z)** `4.0.1` `Mozilla Public License v2.0` 7-zip 的封装类

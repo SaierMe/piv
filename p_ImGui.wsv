@@ -10,7 +10,7 @@
         @视窗.头文件搜寻目录 = "imgui\r\nFrameWork">
 
 类 ImGui <公开 注释 = "ImGui是一个即时渲染UI,即每一帧都会重新计算布局和渲染,对CPU和GPU的占用比MFC/WTL高."
-        注释 = "由于采用DirectX、OpenGL、Vulkan等引擎渲染界面，性能和图像质量都很高.">
+        注释 = "由于采用DirectX、OpenGL、Vulkan等引擎渲染界面，性能和图像质量都很高." 折叠>
 {
     方法 检查版本 <公开 静态 注释 = "用于验证调用方代码和Dear ImGui编译版本之间的ABI兼容性" 折叠 @嵌入式方法 = "">
     {
@@ -2643,7 +2643,7 @@
     }
 }
 
-类 ImGui表格 <公开 注释 = "ImGui的表格组件">
+类 ImGui表格 <公开 注释 = "ImGui的表格组件" 折叠>
 {
 
     # 表格 | Tables
@@ -2753,7 +2753,7 @@
     }
 }
 
-类 IM绘制列表类 <公开 基础类 = 结构指针基础类 注释 = "ImDrawList" 折叠>
+类 IM绘制列表类 <公开 基础类 = 结构指针基础类 注释 = "ImDrawList">
 {
 
     # @ @m<PIV_DECLARE_STRUCT_PTR> (ImDrawList)
@@ -3217,7 +3217,7 @@
     # size_t m_index;
     # std::vector<PivStringU> m_vecData;
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_vecData = objCopyFrom.m_vecData; }
-    # inline void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom) { m_vecData = std::move(objCopyFrom.m_vecData); }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_vecData = std::move(rhs.m_vecData); return *this; }
     # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_vecData == objCompare.m_vecData); }
     # inline std::vector<PivStringU> &data () { return m_vecData; }
     # inline std::vector<PivStringU> *pdata () { return &m_vecData; }

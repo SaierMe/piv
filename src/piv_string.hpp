@@ -6545,3 +6545,160 @@ public:
 }; // PivAny2Us
 
 #endif // _PIV_STRING_HPP
+
+#ifndef _PIV_STRING_HPP_2023_10
+#define _PIV_STRING_HPP_2023_10
+
+/**
+ * @brief 任意编码转std::string_view
+ */
+class PivStr2SV
+{
+private:
+    piv::string_view _sv;
+    std::unique_ptr<std::string> _buffer{nullptr};
+
+public:
+    PivStr2SV() = delete;
+    ~PivStr2SV() {}
+
+    /**
+     * @brief 构造的同时将提供的文本转换
+     * @param s 所欲转换的任意编码文本
+     */
+    PivStr2SV(const char *s)
+    {
+        _sv = s;
+    }
+
+    PivStr2SV(const wchar_t *s)
+    {
+        _buffer.reset(new std::string{});
+        piv::encoding::W2Uex(*_buffer, s, -1);
+        _sv = *_buffer;
+    }
+
+    PivStr2SV(const CVolString &s)
+    {
+        _buffer.reset(new std::string{});
+        piv::encoding::W2Uex(*_buffer, s.GetText(), static_cast<size_t>(s.GetLength()));
+        _sv = *_buffer;
+    }
+
+    PivStr2SV(const CVolMem &s)
+    {
+#ifdef SIMDUTF_H
+        int encodings = simdutf::detect_encodings(reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
+        if ((encodings & 2) == 2) // UTF-16LE
+        {
+            _buffer.reset(new std::string{});
+            piv::encoding::W2Uex(*_buffer, s.GetTextPtr(), static_cast<size_t>(s.GetSize()) / 2);
+            _sv = *_buffer;
+        }
+        else if ((encodings & 1) == 1) // UTF-8
+        {
+            _sv = piv::string_view{reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize())};
+        }
+        else // ANSI
+        {
+            _buffer.reset(new std::string{});
+            piv::encoding::A2Uex(*_buffer, reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
+            _sv = *_buffer;
+        }
+#else
+        _sv = piv::string_view{reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize())};
+#endif
+    }
+
+    PivStr2SV(const PivStringA &s)
+    {
+        _sv = s.data();
+    }
+
+    PivStr2SV(const PivStringU &s)
+    {
+        _sv = s.data();
+    }
+
+    PivStr2SV(const PivStringW &s)
+    {
+        _buffer.reset(new std::string{});
+        piv::encoding::W2Uex(*_buffer, s.GetText(), s.GetLength());
+        _sv = *_buffer;
+    }
+
+    PivStr2SV(const PivStringViewA &s)
+    {
+        _sv = s.data();
+    }
+
+    PivStr2SV(const PivStringViewU &s)
+    {
+        _sv = s.data();
+    }
+
+    PivStr2SV(const PivStringViewW &s)
+    {
+        _buffer.reset(new std::string{});
+        piv::encoding::W2Uex(*_buffer, s.GetText(), s.GetLength());
+        _sv = *_buffer;
+    }
+
+    /**
+     * @brief 获取转换后的文本指针
+     * @return 字符串指针
+     */
+    inline const char *GetText() const noexcept
+    {
+        return _sv.data();
+    }
+
+    /**
+     * @brief 获取转换后的文本指针
+     * @return 字符串指针
+     */
+    inline const char *GetPtr() const noexcept
+    {
+        return _sv.data();
+    }
+
+    /**
+     * @brief 获取转换后的尾字符指针
+     * @return 尾字符指针
+     */
+    inline const char *GetEndPtr() const noexcept
+    {
+        return _sv.data() + _sv.size();
+    }
+
+    /**
+     * @brief 获取转换后的文本长度
+     * @return 文本的字符长度
+     */
+    inline size_t GetLength() const noexcept
+    {
+        return _sv.size();
+    }
+
+    operator const piv::string_view &() const noexcept
+    {
+        return _sv;
+    }
+
+    operator piv::string_view &() noexcept
+    {
+        return _sv;
+    }
+
+    const piv::string_view &operator*() const noexcept
+    {
+        return _sv;
+    }
+
+    piv::string_view &operator*()  noexcept
+    {
+        return _sv;
+    }
+}; // PivStr2SV
+
+#endif // _PIV_STRING_HPP_2023_10

@@ -8,7 +8,7 @@
 # bit7z: v4.0.1       2023-10-05  开源协议: MPL-2.0
 
 类 存档读写类 <公开 注释 = "提供简单易用的压缩和解压命令,只需要调用一个方法即可完成压缩或解压." 注释 = "功能没有\"存档解压类\"和\"存档压缩类\"全面,也没有进度反馈,但胜在简单."
-        折叠 @文档 = "category = \"文件压缩\"" @禁止创建对象 = 真 "@视窗.外部头文件.全局-100" = "<chrono>"
+        折叠 @文档 = "category = \"文件压缩\"" @禁止创建对象 = 真 "@视窗.外部头文件.全局-100" = "<malloc.h>\r\n<chrono>"
         @视窗.外部头文件 = "bit7z\\include\\piv_bit7z.hpp" @视窗.外部库 = "bit7z\\lib\\$(p)\\$(d)\\bit7z_$(crt).lib"
         @视窗.附属文件 = "bit7z\\lib\\$(p)\\7z.dll" @视窗.需求VS版本 = "15-"
         @视窗.需求系统头文件 = "user\\piv\\bit7z\\lib\\$(p)\\$(d)\\bit7z_$(crt).lib | 缺少bit7z的静态库文件(文件太大，默认未安装),请自行下载安装PIV模块的附加静态库文件 https://piv.ink/volpiv/">
@@ -305,8 +305,7 @@
     # ----
     # @begin
     # <> <include>
-    # public:
-    #     static void @an<_sOnAfterAppExit> () { piv::Archive::Free7zLib (); } // 退出程序前释放7z.dll
+    # static void @an<_sOnAfterAppExit> () { piv::Archive::Free7zLib (); } // 退出程序前释放7z.dll
     # <> </include>
     # @end
 }
@@ -1361,6 +1360,7 @@
     #     inline_ @sn<current_class> (bit7z::BitPropVariant& PropVar) : @sn<current_class>() { m_PropVar = PropVar; }
     #     inline_ BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return m_PropVar == objCompare.m_PropVar; }
     #     inline_ void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_PropVar = objCopyFrom.m_PropVar; }
+    #     inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_PropVar = std::move(rhs.m_PropVar); return *this; }
     #     inline_ bit7z::BitPropVariant& data () { return m_PropVar; }
     # <> </include>
     # @end
@@ -1425,6 +1425,7 @@
     #     inline_ @sn<current_class> (std::map<bit7z::BitProperty, bit7z::BitPropVariant>& map) : @sn<current_class>() { m_map = map; }
     #     inline_ BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return m_map == objCompare.m_map; }
     #     inline_ void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_map = objCopyFrom.m_map; }
+    #     inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_map = std::move(rhs.m_map); return *this; }
     #     inline_ std::map<bit7z::BitProperty, bit7z::BitPropVariant>& data () { return m_map; }
     # <> </include>
     # @end
@@ -1550,12 +1551,13 @@
 
     # @begin
     # <> <include>
+    # private:
+    #     std::vector<bit7z::BitArchiveItemInfo> m_items;
     # public:
     #     inline_ @sn<current_class> (std::vector<bit7z::BitArchiveItemInfo>& items) : @sn<current_class>() { m_items = items; }
     #     inline_ void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_items = objCopyFrom.m_items; }
+    #     inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_items = std::move(rhs.m_items); return *this; }
     #     inline_ std::vector<bit7z::BitArchiveItemInfo>& data () { return m_items; }
-    # private:
-    #     std::vector<bit7z::BitArchiveItemInfo> m_items;
     # <> </include>
     # @end
 }

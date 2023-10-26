@@ -36,14 +36,15 @@
 
 #include <mutex>
 #include <memory>
+#include <atomic>
 
 namespace piv
 {
     namespace Archive
     {
-        static bit7z::Bit7zLibrary *m_7zLib = nullptr; // 7z.dll动态库
-        static std::string g_error{"OK"};              // 错误信息
-        static std::mutex g_error_mutex;
+        static std::atomic<bit7z::Bit7zLibrary *> m_7zLib = nullptr; // 7z.dll动态库
+        static std::string g_error{"OK"};                            // 错误信息
+        static std::mutex g_mutex;
 
         /**
          * @brief 加载静态库
@@ -54,9 +55,21 @@ namespace piv
         {
             try
             {
-                m_7zLib = new bit7z::Bit7zLibrary{library_path};
-                m_7zLib->setLargePageMode();
-                return m_7zLib != nullptr;
+                bit7z::Bit7zLibrary *p = m_7zLib.load(std::memory_order_relaxed);
+                std::atomic_thread_fence(std::memory_order_acquire);
+                if (p == nullptr)
+                {
+                    std::lock_guard<std::mutex> lock(g_mutex);
+                    p = m_7zLib.load(std::memory_order_relaxed);
+                    if (p == nullptr)
+                    {
+                        p = new bit7z::Bit7zLibrary{library_path};
+                        std::atomic_thread_fence(std::memory_order_release);
+                        m_7zLib.store(p, std::memory_order_relaxed);
+                        p->setLargePageMode();
+                    }
+                }
+                return true;
             }
             catch (...)
             {
@@ -69,10 +82,18 @@ namespace piv
          */
         static void Free7zLib()
         {
-            if (m_7zLib)
+            bit7z::Bit7zLibrary *p = m_7zLib.load(std::memory_order_relaxed);
+            std::atomic_thread_fence(std::memory_order_acquire);
+            if (p != nullptr)
             {
-                delete m_7zLib;
-                m_7zLib = nullptr;
+                std::lock_guard<std::mutex> lock(g_mutex);
+                p = m_7zLib.load(std::memory_order_relaxed);
+                if (p != nullptr)
+                {
+                    delete p;
+                    std::atomic_thread_fence(std::memory_order_release);
+                    m_7zLib.store(nullptr, std::memory_order_relaxed);
+                }
             }
         }
 
@@ -81,11 +102,21 @@ namespace piv
          */
         inline static bit7z::Bit7zLibrary &Get7zLib()
         {
-            if (!m_7zLib)
+            bit7z::Bit7zLibrary *p = m_7zLib.load(std::memory_order_relaxed);
+            std::atomic_thread_fence(std::memory_order_acquire);
+            if (p == nullptr)
             {
-                Load7zLib();
+                std::lock_guard<std::mutex> lock(g_mutex);
+                p = m_7zLib.load(std::memory_order_relaxed);
+                if (p == nullptr)
+                {
+                    p = new bit7z::Bit7zLibrary{bit7z::kDefaultLibrary};
+                    std::atomic_thread_fence(std::memory_order_release);
+                    m_7zLib.store(p, std::memory_order_relaxed);
+                    p->setLargePageMode();
+                }
             }
-            return *m_7zLib;
+            return *p;
         }
 
         /**
@@ -268,7 +299,7 @@ public:
      */
     static CVolString GetLastError()
     {
-        std::lock_guard<std::mutex> guard(piv::Archive::g_error_mutex);
+        std::lock_guard<std::mutex> guard(piv::Archive::g_mutex);
         return CVolString{piv::Archive::g_error.c_str()};
     }
 
@@ -278,7 +309,7 @@ public:
      */
     static void SetError(const char *msg)
     {
-        std::lock_guard<std::mutex> guard(piv::Archive::g_error_mutex);
+        std::lock_guard<std::mutex> guard(piv::Archive::g_mutex);
         piv::Archive::g_error = msg;
     }
 
@@ -3366,7 +3397,7 @@ public:
         }
         try
         {
-            m_archive->addFiles(in_dir, filter, isExclude ? bit7z::FilterPolicy::Exclude: bit7z::FilterPolicy::Include, recursion);
+            m_archive->addFiles(in_dir, filter, isExclude ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include, recursion);
             SetError("OK");
             return true;
         }

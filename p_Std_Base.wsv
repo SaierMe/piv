@@ -1,6 +1,6 @@
 <火山程序 类型 = "通常" 版本 = 1 />
 
-包 火山.PIV基础类 <注释 = "https://github.com/SaierMe/piv" "">
+包 火山.PIV基础类 <注释 = "https://github.com/SaierMe/piv" @视窗.头文件搜寻目录 = "src">
 
 类 标准调用类 <公开 注释 = "封装作者: kyozy" 注释 = "std::functional" 折叠 @文档 = "category = \"标准库\""
         @视窗.外部头文件 = "<functional>" @禁止创建对象 = 真>
@@ -162,7 +162,7 @@
     # inline_ @m<set>& data () { return m_set; }
     # inline_ @m<set>* pdata () { return &m_set; }
     # inline_ void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom)  { m_set = objCopyFrom.m_set; }
-    # inline_ void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom)  { m_set = std::move(objCopyFrom.m_set); }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_set = std::move(rhs.m_set); return *this; }
     # inline_ BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_set == objCompare.m_set); }
     # <> </include>
     # @end
@@ -737,7 +737,7 @@
     # inline_ @m<map>& data () { return m_map; }
     # inline_ @m<map>* pdata () { return &m_map; }
     # inline_ void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom)  { m_map = objCopyFrom.m_map; }
-    # inline_ void @an<_CopySelfFromExtra> (@sn<current_class>&& objCopyFrom)  { m_map = std::move(objCopyFrom.m_map); }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_map = std::move(rhs.m_map); return *this; }
     # inline_ BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_map == objCompare.m_map); }
     # <> </include>
     # @end

@@ -2,7 +2,7 @@
 
 包 火山.PIV基础类 <注释 = "https://github.com/SaierMe/piv">
 
-类 Go协程 <公开 注释 = "Golang风格的C++11协程库" 注释 = "https://github.com/yyzybb537/libgo" 注释 = "" 注释 = "" 折叠
+类 Go协程 <公开 注释 = "Golang风格的C++11协程库" 注释 = "https://github.com/yyzybb537/libgo" 折叠
         @文档 = "category = \"协程\"" "@视窗.外部头文件.全局-100" = "<malloc.h>\r\n<chrono>"
         @视窗.头文件搜寻目录 = "src\\libgo\\netio\\windows"
         @视窗.外部头文件 = "src\\libgo\\libgo.h\r\nsrc\\libgo\\netio\\windows\\win_vc_hook.h"
@@ -63,7 +63,7 @@
         @ co::__go(__FILE__, __LINE__) - std::bind(&@pdt<对象实例>::@pvpt<方法输出名>, &@<对象实例>)
     }
 
-    方法 启动调度器 <公开 静态 注释 = "在新线程中启动默认协程调度器,开始执行协程." 折叠 @嵌入式方法 = "">
+    方法 启动调度器 <公开 静态 注释 = "在新线程中启动默认协程调度器,开始执行协程." 注释 = "  1. 本方法全局只能执行一次,第二次执行会导致程序退出;" 折叠 @嵌入式方法 = "">
     参数 最小线程数 <类型 = 整数 注释 = "最小调度线程数,为0时设置为cpu核心数." @默认值 = 0>
     参数 最大线程数 <类型 = 整数 注释 = "最大调度线程数,为0时与\"最小线程数\"相同;" 注释 = "如果大于\"最小线程数\",则当协程产生长时间阻塞时,可以自动扩展调度线程数."
             @默认值 = 0>
@@ -121,7 +121,7 @@
 
     # 动态成员
 
-    方法 启动 <公开 注释 = "在新线程中启动协程调度器,开始执行协程." 折叠 @嵌入式方法 = "">
+    方法 启动 <公开 注释 = "在新线程中启动协程调度器,开始执行协程." 注释 = "  1. 请勿重复启动,否则会导致程序异常退出;" 折叠 @嵌入式方法 = "">
     参数 最小线程数 <类型 = 整数 注释 = "最小调度线程数,为0时设置为cpu核心数." @默认值 = 0>
     参数 最大线程数 <类型 = 整数 注释 = "最大调度线程数,为0时与\"最小线程数\"相同;" 注释 = "如果大于\"最小线程数\",则当协程产生长时间阻塞时,可以自动扩展调度线程数."
             @默认值 = 0>
@@ -246,6 +246,7 @@
     # inline co::Scheduler* pdata() { return (m_sched != nullptr) ? m_sched : &co::Scheduler::getInstance(); }
     # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_sched == objCompare.m_sched); }
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_sched = objCopyFrom.m_sched; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_sched = std::move(rhs.m_sched); return *this; }
     # inline @sn<current_class>& operator= (co::Scheduler* rhs) { m_sched = rhs; return *this; }
     # inline operator co::Scheduler* () { return m_sched; }
     # <> </include>
@@ -295,7 +296,7 @@
     }
 
     方法 投递回调任务2 <公开 注释 = "投递任务函数和回调函数到协程池中;" 注释 = "  1. 如果绑定了回调处理器,则需要在处理器中运行回调函数;"
-            注释 = "  2. 未绑定回调处理器则在协程池中执行回调函数;" 注释 = "  3. 本方法的函数有返回值和参数格式的要求,具体看参数备注;" 折叠 @嵌入式方法 = "">
+            注释 = "  2. 未绑定回调处理器则在协程池中执行回调函数;" 注释 = "  3. 本方法的函数有返回值和参数格式的要求,具体看参数备注;" @嵌入式方法 = "">
     参数 返回值类型 <注释 = "提供任务函数的返回值类型" @需求类型 = 数据类型 @匹配类型 = 所有类型>
     参数 任务函数 <类型 = 函数对象类 注释 = "所欲投递到协程池的任务函数;" 注释 = "不能提供函数对象类变量,可以调用下列方法创建:" 注释 = "- 绑定静态方法   绑定无参数静态方法"
             注释 = "- 绑定动态方法   绑定无参数动态方法" 注释 = "- 绑定函数指针   绑定无参数函数指针" 注释 = "- 绑定函数指针2  绑定无参数函数指针2"
@@ -319,6 +320,7 @@
     # <> <include>
     # co::AsyncCoroutinePool* m_Pool = nullptr;
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_Pool = objCopyFrom.m_Pool; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_Pool = std::move(rhs.m_Pool); return *this; }
     # inline @sn<current_class>& Create(size_t maxCallbackPoints = 128) {
     #     if(!m_Pool) { m_Pool = co::AsyncCoroutinePool::Create(maxCallbackPoints); } return *this;
     # }
@@ -349,6 +351,7 @@
     # <> <include>
     # std::shared_ptr<co::AsyncCoroutinePool::CallbackPoint> m_point{new co::AsyncCoroutinePool::CallbackPoint};
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_point = objCopyFrom.m_point; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_point = std::move(rhs.m_point); return *this; }
     # inline co::AsyncCoroutinePool::CallbackPoint& data() { return *m_point; }
     # inline co::AsyncCoroutinePool::CallbackPoint* pdata() { return m_point.get(); }
     # inline operator co::AsyncCoroutinePool::CallbackPoint* () { return m_point.get(); }
@@ -499,6 +502,7 @@
     # <> <include>
     # std::shared_ptr<co::CoTimer> m_Timer;
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_Timer = objCopyFrom.m_Timer; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_Timer = std::move(rhs.m_Timer); return *this; }
     # inline BOOL init(INT64 dur, co::Scheduler * scheduler) {
     #     if (m_Timer) return FALSE;
     #     m_Timer.reset(new co::CoTimer(std::chrono::microseconds(dur), scheduler)); return TRUE;
@@ -523,6 +527,7 @@
     # inline @sn<current_class> (const co::CoTimer::TimerId& rhs) { m_TimerId = rhs; }
     # inline @sn<current_class> (co::CoTimer::TimerId&& rhs) { m_TimerId = std::move(rhs); }
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_TimerId = objCopyFrom.m_TimerId; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_TimerId = std::move(rhs.m_TimerId); return *this; }
     # inline co::CoTimer::TimerId& data() { return m_TimerId; }
     # <> </include>
     # @end
@@ -727,7 +732,7 @@
     # @end
 }
 
-类 信道模板类 <公开 注释 = "信道是协程安全的,使用时不需要加锁" 折叠 @文档 = "category = \"协程.辅助类\"" @模板基础类 = 真 @强制依赖 = "Go协程">
+类 信道模板类 <公开 注释 = "信道是协程安全的,使用时不需要加锁" @文档 = "category = \"协程.辅助类\"" @模板基础类 = 真 @强制依赖 = "Go协程">
 {
     方法 缓冲区容量 <公开 属性写 注释 = "设置信道的缓冲区容量;" 注释 = "  1. 信道默认没有缓冲区,因此写入数据时会阻塞当前协程,直到其他协程读取数据;"
             注释 = "  2. 拥有缓冲区后,可以直接写入对应容量的数据而不会阻塞当前协程;" 注释 = "  3. 缓冲区满了之后会阻塞当前协程,等待缓冲区出现空位;"

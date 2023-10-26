@@ -492,6 +492,7 @@
     # std::vector<std::chrono::steady_clock::time_point> m_tpArray;
     # void @an<_OnInitExtra> () { m_tpArray.push_back (std::chrono::steady_clock::now ()); }
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_tpArray = objCopyFrom.m_tpArray; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_tpArray = std::move(rhs.m_tpArray); return *this; }
     # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_tpArray == objCompare.m_tpArray); }
     # inline std::vector<std::chrono::steady_clock::time_point>& data () { return m_tpArray; }
     # inline std::vector<std::chrono::steady_clock::time_point>* pdata ()  { return &m_tpArray; }
@@ -607,6 +608,7 @@
     # LARGE_INTEGER m_Frequency, m_StartingTime;
     # void @an<_OnInitExtra> () { ::QueryPerformanceFrequency(&m_Frequency); ::QueryPerformanceCounter(&m_StartingTime); }
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_Frequency = objCopyFrom.m_Frequency; m_StartingTime = objCopyFrom.m_StartingTime; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_StartingTime = std::move(rhs.m_StartingTime); return *this; }
     # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_StartingTime.QuadPart == objCompare.m_StartingTime.QuadPart); }
     # <> </include>
 }

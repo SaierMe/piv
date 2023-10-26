@@ -31,7 +31,7 @@ namespace piv
 
     struct ansi
     {
-        unsigned char bom = 0;
+        unsigned char bom[1] = {0};
     };
     struct utf8
     {
@@ -2698,7 +2698,7 @@ namespace piv
             if (piv::encoding::UrlEncodeNeed(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize()), ReservedWord))
             {
                 CVolMem buffer;
-                piv::encoding::UrlStrEncode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), buffer, ReservedWord);
+                piv::encoding::UrlDataEncode<char>(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), utf8, ReservedWord, buffer);
                 if (utf8)
                     return PivU2Ws{buffer}.GetStr(encoded);
                 else
@@ -3232,7 +3232,6 @@ namespace piv
                     val = -1; /* mark value complete */
                 }
             }
-
             /* process remaining bits; write at most 1 byte */
             if (val != -1)
                 output.AddU8Char((U8CHAR)(queue | val << nbits));

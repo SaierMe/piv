@@ -7,7 +7,7 @@
         注释 = "  1. ULID前6个字节是毫秒时间戳,后10个字节通过std::mt19937算法生成的随机数;"
         注释 = "  2. ULID跟UUID/GUID相比,最大的区别是可以按字典序排序,先比较前面的时间戳," 注释 = "如果时间戳相等则继续比较后面的随机数;"
         注释 = "  3. ULID可以提取出时间戳;" 注释 = "  4. ULID文本无特殊字符,可直接用于URL、JSON、SQL语句..."
-        注释 = "https://github.com/suyash/ulid" 折叠 @文档 = "category = \"伪随机数\""
+        注释 = "https://github.com/suyash/ulid" @文档 = "category = \"伪随机数\""
         @视窗.外部头文件 = "src\\detail\\ulid_struct.hh" "@视窗.外部头文件.全局-100" = "<malloc.h>\r\n<chrono>">
 {
     方法 创建 <公开 注释 = "从现行时间创建一个ULID并填入本对象" 折叠 @嵌入式方法 = "">
@@ -82,7 +82,8 @@
     #     ulid::EncodeTimeSystemClockNow(m_ulid);
     #     ulid::EncodeEntropyMt19937(std::mt19937{std::random_device{}()}, m_ulid);
     # }
-    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_ulid = objCopyFrom.m_ulid; }
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_ulid = objCopyFrom.m_ulid; 
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_ulid = std::move(rhs.m_ulid); return *this; }
     # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const {
     #     return (ulid::CompareULIDs(m_ulid, objCompare.m_ulid) == 0);
     # }
@@ -417,7 +418,7 @@
     }
 }
 
-类 标准随机数类 <公开 基础类 = 标准随机数基本类 注释 = "采用\"std::mt19937\"的32位梅森旋转算法,耗时最慢且状态存储要求较高,但产生的随机数质量最高." 折叠
+类 标准随机数类 <公开 基础类 = 标准随机数基本类 注释 = "采用\"std::mt19937\"的32位梅森旋转算法,耗时最慢且状态存储要求较高,但产生的随机数质量最高."
         编辑时信息 = "3DC94, 0, 0, 0" @文档 = "category = \"伪随机数\"">
 {
     方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
@@ -432,13 +433,14 @@
     # std::mt19937 gen;
     # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
     # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
     # <> </include>
     # @end
 }
 
 类 随机数类_mt19937_64 <公开 基础类 = 标准随机数基本类 注释 = "采用\"std::mt19937_64\"的64位梅森旋转算法,耗时最慢且状态存储要求较高,但产生的随机数质量最高."
-        折叠 编辑时信息 = "2DF4E, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+        编辑时信息 = "2DF4E, 0, 0, 0" @文档 = "category = \"伪随机数\"">
 {
     方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
             注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的" 注释 = "种子值时,才需要手动调用." 折叠>
@@ -452,13 +454,14 @@
     # std::mt19937_64 gen;
     # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
     # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
     # <> </include>
     # @end
 }
 
 类 随机数类_minstd_rand0 <公开 基础类 = 标准随机数基本类 注释 = "采用\"std::minstd_rand0\"的线性同余算法,速度较快且状态存储要求最低,但产生的随机数质量一般."
-        折叠 编辑时信息 = "2A364, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+        编辑时信息 = "2A364, 0, 0, 0" @文档 = "category = \"伪随机数\"">
 {
     方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
             注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的" 注释 = "种子值时,才需要手动调用." 折叠>
@@ -472,13 +475,14 @@
     # std::minstd_rand0 gen;
     # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
     # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
     # <> </include>
     # @end
 }
 
 类 随机数类_minstd_rand <公开 基础类 = 标准随机数基本类 注释 = "采用\"std::minstd_rand\"的线性同余算法,速度较快且状态存储要求最低,但产生的随机数质量一般."
-        折叠 编辑时信息 = "2C985, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+        编辑时信息 = "2C985, 0, 0, 0" @文档 = "category = \"伪随机数\"">
 {
     方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
             注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的" 注释 = "种子值时,才需要手动调用." 折叠>
@@ -492,14 +496,15 @@
     # std::minstd_rand gen;
     # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
     # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
     # <> </include>
     # @end
 }
 
 类 随机数类_ranlux24_base <公开 基础类 = 标准随机数基本类
-        注释 = "采用\"std::ranlux24_base\"的带进位减(延迟斐波那契)算法,速度非常快,但状态存储要求最大,也有不太适合的谱特性." 折叠
-        编辑时信息 = "2A61E, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+        注释 = "采用\"std::ranlux24_base\"的带进位减(延迟斐波那契)算法,速度非常快,但状态存储要求最大,也有不太适合的谱特性." 编辑时信息 = "2A61E, 0, 0, 0"
+        @文档 = "category = \"伪随机数\"">
 {
     方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
             注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的" 注释 = "种子值时,才需要手动调用." 折叠>
@@ -513,14 +518,15 @@
     # std::ranlux24_base gen;
     # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
     # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
     # <> </include>
     # @end
 }
 
 类 随机数类_ranlux48_base <公开 基础类 = 标准随机数基本类
-        注释 = "采用\"std::ranlux48_base\"的带进位减(延迟斐波那契)算法,速度非常快,但状态存储要求最大,也有不太适合的谱特性." 折叠
-        编辑时信息 = "2B102, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+        注释 = "采用\"std::ranlux48_base\"的带进位减(延迟斐波那契)算法,速度非常快,但状态存储要求最大,也有不太适合的谱特性." 编辑时信息 = "2B102, 0, 0, 0"
+        @文档 = "category = \"伪随机数\"">
 {
     方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
             注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的" 注释 = "种子值时,才需要手动调用." 折叠>
@@ -534,12 +540,13 @@
     # std::ranlux48_base gen;
     # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
     # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
     # <> </include>
     # @end
 }
 
-类 随机数类_ranlux24 <公开 基础类 = 标准随机数基本类 注释 = "基于\"随机数类_ranlux24_base\"加上随机数引擎适配器,舍弃了部分不太适合的谱特性." 折叠
+类 随机数类_ranlux24 <公开 基础类 = 标准随机数基本类 注释 = "基于\"随机数类_ranlux24_base\"加上随机数引擎适配器,舍弃了部分不太适合的谱特性."
         编辑时信息 = "34C3E, 0, 0, 0" @文档 = "category = \"伪随机数\"">
 {
     方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
@@ -554,12 +561,13 @@
     # std::ranlux24 gen;
     # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
     # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
     # <> </include>
     # @end
 }
 
-类 随机数类_ranlux48 <公开 基础类 = 标准随机数基本类 注释 = "基于\"随机数类_ranlux48_base\"加上随机数引擎适配器,舍弃了部分不太适合的谱特性." 折叠
+类 随机数类_ranlux48 <公开 基础类 = 标准随机数基本类 注释 = "基于\"随机数类_ranlux48_base\"加上随机数引擎适配器,舍弃了部分不太适合的谱特性."
         编辑时信息 = "36207, 0, 0, 0" @文档 = "category = \"伪随机数\"">
 {
     方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
@@ -574,12 +582,13 @@
     # std::ranlux48 gen;
     # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
     # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
     # <> </include>
     # @end
 }
 
-类 随机数类_knuth_b <公开 基础类 = 标准随机数基本类 注释 = "基于\"随机数类_minstd_rand0\"加上随机数引擎适配器,打乱了随机数引擎的输出." 折叠
+类 随机数类_knuth_b <公开 基础类 = 标准随机数基本类 注释 = "基于\"随机数类_minstd_rand0\"加上随机数引擎适配器,打乱了随机数引擎的输出."
         编辑时信息 = "3A0AA, 0, 0, 0" @文档 = "category = \"伪随机数\"">
 {
     方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
@@ -594,6 +603,7 @@
     # std::knuth_b gen;
     # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
     # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
     # <> </include>
     # @end

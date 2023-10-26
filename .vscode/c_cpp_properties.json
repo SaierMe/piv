@@ -5,8 +5,9 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "C:\\App\\win_android_chs_person\\plugins\\vprj_win\\classlib",
-                "D:\\Documents\\GitHub\\asio2\\include",
-                "D:\\Documents\\GitHub\\asio2\\3rd"
+                "C:\\App\\win_android_chs_person\\plugins\\vprj_win\\classlib\\user\\piv\\src",
+                "C:\\App\\win_android_chs_person\\plugins\\vprj_win\\classlib\\user\\piv\\asio2\\3rd",
+                "C:\\App\\win_android_chs_person\\plugins\\vprj_win\\classlib\\user\\piv\\asio2"
             ],
             "defines": [
                 "_DEBUG",

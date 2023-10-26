@@ -500,6 +500,7 @@
     # <> <include>
     # std::function<void()> m_func;
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_func = objCopyFrom.m_func; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_func = std::move(rhs.m_func); return *this; }
     # inline @sn<current_class>& operator= (const std::function<void()>& rhs) { m_func = rhs; return *this; }
     # inline @sn<current_class>& operator= (std::function<void()>&& rhs) { m_func = std::move(rhs); return *this; }
     # inline operator std::function<void()>& () { return m_func; }
@@ -825,8 +826,9 @@
     # <> <include>
     # using ValueType = std::remove_pointer<@dt<模板类型1> *>::type;
     # std::shared_future<ValueType> m_future;
-    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_future = objCopyFrom.m_future; }
     # inline @sn<current_class>(std::future<ValueType>&& rhs) { m_future = rhs.share(); }
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_future = objCopyFrom.m_future; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_future = std::move(rhs.m_future); return *this; }
     # inline @sn<current_class>& operator= (std::future<ValueType>&& rhs) { m_future = rhs.share(); return *this; }
     # inline std::shared_future<ValueType>& data() { return m_future; }
     # inline std::shared_future<ValueType>* pdata() { return &m_future; }
@@ -895,6 +897,7 @@
     # using ValueType = std::remove_pointer<@dt<模板类型1> *>::type;
     # std::shared_ptr<std::promise<ValueType>> m_promise{new std::promise<ValueType>};
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_promise = objCopyFrom.m_promise; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_promise = std::move(rhs.m_promise); return *this; }
     # inline std::promise<ValueType>& data() { return *m_promise; }
     # inline std::promise<ValueType>* pdata() { return m_promise.get(); }
     # inline operator std::promise<ValueType>& () { return *m_promise; }
@@ -939,8 +942,9 @@
     # <> <include>
     # using ValueType = void;
     # std::shared_future<void> m_future;
-    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_future = objCopyFrom.m_future; }
     # inline @sn<current_class>(std::future<void>&& rhs) { m_future = rhs.share(); }
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_future = objCopyFrom.m_future; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_future = std::move(rhs.m_future); return *this; }
     # inline @sn<current_class>& operator= (std::future<void>&& rhs) { m_future = rhs.share(); return *this; }
     # inline std::shared_future<void>& data() { return m_future; }
     # inline std::shared_future<void>* pdata() { return &m_future; }
@@ -1023,6 +1027,7 @@
     # <> <include>
     # std::shared_ptr<std::promise<void>> m_promise{new std::promise<void>};
     # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_promise = objCopyFrom.m_promise; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_promise = std::move(rhs.m_promise); return *this; }
     # inline std::promise<void>& data() { return *m_promise; }
     # inline std::promise<void>* pdata() { return m_promise.get(); }
     # inline operator std::promise<void>& () { return *m_promise; }
@@ -1431,7 +1436,7 @@
     }
 
     方法 入队EX <公开 类型 = 逻辑型 注释 = "在当前队列的尾部添加指定成员,返回是否成功." 注释 = "本方法将按需分配内存,仅在分配内存失败时返回假." 折叠 @嵌入式方法 = "">
-    参数 生产者令牌 <类型 = 队列生产者令牌 注释 = "提供由\"创建生产者令牌\"返回的令牌,使用令牌可以提升入队的速度.">
+    参数 生产者令牌 <类型 = 生产者队列令牌 注释 = "提供由\"创建生产者令牌\"返回的令牌,使用令牌可以提升入队的速度.">
     参数 值 <类型 = 模板类型1 注释 = "提供所欲添加的成员">
     {
         @ @sn<this>.data().enqueue(@<生产者令牌>, @<值>)
@@ -1444,7 +1449,7 @@
     }
 
     方法 尝试入队EX <公开 类型 = 逻辑型 注释 = "尝试在当前队列的尾部添加指定成员,返回是否成功." 注释 = "本方法不会重分配内存,没有可用空间将返回失败." 折叠 @嵌入式方法 = "">
-    参数 生产者令牌 <类型 = 队列生产者令牌 注释 = "提供由\"创建生产者令牌\"返回的令牌,使用令牌可以提升入队的速度.">
+    参数 生产者令牌 <类型 = 生产者队列令牌 注释 = "提供由\"创建生产者令牌\"返回的令牌,使用令牌可以提升入队的速度.">
     参数 值 <类型 = 模板类型1 注释 = "提供所欲添加的成员">
     {
         @ @sn<this>.data().try_enqueue(@<生产者令牌>, @<值>)
@@ -1459,7 +1464,7 @@
 
     方法 批量入队EX <公开 类型 = 逻辑型 注释 = "在当前队列的尾部添加指定数量的多个成员,返回是否成功." 注释 = "本方法将按需分配内存,仅在分配内存失败时返回假." 折叠
             @嵌入式方法 = "">
-    参数 生产者令牌 <类型 = 队列生产者令牌 注释 = "提供由\"创建生产者令牌\"返回的令牌,使用令牌可以提升入队的速度.">
+    参数 生产者令牌 <类型 = 生产者队列令牌 注释 = "提供由\"创建生产者令牌\"返回的令牌,使用令牌可以提升入队的速度.">
     参数 首成员 <类型 = 模板类型1 注释 = "提供所欲批量添加的首成员变量;" 注释 = "所欲批量入队的多个成员必须是连续内存中的数据." @需求类型 = 可写入变量>
     参数 入队数量 <类型 = 整数 注释 = "所欲添加的成员数量">
     {
@@ -1476,7 +1481,7 @@
 
     方法 尝试批量入队EX <公开 类型 = 逻辑型 注释 = "尝试在当前队列的尾部添加指定数量的多个成员,返回是否成功." 注释 = "本方法不会重分配内存,没有可用空间将返回失败." 折叠
             @嵌入式方法 = "">
-    参数 生产者令牌 <类型 = 队列生产者令牌 注释 = "提供由\"创建生产者令牌\"返回的令牌,使用令牌可以提升入队的速度.">
+    参数 生产者令牌 <类型 = 生产者队列令牌 注释 = "提供由\"创建生产者令牌\"返回的令牌,使用令牌可以提升入队的速度.">
     参数 首成员 <类型 = 模板类型1 注释 = "提供所欲批量添加的首成员变量;" 注释 = "所欲批量入队的多个成员必须是连续内存中的数据." @需求类型 = 可写入变量>
     参数 入队数量 <类型 = 整数 注释 = "所欲添加的成员数量">
     {
@@ -1492,7 +1497,7 @@
     }
 
     方法 出队EX <公开 类型 = 逻辑型 注释 = "获取并删除队列的第一个成员,返回是否成功." 折叠 @嵌入式方法 = "">
-    参数 消费者令牌 <类型 = 队列消费者令牌 注释 = "提供由\"创建消费者令牌\"返回的令牌,使用令牌可以提升出队的速度.">
+    参数 消费者令牌 <类型 = 消费者队列令牌 注释 = "提供由\"创建消费者令牌\"返回的令牌,使用令牌可以提升出队的速度.">
     参数 弹出值 <类型 = 模板类型1 注释 = "提供用来获取所弹出成员的变量" @需求类型 = 可写入变量>
     {
         @ @sn<this>.data().try_dequeue(@<消费者令牌>, @<弹出值>)
@@ -1506,7 +1511,7 @@
     }
 
     方法 批量出队EX <公开 类型 = 逻辑型 注释 = "获取并删除队列的第一个成员,返回是否成功." 折叠 @嵌入式方法 = "">
-    参数 消费者令牌 <类型 = 队列消费者令牌 注释 = "提供由\"创建消费者令牌\"返回的令牌,使用令牌可以提升出队的速度.">
+    参数 消费者令牌 <类型 = 消费者队列令牌 注释 = "提供由\"创建消费者令牌\"返回的令牌,使用令牌可以提升出队的速度.">
     参数 首成员 <类型 = 模板类型1 注释 = "提供用于获取批量出队数据的,连续内存数据的首成员变量.." @需求类型 = 可写入变量>
     参数 出队数量 <类型 = 整数 注释 = "所欲出队的成员数量">
     {
@@ -1532,16 +1537,16 @@
         @ @sn<this>.data().swap(@<所欲交换的队列>.data())
     }
 
-    方法 创建生产者令牌 <公开 类型 = 队列生产者令牌 注释 = "创建一个仅在当前线程中使用的生产者令牌,用于入队的EX版方法." 注释 = "使用令牌可以显著提升入队的速度." 折叠
+    方法 创建生产者令牌 <公开 类型 = 生产者队列令牌 注释 = "创建一个仅在当前线程中使用的生产者令牌,用于入队的EX版方法." 注释 = "使用令牌可以显著提升入队的速度." 折叠
             @嵌入式方法 = "">
     {
-        @ @dt<队列生产者令牌>( new moodycamel::ProducerToken(@sn<this>.data()) )
+        @ @dt<生产者队列令牌>( new moodycamel::ProducerToken(@sn<this>.data()) )
     }
 
-    方法 创建消费者令牌 <公开 类型 = 队列消费者令牌 注释 = "创建一个仅在当前线程中使用的消费者令牌,用于出队的EX版方法." 注释 = "使用令牌可以显著提升出队的速度." 折叠
+    方法 创建消费者令牌 <公开 类型 = 消费者队列令牌 注释 = "创建一个仅在当前线程中使用的消费者令牌,用于出队的EX版方法." 注释 = "使用令牌可以显著提升出队的速度." 折叠
             @嵌入式方法 = "">
     {
-        @ @dt<队列消费者令牌>( new moodycamel::ProducerToken(@sn<this>.data()) )
+        @ @dt<消费者队列令牌>( new moodycamel::ProducerToken(@sn<this>.data()) )
     }
 
     # @begin
@@ -1552,9 +1557,9 @@
     # inline moodycamel::ConcurrentQueue<Item_t>& data() { return *m_queue; }
     # @sn<current_class> (@sn<current_class>&& rhs) { m_queue = std::move(rhs.m_queue); }
     # inline void @an<_OnInitExtra>() { if (!m_queue) { init(1024); } }
-    # inline void @an<_CopySelfFromExtra>(const @sn<current_class>& objCopyFrom) { m_queue = objCopyFrom.m_queue; }
-    # inline void @an<_CopySelfFromExtra>(@sn<current_class>&& objCopyFrom) { m_queue = std::move(objCopyFrom.m_queue); }
     # inline BOOL @an<_IsSelfEqualExtra>(const @sn<current_class>& objCompare) const { return (m_queue == objCompare.m_queue); }
+    # inline void @an<_CopySelfFromExtra>(const @sn<current_class>& objCopyFrom) { m_queue = objCopyFrom.m_queue; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_queue = std::move(rhs.m_queue); return *this; }
     # <> </include>
     # @end
 }
@@ -1572,7 +1577,7 @@
     }
 
     方法 入队EX <公开 类型 = 逻辑型 注释 = "在当前队列的尾部添加指定成员,返回是否成功." 注释 = "本方法将按需分配内存,仅在分配内存失败时返回假." 折叠 @嵌入式方法 = "">
-    参数 生产者令牌 <类型 = 队列生产者令牌 注释 = "提供由\"创建生产者令牌\"返回的令牌,使用令牌可以提升入队的速度.">
+    参数 生产者令牌 <类型 = 生产者队列令牌 注释 = "提供由\"创建生产者令牌\"返回的令牌,使用令牌可以提升入队的速度.">
     参数 值 <类型 = 模板类型1 注释 = "提供所欲添加的成员">
     {
         @ @sn<this>.data().enqueue(@<生产者令牌>, @<值>)
@@ -1585,7 +1590,7 @@
     }
 
     方法 尝试入队EX <公开 类型 = 逻辑型 注释 = "尝试在当前队列的尾部添加指定成员,返回是否成功." 注释 = "本方法不会重分配内存,没有可用空间将返回失败." 折叠 @嵌入式方法 = "">
-    参数 生产者令牌 <类型 = 队列生产者令牌 注释 = "提供由\"创建生产者令牌\"返回的令牌,使用令牌可以提升入队的速度.">
+    参数 生产者令牌 <类型 = 生产者队列令牌 注释 = "提供由\"创建生产者令牌\"返回的令牌,使用令牌可以提升入队的速度.">
     参数 值 <类型 = 模板类型1 注释 = "提供所欲添加的成员">
     {
         @ @sn<this>.data().try_enqueue(@<生产者令牌>, @<值>)
@@ -1600,7 +1605,7 @@
 
     方法 批量入队EX <公开 类型 = 逻辑型 注释 = "在当前队列的尾部添加指定数量的多个成员,返回是否成功." 注释 = "本方法将按需分配内存,仅在分配内存失败时返回假." 折叠
             @嵌入式方法 = "">
-    参数 生产者令牌 <类型 = 队列生产者令牌 注释 = "提供由\"创建生产者令牌\"返回的令牌,使用令牌可以提升入队的速度.">
+    参数 生产者令牌 <类型 = 生产者队列令牌 注释 = "提供由\"创建生产者令牌\"返回的令牌,使用令牌可以提升入队的速度.">
     参数 首成员 <类型 = 模板类型1 注释 = "提供所欲批量添加的首成员变量;" 注释 = "所欲批量入队的多个成员必须是连续内存中的数据." @需求类型 = 可写入变量>
     参数 入队数量 <类型 = 整数 注释 = "所欲添加的成员数量">
     {
@@ -1617,7 +1622,7 @@
 
     方法 尝试批量入队EX <公开 类型 = 逻辑型 注释 = "尝试在当前队列的尾部添加指定数量的多个成员,返回是否成功." 注释 = "本方法不会重分配内存,没有可用空间将返回失败." 折叠
             @嵌入式方法 = "">
-    参数 生产者令牌 <类型 = 队列生产者令牌 注释 = "提供由\"创建生产者令牌\"返回的令牌,使用令牌可以提升入队的速度.">
+    参数 生产者令牌 <类型 = 生产者队列令牌 注释 = "提供由\"创建生产者令牌\"返回的令牌,使用令牌可以提升入队的速度.">
     参数 首成员 <类型 = 模板类型1 注释 = "提供所欲批量添加的首成员变量;" 注释 = "所欲批量入队的多个成员必须是连续内存中的数据." @需求类型 = 可写入变量>
     参数 入队数量 <类型 = 整数 注释 = "所欲添加的成员数量">
     {
@@ -1633,7 +1638,7 @@
     }
 
     方法 出队EX <公开 类型 = 逻辑型 注释 = "获取并删除队列的第一个成员,返回是否成功." 折叠 @嵌入式方法 = "">
-    参数 消费者令牌 <类型 = 队列消费者令牌 注释 = "提供由\"创建消费者令牌\"返回的令牌,使用令牌可以提升出队的速度.">
+    参数 消费者令牌 <类型 = 消费者队列令牌 注释 = "提供由\"创建消费者令牌\"返回的令牌,使用令牌可以提升出队的速度.">
     参数 弹出值 <类型 = 模板类型1 注释 = "提供用来获取所弹出成员的变量" @需求类型 = 可写入变量>
     {
         @ @sn<this>.data().try_dequeue(@<消费者令牌>, @<弹出值>)
@@ -1647,7 +1652,7 @@
     }
 
     方法 批量出队EX <公开 类型 = 逻辑型 注释 = "获取并删除队列的第一个成员,返回是否成功." 折叠 @嵌入式方法 = "">
-    参数 消费者令牌 <类型 = 队列消费者令牌 注释 = "提供由\"创建消费者令牌\"返回的令牌,使用令牌可以提升出队的速度.">
+    参数 消费者令牌 <类型 = 消费者队列令牌 注释 = "提供由\"创建消费者令牌\"返回的令牌,使用令牌可以提升出队的速度.">
     参数 首成员 <类型 = 模板类型1 注释 = "提供用于获取批量出队数据的,连续内存数据的首成员变量.." @需求类型 = 可写入变量>
     参数 出队数量 <类型 = 整数 注释 = "所欲出队的成员数量">
     {
@@ -1673,16 +1678,16 @@
         @ @sn<this>.data().swap(@<所欲交换的队列>.data())
     }
 
-    方法 创建生产者令牌 <公开 类型 = 队列生产者令牌 注释 = "创建一个仅在当前线程中使用的生产者令牌,用于入队的EX版方法." 注释 = "使用令牌可以显著提升入队的速度." 折叠
+    方法 创建生产者令牌 <公开 类型 = 生产者队列令牌 注释 = "创建一个仅在当前线程中使用的生产者令牌,用于入队的EX版方法." 注释 = "使用令牌可以显著提升入队的速度." 折叠
             @嵌入式方法 = "">
     {
-        @ @dt<队列生产者令牌>( new moodycamel::ProducerToken(@sn<this>.data()) )
+        @ @dt<生产者队列令牌>( new moodycamel::ProducerToken(@sn<this>.data()) )
     }
 
-    方法 创建消费者令牌 <公开 类型 = 队列消费者令牌 注释 = "创建一个仅在当前线程中使用的消费者令牌,用于出队的EX版方法." 注释 = "使用令牌可以显著提升出队的速度." 折叠
+    方法 创建消费者令牌 <公开 类型 = 消费者队列令牌 注释 = "创建一个仅在当前线程中使用的消费者令牌,用于出队的EX版方法." 注释 = "使用令牌可以显著提升出队的速度." 折叠
             @嵌入式方法 = "">
     {
-        @ @dt<队列消费者令牌>( new moodycamel::ProducerToken(@sn<this>.data()) )
+        @ @dt<消费者队列令牌>( new moodycamel::ProducerToken(@sn<this>.data()) )
     }
 
     # ---
@@ -1694,7 +1699,7 @@
     }
 
     方法 等待出队EX <公开 注释 = "阻塞当前线程,直到有可出队的成员,然后将它出队." 折叠 @嵌入式方法 = "">
-    参数 消费者令牌 <类型 = 队列消费者令牌 注释 = "提供由\"创建消费者令牌\"返回的令牌,使用令牌可以提升出队的速度.">
+    参数 消费者令牌 <类型 = 消费者队列令牌 注释 = "提供由\"创建消费者令牌\"返回的令牌,使用令牌可以提升出队的速度.">
     参数 弹出值 <类型 = 模板类型1 注释 = "提供用来获取所弹出成员的变量" @需求类型 = 可写入变量>
     {
         @ @sn<this>.data().wait_dequeue(@<消费者令牌>, @<弹出值>)
@@ -1708,7 +1713,7 @@
     }
 
     方法 限时出队EX <公开 类型 = 逻辑型 注释 = "阻塞当前线程直到有可出队的成员或超过了指定的微秒时间." 注释 = "有可出队成员时将它出队并返回真,超时则返回假." 折叠 @嵌入式方法 = "">
-    参数 消费者令牌 <类型 = 队列消费者令牌 注释 = "提供由\"创建消费者令牌\"返回的令牌,使用令牌可以提升出队的速度.">
+    参数 消费者令牌 <类型 = 消费者队列令牌 注释 = "提供由\"创建消费者令牌\"返回的令牌,使用令牌可以提升出队的速度.">
     参数 弹出值 <类型 = 模板类型1 注释 = "提供用来获取所弹出成员的变量" @需求类型 = 可写入变量>
     参数 最大等待时间 <类型 = 长整数 注释 = "指定所欲等待的最多微秒数,小于0表示无限等待." 注释 = "1秒=1,000,000微秒">
     {
@@ -1723,7 +1728,7 @@
     }
 
     方法 等待批量出队EX <公开 类型 = 整数 注释 = "阻塞当前线程,直到出队了一或多个成员,返回实际出队的成员数(必定大于1)." 折叠 @嵌入式方法 = "">
-    参数 消费者令牌 <类型 = 队列消费者令牌 注释 = "提供由\"创建消费者令牌\"返回的令牌,使用令牌可以提升出队的速度.">
+    参数 消费者令牌 <类型 = 消费者队列令牌 注释 = "提供由\"创建消费者令牌\"返回的令牌,使用令牌可以提升出队的速度.">
     参数 首成员 <类型 = 模板类型1 注释 = "提供用于获取批量出队数据的,连续内存数据的首成员变量." @需求类型 = 可写入变量>
     参数 最大出队数 <类型 = 整数 注释 = "所欲出队的最大成员数目">
     {
@@ -1741,7 +1746,7 @@
 
     方法 限时批量出队EX <公开 类型 = 整数 注释 = "尝试将多个成员从队列中出队,返回实际出队的成员数(不大于指定的\"最大出队数\")."
             注释 = "如果在指定的微秒时间内没有出队任何成员,则返回0." 折叠 @嵌入式方法 = "">
-    参数 消费者令牌 <类型 = 队列消费者令牌 注释 = "提供由\"创建消费者令牌\"返回的令牌,使用令牌可以提升出队的速度.">
+    参数 消费者令牌 <类型 = 消费者队列令牌 注释 = "提供由\"创建消费者令牌\"返回的令牌,使用令牌可以提升出队的速度.">
     参数 首成员 <类型 = 模板类型1 注释 = "提供用于获取批量出队数据的,连续内存数据的首成员变量." @需求类型 = 可写入变量>
     参数 最大出队数 <类型 = 整数 注释 = "所欲出队的最大成员数目">
     参数 最大等待时间 <类型 = 长整数 注释 = "指定所欲等待的最多微秒数,小于0表示无限等待." 注释 = "1秒=1,000,000微秒">
@@ -1758,14 +1763,14 @@
     # inline moodycamel::BlockingConcurrentQueue<Item_t>& data() { return *m_queue; }
     # @sn<current_class> (@sn<current_class>&& rhs) { m_queue = std::move(rhs.m_queue); }
     # inline void @an<_OnInitExtra>() { if (!m_queue) { init(192); } }
-    # inline void @an<_CopySelfFromExtra>(const @sn<current_class>& objCopyFrom) { m_queue = objCopyFrom.m_queue; }
-    # inline void @an<_CopySelfFromExtra>(@sn<current_class>&& objCopyFrom) { m_queue = std::move(objCopyFrom.m_queue); }
     # inline BOOL @an<_IsSelfEqualExtra>(const @sn<current_class>& objCompare) const { return (m_queue == objCompare.m_queue); }
+    # inline void @an<_CopySelfFromExtra>(const @sn<current_class>& objCopyFrom) { m_queue = objCopyFrom.m_queue; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_queue = std::move(rhs.m_queue); return *this; }
     # <> </include>
     # @end
 }
 
-类 队列生产者令牌 <公开 注释 = "本类必须定义变量并赋值后才能使用,例:" 注释 = "生产者令牌 = XX无锁队列类.创建生产者令牌()" 折叠
+类 生产者队列令牌 <公开 注释 = "本类必须定义变量并赋值后才能使用,例:" 注释 = "生产者令牌 = XX无锁队列类.创建生产者令牌()" 折叠
         @文档 = "category = \"数据处理.队列.辅助类\"" @强制依赖 = "整数无锁队列类">
 {
 
@@ -1783,7 +1788,7 @@
     # @end
 }
 
-类 队列消费者令牌 <公开 注释 = "本类必须定义变量并赋值后才能使用,例:" 注释 = "消费者令牌 = XX无锁队列类.创建消费者令牌()" 折叠
+类 消费者队列令牌 <公开 注释 = "本类必须定义变量并赋值后才能使用,例:" 注释 = "消费者令牌 = XX无锁队列类.创建消费者令牌()" 折叠
         @文档 = "category = \"数据处理.队列.辅助类\"" @强制依赖 = "整数无锁队列类">
 {
 
@@ -1868,16 +1873,16 @@
     # inline moodycamel::ReaderWriterQueue<Item_t>& data() { return *m_queue; }
     # @sn<current_class> (@sn<current_class>&& rhs) { m_queue = std::move(rhs.m_queue); }
     # inline void @an<_OnInitExtra>() { if (!m_queue) { init(15); } }
-    # inline void @an<_CopySelfFromExtra>(const @sn<current_class>& objCopyFrom) { m_queue = objCopyFrom.m_queue; }
-    # inline void @an<_CopySelfFromExtra>(@sn<current_class>&& objCopyFrom) { m_queue = std::move(objCopyFrom.m_queue); }
     # inline BOOL @an<_IsSelfEqualExtra>(const @sn<current_class>& objCompare) const { return (m_queue == objCompare.m_queue); }
+    # inline void @an<_CopySelfFromExtra>(const @sn<current_class>& objCopyFrom) { m_queue = objCopyFrom.m_queue; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_queue = std::move(rhs.m_queue); return *this; }
     # <> </include>
     # @end
 }
 
 类 读写阻塞队列模板类 <公开 注释 = "支持单生产者线程、单消费者线程的无锁读写阻塞队列." 注释 = " 1. 只能单个生产者线程入队,以及单个消费者线程出队;"
         注释 = " 2. 对象采用共享智能指针封装,拷贝赋值后仍指向同一队列数据;" 注释 = " 3. 队列默认初始分配15个成员数的内存,若要自定义初始容量,请用\"重置队列\";"
-        注释 = " 4. 出队不会释放内存,这意味着队列的内存占用只增不减;" 注释 = " 5. 在\"读写队列\"的基础上增加了会阻塞当前线程的出队方法;"
+        注释 = " 4. 出队不会释放内存,这意味着队列的内存占用只增不减;" 注释 = " 5. 在\"读写队列\"的基础上增加了会阻塞当前线程的出队方法;" 折叠
         @文档 = "category = \"数据处理.队列.模板类\"" @视窗.外部头文件 = "src\\detail\\readerwriterqueue.h"
         "@视窗.外部头文件.全局-100" = "<malloc.h>\r\n<chrono>" @模板基础类 = 真>
 {
@@ -1956,9 +1961,9 @@
     # inline moodycamel::BlockingReaderWriterQueue<Item_t>& data() { return *m_queue; }
     # @sn<current_class> (@sn<current_class>&& rhs) { m_queue = std::move(rhs.m_queue); }
     # inline void @an<_OnInitExtra>() { if (!m_queue) { init(15); } }
-    # inline void @an<_CopySelfFromExtra>(const @sn<current_class>& objCopyFrom) { m_queue = objCopyFrom.m_queue; }
-    # inline void @an<_CopySelfFromExtra>(@sn<current_class>&& objCopyFrom) { m_queue = std::move(objCopyFrom.m_queue); }
     # inline BOOL @an<_IsSelfEqualExtra>(const @sn<current_class>& objCompare) const { return (m_queue == objCompare.m_queue); }
+    # inline void @an<_CopySelfFromExtra>(const @sn<current_class>& objCopyFrom) { m_queue = objCopyFrom.m_queue; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_queue = std::move(rhs.m_queue); return *this; }
     # <> </include>
     # @end
 }
@@ -2058,9 +2063,9 @@
     #     return *m_queue;
     # }
     # @sn<current_class> (@sn<current_class>&& rhs) { m_queue = std::move(rhs.m_queue); }
-    # inline void @an<_CopySelfFromExtra>(const @sn<current_class>& objCopyFrom) { m_queue = objCopyFrom.m_queue; }
-    # inline void @an<_CopySelfFromExtra>(@sn<current_class>&& objCopyFrom) { m_queue = std::move(objCopyFrom.m_queue); }
     # inline BOOL @an<_IsSelfEqualExtra>(const @sn<current_class>& objCompare) const { return (m_queue == objCompare.m_queue); }
+    # inline void @an<_CopySelfFromExtra>(const @sn<current_class>& objCopyFrom) { m_queue = objCopyFrom.m_queue; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_queue = std::move(rhs.m_queue); return *this; }
     # <> </include>
     # @end
 }
