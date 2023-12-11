@@ -64,5 +64,7 @@ IF EXIST "%PATH%bit7z\lib\x64\15" RD /S /Q "%PATH%bit7z\lib\x64\15"
 IF EXIST "%PATH%bit7z\lib\x64\16" RD /S /Q "%PATH%bit7z\lib\x64\16"
 IF EXIST "%PATH%bit7z\lib\x64\17" RD /S /Q "%PATH%bit7z\lib\x64\17"
 
-ECHO 已删除 2023-10-05 版之前的PIV模块残留文件。
+IF EXIST "%PATH%minhook\src" RD /S /Q "%PATH%minhook\src"
+
+ECHO 已删除 2023-11-30 版之前的PIV模块残留文件。
 PAUSE

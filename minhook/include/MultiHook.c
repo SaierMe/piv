@@ -1221,8 +1221,7 @@ BOOL CreateTrampolineFunction(PTRAMPOLINE ct)
 #endif
         newPos += copySize;
         oldPos += hs.len;
-    }
-    while (!finished);
+    } while (!finished);
 
     // Is there enough place for a long jump?
     if (oldPos < sizeof(JMP_REL)
@@ -1272,7 +1271,7 @@ typedef struct _FROZEN_THREADS
 } FROZEN_THREADS, *PFROZEN_THREADS;
 
 // Thread freeze related definitions.
-typedef NTSTATUS(NTAPI* NtGetNextThread_t)(
+typedef NTSTATUS(NTAPI *NtGetNextThread_t)(
     _In_ HANDLE ProcessHandle,
     _In_opt_ HANDLE ThreadHandle,
     _In_ ACCESS_MASK DesiredAccess,
@@ -1282,11 +1281,11 @@ typedef NTSTATUS(NTAPI* NtGetNextThread_t)(
     );
 
 #ifndef STATUS_NO_MORE_ENTRIES
-#define STATUS_NO_MORE_ENTRIES ((NTSTATUS)0x8000001AL)
+    #define STATUS_NO_MORE_ENTRIES ((NTSTATUS)0x8000001AL)
 #endif
 
 #ifndef NT_SUCCESS
-#define NT_SUCCESS(Status) ((NTSTATUS)(Status) >= 0)
+    #define NT_SUCCESS(Status) ((NTSTATUS)(Status) >= 0)
 #endif
 
 // Function and function pointer declarations.
@@ -2041,7 +2040,7 @@ MH_STATUS WINAPI MH_CreateHookEx(ULONG_PTR hookIdent, LPVOID pTarget, LPVOID pDe
 }
 
 //-------------------------------------------------------------------------
-MH_STATUS WINAPI MH_CreateHook(LPVOID pTarget, LPVOID pDetour, LPVOID* ppOriginal)
+MH_STATUS WINAPI MH_CreateHook(LPVOID pTarget, LPVOID pDetour, LPVOID *ppOriginal)
 {
     return MH_CreateHookEx(MH_DEFAULT_IDENT, pTarget, pDetour, ppOriginal);
 }
@@ -2393,7 +2392,7 @@ MH_STATUS WINAPI MH_CreateHookApiEx(
     if (pTarget == NULL)
         return MH_ERROR_FUNCTION_NOT_FOUND;
 
-    if(ppTarget != NULL)
+    if (ppTarget != NULL)
         *ppTarget = pTarget;
 
     return MH_CreateHook(pTarget, pDetour, ppOriginal);
@@ -2403,11 +2402,11 @@ MH_STATUS WINAPI MH_CreateHookApiEx(
 MH_STATUS WINAPI MH_CreateHookApi(
     LPCWSTR pszModule, LPCSTR pszProcName, LPVOID pDetour, LPVOID *ppOriginal)
 {
-   return MH_CreateHookApiEx(pszModule, pszProcName, pDetour, ppOriginal, NULL);
+    return MH_CreateHookApiEx(pszModule, pszProcName, pDetour, ppOriginal, NULL);
 }
 
 //-------------------------------------------------------------------------
-const char * WINAPI MH_StatusToString(MH_STATUS status)
+const char *WINAPI MH_StatusToString(MH_STATUS status)
 {
 #define MH_ST2STR(x)    \
     case x:             \

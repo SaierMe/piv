@@ -342,7 +342,8 @@ public:
     inline bool SetObject(const CVolObject &object, const KeyT &key, int32_t expireDuration = 0)
     {
         if (!m_MMKV)
-            false CVolMemoryOutputStream memStream;
+            return false;
+        CVolMemoryOutputStream memStream;
         object.VolSaveIntoStream(memStream);
         CVolMem bin = memStream.GetBin(CVolMem());
         mmkv::MMBuffer buffer{bin.GetPtr(), static_cast<size_t>(bin.GetSize()), mmkv::MMBufferNoCopy};

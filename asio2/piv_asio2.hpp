@@ -21,7 +21,7 @@ namespace piv
             return *this;
         }
 
-        inline bool has_recv_fun()
+        inline bool has_recv_fun() const
         {
             return _recv_fun.has_value();
         }
@@ -32,7 +32,7 @@ namespace piv
             return std::any_cast<T &>(_recv_fun);
         }
 
-        inline int32_t get_packet_size()
+        inline int32_t get_packet_size() const
         {
             return static_cast<int32_t>(body_.size() + 8);
         }

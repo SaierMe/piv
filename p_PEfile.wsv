@@ -2,133 +2,129 @@
 
 包 火山.PIV基础类 <注释 = "PE文件解析与操作" 注释 = "https://github.com/SaierMe/piv" @视窗.外部头文件 = "src\\PEfile.hpp">
 
-类 PE文件操作类 <公开 注释 = "解析可执行文件的各种数据." 折叠 @文档 = "category = \"PE文件操作\"">
+类 PE文件操作类 <公开 注释 = "解析可执行文件的各种数据" 折叠 @文档 = "category = \"PE文件操作\"">
 {
 
-    # @ @m<DECLARE_REF_OBJECT_CLASS_WITH_DATA> (CPeFileInfo)
+    # @ @m<DECLARE_REF_OBJECT_CLASS_WITH_DATA> (PivPeFile)
 
-    方法 打开文件 <公开 类型 = 逻辑型 注释 = "打开并解析指定文件路径的可执行文件." 返回值注释 = "返回是否解析成功." 折叠 @嵌入式方法 = "">
-    参数 文件名 <类型 = 文本型 注释 = "请提供包含完整路径的文件名.">
+    方法 打开文件 <公开 类型 = 逻辑型 注释 = "打开并解析指定文件路径的可执行文件" 返回值注释 = "返回是否解析成功" 折叠 @嵌入式方法 = "">
+    参数 文件名 <类型 = 文本型 注释 = "请提供包含完整路径的文件名">
     {
-        @ (BOOL)@sn<this>.data ().OpenPeFile (@<文件名>.GetText ())
+        @ @sn<this>.data().OpenPeFile(@<文件名>.GetText())
     }
 
-    方法 打开数据 <公开 类型 = 逻辑型 注释 = "打开并解析内存中的可执行数据." 返回值注释 = "返回是否解析成功." 折叠 @嵌入式方法 = "">
+    方法 打开数据 <公开 类型 = 逻辑型 注释 = "打开并解析内存中的可执行数据" 返回值注释 = "返回是否解析成功" 折叠 @嵌入式方法 = "">
     参数 数据指针 <类型 = 变整数 注释 = "可执行数据的首地址(基址)">
     参数 数据大小 <类型 = 整数 注释 = "可执行文件的字节大小">
-    参数 是否已对齐 <类型 = 逻辑型 注释 = "  请确定可执行数据是否已经内存对齐." 注释 = "  如果是原始的PE文件,请设置为假." 注释 = "  如果节区已经被对齐,请设置为真."
+    参数 是否已对齐 <类型 = 逻辑型 注释 = "请确定可执行数据是否已经内存对齐;" 注释 = "如果是原始的PE文件,请设置为假;" 注释 = "如果节区已经被对齐,请设置为真." @默认值 = 假>
+    参数 是否已加载 <类型 = 逻辑型 注释 = "请确定可执行数据是否已经被加载运行;" 注释 = "如果是原始的PE文件,请设置为假;" 注释 = "如果是系统已经加载运行的模块,请设置为真."
             @默认值 = 假>
-    参数 是否已加载 <类型 = 逻辑型 注释 = "  请确定可执行数据是否已经被加载运行." 注释 = "  如果是原始的PE文件,请设置为假."
-            注释 = "  如果是系统已经加载运行的模块,请设置为真." @默认值 = 假>
     {
-        @ (BOOL)@sn<this>.data ().OpenPeData ((void*)@<数据指针>, (DWORD)@<数据大小>, @<是否已对齐>, @<是否已加载>)
+        @ @sn<this>.data().OpenPeData(reinterpret_cast<void*>(@<数据指针>), static_cast<DWORD>(@<数据大小>), @<是否已对齐>, @<是否已加载>)
     }
 
-    方法 打开模块 <公开 类型 = 逻辑型 注释 = "打开并解析系统中已加载的模块." 返回值注释 = "返回是否解析成功." 折叠 @禁止流程检查 = 真>
-    参数 进程ID <类型 = 整数 注释 = "  0为当前进程" @默认值 = 0>
-    参数 模块名称 <类型 = 文本型 注释 = "  请提供模块的文件名称(区分大小写)." 注释 = "  如省略扩展名则默认为\".dll\". 结尾为\".\"则表示模块名称没有扩展名."
-            注释 = "  该名称可以不包含路径,如果指定路径,必须用反斜杠\"\\\\\"." 注释 = "  留空为打开进程的exe文件." @默认值 = 空对象>
+    方法 打开模块 <公开 类型 = 逻辑型 注释 = "打开并解析系统中已加载的模块" 返回值注释 = "返回是否解析成功" 折叠 @禁止流程检查 = 真>
+    参数 进程ID <类型 = 整数 注释 = "0为当前进程" @默认值 = 0>
+    参数 模块名称 <类型 = 文本型 注释 = "请提供模块的文件名称(区分大小写);" 注释 = "如省略扩展名则默认为\".dll\". 结尾为\".\"则表示模块名称没有扩展名;"
+            注释 = "该名称可以不包含路径,如果指定路径,必须用反斜杠\"\\\\\";" 注释 = "留空为打开进程的exe文件." @默认值 = 空对象>
     {
         变量 进程操作 <类型 = 进程操作类>
         变量 模块信息 <类型 = 模块信息类>
-        变量 模块句柄 <类型 = 变整数>
+        变量 模块句柄 <类型 = 长整数>
         如果 (进程操作.打开进程 (进程ID) == 真)
         {
             模块句柄 = 进程操作.取模块句柄 (模块名称)
             如果 (进程操作.取模块信息 (模块句柄, 模块信息) == 真)
             {
-                @ return (BOOL)data ().OpenPeData ((void*)@<模块信息.lpBaseOfDll>, (DWORD)@<模块信息.SizeOfImage>, TRUE, TRUE);
-
+                @ return (BOOL)data().OpenPeData(reinterpret_cast<void*>(@<模块信息.lpBaseOfDll>), static_cast<DWORD>(@<模块信息.SizeOfImage>), TRUE, TRUE);
             }
-
         }
         返回 (假)
     }
 
     方法 关闭数据 <公开 注释 = "关闭文件并释放数据,类析构时会自动执行." 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.data ().ClosePeData ()
+        @ @sn<this>.data().ClosePeData()
     }
 
-    方法 保存数据 <公开 类型 = 逻辑型 注释 = "将当前打开的可执行数据保存到新文件中." 返回值注释 = "返回是否保存成功." 折叠 @嵌入式方法 = "">
+    方法 保存数据 <公开 类型 = 逻辑型 注释 = "将当前打开的可执行数据保存到新文件中" 返回值注释 = "返回是否保存成功" 折叠 @嵌入式方法 = "">
     参数 文件名 <类型 = 文本型 注释 = "提供所欲写到文件的路径名称">
     参数 是否修复PE结构 <类型 = 逻辑型 注释 = "是否将已加载到内存中运行的PE数据还原成PE文件结构." @默认值 = 真>
     {
-        @ (BOOL)@sn<this>.data ().SavePeDatas (@<文件名>.GetText(), @<是否修复PE结构>)
+        @ @sn<this>.data().SavePeDatas(@<文件名>.GetText(), @<是否修复PE结构>)
     }
 
-    方法 是否可写 <公开 类型 = 逻辑型 注释 = "返回当前的PE数据是否处于可写的内存区域中." 返回值注释 = "返回真表示数据可写." 折叠 @嵌入式方法 = "">
+    方法 是否可写 <公开 类型 = 逻辑型 注释 = "返回当前的PE数据是否处于可写的内存区域中" 返回值注释 = "返回真表示数据可写" 折叠 @嵌入式方法 = "">
     {
-        @ (BOOL)@sn<this>.data ().IsWriteable ()
+        @ @sn<this>.data().IsWriteable()
     }
 
-    方法 复制到新内存 <公开 类型 = 变整数 注释 = "  将可执行数据复制到新的内存地址,本类默认以只读方式打开PE数据," 注释 = "如果要进行改写操作,必须执行本方法."
-            注释 = "  新的内存尺寸跟\"取映像尺寸\"的返回值一样." 返回值注释 = "  成功返回新的内存地址,失败返回0." 返回值注释 = "  成功后将关闭之前打开的文件句柄和内存映射文件." 折叠
-            @嵌入式方法 = "">
+    方法 复制到新内存 <公开 类型 = 变整数 注释 = "将可执行数据复制到新的内存地址." 注释 = "本类默认以只读方式打开PE数据,如果要进行改写操作,必须执行本方法."
+            注释 = "新的内存尺寸跟\"取映像尺寸\"一样." 注释 = "成功后将关闭之前打开的文件句柄和内存映射文件." 返回值注释 = "成功返回新的内存地址,失败返回0;" 折叠 @嵌入式方法 = "">
     {
-        @ (INT_P)@sn<this>.data ().CopyToNewMem (TRUE)
+        @ (INT_P)@sn<this>.data().CopyToNewMem(TRUE)
     }
 
     方法 加载内存PE <公开 类型 = 逻辑型 注释 = "将PE数据复制到可执行可读写的新内存,并进行内存对齐、地址重定位和绑定导入表函数地址." 折叠 @嵌入式方法 = "">
     {
-        @ (BOOL)@sn<this>.data ().MemLoadPE ()
+        @ @sn<this>.data().MemLoadPE()
     }
 
     方法 取最后错误 <公开 类型 = 整数 注释 = "  返回本类最后一次的操作结果,0表示操作成功,其他值表示有错误," 注释 = "可以调用\"取错误信息\"得知具体的中文错误信息." 折叠
             @嵌入式方法 = "">
     {
-        @ (INT)@sn<this>.data ().GetErrorCode ()
+        @ @sn<this>.data().GetErrorCode()
     }
 
-    方法 取最后错误信息 <公开 类型 = 文本型 注释 = "返回本类最后一次的操作结果." 返回值注释 = "返回的是含错误代码和中文错误描述的文本型." 折叠 @嵌入式方法 = "">
+    方法 取最后错误信息 <公开 类型 = 文本型 注释 = "返回本类最后一次的操作结果" 返回值注释 = "返回的是含错误代码和中文错误描述的文本型" 折叠 @嵌入式方法 = "">
     {
-        @ @an<CVolString> (@sn<this>.data ().GetErrorMessage ())
+        @ @an<CVolString>(@sn<this>.data().GetErrorMessage())
     }
 
     方法 取数据指针 <公开 类型 = 变整数 注释 = "  获取可执行文件在内存中的基址,请勿对不可写的内存区域进行写操作," 注释 = "可能会导致程序崩溃,进行写操作前请先用\"是否可写\"方法判断."
             返回值注释 = "必须先\"解析文件\"成功才能返回有效数据." 折叠 @嵌入式方法 = "">
     {
-        @ (INT_P)@sn<this>.data ().GetBaseAddress ()
+        @ (INT_P)@sn<this>.data().GetBaseAddress()
     }
 
-    方法 取数据尺寸 <公开 类型 = 整数 注释 = "获取可执行文件当前占用的内存大小." 返回值注释 = "成功返回内存大小,失败返回0." 折叠 @嵌入式方法 = "">
+    方法 取数据尺寸 <公开 类型 = 整数 注释 = "获取可执行文件当前占用的内存大小" 返回值注释 = "成功返回内存大小,失败返回0." 折叠 @嵌入式方法 = "">
     {
-        @ (INT)@sn<this>.data ().GetDataSize ()
+        @ (INT)@sn<this>.data().GetDataSize()
     }
 
-    方法 取映像尺寸 <公开 类型 = 整数 注释 = "计算出可执行文件被系统加载到内存之后的映像尺寸." 返回值注释 = "成功返回映像文件大小,失败返回0." 折叠 @嵌入式方法 = "">
+    方法 取映像尺寸 <公开 类型 = 整数 注释 = "计算出可执行文件被系统加载到内存之后的映像尺寸" 返回值注释 = "成功返回映像文件大小,失败返回0." 折叠 @嵌入式方法 = "">
     {
-        @ (INT)@sn<this>.data ().CalcTotalImageSize ()
+        @ (INT)@sn<this>.data().CalcTotalImageSize()
     }
 
-    方法 取文件尺寸 <公开 类型 = 整数 注释 = "计算出可执行文件的原始文件尺寸." 返回值注释 = "成功返回文件尺寸,失败返回0." 折叠 @嵌入式方法 = "">
+    方法 取文件尺寸 <公开 类型 = 整数 注释 = "计算出可执行文件的原始文件尺寸" 返回值注释 = "成功返回文件尺寸,失败返回0." 折叠 @嵌入式方法 = "">
     {
-        @ (INT)@sn<this>.data ().CalcPeFileSize ()
+        @ (INT)@sn<this>.data().CalcPeFileSize()
     }
 
-    方法 是否为64位 <公开 类型 = 逻辑型 注释 = "返回可执行文件是否为64位." 折叠 @嵌入式方法 = "">
+    方法 是否为64位 <公开 类型 = 逻辑型 注释 = "返回可执行文件是否为64位" 折叠 @嵌入式方法 = "">
     {
-        @ (BOOL)@sn<this>.data ().Is64Pe ()
+        @ @sn<this>.data().Is64Pe()
     }
 
     方法 是否为DLL <公开 注释 = "返回可执行文件是否为DLL文件." 折叠 @嵌入式方法 = "">
     {
-        @ (BOOL)@sn<this>.data ().IsDllData ()
+        @ @sn<this>.data().IsDllData()
     }
 
     方法 是否为EXE <公开 注释 = "返回可执行文件是否为EXE文件." 折叠 @嵌入式方法 = "">
     {
-        @ (BOOL)@sn<this>.data ().IsExeData ()
+        @ @sn<this>.data().IsExeData()
     }
 
     方法 取映像基址 <公开 类型 = 长整数 注释 = "获取可执行文件的映像基址(ImageBase),32位PE可强制转换到整数." 返回值注释 = "失败返回0." 折叠 @嵌入式方法 = "">
     {
-        @ (INT64)@sn<this>.data ().GetImageBase ()
+        @ (INT64)@sn<this>.data().GetImageBase()
     }
 
     方法 取入口点 <公开 类型 = 整数 注释 = "获取可执行文件的代码入口点(EntryPoint)." 折叠 @嵌入式方法 = "">
     {
-        @ (INT)@sn<this>.data ().GetEntryPoint ()
+        @ (INT)@sn<this>.data().GetEntryPoint()
     }
 
     方法 取DOS头 <公开 类型 = IMAGE_DOS_HEADER 注释 = "获取可执行文件的DOS头数据." 折叠 @禁止流程检查 = 真>
@@ -263,35 +259,34 @@
 
     # ---
 
-    方法 相对虚拟地址到文件偏移 <公开 类型 = 整数 注释 = "将相对虚拟地址(RVA)转换到文件偏移量(FOA)." 折叠 @嵌入式方法 = "">
+    方法 相对虚拟地址到文件偏移 <公开 类型 = 整数 注释 = "将相对虚拟地址(RVA)转换到文件偏移量(FOA)." @嵌入式方法 = "">
     参数 相对虚拟地址 <类型 = 整数>
     {
-        @ (INT)@sn<this>.data ().Rva2Foa ((DWORD)@<相对虚拟地址>)
+        @ (INT)@sn<this>.data().Rva2Foa(static_cast<DWORD>(@<相对虚拟地址>))
     }
 
-    方法 文件偏移到相对虚拟地址 <公开 类型 = 整数 注释 = "将文件偏移量(FOA)转换到相对虚拟地址(RVA)." 返回值注释 = "失败返回0" 折叠 @嵌入式方法 = "">
+    方法 文件偏移到相对虚拟地址 <公开 类型 = 整数 注释 = "将文件偏移量(FOA)转换到相对虚拟地址(RVA)." 返回值注释 = "失败返回0" @嵌入式方法 = "">
     参数 文件偏移 <类型 = 整数>
     {
-        @ (INT)@sn<this>.data ().Foa2Rva ((DWORD)@<文件偏移>)
+        @ (INT)@sn<this>.data().Foa2Rva(static_cast<DWORD>(@<文件偏移>))
     }
 }
 
 # ---
 
-类 内存DLL加载类 <公开 注释 = "  本类不使用系统的加载器载正常加载DLL模块,而是手动修改DLL的PE数据" 注释 = "并运行,因此成功加载的DLL没有模块句柄,也不会被系统API枚举出来."
-        注释 = "  * 将DLL数据复制到一块新申请的可执行可读写的虚拟内存,然后对DLL的" 注释 = "PE数据进行内存对齐、地址重定位和绑定导入表函数地址,最后执行DLL模块"
-        注释 = "的入口点函数." 注释 = "  * 在类析构或卸载模块之前,可以获取DLL导出表里的函数并调用." 注释 = "  * 只能在当前进程中加载,不支持注入到其他进程."
-        注释 = "  * 兼容32位和64位的程序,DLL模块和进程的位数不符会返回失败." 注释 = "  * 若重建导入表时,有模块未被系统加载,会自动调用LoadLibrary加载,"
-        注释 = "卸载模块时会自动FreeLibrary(例如该DLL有依赖其他非系统的DLL)." 折叠 @文档 = "category = \"内存注入\"">
+类 内存DLL加载类 <公开 注释 = "注意: 这个类库是我自己写的,是否\"PE文件操作类\"的副产物,可能不够完善," 注释 = "一般建议用\"内存模块PP\"."
+        注释 = "  1. 本类不使用系统的加载器载正常加载DLL模块,而是手动修改DLL的PE数据" 注释 = "并运行,因此成功加载的DLL不会被系统API枚举出来;"
+        注释 = "  2. 在类析构或卸载模块之前,可以获取DLL导出表里的函数并调用;" 注释 = "  3. 只能在当前进程中加载,不支持注入到其他进程;"
+        注释 = "  4. 兼容32位和64位的程序,DLL模块和进程的位数不符会返回失败;" 折叠 @文档 = "category = \"内存注入\"">
 {
 
-    # @ @m<DECLARE_REF_OBJECT_CLASS_WITH_DATA> (CMemLoadDll)
+    # @ @m<DECLARE_REF_OBJECT_CLASS_WITH_DATA> (PivMemLoader)
 
     方法 保存数据 <公开 类型 = 逻辑型 注释 = "!!!功能未完成,未修复内存中的PE数据!!!" 注释 = "将当前打开的可执行数据保存到新文件中." 返回值注释 = "返回是否保存成功." 折叠
             @禁止流程检查 = 真>
     参数 文件名 <类型 = 文本型 注释 = "提供所欲写到文件的路径名称">
     {
-        @ return (BOOL)WriteDataIntoFile (@<文件名>.GetText(), data ().GetBaseAddress (), (INT_P)data ().GetDataSize ());
+        @ return WriteDataIntoFile(@<文件名>.GetText(), data().GetBaseAddress(), (INT_P)data().GetDataSize());
     }
 
     方法 加载模块 <公开 类型 = 逻辑型 注释 = "  在内存中加载DLL数据,并运行DLL的入口点函数.提供的DLL数据" 注释 = "必须是未经修改的(内容跟磁盘的DLL文件一致),否则会崩溃."
@@ -300,51 +295,51 @@
     参数 DLL数据地址 <类型 = 变整数 注释 = "DLL数据在内存中的地址,请提供原始的DLL数据">
     参数 DLL数据大小 <类型 = 整数 注释 = "DLL数据的字节大小">
     {
-        @ @sn<this>.data ().MemLoadLibrary ((void*)@<DLL数据地址>, (DWORD)@<DLL数据大小>)
+        @ @sn<this>.data().MemLoadLibrary((void*)@<DLL数据地址>, (DWORD)@<DLL数据大小>)
     }
 
     方法 卸载模块 <公开 注释 = "  卸载内存DLL,卸载后请勿再调用DLL中的函数,否则会造成崩溃." 注释 = "  类析构时会自动卸载,一般不需要手动调用." 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.data ().MemFreeLibrary ()
+        @ @sn<this>.data().MemFreeLibrary()
     }
 
     方法 函数名取地址 <公开 类型 = 变整数 注释 = "获取DLL模块中指定名称的函数地址(VA)." 返回值注释 = "成功返回函数地址,失败返回0." 折叠 @嵌入式方法 = "">
     参数 函数名称 <类型 = 文本型 注释 = "所欲取地址的函数名称">
     {
-        @ (INT_P)@sn<this>.data ().MemGetProcAddress ((LPCSTR)GetMbsText(@<函数名称>.GetText (), CVolMem (), NULL))
+        @ (INT_P)@sn<this>.data().MemGetProcAddress(GetMbsText(@<函数名称>.GetText(), CVolMem(), NULL))
     }
 
     方法 函数序号取地址 <公开 类型 = 变整数 注释 = "获取DLL模块中指定序号的函数地址(VA)." 返回值注释 = "成功返回函数地址,失败返回0." 折叠 @嵌入式方法 = "">
     参数 函数序号 <类型 = 整数 注释 = "所欲取地址的函数序号,起始序号应大于等于1.">
     {
-        @ (INT_P)@sn<this>.data ().MemGetProcAddress ((LPCSTR)@<函数序号>)
+        @ (INT_P)@sn<this>.data().MemGetProcAddress((LPCSTR)@<函数序号>)
     }
 
     方法 取模块基址 <公开 类型 = 变整数 注释 = "获取内存DLL在虚拟内存中的模块基址(VA)." 返回值注释 = "未加载时返回0." 折叠 @嵌入式方法 = "">
     {
-        @ (INT_P)@sn<this>.data ().GetBaseAddress ()
+        @ (INT_P)@sn<this>.data().GetBaseAddress()
     }
 
     方法 取模块尺寸 <公开 类型 = 整数 注释 = "  获取DLL数据在内存对齐之后的映像尺寸,该尺寸不等于DLL" 注释 = "的文件尺寸." 返回值注释 = "成功返回模块的尺寸,失败返回0." 折叠
             @嵌入式方法 = "">
     {
-        @ (INT)@sn<this>.data ().CalcTotalImageSize ()
+        @ (INT)@sn<this>.data().CalcTotalImageSize()
     }
 
     方法 是否已加载 <公开 类型 = 逻辑型 注释 = "返回是否已经成功加载了内存DLL." 返回值注释 = "已加载返回真,否则返回假." 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.data ().IsLoadOk ()
+        @ @sn<this>.data().IsLoadOk()
     }
 
     方法 取最后错误 <公开 类型 = 整数 注释 = "  返回本类最后一次的操作结果,0表示操作成功,其他值表示有错误," 注释 = "可以调用\"取错误信息\"得知具体的中文错误信息." 折叠
             @嵌入式方法 = "">
     {
-        @ (INT)@sn<this>.data ().GetErrorCode ()
+        @ (INT)@sn<this>.data().GetErrorCode()
     }
 
     方法 取最后错误信息 <公开 类型 = 文本型 注释 = "返回本类最后一次的操作结果." 返回值注释 = "返回的是含错误代码和中文错误描述的文本型." 折叠 @嵌入式方法 = "">
     {
-        @ @an<CVolString> (@sn<this>.data ().GetErrorMessage ())
+        @ @an<CVolString>(@sn<this>.data().GetErrorMessage())
     }
 }
 
@@ -864,179 +859,3 @@
 }
 
 类 导入表数组类 <公开 基础类 = 对象数组模板类 注释 = "导入表数组" @文档 = "category = \"PE文件操作.辅助类\"" @模板实现类 = "导出表类">
-
-# ======
-
-类 程序信息类 <公开 注释 = "用于获取程序文件的版本信息" 折叠2 @文档 = "category = \"PE文件操作\"" @全局类 = 真 @禁止创建对象 = 真
-        @视窗.外部库 = "Version.lib">
-{
-    方法 取程序版本 <公开 静态 类型 = 逻辑型 注释 = "获取程序文件的完整版本信息,取自版本信息资源的StringFileInfo结构."
-            注释 = "注意: 由于火山程序的版本信息比较别扭,本方法只能获取火山程序的\"版本名称\"属性," 注释 = "如果要获取\"版本号\",请使用\"取文件版本\"或\"取产品版本\"."
-            返回值注释 = "返回是否成功" 折叠 @禁止流程检查 = 真>
-    参数 文件名 <类型 = 文本型 注释 = "包含完整路径的文件名">
-    参数 版本信息 <类型 = 程序版本信息类>
-    {
-        @ @<版本信息>.ResetToNullObject ();
-        @ DWORD bufSize = ::GetFileVersionInfoSizeW (@<文件名>.GetText (), 0);
-        @ if (!bufSize) return FALSE;
-        @ @an<CVolMem> buffer;
-        @ buffer.Alloc (bufSize, TRUE);
-        @ if (::GetFileVersionInfoW (@<文件名>.GetText (), 0, bufSize, buffer.GetPtr ()) == 0)
-        @     return FALSE;
-        @ struct LANGANDCODEPAGE {
-        @     WORD wLanguage;
-        @     WORD wCodePage;
-        @ } *lpTranslate;
-        @ UINT cbTranslate, data_len;
-        @ if (::VerQueryValueW (buffer.GetPtr (), L"\\VarFileInfo\\Translation", (LPVOID*)&lpTranslate, &cbTranslate))
-        @ {
-        @     for (UINT i = 0; i < (cbTranslate / sizeof (struct LANGANDCODEPAGE)); i++)
-        @     {
-        @         WCHAR SubBlock[MAX_PATH] { '\0' };
-        @         const WCHAR* szText = nullptr;
-        @         if (::VerLanguageNameW (lpTranslate[i].wLanguage, SubBlock, MAX_PATH)) @<版本信息.语言>.SetText (SubBlock);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\Comments", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.注释>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\CompanyName", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.公司名称>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\FileDescription", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.文件说明>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\FileVersion", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.文件版本>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\InternalName", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.内部名称>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\LegalCopyright", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.版权>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\LegalTrademarks", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.法律商标>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\OriginalFilename", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.原始文件名>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\ProductName", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.产品名称>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\ProductVersion", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.产品版本>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\PrivateBuild", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.私有版本>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\SpecialBuild", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.特殊版本>.SetText (szText);
-        @         break; // 跳出循环,只取第一个语言
-        @     }
-        @     return TRUE;
-        @ }
-        @ return FALSE;
-    }
-
-    方法 取程序文件版本 <公开 静态 类型 = 文本型 注释 = "返回程序文件的文件版本字符串,取自版本信息资源的StringFileInfo结构."
-            返回值注释 = "成功返回文件版本(等同火山程序的\"版本名称\"属性)" 折叠 @禁止流程检查 = 真>
-    参数 文件名 <类型 = 文本型 注释 = "包含完整路径的文件名">
-    {
-        @ DWORD bufSize = ::GetFileVersionInfoSizeW (@<文件名>.GetText (), 0);
-        @ @an<CVolString> szFileVersion;
-        @ if (!bufSize) return szFileVersion;
-        @ @an<CVolMem> buffer;
-        @ buffer.Alloc (bufSize, TRUE);
-        @ if (::GetFileVersionInfoW (@<文件名>.GetText(), 0, bufSize, buffer.GetPtr ()) == 0)
-        @     return szFileVersion;
-        @ struct LANGANDCODEPAGE {
-        @     WORD wLanguage;
-        @     WORD wCodePage;
-        @ } *lpTranslate;
-        @ UINT cbTranslate, data_len;
-        @ if (::VerQueryValueW (buffer.GetPtr (), L"\\VarFileInfo\\Translation", (LPVOID*)&lpTranslate, &cbTranslate))
-        @ {
-        @     for (UINT i = 0; i < (cbTranslate / sizeof (struct LANGANDCODEPAGE)); i++)
-        @     {
-        @         WCHAR SubBlock[MAX_PATH] { 0 };
-        @         const WCHAR* szText = nullptr;
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\FileVersion", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len))
-        @             szFileVersion.SetText (szText);
-        @         break; // 跳出循环,只取第一个语言
-        @     }
-        @ }
-        @ return szFileVersion;
-    }
-
-    方法 取文件版本 <公开 静态 类型 = 长整数 注释 = "返回程序文件的文件版本,取自版本信息资源的VS_FIXEDFILEINFO结构."
-            注释 = "调用失败返回-1,长整数的版本号更适合比较,但不直观." 折叠 @禁止流程检查 = 真>
-    参数 文件名 <类型 = 文本型 注释 = "包含完整路径的文件名">
-    参数 返回版本格式文本 <类型 = 文本型 注释 = "在本参数中返回类似\"1.1.0.0\"格式的文本版本号,更适合于展示." @默认值 = 空对象>
-    {
-        @ DWORD bufSize = ::GetFileVersionInfoSizeW (@<文件名>.GetText (), 0);
-        @ if (!bufSize) return -1;
-        @ @an<CVolMem> buffer;
-        @ buffer.Alloc (bufSize, TRUE);
-        @ if (::GetFileVersionInfoW (@<文件名>.GetText(), 0, bufSize, buffer.GetPtr ()) == 0)
-        @     return -1;
-        @ VS_FIXEDFILEINFO* pFileInfo = nullptr;
-        @ UINT cbFileInfo;
-        @ if (::VerQueryValueW (buffer.GetPtr (), L"\\", (LPVOID*)&pFileInfo, &cbFileInfo))
-        @ {
-        @     if (!@<返回版本格式文本>.IsNullObject())
-        @         @<返回版本格式文本>.Format (L"%d.%d.%d.%d", HIWORD(pFileInfo->dwFileVersionMS), LOWORD((DWORD)pFileInfo->dwFileVersionMS), HIWORD(pFileInfo->dwFileVersionLS), LOWORD((DWORD)pFileInfo->dwFileVersionLS));
-        @     return (INT64)(pFileInfo->dwFileVersionMS | ((UINT64)pFileInfo->dwFileVersionLS << 32));
-        @ }
-        @ return -1;
-    }
-
-    方法 取产品版本 <公开 静态 类型 = 长整数 注释 = "返回程序文件的产品版本,取自版本信息资源的VS_FIXEDFILEINFO结构."
-            注释 = "调用失败返回-1,长整数的版本号更适合比较,但不直观." 折叠 @禁止流程检查 = 真>
-    参数 文件名 <类型 = 文本型 注释 = "包含完整路径的文件名">
-    参数 返回版本格式文本 <类型 = 文本型 注释 = "在本参数中返回类似\"1.1.0.0\"格式的文本版本号,更适合于展示." @默认值 = 空对象>
-    {
-        @ DWORD bufSize = ::GetFileVersionInfoSizeW (@<文件名>.GetText (), 0);
-        @ if (!bufSize) return -1;
-        @ @an<CVolMem> buffer;
-        @ buffer.Alloc (bufSize, TRUE);
-        @ if (::GetFileVersionInfoW (@<文件名>.GetText(), 0, bufSize, buffer.GetPtr ()) == 0)
-        @     return -1;
-        @ VS_FIXEDFILEINFO* pFileInfo = nullptr;
-        @ UINT cbFileInfo;
-        @ if (::VerQueryValueW (buffer.GetPtr (), L"\\", (LPVOID*)&pFileInfo, &cbFileInfo))
-        @ {
-        @     if (!@<返回版本格式文本>.IsNullObject())
-        @         @<返回版本格式文本>.Format (L"%d.%d.%d.%d", HIWORD(pFileInfo->dwProductVersionMS), LOWORD((DWORD)pFileInfo->dwProductVersionMS), HIWORD(pFileInfo->dwProductVersionLS), LOWORD((DWORD)pFileInfo->dwProductVersionLS));
-        @     return (INT64)(pFileInfo->dwProductVersionMS | ((UINT64)pFileInfo->dwProductVersionLS << 32));
-        @ }
-        @ return -1;
-    }
-}
-
-类 程序版本信息类 <公开 基础类 = 扩展对象类 注释 = "程序文件版本信息的辅助类" 折叠 @文档 = "category = \"PE文件操作.辅助类\"">
-{
-    变量 注释 <公开 类型 = 文本型 注释 = "(可能为空)Comments,与文件关联的注释.">
-    变量 公司名称 <公开 类型 = 文本型 注释 = "CompanyName,生成文件的公司的名称.">
-    变量 文件说明 <公开 类型 = 文本型 注释 = "FileDescription,文件说明.">
-    变量 文件版本 <公开 类型 = 文本型 注释 = "FileVersion,文件的版本号.">
-    变量 内部名称 <公开 类型 = 文本型 注释 = "InternalName,文件的内部名称. 如果不存在内部名称,则该属性将包含文件的原始名称(不带扩展名).">
-    变量 版权 <公开 类型 = 文本型 注释 = "LegalCopyright,包括所有声明的完整文本、合法符号、版权日期等.">
-    变量 法律商标 <公开 类型 = 文本型 注释 = "(可能为空)LegalTrademarks,应用到文件的商标和注册商标.">
-    变量 原始文件名 <公开 类型 = 文本型 注释 = "OriginalFilename,创建文件时使用的名称.">
-    变量 产品名称 <公开 类型 = 文本型 注释 = "ProductName,与此文件一起发行的产品的名称.">
-    变量 产品版本 <公开 类型 = 文本型 注释 = "ProductVersion,与此文件一起发行的产品的版本.">
-    变量 私有版本 <公开 类型 = 文本型 注释 = "(可能为空)PrivateBuild,文件私有版本的信息.">
-    变量 特殊版本 <公开 类型 = 文本型 注释 = "(可能为空)SpecialBuild,文件的特殊内部版本信息.">
-    变量 语言 <公开 类型 = 文本型 注释 = "程序的语言">
-
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖>
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
-    {
-        展示内容 = "<程序版本信息类> 总共 13 个成员:\r\n"
-        加入文本 (展示内容, "1. 注释: " + 取调试文本2 (最大展示数据尺寸, 注释) + "\r\n")
-        加入文本 (展示内容, "2. 公司名称: " + 取调试文本2 (最大展示数据尺寸, 公司名称) + "\r\n")
-        加入文本 (展示内容, "3. 文件说明: " + 取调试文本2 (最大展示数据尺寸, 文件说明) + "\r\n")
-        加入文本 (展示内容, "4. 文件版本: " + 取调试文本2 (最大展示数据尺寸, 文件版本) + "\r\n")
-        加入文本 (展示内容, "5. 内部名称: " + 取调试文本2 (最大展示数据尺寸, 内部名称) + "\r\n")
-        加入文本 (展示内容, "6. 版权: " + 取调试文本2 (最大展示数据尺寸, 版权) + "\r\n")
-        加入文本 (展示内容, "7. 法律商标: " + 取调试文本2 (最大展示数据尺寸, 法律商标) + "\r\n")
-        加入文本 (展示内容, "8. 原始文件名: " + 取调试文本2 (最大展示数据尺寸, 原始文件名) + "\r\n")
-        加入文本 (展示内容, "9. 产品名称: " + 取调试文本2 (最大展示数据尺寸, 产品名称) + "\r\n")
-        加入文本 (展示内容, "10. 产品版本: " + 取调试文本2 (最大展示数据尺寸, 产品版本) + "\r\n")
-        加入文本 (展示内容, "11. 私有版本: " + 取调试文本2 (最大展示数据尺寸, 私有版本) + "\r\n")
-        加入文本 (展示内容, "12. 特殊版本: " + 取调试文本2 (最大展示数据尺寸, 特殊版本) + "\r\n")
-        加入文本 (展示内容, "13. 语言: " + 取调试文本2 (最大展示数据尺寸, 语言) + "\r\n")
-    }
-}
-
-类 程序版本信息数组类 <公开 基础类 = 对象数组模板类 @文档 = "category = \"PE文件操作.辅助类\"" @模板实现类 = "程序版本信息类">

@@ -38,6 +38,12 @@
         @ @<所欲创建对象的类型> (@<参数列表>)
     }
 
+    方法 取变量类型名称 <公开 静态 类型 = 文本型 注释 = "返回指定变量的C++类型名称" 折叠 @视窗.外部头文件 = "<typeinfo>" @嵌入式方法 = "">
+    参数 变量 <注释 = "所欲取类型名称的变量" @匹配类型 = 通用型>
+    {
+        @ @an<CVolString>(typeid(@<变量>).name())
+    }
+
     #
 
     方法 取执行文件路径 <公开 静态 类型 = 文本型 注释 = "返回当前被执行程序文件的完整路径(带文件名)." 折叠 @禁止流程检查 = 真>
@@ -224,7 +230,7 @@
     }
 
     方法 全局处理事件 <公开 静态 注释 = "暂时转让控制权,以便让Windows操作系统有机会处理其它的如用户键盘或鼠标输入等事件."
-            注释 = "直到操作系统处理并发送完程序消息队列中的所有事件后,本方法才会返回." 折叠>
+            注释 = "直到操作系统处理并发送完程序消息队列中的所有事件后,本方法才会返回.">
     {
         @ MSG msg;
         @ while (::PeekMessage (&msg, NULL, NULL, NULL, PM_NOREMOVE) && msg.message != WM_QUIT)
@@ -615,7 +621,7 @@
     }
 }
 
-类 通用文件对话框 <公开 注释 = "调用系统的文件对话框选择文件." 折叠 @文档 = "category = \"文件操作\"" @禁止创建对象 = 真>
+类 通用文件对话框 <公开 注释 = "调用系统的文件对话框选择文件." @文档 = "category = \"文件操作\"" @禁止创建对象 = 真>
 {
     方法 打开文件 <公开 静态 类型 = 逻辑型 注释 = "调用系统的文件对话框选择打开文件." 返回值注释 = "  返回是否成功,成功时在\"文件名\"参数中返回全路径文件名."
             返回值注释 = "  如失败或取消打开文件,则\"文件名\"参数返回空文本." 折叠 @禁止流程检查 = 真>
@@ -634,37 +640,37 @@
     参数 不改变目录 <类型 = 逻辑型 注释 = "是否在对话框关闭后,将\"当前目录\"还原为打开对话框之前的目录." @默认值 = 假>
     {
         @ OPENFILENAMEW ofn { 0 };
-        @ ofn.lStructSize = sizeof (OPENFILENAMEW);
-        @ ofn.hwndOwner = @<父窗口句柄> ? (HWND)@<父窗口句柄> : NULL;
+        @ ofn.lStructSize = sizeof(OPENFILENAMEW);
+        @ ofn.hwndOwner = @<父窗口句柄> ? reinterpret_cast<HWND>(@<父窗口句柄>) : NULL;
         @ @an<CVolMem> szFilter;
-        @ if (@<过滤器>.IsEmpty ()) {
+        @ if (@<过滤器>.IsEmpty()) {
         @     ofn.lpstrFilter = NULL;
         @ } else {
-        @     szFilter.AddTextValue (@<过滤器>, TRUE);
-        @     szFilter.ReplaceBin (CVolMem (_CT ("|")), CVolMem ().AddManyBytes (2, 0, 0), 0, 0);
-        @     szFilter.AddWord (0);
-        @     ofn.lpstrFilter = reinterpret_cast<const WCHAR*>(szFilter.GetPtr ());
+        @     szFilter.AddTextValue(@<过滤器>, TRUE);
+        @     szFilter.ReplaceBin(CVolMem(_CT("|")), CVolMem().AddManyBytes(2, 0, 0), 0, 0);
+        @     szFilter.AddWord(0);
+        @     ofn.lpstrFilter = reinterpret_cast<const WCHAR*>(szFilter.GetPtr());
         @ }
-        @ ofn.lpstrInitialDir = @<初始目录>.IsEmpty () ? NULL : @<初始目录>.GetText ();
+        @ ofn.lpstrInitialDir = @<初始目录>.IsEmpty() ? NULL : @<初始目录>.GetText();
         @ WCHAR szBuffer[MAX_PATH * 4];
-        @ if (@<文件名>.IsEmpty ())
+        @ if (@<文件名>.IsEmpty())
         @     szBuffer[0] = '\0';
         @ else
-        @     wcscpy_s (szBuffer, MAX_PATH * 4, @<文件名>.GetText ());
+        @     wcscpy_s(szBuffer, MAX_PATH * 4, @<文件名>.GetText());
         @ ofn.lpstrFile = szBuffer;
-        @ ofn.lpstrTitle = @<标题>.IsEmpty () ? NULL : @<标题>.GetText ();
-        @ ofn.nMaxFile = sizeof (szBuffer);
+        @ ofn.lpstrTitle = @<标题>.IsEmpty() ? NULL : @<标题>.GetText();
+        @ ofn.nMaxFile = sizeof(szBuffer);
         @ ofn.nFilterIndex = static_cast<DWORD>(@<初始过滤器>);
-        @ ofn.lpstrDefExt = @<默认文件后缀>.IsEmpty () ? NULL : @<默认文件后缀>.GetText ();
+        @ ofn.lpstrDefExt = @<默认文件后缀>.IsEmpty() ? NULL : @<默认文件后缀>.GetText();
         @ ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
         @ if (@<创建时提示>) ofn.Flags |= OFN_CREATEPROMPT;
         @ if (@<禁止解析快捷方式>) ofn.Flags |= OFN_NODEREFERENCELINKS;
         @ if (@<不改变目录>) ofn.Flags |= OFN_NOCHANGEDIR;
-        @ if (::GetOpenFileNameW (&ofn)) {
-        @     @<文件名>.SetText (ofn.lpstrFile);
+        @ if (::GetOpenFileNameW(&ofn)) {
+        @     @<文件名>.SetText(ofn.lpstrFile);
         @     return TRUE;
         @ }
-        @ @<文件名>.Empty ();
+        @ @<文件名>.Empty();
         @ return FALSE;
     }
 
@@ -681,41 +687,41 @@
     参数 初始目录 <类型 = 文本型 注释 = "指定打开对话框时自动跳转到的目录" @默认值 = 空对象>
     参数 不改变目录 <类型 = 逻辑型 注释 = "是否在对话框关闭后,将\"当前目录\"还原为打开对话框之前的目录." @默认值 = 假>
     {
-        @ @<文件名列表>.data ().RemoveAll ();
+        @ @<文件名列表>.data().RemoveAll();
         @ OPENFILENAMEW ofn { 0 };
-        @ ofn.lStructSize = sizeof (OPENFILENAMEW);
-        @ ofn.hwndOwner = @<父窗口句柄> ? (HWND)@<父窗口句柄> : NULL;
+        @ ofn.lStructSize = sizeof(OPENFILENAMEW);
+        @ ofn.hwndOwner = @<父窗口句柄> ? reinterpret_cast<HWND>(@<父窗口句柄>) : NULL;
         @ @an<CVolMem> szFilter;
-        @ if (@<过滤器>.IsEmpty ()) {
+        @ if (@<过滤器>.IsEmpty()) {
         @     ofn.lpstrFilter = NULL;
         @ } else {
-        @     szFilter.AddTextValue (@<过滤器>, TRUE);
-        @     szFilter.ReplaceBin (CVolMem (_CT ("|")), CVolMem ().AddManyBytes (2, 0, 0), 0, 0);
-        @     szFilter.AddWord (0);
-        @     ofn.lpstrFilter = reinterpret_cast<const WCHAR*>(szFilter.GetPtr ());
+        @     szFilter.AddTextValue(@<过滤器>, TRUE);
+        @     szFilter.ReplaceBin(CVolMem(_CT("|")), CVolMem().AddManyBytes(2, 0, 0), 0, 0);
+        @     szFilter.AddWord(0);
+        @     ofn.lpstrFilter = reinterpret_cast<const WCHAR*>(szFilter.GetPtr());
         @ }
-        @ ofn.lpstrInitialDir = @<初始目录>.IsEmpty () ? NULL : @<初始目录>.GetText ();
-        @ WCHAR szBuffer[MAX_PATH * 512] { 0 }; // 这个缓冲区大小保守可以打开1000-2000个文件
-        @ ofn.lpstrFile = szBuffer;
-        @ ofn.lpstrTitle = @<标题>.IsEmpty () ? NULL : @<标题>.GetText ();
-        @ ofn.nMaxFile = sizeof (szBuffer);
+        @ ofn.lpstrInitialDir = @<初始目录>.IsEmpty() ? NULL : @<初始目录>.GetText();
+        // 这个缓冲区大小保守可以打开1000-2000个文件
+        @ ofn.lpstrFile = reinterpret_cast<WCHAR *>(calloc(MAX_PATH * 512, sizeof(WCHAR)));
+        @ ofn.lpstrTitle = @<标题>.IsEmpty() ? NULL : @<标题>.GetText();
+        @ ofn.nMaxFile = MAX_PATH * 512;
         @ ofn.nFilterIndex = static_cast<DWORD>(@<初始过滤器>);
         @ ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_ALLOWMULTISELECT | OFN_NODEREFERENCELINKS;
         @ if (@<不改变目录>) ofn.Flags |= OFN_NOCHANGEDIR;
-        @ if (::GetOpenFileNameW (&ofn)) {
-        @     @an<CVolString> szPath {szBuffer, ofn.nFileOffset};
-        @     szPath.CheckAddPathChar ();
-        @     WCHAR* p = szBuffer + ofn.nFileOffset; // 把指针移到第一个文件
+        @ if (::GetOpenFileNameW(&ofn)) {
+        @     @an<CVolString> szPath {ofn.lpstrFile, ofn.nFileOffset};
+        @     szPath.CheckAddPathChar();
+        @     WCHAR* p = ofn.lpstrFile + ofn.nFileOffset; // 把指针移到第一个文件
         @     while (*p) {
         @         @an<CVolString> szFileName;
-        @         szFileName.AddText (szPath);
-        @         szFileName.AddText (p);
-        @         @<文件名列表>.data ().Add (szFileName);
-        @         p += wcslen (p) + 1; // 移至下一个文件
+        @         szFileName.AddText(szPath);
+        @         szFileName.AddText(p);
+        @         @<文件名列表>.data().Add(szFileName);
+        @         p += wcslen(p) + 1; // 移至下一个文件
         @     }
-        @     return (INT)@<文件名列表>.data ().GetCount ();
         @ }
-        @ return 0;
+        @ free(ofn.lpstrFile);
+        @ return static_cast<INT>(@<文件名列表>.data().GetCount());
     }
 
     方法 保存文件 <公开 静态 类型 = 逻辑型 注释 = "调用系统的文件对话框选择保存文件." 返回值注释 = "  返回是否成功,成功时在\"文件名\"参数中返回全路径文件名."
@@ -734,36 +740,36 @@
     参数 不改变目录 <类型 = 逻辑型 注释 = "是否在对话框关闭后,将\"当前目录\"还原为打开对话框之前的目录." @默认值 = 假>
     {
         @ OPENFILENAMEW ofn { 0 };
-        @ ofn.lStructSize = sizeof (OPENFILENAMEW);
-        @ ofn.hwndOwner = @<父窗口句柄> ? (HWND)@<父窗口句柄> : NULL;
+        @ ofn.lStructSize = sizeof(OPENFILENAMEW);
+        @ ofn.hwndOwner = @<父窗口句柄> ? reinterpret_cast<HWND>(@<父窗口句柄>) : NULL;
         @ @an<CVolMem> szFilter;
-        @ if (@<过滤器>.IsEmpty ()) {
+        @ if (@<过滤器>.IsEmpty()) {
         @     ofn.lpstrFilter = NULL;
         @ } else {
-        @     szFilter.AddTextValue (@<过滤器>, TRUE);
-        @     szFilter.ReplaceBin (CVolMem (_CT ("|")), CVolMem ().AddManyBytes (2, 0, 0), 0, 0);
-        @     szFilter.AddWord (0);
-        @     ofn.lpstrFilter = reinterpret_cast<const WCHAR*>(szFilter.GetPtr ());
+        @     szFilter.AddTextValue(@<过滤器>, TRUE);
+        @     szFilter.ReplaceBin(CVolMem(_CT("|")), CVolMem().AddManyBytes(2, 0, 0), 0, 0);
+        @     szFilter.AddWord(0);
+        @     ofn.lpstrFilter = reinterpret_cast<const WCHAR*>(szFilter.GetPtr());
         @ }
-        @ ofn.lpstrInitialDir = @<初始目录>.IsEmpty () ? NULL : @<初始目录>.GetText ();
+        @ ofn.lpstrInitialDir = @<初始目录>.IsEmpty() ? NULL : @<初始目录>.GetText();
         @ WCHAR szBuffer[MAX_PATH * 4];
-        @ if (@<文件名>.IsEmpty ())
+        @ if (@<文件名>.IsEmpty())
         @     szBuffer[0] = '\0';
         @ else
-        @     wcscpy_s (szBuffer, MAX_PATH * 4, @<文件名>.GetText ());
+        @     wcscpy_s(szBuffer, MAX_PATH * 4, @<文件名>.GetText());
         @ ofn.lpstrFile = szBuffer;
-        @ ofn.lpstrTitle = @<标题>.IsEmpty () ? NULL : @<标题>.GetText ();
-        @ ofn.nMaxFile = sizeof (szBuffer);
+        @ ofn.lpstrTitle = @<标题>.IsEmpty() ? NULL : @<标题>.GetText();
+        @ ofn.nMaxFile = sizeof(szBuffer);
         @ ofn.nFilterIndex = static_cast<DWORD>(@<初始过滤器>);
-        @ ofn.lpstrDefExt = @<默认文件后缀>.IsEmpty () ? NULL : @<默认文件后缀>.GetText ();
+        @ ofn.lpstrDefExt = @<默认文件后缀>.IsEmpty() ? NULL : @<默认文件后缀>.GetText();
         @ ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
         @ if (@<文件覆盖提示>) ofn.Flags |= OFN_OVERWRITEPROMPT;
         @ if (@<不改变目录>) ofn.Flags |= OFN_NOCHANGEDIR;
-        @ if (::GetSaveFileNameW (&ofn)) {
-        @     @<文件名>.SetText (ofn.lpstrFile);
+        @ if (::GetSaveFileNameW(&ofn)) {
+        @     @<文件名>.SetText(ofn.lpstrFile);
         @     return TRUE;
         @ }
-        @ @<文件名>.Empty ();
+        @ @<文件名>.Empty();
         @ return FALSE;
     }
 }
@@ -965,7 +971,7 @@
     方法 收到输出信息 <公开 定义事件 类型 = 整数 注释 = "启动命令行提示符或执行命令后,在此返回命令的输出信息." 返回值注释 = "此返回值无意义" 折叠>
     参数 输出信息 <类型 = 字节集类 注释 = "  命令行提示符打印在屏幕上的文本,请根据命令行的编码" 注释 = "使用\"多字节到文本\"或\"UTF8到文本\"等命令转换到文本型.">
 
-    方法 启动命令行 <公开 类型 = 逻辑型 注释 = "启动命令行提示符进程,并建立匿名管道." 注释 = "类初始化时会自动启动,除非你执行过\"关闭命令行\",否则不需要手动调用本方法." 折叠
+    方法 启动命令行 <公开 类型 = 逻辑型 注释 = "启动命令行提示符进程,并建立匿名管道." 注释 = "类初始化时会自动启动,除非你执行过\"关闭命令行\",否则不需要手动调用本方法."
             @禁止流程检查 = 真 "">
     参数 刷新时间 <类型 = 整数 注释 = "读取屏幕信息的间隔" @默认值 = 200>
     {
@@ -979,10 +985,10 @@
         @ STARTUPINFOW si = { sizeof(STARTUPINFO) };
         @ PROCESS_INFORMATION pi = { 0 };
         @ // 创建第一条匿名管道
-        @ if (!::CreatePipe (&m_hReadPipeHandle, &m_hWritePipeShell, &sa, 0))
+        @ if (!::CreatePipe (&m_hReadPipeHandle, &m_hWritePipeShell, &sa, 6))
         @     goto Fail;
         @ // 创建第二条匿名管道
-        @ if (!::CreatePipe (&m_hReadPipeShell, &m_hWritePipeHandle, &sa, 0))
+        @ if (!::CreatePipe (&m_hReadPipeShell, &m_hWritePipeHandle, &sa, 6))
         @     goto Fail;
         @ // 设置进程的信息
         @ GetStartupInfoW (&si);
@@ -1236,6 +1242,182 @@
         @ (INT_P)LocalFree ((HLOCAL)@<先前所分配内存地址>)
     }
 }
+
+# ===
+
+类 程序信息类 <公开 注释 = "用于获取程序文件的版本信息" 折叠 折叠2 @文档 = "category = \"PE文件操作\"" @全局类 = 真 @禁止创建对象 = 真
+        @视窗.外部库 = "Version.lib">
+{
+    方法 取程序版本 <公开 静态 类型 = 逻辑型 注释 = "获取程序文件的完整版本信息,取自版本信息资源的StringFileInfo结构."
+            注释 = "注意: 由于火山程序的版本信息比较别扭,本方法只能获取火山程序的\"版本名称\"属性," 注释 = "如果要获取\"版本号\",请使用\"取文件版本\"或\"取产品版本\"."
+            返回值注释 = "返回是否成功" 折叠 @禁止流程检查 = 真>
+    参数 文件名 <类型 = 文本型 注释 = "包含完整路径的文件名">
+    参数 版本信息 <类型 = 程序版本信息类>
+    {
+        @ @<版本信息>.ResetToNullObject ();
+        @ DWORD bufSize = ::GetFileVersionInfoSizeW (@<文件名>.GetText (), 0);
+        @ if (!bufSize) return FALSE;
+        @ @an<CVolMem> buffer;
+        @ buffer.Alloc (bufSize, TRUE);
+        @ if (::GetFileVersionInfoW (@<文件名>.GetText (), 0, bufSize, buffer.GetPtr ()) == 0)
+        @     return FALSE;
+        @ struct LANGANDCODEPAGE {
+        @     WORD wLanguage;
+        @     WORD wCodePage;
+        @ } *lpTranslate;
+        @ UINT cbTranslate, data_len;
+        @ if (::VerQueryValueW (buffer.GetPtr (), L"\\VarFileInfo\\Translation", (LPVOID*)&lpTranslate, &cbTranslate))
+        @ {
+        @     for (UINT i = 0; i < (cbTranslate / sizeof (struct LANGANDCODEPAGE)); i++)
+        @     {
+        @         WCHAR SubBlock[MAX_PATH] { '\0' };
+        @         const WCHAR* szText = nullptr;
+        @         if (::VerLanguageNameW (lpTranslate[i].wLanguage, SubBlock, MAX_PATH)) @<版本信息.语言>.SetText (SubBlock);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\Comments", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.注释>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\CompanyName", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.公司名称>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\FileDescription", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.文件说明>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\FileVersion", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.文件版本>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\InternalName", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.内部名称>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\LegalCopyright", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.版权>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\LegalTrademarks", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.法律商标>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\OriginalFilename", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.原始文件名>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\ProductName", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.产品名称>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\ProductVersion", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.产品版本>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\PrivateBuild", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.私有版本>.SetText (szText);
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\SpecialBuild", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.特殊版本>.SetText (szText);
+        @         break; // 跳出循环,只取第一个语言
+        @     }
+        @     return TRUE;
+        @ }
+        @ return FALSE;
+    }
+
+    方法 取程序文件版本 <公开 静态 类型 = 文本型 注释 = "返回程序文件的文件版本字符串,取自版本信息资源的StringFileInfo结构."
+            返回值注释 = "成功返回文件版本(等同火山程序的\"版本名称\"属性)" 折叠 @禁止流程检查 = 真>
+    参数 文件名 <类型 = 文本型 注释 = "包含完整路径的文件名">
+    {
+        @ DWORD bufSize = ::GetFileVersionInfoSizeW (@<文件名>.GetText (), 0);
+        @ @an<CVolString> szFileVersion;
+        @ if (!bufSize) return szFileVersion;
+        @ @an<CVolMem> buffer;
+        @ buffer.Alloc (bufSize, TRUE);
+        @ if (::GetFileVersionInfoW (@<文件名>.GetText(), 0, bufSize, buffer.GetPtr ()) == 0)
+        @     return szFileVersion;
+        @ struct LANGANDCODEPAGE {
+        @     WORD wLanguage;
+        @     WORD wCodePage;
+        @ } *lpTranslate;
+        @ UINT cbTranslate, data_len;
+        @ if (::VerQueryValueW (buffer.GetPtr (), L"\\VarFileInfo\\Translation", (LPVOID*)&lpTranslate, &cbTranslate))
+        @ {
+        @     for (UINT i = 0; i < (cbTranslate / sizeof (struct LANGANDCODEPAGE)); i++)
+        @     {
+        @         WCHAR SubBlock[MAX_PATH] { 0 };
+        @         const WCHAR* szText = nullptr;
+        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\FileVersion", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len))
+        @             szFileVersion.SetText (szText);
+        @         break; // 跳出循环,只取第一个语言
+        @     }
+        @ }
+        @ return szFileVersion;
+    }
+
+    方法 取文件版本 <公开 静态 类型 = 长整数 注释 = "返回程序文件的文件版本,取自版本信息资源的VS_FIXEDFILEINFO结构."
+            注释 = "调用失败返回-1,长整数的版本号更适合比较,但不直观." 折叠 @禁止流程检查 = 真>
+    参数 文件名 <类型 = 文本型 注释 = "包含完整路径的文件名">
+    参数 返回版本格式文本 <类型 = 文本型 注释 = "在本参数中返回类似\"1.1.0.0\"格式的文本版本号,更适合于展示." @默认值 = 空对象>
+    {
+        @ DWORD bufSize = ::GetFileVersionInfoSizeW (@<文件名>.GetText (), 0);
+        @ if (!bufSize) return -1;
+        @ @an<CVolMem> buffer;
+        @ buffer.Alloc (bufSize, TRUE);
+        @ if (::GetFileVersionInfoW (@<文件名>.GetText(), 0, bufSize, buffer.GetPtr ()) == 0)
+        @     return -1;
+        @ VS_FIXEDFILEINFO* pFileInfo = nullptr;
+        @ UINT cbFileInfo;
+        @ if (::VerQueryValueW (buffer.GetPtr (), L"\\", (LPVOID*)&pFileInfo, &cbFileInfo))
+        @ {
+        @     if (!@<返回版本格式文本>.IsNullObject())
+        @         @<返回版本格式文本>.Format (L"%d.%d.%d.%d", HIWORD(pFileInfo->dwFileVersionMS), LOWORD((DWORD)pFileInfo->dwFileVersionMS), HIWORD(pFileInfo->dwFileVersionLS), LOWORD((DWORD)pFileInfo->dwFileVersionLS));
+        @     return (INT64)(pFileInfo->dwFileVersionMS | ((UINT64)pFileInfo->dwFileVersionLS << 32));
+        @ }
+        @ return -1;
+    }
+
+    方法 取产品版本 <公开 静态 类型 = 长整数 注释 = "返回程序文件的产品版本,取自版本信息资源的VS_FIXEDFILEINFO结构."
+            注释 = "调用失败返回-1,长整数的版本号更适合比较,但不直观." 折叠 @禁止流程检查 = 真>
+    参数 文件名 <类型 = 文本型 注释 = "包含完整路径的文件名">
+    参数 返回版本格式文本 <类型 = 文本型 注释 = "在本参数中返回类似\"1.1.0.0\"格式的文本版本号,更适合于展示." @默认值 = 空对象>
+    {
+        @ DWORD bufSize = ::GetFileVersionInfoSizeW (@<文件名>.GetText (), 0);
+        @ if (!bufSize) return -1;
+        @ @an<CVolMem> buffer;
+        @ buffer.Alloc (bufSize, TRUE);
+        @ if (::GetFileVersionInfoW (@<文件名>.GetText(), 0, bufSize, buffer.GetPtr ()) == 0)
+        @     return -1;
+        @ VS_FIXEDFILEINFO* pFileInfo = nullptr;
+        @ UINT cbFileInfo;
+        @ if (::VerQueryValueW (buffer.GetPtr (), L"\\", (LPVOID*)&pFileInfo, &cbFileInfo))
+        @ {
+        @     if (!@<返回版本格式文本>.IsNullObject())
+        @         @<返回版本格式文本>.Format (L"%d.%d.%d.%d", HIWORD(pFileInfo->dwProductVersionMS), LOWORD((DWORD)pFileInfo->dwProductVersionMS), HIWORD(pFileInfo->dwProductVersionLS), LOWORD((DWORD)pFileInfo->dwProductVersionLS));
+        @     return (INT64)(pFileInfo->dwProductVersionMS | ((UINT64)pFileInfo->dwProductVersionLS << 32));
+        @ }
+        @ return -1;
+    }
+}
+
+类 程序版本信息类 <公开 基础类 = 扩展对象类 注释 = "程序文件版本信息的辅助类" 折叠 @文档 = "category = \"PE文件操作.辅助类\"">
+{
+    变量 注释 <公开 类型 = 文本型 注释 = "(可能为空)Comments,与文件关联的注释.">
+    变量 公司名称 <公开 类型 = 文本型 注释 = "CompanyName,生成文件的公司的名称.">
+    变量 文件说明 <公开 类型 = 文本型 注释 = "FileDescription,文件说明.">
+    变量 文件版本 <公开 类型 = 文本型 注释 = "FileVersion,文件的版本号.">
+    变量 内部名称 <公开 类型 = 文本型 注释 = "InternalName,文件的内部名称. 如果不存在内部名称,则该属性将包含文件的原始名称(不带扩展名).">
+    变量 版权 <公开 类型 = 文本型 注释 = "LegalCopyright,包括所有声明的完整文本、合法符号、版权日期等.">
+    变量 法律商标 <公开 类型 = 文本型 注释 = "(可能为空)LegalTrademarks,应用到文件的商标和注册商标.">
+    变量 原始文件名 <公开 类型 = 文本型 注释 = "OriginalFilename,创建文件时使用的名称.">
+    变量 产品名称 <公开 类型 = 文本型 注释 = "ProductName,与此文件一起发行的产品的名称.">
+    变量 产品版本 <公开 类型 = 文本型 注释 = "ProductVersion,与此文件一起发行的产品的版本.">
+    变量 私有版本 <公开 类型 = 文本型 注释 = "(可能为空)PrivateBuild,文件私有版本的信息.">
+    变量 特殊版本 <公开 类型 = 文本型 注释 = "(可能为空)SpecialBuild,文件的特殊内部版本信息.">
+    变量 语言 <公开 类型 = 文本型 注释 = "程序的语言">
+
+    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖>
+    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
+    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    {
+        展示内容 = "<程序版本信息类> 总共 13 个成员:\r\n"
+        加入文本 (展示内容, "1. 注释: " + 取调试文本2 (最大展示数据尺寸, 注释) + "\r\n")
+        加入文本 (展示内容, "2. 公司名称: " + 取调试文本2 (最大展示数据尺寸, 公司名称) + "\r\n")
+        加入文本 (展示内容, "3. 文件说明: " + 取调试文本2 (最大展示数据尺寸, 文件说明) + "\r\n")
+        加入文本 (展示内容, "4. 文件版本: " + 取调试文本2 (最大展示数据尺寸, 文件版本) + "\r\n")
+        加入文本 (展示内容, "5. 内部名称: " + 取调试文本2 (最大展示数据尺寸, 内部名称) + "\r\n")
+        加入文本 (展示内容, "6. 版权: " + 取调试文本2 (最大展示数据尺寸, 版权) + "\r\n")
+        加入文本 (展示内容, "7. 法律商标: " + 取调试文本2 (最大展示数据尺寸, 法律商标) + "\r\n")
+        加入文本 (展示内容, "8. 原始文件名: " + 取调试文本2 (最大展示数据尺寸, 原始文件名) + "\r\n")
+        加入文本 (展示内容, "9. 产品名称: " + 取调试文本2 (最大展示数据尺寸, 产品名称) + "\r\n")
+        加入文本 (展示内容, "10. 产品版本: " + 取调试文本2 (最大展示数据尺寸, 产品版本) + "\r\n")
+        加入文本 (展示内容, "11. 私有版本: " + 取调试文本2 (最大展示数据尺寸, 私有版本) + "\r\n")
+        加入文本 (展示内容, "12. 特殊版本: " + 取调试文本2 (最大展示数据尺寸, 特殊版本) + "\r\n")
+        加入文本 (展示内容, "13. 语言: " + 取调试文本2 (最大展示数据尺寸, 语言) + "\r\n")
+    }
+}
+
+类 程序版本信息数组类 <公开 基础类 = 对象数组模板类 @文档 = "category = \"PE文件操作.辅助类\"" @模板实现类 = "程序版本信息类">
 
 类 "//文件对话框选项" <公开 注释 = "暂未使用,直接写在内嵌代码里了,仅供参考." 折叠 @常量类 = 整数 @文档 = "category = \"文件操作.辅助类\"">
 {

@@ -302,9 +302,11 @@ namespace asio2::detail
 		/**
 		 * @brief set the root directory where we load the files.
 		 */
-		inline self& set_root_directory(std::filesystem::path path)
+		inline self& set_root_directory(const std::filesystem::path& path)
 		{
-			this->root_directory_ = std::move(path);
+			std::error_code ec{};
+			this->root_directory_ = std::filesystem::canonical(path, ec);
+			assert(!ec);
 			return *this;
 		}
 
@@ -401,17 +403,17 @@ namespace asio2::detail
 
 			// Build the path to the requested file
 			std::filesystem::path filepath;
+
 			if (this->root_directory_.empty())
 			{
 				filepath = std::move(path);
-				filepath.make_preferred();
 			}
 			else
 			{
-				filepath = this->root_directory_;
-				filepath.make_preferred();
-				filepath /= path.make_preferred().relative_path();
+				filepath = detail::make_filepath(this->root_directory_, path);
 			}
+
+			filepath.make_preferred();
 
 			// Attempt to open the file
 			beast::error_code ec;

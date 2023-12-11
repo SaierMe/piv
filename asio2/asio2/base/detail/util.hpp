@@ -34,10 +34,11 @@
 #include <limits>
 #include <thread>
 #include <mutex>
-#include <shared_mutex>
 
 #include <asio2/base/error.hpp>
 
+#include <asio2/base/detail/filesystem.hpp>
+#include <asio2/base/detail/shared_mutex.hpp>
 #include <asio2/base/detail/type_traits.hpp>
 
 #include <asio2/util/string.hpp>
@@ -604,6 +605,54 @@ namespace asio2::detail
 	// C++17 class template argument deduction guides
 	template<class Integer>
 	integer_add_sub_guard(Integer&)->integer_add_sub_guard<Integer>;
+
+	template<typename = void>
+	bool is_subpath_of(const std::filesystem::path& base, const std::filesystem::path& p) noexcept
+	{
+		assert(std::filesystem::is_directory(base));
+
+		auto it_base = base.begin();
+		auto it_p = p.begin();
+
+		while (it_base != base.end() && it_p != p.end())
+		{
+			if (*it_base != *it_p)
+			{
+				return false;
+			}
+
+			++it_base;
+			++it_p;
+		}
+
+		// If all components of base are matched, and p has more components, then base is a subpath of p
+		return it_base == base.end() && it_p != p.end();
+	}
+
+	template<typename = void>
+	std::filesystem::path make_filepath(const std::filesystem::path& base, const std::filesystem::path& p) noexcept
+	{
+		std::error_code ec{};
+		std::filesystem::path b = std::filesystem::canonical(base, ec);
+		if (ec)
+		{
+			return {};
+		}
+
+		assert(std::filesystem::is_directory(b));
+
+		std::filesystem::path filepath = b;
+		filepath += p;
+
+		filepath = std::filesystem::canonical(filepath, ec);
+
+		if (ec || !is_subpath_of(b, filepath))
+		{
+			return {};
+		}
+
+		return filepath;
+	}
 }
 
 namespace asio2

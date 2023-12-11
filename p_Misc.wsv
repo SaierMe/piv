@@ -82,7 +82,7 @@
     #     ulid::EncodeTimeSystemClockNow(m_ulid);
     #     ulid::EncodeEntropyMt19937(std::mt19937{std::random_device{}()}, m_ulid);
     # }
-    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_ulid = objCopyFrom.m_ulid; 
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_ulid = objCopyFrom.m_ulid;
     # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_ulid = std::move(rhs.m_ulid); return *this; }
     # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const {
     #     return (ulid::CompareULIDs(m_ulid, objCompare.m_ulid) == 0);
@@ -99,8 +99,8 @@
 
 # 随机数 ===
 
-类 标准随机数基本类 <公开 注释 = "封装了<std::random>的基本操作" 折叠 编辑时信息 = "36FA5, 0, 0, 0" @文档 = "category = \"伪随机数\""
-        @视窗.外部头文件 = "<random>">
+类 标准随机数基本类 <公开 注释 = "封装了<std::random>的基本操作" 注释 = "请勿直接使用本类" 折叠 编辑时信息 = "36FA5, 0, 0, 0"
+        @文档 = "category = \"伪随机数\"" @视窗.外部头文件 = "<random>" @禁止创建对象 = 真>
 {
 
     # 均匀分布

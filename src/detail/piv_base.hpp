@@ -31,6 +31,10 @@
 #define PIV_ELSE_IF else if
 #endif
 
+// 向前移动指针N个字节
+#define PIV_PTR_FORWARD(cast, ptr, offset) ((cast)((uint64_t)(ptr) + (int64_t)(offset)))
+// 向后移动指针N个字节
+#define PIV_PTR_BACKWARD(cast, ptr, offset) ((cast)((uint64_t)(ptr) - (int64_t)(offset)))
 
 namespace piv
 {

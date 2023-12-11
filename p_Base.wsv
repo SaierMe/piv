@@ -514,7 +514,6 @@
 # #define PIV_ARRAY_AND_SIZE(_ARR)  (_ARR), sizeof(_ARR) / sizeof(*(_ARR))
 # #define PIV_MEM_PTR_AND_SIZE(_MEM)  (_MEM).GetPtr(), (_MEM).GetSize()
 # #define PIV_TEXT_AND_SIZE(_STR)  (_STR).GetText(), (_STR).GetLength()
-# #define PIV_GET_TEXT(_STR)  (_STR).IsEmpty() ? nullptr : (_STR).GetText()
 # #define PIV_GET_GLOBAL_OBJ(_OBJ_TYPE)  dynamic_cast<_OBJ_TYPE&>(g_objVolApp.GetRefGlobalObject (VOL_RUNTIME_CLASS (_OBJ_TYPE)))
 # namespace piv
 # {

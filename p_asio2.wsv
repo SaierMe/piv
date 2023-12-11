@@ -1,8 +1,12 @@
 <火山程序 类型 = "通常" 版本 = 1 />
 
-包 火山.Asio2网络 <注释 = "https://github.com/SaierMe/piv" @视窗.头文件搜寻目录 = "asio2\r\nasio2\\3rd"
-        "@视窗.外部头文件.全局-100" = "<malloc.h>\r\n<chrono>" @视窗.外部头文件 = "asio2\\piv_asio2.hpp"
-        @视窗.附加编译参数 = "cpp: /std:c++17 /bigobj">
+包 火山.Asio2网络 <注释 = "https://github.com/SaierMe/piv" 注释 = "" @视窗.头文件搜寻目录 = "asio2\r\nasio2\\3rd"
+        "@视窗.外部头文件.全局-100" = "<malloc.h>\r\n<chrono>" "@视窗.外部头文件.全局-111" = "src\\piv_string.hpp"
+        @视窗.外部头文件 = "asio2\\piv_asio2.hpp" @视窗.附加编译参数 = "cpp: /std:c++17 /bigobj"
+        @视窗.预定义宏 = "ASIO2_ENABLE_SSL" @视窗.头文件搜寻目录 = "OpenSSL\\include"
+        @视窗.外部库 = "OpenSSL\\lib\\$(p)\\libcrypto.lib\r\nOpenSSL\\lib\\$(p)\\libssl.lib\r\nCrypt32.lib"
+        @视窗.附属文件.win32 = "OpenSSL\\lib\\win32\\libcrypto-3.dll\nOpenSSL\\lib\\win32\\libssl-3.dll"
+        @视窗.附属文件.x64 = "OpenSSL\\lib\\x64\\libcrypto-3-x64.dll\nOpenSSL\\lib\\x64\\libssl-3-x64.dll">
 
 # 实用工具 ===
 
@@ -31,11 +35,11 @@
         @ @dt<ASIO2_IMCP报文类>{asio2::ping::execute(PivStr2SV{@<主机>}, std::chrono::milliseconds(@<超时时间>))}
     }
 
-    方法 网页访问 <公开 静态 类型 = ASIO2_HTTP响应类 注释 = "注意: 本方法不支持自动重定向和补全协议头,因此不推荐使用." 折叠 @嵌入式方法 = "">
+    方法 "// 网页访问" <公开 静态 类型 = ASIO2_HTTP响应类 注释 = "注意: 本方法不支持自动重定向和补全协议头,不建议使用." 折叠 @嵌入式方法 = "">
     参数 请求参数 <类型 = ASIO2_HTTP请求类>
     参数 超时时间 <类型 = 整数 @默认值 = 15000>
     {
-        @ @dt<ASIO2_HTTP响应类>{asio2::http_client::execute(@<请求参数>, std::chrono::milliseconds(@<超时时间>), nullptr)}
+        @ @dt<ASIO2_HTTP响应类>{asio2::https_client::execute(@<请求参数>, std::chrono::milliseconds(@<超时时间>), nullptr)}
     }
 
     #
@@ -66,7 +70,7 @@
         @                   static_cast<unsigned>(@<版本>))}
     }
 
-    方法 创建响应 <公开 静态 类型 = ASIO2_HTTP响应类 折叠 @嵌入式方法 = "">
+    方法 创建响应 <公开 静态 类型 = ASIO2_HTTP响应类 注释 = "从URI(统一资源标识符)创建一个典型的HTTP响应结构." 折叠 @嵌入式方法 = "">
     参数 URI <注释 = "推荐类型: 标准文本类U、文本视图类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     {
         @ @dt<ASIO2_HTTP响应类>{asio2::http::make_response(PivStr2SV{@<URI>})}
@@ -98,14 +102,14 @@
         @ @dt<标准文本类U>{asio2::http::url_decode(PivStr2SV{@<欲解码数据>})}
     }
 
-    方法 是否有未编码字符 <公开 静态 类型 = 逻辑型 折叠 @嵌入式方法 = "">
+    方法 是否有未编码字符 <公开 静态 类型 = 逻辑型 注释 = "检查指定的文本是否有未被URL编码的字符" 折叠 @嵌入式方法 = "">
     参数 URL文本 <注释 = "推荐类型: 标准文本类U、文本视图类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     参数 偏移位置 <类型 = 整数 注释 = "从哪个位置开始编码" @默认值 = 0>
     {
         @ asio2::http::has_unencode_char(PivStr2SV{@<URL文本>}, static_cast<size_t>(@<偏移位置>))
     }
 
-    方法 是否有未解码字符 <公开 静态 类型 = 逻辑型 折叠 @嵌入式方法 = "">
+    方法 是否有未解码字符 <公开 静态 类型 = 逻辑型 注释 = "检查指定的文本是否有未被解码的URL编码字符" 折叠 @嵌入式方法 = "">
     参数 URL文本 <注释 = "推荐类型: 标准文本类U、文本视图类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     参数 偏移位置 <类型 = 整数 注释 = "从哪个位置开始编码" @默认值 = 0>
     {
@@ -124,7 +128,7 @@
 
     # ---
 
-    方法 生成错误页 <公开 静态 类型 = 标准文本类U 折叠 @嵌入式方法 = "">
+    方法 生成错误页 <公开 静态 类型 = 标准文本类U 注释 = "通过指定的HTTP状态码和错误描述,创建一个简单的错误网页内容." @嵌入式方法 = "">
     参数 状态码 <类型 = ASIO2_状态码>
     参数 错误描述 <注释 = "推荐类型: 标准文本类U、文本视图类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     {
@@ -886,7 +890,7 @@
 
     方法 请求结果 <公开 属性读 类型 = 字节集类 注释 = "本次请求所返回的响应结果数据." 注释 = "注意: 返回字节集类,会有内存拷贝." 折叠 @禁止流程检查 = 真>
     {
-        @ return @an<CVolMem>(data().body().text().c_str(), data().body().size());
+        @ return @an<CVolMem>(data().body().text().c_str(), static_cast<INT_P>(data().body().size()));
     }
 
     方法 响应体 <公开 属性读 类型 = 文本视图类U 注释 = "本次请求所返回的UTF-8编码响应体,其他编码使用本方法会乱码." 注释 = "注意: 本方法等同于\"请求结果\",但不会产生内存复制."

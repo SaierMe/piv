@@ -547,6 +547,8 @@ namespace boost::beast::http
 		// we plan on capturing the chunks ourselves.
 		http::parser<isRequest, http::string_body> hp;
 
+		hp.body_limit((std::numeric_limits<std::uint64_t>::max)());
+
 		// First read the complete header
 		http::read_header(stream, buffer, hp, ec);
 		if (ec)
@@ -608,6 +610,8 @@ namespace boost::beast::http
 			// use a local variable, since temporaries can only bind to const refs.
 			p.on_chunk_header(header_cb);
 
+			bool continued = true;
+
 			// Declare the chunk body callback. This is called one or
 			// more times for each piece of a chunk body.
 			auto body_cb = [&](
@@ -623,7 +627,7 @@ namespace boost::beast::http
 
 				// Append this piece to our container
 				//chunk.append(body.data(), body.size());
-				cbb(body);
+				continued = cbb(body);
 
 				// The return value informs the parser of how much of the body we
 				// consumed. We will indicate that we consumed everything passed in.
@@ -631,7 +635,7 @@ namespace boost::beast::http
 			};
 			p.on_chunk_body(body_cb);
 
-			while (!p.is_done())
+			while (continued && !p.is_done())
 			{
 				// Read as much as we can. When we reach the end of the chunk, the chunk
 				// body callback will make the read return with the end_of_chunk error.
@@ -642,6 +646,11 @@ namespace boost::beast::http
 					return;
 				else
 					ec = {};
+			}
+
+			if (!continued && !p.is_done())
+			{
+				ec = asio::error::operation_aborted;
 			}
 		}
 		else
@@ -662,7 +671,11 @@ namespace boost::beast::http
 
 				ASIO2_ASSERT(bytes_read == buf.size() - p.get().body().size);
 
-				cbb(std::string_view(buf.data(), bytes_read));
+				if (!cbb(std::string_view(buf.data(), bytes_read)))
+				{
+					ec = asio::error::operation_aborted;
+					break;
+				}
 			}
 		}
 	}

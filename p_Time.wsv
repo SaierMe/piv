@@ -791,33 +791,43 @@
 类 全局纳秒时钟 <公开 注释 = "  为\"纳秒时钟类\"的二次封装,内部维护了一个全局的纳秒时钟," 注释 = "并进行周期性的校时."
         注释 = "  只需要调用全局方法\"取现行纳秒时间戳\"即可获取高精度的计时." 折叠 @文档 = "category = \"时间操作\"" @强制依赖 = "纳秒时钟类" @全局类 = 真>
 {
-    方法 取现行纳秒时间戳 <公开 静态 类型 = 长整数 注释 = "获取当前的纳秒时间戳" 折叠 @禁止流程检查 = 真>
+    方法 取现行纳秒时间戳 <公开 静态 类型 = 长整数 注释 = "获取当前的纳秒时间戳" 折叠 @嵌入式方法 = "">
     {
-        @ return piv::g_tscns.rdns();
+        @ PivNSTimer::rdns()
     }
 
     # @begin
     # <> <global>
     # <> <include>
-    # namespace piv {
-    #     static TSCNS g_tscns;
-    # }
+    # class PivNSTimer {
+    # private:
+    #     TSCNS m_tscns;
+    #     PivNSTimer() {
+    #         m_tscns.init(20000000, 3000000000);
+    #         std::thread(&PivNSTimer::calibrate_loop, this).detach();
+    #     }
+    #     ~PivNSTimer() {}
+    #     PivNSTimer(const PivNSTimer &) = delete;
+    #     PivNSTimer(PivNSTimer &&) = delete;
+    #     PivNSTimer &operator=(const PivNSTimer &) = delete;
+    #     PivNSTimer &operator=(PivNSTimer &&) = delete;
+    #     void calibrate_loop() {
+    #         while (true) {
+    #             m_tscns.calibrate();
+    #             std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+    #         }
+    #     }
+    # public:
+    #     static PivNSTimer &getInstance() {
+    #         static PivNSTimer instance;
+    #         return instance;
+    #     }
+    #     static int64_t rdns() {
+    #         return getInstance().m_tscns.rdns();
+    #     }
+    # };
     # <> </include>
     # <> </global>
-    # <> <include>
-    # static void @an<_sOnStaticInitExtra>()
-    # {
-    #     piv::g_tscns.init(20000000, 3000000000);
-    #     std::thread(&calibrate_loop).detach();
-    # }
-    # static void calibrate_loop()
-    # {
-    #     while(true) {
-    #         piv::g_tscns.calibrate();
-    #         std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-    #     }
-    # }
-    # <> <include>
     # @end
 }
 

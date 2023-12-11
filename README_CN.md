@@ -112,13 +112,20 @@
 
 ※我经常修改现有的代码，比如修正bug、优化效率、规范格式、修订备注等……如果功能和用法没有改变，一般不会写在更新日志里，所以每次更新改动的地方其实还是有不少的。
 
-### 📅 2023/10/28
+### 📅 2023/12/11
 
-1. 新增子模块「PIV网络库」；
-1. 新增支持库「Asio2网络」以及相关例程，目前已封装 Ping 和 TCP、HTTP 客户端，更多功能待更新；
+1. 升级了「进程操作类」，部分 API 改用了 Ntdll 版，支持 32 位程序读取 64 位进程的信息和内存；注意：类库中的内存地址和句柄改为长整数，你之前的源码需要小量修改；
+2. std::Vector 数组容器增加了「升序排序、降序排序」，其中「对象容器模板类」需要在模板实现类的接收事件「小于比较、大于比较」中实现对应的比较函数，才能正确排序；
+3. 标准文本类和文本视图增加了读写属性「代码页」，可用于处理非本地编码的多字节文本转换；
+4. ImGui 增加了「IM字形范围构建类」，提供了自定义字形范围的相关方法，具体请看例程；
+5. 新增「IM颜色类」，提供了 ImGui 中的各种颜色的快捷创建与转换（ImGui 不能直接使用火山颜色类中的常量）；
+6. 新增「内存模块PP」，封装了 MemoryModulePP，这是官方「内存模块库」MemoryModule 的分支；
+
+### 📅 2023/10/31
+
 1. 新增全局方法 _u8 和 _sv，为「创建文本对象U」和「创建文本视图U」的别名；
-1. 新增全局方法「取全局单例、构造对象、带参构造对象」，前两个相比系统的「取全局对象、新建对象」，返回值即为所提供的对象类型，无需做类型转换；
-1. 其他优化和修正；
+2. 新增全局方法「取全局单例、构造对象、带参构造对象」，前两个相比系统的「取全局对象、新建对象」，返回值即为所提供的对象类型，无需做类型转换；
+3. 其他优化和修正；
 
 ### 📅 2023/10/12
 
@@ -498,12 +505,12 @@
 
 ## 💌 开源项目
 
-- [nlohmann **JSON**](https://github.com/nlohmann/json) `3.11.2` `MIT license`  现代 C++ 的 JSON 库
+- [nlohmann **JSON**](https://github.com/nlohmann/json) `3.11.3` `MIT license`  现代 C++ 的 JSON 库
 - **[fmtlog](https://github.com/MengRao/fmtlog)**  `2.2.1`  `MIT license` 纳秒级精度的高性能异步日志记录库
 - **[{fmt}](https://github.com/fmtlib/fmt)**  `10.1.1`  `MIT license` 格式化文本库，等同 C++20 std::format 的实现 
 - **[md4c](https://github.com/mity/md4c)** `0.4.8`  `MIT license` CommonMark 0.30 规范 + GFM 的 Markdown 解析库
 - **[simpleini](https://github.com/brofield/simpleini)** `4.20` `MIT license` 简易的 INI 配置文件读写库
-- **[simdutf](https://github.com/simdutf/simdutf)** `4.0.3` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
+- **[simdutf](https://github.com/simdutf/simdutf)** `4.0.8` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
 - **[OpenCC](https://github.com/BYVoid/OpenCC)** `1.1.6` `Apache-2.0 license` 中文简繁转换开源项目，支持词汇级别的转换、异体字转换和地区习惯用词转换
 - **[7-zip](https://www.7-zip.org/)** `23.01` `GNU LGPL license` 免费的开源压缩软件（采用GNU LGPL协议，只使用它的 dll 文件不会传染）
 - **[bit7z](https://github.com/rikyoz/bit7z)** `4.0.1` `Mozilla Public License v2.0` 7-zip 的封装类

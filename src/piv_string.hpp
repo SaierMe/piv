@@ -776,6 +776,7 @@ private:
 
 public:
     using EncodeType_t = EncodeType;
+    uint32_t code_page = 0;
 
     /**
      * @brief 默认构造和析构函数
@@ -955,7 +956,7 @@ public:
         }
         else
         {
-            PivA2Ws{reinterpret_cast<const char *>(sv.data()), sv.length()}.GetStr(strDump);
+            PivA2Ws{reinterpret_cast<const char *>(sv.data()), sv.length(), code_page}.GetStr(strDump);
         }
     }
 
@@ -1201,7 +1202,7 @@ public:
                 }
                 else
                 {
-                    PivW2A convert{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2};
+                    PivW2A convert{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2, code_page};
                     pStr->assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
                 }
             }
@@ -1224,7 +1225,7 @@ public:
                 }
                 else
                 {
-                    PivU2A convert{reinterpret_cast<const char *>(data.get()), fileSize};
+                    PivU2A convert{reinterpret_cast<const char *>(data.get()), fileSize, code_page};
                     pStr->assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
                 }
             }
@@ -1242,12 +1243,12 @@ public:
                 Succeeded = (fread(const_cast<char *>(data.get()), 1, fileSize, in) == fileSize);
                 PIV_IF(sizeof(EncodeType) == 2)
                 {
-                    PivA2W convert{reinterpret_cast<const char *>(data.get()), fileSize};
+                    PivA2W convert{reinterpret_cast<const char *>(data.get()), fileSize, code_page};
                     pStr->assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
                 }
                 PIV_ELSE_IF(sizeof(EncodeType) == 3)
                 {
-                    PivA2U convert{reinterpret_cast<const char *>(data.get()), fileSize};
+                    PivA2U convert{reinterpret_cast<const char *>(data.get()), fileSize, code_page};
                     pStr->assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
                 }
             }
@@ -1300,7 +1301,7 @@ public:
             }
             else
             {
-                PivA2W convert{reinterpret_cast<const char *>(sv.data()), count};
+                PivA2W convert{reinterpret_cast<const char *>(sv.data()), count, code_page};
                 Succeeded = (fwrite(convert.GetText(), 2, convert.GetLength(), out) == convert.GetLength());
             }
         }
@@ -1322,7 +1323,7 @@ public:
             }
             else
             {
-                PivA2U convert{reinterpret_cast<const char *>(sv.data()), count};
+                PivA2U convert{reinterpret_cast<const char *>(sv.data()), count, code_page};
                 Succeeded = (fwrite(convert.GetText(), 1, convert.GetLength(), out) == convert.GetLength());
             }
         }
@@ -1330,12 +1331,12 @@ public:
         {
             PIV_IF(sizeof(EncodeType) == 2)
             {
-                PivW2A convert{reinterpret_cast<const wchar_t *>(sv.data()), count};
+                PivW2A convert{reinterpret_cast<const wchar_t *>(sv.data()), count, code_page};
                 Succeeded = (fwrite(convert.GetText(), 1, convert.GetLength(), out) == convert.GetLength());
             }
             PIV_ELSE_IF(sizeof(EncodeType) == 3)
             {
-                PivU2A convert{reinterpret_cast<const char *>(sv.data()), count};
+                PivU2A convert{reinterpret_cast<const char *>(sv.data()), count, code_page};
                 Succeeded = (fwrite(convert.GetText(), 1, convert.GetLength(), out) == convert.GetLength());
             }
             else
@@ -1450,7 +1451,7 @@ public:
         }
         else
         {
-            return IsEqual(PivStringView{reinterpret_cast<const CharT *>(PivW2A{other}.GetText())}, case_sensitive);
+            return IsEqual(PivStringView{reinterpret_cast<const CharT *>(PivW2A{other, (size_t)-1, code_page}.GetText())}, case_sensitive);
         }
     }
     inline bool IsEqual(const CVolMem &other, const bool &case_sensitive = false) const
@@ -1487,7 +1488,7 @@ public:
         }
         else
         {
-            return IIsEqual(PivStringView{reinterpret_cast<const CharT *>(PivW2A{other}.GetText())});
+            return IIsEqual(PivStringView{reinterpret_cast<const CharT *>(PivW2A{other, (size_t)-1, code_page}.GetText())});
         }
     }
     inline bool IIsEqual(const CVolMem &other) const
@@ -1575,7 +1576,7 @@ public:
         }
         else
         {
-            return this->compare(reinterpret_cast<const CharT *>(PivW2A{s}.GetText()), case_insensitive);
+            return this->compare(reinterpret_cast<const CharT *>(PivW2A{s, (size_t)-1, code_page}.GetText()), case_insensitive);
         }
     }
 
@@ -1615,7 +1616,7 @@ public:
     }
     inline size_t CopyStr(ptrdiff_t dest, const size_t &pos, const size_t &count) const
     {
-        return CopyStr(reinterpret_cast<CharT *>(dest), pos, count);
+        return CopyStr(const_cast<CharT *>(reinterpret_cast<const CharT *>(dest)), pos, count);
     }
     inline size_t CopyStr(CVolString &dest, const size_t &pos, const size_t &count) const
     {
@@ -1663,8 +1664,18 @@ public:
      */
     inline CVolString ToVolString() const
     {
-        ASSERT(sizeof(CharT) == 2); // 只有UTF-16LE编码的文本视图可以置入火山文本型;
-        return CVolString(reinterpret_cast<const wchar_t *>(sv.data()), sv.size());
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
+            return CVolString(reinterpret_cast<const wchar_t *>(sv.data()), sv.size());
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
+        {
+            return *PivU2Ws{reinterpret_cast<const char *>(sv.data()), sv.size()};
+        }
+        else
+        {
+            return *PivA2Ws{reinterpret_cast<const char *>(sv.data()), sv.size(), code_page};
+        }
     }
 
     /**
@@ -1973,7 +1984,7 @@ public:
         }
         else
         {
-            return FindFirstOf(reinterpret_cast<const CharT *>(PivW2A{chars}.GetText()), pos);
+            return FindFirstOf(reinterpret_cast<const CharT *>(PivW2A{chars, (size_t)-1, code_page}.GetText()), pos);
         }
     }
 
@@ -2012,7 +2023,7 @@ public:
         }
         else
         {
-            return FindLastOf(reinterpret_cast<const CharT *>(PivW2A{chars}.GetText()), pos);
+            return FindLastOf(reinterpret_cast<const CharT *>(PivW2A{chars, (size_t)-1, code_page}.GetText()), pos);
         }
     }
 
@@ -2051,7 +2062,7 @@ public:
         }
         else
         {
-            return FindFirstNotOf(reinterpret_cast<const CharT *>(PivW2A{chars}.GetText()), pos);
+            return FindFirstNotOf(reinterpret_cast<const CharT *>(PivW2A{chars, (size_t)-1, code_page}.GetText()), pos);
         }
     }
 
@@ -2090,7 +2101,7 @@ public:
         }
         else
         {
-            return FindLastNotOf(reinterpret_cast<const CharT *>(PivW2A{chars}.GetText()), pos);
+            return FindLastNotOf(reinterpret_cast<const CharT *>(PivW2A{chars, (size_t)-1, code_page}.GetText()), pos);
         }
     }
 
@@ -2143,7 +2154,7 @@ public:
         }
         else
         {
-            return SearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{text}.GetText())}, pos, case_insensitive, textlen);
+            return SearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{text, (size_t)-1, code_page}.GetText())}, pos, case_insensitive, textlen);
         }
     }
 
@@ -2189,7 +2200,7 @@ public:
         }
         else
         {
-            return ReverseSearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{text}.GetText())}, pos, case_insensitive, textlen);
+            return ReverseSearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{text, (size_t)-1, code_page}.GetText())}, pos, case_insensitive, textlen);
         }
     }
 
@@ -2276,7 +2287,7 @@ public:
         }
         else
         {
-            return EndOf(reinterpret_cast<const CharT *>(PivW2A{s}.GetText()), case_sensitive);
+            return EndOf(reinterpret_cast<const CharT *>(PivW2A{s, (size_t)-1, code_page}.GetText()), case_sensitive);
         }
     }
 
@@ -2394,7 +2405,7 @@ public:
         }
         else
         {
-            return SplitStrings(reinterpret_cast<const CharT *>(PivW2A{delimit}.GetText()), svArray, trimAll, ignoreEmptyStr, max_count);
+            return SplitStrings(reinterpret_cast<const CharT *>(PivW2A{delimit, (size_t)-1, code_page}.GetText()), svArray, trimAll, ignoreEmptyStr, max_count);
         }
     }
 
@@ -2482,7 +2493,7 @@ public:
         }
         else
         {
-            return SplitSubStrings(reinterpret_cast<const CharT *>(PivW2A{delimit}.GetText()), svArray, trimAll, ignoreEmptyStr, max_count);
+            return SplitSubStrings(reinterpret_cast<const CharT *>(PivW2A{delimit, (size_t)-1, code_page}.GetText()), svArray, trimAll, ignoreEmptyStr, max_count);
         }
     }
 
@@ -2533,6 +2544,66 @@ public:
     }
 
     /**
+     * @brief 到UTF8
+     * @return 返回转换后的UTF-8文本
+     */
+    inline std::string ToUtf8() const
+    {
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
+            return PivW2U{reinterpret_cast<const wchar_t *>(sv.data()), sv.size()}.String();
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
+        {
+            return std::string{reinterpret_cast<const char *>(sv.data()), sv.size()};
+        }
+        else
+        {
+            return PivA2U{reinterpret_cast<const char *>(sv.data()), sv.size(), code_page}.String();
+        }
+    }
+
+    /**
+     * @brief 到ANSI
+     * @return 返回转换后的ANSI文本
+     */
+    inline std::string ToMbs() const
+    {
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
+            return PivW2A{reinterpret_cast<const wchar_t *>(sv.data()), sv.size(), code_page}.String();
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
+        {
+            return PivU2A{reinterpret_cast<const char *>(sv.data()), sv.size(), code_page}.String();
+        }
+        else
+        {
+            return std::string{reinterpret_cast<const char *>(sv.data()), sv.size()};
+        }
+    }
+
+    /**
+     * @brief 到UTF16
+     * @return 返回转换后的UTF-16LE文本
+     */
+    inline std::wstring ToUtf16() const
+    {
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
+            return std::wstring{reinterpret_cast<const wchar_t *>(sv.data()), sv.size()};
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
+        {
+            return PivU2W{reinterpret_cast<const char *>(sv.data()), sv.size()}.String();
+        }
+        else
+        {
+            return PivA2W{reinterpret_cast<const char *>(sv.data()), sv.size(), code_page}.String();
+        }
+    }
+
+    /**
      * @brief 到十六进制文本
      * @param hexstr 返回的十六进制文本
      * @return
@@ -2563,7 +2634,7 @@ public:
         }
         else
         {
-            return piv::encoding::to_usc2<CharT>(piv::wstring_view{*PivA2W{reinterpret_cast<const char *>(sv.data()), sv.size()}}, en_ascii, usc2);
+            return piv::encoding::to_usc2<CharT>(piv::wstring_view{*PivA2W{reinterpret_cast<const char *>(sv.data()), sv.size(), code_page}}, en_ascii, usc2);
         }
     }
     inline CVolString &ToUsc2Str(const bool &en_ascii = false, CVolString &usc2 = CVolString{}) const
@@ -2578,7 +2649,7 @@ public:
         }
         else
         {
-            return piv::encoding::to_usc2str(piv::wstring_view{*PivA2W{reinterpret_cast<const char *>(sv.data()), sv.size()}}, en_ascii, usc2);
+            return piv::encoding::to_usc2str(piv::wstring_view{*PivA2W{reinterpret_cast<const char *>(sv.data()), sv.size(), code_page}}, en_ascii, usc2);
         }
     }
 
@@ -2705,6 +2776,7 @@ private:
 
 public:
     using EncodeType_t = EncodeType;
+    uint32_t code_page = 0;
 
     /**
      * @brief 默认构造和析构函数
@@ -2726,7 +2798,7 @@ public:
             else if (s.type() == 3)
                 str.assign(reinterpret_cast<const CharT *>(PivU2W{reinterpret_cast<const char *>(s.GetText())}.GetText()));
             else
-                str.assign(reinterpret_cast<const CharT *>(PivA2W{reinterpret_cast<const char *>(s.GetText())}.GetText()));
+                str.assign(reinterpret_cast<const CharT *>(PivA2W{reinterpret_cast<const char *>(s.GetText()), s.GetLength(), code_page}.GetText()));
         }
         PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
@@ -2735,14 +2807,14 @@ public:
             else if (s.type() == 3)
                 str = s.str;
             else
-                str.assign(reinterpret_cast<const CharT *>(PivA2U{reinterpret_cast<const char *>(s.GetText())}.GetText()));
+                str.assign(reinterpret_cast<const CharT *>(PivA2U{reinterpret_cast<const char *>(s.GetText()), s.GetLength(), code_page}.GetText()));
         }
         else
         {
             if (s.type() == 2)
-                str.assign(reinterpret_cast<const CharT *>(PivW2A{reinterpret_cast<const wchar_t *>(s.GetText())}.GetText()));
+                str.assign(reinterpret_cast<const CharT *>(PivW2A{reinterpret_cast<const wchar_t *>(s.GetText()), s.GetLength(), code_page}.GetText()));
             else if (s.type() == 3)
-                str.assign(reinterpret_cast<const CharT *>(PivU2A{reinterpret_cast<const char *>(s.GetText())}.GetText()));
+                str.assign(reinterpret_cast<const CharT *>(PivU2A{reinterpret_cast<const char *>(s.GetText()), s.GetLength(), code_page}.GetText()));
             else
                 str = s.str;
         }
@@ -2756,7 +2828,7 @@ public:
             else if (s.type() == 3)
                 str.assign(reinterpret_cast<const CharT *>(PivU2W{reinterpret_cast<const char *>(s.GetText())}.GetText()));
             else
-                str.assign(reinterpret_cast<const CharT *>(PivA2W{reinterpret_cast<const char *>(s.GetText())}.GetText()));
+                str.assign(reinterpret_cast<const CharT *>(PivA2W{reinterpret_cast<const char *>(s.GetText()), s.GetLength(), code_page}.GetText()));
         }
         PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
@@ -2765,14 +2837,14 @@ public:
             else if (s.type() == 3)
                 str = std::move(s.str);
             else
-                str.assign(reinterpret_cast<const CharT *>(PivA2U{reinterpret_cast<const char *>(s.GetText())}.GetText()));
+                str.assign(reinterpret_cast<const CharT *>(PivA2U{reinterpret_cast<const char *>(s.GetText()), s.GetLength(), code_page}.GetText()));
         }
         else
         {
             if (s.type() == 2)
-                str.assign(reinterpret_cast<const CharT *>(PivW2A{reinterpret_cast<const wchar_t *>(s.GetText())}.GetText()));
+                str.assign(reinterpret_cast<const CharT *>(PivW2A{reinterpret_cast<const wchar_t *>(s.GetText()), s.GetLength(), code_page}.GetText()));
             else if (s.type() == 3)
-                str.assign(reinterpret_cast<const CharT *>(PivU2A{reinterpret_cast<const char *>(s.GetText())}.GetText()));
+                str.assign(reinterpret_cast<const CharT *>(PivU2A{reinterpret_cast<const char *>(s.GetText()), s.GetLength(), code_page}.GetText()));
             else
                 str = std::move(s.str);
         }
@@ -2819,7 +2891,7 @@ public:
         }
         else
         {
-            str.assign(reinterpret_cast<const CharT *>(PivW2A{s}.GetText()));
+            str.assign(reinterpret_cast<const CharT *>(PivW2A{s, s.size(), code_page}.GetText()));
         }
     }
     PivString(std::basic_string<wchar_t> &&s)
@@ -2834,7 +2906,7 @@ public:
         }
         else
         {
-            str.assign(reinterpret_cast<const CharT *>(PivW2A{s}.GetText()));
+            str.assign(reinterpret_cast<const CharT *>(PivW2A{s, s.size(), code_page}.GetText()));
         }
     }
     PivString(const piv::basic_string_view<char> &s)
@@ -2864,7 +2936,7 @@ public:
         }
         else
         {
-            str.assign(reinterpret_cast<const CharT *>(PivW2A{s}.GetText()));
+            str.assign(reinterpret_cast<const CharT *>(PivW2A{s, s.size(), code_page}.GetText()));
         }
     }
     PivString(const char *s, size_t count = (size_t)-1)
@@ -2903,7 +2975,7 @@ public:
         }
         else
         {
-            str.assign(reinterpret_cast<const CharT *>(PivW2A{s, count}.GetText()));
+            str.assign(reinterpret_cast<const CharT *>(PivW2A{s, count, code_page}.GetText()));
         }
     }
     PivString(const CVolString &s)
@@ -2918,7 +2990,7 @@ public:
         }
         else
         {
-            str.assign(reinterpret_cast<const CharT *>(PivW2A{s}.GetText()));
+            str.assign(reinterpret_cast<const CharT *>(PivW2A{s, (size_t)-1, code_page}.GetText()));
         }
     }
     PivString(const CVolMem &s)
@@ -3060,7 +3132,7 @@ public:
         }
         else
         {
-            PivA2Ws{reinterpret_cast<const char *>(str.c_str())}.GetStr(strDump);
+            PivA2Ws{reinterpret_cast<const char *>(str.c_str()), str.size(), code_page}.GetStr(strDump);
         }
     }
 
@@ -3322,7 +3394,7 @@ public:
         }
         else
         {
-            return this->compare(reinterpret_cast<const CharT *>(PivW2A{s}.GetText()), case_insensitive);
+            return this->compare(reinterpret_cast<const CharT *>(PivW2A{s, (size_t)-1, code_page}.GetText()), case_insensitive);
         }
     }
 
@@ -3379,7 +3451,7 @@ public:
         }
         else
         {
-            PivW2A ansi{s};
+            PivW2A ansi{s, (size_t)-1, code_page};
             str.assign(reinterpret_cast<const CharT *>(ansi.GetText()), (count == (size_t)-1) ? ansi.GetLength() : count);
         }
         return *this;
@@ -3599,7 +3671,7 @@ public:
                 }
                 else
                 {
-                    PivW2A convert{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2};
+                    PivW2A convert{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2, code_page};
                     str.assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
                 }
             }
@@ -3622,7 +3694,7 @@ public:
                 }
                 else
                 {
-                    PivU2A convert{reinterpret_cast<const char *>(data.get()), fileSize};
+                    PivU2A convert{reinterpret_cast<const char *>(data.get()), fileSize, code_page};
                     str.assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
                 }
             }
@@ -3640,12 +3712,12 @@ public:
                 Succeeded = (fread(const_cast<char *>(data.get()), 1, fileSize, in) == fileSize);
                 PIV_IF(sizeof(EncodeType) == 2)
                 {
-                    PivA2W convert{reinterpret_cast<const char *>(data.get()), fileSize};
+                    PivA2W convert{reinterpret_cast<const char *>(data.get()), fileSize, code_page};
                     str.assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
                 }
                 else
                 {
-                    PivA2U convert{reinterpret_cast<const char *>(data.get()), fileSize};
+                    PivA2U convert{reinterpret_cast<const char *>(data.get()), fileSize, code_page};
                     str.assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
                 }
             }
@@ -3691,7 +3763,7 @@ public:
             }
             else
             {
-                PivA2W convert{reinterpret_cast<const char *>(str.c_str()), count};
+                PivA2W convert{reinterpret_cast<const char *>(str.c_str()), count, code_page};
                 Succeeded = (fwrite(convert.GetText(), 2, convert.GetLength(), out) == convert.GetLength());
             }
         }
@@ -3713,7 +3785,7 @@ public:
             }
             else
             {
-                PivA2U convert{reinterpret_cast<const char *>(str.c_str()), count};
+                PivA2U convert{reinterpret_cast<const char *>(str.c_str()), count, code_page};
                 Succeeded = (fwrite(convert.GetText(), 1, convert.GetLength(), out) == convert.GetLength());
             }
         }
@@ -3721,12 +3793,12 @@ public:
         {
             PIV_IF(sizeof(EncodeType) == 2)
             {
-                PivW2A convert{reinterpret_cast<const wchar_t *>(str.c_str()), count};
+                PivW2A convert{reinterpret_cast<const wchar_t *>(str.c_str()), count, code_page};
                 Succeeded = (fwrite(convert.GetText(), 1, convert.GetLength(), out) == convert.GetLength());
             }
             PIV_ELSE_IF(sizeof(EncodeType) == 3)
             {
-                PivU2A convert{reinterpret_cast<const char *>(str.c_str()), count};
+                PivU2A convert{reinterpret_cast<const char *>(str.c_str()), count, code_page};
                 Succeeded = (fwrite(convert.GetText(), 1, convert.GetLength(), out) == convert.GetLength());
             }
             else
@@ -3801,7 +3873,7 @@ public:
         }
         else
         {
-            PivW2A ansi{s};
+            PivW2A ansi{s, (size_t)-1, code_page};
             str.append(reinterpret_cast<const CharT *>(ansi.GetText()));
         }
         return *this;
@@ -3819,7 +3891,7 @@ public:
         }
         else
         {
-            PivW2A ansi{s};
+            PivW2A ansi{s, (size_t)-1, code_page};
             str.append(reinterpret_cast<const CharT *>(ansi.GetText()));
         }
         return *this;
@@ -4056,7 +4128,7 @@ public:
         }
         else
         {
-            PivW2A ansi{s};
+            PivW2A ansi{s, (size_t)-1, code_page};
             str.append(reinterpret_cast<const CharT *>(ansi.GetText()), (count == (size_t)-1) ? ansi.GetLength() : count);
         }
         return *this;
@@ -4120,7 +4192,7 @@ public:
         }
         else
         {
-            return AddManyText(reinterpret_cast<const CharT *>(PivW2A{s}.GetText()), times);
+            return AddManyText(reinterpret_cast<const CharT *>(PivW2A{s, (size_t)-1, code_page}.GetText()), times);
         }
     }
 
@@ -4165,7 +4237,7 @@ public:
         }
         else
         {
-            return AddLowerText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{s}.GetText())});
+            return AddLowerText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{s, (size_t)-1, code_page}.GetText())});
         }
     }
 
@@ -4210,7 +4282,7 @@ public:
         }
         else
         {
-            return AddUpperText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{s}.GetText())});
+            return AddUpperText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{s, (size_t)-1, code_page}.GetText())});
         }
     }
 
@@ -4252,7 +4324,7 @@ public:
         }
         else
         {
-            str.append(piv::edit::format(reinterpret_cast<const CharT *>(PivW2A{format}.GetText()), args...));
+            str.append(piv::edit::format(reinterpret_cast<const CharT *>(PivW2A{format, (size_t)-1, code_page}.GetText()), args...));
         }
         return *this;
     }
@@ -4316,7 +4388,7 @@ public:
         }
         else
         {
-            return InsertText(index, reinterpret_cast<const CharT *>(PivW2A{s}.GetText()), count);
+            return InsertText(index, reinterpret_cast<const CharT *>(PivW2A{s, (size_t)-1, code_page}.GetText()), count);
         }
     }
 
@@ -4630,7 +4702,7 @@ public:
         }
         else
         {
-            return FindFirstOf(reinterpret_cast<const CharT *>(PivW2A{chars}.GetText()), pos);
+            return FindFirstOf(reinterpret_cast<const CharT *>(PivW2A{chars, (size_t)-1, code_page}.GetText()), pos);
         }
     }
 
@@ -4669,7 +4741,7 @@ public:
         }
         else
         {
-            return FindLastOf(reinterpret_cast<const CharT *>(PivW2A{chars}.GetText()), pos);
+            return FindLastOf(reinterpret_cast<const CharT *>(PivW2A{chars, (size_t)-1, code_page}.GetText()), pos);
         }
     }
 
@@ -4708,7 +4780,7 @@ public:
         }
         else
         {
-            return FindFirstNotOf(reinterpret_cast<const CharT *>(PivW2A{chars}.GetText()), pos);
+            return FindFirstNotOf(reinterpret_cast<const CharT *>(PivW2A{chars, (size_t)-1, code_page}.GetText()), pos);
         }
     }
 
@@ -4747,7 +4819,7 @@ public:
         }
         else
         {
-            return FindLastNotOf(reinterpret_cast<const CharT *>(PivW2A{chars}.GetText()), pos);
+            return FindLastNotOf(reinterpret_cast<const CharT *>(PivW2A{chars, (size_t)-1, code_page}.GetText()), pos);
         }
     }
 
@@ -4798,7 +4870,7 @@ public:
         }
         else
         {
-            return SearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{text}.GetText())}, pos, case_insensitive, textlen);
+            return SearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{text, (size_t)-1, code_page}.GetText())}, pos, case_insensitive, textlen);
         }
     }
 
@@ -4844,7 +4916,7 @@ public:
         }
         else
         {
-            return ReverseSearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{text}.GetText())}, pos, case_insensitive, textlen);
+            return ReverseSearchText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{text, (size_t)-1, code_page}.GetText())}, pos, case_insensitive, textlen);
         }
     }
 
@@ -4923,15 +4995,15 @@ public:
     {
         PIV_IF(sizeof(EncodeType) == 2)
         {
-            return EndOf(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(text.GetText())}, case_sensitive);
+            return EndOf(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(s.GetText())}, case_sensitive);
         }
         PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
-            return EndOf(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{text}.GetText())}, case_sensitive);
+            return EndOf(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2U{s}.GetText())}, case_sensitive);
         }
         else
         {
-            return EndOf(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{text}.GetText())}, case_sensitive);
+            return EndOf(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{s, (size_t)-1, code_page}.GetText())}, case_sensitive);
         }
     }
 
@@ -4991,15 +5063,15 @@ public:
     {
         PIV_IF(sizeof(EncodeType) == 2)
         {
-            return Replace(pos, count, reinterpret_cast<const CharT *>(text.GetText()), -1);
+            return Replace(pos, count, reinterpret_cast<const CharT *>(s.GetText()), -1);
         }
         PIV_ELSE_IF(sizeof(EncodeType) == 3)
         {
-            return Replace(pos, count, reinterpret_cast<const CharT *>(PivW2U{text}.GetText()), -1);
+            return Replace(pos, count, reinterpret_cast<const CharT *>(PivW2U{s}.GetText()), -1);
         }
         else
         {
-            return Replace(pos, count, reinterpret_cast<const CharT *>(PivW2A{text}.GetText()), -1);
+            return Replace(pos, count, reinterpret_cast<const CharT *>(PivW2A{s, (size_t)-1, code_page}.GetText()), -1);
         }
     }
 
@@ -5067,8 +5139,8 @@ public:
         }
         else
         {
-            PivW2A find_mbcs{findStr};
-            PivW2A rep_mbcs{repStr};
+            PivW2A find_mbcs{findStr, (size_t)-1, code_page};
+            PivW2A rep_mbcs{repStr, (size_t)-1, code_page};
             return ReplaceSubText(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(find_mbcs.GetText())},
                                   piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(rep_mbcs.GetText())}, pos, count, case_sensitive);
         }
@@ -5234,7 +5306,7 @@ public:
         for (size_t i = 0; i < str.size();)
         {
             ch = static_cast<unsigned char>(str[i]);
-            if ((ch >= 0 && ch <= 0x09) || (ch >= 0x0B && ch <= 0x0C) || (!reserveLFCR && (ch == '\r' || ch == '\n')) || (ch >= 0x0E && ch <= ' '))
+            if ((ch >= 0 && ch <= 0x09) || ch == 0x0B || ch == 0x0C || (!reserveLFCR && (ch == '\r' || ch == '\n')) || (ch >= 0x0E && ch <= ' '))
                 str.erase(i, 1);
             else
                 i++;
@@ -5346,7 +5418,7 @@ public:
         }
         else
         {
-            return SplitStrings(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{delimit}.GetText())}, strArray, trimAll, ignoreEmptyStr, max_count);
+            return SplitStrings(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{delimit, (size_t)-1, code_page}.GetText())}, strArray, trimAll, ignoreEmptyStr, max_count);
         }
     }
 
@@ -5436,7 +5508,7 @@ public:
         }
         else
         {
-            return SplitStringsView(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{delimit}.GetText())}, svArray, trimAll, ignoreEmptyStr, max_count);
+            return SplitStringsView(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{delimit, (size_t)-1, code_page}.GetText())}, svArray, trimAll, ignoreEmptyStr, max_count);
         }
     }
 
@@ -5524,7 +5596,7 @@ public:
         }
         else
         {
-            return SplitSubStrings(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{delimit}.GetText())}, strArray, trimAll, ignoreEmptyStr, max_count);
+            return SplitSubStrings(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{delimit, (size_t)-1, code_page}.GetText())}, strArray, trimAll, ignoreEmptyStr, max_count);
         }
     }
 
@@ -5613,7 +5685,7 @@ public:
         }
         else
         {
-            return SplitSubStringViews(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{delimit}.GetText())}, svArray, trimAll, ignoreEmptyStr, max_count);
+            return SplitSubStringViews(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{delimit, (size_t)-1, code_page}.GetText())}, svArray, trimAll, ignoreEmptyStr, max_count);
         }
     }
 
@@ -5631,12 +5703,12 @@ public:
     }
     inline size_t CopyStr(ptrdiff_t dest, const size_t &pos, const size_t &count) const
     {
-        return CopyStr(reinterpret_cast<CharT *>(dest), pos, count);
+        return CopyStr(const_cast<CharT *>(reinterpret_cast<const CharT *>(dest)), pos, count);
     }
     inline size_t CopyStr(CVolString &dest, const size_t &pos, const size_t &count) const
     {
         dest.SetLength(count);
-        size_t n = CopyStr(const_cast<CharT *>(reinterpret_cast<cont CharT *>(dest.GetText())), pos, count);
+        size_t n = CopyStr(const_cast<CharT *>(reinterpret_cast<const CharT *>(dest.GetText())), pos, count);
         if (n == 0)
             dest.Empty();
         else
@@ -5646,7 +5718,7 @@ public:
     inline size_t CopyStr(CVolMem &dest, const size_t &pos, const size_t &count) const
     {
         dest.Alloc(count, TRUE);
-        size_t n = CopyStr(const_cast<CharT *>(reinterpret_cast<cont CharT *>(dest.GetPtr())), pos, count);
+        size_t n = CopyStr(const_cast<CharT *>(reinterpret_cast<const CharT *>(dest.GetPtr())), pos, count);
         if (n == 0)
             dest.Empty();
         else
@@ -5689,7 +5761,7 @@ public:
         }
         else
         {
-            return *PivA2Ws{reinterpret_cast<const char *>(str.c_str())};
+            return *PivA2Ws{reinterpret_cast<const char *>(str.c_str()), str.size(), code_page};
         }
     }
 
@@ -5809,6 +5881,66 @@ public:
     }
 
     /**
+     * @brief 到UTF8
+     * @return 返回转换后的UTF-8文本
+     */
+    inline std::string ToUtf8() const
+    {
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
+            return PivW2U{reinterpret_cast<const wchar_t *>(str.c_str()), str.size()}.String();
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
+        {
+            return std::string{reinterpret_cast<const char *>(str.c_str())};
+        }
+        else
+        {
+            return PivA2U{reinterpret_cast<const char *>(str.c_str()), str.size(), code_page}.String();
+        }
+    }
+
+    /**
+     * @brief 到ANSI
+     * @return 返回转换后的ANSI文本
+     */
+    inline std::string ToMbs() const
+    {
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
+            return PivW2A{reinterpret_cast<const wchar_t *>(str.c_str()), str.size(), code_page}.String();
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
+        {
+            return PivU2A{reinterpret_cast<const char *>(str.c_str()), str.size(), code_page}.String();
+        }
+        else
+        {
+            return std::string{reinterpret_cast<const char *>(str.c_str())};
+        }
+    }
+
+    /**
+     * @brief 到UTF16
+     * @return 返回转换后的UTF-16LE文本
+     */
+    inline std::wstring ToUtf16() const
+    {
+        PIV_IF(sizeof(EncodeType) == 2)
+        {
+            return std::wstring{reinterpret_cast<const wchar_t *>(str.c_str())};
+        }
+        PIV_ELSE_IF(sizeof(EncodeType) == 3)
+        {
+            return PivU2W{reinterpret_cast<const char *>(str.c_str()), str.size()}.String();
+        }
+        else
+        {
+            return PivA2W{reinterpret_cast<const char *>(str.c_str()), str.size(), code_page}.String();
+        }
+    }
+
+    /**
      * @brief URL编码
      * @param utf8
      * @param ReservedWord 是否不编码保留字符
@@ -5865,7 +5997,7 @@ public:
         }
         else
         {
-            piv::encoding::hex_to_str(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{hexstr}.GetText())}, str);
+            piv::encoding::hex_to_str(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{hexstr, (size_t)-1, code_page}.GetText())}, str);
         }
         return *this;
     }
@@ -5902,7 +6034,7 @@ public:
         }
         else
         {
-            str.append(piv::encoding::hex_to_str(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{hexstr}.GetText())}));
+            str.append(piv::encoding::hex_to_str(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{hexstr, (size_t)-1, code_page}.GetText())}));
         }
         return *this;
     }
@@ -5924,7 +6056,7 @@ public:
         }
         else
         {
-            return PivString{piv::encoding::to_usc2<CharT>(piv::wstring_view{*PivA2W{reinterpret_cast<const char *>(str.c_str())}}, en_ascii)};
+            return PivString{piv::encoding::to_usc2<CharT>(piv::wstring_view{*PivA2W{reinterpret_cast<const char *>(str.c_str()), str.size(), code_page}}, en_ascii)};
         }
     }
     inline CVolString &ToUsc2Str(const bool &en_ascii = false, CVolString &usc2 = CVolString{}) const
@@ -5939,7 +6071,7 @@ public:
         }
         else
         {
-            return piv::encoding::to_usc2str(piv::wstring_view{*PivA2W{reinterpret_cast<const char *>(str.c_str())}}, en_ascii, usc2);
+            return piv::encoding::to_usc2str(piv::wstring_view{*PivA2W{reinterpret_cast<const char *>(str.c_str()), str.size(), code_page}}, en_ascii, usc2);
         }
     }
 
@@ -5963,8 +6095,8 @@ public:
         }
         else
         {
-            piv::encoding::usc2_to_str(piv::wstring_view{*PivA2W{reinterpret_cast<const char *>(usc2.data()), usc2.size()}}, ret);
-            str.assign(reinterpret_cast<const CharT *>(PivW2A{ret}.GetText()));
+            piv::encoding::usc2_to_str(piv::wstring_view{*PivA2W{reinterpret_cast<const char *>(usc2.data()), usc2.size(), code_page}}, ret);
+            str.assign(reinterpret_cast<const CharT *>(PivW2A{ret, ret.size(), code_page}.GetText()));
         }
         return *this;
     }
@@ -5990,7 +6122,7 @@ public:
         }
         else
         {
-            str.assign(reinterpret_cast<const CharT *>(PivW2A{ret}.GetText()));
+            str.assign(reinterpret_cast<const CharT *>(PivW2A{ret, ret.size(), code_page}.GetText()));
         }
         return *this;
     }
@@ -6015,8 +6147,8 @@ public:
         }
         else
         {
-            piv::encoding::usc2_to_str(piv::wstring_view{*PivA2W{reinterpret_cast<const char *>(usc2.data()), usc2.size()}}, ret);
-            str.append(reinterpret_cast<const CharT *>(PivW2A{ret}.GetText()));
+            piv::encoding::usc2_to_str(piv::wstring_view{*PivA2W{reinterpret_cast<const char *>(usc2.data()), usc2.size(), code_page}}, ret);
+            str.append(reinterpret_cast<const CharT *>(PivW2A{ret, ret.size(), code_page}.GetText()));
         }
         return *this;
     }
@@ -6042,7 +6174,7 @@ public:
         }
         else
         {
-            str.append(reinterpret_cast<const CharT *>(PivW2A{ret}.GetText()));
+            str.append(reinterpret_cast<const CharT *>(PivW2A{ret, ret.size(), code_page}.GetText()));
         }
         return *this;
     }
@@ -6544,11 +6676,6 @@ public:
     }
 }; // PivAny2Us
 
-#endif // _PIV_STRING_HPP
-
-#ifndef _PIV_STRING_HPP_2023_10
-#define _PIV_STRING_HPP_2023_10
-
 /**
  * @brief 任意编码转std::string_view
  */
@@ -6695,10 +6822,10 @@ public:
         return _sv;
     }
 
-    piv::string_view &operator*()  noexcept
+    piv::string_view &operator*() noexcept
     {
         return _sv;
     }
 }; // PivStr2SV
 
-#endif // _PIV_STRING_HPP_2023_10
+#endif // _PIV_STRING_HPP
