@@ -27,9 +27,6 @@
 #ifndef BIT7Z_AUTO_PREFIX_LONG_PATHS
 #define BIT7Z_AUTO_PREFIX_LONG_PATHS
 #endif
-#ifndef BIT7Z_PATH_SANITIZATION
-#define BIT7Z_PATH_SANITIZATION
-#endif
 
 #include "bit7z.hpp"
 #include "bitarchiveeditor.hpp"
@@ -42,83 +39,6 @@ namespace piv
 {
     namespace Archive
     {
-        static std::atomic<bit7z::Bit7zLibrary *> m_7zLib = nullptr; // 7z.dll动态库
-        static std::string g_error{"OK"};                            // 错误信息
-        static std::mutex g_mutex;
-
-        /**
-         * @brief 加载静态库
-         * @param library_path 7z.dll的路径
-         * @return 是否加载成功
-         */
-        static bool Load7zLib(const bit7z::tstring &library_path = bit7z::kDefaultLibrary)
-        {
-            try
-            {
-                bit7z::Bit7zLibrary *p = m_7zLib.load(std::memory_order_relaxed);
-                std::atomic_thread_fence(std::memory_order_acquire);
-                if (p == nullptr)
-                {
-                    std::lock_guard<std::mutex> lock(g_mutex);
-                    p = m_7zLib.load(std::memory_order_relaxed);
-                    if (p == nullptr)
-                    {
-                        p = new bit7z::Bit7zLibrary{library_path};
-                        std::atomic_thread_fence(std::memory_order_release);
-                        m_7zLib.store(p, std::memory_order_relaxed);
-                        p->setLargePageMode();
-                    }
-                }
-                return true;
-            }
-            catch (...)
-            {
-                return false;
-            }
-        }
-
-        /**
-         * @brief 卸载7z.dll动态库
-         */
-        static void Free7zLib()
-        {
-            bit7z::Bit7zLibrary *p = m_7zLib.load(std::memory_order_relaxed);
-            std::atomic_thread_fence(std::memory_order_acquire);
-            if (p != nullptr)
-            {
-                std::lock_guard<std::mutex> lock(g_mutex);
-                p = m_7zLib.load(std::memory_order_relaxed);
-                if (p != nullptr)
-                {
-                    delete p;
-                    std::atomic_thread_fence(std::memory_order_release);
-                    m_7zLib.store(nullptr, std::memory_order_relaxed);
-                }
-            }
-        }
-
-        /**
-         * @brief 获取7z动态库实例
-         */
-        inline static bit7z::Bit7zLibrary &Get7zLib()
-        {
-            bit7z::Bit7zLibrary *p = m_7zLib.load(std::memory_order_relaxed);
-            std::atomic_thread_fence(std::memory_order_acquire);
-            if (p == nullptr)
-            {
-                std::lock_guard<std::mutex> lock(g_mutex);
-                p = m_7zLib.load(std::memory_order_relaxed);
-                if (p == nullptr)
-                {
-                    p = new bit7z::Bit7zLibrary{bit7z::kDefaultLibrary};
-                    std::atomic_thread_fence(std::memory_order_release);
-                    m_7zLib.store(p, std::memory_order_relaxed);
-                    p->setLargePageMode();
-                }
-            }
-            return *p;
-        }
-
         /**
          * @brief 返回存档输出格式
          * @param value 输出格式值
@@ -271,6 +191,128 @@ namespace piv
     } // namespace Archive
 } // namespace piv
 
+/**
+ * @brief 加载与释放7z.dll动态库(单例对象)
+ */
+class Piv7zLib
+{
+private:
+    Piv7zLib() {}
+    ~Piv7zLib()
+    {
+        this->Free();
+    }
+    Piv7zLib(const Piv7zLib &) = delete;
+    Piv7zLib(Piv7zLib &&) = delete;
+    Piv7zLib &operator=(const Piv7zLib &) = delete;
+    Piv7zLib &operator=(Piv7zLib &&) = delete;
+
+    std::atomic<bit7z::Bit7zLibrary *> m_7zLib = nullptr;
+    std::string m_error{"OK"};
+    std::mutex m_mutex;
+
+public:
+    static Piv7zLib &data()
+    {
+        static Piv7zLib inst;
+        return inst;
+    }
+
+    /**
+     * @brief 获取7z动态库实例
+     */
+    bit7z::Bit7zLibrary &Get()
+    {
+        bit7z::Bit7zLibrary *p = m_7zLib.load(std::memory_order_relaxed);
+        std::atomic_thread_fence(std::memory_order_acquire);
+        if (p == nullptr)
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+            p = m_7zLib.load(std::memory_order_relaxed);
+            if (p == nullptr)
+            {
+                p = new bit7z::Bit7zLibrary{bit7z::kDefaultLibrary};
+                std::atomic_thread_fence(std::memory_order_release);
+                m_7zLib.store(p, std::memory_order_relaxed);
+                p->setLargePageMode();
+            }
+        }
+        return *p;
+    }
+
+    /**
+     * @brief 加载静态库
+     * @param library_path 7z.dll的路径
+     * @return 是否加载成功
+     */
+    bool Load(const bit7z::tstring &library_path = bit7z::kDefaultLibrary)
+    {
+        try
+        {
+            bit7z::Bit7zLibrary *p = m_7zLib.load(std::memory_order_relaxed);
+            std::atomic_thread_fence(std::memory_order_acquire);
+            if (p == nullptr)
+            {
+                std::lock_guard<std::mutex> lock(m_mutex);
+                p = m_7zLib.load(std::memory_order_relaxed);
+                if (p == nullptr)
+                {
+                    p = new bit7z::Bit7zLibrary{library_path};
+                    std::atomic_thread_fence(std::memory_order_release);
+                    m_7zLib.store(p, std::memory_order_relaxed);
+                    p->setLargePageMode();
+                }
+            }
+            return true;
+        }
+        catch (...)
+        {
+            return false;
+        }
+    }
+
+    /**
+     * @brief 卸载7z.dll动态库
+     */
+    void Free()
+    {
+        bit7z::Bit7zLibrary *p = m_7zLib.load(std::memory_order_relaxed);
+        std::atomic_thread_fence(std::memory_order_acquire);
+        if (p != nullptr)
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+            p = m_7zLib.load(std::memory_order_relaxed);
+            if (p != nullptr)
+            {
+                delete p;
+                std::atomic_thread_fence(std::memory_order_release);
+                m_7zLib.store(nullptr, std::memory_order_relaxed);
+            }
+        }
+    }
+
+    /**
+     * @brief 取最后错误
+     * @return
+     */
+    inline CVolString GetLastError()
+    {
+        std::lock_guard<std::mutex> guard(m_mutex);
+        return CVolString{m_error.c_str()};
+    }
+
+    /**
+     * @brief 置错误信息
+     * @param msg
+     */
+    inline void SetError(const char *msg)
+    {
+        std::lock_guard<std::mutex> guard(m_mutex);
+        m_error = msg;
+    }
+
+}; // Piv7zLib
+
 class PivArchiveOperate
 {
 public:
@@ -297,10 +339,9 @@ public:
      * @brief 取最后错误
      * @return
      */
-    static CVolString GetLastError()
+    inline static CVolString GetLastError()
     {
-        std::lock_guard<std::mutex> guard(piv::Archive::g_mutex);
-        return CVolString{piv::Archive::g_error.c_str()};
+        return Piv7zLib::data().GetLastError();
     }
 
     /**
@@ -309,8 +350,7 @@ public:
      */
     static void SetError(const char *msg)
     {
-        std::lock_guard<std::mutex> guard(piv::Archive::g_mutex);
-        piv::Archive::g_error = msg;
+        return Piv7zLib::data().SetError(msg);
     }
 
     /**
@@ -337,7 +377,7 @@ public:
             {
                 in_paths.push_back(bit7z::tstring{paths.GetAt(i)});
             }
-            bit7z::BitFileCompressor Compressor{piv::Archive::Get7zLib(), format};
+            bit7z::BitFileCompressor Compressor{Piv7zLib::data().Get(), format};
             Compressor.setPassword(password);
             Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
             Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
@@ -371,7 +411,7 @@ public:
         }
         try
         {
-            bit7z::BitFileCompressor Compressor{piv::Archive::Get7zLib(), format};
+            bit7z::BitFileCompressor Compressor{Piv7zLib::data().Get(), format};
             Compressor.setPassword(password);
             Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
             Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
@@ -419,7 +459,7 @@ public:
         }
         try
         {
-            bit7z::BitFileCompressor Compressor{piv::Archive::Get7zLib(), format};
+            bit7z::BitFileCompressor Compressor{Piv7zLib::data().Get(), format};
             Compressor.setPassword(password);
             Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
             Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
@@ -464,7 +504,7 @@ public:
     {
         try
         {
-            bit7z::BitFileCompressor Compressor{piv::Archive::Get7zLib(), format};
+            bit7z::BitFileCompressor Compressor{Piv7zLib::data().Get(), format};
             Compressor.setPassword(password);
             Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
             Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
@@ -493,7 +533,7 @@ public:
     {
         try
         {
-            bit7z::BitFileCompressor Compressor{piv::Archive::Get7zLib(), format};
+            bit7z::BitFileCompressor Compressor{Piv7zLib::data().Get(), format};
             Compressor.setPassword(password);
             Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
             Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
@@ -521,7 +561,7 @@ public:
     {
         try
         {
-            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), format};
+            bit7z::BitFileExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             extractor.extract(in_file, out_dir);
             SetError("OK");
@@ -541,7 +581,7 @@ public:
             return false;
         try
         {
-            bit7z::BitMemExtractor extractor{piv::Archive::Get7zLib(), format};
+            bit7z::BitMemExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             extractor.extract(buffer, out_dir);
             SetError("OK");
@@ -568,7 +608,7 @@ public:
         out_buffer.clear();
         try
         {
-            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), format};
+            bit7z::BitFileExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             bit7z::BitInputArchive in_archive{extractor, in_file};
             for (auto itr = in_archive.begin(); itr != in_archive.end(); itr++)
@@ -601,7 +641,7 @@ public:
             return false;
         try
         {
-            bit7z::BitMemExtractor extractor{piv::Archive::Get7zLib(), format};
+            bit7z::BitMemExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             bit7z::BitInputArchive in_archive{extractor, buffer};
             for (auto itr = in_archive.begin(); itr != in_archive.end(); itr++)
@@ -641,7 +681,7 @@ public:
     {
         try
         {
-            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), format};
+            bit7z::BitFileExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             extractor.extractMatching(in_file, filter, out_dir, isExclude ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include);
             SetError("OK");
@@ -661,7 +701,7 @@ public:
             return false;
         try
         {
-            bit7z::BitMemExtractor extractor{piv::Archive::Get7zLib(), format};
+            bit7z::BitMemExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             extractor.extractMatching(buffer, filter, out_dir, isExclude ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include);
             SetError("OK");
@@ -693,7 +733,7 @@ public:
         {
             if (filter.empty())
                 throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
-            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), format};
+            bit7z::BitFileExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             bit7z::BitInputArchive in_archive(extractor, in_file);
             for (const auto &item : in_archive)
@@ -727,7 +767,7 @@ public:
         {
             if (filter.empty())
                 throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
-            bit7z::BitMemExtractor extractor{piv::Archive::Get7zLib(), format};
+            bit7z::BitMemExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             bit7z::BitInputArchive in_archive(extractor, buffer);
             for (const auto &item : in_archive)
@@ -766,7 +806,7 @@ public:
     {
         try
         {
-            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), format};
+            bit7z::BitFileExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             extractor.extractMatchingRegex(in_file, regex, out_dir, isExclude ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include);
             SetError("OK");
@@ -791,7 +831,7 @@ public:
             return false;
         try
         {
-            bit7z::BitMemExtractor extractor{piv::Archive::Get7zLib(), format};
+            bit7z::BitMemExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             extractor.extractMatchingRegex(buffer, regex, out_dir, isExclude ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include);
             SetError("OK");
@@ -828,7 +868,7 @@ public:
         {
             if (regex.empty())
                 throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
-            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), format};
+            bit7z::BitFileExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             bit7z::BitInputArchive in_archive(extractor, in_file);
             const bit7z::tregex regex_filter(regex, bit7z::tregex::ECMAScript | bit7z::tregex::optimize);
@@ -870,7 +910,7 @@ public:
         {
             if (regex.empty())
                 throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
-            bit7z::BitMemExtractor extractor{piv::Archive::Get7zLib(), format};
+            bit7z::BitMemExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             bit7z::BitInputArchive in_archive(extractor, buffer);
             const bit7z::tregex regex_filter(regex, bit7z::tregex::ECMAScript | bit7z::tregex::optimize);
@@ -913,7 +953,7 @@ public:
     {
         try
         {
-            bit7z::BitFileExtractor extractor{piv::Archive::Get7zLib(), format};
+            bit7z::BitFileExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             extractor.test(in_file);
             SetError("OK");
@@ -1073,7 +1113,7 @@ public:
         CloseArchive();
         try
         {
-            m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), in_file, format, password});
+            m_archive.reset(new bit7z::BitArchiveReader{Piv7zLib::data().Get(), in_file, format, password});
             EnableFeeback(feedback);
             SetError("OK");
             return true;
@@ -1099,7 +1139,7 @@ public:
         CloseArchive();
         try
         {
-            m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), in_stream, format, password});
+            m_archive.reset(new bit7z::BitArchiveReader{Piv7zLib::data().Get(), in_stream, format, password});
             EnableFeeback(feedback);
             SetError("OK");
             return true;
@@ -1125,7 +1165,7 @@ public:
         CloseArchive();
         try
         {
-            m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), in_buffer, format, password});
+            m_archive.reset(new bit7z::BitArchiveReader{Piv7zLib::data().Get(), in_buffer, format, password});
             EnableFeeback(feedback);
             SetError("OK");
             return true;
@@ -1153,7 +1193,7 @@ public:
                                                       reinterpret_cast<bit7z::byte_t *>(in_data.GetPtr()) + in_data.GetSize()});
         try
         {
-            m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), *m_buffer, format, password});
+            m_archive.reset(new bit7z::BitArchiveReader{Piv7zLib::data().Get(), *m_buffer, format, password});
             EnableFeeback(feedback);
             SetError("OK");
             return true;
@@ -1182,7 +1222,7 @@ public:
                                                       reinterpret_cast<bit7z::byte_t *>(mem_ptr) + mem_size});
         try
         {
-            m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), *m_buffer, format, password});
+            m_archive.reset(new bit7z::BitArchiveReader{Piv7zLib::data().Get(), *m_buffer, format, password});
             EnableFeeback(feedback);
             SetError("OK");
             return true;
@@ -1219,7 +1259,7 @@ public:
         m_buffer.reset(new std::vector<bit7z::byte_t>{data, data + ::SizeofResource(hModule, hSrc)});
         try
         {
-            m_archive.reset(new bit7z::BitArchiveReader{piv::Archive::Get7zLib(), *m_buffer, format, password});
+            m_archive.reset(new bit7z::BitArchiveReader{Piv7zLib::data().Get(), *m_buffer, format, password});
             EnableFeeback(feedback);
             SetError("OK");
             return true;
@@ -2018,7 +2058,7 @@ public:
         CloseArchive();
         try
         {
-            m_archive.reset(new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), format});
+            m_archive.reset(new bit7z::BitArchiveWriter{Piv7zLib::data().Get(), format});
             EnableFeeback(feedback);
             SetError("OK");
             return true;
@@ -2044,7 +2084,7 @@ public:
         CloseArchive();
         try
         {
-            m_archive.reset(new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), in_file, format, password});
+            m_archive.reset(new bit7z::BitArchiveWriter{Piv7zLib::data().Get(), in_file, format, password});
             EnableFeeback(feedback);
             SetError("OK");
             return true;
@@ -2070,7 +2110,7 @@ public:
         CloseArchive();
         try
         {
-            m_archive.reset(new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), in_buffer, format, password});
+            m_archive.reset(new bit7z::BitArchiveWriter{Piv7zLib::data().Get(), in_buffer, format, password});
             EnableFeeback(feedback);
             SetError("OK");
             return true;
@@ -2096,7 +2136,7 @@ public:
         CloseArchive();
         try
         {
-            m_archive.reset(new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), in_stream, format, password});
+            m_archive.reset(new bit7z::BitArchiveWriter{Piv7zLib::data().Get(), in_stream, format, password});
             EnableFeeback(feedback);
             SetError("OK");
             return true;
@@ -2124,7 +2164,7 @@ public:
                                                       reinterpret_cast<bit7z::byte_t *>(in_buffer.GetPtr()) + in_buffer.GetSize()});
         try
         {
-            m_archive.reset(new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), *m_buffer, format, password});
+            m_archive.reset(new bit7z::BitArchiveWriter{Piv7zLib::data().Get(), *m_buffer, format, password});
             EnableFeeback(feedback);
             SetError("OK");
             return true;
@@ -2145,7 +2185,7 @@ public:
         try
         {
             m_in_stream.OpenStream(resid);
-            m_archive = new bit7z::BitArchiveWriter{piv::Archive::Get7zLib(), m_in_stream.is(), format, password};
+            m_archive = new bit7z::BitArchiveWriter{Piv7zLib::data().Get(), m_in_stream.is(), format, password};
             EnableFeeback(feedback);
             SetError("OK");
             return true;
@@ -2792,7 +2832,7 @@ public:
         CloseArchive();
         try
         {
-            m_archive.reset(new bit7z::BitArchiveEditor{piv::Archive::Get7zLib(), in_file, format, password});
+            m_archive.reset(new bit7z::BitArchiveEditor{Piv7zLib::data().Get(), in_file, format, password});
             m_archive->setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
             EnableFeeback(feedback);
             SetError("OK");

@@ -298,7 +298,7 @@ namespace piv
                 for (size_t i = 0; i < str.size(); i++, count++)
                 {
                     ch = str[i];
-                    if (ch >= (CharT)0xD800 && ch <= (CharT)0xDBFF)
+                    if (ch >= (CharT)0xD800 && ch <= (CharT)0xDFFF)
                         i++;
                 }
             }
@@ -342,7 +342,7 @@ namespace piv
                 while (n--)
                 {
                     ch = str[i++];
-                    if (ch >= (CharT)0xD800 && ch <= (CharT)0xDBFF)
+                    if (ch >= (CharT)0xD800 && ch <= (CharT)0xDFFF)
                     {
                         reverse[n] = str[i++];
                         reverse[--n] = ch;
@@ -646,7 +646,7 @@ namespace piv
                 ch = str[i];
                 PIV_IF(sizeof(EncodeType) == 2)
                 {
-                    if (ch >= (CharT)0xD800 && ch <= (CharT)0xDBFF)
+                    if (ch >= (CharT)0xD800 && ch <= (CharT)0xDFFF)
                         i++;
                 }
                 PIV_ELSE_IF(sizeof(EncodeType) == 3)
@@ -1355,6 +1355,15 @@ public:
     inline const CharT *GetText() const
     {
         return sv.data();
+    }
+
+    /**
+     * @brief 取可空文本指针
+     * @return 返回文本指针
+     */
+    inline const CharT *GetTextMaybeNull() const
+    {
+        return IsNullObject() ? nullptr : sv.data();
     }
 
     /**
@@ -3193,6 +3202,15 @@ public:
     }
 
     /**
+     * @brief 取可空文本指针
+     * @return 返回文本指针
+     */
+    inline const CharT *GetTextMaybeNull() const
+    {
+        return IsNullObject() ? nullptr : str.c_str();
+    }
+
+    /**
      * @brief 取文本长度
      */
     inline size_t GetLength() const
@@ -4026,6 +4044,25 @@ public:
     }
 
     /**
+     * @brief 加入文本行
+     * @param s 所欲加入到尾部的文本数据
+     * @return 返回自身
+     */
+    template <typename T>
+    PivString &AddTextLine(const T &s)
+    {
+        AddText(s);
+        str.push_back('\r');
+        str.push_back('\n');
+        return *this;
+    }
+    template <typename T, typename... Args>
+    PivString &AddTextLine(const T &s, const Args... args)
+    {
+        return AddText(s).AddText(args...);
+    }
+
+    /**
      * @brief 加入无符号数值
      * @param value 所欲加入的无符号数值
      * @return
@@ -4345,13 +4382,13 @@ public:
      */
     inline PivString &InsertText(const size_t &index, const CharT &ch)
     {
-        ASSERT(index < str.size());
+        ASSERT(index <= str.size());
         str.insert(index, 1, ch);
         return *this;
     }
     inline PivString &InsertText(const size_t &index, const CharT *s, const size_t &count = (size_t)-1)
     {
-        ASSERT(index < str.size());
+        ASSERT(index <= str.size());
         if (count == (size_t)-1)
             str.insert(index, s);
         else
@@ -4360,7 +4397,7 @@ public:
     }
     inline PivString &InsertText(const size_t &index, const std::basic_string<CharT> &s, const size_t &count = (size_t)-1)
     {
-        ASSERT(index < str.size());
+        ASSERT(index <= str.size());
         if (count == (size_t)-1)
             str.insert(index, s);
         else

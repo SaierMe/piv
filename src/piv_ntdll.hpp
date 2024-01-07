@@ -64,126 +64,9 @@ namespace NtPiv
     typedef NTSTATUS(NTAPI *pLdrGetDllHandle)(IN OPTIONAL PWORD pwPath, IN OPTIONAL PVOID Unused, IN PUNICODE_STRING ModuleFileName, OUT HMODULE *pHModule);
     typedef NTSTATUS(NTAPI *pLdrGetProcedureAddress)(IN HMODULE ModuleHandle, IN OPTIONAL PANSI_STRING FunctionName, IN OPTIONAL WORD Oridinal, OUT PVOID *FunctionAddress);
 
-    // 成员变量
-
-    // Kernel32
-    static pGetProcessDEPPolicy GetProcessDEPPolicy;
-    static pIsWow64Process IsWow64Process;
-
-    // Nt
-    static pNtOpenProcess NtOpenProcess;
-    static pNtClose NtClose;
-    static pNtCreateThreadEx NtCreateThreadEx;
-    static pNtQueryInformationProcess NtQueryInformationProcess;
-    static pNtAllocateVirtualMemory NtAllocateVirtualMemory;
-    static pNtFreeVirtualMemory NtFreeVirtualMemory;
-    static pNtReadVirtualMemory NtReadVirtualMemory;
-    static pNtWriteVirtualMemory NtWriteVirtualMemory;
-    static pNtProtectVirtualMemory NtProtectVirtualMemory;
-    static pNtQueryVirtualMemory NtQueryVirtualMemory;
-
-    // Wow64
-    static pNtWow64QueryInformationProcess64 NtWow64QueryInformationProcess64;
-    static pNtWow64AllocateVirtualMemory64 NtWow64AllocateVirtualMemory64;
-    static pNtWow64ReadVirtualMemory64 NtWow64ReadVirtualMemory64;
-    static pNtWow64WriteVirtualMemory64 NtWow64WriteVirtualMemory64;
-    static pNtWow64QueryVirtualMemory64 NtWow64QueryVirtualMemory64;
-
-    // Rtl
-    static pRtlAdjustPrivilege RtlAdjustPrivilege;
-    static pRtlInitAnsiString RtlInitAnsiString;
-    static pRtlInitUnicodeString RtlInitUnicodeString;
-
-    // Ldr
-    static pLdrLoadDll LdrLoadDll;
-    static pLdrUnloadDll LdrUnloadDll;
-    static pLdrGetDllHandle LdrGetDllHandle;
-    static pLdrGetProcedureAddress LdrGetProcedureAddress;
-
-    /**
-     * @brief 加载Ntdll函数
-     * @return
-     */
-    static bool LoadNt()
-    {
-        static bool isLoaded;
-        if (isLoaded == false)
-        {
-            HMODULE NtdllModule = ::GetModuleHandleW(L"ntdll.dll");
-            RtlInitAnsiString = (pRtlInitAnsiString)::GetProcAddress(NtdllModule, "RtlInitAnsiString");
-            LdrGetProcedureAddress = (pLdrGetProcedureAddress)::GetProcAddress(NtdllModule, "LdrGetProcedureAddress");
-            if (!NtdllModule || !LdrGetProcedureAddress || !RtlInitAnsiString)
-                return false;
-
-            ANSI_STRING FunctionName;
-
-            RtlInitAnsiString(&FunctionName, "RtlInitUnicodeString");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&RtlInitUnicodeString));
-            RtlInitAnsiString(&FunctionName, "LdrGetDllHandle");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&LdrGetDllHandle));
-            RtlInitAnsiString(&FunctionName, "LdrLoadDll");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&LdrLoadDll));
-            RtlInitAnsiString(&FunctionName, "LdrUnloadDll");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&LdrUnloadDll));
-
-            // Kernel32
-            UNICODE_STRING ModuleFileName;
-            HMODULE KernelModule;
-            RtlInitUnicodeString(&ModuleFileName, L"Kernel32.dll");
-            LdrGetDllHandle(0, 0, &ModuleFileName, &KernelModule);
-
-            RtlInitAnsiString(&FunctionName, "GetProcessDEPPolicy");
-            LdrGetProcedureAddress(KernelModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&GetProcessDEPPolicy));
-            RtlInitAnsiString(&FunctionName, "IsWow64Process");
-            LdrGetProcedureAddress(KernelModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&IsWow64Process));
-
-            // Nt
-            RtlInitAnsiString(&FunctionName, "NtOpenProcess");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&NtOpenProcess));
-            RtlInitAnsiString(&FunctionName, "NtClose");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&NtClose));
-            RtlInitAnsiString(&FunctionName, "NtCreateThreadEx");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&NtCreateThreadEx));
-            RtlInitAnsiString(&FunctionName, "NtQueryInformationProcess");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&NtQueryInformationProcess));
-            RtlInitAnsiString(&FunctionName, "NtAllocateVirtualMemory");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&NtAllocateVirtualMemory));
-            RtlInitAnsiString(&FunctionName, "NtFreeVirtualMemory");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&NtFreeVirtualMemory));
-            RtlInitAnsiString(&FunctionName, "NtReadVirtualMemory");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&NtReadVirtualMemory));
-            RtlInitAnsiString(&FunctionName, "NtWriteVirtualMemory");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&NtWriteVirtualMemory));
-            RtlInitAnsiString(&FunctionName, "NtProtectVirtualMemory");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&NtProtectVirtualMemory));
-            RtlInitAnsiString(&FunctionName, "NtQueryVirtualMemory");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&NtQueryVirtualMemory));
-
-#ifdef _WIN64
-            // Rtl
-            RtlInitAnsiString(&FunctionName, "RtlAdjustPrivilege");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&RtlAdjustPrivilege));
-#else
-            RtlInitAnsiString(&FunctionName, "NtWow64QueryInformationProcess64");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&NtWow64QueryInformationProcess64));
-            RtlInitAnsiString(&FunctionName, "NtWow64AllocateVirtualMemory64");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&NtWow64AllocateVirtualMemory64));
-            RtlInitAnsiString(&FunctionName, "NtWow64ReadVirtualMemory64");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&NtWow64ReadVirtualMemory64));
-            RtlInitAnsiString(&FunctionName, "NtWow64WriteVirtualMemory64");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&NtWow64WriteVirtualMemory64));
-            RtlInitAnsiString(&FunctionName, "NtWow64QueryVirtualMemory64");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&NtWow64QueryVirtualMemory64));
-            RtlInitAnsiString(&FunctionName, "NtWow64QueryInformationProcess64");
-            LdrGetProcedureAddress(NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&NtWow64QueryInformationProcess64));
-#endif
-            // 判断重要函数是否获取成功
-            if (!NtOpenProcess || !NtClose || !NtQueryInformationProcess || !NtReadVirtualMemory)
-                return false;
-            isLoaded = true;
-        }
-        return true;
-    }
+    // Psapi
+    typedef BOOL(WINAPI *pGetProcessMemoryInfo)(IN HANDLE Process, IN OUT PVOID ppsmemCounters, IN DWORD cb);
+    typedef DWORD(WINAPI *pGetProcessImageFileNameW)(IN HANDLE hProcess, IN OUT LPWSTR lpImageFileName, IN DWORD nSize);
 
     template <typename T = PSTR>
     struct STRING_T
@@ -463,6 +346,13 @@ namespace NtPiv
         T PatchInformation;
     };
 
+    template <typename T = PWSTR>
+    struct MEMORY_MAPPED_FILE_NAME_INFORMATION
+    {
+        UNICODE_STRING_T<T> Name;
+        WCHAR Buffer[512];
+    };
+
 #if defined(_WIN64)
     typedef PROCESS_BASIC_INFORMATION64 PROCESS_BASIC_INFORMATION;
     typedef PEB_T<ULONG64, 60> PEB;
@@ -472,5 +362,175 @@ namespace NtPiv
 #endif
 
 } // namespace NtPiv
+
+/**
+ * @brief 动态加载NtDll.dll(单例对象)
+ */
+class PivNT
+{
+private:
+    PivNT() {}
+    ~PivNT()
+    {
+        if (PsapiModule && LdrUnloadDll)
+            LdrUnloadDll(PsapiModule);
+    }
+    PivNT(const PivNT &) = delete;
+    PivNT(PivNT &&) = delete;
+    PivNT &operator=(const PivNT &) = delete;
+    PivNT &operator=(PivNT &&) = delete;
+
+    HMODULE PsapiModule = NULL;
+    HMODULE NtdllModule = NULL;
+    HMODULE KernelModule = NULL;
+    bool _isLoaded = false;
+
+public:
+    // Kernel32
+    NtPiv::pGetProcessDEPPolicy GetProcessDEPPolicy = nullptr;
+    NtPiv::pIsWow64Process IsWow64Process = nullptr;
+
+    // Nt
+    NtPiv::pNtOpenProcess NtOpenProcess = nullptr;
+    NtPiv::pNtClose NtClose = nullptr;
+    NtPiv::pNtCreateThreadEx NtCreateThreadEx = nullptr;
+    NtPiv::pNtQueryInformationProcess NtQueryInformationProcess = nullptr;
+    NtPiv::pNtAllocateVirtualMemory NtAllocateVirtualMemory = nullptr;
+    NtPiv::pNtFreeVirtualMemory NtFreeVirtualMemory = nullptr;
+    NtPiv::pNtReadVirtualMemory NtReadVirtualMemory = nullptr;
+    NtPiv::pNtWriteVirtualMemory NtWriteVirtualMemory = nullptr;
+    NtPiv::pNtProtectVirtualMemory NtProtectVirtualMemory = nullptr;
+    NtPiv::pNtQueryVirtualMemory NtQueryVirtualMemory = nullptr;
+
+    // Wow64
+    NtPiv::pNtWow64QueryInformationProcess64 NtWow64QueryInformationProcess64 = nullptr;
+    NtPiv::pNtWow64AllocateVirtualMemory64 NtWow64AllocateVirtualMemory64 = nullptr;
+    NtPiv::pNtWow64ReadVirtualMemory64 NtWow64ReadVirtualMemory64 = nullptr;
+    NtPiv::pNtWow64WriteVirtualMemory64 NtWow64WriteVirtualMemory64 = nullptr;
+    NtPiv::pNtWow64QueryVirtualMemory64 NtWow64QueryVirtualMemory64 = nullptr;
+
+    // Rtl
+    NtPiv::pRtlAdjustPrivilege RtlAdjustPrivilege = nullptr;
+    NtPiv::pRtlInitAnsiString RtlInitAnsiString = nullptr;
+    NtPiv::pRtlInitUnicodeString RtlInitUnicodeString = nullptr;
+
+    // Ldr
+    NtPiv::pLdrLoadDll LdrLoadDll = nullptr;
+    NtPiv::pLdrUnloadDll LdrUnloadDll = nullptr;
+    NtPiv::pLdrGetDllHandle LdrGetDllHandle = nullptr;
+    NtPiv::pLdrGetProcedureAddress LdrGetProcedureAddress = nullptr;
+
+    // Psapi
+    NtPiv::pGetProcessMemoryInfo GetProcessMemoryInfo = nullptr;
+    NtPiv::pGetProcessImageFileNameW GetProcessImageFileNameW = nullptr;
+
+    static PivNT &data()
+    {
+        static PivNT Nt;
+        if (Nt._isLoaded == false)
+        {
+            Nt.NtdllModule = ::GetModuleHandleW(L"ntdll.dll");
+            Nt.RtlInitAnsiString = reinterpret_cast<NtPiv::pRtlInitAnsiString>(::GetProcAddress(Nt.NtdllModule, "RtlInitAnsiString"));
+            Nt.LdrGetProcedureAddress = reinterpret_cast<NtPiv::pLdrGetProcedureAddress>(::GetProcAddress(Nt.NtdllModule, "LdrGetProcedureAddress"));
+
+            if (Nt.NtdllModule && Nt.LdrGetProcedureAddress && Nt.RtlInitAnsiString)
+            {
+                ANSI_STRING FunctionName;
+
+                Nt.RtlInitAnsiString(&FunctionName, "RtlInitUnicodeString");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.RtlInitUnicodeString));
+                Nt.RtlInitAnsiString(&FunctionName, "LdrGetDllHandle");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.LdrGetDllHandle));
+                Nt.RtlInitAnsiString(&FunctionName, "LdrLoadDll");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.LdrLoadDll));
+                Nt.RtlInitAnsiString(&FunctionName, "LdrUnloadDll");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.LdrUnloadDll));
+
+                // Kernel32
+                UNICODE_STRING ModuleFileName;
+                Nt.RtlInitUnicodeString(&ModuleFileName, L"Kernel32.dll");
+                Nt.LdrGetDllHandle(0, 0, &ModuleFileName, &Nt.KernelModule);
+                if (Nt.KernelModule)
+                {
+                    Nt.RtlInitAnsiString(&FunctionName, "GetProcessDEPPolicy");
+                    Nt.LdrGetProcedureAddress(Nt.KernelModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.GetProcessDEPPolicy));
+                    Nt.RtlInitAnsiString(&FunctionName, "IsWow64Process");
+                    Nt.LdrGetProcedureAddress(Nt.KernelModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.IsWow64Process));
+                }
+
+                // Nt
+                Nt.RtlInitAnsiString(&FunctionName, "NtOpenProcess");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.NtOpenProcess));
+                Nt.RtlInitAnsiString(&FunctionName, "NtClose");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.NtClose));
+                Nt.RtlInitAnsiString(&FunctionName, "NtCreateThreadEx");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.NtCreateThreadEx));
+                Nt.RtlInitAnsiString(&FunctionName, "NtQueryInformationProcess");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.NtQueryInformationProcess));
+                Nt.RtlInitAnsiString(&FunctionName, "NtAllocateVirtualMemory");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.NtAllocateVirtualMemory));
+                Nt.RtlInitAnsiString(&FunctionName, "NtFreeVirtualMemory");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.NtFreeVirtualMemory));
+                Nt.RtlInitAnsiString(&FunctionName, "NtReadVirtualMemory");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.NtReadVirtualMemory));
+                Nt.RtlInitAnsiString(&FunctionName, "NtWriteVirtualMemory");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.NtWriteVirtualMemory));
+                Nt.RtlInitAnsiString(&FunctionName, "NtProtectVirtualMemory");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.NtProtectVirtualMemory));
+                Nt.RtlInitAnsiString(&FunctionName, "NtQueryVirtualMemory");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.NtQueryVirtualMemory));
+
+#ifdef _WIN64
+                // Rtl
+                Nt.RtlInitAnsiString(&FunctionName, "RtlAdjustPrivilege");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.RtlAdjustPrivilege));
+#else
+                Nt.RtlInitAnsiString(&FunctionName, "NtWow64QueryInformationProcess64");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.NtWow64QueryInformationProcess64));
+                Nt.RtlInitAnsiString(&FunctionName, "NtWow64AllocateVirtualMemory64");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.NtWow64AllocateVirtualMemory64));
+                Nt.RtlInitAnsiString(&FunctionName, "NtWow64ReadVirtualMemory64");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.NtWow64ReadVirtualMemory64));
+                Nt.RtlInitAnsiString(&FunctionName, "NtWow64WriteVirtualMemory64");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.NtWow64WriteVirtualMemory64));
+                Nt.RtlInitAnsiString(&FunctionName, "NtWow64QueryVirtualMemory64");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.NtWow64QueryVirtualMemory64));
+                Nt.RtlInitAnsiString(&FunctionName, "NtWow64QueryInformationProcess64");
+                Nt.LdrGetProcedureAddress(Nt.NtdllModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&Nt.NtWow64QueryInformationProcess64));
+#endif
+                if (Nt.NtOpenProcess && Nt.NtClose && Nt.NtQueryInformationProcess && Nt.NtReadVirtualMemory)
+                    Nt._isLoaded = true;
+            }
+        }
+        return Nt;
+    }
+
+    inline bool loadPsapi()
+    {
+        if (GetProcessImageFileNameW && GetProcessMemoryInfo)
+            return true;
+        if (_isLoaded)
+        {
+            UNICODE_STRING ModuleFileName;
+            ANSI_STRING FunctionName;
+            RtlInitUnicodeString(&ModuleFileName, L"psapi.dll");
+            if (NT_SUCCESS(LdrLoadDll(NULL, 0, &ModuleFileName, &PsapiModule)))
+            {
+                RtlInitAnsiString(&FunctionName, "GetProcessImageFileNameW");
+                LdrGetProcedureAddress(PsapiModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&GetProcessImageFileNameW));
+                RtlInitAnsiString(&FunctionName, "GetProcessMemoryInfo");
+                LdrGetProcedureAddress(PsapiModule, &FunctionName, 0, reinterpret_cast<PVOID *>(&GetProcessMemoryInfo));
+                if (GetProcessImageFileNameW && GetProcessMemoryInfo)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    inline bool isLoaded() const noexcept
+    {
+        return _isLoaded;
+    }
+}; // class PivNT
 
 #endif // _PIV_NTDLL_HPP

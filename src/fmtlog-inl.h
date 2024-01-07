@@ -21,6 +21,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+#ifndef _MENGRAO_FMTLOG_INL_H
+#define _MENGRAO_FMTLOG_INL_H
+
 #include "fmtlog.h"
 #include <mutex>
 #include <thread>
@@ -727,3 +730,4 @@ void fmtlogT<_>::stopPollingThread() noexcept {
 
 template class fmtlogT<0>;
 
+#endif // _MENGRAO_FMTLOG_INL_H

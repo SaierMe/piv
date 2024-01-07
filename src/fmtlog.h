@@ -21,7 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#pragma once
+#ifndef _MENGRAO_FMTLOG_H
+#define _MENGRAO_FMTLOG_H
 //#define FMTLOG_HEADER_ONLY
 #include "fmt/format.h"
 #if (defined(_WIN32) && !defined(FMTLOG_UNICODE_STRING))
@@ -287,6 +288,8 @@ public:
     size_t nameSize;
   };
 
+#ifndef _MENGRAO_TSCNS_H
+#define _MENGRAO_TSCNS_H
   // https://github.com/MengRao/tscns
   class TSCNS
   {
@@ -408,6 +411,8 @@ public:
     int64_t base_ns_err_;
     int64_t next_calibrate_tsc_;
   };
+
+#endif // _MENGRAO_TSCNS_H
 
   void init() {
     tscns.init();
@@ -922,3 +927,5 @@ inline bool fmtlogT<_>::checkLogLevel(LogLevel logLevel) noexcept {
 #ifdef FMTLOG_HEADER_ONLY
 #include "fmtlog-inl.h"
 #endif
+
+#endif // _MENGRAO_FMTLOG_H

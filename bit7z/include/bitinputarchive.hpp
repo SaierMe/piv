@@ -136,12 +136,19 @@ class BitInputArchive {
         }
 
         /**
+         * @brief Extracts the archive to the chosen directory.
+         *
+         * @param outDir   the output directory where the extracted files will be put.
+         */
+        void extractTo( const tstring& outDir ) const;
+
+        /**
          * @brief Extracts the specified items to the chosen directory.
          *
          * @param outDir   the output directory where the extracted files will be put.
          * @param indices  the array of indices of the files in the archive that must be extracted.
          */
-        void extractTo( const tstring& outDir, const std::vector< uint32_t >& indices = {} ) const;
+        void extractTo( const tstring& outDir, const std::vector< uint32_t >& indices ) const;
 
         BIT7Z_DEPRECATED_MSG("Since v4.0; please, use the extractTo method.")
         inline void extract( std::vector< byte_t >& outBuffer, uint32_t index = 0 ) const {
@@ -337,7 +344,7 @@ class BitInputArchive {
                 friend class BitInputArchive;
         };
 
-        using const_iterator BIT7Z_MAYBE_UNUSED BIT7Z_DEPRECATED_MSG("Use ConstIterator") = ConstIterator;
+        BIT7Z_DEPRECATED_TYPEDEF( const_iterator, ConstIterator, "Use ConstIterator" );
 
         /**
          * @return an iterator to the first element of the archive; if the archive is empty,

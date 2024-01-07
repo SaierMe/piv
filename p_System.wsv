@@ -621,7 +621,7 @@
     }
 }
 
-类 通用文件对话框 <公开 注释 = "调用系统的文件对话框选择文件." @文档 = "category = \"文件操作\"" @禁止创建对象 = 真>
+类 通用文件对话框 <公开 注释 = "调用系统的文件对话框选择文件." 折叠 @文档 = "category = \"文件操作\"" @禁止创建对象 = 真>
 {
     方法 打开文件 <公开 静态 类型 = 逻辑型 注释 = "调用系统的文件对话框选择打开文件." 返回值注释 = "  返回是否成功,成功时在\"文件名\"参数中返回全路径文件名."
             返回值注释 = "  如失败或取消打开文件,则\"文件名\"参数返回空文本." 折叠 @禁止流程检查 = 真>
@@ -780,34 +780,30 @@
     # ---
     # @begin
     # <> <include>
-    #     LONG_PTR m_OldWndProc = NULL;
-    #     HWND m_hWnd = NULL;
-    #     typedef struct tagCHANGEFILTERSTRUCT {
-    #       DWORD cbSize;
-    #       DWORD ExtStatus;
-    #     } CHANGEFILTERSTRUCT, *PCHANGEFILTERSTRUCT;
-    #     typedef BOOL(WINAPI* Typedef_ChangeWindowMessageFilterEx)(HWND, UINT, DWORD, PCHANGEFILTERSTRUCT);
-    #     Typedef_ChangeWindowMessageFilterEx API_ChangeWindowMessageFilterEx =
-    #             (Typedef_ChangeWindowMessageFilterEx)::GetProcAddress(::GetModuleHandle (L"User32.dll"), "ChangeWindowMessageFilterEx");
+    # LONG_PTR m_OldWndProc = NULL;
+    # HWND m_hWnd = NULL;
+    # typedef BOOL(WINAPI* pChangeWindowMessageFilterEx)(HWND, UINT, DWORD, PVOID);
+    # pChangeWindowMessageFilterEx API_ChangeWindowMessageFilterEx =
+    #     (pChangeWindowMessageFilterEx)::GetProcAddress(::GetModuleHandle (L"User32.dll"), "ChangeWindowMessageFilterEx");
     # <> </include>
-    # LRESULT CALLBACK WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    #     @sn<current_class>* pThis = (@sn<current_class>*)GetWindowLongPtrW (hwnd, GWLP_USERDATA);
+    # LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    #     @sn<current_class>* pThis = reinterpret_cast<@sn<current_class>*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
     #     if (pThis != NULL) {
     #         if (uMsg == WM_DROPFILES) {
     #             @dt<文本数组类> saryFileNames;
     #             WCHAR szFileName[MAX_PATH] = { _T ('\0') };
-    #             UINT uFileNum = ::DragQueryFileW ((HDROP)wParam, 0xFFFFFFFF, NULL, 0);
+    #             UINT uFileNum = ::DragQueryFileW((HDROP)wParam, 0xFFFFFFFF, NULL, 0);
     #             for (UINT i = 0; i < uFileNum; ++i) {
-    #                 ::DragQueryFileW ((HDROP)wParam, i, szFileName, MAX_PATH);
-    #                 saryFileNames.data ().Add (szFileName);
+    #                 ::DragQueryFileW((HDROP)wParam, i, szFileName, MAX_PATH);
+    #                 saryFileNames.data().Add(szFileName);
     #             }
-    #             ::DragFinish ((HDROP)wParam);
-    #             pThis->@<文件被拖放> (saryFileNames);
+    #             ::DragFinish((HDROP)wParam);
+    #             pThis->@<文件被拖放>(saryFileNames);
     #             return 0;
     #         }
-    #         return ::CallWindowProcW ((WNDPROC)pThis->m_OldWndProc, hwnd, uMsg, wParam, lParam);
+    #         return ::CallWindowProcW((WNDPROC)pThis->m_OldWndProc, hwnd, uMsg, wParam, lParam);
     #     }
-    #     return ::DefWindowProcW (hwnd, uMsg, wParam, lParam);
+    #     return ::DefWindowProcW(hwnd, uMsg, wParam, lParam);
     # }
     # @end
 
@@ -819,32 +815,37 @@
     方法 文件被拖放 <公开 定义事件 类型 = 整数 注释 = "拖放操作的回调事件" 折叠>
     参数 所拖放文件 <类型 = 文本数组类 注释 = "拖放操作接收到的文件">
 
+    方法 是否启用 <公开 属性读 类型 = 逻辑型 注释 = "返回当前是否启用了文件拖放" 折叠 @禁止流程检查 = 真>
+    {
+        @ return (m_hWnd != NULL && m_OldWndProc != NULL);
+    }
+
     方法 启用拖放 <公开 注释 = "启用文件拖放,并选择需要绑定的窗口组件" 折叠>
     参数 绑定组件 <类型 = 变整数 注释 = "所欲绑定到拖放的窗口组件句柄(可使用\"取窗口句柄\"获取)">
     {
-        @ if (!m_hWnd) @<禁用拖放> (); // 如果之前有绑定过其他组件,先将它禁用
+        @ if (!m_hWnd) { @<禁用拖放>(); } // 如果之前有绑定过其他组件,先将它禁用
         @ m_hWnd = (HWND)@<绑定组件>;
         @ if (!m_OldWndProc) {
-        @     ::SetWindowLongPtrW (m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
-        @     m_OldWndProc = ::SetWindowLongPtrW (m_hWnd, GWLP_WNDPROC, (LONG_PTR)WindowProc);
+        @     ::SetWindowLongPtrW(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
+        @     m_OldWndProc = ::SetWindowLongPtrW(m_hWnd, GWLP_WNDPROC, (LONG_PTR)WindowProc);
         @ }
-        @ ::DragAcceptFiles (m_hWnd, TRUE);
+        @ ::DragAcceptFiles(m_hWnd, TRUE);
         @ if (API_ChangeWindowMessageFilterEx) {
-        @     API_ChangeWindowMessageFilterEx (m_hWnd, WM_DROPFILES, 1, NULL); // WM_DROPFILES, MSGFLT_ADD
-        @     API_ChangeWindowMessageFilterEx (m_hWnd, 0x0049, 1, NULL); // 0x0049 == WM_COPYGLOBALDATA, MSGFLT_ADD
+        @     API_ChangeWindowMessageFilterEx(m_hWnd, WM_DROPFILES, 1, NULL); // WM_DROPFILES, MSGFLT_ADD
+        @     API_ChangeWindowMessageFilterEx(m_hWnd, 0x0049, 1, NULL); // 0x0049 == WM_COPYGLOBALDATA, MSGFLT_ADD
         @ }
     }
 
     方法 禁用拖放 <公开 注释 = "停止拖放功能" 折叠>
     {
         @ if (m_hWnd && m_OldWndProc) {
-        @     ::DragAcceptFiles (m_hWnd, FALSE);
-        @     ::SetWindowLongPtrW (m_hWnd, GWLP_WNDPROC, (LONG_PTR)m_OldWndProc);
+        @     ::DragAcceptFiles(m_hWnd, FALSE);
+        @     ::SetWindowLongPtrW(m_hWnd, GWLP_WNDPROC, (LONG_PTR)m_OldWndProc);
         @     if (API_ChangeWindowMessageFilterEx) {
-        @         API_ChangeWindowMessageFilterEx (m_hWnd, WM_DROPFILES, 0, NULL); // WM_DROPFILES, MSGFLT_RESET
-        @         API_ChangeWindowMessageFilterEx (m_hWnd, 0x0049, 0, NULL); // 0x0049 == WM_COPYGLOBALDATA, MSGFLT_RESET
+        @         API_ChangeWindowMessageFilterEx(m_hWnd, WM_DROPFILES, 0, NULL); // WM_DROPFILES, MSGFLT_RESET
+        @         API_ChangeWindowMessageFilterEx(m_hWnd, 0x0049, 0, NULL); // 0x0049 == WM_COPYGLOBALDATA, MSGFLT_RESET
         @     }
-        @     m_hWnd = NULL;
+        @     m_hWnd = NULL; m_OldWndProc = NULL;
         @ }
     }
 }
@@ -853,15 +854,15 @@
 {
 
     # @begin
-    #     BOOL CALLBACK nEnumFontFamExProc (LPLOGFONTW lplf, LPTEXTMETRIC lptm, DWORD iType, LPARAM lpData) {
-    #         (*(@dt<文本数组类>*)lpData).data ().Add (CVolString (lplf->lfFaceName));
+    # BOOL CALLBACK nEnumFontFamExProc(LPLOGFONTW lplf, LPTEXTMETRIC lptm, DWORD iType, LPARAM lpData) {
+    #     (*(@dt<文本数组类>*)lpData).data().Add(CVolString (lplf->lfFaceName));
+    #     return TRUE;
+    # }
+    # BOOL CALLBACK eEnumFontFamExProc(LPLOGFONTW lplf, LPTEXTMETRIC lptm, DWORD iType, LPARAM lpData) {
+    #     if (((@sn<current_class>*)lpData)->@<字体回调>(@an<CVolString>(lplf->lfFaceName), (INT)iType) == 0)
     #         return TRUE;
-    #     }
-    #     BOOL CALLBACK eEnumFontFamExProc (LPLOGFONTW lplf, LPTEXTMETRIC lptm, DWORD iType, LPARAM lpData) {
-    #         if (((@sn<current_class>*)lpData)->@<字体回调> (CVolString (lplf->lfFaceName), (INT)iType) == 0)
-    #             return TRUE;
-    #         return FALSE;
-    #     }
+    #     return FALSE;
+    # }
     # @end
 
     方法 取系统字体列表 <公开 类型 = 整数 注释 = "枚举系统中的字体到文本数组类中" 返回值注释 = "成功返回字体数量" 折叠 @禁止流程检查 = 真>
@@ -870,15 +871,15 @@
     参数 检索字体 <类型 = 文本型 注释 = "为空返回所有字体, 否则只返回指定名称的字体(文本超长将被忽略),可用于判断指定的字体是否存在." @默认值 = 空对象>
     参数 窗口句柄 <类型 = 变整数 注释 = "可空" @默认值 = 0>
     {
-        @ @<字体列表>.data ().RemoveAll ();
-        @ HDC hdc = ::GetDC ((@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>);
+        @ @<字体列表>.data().RemoveAll();
+        @ HDC hdc = ::GetDC((@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>);
         @ LOGFONTW lf;
-        @ memset (&lf, 0, sizeof (LOGFONTW));
+        @ memset(&lf, 0, sizeof (LOGFONTW));
         @ lf.lfCharSet = (BYTE)@<字符集>;
-        @ if (@<检索字体>.GetLength ()<= 32) lstrcat (lf.lfFaceName, @<检索字体>.GetText ());
-        @ ::EnumFontFamiliesExW (hdc, (LPLOGFONTW)&lf, (FONTENUMPROCW)&nEnumFontFamExProc, (LPARAM)&@<字体列表>, 0);
-        @ ::ReleaseDC ((@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>, hdc);
-        @ return (INT)@<字体列表>.data ().GetCount ();
+        @ if (@<检索字体>.GetLength()<= 32) lstrcat(lf.lfFaceName, @<检索字体>.GetText());
+        @ ::EnumFontFamiliesExW(hdc, (LPLOGFONTW)&lf, (FONTENUMPROCW)&nEnumFontFamExProc, (LPARAM)&@<字体列表>, 0);
+        @ ::ReleaseDC((@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>, hdc);
+        @ return (INT)@<字体列表>.data().GetCount();
     }
 
     方法 枚举系统字体 <公开 注释 = "枚举系统中的字体,然后在\"字体回调\"事件中处理找到的字体." 折叠 "">
@@ -886,13 +887,13 @@
     参数 检索字体 <类型 = 文本型 注释 = "为空返回所有字体, 否则只返回指定名称的字体(文本超长将被忽略)." @默认值 = 空对象>
     参数 窗口句柄 <类型 = 变整数 注释 = "可空" @默认值 = 0>
     {
-        @ HDC hdc = ::GetDC ((@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>);
+        @ HDC hdc = ::GetDC((@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>);
         @ LOGFONTW lf;
-        @ memset (&lf, 0, sizeof (LOGFONTW));
+        @ memset(&lf, 0, sizeof (LOGFONTW));
         @ lf.lfCharSet = @<字符集>;
-        @ if (@<检索字体>.GetLength ()<= 32) lstrcat (lf.lfFaceName, @<检索字体>.GetText ());
-        @ ::EnumFontFamiliesExW (hdc, (LPLOGFONTW)&lf, (FONTENUMPROCW)&eEnumFontFamExProc, (LPARAM)this, 0);
-        @ ::ReleaseDC ((@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>, hdc);
+        @ if (@<检索字体>.GetLength()<= 32) lstrcat(lf.lfFaceName, @<检索字体>.GetText());
+        @ ::EnumFontFamiliesExW(hdc, (LPLOGFONTW)&lf, (FONTENUMPROCW)&eEnumFontFamExProc, (LPARAM)this, 0);
+        @ ::ReleaseDC((@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>, hdc);
     }
 
     方法 字体回调 <公开 定义事件 类型 = 整数 注释 = "执行\"枚举系统字体\"后,本事件会收到枚举的字体,每次事件返回一个字体"

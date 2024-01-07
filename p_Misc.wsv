@@ -2,13 +2,13 @@
 
 包 火山.PIV基础类 <注释 = "https://github.com/SaierMe/piv" "">
 
-类 ULID类 <公开 基础类 = 扩展对象类 注释 = "ULID(可排序的唯一标识符);"
+类 ULID类 <公开 基础类 = PIV对象类 注释 = "ULID(可排序的唯一标识符);"
         注释 = "它结合毫秒时间戳和随机数生成32个字节长度的标识符,并通过Base32转换到26个字符的ULID文本."
         注释 = "  1. ULID前6个字节是毫秒时间戳,后10个字节通过std::mt19937算法生成的随机数;"
         注释 = "  2. ULID跟UUID/GUID相比,最大的区别是可以按字典序排序,先比较前面的时间戳," 注释 = "如果时间戳相等则继续比较后面的随机数;"
         注释 = "  3. ULID可以提取出时间戳;" 注释 = "  4. ULID文本无特殊字符,可直接用于URL、JSON、SQL语句..."
-        注释 = "https://github.com/suyash/ulid" @文档 = "category = \"伪随机数\""
-        @视窗.外部头文件 = "src\\detail\\ulid_struct.hh" "@视窗.外部头文件.全局-100" = "<malloc.h>\r\n<chrono>">
+        注释 = "https://github.com/suyash/ulid" 折叠 @文档 = "category = \"伪随机数\""
+        @视窗.外部头文件 = "src\\detail\\ulid_struct.hh">
 {
     方法 创建 <公开 注释 = "从现行时间创建一个ULID并填入本对象" 折叠 @嵌入式方法 = "">
     {
@@ -99,514 +99,365 @@
 
 # 随机数 ===
 
-类 标准随机数基本类 <公开 注释 = "封装了<std::random>的基本操作" 注释 = "请勿直接使用本类" 折叠 编辑时信息 = "36FA5, 0, 0, 0"
-        @文档 = "category = \"伪随机数\"" @视窗.外部头文件 = "<random>" @禁止创建对象 = 真>
+类 标准随机数模板类 <公开 注释 = "封装了<std::random>的基本操作" 注释 = "请勿直接使用本类" 编辑时信息 = "36FA5, 0, 0, 0"
+        @文档 = "category = \"伪随机数\"" @视窗.外部头文件 = "<random>" @模板基础类 = 真>
 {
 
+    # @begin
+    # <> <include>
+    # std::random_device rd;
+    # @m<engine> gen;
+    # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
+    # template <typename T>
+    # inline T GenRandInt(const T & min_value, const T & max_value) {
+    #     std::uniform_int_distribution<T> dist(min_value, max_value);
+    #     return dist(gen);
+    # }
+    # <> </include>
+    # @end
     # 均匀分布
 
-    方法 取随机数 <公开 注释 = "产生在一个范围内均匀分布的伪随机数." 注释 = "本方法可以自定义返回的整数类型." 返回值注释 = "返回产生的随机数,类型与参数\"数值类型\"相同." 折叠
+    方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
+            注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的" 注释 = "种子值时,才需要手动调用." 折叠>
+    {
+        @ gen.seed (rd ());
+    }
+
+    方法 取随机数 <公开 注释 = "产生在一个范围内均匀分布的伪随机数." 注释 = "本方法可以自定义返回的整数类型." 返回值注释 = "返回产生的随机数,类型与参数\"数值类型\"相同."
             @嵌入式方法 = "">
-    参数 数值类型 <注释 = "请填写\"字节\"、\"短整数\"、\"字符\"、\"整数\"、\"长整数\"等基本整数型." @匹配类型 = 通用整数型 @需求类型 = 数据类型 @返回值类型 = 0>
+    参数 数值类型 <注释 = "请填写\"短整数\"、\"整数\"、\"长整数\"等基本整数型." @匹配类型 = 通用整数型 @需求类型 = 数据类型 @返回值类型 = 0>
     参数 最小值 <注释 = "指定取值范围的最小值,可使用\"数值范围\"中的常量." @匹配类型 = 匹配前参数值类型>
     参数 最大值 <注释 = "指定取值范围的最大值,必须大于等于最小值,可使用\"数值范围\"中的常量." @匹配类型 = 匹配前参数值类型>
     {
-        @ [&] {
-        @     std::uniform_int_distribution<@<数值类型>> dist (@<最小值>, @<最大值>);
-        @     return dist (@sn<this>.gen);
-        @ } ()
+        @ @sn<this>.GenRandInt<@<数值类型>>(@<最小值>, @<最大值>)
     }
 
-    方法 取随机整数 <公开 类型 = 整数 注释 = "产生在一个范围内均匀分布的伪随机整数." 返回值注释 = "返回产生的随机整数." 折叠 @嵌入式方法 = "">
+    方法 取随机整数 <公开 类型 = 整数 注释 = "产生在一个范围内均匀分布的伪随机整数" 返回值注释 = "返回产生的随机整数." 折叠 @禁止流程检查 = 真>
     参数 最小值 <类型 = 整数 注释 = "指定取值范围的最小值" @默认值 = 0>
     参数 最大值 <类型 = 整数 注释 = "指定取值范围的最大值,必须大于等于最小值" @默认值 = 数值范围.最大整数值>
     {
-        @ [&] {
-        @     std::uniform_int_distribution<INT> dist (@<最小值>, @<最大值>);
-        @     return dist (@sn<this>.gen);
-        @ } ()
+        @ std::uniform_int_distribution<INT> dist(@<最小值>, @<最大值>);
+        @ return dist(gen);
     }
 
-    方法 取随机长整数 <公开 类型 = 长整数 注释 = "产生在一个范围内均匀分布的伪随机长整数." 返回值注释 = "返回产生的随机长整数." 折叠 @嵌入式方法 = "">
+    方法 取随机长整数 <公开 类型 = 长整数 注释 = "产生在一个范围内均匀分布的伪随机长整数" 返回值注释 = "返回产生的随机长整数." 折叠 @禁止流程检查 = 真>
     参数 最小值 <类型 = 长整数 注释 = "指定取值范围的最小值" @默认值 = 0>
     参数 最大值 <类型 = 长整数 注释 = "指定取值范围的最大值,必须大于等于最小值" @默认值 = 数值范围.最大长整数值>
     {
-        @ [&] {
-        @     std::uniform_int_distribution<INT64> dist (@<最小值>, @<最大值>);
-        @     return dist (@sn<this>.gen);
-        @ } ()
+        @ std::uniform_int_distribution<INT64> dist(@<最小值>, @<最大值>);
+        @ return dist(gen);
     }
 
-    方法 取随机小数 <公开 类型 = 小数 注释 = "产生在一个范围内均匀分布的伪随机小数." 返回值注释 = "返回产生的随机小数." @嵌入式方法 = "">
+    方法 取随机小数 <公开 类型 = 小数 注释 = "产生在一个范围内均匀分布的伪随机小数" 返回值注释 = "返回产生的随机小数." 折叠 @禁止流程检查 = 真>
     参数 最小值 <类型 = 小数 注释 = "指定取值范围的最小值" @默认值 = 0>
     参数 最大值 <类型 = 小数 注释 = "指定取值范围的最大值,必须大于等于最小值" @默认值 = 1.0>
     {
-        @ [&] {
-        @     std::uniform_real_distribution<DOUBLE> dist (@<最小值>, @<最大值>);
-        @     return dist (@sn<this>.gen);
-        @ } ()
+        @ std::uniform_real_distribution<DOUBLE> dist(@<最小值>, @<最大值>);
+        @ return dist(gen);
     }
 
-    方法 取随机单精度小数 <公开 类型 = 单精度小数 注释 = "产生在一个范围内均匀分布的伪随机单精度小数." 返回值注释 = "返回产生的随机单精度小数." 折叠 @嵌入式方法 = "">
+    方法 取随机单精度小数 <公开 类型 = 单精度小数 注释 = "产生在一个范围内均匀分布的伪随机单精度小数" 返回值注释 = "返回产生的随机单精度小数." 折叠 @禁止流程检查 = 真>
     参数 最小值 <类型 = 单精度小数 注释 = "指定取值范围的最小值" @默认值 = 0>
     参数 最大值 <类型 = 单精度小数 注释 = "指定取值范围的最大值,必须大于等于最小值" @默认值 = 1.0>
     {
-        @ [&] {
-        @     std::uniform_real_distribution<float> dist (@<最小值>, @<最大值>);
-        @     return dist (@sn<this>.gen);
-        @ } ()
+        @ std::uniform_real_distribution<float> dist(@<最小值>, @<最大值>);
+        @ return dist(gen);
     }
 
     # 伯努利分布
 
-    方法 取伯努利分布逻辑 <公开 类型 = 逻辑型 注释 = "根据伯努利分布离散概率函数产生随机逻辑值." 返回值注释 = "返回产生的随机逻辑值." 折叠 @嵌入式方法 = "">
+    方法 取伯努利分布逻辑 <公开 类型 = 逻辑型 注释 = "根据伯努利分布离散概率函数产生随机逻辑值" 返回值注释 = "返回产生的随机逻辑值." 折叠 @禁止流程检查 = 真>
     参数 成功概率 <类型 = 小数 注释 = "  取值范围为 0 ≤ p ≤ 1" 注释 = "  默认为50%的概率产生\"真\"." @默认值 = 0.50>
     {
-        @ [&] {
-        @     std::bernoulli_distribution dist (@<成功概率>);
-        @     return dist (@sn<this>.gen);
-        @ } ()
+        @ std::bernoulli_distribution dist(@<成功概率>);
+        @ return dist(gen);
     }
 
     方法 取二项分布整数 <公开 类型 = 整数 注释 = "根据二项分布离散概率函数产生随机正整数值." 注释 = "若每次试验的成功率为p,返回t次试验中的成功次数."
-            返回值注释 = "返回随机的成功次数." 折叠 @嵌入式方法 = "">
+            返回值注释 = "返回随机的成功次数." @禁止流程检查 = 真>
     参数 试验次数 <类型 = 整数 注释 = "定义为t,必须大于等于0,为试验次数">
     参数 成功概率 <类型 = 小数 注释 = "定义为p,取值范围为0 ≤ p ≤ 1,为每次试验产生\"真\"的概率." @默认值 = 0.50>
     {
-        @ [&] {
-        @     std::binomial_distribution<INT> dist (@<试验次数>, @<成功概率>);
-        @     return dist (@sn<this>.gen);
-        @ } ()
+        @ std::binomial_distribution<INT> dist(@<试验次数>, @<成功概率>);
+        @ return dist(gen);
     }
 
     方法 取负二项分布整数 <公开 类型 = 整数 注释 = "根据负二项分布离散概率函数产生随机正整数值." 注释 = "若每次试验的成功率为p,在多次试验后得到的成功次数为k,返回其中的失败次数."
-            返回值注释 = "返回随机的失败次数." 折叠 @嵌入式方法 = "">
+            返回值注释 = "返回随机的失败次数." 折叠 @禁止流程检查 = 真>
     参数 成功次数 <类型 = 整数 注释 = "定义为k,必须大于0,为多次试验的成功次数">
     参数 成功概率 <类型 = 小数 注释 = "定义为p,取值范围为0 < p ≤ 1,为每次试验产生\"真\"的概率." @默认值 = 0.50>
     {
-        @ [&] {
-        @     std::negative_binomial_distribution<INT> dist (@<成功次数>, @<成功概率>);
-        @     return dist (@sn<this>.gen);
-        @ } ()
+        @ std::negative_binomial_distribution<INT> dist(@<成功次数>, @<成功概率>);
+        @ return dist(gen);
     }
 
     方法 取几何分布整数 <公开 类型 = 整数 注释 = "根据几何分布离散概率函数产生随机正整数值." 注释 = "若每次试验的成功率为p,返回需要试验多少次才能获得成功."
-            返回值注释 = "返回随机的试验次数." 折叠 @嵌入式方法 = "">
+            返回值注释 = "返回随机的试验次数." 折叠 @禁止流程检查 = 真>
     参数 成功概率 <类型 = 小数 注释 = "定义为p,取值范围为0 < p < 1,为每次试验产生\"真\"的概率." @默认值 = 0.50>
     {
-        @ [&] {
-        @     std::geometric_distribution<INT> dist (@<成功概率>);
-        @     return dist (@sn<this>.gen);
-        @ } ()
+        @ std::geometric_distribution<INT> dist(@<成功概率>);
+        @ return dist(gen);
     }
 
     # 泊松分布
 
     方法 取泊松分布整数 <公开 类型 = 整数 注释 = "根据泊松分布离散概率函数产生随机正整数值." 注释 = "若同一时间或空间内平均发生μ次事件,返回其发生i次的概率."
-            返回值注释 = "返回随机的概率." 折叠 @嵌入式方法 = "">
+            返回值注释 = "返回随机的概率." 折叠 @禁止流程检查 = 真>
     参数 平均数 <类型 = 小数 注释 = "定义为μ,取值范围为0 < μ,为随机事件发生的平均数." @默认值 = 1.0>
     {
-        @ [&] {
-        @     std::poisson_distribution<INT> dist (@<平均数>);
-        @     return dist (@sn<this>.gen);
-        @ } ()
+        @ std::poisson_distribution<INT> dist(@<平均数>);
+        @ return dist(gen);
     }
 
     方法 取指数分布小数 <公开 类型 = 小数 注释 = "根据指数分布离散概率函数产生随机正小数值." 注释 = "若随机事件在每个时间或距离单位发生的频率为λ,返回的值为到一次随机事件的时间或距离."
-            返回值注释 = "返回随机的时间或距离小数." 折叠 @嵌入式方法 = "">
+            返回值注释 = "返回随机的时间或距离小数." 折叠 @禁止流程检查 = 真>
     参数 事件频率 <类型 = 小数 注释 = "定义为λ,取值范围为0 < λ,为每单位事件发生的频率." @默认值 = 1.0>
     {
-        @ [&] {
-        @     std::exponential_distribution<DOUBLE> dist (@<事件频率>);
-        @     return dist (@sn<this>.gen);
-        @ } ()
+        @ std::exponential_distribution<DOUBLE> dist(@<事件频率>);
+        @ return dist(gen);
     }
 
-    方法 取伽玛分布小数 <公开 类型 = 小数 注释 = "根据伽玛分布离散概率函数产生随机正小数值." 注释 = "返回α个独立指数分布的随机变量的和,每个的平均值为β." 折叠 @嵌入式方法 = "">
+    方法 取伽玛分布小数 <公开 类型 = 小数 注释 = "根据伽玛分布离散概率函数产生随机正小数值." 注释 = "返回α个独立指数分布的随机变量的和,每个的平均值为β." 折叠 @禁止流程检查 = 真>
     参数 形状 <类型 = 小数 注释 = "定义为α,为形状参数." @默认值 = 1.0>
     参数 尺度 <类型 = 小数 注释 = "定义为β,为尺度参数." @默认值 = 1.0>
     {
-        @ [&] {
-        @     std::gamma_distribution<DOUBLE> dist (@<形状>, @<尺度>);
-        @     return dist (@sn<this>.gen);
-        @ } ()
+        @ std::gamma_distribution<DOUBLE> dist(@<形状>, @<尺度>);
+        @ return dist(gen);
     }
 
-    方法 取威布尔分布小数 <公开 类型 = 小数 注释 = "根据威布尔分布离散概率函数产生随机正小数值." 折叠 @嵌入式方法 = "">
+    方法 取威布尔分布小数 <公开 类型 = 小数 注释 = "根据威布尔分布离散概率函数产生随机正小数值" 折叠 @禁止流程检查 = 真>
     参数 形状 <类型 = 小数 注释 = "定义为α,为形状参数." @默认值 = 1.0>
     参数 尺度 <类型 = 小数 注释 = "定义为β,为尺度参数." @默认值 = 1.0>
     {
-        @ [&] {
-        @     std::weibull_distribution<DOUBLE> dist (@<形状>, @<尺度>);
-        @     return dist (@sn<this>.gen);
-        @ } ()
+        @ std::weibull_distribution<DOUBLE> dist(@<形状>, @<尺度>);
+        @ return dist(gen);
     }
 
-    方法 取极值分布小数 <公开 类型 = 小数 注释 = "根据极值分布离散概率函数产生随机小数值." 折叠 @嵌入式方法 = "">
+    方法 取极值分布小数 <公开 类型 = 小数 注释 = "根据极值分布离散概率函数产生随机小数值" 折叠 @禁止流程检查 = 真>
     参数 位置 <类型 = 小数 注释 = "定义为α,为位置参数." @默认值 = 1.0>
     参数 尺度 <类型 = 小数 注释 = "定义为β,为尺度参数." @默认值 = 1.0>
     {
-        @ [&] {
-        @     std::extreme_value_distribution<DOUBLE> dist (@<位置>, @<尺度>);
-        @     return dist (@sn<this>.gen);
-        @ } ()
+        @ std::extreme_value_distribution<DOUBLE> dist(@<位置>, @<尺度>);
+        @ return dist(gen);
     }
 
     # 正态分布
 
-    方法 取正态分布小数 <公开 类型 = 小数 注释 = "根据正态分布离散概率函数产生随机小数值." 折叠 @嵌入式方法 = "">
+    方法 取正态分布小数 <公开 类型 = 小数 注释 = "根据正态分布离散概率函数产生随机小数值" 折叠 @禁止流程检查 = 真>
     参数 平均数 <类型 = 小数 注释 = "定义为μ,为位置参数." @默认值 = 1.0>
     参数 标准差 <类型 = 小数 注释 = "定义为σ,为尺度参数." @默认值 = 1.0>
     {
-        @ [&] {
-        @     std::normal_distribution<DOUBLE> dist (@<平均数>, @<标准差>);
-        @     return dist (@sn<this>.gen);
-        @ } ()
+        @ std::normal_distribution<DOUBLE> dist(@<平均数>, @<标准差>);
+        @ return dist(gen);
     }
 
-    方法 取卡方分布小数 <公开 类型 = 小数 注释 = "根据卡方分布离散概率函数产生随机小数值." 折叠 @嵌入式方法 = "">
+    方法 取卡方分布小数 <公开 类型 = 小数 注释 = "根据卡方分布离散概率函数产生随机小数值" 折叠 @禁止流程检查 = 真>
     参数 自由度 <类型 = 小数 @默认值 = 1.0>
     {
-        @ [&] {
-        @     std::chi_squared_distribution<DOUBLE> dist (@<自由度>);
-        @     return dist (@sn<this>.gen);
-        @ } ()
+        @ std::chi_squared_distribution<DOUBLE> dist(@<自由度>);
+        @ return dist(gen);
     }
 
-    方法 取柯西分布小数 <公开 类型 = 小数 注释 = "根据柯西分布离散概率函数产生随机小数值." 折叠 @嵌入式方法 = "">
+    方法 取柯西分布小数 <公开 类型 = 小数 注释 = "根据柯西分布离散概率函数产生随机小数值" 折叠 @禁止流程检查 = 真>
     参数 位置 <类型 = 小数 @默认值 = 1.0>
     参数 尺度 <类型 = 小数 @默认值 = 1.0>
     {
-        @ [&] {
-        @     std::cauchy_distribution<DOUBLE> dist (@<位置>, @<尺度>);
-        @     return dist (@sn<this>.gen);
-        @ } ()
+        @ std::cauchy_distribution<DOUBLE> dist(@<位置>, @<尺度>);
+        @ return dist(gen);
     }
 
-    方法 取费舍尔分布小数 <公开 类型 = 小数 注释 = "根据费舍尔F分布离散概率函数产生随机小数值." 折叠 @嵌入式方法 = "">
+    方法 取费舍尔分布小数 <公开 类型 = 小数 注释 = "根据费舍尔F分布离散概率函数产生随机小数值" 折叠 @禁止流程检查 = 真>
     参数 自由度m <类型 = 小数 @默认值 = 1.0>
     参数 自由度n <类型 = 小数 @默认值 = 1.0>
     {
-        @ [&] {
-        @     std::fisher_f_distribution<DOUBLE> dist (@<自由度m>, @<自由度n>);
-        @     return dist (@sn<this>.gen);
-        @ } ()
+        @ std::fisher_f_distribution<DOUBLE> dist(@<自由度m>, @<自由度n>);
+        @ return dist(gen);
     }
 
-    方法 取学生T分布小数 <公开 类型 = 小数 注释 = "根据学生T分布离散概率函数产生随机小数值." 折叠 @嵌入式方法 = "">
+    方法 取学生T分布小数 <公开 类型 = 小数 注释 = "根据学生T分布离散概率函数产生随机小数值" 折叠 @禁止流程检查 = 真>
     参数 自由度 <类型 = 小数 @默认值 = 1.0>
     {
-        @ [&] {
-        @     std::student_t_distribution<DOUBLE> dist (@<自由度>);
-        @     return dist (@sn<this>.gen);
-        @ } ()
+        @ std::student_t_distribution<DOUBLE> dist(@<自由度>);
+        @ return dist(gen);
     }
 
     # 自定义方法
 
     方法 取随机字符 <公开 类型 = 文本型 注释 = "获取由指定数量和类型的随机ASCII字符,适合用来生成密码." 返回值注释 = "成功返回指定字符数的随机文本,失败返回空文本." 折叠
-            @嵌入式方法 = "">
+            @禁止流程检查 = 真>
     参数 欲取字符数 <类型 = 整数 注释 = "要取的字符个数">
     参数 字符类型 <类型 = 整数 注释 = "为以下数值相加值或位或值,默认为1+2+4;" 注释 = "  1、数字" 注释 = "  2、小写字母" 注释 = "  4、大写字母"
             注释 = "  8、特殊符号" @默认值 = 7>
     {
-        @ [&](int nLength) {
-        @     TCHAR Buffer[96] { 0 };
-        @     INT nFlags = @<字符类型>;
-        @     if ((nFlags & 1) == 1) wcscat (Buffer, L"0123456789");
-        @     if ((nFlags & 2) == 2) wcscat (Buffer, L"abcdefghijklmnopqrstuvwxyz");
-        @     if ((nFlags & 4) == 4) wcscat (Buffer, L"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-        @     if ((nFlags & 8) == 8) wcscat (Buffer, L" !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
-        @     size_t Offset = wcslen (Buffer) - 1;
-        @     @an<CVolString> szStr;
-        @     if (Offset <= 0) return szStr;
-        @     wchar_t* pStr = szStr.InitWithChars (nLength, ' ');
-        @     for (INT i = 0; i < nLength; i++) {
-        @         pStr[i] = Buffer[randint (0, Offset)];
-        @     }
-        @     return szStr;
-        @ } (@<欲取字符数>)
+        @ TCHAR Buffer[96] { 0 };
+        @ INT nFlags = @<字符类型>;
+        @ if ((nFlags & 1) == 1) wcscat (Buffer, L"0123456789");
+        @ if ((nFlags & 2) == 2) wcscat (Buffer, L"abcdefghijklmnopqrstuvwxyz");
+        @ if ((nFlags & 4) == 4) wcscat (Buffer, L"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        @ if ((nFlags & 8) == 8) wcscat (Buffer, L" !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
+        @ size_t Offset = wcslen (Buffer) - 1;
+        @ @an<CVolString> szStr;
+        @ if (Offset <= 0) return szStr;
+        @ wchar_t* pStr = szStr.InitWithChars (@<欲取字符数>, ' ');
+        @ std::uniform_int_distribution<INT> dist(0, Offset);
+        @ for (INT i = 0; i < @<欲取字符数>; i++) {
+        @     pStr[i] = Buffer[dist(gen)];
+        @ }
+        @ return szStr;
     }
 
-    方法 取随机汉字 <公开 类型 = 文本型 注释 = "获取指定数量的随机汉字." 注释 = "注: 从20902个汉字中获取,有大量非常用汉字,看起来非常像乱码." 折叠 @嵌入式方法 = "">
+    方法 取随机汉字 <公开 类型 = 文本型 注释 = "获取指定数量的随机汉字." 注释 = "注: 从20902个汉字中获取,有大量非常用汉字,看起来非常像乱码." 折叠 @禁止流程检查 = 真>
     参数 汉字数量 <类型 = 整数 注释 = "提供随机汉字的数量">
     {
-        @ [&](int nSize) {
-        @     @an<CVolString> szStr;
-        @     szStr.SetNumAlignChars (nSize);
-        @     std::uniform_int_distribution<TCHAR> dist (0x4E00, 0x9FA5);
-        @     for (INT i = 0; i < nSize; i++) {
-        @         szStr.AddChar (dist (@sn<this>.gen));
-        @     }
-        @     return szStr;
-        @ } (@<汉字数量>)
+        @ @an<CVolString> szStr;
+        @ szStr.SetNumAlignChars(@<汉字数量>);
+        @ std::uniform_int_distribution<unsigned short> dist(0x4E00, 0x9FA5);
+        @ for (INT i = 0; i < @<汉字数量>; i++) {
+        @     szStr.AddChar(static_cast<WCHAR>(dist(gen)));
+        @ }
+        @ return szStr;
     }
 
-    方法 取随机百家姓 <公开 类型 = 文本型 注释 = "获取随机的百家姓." 返回值注释 = "成功返回指定字符数的随机文本,失败返回空文本." 折叠 @嵌入式方法 = "">
+    方法 取随机百家姓 <公开 类型 = 文本型 注释 = "获取随机的百家姓" 返回值注释 = "成功返回指定字符数的随机文本,失败返回空文本." 折叠 @禁止流程检查 = 真>
     {
-        @ [&]() {
-        @     const TCHAR* surname[] {_T("赵"),_T("钱"),_T("孙"),_T("李"),_T("周"),_T("吴"),_T("郑"),_T("王"),_T("冯"),_T("陈"),
-        @                             _T("褚"),_T("卫"),_T("蒋"),_T("沈"),_T("韩"),_T("杨"),_T("朱"),_T("秦"),_T("尤"),_T("许"),
-        @                             _T("何"),_T("吕"),_T("施"),_T("张"),_T("孔"),_T("曹"),_T("严"),_T("华"),_T("金"),_T("魏"),
-        @                             _T("陶"),_T("姜"),_T("戚"),_T("谢"),_T("邹"),_T("喻"),_T("柏"),_T("水"),_T("窦"),_T("章"),
-        @                             _T("云"),_T("苏"),_T("潘"),_T("葛"),_T("奚"),_T("范"),_T("彭"),_T("郎"),_T("鲁"),_T("韦"),
-        @                             _T("昌"),_T("马"),_T("苗"),_T("凤"),_T("花"),_T("方"),_T("俞"),_T("任"),_T("袁"),_T("柳"),
-        @                             _T("酆"),_T("鲍"),_T("史"),_T("唐"),_T("费"),_T("廉"),_T("岑"),_T("薛"),_T("雷"),_T("贺"),
-        @                             _T("倪"),_T("汤"),_T("滕"),_T("殷"),_T("罗"),_T("毕"),_T("郝"),_T("邬"),_T("安"),_T("常"),
-        @                             _T("乐"),_T("于"),_T("时"),_T("傅"),_T("皮"),_T("卞"),_T("齐"),_T("康"),_T("伍"),_T("余"),
-        @                             _T("元"),_T("卜"),_T("顾"),_T("孟"),_T("平"),_T("黄"),_T("和"),_T("穆"),_T("萧"),_T("尹"),
-        @                             _T("姚"),_T("邵"),_T("湛"),_T("汪"),_T("祁"),_T("毛"),_T("禹"),_T("狄"),_T("米"),_T("贝"),
-        @                             _T("明"),_T("臧"),_T("计"),_T("伏"),_T("成"),_T("戴"),_T("谈"),_T("宋"),_T("茅"),_T("庞"),
-        @                             _T("熊"),_T("纪"),_T("舒"),_T("屈"),_T("项"),_T("祝"),_T("董"),_T("梁"),_T("杜"),_T("阮"),
-        @                             _T("蓝"),_T("闵"),_T("席"),_T("季"),_T("麻"),_T("强"),_T("贾"),_T("路"),_T("娄"),_T("危"),
-        @                             _T("江"),_T("童"),_T("颜"),_T("郭"),_T("梅"),_T("盛"),_T("林"),_T("刁"),_T("钟"),_T("徐"),
-        @                             _T("邱"),_T("骆"),_T("高"),_T("夏"),_T("蔡"),_T("田"),_T("樊"),_T("胡"),_T("凌"),_T("霍"),
-        @                             _T("虞"),_T("万"),_T("支"),_T("柯"),_T("昝"),_T("管"),_T("卢"),_T("莫"),_T("经"),_T("房"),
-        @                             _T("裘"),_T("缪"),_T("干"),_T("解"),_T("应"),_T("宗"),_T("丁"),_T("宣"),_T("贲"),_T("邓"),
-        @                             _T("郁"),_T("单"),_T("杭"),_T("洪"),_T("包"),_T("诸"),_T("左"),_T("石"),_T("崔"),_T("吉"),
-        @                             _T("钮"),_T("龚"),_T("程"),_T("嵇"),_T("邢"),_T("滑"),_T("裴"),_T("陆"),_T("荣"),_T("翁"),
-        @                             _T("荀"),_T("羊"),_T("於"),_T("惠"),_T("甄"),_T("曲"),_T("家"),_T("封"),_T("芮"),_T("羿"),
-        @                             _T("储"),_T("靳"),_T("汲"),_T("邴"),_T("糜"),_T("松"),_T("井"),_T("段"),_T("富"),_T("巫"),
-        @                             _T("乌"),_T("焦"),_T("巴"),_T("弓"),_T("牧"),_T("隗"),_T("山"),_T("谷"),_T("车"),_T("侯"),
-        @                             _T("宓"),_T("蓬"),_T("全"),_T("郗"),_T("班"),_T("仰"),_T("秋"),_T("仲"),_T("伊"),_T("宫"),
-        @                             _T("宁"),_T("仇"),_T("栾"),_T("暴"),_T("甘"),_T("钭"),_T("厉"),_T("戎"),_T("祖"),_T("武"),
-        @                             _T("符"),_T("刘"),_T("景"),_T("詹"),_T("束"),_T("龙"),_T("叶"),_T("幸"),_T("司"),_T("韶"),
-        @                             _T("郜"),_T("黎"),_T("蓟"),_T("薄"),_T("印"),_T("宿"),_T("白"),_T("怀"),_T("蒲"),_T("邰"),
-        @                             _T("从"),_T("鄂"),_T("索"),_T("咸"),_T("籍"),_T("赖"),_T("卓"),_T("蔺"),_T("屠"),_T("蒙"),
-        @                             _T("池"),_T("乔"),_T("阴"),_T("胥"),_T("能"),_T("苍"),_T("双"),_T("闻"),_T("莘"),_T("党"),
-        @                             _T("翟"),_T("谭"),_T("贡"),_T("劳"),_T("逄"),_T("姬"),_T("申"),_T("扶"),_T("堵"),_T("冉"),
-        @                             _T("宰"),_T("郦"),_T("雍"),_T("郤"),_T("璩"),_T("桑"),_T("桂"),_T("濮"),_T("牛"),_T("寿"),
-        @                             _T("通"),_T("边"),_T("扈"),_T("燕"),_T("冀"),_T("郏"),_T("浦"),_T("尚"),_T("农"),_T("温"),
-        @                             _T("别"),_T("庄"),_T("晏"),_T("柴"),_T("瞿"),_T("阎"),_T("充"),_T("慕"),_T("连"),_T("茹"),
-        @                             _T("习"),_T("宦"),_T("艾"),_T("鱼"),_T("容"),_T("向"),_T("古"),_T("易"),_T("慎"),_T("戈"),
-        @                             _T("廖"),_T("庾"),_T("终"),_T("暨"),_T("居"),_T("衡"),_T("步"),_T("都"),_T("耿"),_T("满"),
-        @                             _T("弘"),_T("匡"),_T("国"),_T("文"),_T("寇"),_T("广"),_T("禄"),_T("阙"),_T("东"),_T("欧"),
-        @                             _T("殳"),_T("沃"),_T("利"),_T("蔚"),_T("越"),_T("夔"),_T("隆"),_T("师"),_T("巩"),_T("厍"),
-        @                             _T("聂"),_T("晁"),_T("勾"),_T("敖"),_T("融"),_T("冷"),_T("訾"),_T("辛"),_T("阚"),_T("那"),
-        @                             _T("简"),_T("饶"),_T("空"),_T("曾"),_T("毋"),_T("沙"),_T("乜"),_T("养"),_T("鞠"),_T("须"),
-        @                             _T("丰"),_T("巢"),_T("关"),_T("蒯"),_T("相"),_T("查"),_T("後"),_T("荆"),_T("红"),_T("游"),
-        @                             _T("竺"),_T("权"),_T("逯"),_T("盖"),_T("益"),_T("桓"),_T("公"),_T("万俟"),_T("司马"),_T("上官"),
-        @                             _T("欧阳"),_T("夏侯"),_T("诸葛"),_T("闻人"),_T("东方"),_T("赫连"),_T("皇甫"),_T("尉迟"),
-        @                             _T("公羊"),_T("澹台"),_T("公冶"),_T("宗政"),_T("濮阳"),_T("淳于"),_T("单于"),_T("太叔"),
-        @                             _T("申屠"),_T("公孙"),_T("仲孙"),_T("轩辕"),_T("令狐"),_T("钟离"),_T("宇文"),_T("长孙"),
-        @                             _T("慕容"),_T("鲜于"),_T("闾丘"),_T("司徒"),_T("司空"),_T("亓官"),_T("司寇"),_T("仉"),
-        @                             _T("督"),_T("子车"),_T("颛孙"),_T("端木"),_T("巫马"),_T("公西"),_T("漆雕"),_T("乐正"),
-        @                             _T("壤驷"),_T("公良"),_T("拓跋"),_T("夹谷"),_T("宰父"),_T("谷梁"),_T("晋"),_T("楚"),_T("闫"),
-        @                             _T("法"),_T("汝"),_T("鄢"),_T("涂"),_T("钦"),_T("段干"),_T("百里"),_T("东郭"),_T("南门"),
-        @                             _T("呼延"),_T("归"),_T("海"),_T("羊舌"),_T("微生"),_T("岳"),_T("帅"),_T("缑"),_T("亢"),
-        @                             _T("况"),_T("后"),_T("有"),_T("琴"),_T("梁丘"),_T("左丘"),_T("东门"),_T("西门"),_T("商"),
-        @                             _T("牟"),_T("佘"),_T("佴"),_T("伯"),_T("赏"),_T("南宫"),_T("墨"),_T("哈"),_T("谯"),_T("笪"),
-        @                             _T("年"),_T("爱"),_T("阳"),_T("佟"),_T("第五"),_T("言"),_T("福")};
-        @     std::uniform_int_distribution<size_t> dist (0, NUM_ELEMENTS_OF (surname) - 1);
-        @     return @an<CVolString> (surname[dist (@sn<this>.gen)]);
-        @ } ()
+        @ static const WCHAR* surname[] {
+        @     L"赵", L"钱", L"孙", L"李", L"周", L"吴", L"郑", L"王", L"冯", L"陈",
+        @     L"褚", L"卫", L"蒋", L"沈", L"韩", L"杨", L"朱", L"秦", L"尤", L"许",
+        @     L"何", L"吕", L"施", L"张", L"孔", L"曹", L"严", L"华", L"金", L"魏",
+        @     L"陶", L"姜", L"戚", L"谢", L"邹", L"喻", L"柏", L"水", L"窦", L"章",
+        @     L"云", L"苏", L"潘", L"葛", L"奚", L"范", L"彭", L"郎", L"鲁", L"韦",
+        @     L"昌", L"马", L"苗", L"凤", L"花", L"方", L"俞", L"任", L"袁", L"柳",
+        @     L"酆", L"鲍", L"史", L"唐", L"费", L"廉", L"岑", L"薛", L"雷", L"贺",
+        @     L"倪", L"汤", L"滕", L"殷", L"罗", L"毕", L"郝", L"邬", L"安", L"常",
+        @     L"乐", L"于", L"时", L"傅", L"皮", L"卞", L"齐", L"康", L"伍", L"余",
+        @     L"元", L"卜", L"顾", L"孟", L"平", L"黄", L"和", L"穆", L"萧", L"尹",
+        @     L"姚", L"邵", L"湛", L"汪", L"祁", L"毛", L"禹", L"狄", L"米", L"贝",
+        @     L"明", L"臧", L"计", L"伏", L"成", L"戴", L"谈", L"宋", L"茅", L"庞",
+        @     L"熊", L"纪", L"舒", L"屈", L"项", L"祝", L"董", L"梁", L"杜", L"阮",
+        @     L"蓝", L"闵", L"席", L"季", L"麻", L"强", L"贾", L"路", L"娄", L"危",
+        @     L"江", L"童", L"颜", L"郭", L"梅", L"盛", L"林", L"刁", L"钟", L"徐",
+        @     L"邱", L"骆", L"高", L"夏", L"蔡", L"田", L"樊", L"胡", L"凌", L"霍",
+        @     L"虞", L"万", L"支", L"柯", L"昝", L"管", L"卢", L"莫", L"经", L"房",
+        @     L"裘", L"缪", L"干", L"解", L"应", L"宗", L"丁", L"宣", L"贲", L"邓",
+        @     L"郁", L"单", L"杭", L"洪", L"包", L"诸", L"左", L"石", L"崔", L"吉",
+        @     L"钮", L"龚", L"程", L"嵇", L"邢", L"滑", L"裴", L"陆", L"荣", L"翁",
+        @     L"荀", L"羊", L"於", L"惠", L"甄", L"曲", L"家", L"封", L"芮", L"羿",
+        @     L"储", L"靳", L"汲", L"邴", L"糜", L"松", L"井", L"段", L"富", L"巫",
+        @     L"乌", L"焦", L"巴", L"弓", L"牧", L"隗", L"山", L"谷", L"车", L"侯",
+        @     L"宓", L"蓬", L"全", L"郗", L"班", L"仰", L"秋", L"仲", L"伊", L"宫",
+        @     L"宁", L"仇", L"栾", L"暴", L"甘", L"钭", L"厉", L"戎", L"祖", L"武",
+        @     L"符", L"刘", L"景", L"詹", L"束", L"龙", L"叶", L"幸", L"司", L"韶",
+        @     L"郜", L"黎", L"蓟", L"薄", L"印", L"宿", L"白", L"怀", L"蒲", L"邰",
+        @     L"从", L"鄂", L"索", L"咸", L"籍", L"赖", L"卓", L"蔺", L"屠", L"蒙",
+        @     L"池", L"乔", L"阴", L"胥", L"能", L"苍", L"双", L"闻", L"莘", L"党",
+        @     L"翟", L"谭", L"贡", L"劳", L"逄", L"姬", L"申", L"扶", L"堵", L"冉",
+        @     L"宰", L"郦", L"雍", L"郤", L"璩", L"桑", L"桂", L"濮", L"牛", L"寿",
+        @     L"通", L"边", L"扈", L"燕", L"冀", L"郏", L"浦", L"尚", L"农", L"温",
+        @     L"别", L"庄", L"晏", L"柴", L"瞿", L"阎", L"充", L"慕", L"连", L"茹",
+        @     L"习", L"宦", L"艾", L"鱼", L"容", L"向", L"古", L"易", L"慎", L"戈",
+        @     L"廖", L"庾", L"终", L"暨", L"居", L"衡", L"步", L"都", L"耿", L"满",
+        @     L"弘", L"匡", L"国", L"文", L"寇", L"广", L"禄", L"阙", L"东", L"欧",
+        @     L"殳", L"沃", L"利", L"蔚", L"越", L"夔", L"隆", L"师", L"巩", L"厍",
+        @     L"聂", L"晁", L"勾", L"敖", L"融", L"冷", L"訾", L"辛", L"阚", L"那",
+        @     L"简", L"饶", L"空", L"曾", L"毋", L"沙", L"乜", L"养", L"鞠", L"须",
+        @     L"丰", L"巢", L"关", L"蒯", L"相", L"查", L"後", L"荆", L"红", L"游",
+        @     L"竺", L"权", L"逯", L"盖", L"益", L"桓", L"公", L"万俟", L"司马", L"上官",
+        @     L"欧阳", L"夏侯", L"诸葛", L"闻人", L"东方", L"赫连", L"皇甫", L"尉迟",
+        @     L"公羊", L"澹台", L"公冶", L"宗政", L"濮阳", L"淳于", L"单于", L"太叔",
+        @     L"申屠", L"公孙", L"仲孙", L"轩辕", L"令狐", L"钟离", L"宇文", L"长孙",
+        @     L"慕容", L"鲜于", L"闾丘", L"司徒", L"司空", L"亓官", L"司寇", L"仉",
+        @     L"督", L"子车", L"颛孙", L"端木", L"巫马", L"公西", L"漆雕", L"乐正",
+        @     L"壤驷", L"公良", L"拓跋", L"夹谷", L"宰父", L"谷梁", L"晋", L"楚", L"闫",
+        @     L"法", L"汝", L"鄢", L"涂", L"钦", L"段干", L"百里", L"东郭", L"南门",
+        @     L"呼延", L"归", L"海", L"羊舌", L"微生", L"岳", L"帅", L"缑", L"亢",
+        @     L"况", L"后", L"有", L"琴", L"梁丘", L"左丘", L"东门", L"西门", L"商",
+        @     L"牟", L"佘", L"佴", L"伯", L"赏", L"南宫", L"墨", L"哈", L"谯", L"笪",
+        @     L"年", L"爱", L"阳", L"佟", L"第五", L"言", L"福"
+        @ };
+        @ std::uniform_int_distribution<size_t> dist(0, NUM_ELEMENTS_OF(surname) - 1);
+        @ return @an<CVolString>(surname[dist(gen)]);
     }
 
-    方法 取随机字节集 <公开 类型 = 字节集类 注释 = "获取指定长度的随机内容字节集." 折叠 @嵌入式方法 = "">
+    方法 取随机字节集 <公开 类型 = 字节集类 注释 = "获取指定长度的随机内容字节集" 折叠 @禁止流程检查 = 真>
     参数 字节集长度 <类型 = 整数 注释 = "提供随机字节集的长度">
     参数 去除零值 <类型 = 逻辑型 注释 = "返回的字节集中是否包含0值" @默认值 = 真>
     {
-        @ [&](int nSize) {
-        @     @an<CVolMem> memBuf;
-        @     memBuf.SetMemAlignSize (nSize);
-        @     std::uniform_int_distribution<BYTE> dist (@<去除零值> ? 1 : 0, 255);
-        @     for (INT i = 0; i < nSize; i++) {
-        @         memBuf.AddByte (dist (@sn<this>.gen));
-        @     }
-        @     return memBuf;
-        @ } (@<字节集长度>)
+        @ @an<CVolMem> memBuf;
+        @ memBuf.SetMemAlignSize(@<字节集长度>);
+        @ std::uniform_int_distribution<int> dist(@<去除零值> ? 1 : 0, 255);
+        @ for (INT i = 0; i < @<字节集长度>; i++) {
+        @     memBuf.AddByte(static_cast<BYTE>(dist(gen)));
+        @ }
+        @ return memBuf;
     }
 }
 
-类 标准随机数类 <公开 基础类 = 标准随机数基本类 注释 = "采用\"std::mt19937\"的32位梅森旋转算法,耗时最慢且状态存储要求较高,但产生的随机数质量最高."
-        编辑时信息 = "3DC94, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+类 标准随机数类 <公开 基础类 = 标准随机数模板类 注释 = "采用\"std::mt19937\"的32位梅森旋转算法,耗时最慢且状态存储要求较高,但产生的随机数质量最高." 折叠
+        编辑时信息 = "3DC94, 0, 0, 0" @文档 = "category = \"伪随机数\"" @模板实现类 = "">
 {
-    方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
-            注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的" 注释 = "种子值时,才需要手动调用." 折叠>
-    {
-        @ gen.seed (rd ());
-    }
 
-    # @begin
-    # <> <include>
-    # std::random_device rd;
-    # std::mt19937 gen;
-    # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
-    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
-    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
-    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
-    # <> </include>
-    # @end
+    # @ @def_macro engine std::mt19937
 }
 
-类 随机数类_mt19937_64 <公开 基础类 = 标准随机数基本类 注释 = "采用\"std::mt19937_64\"的64位梅森旋转算法,耗时最慢且状态存储要求较高,但产生的随机数质量最高."
-        编辑时信息 = "2DF4E, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+类 随机数类_mt19937_64 <公开 基础类 = 标准随机数模板类 注释 = "采用\"std::mt19937_64\"的64位梅森旋转算法,耗时最慢且状态存储要求较高,但产生的随机数质量最高."
+        折叠 编辑时信息 = "2DF4E, 0, 0, 0" @文档 = "category = \"伪随机数\"" @模板实现类 = "">
 {
-    方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
-            注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的" 注释 = "种子值时,才需要手动调用." 折叠>
-    {
-        @ gen.seed (rd ());
-    }
 
-    # @begin
-    # <> <include>
-    # std::random_device rd;
-    # std::mt19937_64 gen;
-    # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
-    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
-    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
-    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
-    # <> </include>
-    # @end
+    # @ @def_macro engine std::mt19937_64
 }
 
-类 随机数类_minstd_rand0 <公开 基础类 = 标准随机数基本类 注释 = "采用\"std::minstd_rand0\"的线性同余算法,速度较快且状态存储要求最低,但产生的随机数质量一般."
-        编辑时信息 = "2A364, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+类 随机数类_minstd_rand0 <公开 基础类 = 标准随机数模板类 注释 = "采用\"std::minstd_rand0\"的线性同余算法,速度较快且状态存储要求最低,但产生的随机数质量一般."
+        折叠 编辑时信息 = "2A364, 0, 0, 0" @文档 = "category = \"伪随机数\"" @模板实现类 = "">
 {
-    方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
-            注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的" 注释 = "种子值时,才需要手动调用." 折叠>
-    {
-        @ gen.seed (rd ());
-    }
 
-    # @begin
-    # <> <include>
-    # std::random_device rd;
-    # std::minstd_rand0 gen;
-    # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
-    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
-    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
-    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
-    # <> </include>
-    # @end
+    # @ @def_macro engine std::minstd_rand0
 }
 
-类 随机数类_minstd_rand <公开 基础类 = 标准随机数基本类 注释 = "采用\"std::minstd_rand\"的线性同余算法,速度较快且状态存储要求最低,但产生的随机数质量一般."
-        编辑时信息 = "2C985, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+类 随机数类_minstd_rand <公开 基础类 = 标准随机数模板类 注释 = "采用\"std::minstd_rand\"的线性同余算法,速度较快且状态存储要求最低,但产生的随机数质量一般."
+        折叠 编辑时信息 = "2C985, 0, 0, 0" @文档 = "category = \"伪随机数\"" @模板实现类 = "">
 {
-    方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
-            注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的" 注释 = "种子值时,才需要手动调用." 折叠>
-    {
-        @ gen.seed (rd ());
-    }
 
-    # @begin
-    # <> <include>
-    # std::random_device rd;
-    # std::minstd_rand gen;
-    # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
-    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
-    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
-    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
-    # <> </include>
-    # @end
+    # @ @def_macro engine std::minstd_rand
 }
 
-类 随机数类_ranlux24_base <公开 基础类 = 标准随机数基本类
-        注释 = "采用\"std::ranlux24_base\"的带进位减(延迟斐波那契)算法,速度非常快,但状态存储要求最大,也有不太适合的谱特性." 编辑时信息 = "2A61E, 0, 0, 0"
-        @文档 = "category = \"伪随机数\"">
+类 随机数类_ranlux24_base <公开 基础类 = 标准随机数模板类
+        注释 = "采用\"std::ranlux24_base\"的带进位减(延迟斐波那契)算法,速度非常快,但状态存储要求最大,也有不太适合的谱特性." 折叠
+        编辑时信息 = "2A61E, 0, 0, 0" @文档 = "catgory = \"伪随机数\"" @模板实现类 = "">
 {
-    方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
-            注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的" 注释 = "种子值时,才需要手动调用." 折叠>
-    {
-        @ gen.seed (rd ());
-    }
 
-    # @begin
-    # <> <include>
-    # std::random_device rd;
-    # std::ranlux24_base gen;
-    # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
-    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
-    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
-    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
-    # <> </include>
-    # @end
+    # @ @def_macro engine std::ranlux24_base
 }
 
-类 随机数类_ranlux48_base <公开 基础类 = 标准随机数基本类
-        注释 = "采用\"std::ranlux48_base\"的带进位减(延迟斐波那契)算法,速度非常快,但状态存储要求最大,也有不太适合的谱特性." 编辑时信息 = "2B102, 0, 0, 0"
-        @文档 = "category = \"伪随机数\"">
+类 随机数类_ranlux48_base <公开 基础类 = 标准随机数模板类
+        注释 = "采用\"std::ranlux48_base\"的带进位减(延迟斐波那契)算法,速度非常快,但状态存储要求最大,也有不太适合的谱特性." 折叠
+        编辑时信息 = "2B102, 0, 0, 0" @文档 = "caegory = \"伪随机数\"" @模板实现类 = "">
 {
-    方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
-            注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的" 注释 = "种子值时,才需要手动调用." 折叠>
-    {
-        @ gen.seed (rd ());
-    }
 
-    # @begin
-    # <> <include>
-    # std::random_device rd;
-    # std::ranlux48_base gen;
-    # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
-    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
-    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
-    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
-    # <> </include>
-    # @end
+    # @ @def_macro engine std::ranlux48_base
 }
 
-类 随机数类_ranlux24 <公开 基础类 = 标准随机数基本类 注释 = "基于\"随机数类_ranlux24_base\"加上随机数引擎适配器,舍弃了部分不太适合的谱特性."
-        编辑时信息 = "34C3E, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+类 随机数类_ranlux24 <公开 基础类 = 标准随机数模板类 注释 = "基于\"随机数类_ranlux24_base\"加上随机数引擎适配器,舍弃了部分不太适合的谱特性." 折叠
+        编辑时信息 = "34C3E, 0, 0, 0" @文档 = "category = \"伪随机数\"" @模板实现类 = "">
 {
-    方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
-            注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的" 注释 = "种子值时,才需要手动调用." 折叠>
-    {
-        @ gen.seed (rd ());
-    }
 
-    # @begin
-    # <> <include>
-    # std::random_device rd;
-    # std::ranlux24 gen;
-    # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
-    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
-    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
-    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
-    # <> </include>
-    # @end
+    # @ @def_macro engine std::ranlux24
 }
 
-类 随机数类_ranlux48 <公开 基础类 = 标准随机数基本类 注释 = "基于\"随机数类_ranlux48_base\"加上随机数引擎适配器,舍弃了部分不太适合的谱特性."
-        编辑时信息 = "36207, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+类 随机数类_ranlux48 <公开 基础类 = 标准随机数模板类 注释 = "基于\"随机数类_ranlux48_base\"加上随机数引擎适配器,舍弃了部分不太适合的谱特性." 折叠
+        编辑时信息 = "36207, 0, 0, 0" @文档 = "category = \"伪随机数\"" @模板实现类 = "">
 {
-    方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
-            注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的" 注释 = "种子值时,才需要手动调用." 折叠>
-    {
-        @ gen.seed (rd ());
-    }
 
-    # @begin
-    # <> <include>
-    # std::random_device rd;
-    # std::ranlux48 gen;
-    # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
-    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
-    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
-    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
-    # <> </include>
-    # @end
+    # @ @def_macro engine std::ranlux48
 }
 
-类 随机数类_knuth_b <公开 基础类 = 标准随机数基本类 注释 = "基于\"随机数类_minstd_rand0\"加上随机数引擎适配器,打乱了随机数引擎的输出."
-        编辑时信息 = "3A0AA, 0, 0, 0" @文档 = "category = \"伪随机数\"">
+类 随机数类_knuth_b <公开 基础类 = 标准随机数模板类 注释 = "基于\"随机数类_minstd_rand0\"加上随机数引擎适配器,打乱了随机数引擎的输出." 折叠
+        编辑时信息 = "3A0AA, 0, 0, 0" @文档 = "category = \"伪随机数\"" @模板实现类 = "">
 {
-    方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
-            注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的" 注释 = "种子值时,才需要手动调用." 折叠>
-    {
-        @ gen.seed (rd ());
-    }
 
-    # @begin
-    # <> <include>
-    # std::random_device rd;
-    # std::knuth_b gen;
-    # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
-    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
-    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
-    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
-    # <> </include>
-    # @end
+    # @ @def_macro engine std::knuth_b
 }
 
 # ini 配置文件 ===
@@ -727,7 +578,7 @@
     }
 
     方法 创建自文件 <公开 类型 = 整数 注释 = "  从指定的文件中读入ini配置数据,本方法会覆盖本类之前的数据." 注释 = "  注意: 读入配置后就会关闭文件,所以之后修改的配置并不会反映到"
-            注释 = "ini文件中,必须调用\"保存/保存文件\"才会将结果保存到文件." 返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @禁止流程检查 = 真>
+            注释 = "ini文件中,必须调用\"保存/保存文件\"才会将结果保存到文件." 返回值注释 = "返回值大于等于0表示成功,小于0表示失败." @禁止流程检查 = 真>
     参数 文件名 <类型 = 文本型 注释 = "所欲打开的ini配置文件,文件不存在时会自动创建.">
     参数 文本编码 <类型 = 文本编码类型 注释 = "指定所打开ini文件的文本编码;" 注释 = "首先会根据文件的BOM签名自动识别编码;"
             注释 = "若不存在签名,则以此参数指定的编码打开,\"未知\"等同多字节;" 注释 = "文本编码必须选择正确,否则可能会乱码." @默认值 = 文本编码类型.未知>

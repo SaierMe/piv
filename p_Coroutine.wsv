@@ -2,9 +2,8 @@
 
 包 火山.PIV基础类 <注释 = "https://github.com/SaierMe/piv">
 
-类 Go协程 <公开 注释 = "Golang风格的C++11协程库" 注释 = "https://github.com/yyzybb537/libgo" 折叠
-        @文档 = "category = \"协程\"" "@视窗.外部头文件.全局-100" = "<malloc.h>\r\n<chrono>"
-        @视窗.头文件搜寻目录 = "src\\libgo\\netio\\windows"
+类 Go协程 <公开 基础类 = PIV对象类 注释 = "Golang风格的C++11协程库" 注释 = "https://github.com/yyzybb537/libgo"
+        @文档 = "category = \"协程\"" @视窗.头文件搜寻目录 = "src\\libgo\\netio\\windows"
         @视窗.外部头文件 = "src\\libgo\\libgo.h\r\nsrc\\libgo\\netio\\windows\\win_vc_hook.h"
         @视窗.外部源文件 = "src\\libgo\\libgo.cpp\r\nsrc\\libgo\\netio\\windows\\win_vc_hook.cpp">
 {
@@ -16,14 +15,7 @@
     参数 函数对象 <类型 = 函数对象类 注释 = "所欲协程执行的函数对象,可以调用下列方法创建:" 注释 = "- 绑定静态方法   绑定无参数静态方法"
             注释 = "- 绑定动态方法   绑定无参数动态方法" 注释 = "- 绑定函数指针   绑定无参数函数指针" 注释 = "- 绑定函数指针2  绑定无参数函数指针2">
     {
-        @ [&](const char* file, int lineno) {
-        @     co::TaskOpt opt_;
-        @     opt_.file_ = file;
-        @     opt_.lineno_ = lineno;
-        @     co::Scheduler* scheduler_ = co::Processer::GetCurrentScheduler();
-        @     if (!scheduler_) scheduler_ = &co::Scheduler::getInstance();
-        @     scheduler_->CreateTask(@<函数对象>, opt_);
-        @ } (__FILE__, __LINE__)
+        @ @sn<current_class_def>::CreateTask(@<函数对象>, __FILE__, __LINE__)
     }
 
     方法 创建静态协程 <公开 静态 注释 = "在当前协程处理器或默认协程调度器中创建一个绑定静态方法的协程任务." 注释 = "  1. 协程创建以后不会立即执行,而是暂存至可执行列表中,等待调度器调度;"
@@ -73,14 +65,17 @@
 
     方法 无参数无返回值方法
 
-    方法 启动调度器 <公开 静态 注释 = "在新线程中启动默认协程调度器,开始执行协程." 注释 = "  1. 本方法全局只能执行一次,第二次执行会导致程序退出;" 折叠 @嵌入式方法 = "">
+    方法 启动调度器 <公开 静态 注释 = "在新线程中启动默认协程调度器,开始执行协程." 注释 = "  1. 本方法全局只能执行一次,第二次执行会导致程序退出;" 折叠>
     参数 最小线程数 <类型 = 整数 注释 = "最小调度线程数,为0时设置为cpu核心数." @默认值 = 0>
     参数 最大线程数 <类型 = 整数 注释 = "最大调度线程数,为0时与\"最小线程数\"相同;" 注释 = "如果大于\"最小线程数\",则当协程产生长时间阻塞时,可以自动扩展调度线程数."
             @默认值 = 0>
     {
+        @ static bool started;
+        @ if (started) return;
+        @ started = true;
         @ std::thread(
-        @     [] { co::Scheduler::getInstance().Start(@<最小线程数>, @<最大线程数>); }
-        @ ).detach()
+        @     [=] { co::Scheduler::getInstance().Start(@<最小线程数>, @<最大线程数>); }
+        @ ).detach();
     }
 
     方法 停止调度器 <公开 静态 注释 = "停止默认协程调度器." 注释 = "  1. 停止后无法恢复,仅用于安全退出入口函数,不保证终止所有线程;"
@@ -113,6 +108,16 @@
 
     方法 禁止HOOK <公开 静态 注释 = "禁用libgo的HOOK功能." 注释 = "libgo默认HOOK了部分系统API,使一些第三方库不用修改也可以异步并发."
             @视窗.预定义宏 = "LIBGO_ENABLE_HOOK=0">
+
+    # @begin
+    # <> <include>
+    # static void CreateTask(const std::function<void()>& fn, const char* file, int lineno) {
+    #     co::Scheduler* scheduler_ = co::Processer::GetCurrentScheduler();
+    #     if (!scheduler_) scheduler_ = &co::Scheduler::getInstance();
+    #     scheduler_->CreateTask(fn, co::TaskOpt{false, lineno, 0, file});
+    # }
+    # <> </include>
+    # @end
 }
 
 类 协程调度器 <公开 注释 = "负责管理1到N个调度线程,以调度从属协程." 注释 = "请定义变量使用,默认指向同一个全局的默认调度器(也可以直接调用\"Go协程.调度器\")."
@@ -131,14 +136,14 @@
 
     # 动态成员
 
-    方法 启动 <公开 注释 = "在新线程中启动协程调度器,开始执行协程." 注释 = "  1. 请勿重复启动,否则会导致程序异常退出;" 折叠 @嵌入式方法 = "">
+    方法 启动 <公开 注释 = "在新线程中启动协程调度器,开始执行协程." 注释 = "  1. 请勿重复启动,否则会导致程序异常退出;" 折叠>
     参数 最小线程数 <类型 = 整数 注释 = "最小调度线程数,为0时设置为cpu核心数." @默认值 = 0>
     参数 最大线程数 <类型 = 整数 注释 = "最大调度线程数,为0时与\"最小线程数\"相同;" 注释 = "如果大于\"最小线程数\",则当协程产生长时间阻塞时,可以自动扩展调度线程数."
             @默认值 = 0>
     {
         @ std::thread(
-        @     [sched = @sn<this>.pdata()] { sched->Start(@<最小线程数>, @<最大线程数>); }
-        @ ).detach()
+        @     [=] { pdata()->Start(@<最小线程数>, @<最大线程数>); }
+        @ ).detach();
     }
 
     方法 停止 <公开 注释 = "停止协程调度器." 注释 = "  1. 停止后无法恢复,仅用于安全退出入口函数,不保证终止所有线程;"
@@ -153,13 +158,7 @@
     参数 函数对象 <类型 = 函数对象类 注释 = "所欲协程执行的函数对象,可以调用下列方法创建:" 注释 = "- 绑定静态方法   绑定无参数静态方法"
             注释 = "- 绑定动态方法   绑定无参数动态方法" 注释 = "- 绑定函数指针   绑定无参数函数指针" 注释 = "- 绑定函数指针2  绑定无参数函数指针2">
     {
-        @ [&](const char* file, int lineno) {
-        @     co::TaskOpt opt_;
-        @     opt_.file_ = file;
-        @     opt_.lineno_ = lineno;
-        @     opt_.stack_size_ = static_cast<size_t>(@<协程栈上限>);
-        @     @sn<this>.pdata()->CreateTask(@<函数对象>, opt_);
-        @ } (__FILE__, __LINE__)
+        @ @sn<this>.pdata()->CreateTask(@<函数对象>, co::TaskOpt{false, __LINE__, static_cast<size_t>(@<协程栈上限>), __FILE__})
     }
 
     方法 创建静态协程 <公开 注释 = "在当前调度器中创建一个绑定静态方法的协程任务." 注释 = "  1. 协程创建以后不会立即执行,而是暂存至可执行列表中,等待调度器调度;"
@@ -287,7 +286,8 @@
     }
 
     方法 最大协程数 <公开 属性写 注释 = "自定义协程池中的最大协程数,建议设置的多一些,不被执行的协程不会占用cpu资源."
-            注释 = "  1. 默认值: MAX(最小调度线程数*150, 最大调度线程数) <= 最大协程数 <= 10240;" 注释 = "  2. 只能在\"启动\"之前设置,之后再设置无效果;" 折叠>
+            注释 = "  1. 默认值: MAX(最小调度线程数*128, 最大调度线程数);" 注释 = "  2. 64位下最大值建议为10240,32位下最大值1792;"
+            注释 = "  3. 只能在\"启动\"之前设置,之后再设置无效果;" 折叠>
     参数 最大协程数 <类型 = 变整数>
     {
         @ data().InitCoroutinePool(static_cast<size_t>(@<最大协程数>));

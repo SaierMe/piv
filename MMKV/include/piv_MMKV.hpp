@@ -8,14 +8,9 @@
 #ifndef _PIV_MMKV_HPP
 #define _PIV_MMKV_HPP
 
-#ifndef __VOL_BASE_H__
-#include <sys/base/libs/win_base/vol_base.h>
-#endif
+#include "../../src/piv_string.hpp"
 
 #include "MMKV.h"
-#include "MMKVPredef.h"
-
-#include "../../src/piv_string.hpp"
 
 namespace piv
 {
@@ -134,30 +129,43 @@ namespace piv
         {
             MMKV::setLogLevel(static_cast<MMKVLogLevel>(level));
         }
-
-        /**
-         * @brief 火山"MMKV事件类"的类指针
-         */
-        static void *g_mmkvEvent = nullptr;
-
-        /**
-         * @brief 置"MMKV事件类"指针
-         * @param pClass 指针
-         */
-        static void SetEventClass(void *pClass)
-        {
-            g_mmkvEvent = pClass;
-        }
-
-        /**
-         * @brief 取"MMKV事件类"指针
-         * @return
-         */
-        static void *GetEventClass()
-        {
-            return g_mmkvEvent;
-        }
     } // namespace mmkv
+
+    /**
+     * @brief MMKV事件指针存取(单例对象)
+     */
+    class mmkvEvent
+    {
+    private:
+        mmkvEvent() {}
+        ~mmkvEvent() {}
+        mmkvEvent(const mmkvEvent &) = delete;
+        mmkvEvent(mmkvEvent &&) = delete;
+        mmkvEvent &operator=(const mmkvEvent &) = delete;
+        mmkvEvent &operator=(mmkvEvent &&) = delete;
+        
+        void *userdate = nullptr;
+
+    public:
+        static mmkvEvent &data()
+        {
+            static mmkvEvent event;
+            return event;
+        }
+        inline void set(void *event) noexcept
+        {
+            userdate = event;
+        }
+        inline bool hasValue() noexcept
+        {
+            return !!userdate;
+        }
+        template <typename T = void *>
+        inline T get() noexcept
+        {
+            return reinterpret_cast<T>(userdate);
+        }
+    }; // class mmkvEvent
 } // namespace piv
 
 /**
@@ -181,9 +189,10 @@ public:
      * @param mode 模式
      * @param cryptKey 密钥
      * @param rootPath 根路径
+     * @param expectedCapacity 预期容量
      * @return
      */
-    int32_t OpenMMKV(const wchar_t *mmapID, const int32_t &mode, const wchar_t *cryptKey, const wchar_t *rootPath)
+    int32_t OpenMMKV(const wchar_t *mmapID, const int32_t &mode, const wchar_t *cryptKey, const wchar_t *rootPath, size_t expectedCapacity = 0)
     {
         Close();
         if (MMKV::getRootDir().empty() == true)
@@ -197,7 +206,7 @@ public:
             m_MMKV = MMKV::defaultMMKV(static_cast<MMKVMode>(mode), _cryptKey.IsEmpty() ? nullptr : &_cryptKey.String());
         else
             m_MMKV = MMKV::mmkvWithID(_mmapID, static_cast<MMKVMode>(mode), _cryptKey.IsEmpty() ? nullptr : &_cryptKey.String(),
-                                      _rootPath.empty() ? nullptr : &_rootPath);
+                                      _rootPath.empty() ? nullptr : &_rootPath, expectedCapacity);
         if (m_MMKV != nullptr)
             return (m_MMKV->count(false) > 0) ? 1 : 0;
         else
@@ -450,6 +459,36 @@ public:
         }
         return result;
     }
+    template <typename KeyT>
+    inline bool GetString(const KeyT &key, std::string &value)
+    {
+        value.clear();
+        if (m_MMKV)
+        {
+            return m_MMKV->getString(PivAny2Us{key}, value);
+        }
+        return false;
+    }
+    template <typename KeyT>
+    inline std::string GetStringU(const KeyT &key)
+    {
+        std::string value;
+        if (m_MMKV)
+        {
+            m_MMKV->getString(PivAny2Us{key}, value);
+        }
+        return value;
+    }
+
+    template <typename KeyT>
+    inline bool GetVector(const KeyT &key, std::vector<std::string> &result)
+    {
+        if (m_MMKV)
+        {
+            return m_MMKV->getVector(PivAny2Us{key}, result);
+        }
+        return false;
+    }
 
     /**
      * @brief 取字节集
@@ -606,11 +645,11 @@ public:
     /**
      * @brief 清空
      */
-    inline void ClearAll()
+    inline void ClearAll(bool keepSpace = false)
     {
         if (m_MMKV)
         {
-            m_MMKV->clearAll();
+            m_MMKV->clearAll(keepSpace);
         }
     }
 
@@ -628,11 +667,11 @@ public:
     /**
      * @brief 清理缓存
      */
-    inline void ClearMemoryCache()
+    inline void ClearMemoryCache(bool keepSpace = false)
     {
         if (m_MMKV)
         {
-            m_MMKV->clearMemoryCache();
+            m_MMKV->clearMemoryCache(keepSpace);
         }
     }
 

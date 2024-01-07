@@ -276,7 +276,7 @@ render_open_ol_block(MD_HTML* r, const MD_BLOCK_OL_DETAIL* det)
         return;
     }
 
-    _snprintf_s(buf, sizeof(buf), _TRUNCATE, "<ol start=\"%u\">\n", det->start);
+    snprintf(buf, sizeof(buf), "<ol start=\"%u\">\n", det->start);
     RENDER_VERBATIM(r, buf);
 }
 

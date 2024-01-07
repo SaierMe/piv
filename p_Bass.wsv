@@ -1,17 +1,25 @@
 <火山程序 类型 = "通常" 版本 = 1 />
 
-包 火山.BASS音频支持库 <注释 = "https://github.com/SaierMe/piv" @视窗.外部头文件 = "BASS\\include\\bass.h"
-        @视窗.外部库 = "BASS\\$(p)\\bass.lib" @视窗.附属文件 = "BASS\\$(p)\\bass.dll">
+包 火山.BASS音频支持库 <注释 = "https://github.com/SaierMe/piv" @视窗.外部头文件 = "BASS\\include\\piv_bass.hpp"
+        "//@视窗.外部头文件" = "BASS\\include\\bass.h" "//@视窗.外部库" = "BASS\\$(p)\\bass.lib"
+        @视窗.附属文件 = "BASS\\$(p)\\bass.dll">
 
 类 BASS音频类 <公开 注释 = "BASS version: 2.4.16.7" 注释 = "http://www.un4seen.com"
-        注释 = "BASS 可以在非盈利软件中免费使用,商用则需要购买许可证.">
+        注释 = "BASS 可以在非盈利软件中免费使用,商用则需要购买许可证." 折叠>
 {
     变量 错误对照表 <静态 类型 = 整数到文本哈希表>
-    变量 格式过滤器 <静态 类型 = 字节集类>
+    变量 格式过滤器 <静态 类型 = 文本型>
 
-    方法 类_初始化
+    方法 加载动态库 <公开 静态 类型 = 逻辑型 注释 = "程序默认在执行本类的函数时加载与程序文件同位置的DLL文件."
+            注释 = "如果你想将DLL放在其他位置,请在执行其他方法前调用本方法手动加载." 折叠 @嵌入式方法 = "req_str_param_text_pointer = true">
+    参数 动态库路径 <类型 = 文本型 注释 = "basswasapi.dll的路径">
     {
-        置配置选项 (BASS_配置选项.BASS_CONFIG_UNICODE, 1)  // 使用Unicode编码
+        @ BassDll::data().Load(@<动态库路径>)
+    }
+
+    方法 卸载动态库 <公开 静态 注释 = "手动卸载动态库,一般不需要执行本方法." 折叠 @嵌入式方法 = "">
+    {
+        @ BassDll::data().Free()
     }
 
     方法 类_清理 <折叠>
@@ -26,14 +34,14 @@
     参数 选项 <类型 = 整数 注释 = "使用\"BASS_配置选项\"里的常量值">
     参数 值 <类型 = 整数 注释 = "具体可用的设置值可以看\"BASS_配置选项\"里的常量备注">
     {
-        @ BASS_SetConfig ((DWORD)@<选项>, (DWORD)@<值>)
+        @ @sn<this>.bass.BASS_SetConfig(static_cast<DWORD>(@<选项>), static_cast<DWORD>(@<值>))
     }
 
     方法 取配置选项 <公开 类型 = 整数 注释 = "获取配置选项的值" 返回值注释 = "成功返回配置值,失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
             @嵌入式方法 = "">
     参数 选项 <类型 = 整数 注释 = "使用\"BASS_配置选项\"里的常量值">
     {
-        @ (INT)BASS_GetConfig ((DWORD)@<选项>)
+        @ static_cast<INT>( @sn<this>.bass.BASS_GetConfig(static_cast<DWORD>(@<选项>)))
     }
 
     方法 置配置选项_指针 <公开 类型 = 逻辑型 注释 = "设置指针类型的配置选项" 返回值注释 = "返回设置是否成功,如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
@@ -41,26 +49,26 @@
     参数 选项 <类型 = 整数 注释 = "使用\"BASS_配置选项_指针\"里的常量值">
     参数 值 <类型 = 变整数 注释 = "具体可用的设置值可以看\"BASS_配置选项_指针\"里的常量备注">
     {
-        @ BASS_SetConfigPtr ((DWORD)@<选项>, &@<值>)
+        @  @sn<this>.bass.BASS_SetConfigPtr(static_cast<DWORD>(@<选项>), &@<值>)
     }
 
     方法 取配置选项_指针 <公开 类型 = 变整数 注释 = "获取指针类型的配置选项" 返回值注释 = "成功返回配置值的指针,失败返回0,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
             折叠 @嵌入式方法 = "">
     参数 选项 <类型 = 整数 注释 = "使用\"BASS_配置选项_指针\"里的常量值">
     {
-        @ (INT_P)BASS_GetConfigPtr (@<选项>)
+        @ reinterpret_cast<INT_P>(@sn<this>.bass.BASS_GetConfigPtr(@<选项>))
     }
 
     方法 取版本 <公开 类型 = 整数 注释 = "获取已加载的BASS的版本号" 返回值注释 = "  返回BASS版本; 例如, 0x02040103(十六进制)将是版本2.4.1.3"
             返回值注释 = "  其中高16位为主版本号,低16位为修订版本号." 折叠 @嵌入式方法 = "">
     {
-        @ (INT)BASS_GetVersion ()
+        @ static_cast<INT>(@sn<this>.bass.BASS_GetVersion())
     }
 
     方法 取错误代码 <公开 类型 = 整数 注释 = "获取当前线程中最近一次调用BASS函数的错误代码" 返回值注释 = "如果在上一次BASS函数调用期间未发生错误, 则返回0" 折叠
             @嵌入式方法 = "">
     {
-        @ BASS_ErrorGetCode ()
+        @ @sn<this>.bass.BASS_ErrorGetCode()
     }
 
     方法 取错误描述 <公开 类型 = 文本型 注释 = "获取当前线程中最近一次调用BASS函数的错误描述" 返回值注释 = "返回错误的描述文本,未定义的错误代码则返回空文本." 折叠>
@@ -139,7 +147,6 @@
         {
             设备信息.加入成员 (信息)
             索引 = 索引 + 1
-
         }
         返回 (设备信息.取成员数 ())
     }
@@ -150,10 +157,10 @@
     参数 设备信息 <类型 = BASS_设备信息 注释 = "返回的设备信息" "">
     {
         @ BASS_DEVICEINFO info;
-        @ if (BASS_GetDeviceInfo ((DWORD)@<设备号>, &info)) {
-        @     if (info.name) @<设备信息.名称>.SetText (info.name);
-        @     if (info.driver) @<设备信息.驱动程序>.SetText (info.driver);
-        @     @<设备信息.标志> = (INT)info.flags;
+        @ if (bass.BASS_GetDeviceInfo(static_cast<DWORD>(@<设备号>), &info)) {
+        @     if (info.name) @<设备信息.名称>.SetText(info.name);
+        @     if (info.driver) @<设备信息.驱动程序>.SetText(info.driver);
+        @     @<设备信息.标志> = static_cast<INT>(info.flags);
         @     return TRUE;
         @ }
         @ return FALSE;
@@ -166,26 +173,26 @@
     参数 设备标志 <类型 = 整数 注释 = "使用\"BASS_设备标志\"的组合值" @默认值 = 0>
     参数 窗口句柄 <类型 = 变整数 注释 = "  指定窗口句柄,0 为当前窗口(控制台程序也请用0)." 注释 = "  该参数只有在使用DirectSound输出时是必须的." @默认值 = 0>
     {
-        @ BASS_Init (@<输出设备>, (DWORD)@<采样率>, (DWORD)@<设备标志>, (HWND)@<窗口句柄>, NULL)
+        @ @sn<this>.bass.BASS_Init(@<输出设备>, static_cast<DWORD>(@<采样率>), static_cast<DWORD>(@<设备标志>), reinterpret_cast<HWND>(@<窗口句柄>), NULL)
     }
 
     方法 释放 <公开 类型 = 逻辑型 注释 = "  释放输出设备使用的所有资源,包括其所有样本、流和MOD音乐." 注释 = "非必要使用,类析构的时候会自动调用."
             返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     {
-        @ BASS_Free ()
+        @ @sn<this>.bass.BASS_Free()
     }
 
     方法 置输出设备 <公开 类型 = 逻辑型 注释 = "设置当前线程后续使用的输出设备" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
             @嵌入式方法 = "">
     参数 设备号 <类型 = 整数 注释 = "0 = 无声音,1 = 第一个真实输出设备.">
     {
-        @ BASS_SetDevice ((DWORD)@<设备号>)
+        @ @sn<this>.bass.BASS_SetDevice(static_cast<DWORD>(@<设备号>))
     }
 
     方法 取输出设备 <公开 类型 = 整数 注释 = "获取当前线程使用的输出设备" 返回值注释 = "成功返回设备号,失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
             @嵌入式方法 = "">
     {
-        @ (INT)BASS_GetDevice ()
+        @ static_cast<INT>(@sn<this>.bass.BASS_GetDevice())
     }
 
     方法 取输出信息 <公开 类型 = 逻辑型 注释 = "获取当前所用设备的信息" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
@@ -193,8 +200,8 @@
     参数 信息 <类型 = BASS_信息 注释 = "返回的信息">
     {
         @ BASS_INFO info;
-        @ if (BASS_GetInfo (&info)) {
-        @     @<信息>.SetStruct ((@dt<BASS_信息>::S*)&info);
+        @ if (bass.BASS_GetInfo(&info)) {
+        @     @<信息>.SetStruct((@dt<BASS_信息>::S*)&info);
         @     return TRUE;
         @ }
         @ return FALSE;
@@ -257,7 +264,6 @@
             {
                 返回 ("DisplayPort接口")
             }
-
         }
         返回 ("未知设备")
     }
@@ -265,56 +271,56 @@
     方法 开始输出 <公开 类型 = 逻辑型 注释 = "开始或恢复输出." 注释 = "使用\"初始化\"方法时会自动开始,除非你暂停或停止了输出,一般不需要使用此方法."
             返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     {
-        @ BASS_Start ()
+        @ @sn<this>.bass.BASS_Start()
     }
 
     方法 停止输出 <公开 类型 = 逻辑型 注释 = "停止输出,将停止播放所有音乐、样本和流."
             返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     {
-        @ BASS_Stop ()
+        @ @sn<this>.bass.BASS_Stop()
     }
 
     方法 暂停输出 <公开 类型 = 逻辑型 注释 = "停止输出,将暂停所有音乐、样本和流,使用\"开始输出\"可以恢复."
             返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     {
-        @ BASS_Pause ()
+        @ @sn<this>.bass.BASS_Pause()
     }
 
     方法 是否已启动 <公开 类型 = 整数 注释 = "检查是否已经开始输出" 返回值注释 = "  设备未启动返回0,如果设备已启动且处于活动状态,则返回1."
             返回值注释 = "  如果处于非活动状态(没有播放任何内容,并且禁用BASS_CONFIG_DEV_NONSTOP),则返回2." 折叠 @嵌入式方法 = "">
     {
-        @ (INT)BASS_IsStarted ()
+        @ static_cast<INT>(@sn<this>.bass.BASS_IsStarted())
     }
 
     方法 更新缓冲 <公开 类型 = 逻辑型 注释 = "更新HSTREAM和HMUSIC声道的播放缓冲"
             返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 长度 <类型 = 整数 注释 = "要渲染的数据量,单位为毫秒.">
     {
-        @ BASS_Update ((DWORD)@<长度>)
+        @ @sn<this>.bass.BASS_Update(static_cast<DWORD>(@<长度>))
     }
 
     方法 取CPU使用率 <公开 类型 = 单精度小数 注释 = "获取BASS当前的CPU使用率" 返回值注释 = "返回CPU使用率" 折叠 @嵌入式方法 = "">
     {
-        @ BASS_GetCPU ()
+        @ @sn<this>.bass.BASS_GetCPU()
     }
 
     方法 置音量 <公开 类型 = 逻辑型 注释 = "设置输出设备的主音量(系统音量)" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
             @嵌入式方法 = "">
     参数 音量 <类型 = 单精度小数 注释 = "音量范围:0(静音)到1(最大值).">
     {
-        @ BASS_SetVolume (@<音量>)
+        @ @sn<this>.bass.BASS_SetVolume(@<音量>)
     }
 
     方法 取音量 <公开 类型 = 单精度小数 注释 = "获取当前的主音量级别" 返回值注释 = "成功返回音量值,失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
             返回值注释 = "音量范围:0(静音)到1(最大值)." 折叠 @嵌入式方法 = "">
     {
-        @ BASS_GetVolume ()
+        @ @sn<this>.bass.BASS_GetVolume()
     }
 
-    方法 取声音对象 <公开 类型 = 变整数 注释 = "获取DirectSound对象" @嵌入式方法 = "">
+    方法 取声音对象 <公开 类型 = 变整数 注释 = "获取DirectSound对象" 折叠 @嵌入式方法 = "">
     参数 对象 <类型 = 整数>
     {
-        @ (INT_P)BASS_GetDSoundObject ((DWORD)@<对象>)
+        @ reinterpret_cast<INT_P>(@sn<this>.bass.BASS_GetDSoundObject(static_cast<DWORD>(@<对象>)))
     }
 
     # 空间音效
@@ -328,7 +334,7 @@
     参数 多普勒因子 <类型 = 单精度小数 注释 = "  取值0.0-10.0" 注释 = "  少于或等于0.0=保持当前设置, 0.0=无多普勒,1.0=真实世界,2.0=真实世界×2"
             注释 = "  多普勒效应是声音在靠近或远离你时改变音调的方式. 听众和声速设置用于计算此效果,此参数值可用于减小或放大效果." @默认值 = 0.0>
     {
-        @ BASS_Set3DFactors (@<距离因子>, @<衰减因子>, @<多普勒因子>)
+        @ @sn<this>.bass.BASS_Set3DFactors(@<距离因子>, @<衰减因子>, @<多普勒因子>)
     }
 
     方法 取空间音效因子 <公开 类型 = 逻辑型 注释 = "获取3D空间音效计算的影响因子" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
@@ -340,21 +346,21 @@
     参数 多普勒因子 <类型 = 单精度小数类 注释 = "  取值0.0-10.0" 注释 = "  少于或等于0.0=保持当前设置, 0.0=无多普勒,1.0=真实世界,2.0=真实世界×2"
             注释 = "  多普勒效应是声音在靠近或远离你时改变音调的方式. 听众和声速设置用于计算此效果,此参数值可用于减小或放大效果.">
     {
-        @ BASS_Get3DFactors (&@<距离因子.值>, &@<衰减因子.值>, &@<多普勒因子.值>)
+        @ @sn<this>.bass.BASS_Get3DFactors(&@<距离因子.值>, &@<衰减因子.值>, &@<多普勒因子.值>)
     }
 
     方法 置空间音效位置 <公开 类型 = 逻辑型 注释 = "设置听众(即播放器)的位置、速度和方向,修改设置后需要调用\"应用空间音效\"才会实际生效."
-            返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
+            返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
     参数 位置 <类型 = BASS_3D矢量 注释 = "听众的位置, NULL=保持当前设置." @默认值 = 空对象>
     参数 速度 <类型 = BASS_3D矢量 注释 = "  听众的速度单位为长度/秒(长度单位用\"置空间音效因子\"设置)."
             注释 = "  NULL=保持当前设置. 只用于计算多普勒效应,不会影响听众的位置." @默认值 = 空对象>
     参数 正面 <类型 = BASS_3D矢量 注释 = "  听众正面所指的方向." 注释 = "  NULL=保持当前设置,这是自动规范化的." @默认值 = 空对象>
     参数 顶部 <类型 = BASS_3D矢量 注释 = "  听众顶部指向的方向." 注释 = "  NULL=保持当前设置,这是自动规范化的,并在必要时调整为与前向量成直角." @默认值 = 空对象>
     {
-        @ BASS_Set3DPosition (@<位置>.IsNullObject () ? NULL : @<位置>.pdata (),
-        @                     @<速度>.IsNullObject () ? NULL : @<速度>.pdata (),
-        @                     @<正面>.IsNullObject () ? NULL : @<正面>.pdata (),
-        @                     @<顶部>.IsNullObject () ? NULL : @<顶部>.pdata ())
+        @ return bass.BASS_Set3DPosition(@<位置>.IsNullObject() ? NULL : @<位置>.pdata(),
+        @                                @<速度>.IsNullObject() ? NULL : @<速度>.pdata(),
+        @                                @<正面>.IsNullObject() ? NULL : @<正面>.pdata(),
+        @                                @<顶部>.IsNullObject() ? NULL : @<顶部>.pdata())
     }
 
     方法 取空间音效位置 <公开 类型 = 逻辑型 注释 = "获取听众(即播放器)的位置、速度和方向"
@@ -365,12 +371,12 @@
     参数 正面 <类型 = BASS_3D矢量 注释 = "  听众正面所指的方向." 注释 = "  NULL=保持当前设置,这是自动规范化的." @默认值 = 空对象>
     参数 顶部 <类型 = BASS_3D矢量 注释 = "  听众顶部指向的方向." 注释 = "  NULL=保持当前设置,这是自动规范化的,并在必要时调整为与前向量成直角." @默认值 = 空对象>
     {
-        @ BASS_Get3DPosition (@<位置>.pdata (), @<速度>.pdata (), @<正面>.pdata (), @<顶部>.pdata ())
+        @ @sn<this>.bass.BASS_Get3DPosition(@<位置>.pdata(), @<速度>.pdata(), @<正面>.pdata(), @<顶部>.pdata())
     }
 
     方法 应用空间音效 <公开 注释 = "应用对3D空间音效系统所做的更改" 折叠 @嵌入式方法 = "">
     {
-        @ BASS_Apply3D ()
+        @ @sn<this>.bass.BASS_Apply3D()
     }
 
     # 插件
@@ -392,7 +398,6 @@
             插件文件.加入成员 (找到文件)
             // 处理事件 ()
             找到文件 = 查找插件.寻找文件 ("")
-
         }
         查找插件.停止寻找文件 ()
         插件文件.枚举循环 ()
@@ -404,9 +409,7 @@
                 变量 信息 <类型 = BASS_插件信息>
                 信息 = 取插件信息 (插件句柄)
                 插件信息.加入成员 (信息)
-
             }
-
         }
         更新格式过滤器 (插件信息)  // 将插件增加的格式支持添加了"浏览音乐文件"的过滤器中
         返回 (插件信息.取成员数 ())
@@ -416,14 +419,14 @@
             折叠 @嵌入式方法 = "">
     参数 文件名 <类型 = 文本型 注释 = "插件的文件名">
     {
-        @ (INT)BASS_PluginLoad (@<文件名>.GetText (), 0) // 参数二 flags 只有一个 BASS_UNICODE,文件头中已经自动应用了
+        @ static_cast<INT>(@sn<this>.bass.BASS_PluginLoad(@<文件名>.GetText(), BASS_UNICODE))
     }
 
     方法 释放插件 <公开 类型 = 逻辑型 注释 = "卸载一个BASS插件" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
             @嵌入式方法 = "">
     参数 插件句柄 <类型 = 整数 注释 = "\"加载插件\"返回插件的句柄">
     {
-        @ BASS_PluginFree ((HPLUGIN)@<插件句柄>)
+        @ @sn<this>.bass.BASS_PluginFree(static_cast<HPLUGIN>(@<插件句柄>))
     }
 
     方法 插件开关 <公开 类型 = 逻辑型 注释 = "启用或禁用插件." 注释 = "此方法允许在之后创建的流或样本中禁用部分插件,而不影响正在使用此插件的流媒体."
@@ -431,7 +434,7 @@
     参数 插件句柄 <类型 = 整数 注释 = "\"加载插件\"返回插件的句柄">
     参数 是否启用 <类型 = 逻辑型 注释 = "真为启用插件,假为禁用插件.">
     {
-        @ BASS_PluginEnable ((HPLUGIN)@<插件句柄>, @<是否启用>)
+        @ @sn<this>.bass.BASS_PluginEnable(static_cast<HPLUGIN>(@<插件句柄>), @<是否启用>)
     }
 
     方法 取插件信息 <公开 类型 = BASS_插件信息 注释 = "获取插件的信息" 返回值注释 = "成功返回插件信息,失败返回空信息,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
@@ -439,16 +442,16 @@
     参数 插件句柄 <类型 = 整数 注释 = "\"加载插件\"返回插件的句柄">
     {
         @ @dt<BASS_插件信息> plugInfo;
-        @ const BASS_PLUGININFO* info = BASS_PluginGetInfo ((HPLUGIN)@<插件句柄>);
+        @ const BASS_PLUGININFO* info = bass.BASS_PluginGetInfo(static_cast<HPLUGIN>(@<插件句柄>));
         @ if (info) {
-        @     plugInfo.version = (INT)info->version;
-        @     plugInfo.formatc = (INT)info->formatc;
+        @     plugInfo.version = static_cast<INT>(info->version);
+        @     plugInfo.formatc = static_cast<INT>(info->formatc);
         @     for (DWORD i = 0; i < info->formatc; ++i) {
         @         @dt<BASS_插件格式> format;
-        @         format.ctype = (INT)info->formats[i].ctype;
-        @         format.name.SetText (info->formats[i].name);
-        @         format.exts.SetText (info->formats[i].exts);
-        @         plugInfo.formats.Add (format, NULL);
+        @         format.ctype = static_cast<INT>(info->formats[i].ctype);
+        @         format.name.SetText(info->formats[i].name);
+        @         format.exts.SetText(info->formats[i].exts);
+        @         plugInfo.formats.Add(format, NULL);
         @     }
         @ }
         @ return plugInfo;
@@ -467,7 +470,8 @@
             注释 = "  BASS_SAMPLE_FLOAT、BASS_SAMPLE_LOOP、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_MUTEMAX、"
             注释 = "  BASS_SAMPLE_OVER_VOL、BASS_SAMPLE_OVER_POS、BASS_SAMPLE_OVER_DIST">
     {
-        @ (INT)BASS_SampleLoad (FALSE, @<文件名>.GetText (), (QWORD)@<数据偏移>, (DWORD)@<数据长度>, (DWORD)@<最大回放>, (DWORD)@<标志>)
+        @ static_cast<INT>(@sn<this>.bass.BASS_SampleLoad(FALSE, reinterpret_cast<const void*>(@<文件名>.GetText()), static_cast<QWORD>(@<数据偏移>),
+        @                  static_cast<DWORD>(@<数据长度>), static_cast<DWORD>(@<最大回放>), static_cast<DWORD>(@<标志>) | BASS_UNICODE))
     }
 
     方法 打开内存样本数据 <公开 类型 = 整数 注释 = "从WAV、AIFF、MP3、MP2、MP1、OGG或插件支持的文件格式加载一段样本."
@@ -479,7 +483,8 @@
             注释 = "  BASS_SAMPLE_FLOAT、BASS_SAMPLE_LOOP、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_MUTEMAX、"
             注释 = "  BASS_SAMPLE_OVER_VOL、BASS_SAMPLE_OVER_POS、BASS_SAMPLE_OVER_DIST">
     {
-        @ return (INT)BASS_SampleLoad (TRUE, (const BYTE*)@<样本数据>.GetPtr (), NULL, (DWORD)@<样本数据>.GetSize (), (DWORD)@<最大回放>, (DWORD)@<标志>);
+        @ return static_cast<INT>(bass.BASS_SampleLoad(TRUE, reinterpret_cast<const void*>(@<样本数据>.GetPtr()), NULL, static_cast<DWORD>(@<样本数据>.GetSize()),
+        @                         static_cast<DWORD>(@<最大回放>), static_cast<DWORD>(@<标志>)));
     }
 
     方法 创建样本 <公开 类型 = 整数 注释 = "创建一段样本" 返回值注释 = "成功返回样本句柄,失败返回0,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
@@ -493,14 +498,15 @@
             注释 = "  BASS_SAMPLE_8BITS、BASS_SAMPLE_FLOAT、BASS_SAMPLE_LOOP、BASS_SAMPLE_3D、BASS_SAMPLE_MUTEMAX、"
             注释 = "  BASS_SAMPLE_OVER_VOL、BASS_SAMPLE_OVER_POS、BASS_SAMPLE_OVER_DIST" @默认值 = 0>
     {
-        @ (INT)BASS_SampleCreate ((DWORD)@<样本长度>, (DWORD)@<采样率>, (DWORD)@<声道数>, (DWORD)@<最大回放>, (DWORD)@<标志>)
+        @ static_cast<INT>(@sn<this>.bass.BASS_SampleCreate(static_cast<DWORD>(@<样本长度>), static_cast<DWORD>(@<采样率>),
+        @                  static_cast<DWORD>(@<声道数>), static_cast<DWORD>(@<最大回放>), static_cast<DWORD>(@<标志>)))
     }
 
     方法 释放样本 <公开 类型 = 逻辑型 注释 = "释放一段样本的资源" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
             @嵌入式方法 = "">
     参数 样本句柄 <类型 = 整数 注释 = "样本的句柄">
     {
-        @ BASS_SampleFree ((HSAMPLE)@<样本句柄>)
+        @ @sn<this>.bass.BASS_SampleFree(static_cast<HSAMPLE>(@<样本句柄>))
     }
 
     方法 置样本数据 <公开 类型 = 逻辑型 注释 = "设置一段样本的数据" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
@@ -508,7 +514,7 @@
     参数 样本句柄 <类型 = 整数 注释 = "样本的句柄">
     参数 缓冲区 <类型 = 变整数 注释 = "欲设置的数据缓冲区指针">
     {
-        @ BASS_SampleSetData ((HSAMPLE)@<样本句柄>, (const void *)@<缓冲区>)
+        @ @sn<this>.bass.BASS_SampleSetData(static_cast<HSAMPLE>(@<样本句柄>), reinterpret_cast<const void *>(@<缓冲区>))
     }
 
     方法 取样本数据 <公开 类型 = 逻辑型 注释 = "获取一段样本的数据副本" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
@@ -516,7 +522,7 @@
     参数 样本句柄 <类型 = 整数 注释 = "样本的句柄">
     参数 缓冲区 <类型 = 变整数 注释 = "返回获取的样本数据">
     {
-        @ BASS_SampleGetData ((HSAMPLE)@<样本句柄>, (void*)@<缓冲区>)
+        @ @sn<this>.bass.BASS_SampleGetData(static_cast<HSAMPLE>(@<样本句柄>), reinterpret_cast<void*>(@<缓冲区>))
     }
 
     方法 置样本数据2 <公开 类型 = 逻辑型 注释 = "设置一段样本的数据. 跟\"置样本数据\"一样,只是把缓冲区封装成字节集类."
@@ -524,7 +530,7 @@
     参数 样本句柄 <类型 = 整数 注释 = "样本的句柄">
     参数 缓冲区 <类型 = 字节集类 注释 = "欲设置的数据缓冲区">
     {
-        @ BASS_SampleSetData ((HSAMPLE)@<样本句柄>, (const void *)@<缓冲区>.GetPtr ())
+        @ @sn<this>.bass.BASS_SampleSetData(static_cast<HSAMPLE>(@<样本句柄>), reinterpret_cast<const void *>(@<缓冲区>.GetPtr()))
     }
 
     方法 取样本数据2 <公开 类型 = 逻辑型 注释 = "获取一段样本的数据副本. 跟\"取样本数据\"一样,只是把缓冲区封装成字节集类."
@@ -535,7 +541,7 @@
         变量 信息 <类型 = BASS_样本>
         取样本信息 (样本句柄, 信息)
         缓冲区.分配字节集 (信息.数据长度)
-        @ return BASS_SampleGetData ((HSAMPLE)@<样本句柄>, @<缓冲区>.GetPtr ());
+        @ return bass.BASS_SampleGetData(static_cast<HSAMPLE>(@<样本句柄>), @<缓冲区>.GetPtr());
     }
 
     方法 取样本信息 <公开 类型 = 逻辑型 注释 = "获取一段样本的默认属性和其他信息" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
@@ -544,8 +550,8 @@
     参数 信息 <类型 = BASS_样本 注释 = "返回获取的样本信息">
     {
         @ BASS_SAMPLE info;
-        @ if (BASS_SampleGetInfo ((HSAMPLE)@<样本句柄>, &info)) {
-        @     @<信息>.SetStruct ((@dt<BASS_样本>::S*)&info);
+        @ if (bass.BASS_SampleGetInfo(static_cast<HSAMPLE>(@<样本句柄>), &info)) {
+        @     @<信息>.SetStruct((@dt<BASS_样本>::S*)&info);
         @     return TRUE;
         @ }
         @ return FALSE;
@@ -557,7 +563,7 @@
     参数 信息 <类型 = BASS_样本 注释 = "设置样本的信息">
     {
         @ @dt<BASS_样本>::S info;
-        @ return BASS_SampleSetInfo ((HSAMPLE)@<样本句柄>, (const BASS_SAMPLE *)@<信息>.GetStruct (&info));
+        @ return bass.BASS_SampleSetInfo(static_cast<HSAMPLE>(@<样本句柄>), reinterpret_cast<const BASS_SAMPLE *>(@<信息>.GetStruct(&info)));
     }
 
     方法 取样本通道 <公开 类型 = 整数 注释 = "为样本创建并初始化一条播放通道" 返回值注释 = "成功返回通道句柄,失败返回0,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
@@ -568,33 +574,27 @@
             注释 = "  BASS_SAMPLE_LOOP、BASS_SAMPLE_OVER_VOL、BASS_SAMPLE_OVER_POS、"
             注释 = "  BASS_SAMPLE_OVER_DIST、BASS_STREAM_AUTOFREE、BASS_STREAM_DECODE、BASS_SPEAKER_xxx" @默认值 = 0>
     {
-        @ (INT)BASS_SampleGetChannel ((HSAMPLE)@<样本句柄>, (DWORD)@<标志>)
+        @ static_cast<INT>(@sn<this>.bass.BASS_SampleGetChannel(static_cast<HSAMPLE>(@<样本句柄>), static_cast<DWORD>(@<标志>)))
     }
 
     方法 取样本所有通道 <公开 类型 = 整数 注释 = "获取样本的所有现有通道" 返回值注释 = "成功返回现有通道数量,失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
             折叠 @禁止流程检查 = 真>
     参数 样本句柄 <类型 = 整数 注释 = "样本的句柄" "">
-    参数 通道数组 <类型 = 整数数组类 注释 = "  存放该样本所有通道句柄的数组." 注释 = "  该数组的大小应与创建样本时的最大设置相同,可以使用\"取样本信息\"获取该属性."
-            @默认值 = 空对象>
+    参数 通道数组 <类型 = 整数数组类 注释 = "存放该样本所有通道句柄的数组;" 注释 = "该数组的大小应与创建样本时的最大设置相同,可以使用\"取样本信息\"获取该属性." @默认值 = 空对象>
     {
-        @ @<通道数组>.data ().RemoveAll ();
         @ BASS_SAMPLE info;
-        @ DWORD count;
-        @ BASS_SampleGetInfo ((HSAMPLE)@<样本句柄>, &info);
-        @ HCHANNEL* channels = (HCHANNEL*)malloc (info.max * sizeof (HCHANNEL));
-        @ count = BASS_SampleGetChannels ((HSAMPLE)@<样本句柄>, channels);
-        @ for (DWORD i = 0; i < count; ++i) {
-        @     @<通道数组>.data ().Add ((INT)channels[i]);
-        @ }
-        @ free (channels);
-        @ return (INT)count;
+        @ bass.BASS_SampleGetInfo(static_cast<HSAMPLE>(@<样本句柄>), &info);
+        @ @<通道数组>.data().InitCount(static_cast<INT_P>(info.max), TRUE);
+        @ INT count = static_cast<INT>(bass.BASS_SampleGetChannels(static_cast<HSAMPLE>(@<样本句柄>), reinterpret_cast<HCHANNEL*>(@<通道数组>.data().GetData())));
+        @ @<通道数组>.data().InitCount(count, FALSE);
+        @ return count;
     }
 
     方法 停止样本 <公开 类型 = 逻辑型 注释 = "停止并释放样本的所有通道(HCHANNEL)"
             返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 样本句柄 <类型 = 整数 注释 = "样本的句柄">
     {
-        @ BASS_SampleStop ((HSAMPLE)@<样本句柄>)
+        @ @sn<this>.bass.BASS_SampleStop(static_cast<HSAMPLE>(@<样本句柄>))
     }
 
     # 音频流
@@ -603,23 +603,30 @@
             返回值注释 = "成功返回流句柄,失败返回0,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
     参数 采样率 <类型 = 整数 @默认值 = 48000>
     参数 声道 <类型 = 整数 注释 = "1 = 单声道, 2 = 立体声, 4 = 四声道, 6 = 5.1, 8 = 7.1" @默认值 = 2>
-    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:"
-            注释 = "  BASS_SAMPLE_8BITS、BASS_SAMPLE_FLOAT、BASS_SAMPLE_3D、BASS_STREAM_AUTOFREE、BASS_STREAM_DECODE、BASS_SPEAKER_xxx"
+    参数 标志 <类型 = 整数 注释 = "使用\"BASS_音频标志\"类中的以下部分常量的组合值:"
+            注释 = " BASS_SAMPLE_8BITS、BASS_SAMPLE_FLOAT、BASS_SAMPLE_3D、BASS_STREAM_AUTOFREE、BASS_STREAM_DECODE、BASS_SPEAKER_xxx"
             @默认值 = 0>
-    参数 处理函数 <类型 = 整数 注释 = "  0(除1-3外的任意值)=需要在接收事件\"BASS音频类_写入流回调\"中写入流数据."
-            注释 = "  1=STREAMPROC_DEVICE 为设备的最终输出混合创建一个\"虚拟\"流." 注释 = "  2=STREAMPROC_DUMMY 创建一个\"虚拟\"流."
-            注释 = "  3=STREAMPROC_PUSH 创建一个\"推送\"流,不是从STREAMPROC函数中提取BASS数据,而是通过\"推送流数据(BASS_StreamPutData)\"将数据推送到BASS."
+    参数 处理函数 <类型 = 整数 注释 = "0(除1-3外的任意值)=需要在接收事件\"BASS音频类_写入流回调\"中写入流数据;"
+            注释 = "1=STREAMPROC_DEVICE 为设备的最终输出混合创建一个\"虚拟\"流;" 注释 = "2=STREAMPROC_DUMMY 创建一个\"虚拟\"流;"
+            注释 = "3=STREAMPROC_PUSH 创建一个\"推送\"流,不是从STREAMPROC函数中提取BASS数据,而是通过\"推送流数据(BASS_StreamPutData)\"将数据推送到BASS."
             @默认值 = 0>
     {
-        @ if (@<处理函数> == 1) {
-        @     return (INT)BASS_StreamCreate ((DWORD)@<采样率>, (DWORD)@<声道>, (DWORD)@<标志>, STREAMPROC_DEVICE, NULL);
-        @ } else if (@<处理函数> == 2) {
-        @     return (INT)BASS_StreamCreate ((DWORD)@<采样率>, (DWORD)@<声道>, (DWORD)@<标志>, STREAMPROC_DUMMY, NULL);
-        @ } else if (@<处理函数> == 3) {
-        @     return (INT)BASS_StreamCreate ((DWORD)@<采样率>, (DWORD)@<声道>, (DWORD)@<标志>, STREAMPROC_PUSH, NULL);
-        @ } else { // 实际上处理函数不为 1-3 时,都会使用接收事件
-        @     return (INT)BASS_StreamCreate ((DWORD)@<采样率>, (DWORD)@<声道>, (DWORD)@<标志>, (STREAMPROC*)&@<写入流回调函数>, (void*)this);
+        @ STREAMPROC* proc = nullptr;
+        @ switch (@<处理函数>) {
+        @     case 1:
+        @         proc = STREAMPROC_DEVICE;
+        @         break;
+        @     case 2:
+        @         proc = STREAMPROC_DUMMY;
+        @         break;
+        @     case 3:
+        @         proc = STREAMPROC_PUSH;
+        @         break;
+        @     default:
+        @         proc = reinterpret_cast<STREAMPROC*>(&@<写入流回调函数>);
         @ }
+        @ return static_cast<INT>(bass.BASS_StreamCreate(static_cast<DWORD>(@<采样率>), static_cast<DWORD>(@<声道>), static_cast<DWORD>(@<标志>),
+        @                         proc, (@<处理函数> >= 1 && @<处理函数> <= 3) ? NULL : reinterpret_cast<void*>(this));
     }
 
     方法 写入流回调 <公开 定义事件 类型 = 整数 注释 = "执行\"创建流数据\"后,需要在本事件处理流数据的写入函数."
@@ -633,11 +640,11 @@
     参数 文件路径 <类型 = 文本型 注释 = "文件的完整路径和名称">
     参数 数据偏移 <类型 = 长整数 注释 = "从文件偏移一段位置开始获取数据流" @默认值 = 0>
     参数 数据长度 <类型 = 长整数 注释 = "0 = 使用整个文件数据" @默认值 = 0>
-    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:"
-            注释 = "  BASS_SAMPLE_FLOAT、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_LOOP、BASS_STREAM_PRESCAN"
-            注释 = "  BASS_STREAM_AUTOFREE、BASS_STREAM_DECODE、BASS_SPEAKER_xxx、BASS_ASYNCFILE" @默认值 = 0>
+    参数 标志 <类型 = 整数 注释 = "使用\"BASS_音频标志\"类中的以下部分常量的组合值:"
+            注释 = " BASS_SAMPLE_FLOAT、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_LOOP、BASS_STREAM_PRESCAN"
+            注释 = " BASS_STREAM_AUTOFREE、BASS_STREAM_DECODE、BASS_SPEAKER_xxx、BASS_ASYNCFILE" @默认值 = 0>
     {
-        @ (INT)BASS_StreamCreateFile (FALSE, @<文件路径>.GetText (), (DWORD)@<数据偏移>, (DWORD)@<数据长度>, (DWORD)@<标志>)
+        @ static_cast<INT>(@sn<this>.bass.BASS_StreamCreateFile(FALSE, reinterpret_cast<const void*>(@<文件路径>.GetText()), static_cast<DWORD>(@<数据偏移>), static_cast<DWORD>(@<数据长度>), static_cast<DWORD>(@<标志>) | BASS_UNICODE))
     }
 
     方法 打开内存流数据 <公开 类型 = 整数 注释 = "从支持格式的字节集中创建一段样本流"
@@ -647,7 +654,7 @@
             注释 = "  BASS_SAMPLE_FLOAT、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_LOOP、BASS_STREAM_PRESCAN"
             注释 = "  BASS_STREAM_AUTOFREE、BASS_STREAM_DECODE、BASS_SPEAKER_xxx、BASS_ASYNCFILE" @默认值 = 0>
     {
-        @ return (INT)BASS_StreamCreateFile (TRUE, (const BYTE*)@<音频数据>.GetPtr (), NULL, (DWORD)@<音频数据>.GetSize (), (DWORD)@<标志>);
+        @ return static_cast<INT>(bass.BASS_StreamCreateFile(TRUE, reinterpret_cast<const void*>(@<音频数据>.GetPtr()), NULL, static_cast<DWORD>(@<音频数据>.GetSize()), static_cast<DWORD>(@<标志>)));
     }
 
     方法 打开网络文件 <公开 类型 = 整数 注释 = "从Internet上的MP3, MP2, MP1, OGG, WAV, AIFF或插件支持的文件创建样本流."
@@ -660,7 +667,8 @@
             注释 = "  BASS_STREAM_BLOCK、BASS_STREAM_STATUS、BASS_STREAM_AUTOFREE、BASS_STREAM_DECODE、BASS_SPEAKER_xxx"
             @默认值 = 0>
     {
-        @ return (INT)BASS_StreamCreateURL (@<Url地址>.GetText(), (DWORD)@<数据偏移>, (DWORD)@<标志>, (DOWNLOADPROC*)&@<下载回调函数>, this);
+        @ return static_cast<INT>(bass.BASS_StreamCreateURL(@<Url地址>.GetText(), static_cast<DWORD>(@<数据偏移>),
+        @                         static_cast<DWORD>(@<标志>) | BASS_UNICODE, reinterpret_cast<DOWNLOADPROC*>(&@<下载回调函数>), this));
     }
 
     方法 下载回调 <公开 定义事件 类型 = 整数 注释 = "执行\"打开网络文件\"后,本事件会陆续收到网络流文件的下载片段" 返回值注释 = "该返回值无意义" 折叠>
@@ -673,12 +681,13 @@
     参数 Url地址 <类型 = 文本型 注释 = "流文件的网络地址必须以\"http://\"、\"https://\"或\"ftp://\"开头.">
     参数 保存文件名 <类型 = 文本型 注释 = "下载后保存的文件名">
     参数 数据偏移 <类型 = 整数 注释 = "从网络文件偏移一段位置开始获取数据流" @默认值 = 0>
-    参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中的以下部分常量的组合值:"
-            注释 = "  BASS_SAMPLE_FLOAT、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_LOOP、BASS_STREAM_RESTRATE"
-            注释 = "  BASS_STREAM_BLOCK、BASS_STREAM_STATUS、BASS_STREAM_AUTOFREE、BASS_STREAM_DECODE、BASS_SPEAKER_xxx"
+    参数 标志 <类型 = 整数 注释 = "使用\"BASS_音频标志\"类中的以下部分常量的组合值:"
+            注释 = " BASS_SAMPLE_FLOAT、BASS_SAMPLE_MONO、BASS_SAMPLE_3D、BASS_SAMPLE_LOOP、BASS_STREAM_RESTRATE"
+            注释 = " BASS_STREAM_BLOCK、BASS_STREAM_STATUS、BASS_STREAM_AUTOFREE、BASS_STREAM_DECODE、BASS_SPEAKER_xxx"
             @默认值 = 0>
     {
-        @ return (INT)BASS_StreamCreateURL (@<Url地址>.GetText (), (DWORD)@<数据偏移>, (DWORD)@<标志>, (DOWNLOADPROC*)@<保存下载回调函数>, @<保存文件名>.GetText ());
+        @ return static_cast<INT>(bass.BASS_StreamCreateURL(@<Url地址>.GetText(), static_cast<DWORD>(@<数据偏移>), static_cast<DWORD>(@<标志>) | BASS_UNICODE,
+        @                         reinterpret_cast<DOWNLOADPROC*>(@<保存下载回调函数>), @<保存文件名>.GetText()));
     }
 
     方法 保存下载回调函数 <静态 注释 = "内部的网络流数据的下载回调函数" 折叠>
@@ -699,7 +708,6 @@
         否则
         {
             文件读写.关闭文件 ()
-
         }
     }
 
@@ -730,18 +738,18 @@
             @默认值 = 0>
     {
         @ BASS_FILEPROCS fileprocs;
-        @ fileprocs.close = (FILECLOSEPROC*)@<文件处理_关闭函数>;
-        @ fileprocs.length = (FILELENPROC*)@<文件处理_长度函数>;
-        @ fileprocs.read = (FILEREADPROC*)@<文件处理_读入函数>;
-        @ fileprocs.seek = (FILESEEKPROC*)@<文件处理_搜索函数>;
-        @ return (INT)BASS_StreamCreateFileUser ((DWORD)@<文件系统>, (DWORD)@<标志>, &fileprocs, this);
+        @ fileprocs.close = reinterpret_cast<FILECLOSEPROC*>(@<文件处理_关闭函数>);
+        @ fileprocs.length = reinterpret_cast<FILELENPROC*>(@<文件处理_长度函数>);
+        @ fileprocs.read = reinterpret_cast<FILEREADPROC*>(@<文件处理_读入函数>);
+        @ fileprocs.seek = reinterpret_cast<FILESEEKPROC*>(@<文件处理_搜索函数>);
+        @ return static_cast<INT>(bass.BASS_StreamCreateFileUser(static_cast<DWORD>(@<文件系统>), static_cast<DWORD>(@<标志>), &fileprocs, this));
     }
 
     方法 释放流 <公开 类型 = 逻辑型 注释 = "释放一个样本流的资源,包括它拥有的任何sync/DSP/FX."
             返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 流句柄 <类型 = 整数 注释 = "样本流的句柄">
     {
-        @ BASS_StreamFree ((HSTREAM)@<流句柄>)
+        @ @sn<this>.bass.BASS_StreamFree(static_cast<HSTREAM>(@<流句柄>))
     }
 
     方法 取流文件位置 <公开 类型 = 长整数 注释 = "获取流文件的位置和状态"
@@ -749,7 +757,7 @@
     参数 流句柄 <类型 = 整数 注释 = "样本流的句柄">
     参数 模式 <类型 = 整数 注释 = "要获取的文件位置和状态,使用\"BASS_文件位置模式\"的常量值." @默认值 = 0>
     {
-        @ (INT64)BASS_StreamGetFilePosition ((HSTREAM)@<流句柄>, (DWORD)@<模式>)
+        @ static_cast<INT64>(@sn<this>.bass.BASS_StreamGetFilePosition(static_cast<HSTREAM>(@<流句柄>), static_cast<DWORD>(@<模式>)))
     }
 
     方法 推送流数据 <公开 类型 = 整数 注释 = "将一段样本数据添加到\"推送\"流"
@@ -759,7 +767,7 @@
     参数 数据长度 <类型 = 整数 注释 = "  以字节为单位的数据长度."
             注释 = "  可以选择使用 BASS_StreamProc_END (0x80000000)标志来表示流的结尾,为 0 时可用于仅检查队列的数据量.">
     {
-        @ (INT)BASS_StreamPutData ((HSTREAM)@<流句柄>, (void*)@<缓冲区>, (DWORD)@<数据长度>)
+        @ static_cast<INT>(@sn<this>.bass.BASS_StreamPutData(static_cast<HSTREAM>(@<流句柄>), reinterpret_cast<void*>(@<缓冲区>), static_cast<DWORD>(@<数据长度>)))
     }
 
     方法 推送流文件数据 <公开 类型 = 整数 注释 = "将数据添加到\"推送缓冲\"的用户文件流的缓冲区"
@@ -768,7 +776,7 @@
     参数 文件数据 <类型 = 变整数 注释 = "文件数据的指针">
     参数 数据大小 <类型 = 整数 注释 = "数据的字节大小,或者用BASS_FILEDATA_END">
     {
-        @ (INT)BASS_StreamPutFileData ((HSTREAM)@<流句柄>, (void*)@<文件数据>, (DWORD)@<数据大小>)
+        @ static_cast<INT>(@sn<this>.bass.BASS_StreamPutFileData(static_cast<HSTREAM>(@<流句柄>), reinterpret_cast<void*>(@<文件数据>), static_cast<DWORD>(@<数据大小>)))
     }
 
     方法 推送流文件数据2 <公开 类型 = 整数 注释 = "将数据添加到\"推送缓冲\"的用户文件流的缓冲区. 跟\"推送流文件数据\"一样,只是把数据封装成字节集类,原始版本适合在回调事件中使用."
@@ -776,7 +784,7 @@
     参数 流句柄 <类型 = 整数 注释 = "样本流的句柄">
     参数 文件数据 <类型 = 字节集类 注释 = "文件数据">
     {
-        @ return (INT)BASS_StreamPutFileData ((HSTREAM)@<流句柄>, (void*)@<文件数据>.GetPtr (), (DWORD)@<文件数据>.GetSize ());
+        @ return static_cast<INT>(bass.BASS_StreamPutFileData(static_cast<HSTREAM>(@<流句柄>), reinterpret_cast<void*>(@<文件数据>.GetPtr()), static_cast<DWORD>(@<文件数据>.GetSize())));
     }
 
     # MOD/MO3 音乐
@@ -791,7 +799,8 @@
             注释 = " BASS_MUSIC_xxx、BASS_SPEAKER_xxx" @默认值 = 0>
     参数 采样率 <类型 = 整数 注释 = "0 = 初始化时指定的采样率, 1 = 设备当前输出的采样率" @默认值 = 0>
     {
-        @ (INT)BASS_MusicLoad (FALSE, @<文件路径>.GetText (), (QWORD)@<数据偏移>, (QWORD)@<数据长度>, (DWORD)@<标志>, (DWORD)@<采样率>)
+        @ static_cast<INT>(@sn<this>.bass.BASS_MusicLoad(FALSE, @<文件路径>.GetText(), static_cast<QWORD>(@<数据偏移>), static_cast<QWORD>(@<数据长度>),
+        @                  static_cast<DWORD>(@<标志>) | BASS_UNICODE, static_cast<DWORD>(@<采样率>)))
     }
 
     方法 打开内存MOD音乐 <公开 类型 = 整数 注释 = "打开MOD格式的音乐数据"
@@ -802,14 +811,15 @@
             @默认值 = 0>
     参数 采样率 <类型 = 整数 注释 = "0 = 初始化时指定的采样率, 1 = 设备当前输出的采样率" @默认值 = 0>
     {
-        @ return (INT)BASS_MusicLoad (TRUE, (const BYTE*)@<内存数据>.GetPtr (), NULL, (DWORD)@<内存数据>.GetSize (), (DWORD)@<标志>, (DWORD)@<采样率>);
+        @ return static_cast<INT>(bass.BASS_MusicLoad(TRUE, @<内存数据>.GetPtr(), NULL, static_cast<DWORD>(@<内存数据>.GetSize()),
+        @                         static_cast<DWORD>(@<标志>), static_cast<DWORD>(@<采样率>)));
     }
 
     方法 释放MOD音乐 <公开 类型 = 逻辑型 注释 = "释放MOD音乐的资源,包括它拥有的任何sync/DSP/FX."
             返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 音乐句柄 <类型 = 整数 注释 = "MOD音乐的句柄">
     {
-        @ BASS_MusicFree ((HMUSIC)@<音乐句柄>)
+        @ @sn<this>.bass.BASS_MusicFree(static_cast<HMUSIC>(@<音乐句柄>))
     }
 
     # 录制设备
@@ -824,7 +834,6 @@
         {
             设备信息.加入成员 (信息)
             索引 = 索引 + 1
-
         }
         返回 (设备信息.取成员数 ())
     }
@@ -835,10 +844,10 @@
     参数 设备信息 <类型 = BASS_设备信息 注释 = "返回的设备信息">
     {
         @ BASS_DEVICEINFO info;
-        @ if (BASS_RecordGetDeviceInfo ((DWORD)@<设备号>, &info)){
-        @     if (info.name) @<设备信息.名称>.SetText (info.name);
-        @     if (info.driver) @<设备信息.驱动程序>.SetText (info.driver);
-        @     @<设备信息.标志> = (INT)info.flags;
+        @ if (bass.BASS_RecordGetDeviceInfo(static_cast<DWORD>(@<设备号>), &info)){
+        @     if (info.name) @<设备信息.名称>.SetText(info.name);
+        @     if (info.driver) @<设备信息.驱动程序>.SetText(info.driver);
+        @     @<设备信息.标志> = static_cast<INT>(info.flags);
         @     return TRUE;
         @ }
         @ return FALSE;
@@ -848,26 +857,26 @@
             返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 设备号 <类型 = 整数 注释 = "-1 = 默认设备, 0 = 第一个设备.">
     {
-        @ BASS_RecordInit ((INT)@<设备号>)
+        @ @sn<this>.bass.BASS_RecordInit(@<设备号>)
     }
 
     方法 释放录制设备 <公开 类型 = 逻辑型 注释 = "释放录制设备使用的所有资源" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
             @嵌入式方法 = "">
     {
-        @ BASS_RecordFree ()
+        @ @sn<this>.bass.BASS_RecordFree()
     }
 
     方法 置录制设备 <公开 类型 = 逻辑型 注释 = "设置当前线程后续使用的录制设备" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
             @嵌入式方法 = "">
     参数 设备号 <类型 = 整数 注释 = "要使用的设备, 0=第一个设备.">
     {
-        @ BASS_RecordSetDevice ((DWORD)@<设备号>)
+        @ @sn<this>.bass.BASS_RecordSetDevice(static_cast<DWORD>(@<设备号>))
     }
 
     方法 取录制设备 <公开 类型 = 整数 注释 = "获取当前线程使用录制设备" 返回值注释 = "成功返回设备号,失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
             @嵌入式方法 = "">
     {
-        @ BASS_RecordGetDevice ()
+        @ @sn<this>.bass.BASS_RecordGetDevice()
     }
 
     方法 取录制信息 <公开 类型 = 逻辑型 注释 = "获取当前所用录制设备的信息" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
@@ -875,8 +884,8 @@
     参数 信息 <类型 = BASS_录制信息 注释 = "返回的信息">
     {
         @ BASS_RECORDINFO info;
-        @ if (BASS_RecordGetInfo (&info)) {
-        @     @<信息>.SetStruct ((@dt<BASS_录制信息>::S*)&info);
+        @ if (bass.BASS_RecordGetInfo(&info)) {
+        @     @<信息>.SetStruct(reinterpret_cast<@dt<BASS_录制信息>::S*>(&info));
         @     return TRUE;
         @ }
         @ return FALSE;
@@ -886,9 +895,9 @@
             折叠 @禁止流程检查 = 真>
     参数 输入设备 <类型 = 整数 注释 = "0 = 第一个设备, -1 = 主设备.">
     {
-        @ const char* ret = BASS_RecordGetInputName ((INT)@<输入设备>);
+        @ const char* ret = bass.BASS_RecordGetInputName(@<输入设备>);
         @ if (ret)
-        @     return @an<CVolString> (ret);
+        @     return @an<CVolString>(ret);
         @ return _CT ("");
     }
 
@@ -898,7 +907,7 @@
     参数 是否启用 <类型 = 逻辑型 注释 = "是否启用输入">
     参数 音量 <类型 = 单精度小数 注释 = "0-1 (静音到最大音量), 少于 0 为保持当前设置.">
     {
-        @ BASS_RecordSetInput ((INT)@<输入设备>, @<是否启用> ? BASS_INPUT_ON : BASS_INPUT_OFF, @<音量>)
+        @ @sn<this>.bass.BASS_RecordSetInput(@<输入设备>, @<是否启用> ? BASS_INPUT_ON : BASS_INPUT_OFF, @<音量>)
     }
 
     方法 取录制设备设置 <公开 类型 = 整数 注释 = "获取录制输入源的当前设置" 返回值注释 = "成功返回设置值,可以与\"BASS_录制标志\"位与确定具体的设置."
@@ -906,7 +915,7 @@
     参数 输入设备 <类型 = 整数 注释 = "0 = 第一个设备, -1 = 主设备.">
     参数 音量 <类型 = 单精度小数类 注释 = "返回音量" @默认值 = 空对象>
     {
-        @ (INT)BASS_RecordGetInput (@<输入设备>, &@<音量.值>)
+        @ static_cast<INT>(@sn<this>.bass.BASS_RecordGetInput(@<输入设备>, &@<音量.值>))
     }
 
     方法 取录制设备类型 <公开 类型 = 整数 注释 = "返回录制输入设备的类型值" 返回值注释 = "请用\"BASS_录制标志\"的常量与返回值比较,以此判断输入设备的类型." 折叠>
@@ -966,7 +975,6 @@
             {
                 返回 ("模拟信号源")
             }
-
         }
         返回 ("非输入设备")
     }
@@ -978,7 +986,8 @@
     参数 标志 <类型 = 整数 注释 = "  使用\"BASS_音频标志\"类中以下部分常量的组合值:"
             注释 = "  BASS_SAMPLE_8BITS、BASS_SAMPLE_FLOAT、BASS_RECORD_PAUSE" @默认值 = 0>
     {
-        @ return (INT)BASS_RecordStart ((DWORD)@<采样率>, (DWORD)@<声道>, (DWORD)@<标志>, (RECORDPROC*)&@<录制回调函数>, this);
+        @ return static_cast<INT>(bass.BASS_RecordStart(static_cast<DWORD>(@<采样率>), static_cast<DWORD>(@<声道>),
+        @                         static_cast<DWORD>(@<标志>), reinterpret_cast<RECORDPROC*>(&@<录制回调函数>), this));
     }
 
     方法 录制回调 <公开 定义事件 类型 = 整数 注释 = "执行\"开始录制\"后,本事件会持续收到一段段的录制数据,你可以在此保存或同步回放录制数据."
@@ -1006,7 +1015,8 @@
         文件读写.移到文件首 ()
         文件读写.写出字节集 (文件头)
         文件读写.关闭文件 ()
-        @ return (INT)BASS_RecordStart ((DWORD)@<采样率>, (DWORD)@<声道>, (DWORD)@<标志>, (RECORDPROC*)&@<保存录制回调函数>, (void *)@<保存文件名>.GetText ());
+        @ return static_cast<INT>(bass.BASS_RecordStart(static_cast<DWORD>(@<采样率>), static_cast<DWORD>(@<声道>), static_cast<DWORD>(@<标志>),
+        @                         reinterpret_cast<RECORDPROC*>(&@<保存录制回调函数>), reinterpret_cast<void*>(@<保存文件名>.GetText())));
     }
 
     方法 保存录制回调函数 <静态 类型 = 逻辑型 注释 = "内部的录制的回调函数,保存录制文件." 返回值注释 = "返回真为继续录制,假为停止." 折叠>
@@ -1021,7 +1031,6 @@
         如果 (录制文件.打开文件 (文件名, 文件打开方式.改读, 文件共享方式.禁止写) == 假)
         {
             返回 (假)
-
         }
         如果 (缓冲区 != 0)
         {
@@ -1047,7 +1056,7 @@
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM、HRECORD或HSAMPLE句柄.">
     参数 位置 <类型 = 长整数 注释 = "欲转换的位置">
     {
-        @ BASS_ChannelBytes2Seconds ((DWORD)@<通道句柄>, (QWORD)@<位置>)
+        @ @sn<this>.bass.BASS_ChannelBytes2Seconds(static_cast<DWORD>(@<通道句柄>), static_cast<QWORD>(@<位置>))
     }
 
     方法 位置_秒到字节 <公开 类型 = 长整数 注释 = "将一个时间位置(秒)转换为字节位置"
@@ -1055,14 +1064,14 @@
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM、HRECORD或HSAMPLE句柄.">
     参数 位置 <类型 = 小数 注释 = "欲转换的位置">
     {
-        @ (INT64)BASS_ChannelSeconds2Bytes ((DWORD)@<通道句柄>, @<位置>)
+        @ static_cast<INT64>(@sn<this>.bass.BASS_ChannelSeconds2Bytes(static_cast<DWORD>(@<通道句柄>), @<位置>))
     }
 
     方法 取通道设备 <公开 类型 = 整数 注释 = "获取通道使用的设备" 返回值注释 = "成功返回设备号,失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
             @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM、HRECORD或HSAMPLE句柄.">
     {
-        @ (INT)BASS_ChannelGetDevice ((DWORD)@<通道句柄>)
+        @ static_cast<INT>(@sn<this>.bass.BASS_ChannelGetDevice(static_cast<DWORD>(@<通道句柄>)))
     }
 
     方法 置通道设备 <公开 类型 = 逻辑型 注释 = "更改流、MOD 音乐或样本使用的设备" 返回值注释 = "返回是否成功. 可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
@@ -1070,14 +1079,14 @@
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM、HRECORD或HSAMPLE句柄.">
     参数 设备号 <类型 = 整数 注释 = "欲使用的设备. 0=无声音, 1=第一个输出设备, BASS_NODEVICE(0x20000)=无设备.">
     {
-        @ BASS_ChannelSetDevice ((DWORD)@<通道句柄>, (DWORD)@<设备号>)
+        @ @sn<this>.bass.BASS_ChannelSetDevice(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<设备号>))
     }
 
     方法 取通道状态 <公开 类型 = 整数 注释 = "检查样本、流或MOD音乐是否处于活动(播放)或暂停状态,还可以检查是否正在录制." 注释 = "返回值请参考\"BASS_通道状态\"中的常量."
-            返回值注释 = "0=停止状态, 1=正在播放, 2=停滞(等待采样数据), 3=暂停, 4=设备已暂停." @嵌入式方法 = "">
+            返回值注释 = "0=停止状态, 1=正在播放, 2=停滞(等待采样数据), 3=暂停, 4=设备已暂停." 折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM或HRECORD句柄.">
     {
-        @ (INT)BASS_ChannelIsActive((DWORD)@<通道句柄>)
+        @ static_cast<INT>(@sn<this>.bass.BASS_ChannelIsActive(static_cast<DWORD>(@<通道句柄>)))
     }
 
     方法 取通道信息 <公开 类型 = 逻辑型 注释 = "获取通道中的信息" 返回值注释 = "返回是否成功. 可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
@@ -1085,15 +1094,15 @@
     参数 通道信息 <类型 = BASS_通道信息 注释 = "返回的通道信息">
     {
         @ BASS_CHANNELINFO info;
-        @ if (BASS_ChannelGetInfo ((DWORD)@<通道句柄>, &info)) {
-        @     @<通道信息.采样率> = (INT)info.freq;
-        @     @<通道信息.声道数> = (INT)info.chans;
-        @     @<通道信息.标志> = (INT)info.flags;
-        @     @<通道信息.通道类型> = (INT)info.ctype;
-        @     @<通道信息.原始比特率> = (INT)info.origres;
-        @     @<通道信息.插件句柄> = (INT)info.plugin;
-        @     @<通道信息.样本句柄> = (INT)info.sample;
-        @     if (info.filename) @<通道信息.文件名>.SetText (info.filename);
+        @ if (bass.BASS_ChannelGetInfo(static_cast<DWORD>(@<通道句柄>), &info)) {
+        @     @<通道信息.采样率> = static_cast<INT>(info.freq);
+        @     @<通道信息.声道数> = static_cast<INT>(info.chans);
+        @     @<通道信息.标志> = static_cast<INT>(info.flags);
+        @     @<通道信息.通道类型> = static_cast<INT>(info.ctype);
+        @     @<通道信息.原始比特率> = static_cast<INT>(info.origres);
+        @     @<通道信息.插件句柄> = static_cast<INT>(info.plugin);
+        @     @<通道信息.样本句柄> = static_cast<INT>(info.sample);
+        @     if (info.filename) @<通道信息.文件名>.SetText(info.filename);
         @     return TRUE;
         @ }
         @ return FALSE;
@@ -1102,11 +1111,11 @@
     方法 取通道标签 <公开 类型 = 变整数 注释 = "获取通道的标签或标题. 返回的数据有可能是二进制、ASCII、UTF8、数组或结构体,需要你根据标签类型从指针获取数据."
             注释 = "如果获取简单的标签,推荐使用\"取通道标签_xxx\"等一系列二次封装的版本(仅支持了部分标签类型)."
             注释 = "如果获取较复杂的标签,推荐使用\"音频标签类\",后果是多附带一个dll文件."
-            返回值注释 = "成功返回标签指针,失败返回0,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." @嵌入式方法 = "">
+            返回值注释 = "成功返回标签指针,失败返回0,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HMUSIC或HSTREAM句柄.">
     参数 标签 <类型 = 整数 注释 = "欲取的标签或标题,为\"BASS_标签类型\"的常量之一.">
     {
-        @ (INT_P)BASS_ChannelGetTags ((DWORD)@<通道句柄>, (DWORD)@<标签>)
+        @ reinterpret_cast<INT_P>(@sn<this>.bass.BASS_ChannelGetTags(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<标签>)))
     }
 
     方法 取通道标签_文本数组 <公开 类型 = 整数 注释 = "获取通道的部分返回数据为文本数组的的标签,为\"取通道标签\"的二次封装."
@@ -1117,17 +1126,17 @@
             注释 = "  BASS_TAG_MF、BASS_TAG_RIFF_INFO">
     参数 标签数组 <类型 = 文本数组类 注释 = "返回的标签/标题数组">
     {
-        @ @<标签数组>.data ().RemoveAll ();
-        @ const char *comments = BASS_ChannelGetTags ((DWORD)@<通道句柄>, (DWORD)@<标签>);
+        @ @<标签数组>.data().RemoveAll();
+        @ const char *comments = bass.BASS_ChannelGetTags(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<标签>));
         @ if (!comments) return -1;
         @ while (*comments) {
         @     if (@<标签> == BASS_TAG_HTTP || @<标签> == BASS_TAG_ICY || @<标签> == BASS_TAG_RIFF_INFO) {
-        @         @<标签数组>.data ().Add (GetWideText ((const CHAR*)comments, CVolMem(), NULL));
+        @         @<标签数组>.data().Add(GetWideText(comments, CVolMem(), NULL));
         @     else
-        @         @<标签数组>.data ().Add (Utf8ToWStr((const U8CHAR*)comments, -1, CVolMem(), NULL, NULL, TRUE)); // UTF8
+        @         @<标签数组>.data().Add(Utf8ToWStr(comments, -1, CVolMem(), NULL, NULL, TRUE)); // UTF8
         @     comments += strlen(comments) + 1;
         @ }
-        @ (INT)@<标签数组>.data ().GetCount ();
+        @ return static_cast<INT>(@<标签数组>.data().GetCount());
     }
 
     方法 取通道标签_文本 <公开 类型 = 文本型 注释 = "获取通道的部分返回数据为文本型的的标签,为\"取通道标签\"的二次封装."
@@ -1138,12 +1147,12 @@
             注释 = "  BASS_TAG_RIFF_DISP、BASS_TAG_MUSIC_NAME、BASS_TAG_MUSIC_MESSAGE、BASS_TAG_MUSIC_AUTH、"
             注释 = "  BASS_TAG_MUSIC_INST、BASS_TAG_MUSIC_CHAN、BASS_TAG_MUSIC_SAMPLE">
     {
-        @ const char *text = BASS_ChannelGetTags ((DWORD)@<通道句柄>, (DWORD)@<标签>);
+        @ const char *text = bass.BASS_ChannelGetTags(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<标签>));
         @ if (text) {
         @     if (@<标签> == BASS_TAG_VENDOR || @<标签> == BASS_TAG_MUSIC_AUTH) {
-        @         return CVolString(Utf8ToWStr((const U8CHAR*)comments, -1, CVolMem(), NULL, NULL, TRUE)); // UTF8
+        @         return CVolString(Utf8ToWStr(text, -1, CVolMem(), NULL, NULL, TRUE)); // UTF8
         @     else
-        @         return CVolString(GetWideText((const CHAR*)comments, CVolMem(), NULL));
+        @         return CVolString(GetWideText(text, CVolMem(), NULL));
         @ }
         返回 ("")
     }
@@ -1153,14 +1162,14 @@
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HMUSIC或HSTREAM句柄.">
     参数 标签 <类型 = TAG_ID3 注释 = "返回的标签信息">
     {
-        @ const TAG_ID3* ret = (const TAG_ID3*)BASS_ChannelGetTags ((DWORD)@<通道句柄>, BASS_TAG_ID3);
+        @ const TAG_ID3* ret = reinterpret_cast<const TAG_ID3*>(bass.BASS_ChannelGetTags(static_cast<DWORD>(@<通道句柄>), BASS_TAG_ID3));
         @ if (ret) {
         @     @<标签.ID> = ret->id;
-        @     @<标签.标题>.SetText (GetWideText ((const CHAR*)ret->title, CVolMem(), NULL));
-        @     @<标签.艺术家>.SetText (GetWideText ((const CHAR*)ret->artist, CVolMem(), NULL));
-        @     @<标签.专辑>.SetText (GetWideText ((const CHAR*)ret->album, CVolMem(), NULL));
-        @     @<标签.年份>.SetText (GetWideText ((const CHAR*)ret->year, CVolMem(), NULL));
-        @     @<标签.注释>.SetText (GetWideText ((const CHAR*)ret->comment, CVolMem(), NULL));
+        @     @<标签.标题>.SetText(GetWideText(ret->title, CVolMem(), NULL));
+        @     @<标签.艺术家>.SetText(GetWideText(ret->artist, CVolMem(), NULL));
+        @     @<标签.专辑>.SetText(GetWideText(ret->album, CVolMem(), NULL));
+        @     @<标签.年份>.SetText(GetWideText(ret->year, CVolMem(), NULL));
+        @     @<标签.注释>.SetText(GetWideText(ret->comment, CVolMem(), NULL));
         @     @<标签.流派> = ret->genre;
         @     return TRUE;
         @ }
@@ -1179,7 +1188,7 @@
             注释 = "  如果要添加标志,则需要在\"标志\"和\"掩码\"参数里都有一样的标志." 注释 = "  如果要移除标志,则在此参数填写要移除的标志,且确保这个标志不在\"标志参数\"中."
             注释 = "  要修改扬声器标志,可以在本参数中使用任意的\"BASS_SPEAKER_xxx\"标志(无需包括其所有标志).">
     {
-        @ (INT)BASS_ChannelFlags ((DWORD)@<通道句柄>, (DWORD)@<标志>, (DWORD)@<掩码>)
+        @ static_cast<INT>(@sn<this>.bass.BASS_ChannelFlags(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<标志>), static_cast<DWORD>(@<掩码>)))
     }
 
     方法 锁定通道 <公开 类型 = 逻辑型 注释 = "将流、MOD音乐或录制的通道锁定到当前线程,锁定后将阻止其他线程访问该通道,直至解锁."
@@ -1187,14 +1196,14 @@
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HMUSIC、HSTREAM或HRECORD句柄.">
     参数 是否锁定 <类型 = 逻辑型 注释 = "是否锁定通道" @默认值 = 真>
     {
-        @ BASS_ChannelLock ((DWORD)@<通道句柄>, @<是否锁定>)
+        @ @sn<this>.bass.BASS_ChannelLock(static_cast<DWORD>(@<通道句柄>), @<是否锁定>)
     }
 
     方法 释放通道 <公开 类型 = 逻辑型 注释 = "释放一条通道,包括通道上的一切同步器/DSP/音效."
             返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM或HRECORD句柄.">
     {
-        @ BASS_ChannelFree ((DWORD)@<通道句柄>)
+        @ @sn<this>.bass.BASS_ChannelFree(static_cast<DWORD>(@<通道句柄>))
     }
 
     方法 播放 <公开 类型 = 逻辑型 注释 = "开始或恢复播放样本、流、MOD音乐或录制." 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
@@ -1202,28 +1211,28 @@
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM或HRECORD句柄.">
     参数 重头播放 <类型 = 逻辑型 注释 = "是否重头开始播放" @默认值 = 假>
     {
-        @ BASS_ChannelPlay ((DWORD)@<通道句柄>, @<重头播放>)
+        @ @sn<this>.bass.BASS_ChannelPlay(static_cast<DWORD>(@<通道句柄>), @<重头播放>)
     }
 
     方法 开始 <公开 类型 = 逻辑型 注释 = "开始或恢复播放样本、流、MOD音乐或录制." 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
             折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM或HRECORD句柄.">
     {
-        @ BASS_ChannelStart ((DWORD)@<通道句柄>)
+        @ @sn<this>.bass.BASS_ChannelStart(static_cast<DWORD>(@<通道句柄>))
     }
 
     方法 停止 <公开 类型 = 逻辑型 注释 = "停止播放样本、流、MOD音乐或停止录制." 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
             折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM或HRECORD句柄.">
     {
-        @ BASS_ChannelStop ((DWORD)@<通道句柄>)
+        @ @sn<this>.bass.BASS_ChannelStop(static_cast<DWORD>(@<通道句柄>))
     }
 
     方法 暂停 <公开 类型 = 逻辑型 注释 = "暂停播放样本、流、MOD音乐或暂停录制,暂停后可以用\"播放\"恢复."
             返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM或HRECORD句柄.">
     {
-        @ BASS_ChannelPause ((DWORD)@<通道句柄>)
+        @ @sn<this>.bass.BASS_ChannelPause(static_cast<DWORD>(@<通道句柄>))
     }
 
     方法 更新播放缓冲 <公开 类型 = 逻辑型 注释 = "更新流或MOD音乐的播放缓冲" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
@@ -1231,7 +1240,7 @@
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HMUSIC或HSTREAM句柄.">
     参数 数据长度 <类型 = 整数 注释 = "需要渲染的数据量,单位为毫秒. 0=默认值(2个更新周期),这是缓冲区中可用空间的上限." @默认值 = 0>
     {
-        @ BASS_ChannelUpdate ((DWORD)@<通道句柄>, (DWORD)@<数据长度>)
+        @ @sn<this>.bass.BASS_ChannelUpdate(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<数据长度>))
     }
 
     方法 置通道属性 <公开 类型 = 逻辑型 注释 = "设置通道的属性值" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
@@ -1245,7 +1254,7 @@
             注释 = "  BASS_ATTRIB_TAIL、BASS_ATTRIB_VOL">
     参数 值 <类型 = 单精度小数 注释 = "新的属性值. 有关取值范围的详细信息,请参见属性的备注或文档.">
     {
-        @ BASS_ChannelSetAttribute ((DWORD)@<通道句柄>, (DWORD)@<属性>, @<值>)
+        @ @sn<this>.bass.BASS_ChannelSetAttribute(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<属性>), @<值>)
     }
 
     方法 取通道属性 <公开 类型 = 逻辑型 注释 = "获取通道的指定属性值" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
@@ -1254,7 +1263,7 @@
     参数 属性 <类型 = 整数 注释 = "要获取值的属性,为\"BASS_通道属性\"的属性之一.">
     参数 值 <类型 = 单精度小数类 注释 = "返回的属性值">
     {
-        @ BASS_ChannelGetAttribute ((DWORD)@<通道句柄>, (DWORD)@<属性>, &@<值.值>)
+        @ @sn<this>.bass.BASS_ChannelGetAttribute(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<属性>), &@<值.值>)
     }
 
     方法 置通道滑动属性 <公开 类型 = 逻辑型 注释 = "将通道的属性从其当前值滑动到新值" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
@@ -1269,7 +1278,7 @@
     参数 值 <类型 = 单精度小数 注释 = "新的属性值. 有关取值范围的详细信息,请参阅属性的备注.">
     参数 时间 <类型 = 整数 注释 = "属性改变成新值所需的时间长度(毫秒)">
     {
-        @ BASS_ChannelSlideAttribute ((DWORD)@<通道句柄>, (DWORD)@<属性>, @<值>, (DWORD)@<时间>)
+        @ @sn<this>.bass.BASS_ChannelSlideAttribute(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<属性>), @<值>, static_cast<DWORD>(@<时间>))
     }
 
     方法 通道是否滑动 <公开 类型 = 逻辑型 注释 = "检查样本、流或MOD音乐的一个属性(或所有属性)是否设置了滑动." 返回值注释 = "如果属性为滑动则返回真,否则返回假." 折叠
@@ -1281,7 +1290,7 @@
             注释 = "  BASS_ATTRIB_MUSIC_SPEED、BASS_ATTRIB_MUSIC_VOL_CHAN、BASS_ATTRIB_MUSIC_VOL_GLOBAL、"
             注释 = "  BASS_ATTRIB_MUSIC_VOL_INST">
     {
-        @ BASS_ChannelIsSliding ((DWORD)@<通道句柄>, (DWORD)@<属性>)
+        @ @sn<this>.bass.BASS_ChannelIsSliding(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<属性>))
     }
 
     方法 置通道属性EX <公开 类型 = 逻辑型 注释 = "设置通道的属性值" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
@@ -1291,7 +1300,7 @@
     参数 值 <类型 = 变整数 注释 = "新的属性数据">
     参数 尺寸 <类型 = 整数 注释 = "属性数据的大小(单位为字节)">
     {
-        @ BASS_ChannelSetAttributeEx ((DWORD)@<通道句柄>, (DWORD)@<属性>, &@<值>, (DWORD)@<尺寸>)
+        @ @sn<this>.bass.BASS_ChannelSetAttributeEx(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<属性>), &@<值>, static_cast<DWORD>(@<尺寸>))
     }
 
     方法 取通道属性EX <公开 类型 = 整数 注释 = "获取通道的指定属性值" 返回值注释 = "成功返回属性数据的大小,失败返回0,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
@@ -1301,7 +1310,7 @@
     参数 值 <类型 = 变整数 注释 = "获取属性数据的指针">
     参数 尺寸 <类型 = 整数 注释 = "属性数据的大小(单位为字节),为0则仅获取属性的大小而不获取数据.">
     {
-        @ (INT)BASS_ChannelGetAttributeEx ((DWORD)@<通道句柄>, (DWORD)@<属性>, &@<值>, (DWORD)@<尺寸>)
+        @ static_cast<INT>(@sn<this>.bass.BASS_ChannelGetAttributeEx(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<属性>), &@<值>, static_cast<DWORD>(@<尺寸>)))
     }
 
     方法 置通道空间属性 <公开 类型 = 逻辑型 注释 = "设置具有3D空间音效功能的样本、流或MOD音乐通道的3D属性."
@@ -1317,7 +1326,7 @@
     参数 外投影角度 <类型 = 整数 注释 = "外投影圆锥体的角度,单位为度. 0(无圆锥体)到360(球体),-1为保持当前状态.">
     参数 外投影音量 <类型 = 单精度小数 注释 = "外部投影圆锥体外的音量. 0(无声)到1(与圆锥体内部相同),少于等于0为保持当前状态.">
     {
-        @ BASS_ChannelSet3DAttributes ((DWORD)@<通道句柄>, @<三维模式>, @<最小距离>, @<最大距离>, @<内投影角度>, @<外投影角度>, @<外投影音量>)
+        @ @sn<this>.bass.BASS_ChannelSet3DAttributes(static_cast<DWORD>(@<通道句柄>), @<三维模式>, @<最小距离>, @<最大距离>, @<内投影角度>, @<外投影角度>, @<外投影音量>)
     }
 
     方法 取通道空间属性 <公开 类型 = 逻辑型 注释 = "获取具有3D空间音效功能的样本、流或MOD音乐通道的3D属性."
@@ -1333,20 +1342,21 @@
     参数 外投影角度 <类型 = 整数类 注释 = "外投影圆锥体的角度,单位为度. 参数留空为不获取." @默认值 = 空对象>
     参数 外投影音量 <类型 = 单精度小数类 注释 = "外部投影圆锥体外的音量. 参数留空为不获取." @默认值 = 空对象>
     {
-        @ BASS_ChannelGet3DAttributes ((DWORD)@<通道句柄>, &@<三维模式.值>, &@<最小距离.值>, &@<最大距离.值>, &@<内投影角度.值>, &@<外投影角度.值>, &@<外投影音量.值>)
+        @ @sn<this>.bass.BASS_ChannelGet3DAttributes(static_cast<DWORD>(@<通道句柄>), &@<三维模式.值>, &@<最小距离.值>, &@<最大距离.值>,
+        @                                            &@<内投影角度.值>, &@<外投影角度.值>, &@<外投影音量.值>)
     }
 
     方法 置通道空间位置 <公开 类型 = 逻辑型 注释 = "设置具有3D空间音效功能的样本、流或MOD音乐通道的3D位置."
-            返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
+            返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC或HSTREAM句柄.">
     参数 位置 <类型 = BASS_3D矢量 注释 = "声音的位置,参数留空为保持当前设置." @默认值 = 空对象>
     参数 指向 <类型 = BASS_3D矢量 注释 = "声音的指向,参数留空为保持当前设置." 注释 = "此项会自动规范化." @默认值 = 空对象>
     参数 速度 <类型 = BASS_3D矢量 注释 = "  声音的速度,参数留空为保持当前设置." 注释 = "  仅用于计算多普勒效应,对声音的位置没有影响." @默认值 = 空对象>
     {
-        @ BASS_ChannelSet3DPosition ((DWORD)@<通道句柄>,
-        @                            @<位置>.IsNullObject () ? NULL : @<位置>.pdata (),
-        @                            @<指向>.IsNullObject () ? NULL : @<指向>.pdata (),
-        @                            @<速度>.IsNullObject () ? NULL : @<速度>.pdata ())
+        @ return bass.BASS_ChannelSet3DPosition(static_cast<DWORD>(@<通道句柄>),
+        @                                       @<位置>.IsNullObject() ? NULL : @<位置>.pdata(),
+        @                                       @<指向>.IsNullObject() ? NULL : @<指向>.pdata(),
+        @                                       @<速度>.IsNullObject() ? NULL : @<速度>.pdata())
     }
 
     方法 取通道空间位置 <公开 类型 = 逻辑型 注释 = "获取具有3D空间音效功能的样本、流或MOD音乐通道的3D位置."
@@ -1356,7 +1366,7 @@
     参数 指向 <类型 = BASS_3D矢量 注释 = "声音的指向,参数留空为不获取." @默认值 = 空对象>
     参数 速度 <类型 = BASS_3D矢量 注释 = "声音的速度,参数留空为不获取." @默认值 = 空对象>
     {
-        @ BASS_ChannelGet3DPosition ((DWORD)@<通道句柄>, @<位置>.pdata (), @<指向>.pdata (), @<速度>.pdata ())
+        @ @sn<this>.bass.BASS_ChannelGet3DPosition(static_cast<DWORD>(@<通道句柄>), @<位置>.pdata(), @<指向>.pdata(), @<速度>.pdata())
     }
 
     方法 取通道长度 <公开 类型 = 长整数 注释 = "获取通道的播放总长度" 返回值注释 = "成功返回通道长度,失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
@@ -1366,7 +1376,7 @@
             注释 = "  1 = BASS_POS_MUSIC_ORDER,获取顺序长度(仅限MOD音乐)." 注释 = "  3 = BASS_POS_OGG,获取OGG文件中的比特流数."
             @默认值 = BASS_位置类型.BASS_POS_BYTE>
     {
-        @ (INT64)BASS_ChannelGetLength ((DWORD)@<通道句柄>, (DWORD)@<位置模式>)
+        @ static_cast<INT64>(@sn<this>.bass.BASS_ChannelGetLength(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<位置模式>)))
     }
 
     方法 置播放位置 <公开 类型 = 逻辑型 注释 = "设置样本、MOD音乐或流的播放位置." 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
@@ -1377,7 +1387,7 @@
             注释 = "  可选位或\"BASS_位置类型\"的所有标志,再额外加上\"BASS_音频标志\"的BASS_MUSIC_POSRESET、BASS_MUSIC_POSRESETEX标志"
             @默认值 = BASS_位置类型.BASS_POS_BYTE>
     {
-        @ BASS_ChannelSetPosition ((DWORD)@<通道句柄>, (QWORD)@<播放位置>, (DWORD)@<位置模式>)
+        @ @sn<this>.bass.BASS_ChannelSetPosition(static_cast<DWORD>(@<通道句柄>), static_cast<QWORD>(@<播放位置>), static_cast<DWORD>(@<位置模式>))
     }
 
     方法 取播放位置 <公开 类型 = 长整数 注释 = "获取样本、流或MOD音乐的播放位置,也可以在录制通道上使用."
@@ -1387,7 +1397,7 @@
             注释 = "  1 = BASS_POS_MUSIC_ORDER,获取顺序长度(仅限MOD音乐)" 注释 = "  可选位或标志 BASS_POS_DECODE."
             @默认值 = BASS_位置类型.BASS_POS_BYTE>
     {
-        @ (INT64)BASS_ChannelGetPosition ((DWORD)@<通道句柄>, (DWORD)@<位置模式>)
+        @ static_cast<INT64>(@sn<this>.bass.BASS_ChannelGetPosition(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<位置模式>)))
     }
 
     方法 取通道电平 <公开 类型 = 整数 注释 = "获取样本、流、MOD音乐或录制的通道级别(峰值振幅)."
@@ -1396,7 +1406,7 @@
             返回值注释 = "该级别的线性范围为0(无声)到32768(最大).通道暂停时将返回0." 折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM或HRECORD句柄.">
     {
-        @ (INT)BASS_ChannelGetLevel ((DWORD)@<通道句柄>)
+        @ static_cast<INT>(@sn<this>.bass.BASS_ChannelGetLevel(static_cast<DWORD>(@<通道句柄>)))
     }
 
     方法 取立体声电平 <公开 类型 = 逻辑型 注释 = "获取样本、流、MOD音乐或录制的通道级别(峰值振幅),本方法用于返回立体声的左右声道电平." 返回值注释 = "返回是否成功." 折叠 "">
@@ -1415,7 +1425,6 @@
             左声道.值 = 位与 (电平, 0xFFFF)
             右声道.值 = 位右移 (电平, 16)
             返回 (真)
-
         }
         返回 (假)
     }
@@ -1429,24 +1438,19 @@
     参数 是否RMS级别 <类型 = 逻辑型 注释 = "假为获取电平级别,真为获取RMS(均方根值)级别." @默认值 = 假>
     参数 应用属性 <类型 = 逻辑型 注释 = "为真时将当前的BASS_ATTRIB_VOL和BASS_ATTRIB_PAN值应用于电平级别中." @默认值 = 假>
     {
-        电平数据.删除所有成员 ()
-        @ BOOL ret;
         @ DWORD flags = @<声道>;
         @ if (@<是否RMS级别>) flags |= BASS_LEVEL_RMS;
         @ if (@<应用属性>) flags |= BASS_LEVEL_VOLPAN;
         @ if (@<声道> == 1) {
         @     @<电平数据>.data().InitCount (1, TRUE);
-        @     ret = BASS_ChannelGetLevelEx ((DWORD)@<通道句柄>, (float*)@<电平数据>.data().GetData(), @<数据长度>, flags);
         @ } else if (@<声道> == 2) {
         @     @<电平数据>.data().InitCount (2, TRUE);
-        @     ret = BASS_ChannelGetLevelEx ((DWORD)@<通道句柄>, (float*)@<电平数据>.data().GetData(), @<数据长度>, flags);
         @ } else {
         @     BASS_CHANNELINFO ci;
         @     BASS_ChannelGetInfo (@<通道句柄>, &ci);
-        @     @<电平数据>.data().InitCount (ci.chans, TRUE);
-        @     ret = BASS_ChannelGetLevelEx ((DWORD)@<通道句柄>, (float*)@<电平数据>.data().GetData(), @<数据长度>, flags);
+        @     @<电平数据>.data().InitCount(ci.chans, TRUE);
         @ }
-        @ return ret;
+        @ return bass.BASS_ChannelGetLevelEx(static_cast<DWORD>(@<通道句柄>), @<电平数据>.data().GetData(), @<数据长度>, flags);
     }
 
     方法 取通道数据 <公开 类型 = 整数 注释 = "获取样本、流、MOD音乐或录制通道的即时样本数据(或其FFT信号)"
@@ -1457,7 +1461,7 @@
     参数 缓冲区 <类型 = 变整数 注释 = "  用来接收数据的缓冲区指针." 注释 = "  当句柄是录制句柄(HRECORD)时,可以为0,以丢弃从录制缓冲区请求的数据." "">
     参数 长度 <类型 = 整数 注释 = "填写要获取的数据字节数(最多268435455或0xFFFFFFF),也可以使用\"BASS_通道数据类型\"中常量的组合值." "">
     {
-        @ (INT)BASS_ChannelGetData ((DWORD)@<通道句柄>, (void*)@<缓冲区>, (DWORD)@<长度>)
+        @ static_cast<INT>(@sn<this>.bass.BASS_ChannelGetData(static_cast<DWORD>(@<通道句柄>), reinterpret_cast<void*>(@<缓冲区>), static_cast<DWORD>(@<长度>)))
     }
 
     方法 取通道数据2 <公开 类型 = 整数 注释 = "获取样本、流、MOD音乐或录制通道的即时样本数据(或其FFT信号)."
@@ -1519,7 +1523,7 @@
             缓冲区长度 = 长度  // 不是FFT,则使用长度参数中的数值
         }
         缓冲区.分配字节集 (缓冲区长度)
-        @ return (INT)BASS_ChannelGetData ((DWORD)@<通道句柄>, (void*)@<缓冲区>.GetPtr (), (DWORD)@<长度>);
+        @ return static_cast<INT>(bass.BASS_ChannelGetData(static_cast<DWORD>(@<通道句柄>), reinterpret_cast<void*>(@<缓冲区>.GetPtr()), static_cast<DWORD>(@<长度>)));
     }
 
     方法 同步回调 <公开 定义事件 类型 = 整数 注释 = "执行\"置通道同步器\",可以在本事件中处理同步回调." 返回值注释 = "返回值无意义" 折叠>
@@ -1533,7 +1537,8 @@
     参数 同步类型 <类型 = 整数 注释 = "同步的类型, 为\"BASS_同步类型\"中常量的组合值.">
     参数 同步参数 <类型 = 长整数 注释 = "设置同步参数. 参数值取决于同步类型,详细请看\"BASS_同步类型\"的常量备注.">
     {
-        @ return (INT)BASS_ChannelSetSync ((DWORD)@<通道句柄>, (DWORD)@<同步类型>, (QWORD)@<同步参数>, (SYNCPROC*)&@<同步回调函数>, this);
+        @ return static_cast<INT>(bass.BASS_ChannelSetSync(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<同步类型>),
+        @                         static_cast<QWORD>(@<同步参数>), reinterpret_cast<SYNCPROC*>(&@<同步回调函数>), this));
     }
 
     方法 移除通道同步器 <公开 类型 = 逻辑型 注释 = "从MOD音乐、流或录制的通道上移除同步器."
@@ -1541,7 +1546,7 @@
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HMUSIC、HSTREAM或HRECORD句柄.">
     参数 同步句柄 <类型 = 整数 注释 = "欲移除的同步句柄">
     {
-        @ BASS_ChannelRemoveSync ((DWORD)@<通道句柄>, (HSYNC)@<同步句柄>)
+        @ @sn<this>.bass.BASS_ChannelRemoveSync(static_cast<DWORD>(@<通道句柄>), static_cast<HSYNC>(@<同步句柄>))
     }
 
     方法 置通道链接 <公开 类型 = 逻辑型 注释 = "将两条MOD音乐或流通道链接在一起,然后可以同时播放两条通道."
@@ -1549,7 +1554,7 @@
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HMUSIC或HSTREAM句柄.">
     参数 链接通道 <类型 = 整数 注释 = "想要链接的通道句柄,可以是HMUSIC或HSTREAM句柄.">
     {
-        @ BASS_ChannelSetLink ((DWORD)@<通道句柄>, (DWORD)@<链接通道>)
+        @ @sn<this>.bass.BASS_ChannelSetLink(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<链接通道>))
     }
 
     方法 移除通道链接 <公开 类型 = 逻辑型 注释 = "移除两条MOD音乐或流通道的链接状态"
@@ -1557,7 +1562,7 @@
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HMUSIC或HSTREAM句柄.">
     参数 已链接通道 <类型 = 整数 注释 = "想要解除链接的通道句柄,可以是HMUSIC或HSTREAM句柄.">
     {
-        @ BASS_ChannelRemoveLink ((DWORD)@<通道句柄>, (DWORD)@<已链接通道>)
+        @ @sn<this>.bass.BASS_ChannelRemoveLink(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<已链接通道>))
     }
 
     方法 DSP回调 <公开 定义事件 类型 = 整数 注释 = "执行\"置通道DSP功能\"后,可以在本事件自定义的DSP功能." 返回值注释 = "缓冲区的数据长度" 折叠>
@@ -1572,7 +1577,7 @@
     参数 优先级 <类型 = 整数 注释 = "新DSP的优先级决定了其在DSP链中的位置,优先级较高的DSP优先被调用.">
     参数 用户数据 <类型 = 变整数 注释 = "传递给回调函数的用户自定义数据,在接收事件中返回" @默认值 = 0>
     {
-        @ return (INT)BASS_ChannelSetDSP ((DWORD)@<通道句柄>, (DSPPROC*)&@<DSP回调函数>, this, (INT)@<优先级>);
+        @ return static_cast<INT>(bass.BASS_ChannelSetDSP(static_cast<DWORD>(@<通道句柄>), reinterpret_cast<DSPPROC*>(&@<DSP回调函数>), this, @<优先级>));
     }
 
     方法 移除通道DSP <公开 类型 = 逻辑型 注释 = "从流、MOD 音乐或录制的通道上移除DSP功能."
@@ -1580,7 +1585,7 @@
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HMUSIC、HSTREAM或HRECORD句柄">
     参数 DSP句柄 <类型 = 整数 注释 = "欲移除DSP功能的句柄,也可以用一个HFX句柄来移除音效.">
     {
-        @ BASS_ChannelRemoveDSP ((DWORD)@<通道句柄>, (HDSP)@<DSP句柄>)
+        @ @sn<this>.bass.BASS_ChannelRemoveDSP(static_cast<DWORD>(@<通道句柄>), static_cast<HDSP>(@<DSP句柄>))
     }
 
     方法 置通道音效 <公开 类型 = 整数 注释 = "在流、MOD 音乐或录制的通道上设置音效."
@@ -1589,7 +1594,7 @@
     参数 效果类型 <类型 = 整数 注释 = "使用\"BASS_音效类型\"的常量之一,之后要用对应的结构体来获取和设置参数.">
     参数 优先级 <类型 = 整数 注释 = "新音效的优先级决定了其在DSP链中的位置,优先级较高的DSP/FX优先被调用." @默认值 = 0>
     {
-        @ (INT)BASS_ChannelSetFX ((DWORD)@<通道句柄>, (DWORD)@<效果类型>, (DWORD)@<优先级>)
+        @ static_cast<INT>(@sn<this>.bass.BASS_ChannelSetFX(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<效果类型>), static_cast<DWORD>(@<优先级>)))
     }
 
     方法 移除通道音效 <公开 类型 = 逻辑型 注释 = "从流、MOD 音乐或录制的通道上移除FX音效."
@@ -1597,7 +1602,7 @@
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HSTREAM、HMUSIC或HRECORD句柄.">
     参数 音效句柄 <类型 = 整数 注释 = "欲移除音效的句柄,也可以用一个DSP句柄来DSP功能.">
     {
-        @ BASS_ChannelRemoveFX (@<通道句柄>, (HFX)@<音效句柄>)
+        @ @sn<this>.bass.BASS_ChannelRemoveFX(@<通道句柄>, static_cast<HFX>(@<音效句柄>))
     }
 
     方法 置音效参数 <公开 类型 = 逻辑型 注释 = "设置音效的具体参数" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
@@ -1609,7 +1614,7 @@
             注释 = "  BASS_DX8_FLANGER、BASS_DX8_GARGLE、BASS_DX8_I3DL2REVERB、BASS_DX8_PARAMEQ、"
             注释 = "  BASS_DX8_REVERB、BASS_FX_VOLUME_PARAM">
     {
-        @ BASS_FXSetParameters ((HFX)@<音效句柄>, (const void *)@<参数>)
+        @ @sn<this>.bass.BASS_FXSetParameters(static_cast<HFX>(@<音效句柄>), reinterpret_cast<const void *>(@<参数>))
     }
 
     方法 取音效参数 <公开 类型 = 逻辑型 注释 = "获取音效的具体参数" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
@@ -1621,7 +1626,7 @@
             注释 = "  BASS_DX8_FLANGER、BASS_DX8_GARGLE、BASS_DX8_I3DL2REVERB、BASS_DX8_PARAMEQ、"
             注释 = "  BASS_DX8_REVERB、BASS_FX_VOLUME_PARAM">
     {
-        @ BASS_FXGetParameters ((HFX)@<音效句柄>, @<参数>)
+        @ @sn<this>.bass.BASS_FXGetParameters(static_cast<HFX>(@<音效句柄>), reinterpret_cast<void*>(@<参数>))
     }
 
     方法 置音效优先级 <公开 类型 = 逻辑型 注释 = "设置音效或DSP功能的优先级,从而确定其在DSP链中的位置."
@@ -1629,14 +1634,14 @@
     参数 句柄 <类型 = 整数 注释 = "DSP或音效的句柄">
     参数 优先级 <类型 = 整数 注释 = "新音效的优先级决定了其在DSP链中的位置,优先级较高的DSP/FX优先被调用.">
     {
-        @ BASS_FXSetPriority ((HFX)@<句柄>, (int)@<优先级>)
+        @ @sn<this>.bass.BASS_FXSetPriority(static_cast<HFX>(@<句柄>), @<优先级>)
     }
 
     方法 重置音效 <公开 类型 = 逻辑型 注释 = "重置通道上的单个或所有音效的状态" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
             @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HFX、HSTREAM、HMUSIC或HRECORD句柄.">
     {
-        @ BASS_FXReset ((DWORD)@<通道句柄>)
+        @ @sn<this>.bass.BASS_FXReset(static_cast<DWORD>(@<通道句柄>))
     }
 
     # 内部使用的回调方法
@@ -1732,70 +1737,49 @@
     方法 更新格式过滤器 <注释 = "本方法为\"加载插件目录\"和\"浏览音乐文件\"的辅助功能." 折叠>
     参数 插件信息数组 <类型 = BASS_插件信息数组 注释 = "留空为自动重新获取插件的信息">
     {
-        变量 所有格式 <类型 = 文本型>
-        变量 单一格式 <类型 = 文本型>
-        所有格式 = "所有文件(*.*)|*.*|所有支持的音乐格式|*.mp3;*.mp2;*.mp1;*.ogg;*.wav;*.aiff;*.xm;*.it;*.s3m;*.mod;*.mtm;*.umx"
-        单一格式 = "基本格式(*.mp3;*.mp2;*.mp1;*.ogg;*.wav;*.aiff)|*.mp3;*.mp2;*.mp1;*.ogg;*.wav;*.aiff|MOD音乐(*.xm;*.it;*.s3m;*.mod;*.mtm;*.umx)|*.xm;*.it;*.s3m;*.mod;*.mtm;*.umx"
+        变量 所有格式 <类型 = 文本型
+                值 = "所有文件(*.*)|*.*|所有支持的音乐格式|*.mp3;*.mp2;*.mp1;*.ogg;*.wav;*.aiff;*.xm;*.it;*.s3m;*.mod;*.mtm;*.umx">
+        变量 单一格式 <类型 = 文本型
+                值 = "基本格式(*.mp3;*.mp2;*.mp1;*.ogg;*.wav;*.aiff)|*.mp3;*.mp2;*.mp1;*.ogg;*.wav;*.aiff|MOD音乐(*.xm;*.it;*.s3m;*.mod;*.mtm;*.umx)|*.xm;*.it;*.s3m;*.mod;*.mtm;*.umx">
         插件信息数组.枚举循环 ()
         {
             变量 索引 <类型 = 整数>
             索引 = BASS_插件信息数组.取枚举索引 ()
             插件信息数组.取成员 (索引).支持格式.枚举循环 ()
             {
-                加入文本 (单一格式, "|" + 插件信息数组.取成员 (索引).支持格式.取枚举值 ().格式描述 + "(" + 插件信息数组.取成员 (索引).支持格式.取枚举值 ().格式扩展名 + ")|" + 插件信息数组.取成员 (索引).支持格式.取枚举值 ().格式扩展名)
-                加入文本 (所有格式, ";" + 插件信息数组.取成员 (索引).支持格式.取枚举值 ().格式扩展名)
-
+                加入格式文本 (单一格式, "|%s(%s)|", 插件信息数组.取成员 (索引).支持格式.取枚举值 ().格式描述, 插件信息数组.取成员 (索引).支持格式.取枚举值 ().格式扩展名)
+                加入格式文本 (所有格式, ";%s", 插件信息数组.取成员 (索引).支持格式.取枚举值 ().格式扩展名)
             }
-
         }
-        格式过滤器 = 文本到字节集 (所有格式 + "|" + 单一格式)
-        格式过滤器.子字节集替换 (文本到字节集 ("|"), 创建字节集 (0, 0))
-        格式过滤器.添加值到字节集 (0)
+        加入文本 (格式过滤器, 所有格式)
+        加入字符 (格式过滤器, '|')
+        加入文本 (格式过滤器, 单一格式)
     }
 
     方法 浏览音乐文件 <公开 类型 = 整数 注释 = "调用系统的文件对话框选择打开音乐文件，允许多选,返回到文本数组类" 注释 = "请务必用\"加载插件目录\"来加载插件,本方法才能自动处理格式支持."
-            返回值注释 = "返回音乐文件名的数量,失败或未选择返回0" @禁止流程检查 = 真>
+            返回值注释 = "返回音乐文件名的数量,失败或未选择返回0" 折叠>
     参数 父窗口句柄 <类型 = 变整数 注释 = "父窗口的句柄,0=表示无父窗口" @默认值 = 0>
     参数 文件名列表 <类型 = 文本数组类 注释 = "返回的文件名数组">
     参数 标题 <类型 = 文本型 注释 = "文件对话框的标题,默认为\"打开\"" @默认值 = "添加音乐文件">
     参数 初始目录 <类型 = 文本型 注释 = "留空为程序的运行文件夹" @默认值 = 空对象>
     {
-        如果 (格式过滤器.取字节集长度 () < 10)  // 如果全局变量"格式过滤器"为空,表示没有加载插件,使用默认的过滤器
+        如果 (文本是否为空 (格式过滤器))  // 如果全局变量"格式过滤器"为空,表示没有加载插件,使用默认的过滤器
         {
-            格式过滤器 = 文本到字节集 ("所有文件(*.*)|*.*|所有支持的音乐格式|*.mp3;*.mp2;*.mp1;*.ogg;*.wav;*.aiff;*.xm;*.it;*.s3m;*.mod;*.mtm;*.umx|基本格式(*.mp3;*.mp2;*.mp1;*.ogg;*.wav;*.aiff)|*.mp3;*.mp2;*.mp1;*.ogg;*.wav;*.aiff|MOD音乐(*.xm;*.it;*.s3m;*.mod;*.mtm;*.umx)|*.xm;*.it;*.s3m;*.mod;*.mtm;*.umx")
-            格式过滤器.子字节集替换 (文本到字节集 ("|"), 创建字节集 (0, 0))
-            格式过滤器.添加值到字节集 (0)
-
+            变量 默认过滤器 <类型 = 文本型
+                    值 = "所有文件(*.*)|*.*|所有支持的音乐格式|*.mp3;*.mp2;*.mp1;*.ogg;*.wav;*.aiff;*.xm;*.it;*.s3m;*.mod;*.mtm;*.umx|基本格式(*.mp3;*.mp2;*.mp1;*.ogg;*.wav;*.aiff)|*.mp3;*.mp2;*.mp1;*.ogg;*.wav;*.aiff|MOD音乐(*.xm;*.it;*.s3m;*.mod;*.mtm;*.umx)|*.xm;*.it;*.s3m;*.mod;*.mtm;*.umx">
+            格式过滤器 = 默认过滤器
         }
-        文件名列表.删除所有成员 ()  // 清空数组
-        @ OPENFILENAMEW ofn{0};
-        @ ofn.lStructSize = sizeof(OPENFILENAMEW);
-        @ ofn.hwndOwner = @<父窗口句柄> ? (HWND)@<父窗口句柄> : NULL;
-        @ ofn.lpstrFilter = (LPCWSTR)@<格式过滤器>.GetPtr ();
-        @ ofn.lpstrInitialDir = @<初始目录>.IsEmpty () ? NULL : @<初始目录>.GetText ();
-        @ WCHAR szBuffer[MAX_PATH * 512] { 0 }; // 这个缓冲区大小保守可以打开1000-2000个文件
-        @ ofn.lpstrFile = szBuffer;
-        @ ofn.lpstrTitle = @<标题>.IsEmpty () ? NULL : @<标题>.GetText ();
-        @ ofn.nMaxFile = sizeof (szBuffer);
-        @ ofn.nFilterIndex = 0;
-        @ ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_ALLOWMULTISELECT;
-        @ if (::GetOpenFileNameW (&ofn))
-        @ {
-        @     @an<CVolString> szPath {szBuffer, ofn.nFileOffset};
-        @     szPath.CheckAddPathChar ();
-        @     WCHAR* p = szBuffer + ofn.nFileOffset; // 把指针移到第一个文件
-        @     while (*p)
-        @     {
-        @         @an<CVolString> szFileName;
-        @         szFileName.AddText (szPath);
-        @         szFileName.AddText (p);
-        @         @<文件名列表>.data ().Add (szFileName);
-        @         p += wcslen (p) + 1; // 移至下一个文件
-        @     }
-        @     return (INT)@<文件名列表>.data ().GetCount ();
-        @ }
-        @ return 0;
+        返回 (通用文件对话框.打开选择多个文件 (文件名列表, 格式过滤器, 父窗口句柄, 标题, 0, 初始目录, 假))
     }
+
+    # @begin
+    # <> <include>
+    # BassDll & bass = BassDll::data();
+    # inline void @an<_OnInitExtra>() {
+    #     ASSERT(bass.Load() == TRUE);
+    # }
+    # <> </include>
+    # @end
 }
 
 类 BASS辅助类 <公开 注释 = "BASS用到的一些辅助方法." 折叠 @禁止创建对象 = 真>
@@ -2207,7 +2191,7 @@
     }
 }
 
-类 BASS_配置选项 <公开 注释 = "\"置配置选项/BASS_SetConfig\"的选项,含部分扩展的配置" 折叠 @文档 = "category = \"辅助类\"">
+类 BASS_配置选项 <公开 注释 = "\"置配置选项/BASS_SetConfig\"的选项,含部分扩展的配置" @文档 = "category = \"辅助类\"">
 {
     常量 BASS_CONFIG_BUFFER <公开 类型 = 整数 值 = @BASS_CONFIG_BUFFER 注释 = "流(HSTREAM)和MOD音乐(HMUSIC)通道的播放缓冲区长度."
             注释 = "参数: 缓冲区长度(单位为毫秒),最小长度为10ms,最大长度为5000ms,如果指定的长度超出此范围,则会自动将其封顶."
@@ -2406,6 +2390,7 @@
             注释 = "参数: OpenSSL库的文件名指针,NULL=使用默认值">
     常量 BASS_CONFIG_FILENAME <公开 类型 = 整数 值 = @BASS_CONFIG_FILENAME 注释 = "这是一个只读配置选项,用于获取加载的BASS库的完整路径.">
     常量 BASS_CONFIG_THREAD <公开 类型 = 整数 值 = @BASS_CONFIG_THREAD 注释 = "标志: 将设置限定在当前线程中">
+    常量 BASS_UNICODE <公开 类型 = 整数 值 = @BASS_UNICODE 注释 = "使用UTF-16编码的文本">
 }
 
 类 BASS_设备标志 <公开 注释 = "\"初始化/BASS_Init\"时使用的标志" 折叠 @文档 = "category = \"辅助类\"">
@@ -2547,7 +2532,7 @@
 
 类 BASS_扬声器分配标志 <公开 注释 = "如今大多数声卡的输出能力不仅仅是普通的立体声. 为了利用这一点,可以将HSTREAM和HMUSIC通道分配给特定的扬声器."
         注释 = "例如,可以在前置或后置扬声器上播放通道,从而有效地从一个设备获得两个独立的立体声输出." 注释 = "5.1声卡上有第三个立体声输出，7.1声卡上有四个立体声输出."
-        注释 = "\"BASS_信息\"类的\"扬声器数量\"成员可用于检查有多少扬声器可用." @文档 = "category = \"辅助类\"">
+        注释 = "\"BASS_信息\"类的\"扬声器数量\"成员可用于检查有多少扬声器可用." 折叠 @文档 = "category = \"辅助类\"">
 {
     常量 BASS_SPEAKER_FRONT <公开 类型 = 整数 值 = @BASS_SPEAKER_FRONT 注释 = "立体声标志: 前置扬声器">
     常量 BASS_SPEAKER_REAR <公开 类型 = 整数 值 = @BASS_SPEAKER_REAR 注释 = "立体声标志: 后/侧扬声器">
@@ -3216,7 +3201,7 @@
     }
 }
 
-类 BASS_FX_VOLUME_PARAM <公开 基础类 = 扩展对象类 注释 = "BASS_FX_VOLUME_PARAM 音量级别调节音效的结构类" 折叠
+类 BASS_FX_VOLUME_PARAM <公开 基础类 = 扩展对象类 注释 = "BASS_FX_VOLUME_PARAM 音量级别调节音效的结构类" 注释 = "" 折叠
         @文档 = "category = \"辅助类\"" @视窗.结构类 = 0>
 {
     变量 目标音量 <公开 类型 = 单精度小数 注释 = "新的音量级别. 0=静音,1.0=正常,大于1.0=放大. 默认值为1.">

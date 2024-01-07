@@ -6,21 +6,17 @@
 
 类 编码辅助类 <公开 注释 = "编码和进制相关的全局辅助方法" 折叠 @文档 = "category = \"编码处理\"" @禁止创建对象 = 真 @全局类 = 真>
 {
-    方法 取整数值位数 <公开 静态 类型 = 整数 注释 = "计算整数值的十进制位数. 比如1000的位数是4." 返回值注释 = "返回大于0的位数,比如0的位数也是1." 折叠 @嵌入式方法 = "">
+    方法 取整数值位数 <公开 静态 类型 = 整数 注释 = "计算整数值的十进制位数,比如0的位数是1,1000的位数是4," 折叠 @嵌入式方法 = "">
     参数 整数值 <注释 = "所欲取位数的数值,可以提供字节、字符、短整数、整数、长整数等类型." @匹配类型 = 通用整数型>
     {
-        @ [](auto v) {
-        @     v /= 10; INT count = 1;
-        @     while (v) { v /= 10; count++; }
-        @     return count;
-        @ } (@<整数值>)
+        @ @sn<current_class_def>::GetValueDigit(@<整数值>)
     }
 
     方法 小数向上取整 <公开 静态 类型 = 整数 注释 = "返回一个小数的整数部分,本方法返回大于所欲处理的小数值的最小整数."
             注释 = "例如,将 7.3 转换 成 8, 将 -7.3 转换成 -7." 折叠 @嵌入式方法 = "">
     参数 所欲处理的小数值 <类型 = 小数>
     {
-        @ (INT)ceil (@<所欲处理的小数值>)
+        @ (INT)ceil(@<所欲处理的小数值>)
     }
 
     方法 合并长整数 <公开 静态 类型 = 长整数 注释 = "  将第一个整数放置到结果长整数的低32位,将第二个整数放置到结果" 注释 = "长整数的高32位,以此合并成一个长整数,并返回合并后的结果."
@@ -28,13 +24,13 @@
     参数 用作合并的整数1 <类型 = 整数>
     参数 用作合并的整数2 <类型 = 整数>
     {
-        @ ((INT64) (((INT)@<用作合并的整数1>) | ((INT64) ((INT)@<用作合并的整数2>)) << 32))
+        @ (((INT64>)@<用作合并的整数1>) | ((INT64)@<用作合并的整数2> << 32))
     }
 
     方法 取高32位 <公开 静态 类型 = 整数 注释 = "获取64位长整数的高32位,对应\"合并长整数\"." 折叠 @嵌入式方法 = "">
     参数 欲取位的值 <类型 = 长整数>
     {
-        @ ((INT) (((INT64) (@<欲取位的值>) >> 32) & 0xFFFFFFFF))
+        @ ((INT)(((INT64) (@<欲取位的值>) >> 32) & 0xFFFFFFFF))
     }
 
     方法 取低32位 <公开 静态 类型 = 整数 注释 = "获取64位长整数的低32位,对应\"合并长整数\"." 折叠 @嵌入式方法 = "">
@@ -47,55 +43,52 @@
             注释 = "#define HIWORD(l)   ((WORD) (((DWORD) (l) >> 16) & 0xFFFF))" 折叠 @嵌入式方法 = "">
     参数 欲取位的值 <类型 = 整数>
     {
-        @ (INT)HIWORD (@<欲取位的值>)
+        @ (INT)HIWORD(@<欲取位的值>)
     }
 
     方法 取低16位 <公开 静态 类型 = 整数 注释 = "获取32位整数的低16位,对应\"合并整数\"." 注释 = "#define LOWORD(l)   ((WORD) (l))" 折叠
             @嵌入式方法 = "">
     参数 欲取位的值 <类型 = 整数>
     {
-        @ (INT)LOWORD ((DWORD)@<欲取位的值>)
+        @ (INT)LOWORD((DWORD)@<欲取位的值>)
     }
 
     方法 取高8位 <公开 静态 类型 = 短整数 注释 = "获取16位短整数的高8位,对应\"合并短整数\"."
             注释 = "#define HIBYTE(w)   ((BYTE) (((WORD) (w) >> 8) & 0xFF))" 折叠 @嵌入式方法 = "">
     参数 欲取位的值 <类型 = 整数>
     {
-        @ (SHORT)HIBYTE (@<欲取位的值>)
+        @ (SHORT)HIBYTE(@<欲取位的值>)
     }
 
     方法 取低8位 <公开 静态 类型 = 短整数 注释 = "获取16位短整数的低8位,对应\"合并短整数\"." 注释 = "#define LOBYTE(w)   ((BYTE) (w))" 折叠
             @嵌入式方法 = "">
     参数 欲取位的值 <类型 = 整数>
     {
-        @ (SHORT)LOBYTE ((WORD)@<欲取位的值>)
+        @ (SHORT)LOBYTE((WORD)@<欲取位的值>)
     }
 
-    方法 取字符十六进制文本 <公开 静态 类型 = 文本型 注释 = "返回所指定字符所对应的十六进制文本" 折叠 @禁止流程检查 = 真>
+    方法 取字符十六进制文本 <公开 静态 类型 = 文本型 注释 = "返回所指定字符所对应的十六进制文本" 折叠 @嵌入式方法 = "">
     参数 所欲转换的字符 <类型 = 字符>
     参数 所需要的最小宽度 <类型 = 整数 注释 = "指定所需求的最小宽度(数字数目),如果有效数值宽度小于该值,则自动在首部加0."
             注释 = "为0表示去除所有的前置\'0\'数字. 字节的十六进制文本不应大于4." @默认值 = 0>
     {
-        @ TCHAR buf [16];
-        @ return CVolString (WordToHexStr ((WORD)@<所欲转换的字符>, @<所需要的最小宽度>, buf, NUM_ELEMENTS_OF (buf)));
+        @ @an<CVolString>(WordToHexStr((WORD)@<所欲转换的字符>, @<所需要的最小宽度>, *PivBuffer<WCHAR>(16), 16))
     }
 
-    方法 取短整数十六进制文本 <公开 静态 类型 = 文本型 注释 = "返回所指定短整数所对应的十六进制文本" 折叠 @禁止流程检查 = 真>
+    方法 取短整数十六进制文本 <公开 静态 类型 = 文本型 注释 = "返回所指定短整数所对应的十六进制文本" 折叠 @嵌入式方法 = "">
     参数 所欲转换的短整数 <类型 = 短整数>
     参数 所需要的最小宽度 <类型 = 整数 注释 = "指定所需求的最小宽度(数字数目),如果有效数值宽度小于该值,则自动在首部加0."
             注释 = "为0表示去除所有的前置\'0\'数字. 字节的十六进制文本不应大于4." @默认值 = 0>
     {
-        @ TCHAR buf [16];
-        @ return CVolString (WordToHexStr ((WORD)@<所欲转换的短整数>, @<所需要的最小宽度>, buf, NUM_ELEMENTS_OF (buf)));
+        @ @an<CVolString>(WordToHexStr((WORD)@<所欲转换的短整数>, @<所需要的最小宽度>, *PivBuffer<WCHAR>(16), 16))
     }
 
-    方法 取字节十六进制文本 <公开 静态 类型 = 文本型 注释 = "返回所指定字节所对应的十六进制文本" 折叠 @禁止流程检查 = 真>
+    方法 取字节十六进制文本 <公开 静态 类型 = 文本型 注释 = "返回所指定字节所对应的十六进制文本" 折叠 @嵌入式方法 = "">
     参数 所欲转换的字节数 <类型 = 字节>
     参数 所需要的最小宽度 <类型 = 整数 注释 = "指定所需求的最小宽度(数字数目),如果有效数值宽度小于该值,则自动在首部加0."
             注释 = "为0表示去除所有的前置\'0\'数字. 字节的十六进制文本不应大于2." @默认值 = 0>
     {
-        @ TCHAR buf [8];
-        @ return CVolString (ByteToHexStr ((BYTE)@<所欲转换的字节数>, @<所需要的最小宽度>, buf, NUM_ELEMENTS_OF (buf)));
+        @ @an<CVolString>(ByteToHexStr((BYTE)@<所欲转换的字节数>, @<所需要的最小宽度>, *PivBuffer<WCHAR>(8), 8))
     }
 
     方法 反转字符字节序 <公开 静态 类型 = 字符 注释 = "  将所指定整数的组成字节的顺序反转,返回反转后的结果值.譬如十六进制整数0x12345678,"
@@ -121,7 +114,7 @@
     参数 转换前的进制 <类型 = 整数 注释 = "  文本的进制,范围为2-36进制."
             注释 = "  如果为0,则按文本的开头自动识别,如\"0x\"为16进制;\"0\"为8进制;\"1-9\"为10进制.">
     {
-        @ (INT)wcstoul (@<转换前的文本>.GetText (), NULL, @<转换前的进制>)
+        @ (INT)wcstoul(@<转换前的文本>.GetText(), NULL, @<转换前的进制>)
     }
 
     方法 任意进制文本到长整数 <公开 静态 类型 = 长整数 注释 = "任意进制文本到十进制长整数" 返回值注释 = "转换完全失败会返回0." 折叠 @嵌入式方法 = "">
@@ -129,7 +122,7 @@
     参数 转换前的进制 <类型 = 整数 注释 = "  文本的进制,范围为2-36进制."
             注释 = "  如果为0,则按文本的开头自动识别,如\"0x\"为16进制;\"0\"为8进制;\"1-9\"为10进制.">
     {
-        @ (INT64)wcstoull (@<转换前的文本>.GetText (), NULL, @<转换前的进制>)
+        @ (INT64)wcstoull(@<转换前的文本>.GetText(), NULL, @<转换前的进制>)
     }
 
     方法 任意进制文本到变整数 <公开 静态 类型 = 变整数 注释 = "任意进制文本到十进制变整数" 返回值注释 = "转换完全失败会返回0." 折叠 @禁止流程检查 = 真>
@@ -138,9 +131,9 @@
             注释 = "  如果为0,则按文本的开头自动识别,如\"0x\"为16进制;\"0\"为8进制;\"1-9\"为10进制.">
     {
         @ #ifdef _PF_32_BITS
-        @     return (INT_P)wcstoul (@<转换前的文本>.GetText (), NULL, @<转换前的进制>);
+        @     return (INT_P)wcstoul(@<转换前的文本>.GetText(), NULL, @<转换前的进制>);
         @ #else
-        @     return (INT_P)wcstoull (@<转换前的文本>.GetText (), NULL, @<转换前的进制>);
+        @     return (INT_P)wcstoull(@<转换前的文本>.GetText(), NULL, @<转换前的进制>);
         @ #endif
     }
 
@@ -149,8 +142,8 @@
     参数 转换后的进制 <类型 = 整数 注释 = "2-36进制">
     {
         @ wchar_t buffer[32] { 0 };
-        @ _itow (@<转换前的整数>, buffer, @<转换后的进制>);
-        @ return @an<CVolString> (buffer).MakeUpper ();
+        @ _itow(@<转换前的整数>, buffer, @<转换后的进制>);
+        @ return @an<CVolString>(buffer).MakeUpper();
     }
 
     方法 长整数到任意进制文本 <公开 静态 类型 = 文本型 注释 = "十进制整数到任意进制文本" 折叠 @禁止流程检查 = 真>
@@ -158,8 +151,8 @@
     参数 转换后的进制 <类型 = 整数 注释 = "2-36进制">
     {
         @ wchar_t buffer[64] { 0 };
-        @ _i64tow (@<转换前的长整数>, buffer, @<转换后的进制>);
-        @ return @an<CVolString> (buffer).MakeUpper ();
+        @ _i64tow(@<转换前的长整数>, buffer, @<转换后的进制>);
+        @ return @an<CVolString>(buffer).MakeUpper();
     }
 
     方法 无符号长整数到任意进制文本 <公开 静态 类型 = 文本型 注释 = "十进制整数到任意进制文本" 折叠 @禁止流程检查 = 真>
@@ -167,8 +160,8 @@
     参数 转换后的进制 <类型 = 整数 注释 = "2-36进制">
     {
         @ wchar_t buffer[64] { 0 };
-        @ _ui64tow ((UINT64)@<转换前的长整数>, buffer, @<转换后的进制>);
-        @ return @an<CVolString> (buffer).MakeUpper ();
+        @ _ui64tow((UINT64)@<转换前的长整数>, buffer, @<转换后的进制>);
+        @ return @an<CVolString>(buffer).MakeUpper();
     }
 
     方法 任意进制文本到任意进制文本 <公开 静态 类型 = 文本型 注释 = "2-36进制间的文本转换" 折叠>
@@ -210,81 +203,124 @@
     }
 
     方法 取格式字节文本 <公开 静态 类型 = 文本型 注释 = "返回适当单位的尺寸文本,根据字节数自动计算适合的单位(bytes、KB、MB、GB和TB)." 折叠 折叠2
-            @视窗.外部头文件 = "shlwapi.h" @视窗.外部库 = "Shlwapi.lib" @禁止流程检查 = 真>
+            @视窗.外部头文件 = "shlwapi.h" @视窗.外部库 = "Shlwapi.lib" @嵌入式方法 = "">
     参数 字节数 <类型 = 长整数>
     {
-        @ WCHAR szSizeStr[100] { 0 };
-        @ return @an<CVolString> (::StrFormatByteSizeW (@<字节数>, szSizeStr, 100));
+        @ @an<CVolString>(::StrFormatByteSizeW(@<字节数>, *PivBuffer<WCHAR>(100), 100))
     }
 
     方法 取格式千字节文本 <公开 静态 类型 = 文本型 注释 = "返回KB单位的尺寸文本,会将字节数向上舍入取整,如小于1024也会返回\"1 KB\"." 折叠 折叠2
-            @视窗.外部头文件 = "shlwapi.h" @视窗.外部库 = "Shlwapi.lib" @禁止流程检查 = 真>
+            @视窗.外部头文件 = "shlwapi.h" @视窗.外部库 = "Shlwapi.lib" @嵌入式方法 = "">
     参数 字节数 <类型 = 长整数>
     {
-        @ WCHAR szSizeStr[100] { 0 };
-        @ return @an<CVolString> (::StrFormatKBSizeW (@<字节数>, szSizeStr, 100));
+        @ @an<CVolString>(::StrFormatKBSizeW(@<字节数>, *PivBuffer<WCHAR>(100), 100))
     }
 
-    方法 文本到Usc2编码 <公开 静态 类型 = 文本型 注释 = "将文本数据转换到Unicode编码." 注释 = "例: \"测试\"转换成\"\\u6d4b\\u8bd5\"" 折叠>
-    参数 欲编码文本 <类型 = 文本型>
-    参数 不编码ASCII字符 <类型 = 逻辑型 注释 = "不对英文字母、数字、常用标点符号进行编码" @默认值 = 真>
-    参数 仅编码非常用字符 <类型 = 逻辑型 注释 = "仅编码ANSI编码不支持显示的字符" @默认值 = 假>
+    方法 十六进制字符到数值 <公开 静态 类型 = 字符 注释 = "将一个十六进制字符转换到10进制数值," 注释 = "如果指定字符不是十六进制,则返回原值."
+            注释 = "例: \'0\'->0, \'f\'->16" 折叠 @禁止流程检查 = 真>
+    参数 字符值 <类型 = 字符>
     {
-        变量 长度 <类型 = 整数>
-        变量 字符值 <类型 = 字符>
-        变量 UC2编码 <类型 = 文本型>
-        长度 = 取文本长度 (欲编码文本)
-        置文本预分配字符数 (UC2编码, 长度 * 6)
-        计次循环 (长度)
-        {
-            字符值 = 取字符 (欲编码文本, 取循环索引 ())
-            如果 (字符值 < 128)
-            {
-                如果 (不编码ASCII字符)
-                {
-                    加入字符 (UC2编码, 字符值)
-                }
-                否则
-                {
-                    加入文本 (UC2编码, "\\u")
-                    加入文本 (UC2编码, 到小写 (取字符十六进制文本 (字符值, 4)))
-                }
-            }
-            否则
-            {
-                如果 (仅编码非常用字符)
-                {
-                    变量 测试字 <类型 = 文本型>
-                    加入字符 (测试字, 字符值)
-                    测试字 = 多字节到文本 (文本到多字节 (测试字, 假))
-                    如果 (测试字 != "?" && 测试字 != "" && 取文本长度 (测试字) == 1)
-                    {
-                        加入字符 (UC2编码, 字符值)
-                        到循环尾
-                    }
-                }
-                加入文本 (UC2编码, "\\u")
-                加入文本 (UC2编码, 到小写 (取字符十六进制文本 (字符值, 4)))
-            }
-        }
-        返回 (UC2编码)
+        @ if (@<字符值> >= '0' && @<字符值> <= '9')
+        @     return @<字符值> - '0';
+        @ if (@<字符值> >= 'a' && @<字符值> <= 'f')
+        @     return @<字符值> - 'a' + 10;
+        @ if (@<字符值> >= 'A' && @<字符值> <= 'F')
+        @     return @<字符值> - 'A' + 10;
+        @ return @<字符值>;
     }
 
-    方法 Usc2编码到文本 <公开 静态 类型 = 文本型 注释 = "将Unicode编码还原为文本数据." 注释 = "例: \"\\u6d4b\\u8bd5\"转换成\"测试\"" 折叠>
-    参数 解码前的文本 <类型 = 文本型>
-    参数 前缀 <类型 = 文本型 @默认值 = "\\u">
+    方法 USC2到字符 <公开 静态 类型 = 字符 注释 = "将一个USC2编码转换到Unicode字符,例: \"6d4b\"->\'测\'"
+            注释 = "注意: 提供的文本应当不含\"\\u\"、\"%u\"等前缀,至少要有四个字符." 折叠 @禁止流程检查 = 真>
+    参数 文本指针 <类型 = 变整数 注释 = "提供的文本至少有四个字符">
     {
-        变量 结果 <类型 = 文本型>
-        变量 找到的位置 <类型 = 整数>
-        结果 = 解码前的文本
-        找到的位置 = 寻找文本 (结果, 前缀, 0)
-        判断循环 (找到的位置 != -1 && 取文本长度 (结果) >= 找到的位置 + 6)
-        {
-            删除字符 (结果, 找到的位置, 6)
-            插入字符 (结果, 找到的位置, (字符)十六进制文本到整数 (取文本中间 (结果, 找到的位置 + 2, 4)))
-            找到的位置 = 寻找文本 (结果, 前缀, 找到的位置)
-        }
-        返回 (结果)
+        @ const WCHAR* hex = reinterpret_cast<const WCHAR*>(@<文本指针>);
+        @ WCHAR dec[4];
+        @ dec[0] = @<编码辅助类.十六进制字符到数值>(hex[0]);
+        @ dec[1] = @<编码辅助类.十六进制字符到数值>(hex[1]);
+        @ dec[2] = @<编码辅助类.十六进制字符到数值>(hex[2]);
+        @ dec[3] = @<编码辅助类.十六进制字符到数值>(hex[3]);
+        @ if (memcmp(dec, hex, 8) == 0)
+        @     return 0;
+        @ return (dec[0] << 12) | (dec[1] << 8) | (dec[2] << 4) | dec[3];
+    }
+
+    方法 文本到Usc2编码 <公开 静态 类型 = 文本型 注释 = "将文本内容转换到Usc2编码,例: \"测试\"->\"\\u6d4b\\u8bd5\"" 折叠 @禁止流程检查 = 真>
+    参数 欲编码文本 <类型 = 文本型 注释 = "所欲编码的文本内容">
+    参数 不编码ASCII字符 <类型 = 逻辑型 注释 = "不对英文字母、数字、半角标点符号进行编码" @默认值 = 真>
+    参数 仅编码非常用字符 <类型 = 逻辑型 注释 = "仅转换GBK编码不支持显示的字符;" 注释 = "注: 本参数为真后,将无视上一个参数值,始终不编码ASCII字符." @默认值 = 假>
+    参数 前缀 <类型 = 文本型 注释 = "可以自定义Usc编码的前缀,一般为\"\\u\"和\"%u\"." @默认值 = "\\u">
+    {
+        @ @an<CVolString> usc2;
+        @ int len = static_cast<int>(@<欲编码文本>.GetLength());
+        @ if (len <= 0) return usc2;
+        @ static const char hexLowCh[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+        @ usc2.SetNumAlignChars(len * 6);
+        @ const WCHAR* str = @<欲编码文本>.GetText();
+        @ WCHAR wch;
+        @ if (!@<仅编码非常用字符>) {
+        @     for (int i = 0; i < len; i++) {
+        @         wch = str[i];
+        @         if ((@<不编码ASCII字符> == TRUE) && (str[i] < 256)) { usc2.AddChar(wch);  continue; }
+        @         usc2.AddText(@<前缀>.GetText());
+        @         usc2.AddChar(hexLowCh[static_cast<unsigned char>(wch >> 12)]);
+        @         usc2.AddChar(hexLowCh[static_cast<unsigned char>(wch >> 8 & 0x000F)]);
+        @         usc2.AddChar(hexLowCh[static_cast<unsigned char>((wch & 0x00FF) >> 4)]);
+        @         usc2.AddChar(hexLowCh[static_cast<unsigned char>(wch & 0x000F)]);
+        @     }
+        @ } else {
+        @     BOOL UsedDefaultChar = FALSE;  CHAR DefaultChar{(CHAR)0xFF};
+        @     PivBuffer<CHAR> buffer(len * 3);
+        @     int size = ::WideCharToMultiByte(936, 0, str, len, buffer.GetPtr(), len * 3, &DefaultChar, &UsedDefaultChar);
+        @     if (UsedDefaultChar && size > 0) {
+        @         PivBuffer<bool> encode(len); CHAR ch;
+        @         for (int i = 0,n = 0; i < len; i++) {
+        @             ch = buffer[n];
+        @             if (ch > 0 && ch < 128) { encode[i] = false;  n++; }
+        @             else if (ch == DefaultChar) { encode[i] = true;  n++; }
+        @             else { encode[i] = false;  n+=2; }
+        @         }
+        @         for (int i = 0; i < len; i++) {
+        @             wch = str[i];
+        @             if (!encode[i]) { usc2.AddChar(wch);  continue; }
+        @             usc2.AddText(@<前缀>.GetText());
+        @             usc2.AddChar(hexLowCh[static_cast<unsigned char>(wch >> 12)]);
+        @             usc2.AddChar(hexLowCh[static_cast<unsigned char>(wch >> 8 & 0x000F)]);
+        @             usc2.AddChar(hexLowCh[static_cast<unsigned char>((wch & 0x00FF) >> 4)]);
+        @             usc2.AddChar(hexLowCh[static_cast<unsigned char>(wch & 0x000F)]);
+        @         }
+        @         return usc2;
+        @     }
+        @     return @<欲编码文本>;
+        @ }
+        @ return usc2;
+    }
+
+    方法 Usc2编码到文本 <公开 静态 类型 = 文本型 注释 = "将Usc2编码文本还原为文本内容,例: \"\\u6d4b\\u8bd5\"->\"测试\"" 折叠 @禁止流程检查 = 真>
+    参数 USC2文本 <类型 = 文本型 注释 = "请确保提供的Usc2编码文本有效,否则会返回不可预料的结果.">
+    参数 前缀 <类型 = 文本型 注释 = "请提供Usc2编码的前缀,一般为\"\\u\"和\"%u\"." @默认值 = "\\u">
+    {
+        @ @an<CVolString> ret;
+        @ INT_P Usc_len = @<USC2文本>.GetLength();
+        @ INT_P Prefix_len = @<前缀>.GetLength();
+        @ if (Prefix_len == 0 || Usc_len == 0) { return ret; }
+        @ ret.SetNumAlignChars(Usc_len);
+        @ const WCHAR* Usc = @<USC2文本>.GetText();
+        @ const WCHAR* Prefix = @<前缀>.GetText();
+        @ WCHAR ch;
+        @ for (INT_P i = 0, n = 0; i < Usc_len; i++) {
+        @     ch = Usc[i];
+        @     if (Prefix[n] != ch) { n = 0; ret.AddChar(ch); continue; }
+        @     if (++n < Prefix_len) { continue; }
+        @     n = 0;
+        @     if (Usc_len <= i + 4) { ret.AddText(Usc + i - Prefix_len + 1); break; }
+        @     ch = @<编码辅助类.USC2到字符>(reinterpret_cast<INT_P>(Usc + i + 1));
+        @     if (ch != 0) {
+        @         ret.AddChar(ch); i+=4;
+        @     } else {
+        @         ret.AddText(Usc + i - Prefix_len + 1, Prefix_len);
+        @     }
+        @ }
+        @ return ret;
     }
 
     方法 整数到中文小写数字 <公开 静态 类型 = 文本型 注释 = "将整数值格式化为中文小写数字." 注释 = "例: 12345 转换为“一万二千三百四十五”."
@@ -348,6 +384,17 @@
         @ strResult.InsertText (0, @<前缀文本>.GetText ());
         @ return strResult;
     }
+
+    # @begin
+    # <> <include>
+    # template <typename T>
+    # static INT GetValueDigit(T value) {
+    #     value /= 10; INT count = 1;
+    #     while (value) { value /= 10; count++; }
+    #     return count;
+    # }
+    # <> </include>
+    # @end
 }
 
 # ===

@@ -4,7 +4,7 @@
 
 # ImGui窗口 (已高度封装,更简单易用)
 
-类 IM_窗口模板类 <注释 = "提供了ImGui窗口共同的成员变量和定义事件." 注释 = "\"模板类型1\"为所使用的渲染器类型" @模板基础类 = 真>
+类 IM_窗口模板类 <注释 = "提供了ImGui窗口共同的成员变量和定义事件." 注释 = "\"模板类型1\"为所使用的渲染器类型" 折叠 @模板基础类 = 真>
 {
     变量 渲染器 <公开 类型 = 模板类型1 注释 = "当前使用的渲染器实例">
     变量 背景颜色 <公开 类型 = ImVec4 注释 = "x=红色; y=绿色; z=蓝色; w=Alpha" x = 0.45 y = 0.55 z = 0.60 w = 1.00>
@@ -35,10 +35,10 @@
     参数 顶边位置 <类型 = 整数 注释 = "改变后的窗口左边在屏幕上的纵向坐标位置">
 
     方法 最小化被改变 <公开 定义事件 类型 = 整数 注释 = "当本窗口改变最小化状态发送此事件" 折叠>
-    参数 是否最小化 <类型 = 逻辑型 注释 = "是否为最小化状态">
+    参数 是否最小化 <类型 = 逻辑型 注释 = "是否为最小化状态(Win32和SDL2窗口下本参数始终为真)">
 
     方法 最大化被改变 <公开 定义事件 类型 = 整数 注释 = "当本窗口改变最大化状态发送此事件" 折叠>
-    参数 是否最大化 <类型 = 逻辑型 注释 = "是否为最大化状态">
+    参数 是否最大化 <类型 = 逻辑型 注释 = "是否为最大化状态(Win32和SDL2窗口下本参数始终为真)">
 
     方法 文件被拖放 <公开 定义事件 类型 = 整数 注释 = "当文件被拖放到本窗口上后,将发送本事件." 折叠>
     参数 所拖放文件 <类型 = 文本数组类 注释 = "提供所有被拖放到本组件上的文件名,数组成员数必定大于0.">
@@ -88,7 +88,7 @@
         变量 样式 <类型 = IM样式类>
         @ if (m_window == NULL) goto Fail;
         @ if (@<透明帧缓冲区>) ImGui_ImplWin32_EnableAlphaCompositing(m_window);
-        @ @<窗口句柄> = (INT_P)m_window;
+        @ @<窗口句柄> = reinterpret_cast<INT_P>(m_window);
         如果 (渲染器.创建设备 (窗口句柄) == 假)
         {
             渲染器.释放设备 (窗口句柄)
@@ -103,18 +103,6 @@
         IO.字体全局缩放 = (单精度小数)取屏幕DPI ()
         IO.标志 = 连续位或 (IO.标志, IM配置标志.键盘导航, IM配置标志.游戏手柄导航, IM配置标志.启用停靠, IM配置标志.启用视口)
         字体图集 = ImGui.取字体图集 ()
-        // 如果 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc"))
-        {
-            // 字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc", 18.0)  // 微软雅黑
-        }
-        // 否则 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "msyh.ttf"))
-        {
-            // 字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttf", 18.0)  // 微软雅黑(老系统)
-        }
-        // 否则 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "simsun.ttc"))
-        {
-            // 字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "simsun.ttc", 16.0)  // 宋体
-        }
         分支判断 (初始化配置 (IO, 字体图集))
         {
             分支 (1)
@@ -133,7 +121,7 @@
         样式 = ImGui.取样式 ()
         如果 (位与 (IO.标志, IM配置标志.启用视口) != 0)
         {
-            样式.窗口圆角半径 = 0.0
+            样式.窗口圆角 = 0.0
             样式.颜色 (IM颜色标识符.窗口背景).w = 1.0
         }
         如果 (字体图集.是否已生成 () == 假)
@@ -156,22 +144,17 @@
         }
         渲染器.准备 ()
         本对象.准备渲染 (样式)
-        变量 完成 <类型 = 逻辑型 值 = 假>
         @ MSG msg;
         @ RECT rt;
-        判断循环 (取反 (完成))
+        判断循环 (真)
         {
             @ while (::PeekMessageW(&msg, nullptr, 0U, 0U, PM_REMOVE))
             @ {
             @     ::TranslateMessage(&msg);
             @     ::DispatchMessageW(&msg);
-            @     if (msg.message == WM_QUIT) @<完成> = TRUE;
             @ }
-            如果 (完成 == 真)
-            {
-                跳出循环
-            }
-            @ if (::GetClientRect((HWND)@<窗口句柄>, &rt))
+            @ if (msg.message == WM_QUIT) break;
+            @ if (::GetClientRect(m_window, &rt))
             @ {
             @     @<改变后宽度> = rt.right - rt.left;
             @     @<改变后高度> = rt.bottom - rt.top;
@@ -204,7 +187,7 @@
         @ Fail:
         @ if (m_window) { ::DestroyWindow(m_window); m_window = NULL; }
         @ if (m_wc.lpszClassName != nullptr) { ::UnregisterClassW(m_wc.lpszClassName, m_wc.hInstance); }
-        @ m_wc = {0};
+        @ memset(&m_wc, 0, sizeof(WNDCLASSEXW));
         @ return FALSE;
     }
 
@@ -216,10 +199,151 @@
 
     方法 取窗口句柄 <公开 类型 = 变整数 注释 = "返回当前窗口组件的句柄,如果尚未创建或创建失败,则返回0." 折叠 @嵌入式方法 = "">
     {
-        @ (INT_P)@sn<this>.m_window
+        @ reinterpret_cast<INT_P>(@sn<this>.m_window)
+    }
+
+    方法 处理事件 <公开 折叠>
+    {
+        @ MSG msg;
+        @ while (::PeekMessageW(&msg, nullptr, 0U, 0U, PM_NOREMOVE) && msg.message != WM_QUIT)
+        @ {
+        @     if (::GetMessage (&msg, NULL, 0, 0) <= 0)
+        @         break;
+        @     ::TranslateMessage(&msg);
+        @     ::DispatchMessageW(&msg);
+        @ }
+    }
+
+    方法 取窗口尺寸 <公开 注释 = "获取本窗口的当前宽度和高度" 折叠>
+    参数 返回宽度 <类型 = 整数 注释 = "必须提供变量" @视窗.后缀文本 = "&">
+    参数 返回高度 <类型 = 整数 注释 = "必须提供变量" @视窗.后缀文本 = "&">
+    {
+        @ if (m_window == NULL) return;
+        @ RECT rt;
+        @ if (::GetWindowRect(m_window, &rt)) {
+        @    @<返回宽度> = rt.right - rt.left;
+        @    @<返回高度> = rt.bottom - rt.top;
+        @ }
+    }
+
+    方法 置窗口尺寸 <公开 注释 = "设置本窗口的宽度和高度" 折叠>
+    参数 宽度值 <类型 = 整数>
+    参数 高度值 <类型 = 整数>
+    {
+        @ if (m_window != NULL)
+        @     ::SetWindowPos(m_window, NULL, 0, 0, @<宽度值>, @<高度值>, (SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER));
+    }
+
+    方法 取窗口位置 <公开 注释 = "获取本窗口的当前位置" 折叠>
+    参数 顶边位置 <类型 = 整数 注释 = "必须提供变量" @视窗.后缀文本 = "&">
+    参数 左边位置 <类型 = 整数 注释 = "必须提供变量" @视窗.后缀文本 = "&">
+    {
+        @ if (m_window == NULL) return;
+        @ RECT rt;
+        @ if (::GetWindowRect(m_window, &rt)) {
+        @    @<顶边位置> = rt.top;
+        @    @<左边位置> = rt.left;
+        @ }
+    }
+
+    方法 置窗口位置 <公开 注释 = "设置本窗口的位置" 折叠>
+    参数 顶边位置 <类型 = 整数>
+    参数 左边位置 <类型 = 整数>
+    {
+        @ if (m_window != NULL)
+        @     ::SetWindowPos(m_window, NULL, @<左边位置>, @<顶边位置>, 0, 0, (SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER));
+    }
+
+    方法 获取焦点 <公开 注释 = "将当前输入焦点设置到窗口上" 折叠 @嵌入式方法 = "">
+    {
+        @ ::SetFocus(@sn<this>.m_window)
     }
 
     # 属性
+
+    方法 左边 <公开 属性读 类型 = 整数 注释 = "返回本窗口的左边位置(有些问题,待修正)" 折叠 @禁止流程检查 = 真>
+    {
+        @ if (m_window != NULL) {
+        @     RECT rt;
+        @     if (::GetWindowRect(m_window, &rt))
+        @         return rt.left;
+        @ }
+        @ return 0;
+    }
+
+    方法 左边 <公开 属性写 注释 = "设置本窗口的左边位置" 折叠>
+    参数 所欲设置的位置 <类型 = 整数>
+    {
+        @ if (m_window != NULL)
+        @ {
+        @     RECT rt;
+        @     ::GetWindowRect(m_window, &rt);
+        @     ::SetWindowPos(m_window, NULL, @<所欲设置的位置>, rt.top, 0, 0, (SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER));
+        @ }
+    }
+
+    方法 顶边 <公开 属性读 类型 = 整数 注释 = "返回本窗口的顶边位置(有些问题,待修正)" 折叠 @禁止流程检查 = 真>
+    {
+        @ if (m_window != NULL) {
+        @     RECT rt;
+        @     if (::GetWindowRect(m_window, &rt))
+        @         return rt.top;
+        @ }
+        @ return 0;
+    }
+
+    方法 顶边 <公开 属性写 注释 = "设置本窗口的顶边位置" 折叠>
+    参数 所欲设置的位置 <类型 = 整数>
+    {
+        @ if (m_window != NULL)
+        @ {
+        @     RECT rt;
+        @     ::GetWindowRect(m_window, &rt);
+        @     ::SetWindowPos(m_window, NULL, rt.left, @<所欲设置的位置>, 0, 0, (SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER));
+        @ }
+    }
+
+    方法 宽度 <公开 属性读 类型 = 整数 注释 = "返回本窗口的宽度" 折叠 @禁止流程检查 = 真>
+    {
+        @ if (m_window != NULL) {
+        @     RECT rt;
+        @     if (::GetWindowRect(m_window, &rt))
+        @         return rt.right - rt.left;
+        @ }
+        @ return 0;
+    }
+
+    方法 宽度 <公开 属性写 注释 = "设置本窗口的宽度" 折叠>
+    参数 所欲设置的宽度 <类型 = 整数>
+    {
+        @ if (m_window != NULL)
+        @ {
+        @     RECT rt;
+        @     ::GetWindowRect(m_window, &rt);
+        @     ::SetWindowPos(m_window, NULL, 0, 0, @<所欲设置的宽度>, rt.bottom - rt.top, (SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER));
+        @ }
+    }
+
+    方法 高度 <公开 属性读 类型 = 整数 注释 = "返回本窗口的高度" 折叠 @禁止流程检查 = 真>
+    {
+        @ if (m_window != NULL) {
+        @     RECT rt;
+        @     if (::GetWindowRect(m_window, &rt))
+        @         return rt.bottom - rt.top;
+        @ }
+        @ return 0;
+    }
+
+    方法 高度 <公开 属性写 注释 = "设置本窗口的高度" 折叠>
+    参数 所欲设置的高度 <类型 = 整数>
+    {
+        @ if (m_window != NULL)
+        @ {
+        @     RECT rt;
+        @     ::GetWindowRect(m_window, &rt);
+        @     ::SetWindowPos(m_window, NULL, 0, 0, rt.right - rt.left, @<所欲设置的高度>, (SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER));
+        @ }
+    }
 
     方法 标题 <公开 属性读 类型 = 文本型 注释 = "返回本窗口的当前标题文本" 折叠 @禁止流程检查 = 真>
     {
@@ -227,7 +351,7 @@
         @ {
         @     CVolString strCaption;
         @     strCaption.SetLength(::GetWindowTextLengthW(m_window));
-        @     ::GetWindowTextW(m_window, (LPWSTR)strCaption.GetText(), strCaption.GetLength());
+        @     ::GetWindowTextW(m_window, strCaption.GetText(), strCaption.GetLength());
         @     return strCaption;
         @ }
         @ return _CT("");
@@ -243,7 +367,7 @@
     方法 图标 <公开 属性写 注释 = "设置显示在本窗口左上角的图标" 折叠>
     参数 所欲设置的图标 <类型 = 图标资源 注释 = "  本参数提供具体所欲设置的图标,如果该资源值为\"空资源.空图标\"" 注释 = "或载入失败,则将使用默认图标.">
     {
-        @ HICON hIcon = (HICON)g_objVolApp.LoadResImage(VRIT_ICON, @<所欲设置的图标>);
+        @ HICON hIcon = reinterpret_cast<HICON>(g_objVolApp.LoadResImage(VRIT_ICON, @<所欲设置的图标>));
         @ if (hIcon) {
         @     ::SendMessage(m_window, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
         @     ::SendMessage(m_window, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
@@ -254,7 +378,7 @@
     参数 所欲设置的图标 <类型 = 图标对象类 注释 = "  本参数提供具体所欲设置的图标对象."
             注释 = "  注意: 在窗口存在期间必须保证本图标对象不被释放(可以将此对象保存在窗口类的成员变量中)," 注释 = "否则所置入图标将失效.">
     {
-        @ HICON hIcon = (HICON)@<所欲设置的图标>.GetGDIHandle();
+        @ HICON hIcon = reinterpret_cast<HICON>(@<所欲设置的图标>.GetGDIHandle());
         @ if (hIcon) {
         @     ::SendMessage(m_window, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
         @     ::SendMessage(m_window, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
@@ -284,37 +408,47 @@
     # <> <include>
     # WNDCLASSEXW m_wc = {0};
     # HWND m_window = NULL;
-    # bool m_created = false;
     #
-    # static LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-    # {
+    # static LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     #     static @sn<current_class>* pThis;
     #     if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
     #         return 1;
     #     switch (msg)
     #     {
     #     case WM_CREATE:
-    #         if (pThis == nullptr) pThis = (@sn<current_class>*)((CREATESTRUCTW*)lParam)->lpCreateParams;
-    #             return 0;
-    #     case WM_SIZE:
-    #         if (wParam != SIZE_MINIMIZED && pThis != nullptr)
-    #         {
-    #             pThis->m_ResizeWidth = (INT)LOWORD(lParam); pThis->m_ResizeHeight = (INT)HIWORD(lParam);
-    #             pThis->@<尺寸被改变>(pThis->m_ResizeWidth, pThis->m_ResizeHeight);
-    #         }
+    #         if (pThis == nullptr)
+    #             pThis = reinterpret_cast<@sn<current_class>*>(reinterpret_cast<CREATESTRUCTW*>(lParam)->lpCreateParams);
     #         return 0;
+    #     case WM_SIZE:
+    #         if (pThis != nullptr)
+    #         {
+    #             if (wParam == SIZE_MINIMIZED) {
+    #                 pThis->@<最小化被改变>(TRUE);
+    #             } else if (wParam == SIZE_MAXIMIZED) {
+    #                 pThis->@<最大化被改变>(TRUE);
+    #             } else {
+    #                 pThis->m_ResizeWidth = static_cast<SHORT>(lParam);
+    #                 pThis->m_ResizeHeight = static_cast<INT>(lParam >> 16);
+    #                 pThis->@<尺寸被改变>(pThis->m_ResizeWidth, pThis->m_ResizeHeight);
+    #             }
+    #         }
+    #         break;
+    #     case WM_MOVE:
+    #         if (pThis != nullptr)
+    #             pThis->@<位置被改变>(static_cast<SHORT>(lParam), static_cast<INT>(lParam >> 16));
+    #         break;
     #     case WM_SYSCOMMAND:
     #         if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
     #             return 0;
     #         break;
     #     case WM_DESTROY:
-    #         if (pThis != nullptr) pThis->@<将被销毁>();
+    #         if (pThis != nullptr)
+    #             pThis->@<将被销毁>();
     #         ::PostQuitMessage(0);
     #         return 0;
     #     case 0x02E0: // WM_DPICHANGED
-    #         if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DpiEnableScaleViewports)
-    #         {
-    #             const RECT* suggested_rect = (RECT*)lParam;
+    #         if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DpiEnableScaleViewports) {
+    #             const RECT* suggested_rect = reinterpret_cast<const RECT*>(lParam);
     #             ::SetWindowPos(hWnd, nullptr, suggested_rect->left, suggested_rect->top, suggested_rect->right - suggested_rect->left, suggested_rect->bottom - suggested_rect->top, SWP_NOZORDER | SWP_NOACTIVATE);
     #         }
     #         break;
@@ -362,7 +496,7 @@
         @     ::SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
         @ }
         变量 窗口句柄 <类型 = 变整数>
-        @ @<窗口句柄> = (INT_P)m_window;
+        @ @<窗口句柄> = reinterpret_cast<INT_P>(m_window);
         如果 (渲染器.渲染器类型 == 1)
         {
             @ glfwMakeContextCurrent(m_window);
@@ -398,18 +532,6 @@
         关注屏幕DPI (真)
         IO.字体全局缩放 = (单精度小数)取屏幕DPI ()
         字体图集 = ImGui.取字体图集 ()
-        // 如果 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc"))
-        {
-            // 字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc", 18.0)  // 微软雅黑
-        }
-        // 否则 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "msyh.ttf"))
-        {
-            // 字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttf", 18.0)  // 微软雅黑(老系统)
-        }
-        // 否则 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "simsun.ttc"))
-        {
-            // 字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "simsun.ttc", 16.0)  // 宋体
-        }
         分支判断 (初始化配置 (IO, 字体图集))
         {
             分支 (1)
@@ -429,7 +551,7 @@
         // 启用视口后调整WindowRounding/WindowBg,使平台窗口看起来与常规窗口相同
         如果 (位与 (IO.标志, IM配置标志.启用视口) != 0)
         {
-            样式.窗口圆角半径 = 0.0
+            样式.窗口圆角 = 0.0
             样式.颜色 (IM颜色标识符.窗口背景).w = 1.0
         }
         如果 (字体图集.是否已生成 () == 假)
@@ -455,7 +577,6 @@
                 ImGui.销毁上下文 ()
                 返回 (假)
             }
-            渲染器.加载字体纹理 ()
         }
         本对象.准备渲染 (样式)
         // 消息循环
@@ -489,7 +610,7 @@
 
     方法 取窗口句柄 <公开 类型 = 变整数 注释 = "返回当前窗口的句柄,如果尚未创建或创建失败,则返回0." 折叠 @嵌入式方法 = "">
     {
-        @ (INT_P)@sn<this>.m_window
+        @ reinterpret_cast<INT_P>(@sn<this>.m_window)
     }
 
     方法 最小化 <公开 注释 = "将本窗口最小化到任务栏图标" 折叠 @嵌入式方法 = "">
@@ -536,17 +657,17 @@
     }
 
     方法 取窗口位置 <公开 注释 = "获取本窗口的当前位置" 折叠 @嵌入式方法 = "">
-    参数 顶边 <类型 = 整数 @需求类型 = 可写入变量>
-    参数 左边 <类型 = 整数 @需求类型 = 可写入变量>
+    参数 顶边位置 <类型 = 整数 @需求类型 = 可写入变量>
+    参数 左边位置 <类型 = 整数 @需求类型 = 可写入变量>
     {
-        @ glfwGetWindowPos(@sn<this>.m_window, &@<顶边>, &@<左边>)
+        @ glfwGetWindowPos(@sn<this>.m_window, &@<左边位置>, &@<顶边位置>)
     }
 
     方法 置窗口位置 <公开 注释 = "设置本窗口的位置" 折叠 @嵌入式方法 = "">
-    参数 顶边 <类型 = 整数>
-    参数 左边 <类型 = 整数>
+    参数 顶边位置 <类型 = 整数>
+    参数 左边位置 <类型 = 整数>
     {
-        @ glfwSetWindowPos(@sn<this>.m_window, @<顶边>, @<左边>)
+        @ glfwSetWindowPos(@sn<this>.m_window, @<左边位置>, @<顶边位置>)
     }
 
     方法 _是否需要退出 <类型 = 逻辑型 折叠 @嵌入式方法 = "">
@@ -560,6 +681,86 @@
     参数 显示器句柄 <类型 = 变整数>
 
     # 属性
+
+    方法 左边 <公开 属性读 类型 = 整数 注释 = "返回本窗口的左边位置" 折叠 @禁止流程检查 = 真>
+    {
+        @ if (m_window != nullptr) {
+        @     int left;
+        @     glfwGetWindowPos(m_window, &left, nullptr);
+        @     return left;
+        @ }
+        @ return 0;
+    }
+
+    方法 左边 <公开 属性写 注释 = "设置本窗口的左边位置" 折叠>
+    参数 所欲设置的位置 <类型 = 整数>
+    {
+        @ if (m_window != nullptr) {
+        @     int top;
+        @     glfwGetWindowPos(m_window, nullptr, &top);
+        @     glfwSetWindowPos(m_window, @<所欲设置的位置>, top);
+        @ }
+    }
+
+    方法 顶边 <公开 属性读 类型 = 整数 注释 = "返回本窗口的顶边位置" 折叠 @禁止流程检查 = 真>
+    {
+        @ if (m_window != nullptr) {
+        @     int top;
+        @     glfwGetWindowPos(m_window, nullptr, &top);
+        @     return top;
+        @ }
+        @ return 0;
+    }
+
+    方法 顶边 <公开 属性写 注释 = "设置本窗口的顶边位置" 折叠>
+    参数 所欲设置的位置 <类型 = 整数>
+    {
+        @ if (m_window != nullptr) {
+        @     int left;
+        @     glfwGetWindowPos(m_window, &left, nullptr);
+        @     glfwSetWindowPos(m_window, left, @<所欲设置的位置>);
+        @ }
+    }
+
+    方法 宽度 <公开 属性读 类型 = 整数 注释 = "返回本窗口的宽度" 折叠 @禁止流程检查 = 真>
+    {
+        @ if (m_window != nullptr) {
+        @     int width;
+        @     glfwGetWindowSize(m_window, &width, NULL);
+        @     return width;
+        @ }
+        @ return 0;
+    }
+
+    方法 宽度 <公开 属性写 注释 = "设置本窗口的宽度" 折叠>
+    参数 所欲设置的宽度 <类型 = 整数>
+    {
+        @ if (m_window != nullptr) {
+        @     int hight;
+        @     glfwGetWindowSize(m_window, nullptr, &hight);
+        @     glfwSetWindowSize(m_window, @<所欲设置的宽度>, hight);
+        @ }
+    }
+
+    方法 高度 <公开 属性读 类型 = 整数 注释 = "返回本窗口的高度" 折叠 @禁止流程检查 = 真>
+    {
+        @ if (m_window != nullptr) {
+        @     int hight;
+        @     glfwGetWindowSize(m_window, NULL, &hight);
+        @     return hight;
+        @ }
+        @ return 0;
+    }
+
+    方法 高度 <公开 属性写 注释 = "设置本窗口的高度" 折叠>
+    参数 所欲设置的高度 <类型 = 整数>
+    {
+        @ if (m_window != nullptr) {
+        @     int width;
+        @     glfwGetWindowSize(m_window, &width, nullptr);
+        @     glfwSetWindowSize(m_window, width, @<所欲设置的高度>);
+        @ }
+    }
 
     方法 标题 <公开 属性写 注释 = "设置本窗口的当前标题文本" 折叠>
     参数 所欲设置标题 <类型 = 文本型 注释 = "提供所欲设置的标题文本">
@@ -620,7 +821,7 @@
     参数 所欲设置的图标 <类型 = 图标资源 注释 = "  本参数提供具体所欲设置的图标,如果该资源值为\"空资源.空图标\"" 注释 = "或载入失败,则将使用默认图标.">
     {
         @ HWND hWnd = glfwGetWin32Window(m_window);
-        @ HICON hIcon = (HICON)g_objVolApp.LoadResImage(VRIT_ICON, @<所欲设置的图标>);
+        @ HICON hIcon = reinterpret_cast<HICON>(g_objVolApp.LoadResImage(VRIT_ICON, @<所欲设置的图标>));
         @ if (hIcon) {
         @     ::SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
         @     ::SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
@@ -632,7 +833,7 @@
             注释 = "  注意: 在窗口存在期间必须保证本图标对象不被释放(可以将此对象保存在窗口类的成员变量中)," 注释 = "否则所置入图标将失效.">
     {
         @ HWND hWnd = glfwGetWin32Window(m_window);
-        @ HICON hIcon = (HICON)@<所欲设置的图标>.GetGDIHandle();
+        @ HICON hIcon = reinterpret_cast<HICON>(@<所欲设置的图标>.GetGDIHandle());
         @ if (hIcon) {
         @     ::SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
         @     ::SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
@@ -642,8 +843,7 @@
     # ---
     # @begin
     # <> <include>
-    # static void @an<_sOnBeforeAppInit>()
-    # {
+    # static void @an<_sOnBeforeAppInit>() {
     #     glfwSetErrorCallback(glfw_error_callback);
     #     glfwInit();
     # }
@@ -653,38 +853,32 @@
     # GLFWmonitor* m_monitor = glfwGetPrimaryMonitor();
     # ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 0.60f);
     # // Callback
-    # static void glfw_error_callback(int error, const char* description)
-    # {
+    # static void glfw_error_callback(int error, const char* description) {
     #     PIVDEBUG("S", CVolString().Format(L"GLFW Error %d: %s\n", error, PivU2W(description).GetText()).GetText());
     # }
-    # static void glfw_pos_callback(GLFWwindow* window, int xpos, int ypos)
-    # {
-    #     ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<位置被改变>(xpos, ypos);
+    # static void glfw_pos_callback(GLFWwindow* window, int xpos, int ypos) {
+    #     reinterpret_cast<@sn<current_class>*>(glfwGetWindowUserPointer(window))->@<位置被改变>(xpos, ypos);
     # }
-    # static void glfw_size_callback(GLFWwindow* window, int width, int height)
-    # {
-    #     ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<尺寸被改变>(width, height);
+    # static void glfw_size_callback(GLFWwindow* window, int width, int height) {
+    #     reinterpret_cast<@sn<current_class>*>(glfwGetWindowUserPointer(window))->@<尺寸被改变>(width, height);
     # }
-    # static void glfw_close_callback(GLFWwindow* window)
-    # {
-    #     ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<将被销毁>();
+    # static void glfw_close_callback(GLFWwindow* window) {
+    #     reinterpret_cast<@sn<current_class>*>(glfwGetWindowUserPointer(window))->@<将被销毁>();
     # }
-    # static void glfw_iconify_callback(GLFWwindow* window, int iconified)
-    # {
-    #     ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<最小化被改变>(iconified);
+    # static void glfw_iconify_callback(GLFWwindow* window, int iconified) {
+    #     reinterpret_cast<@sn<current_class>*>(glfwGetWindowUserPointer(window))->@<最小化被改变>(iconified);
     # }
-    # static void glfw_maximize_callback(GLFWwindow* window, int maximized)
-    # {
-    #     ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<最大化被改变>(maximized);
+    # static void glfw_maximize_callback(GLFWwindow* window, int maximized) {
+    #     reinterpret_cast<@sn<current_class>*>(glfwGetWindowUserPointer(window))->@<最大化被改变>(maximized);
     # }
     # static void glfw_drop_callback(GLFWwindow* window, int path_count, const char* paths[]);
     # <> </include>
-    # void @sn<current_class>::glfw_drop_callback(GLFWwindow* window, int path_count, const char* paths[])
-    # {
+    # void @sn<current_class>::glfw_drop_callback(GLFWwindow* window, int path_count, const char* paths[]) {
     #     @dt<文本数组类> aryFileNames;
-    #     for (size_t i = 0; i < path_count; i++)
+    #     for (int i = 0; i < path_count; i++) {
     #         aryFileNames.data().Add(PivU2W{paths[i]}.GetText());
-    #     ((@sn<current_class>*)glfwGetWindowUserPointer(window))->@<文件被拖放>(aryFileNames);
+    #     }
+    #     reinterpret_cast<@sn<current_class>*>(glfwGetWindowUserPointer(window))->@<文件被拖放>(aryFileNames);
     # }
     # @end
     # ---
@@ -697,7 +891,7 @@
 {
     方法 创建主窗口 <公开 类型 = 逻辑型 注释 = "创建本窗口类的对象并将其作为程序的主窗口." 注释 = "注意:"
             注释 = "  1. 程序中必须存在且只能存在一个主窗口,调用本方法后,主窗口将被设置为本窗口;" 注释 = "  2. 主窗口必须在程序的\"启动类\"中存在成员变量定义,避免其在程序退出前被释放,"
-            注释 = "否则将可能导致程序运行时崩溃." 注释 = "  3. 本方法内实现了消息循环,直到窗口关闭或创建失败,本方法才会返回." 返回值注释 = "返回是否成功" @禁止流程检查 = 真>
+            注释 = "否则将可能导致程序运行时崩溃." 注释 = "  3. 本方法内实现了消息循环,直到窗口关闭或创建失败,本方法才会返回." 返回值注释 = "返回是否成功" 折叠 @禁止流程检查 = 真>
     参数 标题 <类型 = 文本型 注释 = "提供所创建窗口的标题">
     参数 宽度 <类型 = 整数 注释 = "提供所创建窗口的宽度" @默认值 = 1280>
     参数 高度 <类型 = 整数 注释 = "提供所创建窗口的高度" @默认值 = 720>
@@ -729,7 +923,7 @@
         @ m_window = SDL_CreateWindow(PivW2U{@<标题>}.GetText(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, @<宽度>, @<高度>, window_flags);
         @ if (!m_window) return FALSE;
         变量 窗口句柄 <类型 = 变整数>
-        @ @<窗口句柄> = (INT_P)m_window;
+        @ @<窗口句柄> = reinterpret_cast<INT_P>(m_window);
         如果 (渲染器.渲染器类型 == 1)
         {
             @ gl_context = SDL_GL_CreateContext(m_window);
@@ -751,18 +945,6 @@
         IO.标志 = 连续位或 (IO.标志, IM配置标志.键盘导航, IM配置标志.游戏手柄导航, IM配置标志.启用停靠, IM配置标志.启用视口)
         IO.字体全局缩放 = (单精度小数)取屏幕DPI ()
         字体图集 = ImGui.取字体图集 ()
-        // 如果 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc"))
-        {
-            // 字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttc", 18.0)  // 微软雅黑
-        }
-        // 否则 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "msyh.ttf"))
-        {
-            // 字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "msyh.ttf", 18.0)  // 微软雅黑(老系统)
-        }
-        // 否则 (文件是否存在 (取特定目录 (特定目录类型.系统字体) + "simsun.ttc"))
-        {
-            // 字体图集.添加字体文件 (取特定目录 (特定目录类型.系统字体) + "simsun.ttc", 16.0)  // 宋体
-        }
         分支判断 (初始化配置 (IO, 字体图集))
         {
             分支 (1)
@@ -781,7 +963,7 @@
         样式 = ImGui.取样式 ()
         如果 (位与 (IO.标志, IM配置标志.启用视口) != 0)
         {
-            样式.窗口圆角半径 = 0.0
+            样式.窗口圆角 = 0.0
             样式.颜色 (IM颜色标识符.窗口背景).w = 1.0
         }
         如果 (字体图集.是否已生成 () == 假)
@@ -807,7 +989,6 @@
             ImGui.销毁上下文 ()
             返回 (假)
         }
-        渲染器.加载字体纹理 ()
         本对象.准备渲染 (样式)
         // 消息循环
         变量 完成 <类型 = 逻辑型 值 = 假>
@@ -824,6 +1005,9 @@
             @         {
             @         case SDL_WINDOWEVENT_CLOSE: { @<完成> = TRUE; break; }
             @         case SDL_WINDOWEVENT_RESIZED: { @<渲染器.重置尺寸>(event.window.data1, event.window.data2); this->@<尺寸被改变>(event.window.data1, event.window.data2); break; }
+            @         case SDL_WINDOWEVENT_MOVED: { this->@<位置被改变>(event.window.data1, event.window.data2);  break;}
+            @         case SDL_WINDOWEVENT_MINIMIZED: { this->@<最小化被改变>(TRUE);  break;}
+            @         case SDL_WINDOWEVENT_MAXIMIZED: { this->@<最大化被改变>(TRUE);  break;}
             @         }
             @     }
             @ }
@@ -857,7 +1041,7 @@
 
     方法 取窗口句柄 <公开 类型 = 变整数 注释 = "返回当前窗口的句柄,如果尚未创建或创建失败,则返回0." 折叠 @嵌入式方法 = "">
     {
-        @ (INT_P)@sn<this>.m_window
+        @ reinterpret_cast<INT_P>(@sn<this>.m_window)
     }
 
     方法 最小化 <公开 注释 = "将本窗口最小化到任务栏图标" 折叠 @嵌入式方法 = "">
@@ -880,7 +1064,125 @@
         @ SDL_SetWindowInputFocus(@sn<this>.m_window)
     }
 
+    方法 取窗口尺寸 <公开 注释 = "获取本窗口的当前宽度和高度" 折叠 @嵌入式方法 = "">
+    参数 宽度 <类型 = 整数 @需求类型 = 可写入变量>
+    参数 高度 <类型 = 整数 @需求类型 = 可写入变量>
+    {
+        @ SDL_GetWindowSize(@sn<this>.m_window, &@<宽度>, &@<高度>)
+    }
+
+    方法 置窗口尺寸 <公开 注释 = "设置本窗口的宽度和高度" 折叠 @嵌入式方法 = "">
+    参数 宽度 <类型 = 整数>
+    参数 高度 <类型 = 整数>
+    {
+        @ SDL_SetWindowSize(@sn<this>.m_window, @<宽度>, @<高度>)
+    }
+
+    方法 取窗口位置 <公开 注释 = "获取本窗口的当前位置" 折叠 @嵌入式方法 = "">
+    参数 顶边位置 <类型 = 整数 @需求类型 = 可写入变量>
+    参数 左边位置 <类型 = 整数 @需求类型 = 可写入变量>
+    {
+        @ SDL_GetWindowPosition(@sn<this>.m_window, &@<左边位置>, &@<顶边位置>)
+    }
+
+    方法 置窗口位置 <公开 注释 = "设置本窗口的位置" 折叠 @嵌入式方法 = "">
+    参数 顶边位置 <类型 = 整数>
+    参数 左边位置 <类型 = 整数>
+    {
+        @ SDL_SetWindowPosition(@sn<this>.m_window, @<左边位置>, @<顶边位置>)
+    }
+
+    方法 限制窗口尺寸 <公开 注释 = "限制本窗口的宽度和高度,只能在限制的范围内调整大小" 折叠>
+    参数 最小宽度 <类型 = 整数>
+    参数 最大宽度 <类型 = 整数>
+    参数 最小高度 <类型 = 整数>
+    参数 最大高度 <类型 = 整数>
+    {
+        @ SDL_SetWindowMinimumSize(m_window, @<最小宽度>, @<最小高度>);
+        @ SDL_SetWindowMaximumSize(m_window, @<最大宽度>, @<最大高度>);
+    }
+
     # 属性
+
+    方法 左边 <公开 属性读 类型 = 整数 注释 = "返回本窗口的左边位置" 折叠 @禁止流程检查 = 真>
+    {
+        @ if (m_window != nullptr) {
+        @     int left;
+        @     SDL_GetWindowPosition(m_window, &left, nullptr);
+        @     return left;
+        @ }
+        @ return 0;
+    }
+
+    方法 左边 <公开 属性写 注释 = "设置本窗口的左边位置" 折叠>
+    参数 所欲设置的位置 <类型 = 整数>
+    {
+        @ if (m_window != nullptr) {
+        @     int top;
+        @     SDL_GetWindowPosition(m_window, nullptr, &top);
+        @     SDL_SetWindowPosition(m_window, @<所欲设置的位置>, top);
+        @ }
+    }
+
+    方法 顶边 <公开 属性读 类型 = 整数 注释 = "返回本窗口的顶边位置" 折叠 @禁止流程检查 = 真>
+    {
+        @ if (m_window != nullptr) {
+        @     int top;
+        @     SDL_GetWindowPosition(m_window, nullptr, &top);
+        @     return top;
+        @ }
+        @ return 0;
+    }
+
+    方法 顶边 <公开 属性写 注释 = "设置本窗口的顶边位置" 折叠>
+    参数 所欲设置的位置 <类型 = 整数>
+    {
+        @ if (m_window != nullptr) {
+        @     int left;
+        @     SDL_GetWindowPosition(m_window, &left, nullptr);
+        @     SDL_SetWindowPosition(m_window, left, @<所欲设置的位置>);
+        @ }
+    }
+
+    方法 宽度 <公开 属性读 类型 = 整数 注释 = "返回本窗口的宽度" 折叠 @禁止流程检查 = 真>
+    {
+        @ if (m_window != nullptr) {
+        @     int width;
+        @     SDL_GetWindowSize(m_window, &width, NULL);
+        @     return width;
+        @ }
+        @ return 0;
+    }
+
+    方法 宽度 <公开 属性写 注释 = "设置本窗口的宽度" 折叠>
+    参数 所欲设置的宽度 <类型 = 整数>
+    {
+        @ if (m_window != nullptr) {
+        @     int hight;
+        @     SDL_GetWindowSize(m_window, nullptr, &hight);
+        @     SDL_SetWindowSize(m_window, @<所欲设置的宽度>, hight);
+        @ }
+    }
+
+    方法 高度 <公开 属性读 类型 = 整数 注释 = "返回本窗口的高度" 折叠 @禁止流程检查 = 真>
+    {
+        @ if (m_window != nullptr) {
+        @     int hight;
+        @     SDL_GetWindowSize(m_window, NULL, &hight);
+        @     return hight;
+        @ }
+        @ return 0;
+    }
+
+    方法 高度 <公开 属性写 注释 = "设置本窗口的高度" 折叠>
+    参数 所欲设置的高度 <类型 = 整数>
+    {
+        @ if (m_window != nullptr) {
+        @     int width;
+        @     SDL_GetWindowSize(m_window, &width, nullptr);
+        @     SDL_SetWindowSize(m_window, width, @<所欲设置的高度>);
+        @ }
+    }
 
     方法 标题 <公开 属性读 类型 = 文本型 注释 = "返回本窗口的当前标题文本" 折叠 @禁止流程检查 = 真>
     {
@@ -946,7 +1248,7 @@
         @ SDL_VERSION(&info.version);
         @ if (SDL_GetWindowWMInfo(m_window, &info))
         @ {
-        @     HICON hIcon = (HICON)g_objVolApp.LoadResImage(VRIT_ICON, @<所欲设置的图标>);
+        @     HICON hIcon = reinterpret_cast<HICON>(g_objVolApp.LoadResImage(VRIT_ICON, @<所欲设置的图标>));
         @     if (hIcon) {
         @         ::SendMessage(info.info.win.window, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
         @         ::SendMessage(info.info.win.window, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
@@ -962,7 +1264,7 @@
         @ SDL_VERSION(&info.version);
         @ if (SDL_GetWindowWMInfo(m_window, &info))
         @ {
-        @     HICON hIcon = (HICON)@<所欲设置的图标>.GetGDIHandle();
+        @     HICON hIcon = reinterpret_cast<HICON>(@<所欲设置的图标>.GetGDIHandle());
         @     if (hIcon) {
         @         ::SendMessage(info.info.win.window, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
         @         ::SendMessage(info.info.win.window, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
@@ -973,12 +1275,11 @@
     # ---
     # @begin
     # <> <include>
-    # static void @an<_sOnBeforeAppInit>() { IM_ASSERT(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) == 0); }
-    # static void @an<_sOnAfterAppExit>() { SDL_Quit(); }
-    # // 成员变量
     # SDL_Window* m_window = nullptr;
     # SDL_GLContext gl_context = nullptr;
-    # // Callback
+    #
+    # static void @an<_sOnBeforeAppInit>() { IM_ASSERT(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) == 0); }
+    # static void @an<_sOnAfterAppExit>() { SDL_Quit(); }
     # <> </include>
     # @end
     # ---
@@ -1051,7 +1352,7 @@
         }
         如果 (位与 (IO.标志, IM配置标志.启用视口) != 0)
         {
-            样式.窗口圆角半径 = 0.0
+            样式.窗口圆角 = 0.0
             样式.颜色 (IM颜色标识符.窗口背景).w = 1.0
         }
         如果 (字体图集.是否已生成 () == 假)
@@ -1075,7 +1376,7 @@
         渲染器.准备 ()
         本对象.准备渲染 (样式)
         _退出循环.重置 ()
-        启动动态线程 (本对象, "mainloop", _IM窗口句柄)
+        线程对象类.启动动态线程 (本对象, "mainloop", _IM窗口句柄)
         返回 (真)
     }
 
@@ -1114,7 +1415,7 @@
             变量 _宽度 <静态 类型 = 整数>
             变量 _高度 <静态 类型 = 整数>
             @ static RECT rt;
-            @ if (::GetClientRect((HWND)@<窗口句柄_>, &rt))
+            @ if (::GetClientRect(reinterpret_cast<HWND>(@<窗口句柄_>), &rt))
             @ {
             @     @<_宽度> = rt.right - rt.left;
             @     @<_高度> = rt.bottom - rt.top;

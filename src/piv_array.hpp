@@ -12,12 +12,7 @@
 #error 数组P(数组辅助增强)需要 C++17 或更高标准,请使用 Visual Studio 2017 以上版本的编译器
 #endif
 
-// 包含火山视窗基本类,它在火山里的包含顺序比较靠前(全局-110)
-#ifndef __VOL_BASE_H__
-#include <sys/base/libs/win_base/vol_base.h>
-#endif
-
-#include <type_traits>
+#include "detail/piv_base.hpp"
 
 namespace piv
 {

@@ -8,7 +8,7 @@
 #ifndef PIV_PEFILE_HPP
 #define PIV_PEFILE_HPP
 
-#include "piv_process.hpp"
+#include "piv_NtProcess.hpp"
 #include <vector>
 
 class PivFileMapping
@@ -140,7 +140,7 @@ protected:
             if (pPeBase)
             {
                 if (bIsWriteable)
-                    NtPiv::NtFreeVirtualMemory(NULL, &pPeBase, NULL, MEM_RELEASE);
+                    PivNT::data().NtFreeVirtualMemory(NULL, &pPeBase, NULL, MEM_RELEASE);
                 else
                     ::UnmapViewOfFile(pPeBase);
             }
@@ -188,12 +188,10 @@ protected:
     std::unique_ptr<PEFILE_INFO> m_PE;
     std::vector<HMODULE> m_vecHmodule;
     INT m_Error = 0;
+    PivNT& Nt = PivNT::data();
 
 public:
-    PivPeFile()
-    {
-        NtPiv::LoadNt();
-    }
+    PivPeFile(){}
     ~PivPeFile() {}
 
     // 以下函数任何时候皆可调用
@@ -346,7 +344,7 @@ public:
         {
             if (RepairToPeFile(pMemoryAddress) == FALSE)
             {
-                NtPiv::NtFreeVirtualMemory(NULL, &pMemoryAddress, NULL, MEM_RELEASE);
+                Nt.NtFreeVirtualMemory(NULL, &pMemoryAddress, NULL, MEM_RELEASE);
                 return FALSE;
             }
             dwWriteSize = CalcPeFileSize();
@@ -364,7 +362,7 @@ public:
         }
         if (pMemoryAddress)
         {
-            NtPiv::NtFreeVirtualMemory(NULL, &pMemoryAddress, NULL, MEM_RELEASE);
+            Nt.NtFreeVirtualMemory(NULL, &pMemoryAddress, NULL, MEM_RELEASE);
         }
         if (bRes)
         {
@@ -969,7 +967,7 @@ protected:
             return 0;
         }
         void *pMemoryAddress = nullptr;
-        NtPiv::NtAllocateVirtualMemory(NULL, &pMemoryAddress, 0, &dwImageSize, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+        Nt.NtAllocateVirtualMemory(NULL, &pMemoryAddress, 0, &dwImageSize, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
         if (pMemoryAddress == nullptr)
         {
             m_Error = 19;
@@ -994,7 +992,7 @@ protected:
             return FALSE;
         }
         void *pMemoryAddress = nullptr;
-        NtPiv::NtAllocateVirtualMemory(NULL, &pMemoryAddress, 0, &dwImageSize, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+        Nt.NtAllocateVirtualMemory(NULL, &pMemoryAddress, 0, &dwImageSize, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
         if (pMemoryAddress == nullptr)
         {
             m_Error = 19;
@@ -1121,8 +1119,8 @@ protected:
         while (pImport->Name != 0)
         {
             PDWORD pRealThunk = PIV_PTR_FORWARD(PDWORD, m_PE->pPeBase, pImport->FirstThunk);
-            NtPiv::RtlInitUnicodeString(&ModuleFileName, GetWideText(PIV_PTR_FORWARD(LPCSTR, m_PE->pPeBase, pImport->Name), buffer, NULL));
-            if (NT_SUCCESS(NtPiv::LdrLoadDll(NULL, 0, &ModuleFileName, &hModule)))
+            Nt.RtlInitUnicodeString(&ModuleFileName, GetWideText(PIV_PTR_FORWARD(LPCSTR, m_PE->pPeBase, pImport->Name), buffer, NULL));
+            if (NT_SUCCESS(Nt.LdrLoadDll(NULL, 0, &ModuleFileName, &hModule)))
             {
                 vecHmodule->push_back(hModule);
             }
@@ -1130,7 +1128,7 @@ protected:
             {
                 for (size_t i = 0; vecHmodule->size(); i++)
                 {
-                    NtPiv::LdrUnloadDll(vecHmodule->at(i));
+                    Nt.LdrUnloadDll(vecHmodule->at(i));
                 }
                 vecHmodule->clear();
                 m_Error = 20;
@@ -1144,14 +1142,14 @@ protected:
                 PIMAGE_THUNK_DATA pRealIAT = reinterpret_cast<PIMAGE_THUNK_DATA>(pRealThunk);
                 if (pRealIAT->u1.Ordinal & IMAGE_ORDINAL_FLAG)
                 {
-                    NtPiv::LdrGetProcedureAddress(hModule, NULL, static_cast<WORD>(pRealIAT->u1.Ordinal & 0x0000FFFF), &lpFunction);
+                    Nt.LdrGetProcedureAddress(hModule, NULL, static_cast<WORD>(pRealIAT->u1.Ordinal & 0x0000FFFF), &lpFunction);
                 }
                 else
                 {
                     PIMAGE_IMPORT_BY_NAME pByName = PIV_PTR_FORWARD(PIMAGE_IMPORT_BY_NAME,
                                                                    m_PE->pPeBase, pRealIAT->u1.AddressOfData);
-                    NtPiv::RtlInitAnsiString(&FunctionName, pByName->Name);
-                    NtPiv::LdrGetProcedureAddress(hModule, &FunctionName, pByName->Hint, &lpFunction);
+                    Nt.RtlInitAnsiString(&FunctionName, pByName->Name);
+                    Nt.LdrGetProcedureAddress(hModule, &FunctionName, pByName->Hint, &lpFunction);
                 }
                 if (lpFunction != nullptr)
                 {
@@ -1161,7 +1159,7 @@ protected:
                 {
                     for (size_t i = 0; vecHmodule->size(); i++)
                     {
-                        NtPiv::LdrUnloadDll(vecHmodule->at(i));
+                        Nt.LdrUnloadDll(vecHmodule->at(i));
                     }
                     vecHmodule->clear();
                     m_Error = 21;
@@ -1434,10 +1432,10 @@ public:
             m_fnDllMain(reinterpret_cast<HINSTANCE>(m_PE->pPeBase), DLL_PROCESS_DETACH, 0);
             for (size_t i = 0; m_vecHmodule.size(); i++)
             {
-                NtPiv::LdrUnloadDll(m_vecHmodule[i]);
+                Nt.LdrUnloadDll(m_vecHmodule[i]);
             }
             m_vecHmodule.clear();
-            NtPiv::NtFreeVirtualMemory(NULL, &m_PE->pPeBase, NULL, MEM_RELEASE);
+            Nt.NtFreeVirtualMemory(NULL, &m_PE->pPeBase, NULL, MEM_RELEASE);
             m_PE->pPeBase = nullptr;
             m_fnDllMain = nullptr;
             m_bIsLoadOk = FALSE;
@@ -1478,7 +1476,7 @@ public:
         m_vecHmodule.clear();
         if (AlignPeDatas() == FALSE)
         {
-            NtPiv::NtFreeVirtualMemory(NULL, &m_PE->pPeBase, NULL, MEM_RELEASE);
+            Nt.NtFreeVirtualMemory(NULL, &m_PE->pPeBase, NULL, MEM_RELEASE);
             m_PE->pPeBase = nullptr;
             return FALSE;
         }
@@ -1488,7 +1486,7 @@ public:
         }
         if (RebuildImport(&m_vecHmodule) == FALSE)
         {
-            NtPiv::NtFreeVirtualMemory(NULL, &m_PE->pPeBase, NULL, MEM_RELEASE);
+            Nt.NtFreeVirtualMemory(NULL, &m_PE->pPeBase, NULL, MEM_RELEASE);
             m_PE->pPeBase = nullptr;
             return FALSE;
         }
@@ -1499,10 +1497,10 @@ public:
             m_fnDllMain(reinterpret_cast<HINSTANCE>(m_PE->pPeBase), DLL_PROCESS_DETACH, 0);
             for (size_t i = 0; m_vecHmodule.size(); i++)
             {
-                NtPiv::LdrUnloadDll(m_vecHmodule[i]);
+                Nt.LdrUnloadDll(m_vecHmodule[i]);
             }
             m_vecHmodule.clear();
-            NtPiv::NtFreeVirtualMemory(NULL, &m_PE->pPeBase, NULL, MEM_RELEASE);
+            Nt.NtFreeVirtualMemory(NULL, &m_PE->pPeBase, NULL, MEM_RELEASE);
             m_fnDllMain = nullptr;
             m_Error = 23;
             return FALSE;

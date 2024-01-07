@@ -2,7 +2,7 @@
 
 包 火山.PIV基础类 <注释 = "PE文件解析与操作" 注释 = "https://github.com/SaierMe/piv" @视窗.外部头文件 = "src\\PEfile.hpp">
 
-类 PE文件操作类 <公开 注释 = "解析可执行文件的各种数据" 折叠 @文档 = "category = \"PE文件操作\"">
+类 PE文件操作类 <公开 注释 = "解析可执行文件的各种数据" @文档 = "category = \"PE文件操作\"">
 {
 
     # @ @m<DECLARE_REF_OBJECT_CLASS_WITH_DATA> (PivPeFile)
@@ -23,13 +23,13 @@
         @ @sn<this>.data().OpenPeData(reinterpret_cast<void*>(@<数据指针>), static_cast<DWORD>(@<数据大小>), @<是否已对齐>, @<是否已加载>)
     }
 
-    方法 打开模块 <公开 类型 = 逻辑型 注释 = "打开并解析系统中已加载的模块" 返回值注释 = "返回是否解析成功" 折叠 @禁止流程检查 = 真>
+    方法 打开模块 <公开 类型 = 逻辑型 注释 = "打开并解析系统中已加载的模块" 返回值注释 = "返回是否解析成功" @禁止流程检查 = 真>
     参数 进程ID <类型 = 整数 注释 = "0为当前进程" @默认值 = 0>
     参数 模块名称 <类型 = 文本型 注释 = "请提供模块的文件名称(区分大小写);" 注释 = "如省略扩展名则默认为\".dll\". 结尾为\".\"则表示模块名称没有扩展名;"
             注释 = "该名称可以不包含路径,如果指定路径,必须用反斜杠\"\\\\\";" 注释 = "留空为打开进程的exe文件." @默认值 = 空对象>
     {
-        变量 进程操作 <类型 = 进程操作类>
-        变量 模块信息 <类型 = 模块信息类>
+        变量 进程操作 <类型 = NT进程操作类>
+        变量 模块信息 <类型 = NT模块信息类>
         变量 模块句柄 <类型 = 长整数>
         如果 (进程操作.打开进程 (进程ID) == 真)
         {
@@ -209,10 +209,10 @@
 
     # ---
 
-    方法 取导入表 <公开 类型 = 整数 注释 = "获取可执行文件的模块导入表信息." 返回值注释 = "成功返回导入的模块数量,失败返回0." 折叠 @禁止流程检查 = 真>
+    方法 取导入表 <公开 类型 = 整数 注释 = "获取可执行文件的模块导入表信息." 返回值注释 = "成功返回导入的模块数量,失败返回0." @禁止流程检查 = 真>
     参数 导入表 <类型 = 导入表数组类 注释 = "成功在此返回导入表信息">
     {
-        @ @<导入表>.RemoveAll ();
+        @ @<导入表>.data().clear();
         @ std::vector<CVolString> vModuleName;
         @ std::vector<std::vector<DWORD> > vFunOrdinal;
         @ std::vector<std::vector<ULONGLONG> > vFunAddress;
@@ -224,18 +224,14 @@
         @     Dir.ModuleName = vModuleName[i];
         @     for (DWORD y = 0; y < vFunOrdinal[i].size(); y++)
         @     {
-        @         @dt<PE函数类> Info;
-        @         Info.FunctionAddress = (INT64)vFunAddress[i][y];
-        @         Info.FunctionOrdinal = (INT)vFunOrdinal[i][y];
-        @         Info.FunctionName = vFunName[i][y];
-        @         Dir.aFunctions.Add (Info, NULL);
+        @         Dir.aFunctions.data().emplace_back(vFunName[i][y], vFunAddress[i][y], vFunOrdinal[i][y]);
         @     }
-        @     @<导入表>.Add (Dir, NULL);
+        @     @<导入表>.data().push_back(Dir);
         @ }
-        @ return (INT)@<导入表>.GetCount ();
+        @ return (INT)@<导入表>.data().size();
     }
 
-    方法 取导出表 <公开 类型 = 整数 注释 = "获取DLL文件的函数导出表信息,EXE文件没有导出表." 返回值注释 = "成功返回导出的函数数量,失败返回0." 折叠 @禁止流程检查 = 真>
+    方法 取导出表 <公开 类型 = 整数 注释 = "获取DLL文件的函数导出表信息,EXE文件没有导出表." 返回值注释 = "成功返回导出的函数数量,失败返回0." @禁止流程检查 = 真>
     参数 导出表 <类型 = 导出表类 注释 = "成功在此返回导出表信息">
     {
         @ @<导出表>.ResetToNullObject ();
@@ -248,24 +244,20 @@
         @ @<导出表>.ModuleName = sModuleName;
         @ for (DWORD i = 0; i < dwNumOfFun; i++)
         @ {
-        @     @dt<PE函数类> Info;
-        @     Info.FunctionAddress = (INT64)vFunAddress[i];
-        @     Info.FunctionOrdinal = (INT)vFunOrdinal[i];
-        @     Info.FunctionName = vFunName[i];
-        @     @<导出表>.aFunctions.Add (Info, NULL);
+        @     @<导出表>.aFunctions.data().emplace_back(vFunName[i], vFunAddress[i], vFunOrdinal[i]);
         @ }
-        @ return (INT)@<导出表>.aFunctions.GetCount ();
+        @ return (INT)@<导出表>.aFunctions.data().size();
     }
 
     # ---
 
-    方法 相对虚拟地址到文件偏移 <公开 类型 = 整数 注释 = "将相对虚拟地址(RVA)转换到文件偏移量(FOA)." @嵌入式方法 = "">
+    方法 相对虚拟地址到文件偏移 <公开 类型 = 整数 注释 = "将相对虚拟地址(RVA)转换到文件偏移量(FOA)." 折叠 @嵌入式方法 = "">
     参数 相对虚拟地址 <类型 = 整数>
     {
         @ (INT)@sn<this>.data().Rva2Foa(static_cast<DWORD>(@<相对虚拟地址>))
     }
 
-    方法 文件偏移到相对虚拟地址 <公开 类型 = 整数 注释 = "将文件偏移量(FOA)转换到相对虚拟地址(RVA)." 返回值注释 = "失败返回0" @嵌入式方法 = "">
+    方法 文件偏移到相对虚拟地址 <公开 类型 = 整数 注释 = "将文件偏移量(FOA)转换到相对虚拟地址(RVA)." 返回值注释 = "失败返回0" 折叠 @嵌入式方法 = "">
     参数 文件偏移 <类型 = 整数>
     {
         @ (INT)@sn<this>.data().Foa2Rva(static_cast<DWORD>(@<文件偏移>))
@@ -786,7 +778,7 @@
 
 类 导入表描述符数组类 <公开 基础类 = 对象数组模板类 @文档 = "category = \"PE文件操作.辅助类\"" @模板实现类 = "IMAGE_IMPORT_DESCRIPTOR">
 
-类 IMAGE_EXPORT_DIRECTORY <公开 注释 = "PE文件的导出表结构体" 折叠 @文档 = "category = \"PE文件操作.辅助类\"" @视窗.结构类 = 0>
+类 IMAGE_EXPORT_DIRECTORY <公开 注释 = "PE文件的导出表结构体" @文档 = "category = \"PE文件操作.辅助类\"" @视窗.结构类 = 0>
 {
     变量 Characteristics <公开 类型 = 整数 注释 = "未使用,总为0">
     变量 TimeDateStamp <公开 类型 = 整数 注释 = "文件创建时间戳">
@@ -828,7 +820,7 @@
     变量 函数地址 <公开 类型 = 长整数 @输出名 = "FunctionAddress">
     变量 函数序号 <公开 类型 = 整数 @输出名 = "FunctionOrdinal">
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
+    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
             @视窗.后缀文本 = "override">
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
@@ -838,11 +830,21 @@
         加入文本 (展示内容, "2. 函数地址: " + 取调试文本2 (最大展示数据尺寸, 函数地址) + "\r\n")
         加入文本 (展示内容, "3. 函数序号: " + 取调试文本2 (最大展示数据尺寸, 函数序号) + "\r\n")
     }
+
+    # @begin
+    # <> <include>
+    # @sn<current_class>(const CVolString& name, ULONGLONG address, DWORD ordinal) {
+    #     FunctionName = name;
+    #     FunctionAddress = static_cast<INT64>(address);
+    #     FunctionOrdinal = static_cast<INT>(ordinal);
+    # }
+    # <> </include>
+    # @end
 }
 
-类 PE函数数组类 <公开 基础类 = 对象数组模板类 注释 = "PE文件导出表中的函数信息数组" @文档 = "category = \"PE文件操作.辅助类\"" @模板实现类 = "PE函数类">
+类 PE函数数组类 <公开 基础类 = 对象容器模板类 注释 = "PE文件导出表中的函数信息数组" @文档 = "category = \"PE文件操作.辅助类\"" @模板实现类 = "PE函数类">
 
-类 导出表类 <公开 注释 = "导出表" 折叠 @文档 = "category = \"PE文件操作.辅助类\"">
+类 导出表类 <公开 注释 = "导出表" @文档 = "category = \"PE文件操作.辅助类\"">
 {
     变量 模块名称 <公开 类型 = 文本型 @输出名 = "ModuleName">
     变量 函数列表 <公开 类型 = PE函数数组类 @输出名 = "aFunctions">
@@ -858,4 +860,4 @@
     }
 }
 
-类 导入表数组类 <公开 基础类 = 对象数组模板类 注释 = "导入表数组" @文档 = "category = \"PE文件操作.辅助类\"" @模板实现类 = "导出表类">
+类 导入表数组类 <公开 基础类 = 对象容器模板类 注释 = "导入表数组" @文档 = "category = \"PE文件操作.辅助类\"" @模板实现类 = "导出表类">

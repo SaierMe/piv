@@ -2,6 +2,41 @@
 
 包 火山.PIV基础类 <注释 = "https://github.com/SaierMe/piv">
 
+类 PIV对象类 <注释 = "等同于\"扩展对象类\",并导入了<chrono>头文件." 折叠 "@视窗.外部头文件.全局-100" = "<malloc.h>\r\n<chrono>">
+{
+    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 注释 = "" 折叠 折叠2 @虚拟方法 = 可覆盖
+            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
+    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
+    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    {
+        @ BaseClass::GetDumpString (@<展示内容>, @<最大展示数据尺寸>);
+    }
+
+    方法 流读入 <公开 注释 = "从所指定的流对象中读入本对象的数据. 请注意以下事项:" 注释 = "  1. 一旦定义了\"流读入\"方法,必须定义对应的\"流写出\"方法,所读入内容格式与"
+            注释 = "\"流写出\"方法写出的内容格式必须完全一致;" 注释 = "  2. 任何类如果既没有定义\"流读入\"方法,也没有定义\"流写出\"方法,编译器会自动"
+            注释 = "建立默认的\"流读入\"和\"流写出\"方法,默认方法就是首先调用基础类中的对应方法," 注释 = "然后将本对象中的所有非静态变量成员顺序从流中读入/写出;"
+            注释 = "  3. 继承类中如果覆盖了本方法且基础类中也存在数据需要从流中读入,则必须负" 注释 = "责调用基础类中的\"流读入\"方法,调用格式如: \"父对象.流读入 (流对象)\";"
+            注释 = "  4. 如果本方法中的读入操作比较复杂或耗时,在之前最好检查一下流对象当前是" 注释 = "否处于出错状态(\"流对象.是否出错\"方法返回真),如果出错则放弃后续的读入操作,"
+            注释 = "以提高运行效率;" 注释 = "  5. 在读入过程中一旦发现出错,则需要将对应的错误码写入\"流对象.错误码\"属性"
+            注释 = "中(流读入出错不需要,会自动写入),以禁止后续的流读入操作. 错误码可以是" 注释 = "\"流错误码\"类中的常量值,也可以是自行定义的错误码值(必须大于0);"
+            注释 = "  6. 流对象一旦处于出错状态(流对象的\"错误码\"属性值不为\"流错误码.无错误\")," 注释 = "则后续所有流读入操作都会失败,如果欲再次使用此流对象,需要首先调用其"
+            注释 = "\"清除错误\"方法清除掉流的出错状态或者将流关闭后再打开." 折叠 折叠2 @虚拟方法 = 可覆盖 @输出名 = "@LoadFromStream"
+            @视窗.后缀文本 = "override">
+    参数 流对象 <类型 = 输入流类 注释 = "提供欲从其中读入本对象数据内容的输入流">
+
+    方法 流写出 <公开 注释 = "将本对象的数据写入所指定的流对象中. 注意:" 注释 = "  1. 一旦定义了\"流写出\"方法,必须定义对应的\"流读入\"方法,所写出内容格式与"
+            注释 = "\"流读入\"方法读取的内容格式必须完全一致;" 注释 = "  2. 任何类如果既没有定义\"流读入\"方法,也没有定义\"流写出\"方法,编译器会自动"
+            注释 = "建立默认的\"流读入\"和\"流写出\"方法,默认方法就是首先调用基础类中的对应方法," 注释 = "然后将本对象中的所有非静态变量成员顺序从流中读入/写出;"
+            注释 = "  3. 继承类中如果覆盖了本方法且基础类中也存在数据需要写出到流中,则必须负" 注释 = "责调用基础类中的\"流写出\"方法,调用格式如: \"父对象.流写出 (流对象)\";"
+            注释 = "  4. 如果本方法中的写出操作比较复杂或耗时,在之前最好检查一下流对象当前是" 注释 = "否处于出错状态(\"流对象.是否出错\"方法返回真),如果出错则放弃后续的写出操作,"
+            注释 = "以提高运行效率;" 注释 = "  5. 在写出过程中一旦发现出错,则需要将对应的错误码写入\"流对象.错误码\"属性"
+            注释 = "中(流写出出错不需要,会自动写入),以禁止后续的流写出操作. 错误码可以是" 注释 = "\"流错误码\"类中的常量值,也可以是自行定义的错误码值(必须大于0);"
+            注释 = "  6. 流对象一旦处于出错状态(流对象的\"错误码\"属性值不为\"流错误码.无错误\")," 注释 = "则后续所有流写出操作都会失败,如果欲再次使用此流对象,需要首先调用其"
+            注释 = "\"清除错误\"方法清除掉流的出错状态或者将流关闭后再打开." 折叠 折叠2 @虚拟方法 = 可覆盖 @输出名 = "@SaveIntoStream"
+            @视窗.后缀文本 = "override">
+    参数 流对象 <类型 = 输出流类 注释 = "提供欲将本对象数据内容写出到其中的输出流">
+}
+
 类 编译参数类 <公开 注释 = "用于设置MSVC的编译参数" 折叠 @文档 = "category = \"编译参数\"" @禁止创建对象 = 真>
 {
     方法 禁用随机基址 <公开 静态 注释 = "禁用随机基址" "@视窗.附加编译参数.release-default" = "link: /DYNAMICBASE:NO">
@@ -436,10 +471,10 @@
         @模板实现类 = "目录信息类">
 
 类 数据类型基础类 <公开 基础类 = 扩展对象类 注释 = "本类可以在封装结构体和C++类时作为其基础类,用作提供一些基本的操作功能." 注释 = "注意:"
-        注释 = "  1. 本类需要配合 PIV_DECLARE_STRUCT_CLASS 宏使用,宏的参数为所欲封装的结构体或C++类型;" 注释 = "  2. 本类使用指针存储所封装的数据类型;"
-        注释 = "  3. 所封装的结构体和类必须有默认构造函数;" 注释 = "  4. \"是否为参考\"为真时,表示引用了外部指针,复制的类变量指向同一数据,"
-        注释 = "此时本类不会管理指针的释放,请注意外部指针的生命周期;" 注释 = "  5. \"是否为参考\"为假时,本类可以复制赋值;" 折叠 @文档 = "category = \"数据处理\""
-        @视窗.外部头文件 = "<memory>" @禁止创建对象 = 真>
+        注释 = "  1. 本类需要配合 @m<PIV_DECLARE_STRUCT_CLASS>(type) 宏使用,type为所欲封装的结构体或C++类型;"
+        注释 = "  2. 所封装的结构体和类必须有默认构造函数;" 注释 = "  3. 本类使用指针存储所封装的数据类型;"
+        注释 = "  4. \"是否为参考\"为真时,表示引用了外部指针,赋值的类变量指向同一数据," 注释 = "此时本类不会管理指针的释放,请注意外部指针的生命周期;"
+        注释 = "  5. \"是否为参考\"为假时,本类可以复制赋值;" 折叠 @文档 = "category = \"数据处理\"" @视窗.外部头文件 = "<memory>" @禁止创建对象 = 真>
 {
     方法 置指针参考 <公开 注释 = "引用外部指针,所引用的指针不由本对象释放,请注意它的生命周期." 注释 = "可以多个对象实例引用同一个指针." 折叠 @嵌入式方法 = "">
     参数 数据指针 <类型 = 变整数 注释 = "必须是所封装C++类型的指针">
@@ -481,9 +516,10 @@
 }
 
 类 结构指针基础类 <公开 基础类 = 扩展对象类 注释 = "本类可以在封装结构体和C++类时作为其基础类,用作提供一些基本的操作功能." 注释 = "注意:"
-        注释 = "  1. 本类需要配合 PIV_DECLARE_STRUCT_PTR 宏使用,宏的参数为所欲封装的结构体或C++类型;" 注释 = "  2. 本类使用指针存储所封装的数据类型;"
-        注释 = "  3. 本类只能引用外部指针,复制的类变量指向同一数据,且不会管理指针的释放,请注意外部指针的生命周期;"
-        注释 = "  4. 本类的数据指针默认为空指针,当你执行赋值、\"置指针参考\"等方法时,才实际拥有数据;" 折叠 @文档 = "category = \"数据处理\"" @禁止创建对象 = 真>
+        注释 = "  1. 本类需要配合 @m<PIV_DECLARE_STRUCT_PTR>(type) 宏使用,type为所欲封装的结构体或C++类型;"
+        注释 = "  2. 本类主要用于封装没有构造函数的C++类;" 注释 = "  3. 本类使用指针存储所封装的数据类型;"
+        注释 = "  4. 本类只能引用外部指针,复制的类变量指向同一数据,且不会管理指针的释放,请注意外部指针的生命周期;"
+        注释 = "  5. 本类的数据指针默认为空指针,当你执行赋值、\"置指针参考\"等方法时,才实际拥有数据;" 折叠 @文档 = "category = \"数据处理\"" @禁止创建对象 = 真>
 {
     方法 置指针参考 <公开 注释 = "引用外部指针,所引用的指针不由本对象释放,请注意它的生命周期." 注释 = "可以多个对象实例引用同一个指针." 折叠 @嵌入式方法 = "">
     参数 数据指针 <类型 = 变整数 注释 = "必须是所封装C++类型的指针">
@@ -518,10 +554,62 @@
 # namespace piv
 # {
 #     // 取基本数据封装类的值指针,空对象时返回nullptr
-#     static void* GetBaseDataPtr(CVolBaseDataType& data) { return data.IsNullObject() ? nullptr : data.GetDataPtr(); }
+#     template <typename T = void*>
+#     T GetBaseDataPtr(CVolBaseDataType& data) {
+#         return data.IsNullObject() ? nullptr : reinterpret_cast<T>(data.GetDataPtr());
+#     }
 #     // 取文本指针,文本为空时返回nullptr
 #     static const wchar_t* GetText(CVolString& str) { return str.IsEmpty() ? nullptr : str.GetText(); }
-# }
+#     // 强制指针类型转换
+#     template <typename dst_type, typename src_type>
+#     dst_type pointer_cast(src_type src) {
+#         return *static_cast<dst_type*>(static_cast<void*>(&src));
+#     }
+# } // namespace piv
+# // 基于火山内部内存池实现的缓存类
+# template <typename T = BYTE>
+# class PivBuffer
+# {
+# private:
+#     T *p = nullptr; INT_P size = 0;
+# public:
+#     PivBuffer() {}
+#     ~PivBuffer() { Free(); }
+#     // 带参构造(成员数, 是否清零)
+#     PivBuffer(INT_P npSize, bool zero = true) { Alloc(npSize); }
+#     // 分配缓存(成员数, 是否清零)
+#     T* Alloc(INT_P npSize, bool zero = true) {
+#         size = npSize * sizeof(T);
+#         if (!p)
+#             p = reinterpret_cast<T*>(g_objVolApp.GetPoolMem()->Alloc(size));
+#         else
+#             p = reinterpret_cast<T*>(g_objVolApp.GetPoolMem()->Realloc((void*)p, size));
+#         if (zero) memset(p, 0, size);
+#         return p;
+#     }
+#     // 重分配缓存(新成员数, 是否清零)
+#     inline T* Realloc(INT_P npNewSize, bool zero = true) {
+#         size = npNewSize * sizeof(T);
+#         p = reinterpret_cast<T*>(g_objVolApp.GetPoolMem()->Realloc((void*)p, size));
+#         if (zero) memset(p, 0, size);
+#         return p;
+#     }
+#     // 释放缓存
+#     inline void Free() { if (p) g_objVolApp.GetPoolMem()->Free((void*)p); size = 0; }
+#     // 取指针
+#     inline T* GetPtr() { return p; }
+#     // 取指定类型指针
+#     template <typename R = T>
+#     inline R* Get() { return reinterpret_cast<R*>(p); }
+#     // 取字节长度
+#     inline INT_P GetSize() { return size; }
+#     // 取成员数
+#     inline INT_P GetCount() { return size / sizeof(T); }
+#     // 取成员(索引)
+#     T& At(INT_P pos) { return p[pos]; }
+#     T* operator*() { return p; }
+#     T& operator[](INT_P pos) { return p[pos]; }
+# }; // PivBuffer
 # <> </include>
 # <> </global>
 #
@@ -580,6 +668,7 @@
 # @def_macro PIV_DECLARE_STRUCT_CLASS(struct_data_type)  \
 #     @m<PIV_DECLARE_BASE_CLASS> (struct_data_type)  \
 # <>     <include>  \
+#     @sn<current_class>(DATA_TYPE& rhs) { m_ptr.reset(&rhs); m_ref = true; }  \
 #     inline void reference(DATA_TYPE* rhs) { if (m_ref) { m_ptr.release(); } m_ptr.reset(rhs); m_ref = true; }  \
 #     inline @sn<current_class>& Copy(const DATA_TYPE& rhs) {  \
 #         if (m_ref) { m_ptr.release(); m_ptr.reset(new DATA_TYPE{}); m_ref = false; }  \
@@ -617,5 +706,4 @@
 #     inline INT get_size() const { return static_cast<INT>(sizeof(DATA_TYPE)); }  \
 #     inline CVolMem& get_bin(CVolMem& memBuf) { if (m_ptr) { memBuf.CopyFrom(m_ptr, sizeof(DATA_TYPE)); } return memBuf; }  \
 # <>     </include>
-#
 # @end

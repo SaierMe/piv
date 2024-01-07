@@ -93,7 +93,7 @@ namespace piv
             }
             else
             {
-                utf16str = L"";
+                utf16str.clear();
             }
         }
         static void A2Wex(CVolString &utf16str, const char *mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
@@ -487,10 +487,10 @@ namespace piv
         {
             if (chHexChar >= '0' && chHexChar <= '9')
                 return static_cast<unsigned char>(chHexChar - '0');
-            if (chHexChar >= 'A' && chHexChar <= 'F')
-                return static_cast<unsigned char>(chHexChar - 'A' + 10);
             if (chHexChar >= 'a' && chHexChar <= 'f')
                 return static_cast<unsigned char>(chHexChar - 'a' + 10);
+            if (chHexChar >= 'A' && chHexChar <= 'F')
+                return static_cast<unsigned char>(chHexChar - 'A' + 10);
             return static_cast<unsigned char>(chHexChar);
         }
 
@@ -631,6 +631,13 @@ namespace piv
             return to_usc2str(wstring_view{str.GetText()}, en_ascii, usc2);
         }
 
+        /**
+         * @brief USC2编码到文本
+         * @tparam CharT
+         * @param usc2 USC2编码
+         * @param ret 返回文本
+         * @return
+         */
         template <typename CharT>
         std::wstring &usc2_to_str(const basic_string_view<CharT> &usc2, std::wstring &ret = std::wstring{})
         {
@@ -638,12 +645,22 @@ namespace piv
             size_t len = usc2.size();
             ret.reserve(len);
             CharT ch;
+            unsigned char hex[4];
             for (size_t i = 0; i < len; i++)
             {
                 ch = usc2[i];
                 if (ch == '\\' && i + 5 < len && (usc2[i + 1] == 'u' || usc2[i + 1] == 'U'))
                 {
-                    ret.push_back(hexchar_to_value(usc2[i + 2]) << 12 | hexchar_to_value(usc2[i + 3]) << 8 | hexchar_to_value(usc2[i + 4]) << 4 | hexchar_to_value(usc2[i + 5]));
+                    hex[0] = hexchar_to_value(usc2[i + 2]);
+                    hex[1] = hexchar_to_value(usc2[i + 3]);
+                    hex[2] = hexchar_to_value(usc2[i + 4]);
+                    hex[3] = hexchar_to_value(usc2[i + 5]);
+                    if (hex[0] == usc2[i + 2] || hex[1] == usc2[i + 3] || hex[2] == usc2[i + 4] || hex[3] == usc2[i + 5])
+                    {
+                        ret.push_back(static_cast<wchar_t>(ch));
+                        continue;
+                    }
+                    ret.push_back(hex[0] << 12 | hex[1] << 8 | hex[2] << 4 | hex[3]);
                     i += 5;
                 }
                 else

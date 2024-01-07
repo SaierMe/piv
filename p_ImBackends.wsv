@@ -1,0 +1,2695 @@
+<火山程序 类型 = "通常" 版本 = 1 />
+
+包 火山.ImGui <注释 = "例程下载: https://saier.lanzoul.com/b016cwvle"
+        注释 = "GLFW     3.3.8      https://www.glfw.org" 注释 = "SDL      2.26.5     https://www.libsdl.org"
+        注释 = "Vulkan   1.3.246.1  https://vulkan.lunarg.com/sdk/home"
+        注释 = "glad     2023-04-04 https://github.com/Dav1dde/glad" @视窗.头文件搜寻目录 = "FrameWork">
+
+# 平台后端
+
+类 IM_Win32平台 <公开 注释 = "基于Windows API的平台后端,需要配合DirectX、OpenGL、Vulkan渲染器使用." 折叠
+        @文档 = "category = \"平台后端\"" @视窗.外部头文件 = "<backends/imgui_impl_win32.h>"
+        @视窗.外部源文件 = "imgui\\backends\\imgui_impl_win32.cpp">
+{
+    方法 初始化 <公开 静态 类型 = 逻辑型 注释 = "初始化链接到DirectX渲染器" 折叠 @嵌入式方法 = "">
+    参数 窗口句柄 <类型 = 变整数 注释 = "提供Win32 API的窗口句柄(HWND)">
+    {
+        @ ImGui_ImplWin32_Init(reinterpret_cast<void*>(@<窗口句柄>))
+    }
+
+    方法 初始化_OpenGL <公开 静态 类型 = 逻辑型 注释 = "初始化链接到OpenGL渲染器" 折叠 @嵌入式方法 = "">
+    参数 窗口句柄 <类型 = 变整数 注释 = "提供Win32 API的窗口句柄(HWND)">
+    {
+        @ ImGui_ImplWin32_InitForOpenGL(reinterpret_cast<void*>(@<窗口句柄>))
+    }
+
+    方法 关闭 <公开 静态 注释 = "关闭Win32框架" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplWin32_Shutdown()
+    }
+
+    方法 新建帧 <公开 静态 注释 = "新建Win32帧" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplWin32_NewFrame()
+    }
+
+    方法 消息处理 <公开 静态 类型 = 逻辑型 注释 = "让ImGui处理Windows窗口中的部分消息" 返回值注释 = "返回真表示允许消息继续向后传递并处理,返回假表示取消掉该消息的后续处理."
+            折叠 @嵌入式方法 = "">
+    参数 窗口句柄 <类型 = 变整数 注释 = "提供消息所对应的窗口句柄(HWND)">
+    参数 消息值 <类型 = 整数 注释 = "提供消息的具体值">
+    参数 消息参数1 <类型 = 变整数 注释 = "提供消息所附带的参数1的值">
+    参数 消息参数2 <类型 = 变整数 注释 = "提供消息所附带的参数2的值">
+    {
+        @ ImGui_ImplWin32_WndProcHandler(reinterpret_cast<HWND>(@<窗口句柄>), static_cast<UINT>(@<消息值>), static_cast<WPARAM>(@<消息参数1>), static_cast<LPARAM>(@<消息参数2>)) > 0
+    }
+
+    方法 关注DPI <公开 静态 注释 = "设置本程序是否关注系统默认显示器的DPI(缩放比例)" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplWin32_EnableDpiAwareness()
+    }
+
+    方法 取窗口DPI <公开 静态 类型 = 单精度小数 注释 = "返回指定窗口的DPI比例值(相对基准96 DPI)" 折叠 @嵌入式方法 = "">
+    参数 窗口句柄 <类型 = 变整数 注释 = "提供Win32 API的窗口句柄(HWND)">
+    {
+        @ ImGui_ImplWin32_GetDpiScaleForHwnd(reinterpret_cast<HWND>(@<窗口句柄>))
+    }
+
+    方法 取显示器DPI <公开 静态 类型 = 单精度小数 注释 = "返回指定显示器的DPI比例值(相对基准96 DPI)" 折叠 @嵌入式方法 = "">
+    参数 显示器句柄 <类型 = 变整数 注释 = "提供Win32 API的显示器句柄(HMONITOR)">
+    {
+        @ ImGui_ImplWin32_GetDpiScaleForHwnd(reinterpret_cast<HMONITOR>(@<显示器句柄>))
+    }
+
+    方法 启用透明度合成 <公开 静态 注释 = "启用桌面的alpha合成透明度,必须在窗口被创建和被显示之前使用才有效." 折叠 @嵌入式方法 = "">
+    参数 窗口句柄 <类型 = 变整数 注释 = "提供Win32 API的窗口句柄(HWND)">
+    {
+        @ ImGui_ImplWin32_EnableAlphaCompositing(reinterpret_cast<HWND>(@<窗口句柄>))
+    }
+
+    # @begin
+    # <> <include>
+    # <> <global>
+    # extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+    # <> </global>
+    # <> </include>
+    # @end
+}
+
+类 IM_GLFW平台 <公开 注释 = "基于GLFW的平台后端,GLFW是一个OpenGL应用框架,需要配合OpenGL、Vulkan渲染器使用." 折叠 折叠2
+        @文档 = "category = \"平台后端\"" @视窗.预定义宏 = "GLFW_INCLUDE_NONE\r\nGLFW_EXPOSE_NATIVE_WIN32"
+        @视窗.头文件搜寻目录 = "FrameWork\\glfw\\include"
+        @视窗.外部头文件 = "<backends/imgui_impl_glfw.h>\r\n<GLFW/glfw3.h>\r\n<GLFW/glfw3native.h>"
+        @视窗.外部源文件 = "imgui\\backends\\imgui_impl_glfw.cpp"
+        "@视窗.外部库.mt-non_dynamic" = "FrameWork\\glfw\\$(p)\\$(vs)\\glfw3_mt.lib"
+        "@视窗.外部库.md-non_dynamic" = "FrameWork\\glfw\\$(p)\\$(vs)\\glfw3.lib"
+        @视窗.外部库.dynamic = "FrameWork\\glfw\\$(p)\\$(vs)\\glfw3dll.lib"
+        @视窗.附属文件.dynamic = "FrameWork\\glfw\\$(p)\\$(vs)\\glfw3.dll" @视窗.需求VS版本 = "15-">
+{
+    方法 初始化_OpenGL <公开 静态 类型 = 逻辑型 注释 = "初始化链接到OpenGL渲染器" 折叠 @嵌入式方法 = "req_cpp_bool = true">
+    参数 窗口句柄 <类型 = 变整数 注释 = "提供GLFW的窗口句柄,注意不支持Win32 API的窗口句柄.">
+    参数 安装回调 <类型 = 逻辑型 注释 = "是否将GLFW的部分输入输出回调安装到ImGui中">
+    {
+        @ ImGui_ImplGlfw_InitForOpenGL(reinterpret_cast<GLFWwindow*>(@<窗口句柄>), @<安装回调>)
+    }
+
+    方法 初始化_Vulkan <公开 静态 类型 = 逻辑型 注释 = "初始化链接到Vulkan渲染器" 折叠 @嵌入式方法 = "req_cpp_bool = true">
+    参数 窗口句柄 <类型 = 变整数 注释 = "提供GLFW的窗口句柄,注意不支持Win32 API的窗口句柄.">
+    参数 安装回调 <类型 = 逻辑型 注释 = "是否将GLFW的部分输入输出回调安装到ImGui中">
+    {
+        @ ImGui_ImplGlfw_InitForVulkan(reinterpret_cast<GLFWwindow*>(@<窗口句柄>), @<安装回调>)
+    }
+
+    方法 初始化_其他 <公开 静态 类型 = 逻辑型 注释 = "初始化链接到未知渲染器(本方法不可用)" 折叠 @嵌入式方法 = "req_cpp_bool = true">
+    参数 窗口句柄 <类型 = 变整数 注释 = "提供GLFW的窗口句柄,注意不支持Win32 API的窗口句柄.">
+    参数 安装回调 <类型 = 逻辑型 注释 = "是否将GLFW的部分输入输出回调安装到ImGui中">
+    {
+        @ ImGui_ImplGlfw_InitForOther(reinterpret_cast<GLFWwindow*>(@<窗口句柄>), @<安装回调>)
+    }
+
+    方法 关闭 <公开 静态 注释 = "关闭GLFW框架" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplGlfw_Shutdown()
+    }
+
+    方法 新建帧 <公开 静态 注释 = "新建GLFW帧" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplGlfw_NewFrame()
+    }
+
+    方法 安装回调 <公开 静态 注释 = "将指定GLFW窗口的部分输入输出回调安装到ImGui中." 折叠 @嵌入式方法 = "">
+    参数 窗口句柄 <类型 = 变整数 注释 = "提供GLFW的窗口句柄,注意不支持Win32 API的窗口句柄.">
+    {
+        @ ImGui_ImplGlfw_InstallCallbacks(reinterpret_cast<GLFWwindow*>(@<窗口句柄>))
+    }
+
+    方法 还原回调 <公开 静态 注释 = "将指定GLFW窗口的部分输入输出回调函数,还原为ImGui接管前的设置." 折叠 @嵌入式方法 = "">
+    参数 窗口句柄 <类型 = 变整数 注释 = "提供GLFW的窗口句柄,注意不支持Win32 API的窗口句柄.">
+    {
+        @ ImGui_ImplGlfw_InstallCallbacks(reinterpret_cast<GLFWwindow*>(@<窗口句柄>))
+    }
+
+    方法 置链接所有窗口 <公开 静态 注释 = "在所有窗口(包括后台和用户创建的辅助视口)启用链接回调." 折叠 @嵌入式方法 = "">
+    参数 链接所有窗口 <类型 = 逻辑型 注释 = "是否将回调链接到所有窗口">
+    {
+        @ ImGui_ImplGlfw_SetCallbacksChainForAllWindows(static_cast<bool>(@<链接所有窗口>))
+    }
+}
+
+类 IM_SDL2平台 <公开 注释 = "基于SDL(Simple DirectMedia Layer)的平台后端,需要配合DirectX、OpenGL、Vulkan渲染器使用." 折叠 折叠2
+        @文档 = "category = \"平台后端\"" @视窗.头文件搜寻目录 = "FrameWork\\SDL2\\include"
+        @视窗.外部头文件 = "<backends/imgui_impl_sdl2.h>\r\n<SDL.h>"
+        @视窗.外部源文件 = "imgui\\backends\\imgui_impl_sdl2.cpp"
+        @视窗.外部库 = "FrameWork\\SDL2\\$(p)\\SDL2.lib\r\nFrameWork\\SDL2\\$(p)\\SDL2main.lib"
+        @视窗.附属文件 = "FrameWork\\SDL2\\$(p)\\SDL2.dll">
+{
+    方法 初始化_OpenGL <公开 静态 类型 = 逻辑型 注释 = "初始化链接到OpenGL渲染器" 折叠 @嵌入式方法 = "">
+    参数 窗口句柄 <类型 = 变整数>
+    参数 SDL环境 <类型 = 变整数>
+    {
+        @ ImGui_ImplSDL2_InitForOpenGL(reinterpret_cast<SDL_Window*>(@<窗口句柄>), reinterpret_cast<void*>(@<SDL环境>))
+    }
+
+    方法 初始化_D3D <公开 静态 类型 = 逻辑型 注释 = "初始化链接到DirectX渲染器" 折叠 @嵌入式方法 = "">
+    参数 窗口句柄 <类型 = 变整数>
+    {
+        @ ImGui_ImplSDL2_InitForD3D(reinterpret_cast<SDL_Window*>(@<窗口句柄>))
+    }
+
+    方法 初始化_Vulkan <公开 静态 类型 = 逻辑型 注释 = "初始化链接到Vulkan渲染器" 折叠 @嵌入式方法 = "">
+    参数 窗口句柄 <类型 = 变整数>
+    {
+        @ ImGui_ImplSDL2_InitForVulkan(reinterpret_cast<SDL_Window*>(@<窗口句柄>))
+    }
+
+    方法 关闭 <公开 静态 注释 = "关闭SDL2框架" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplSDL2_Shutdown()
+    }
+
+    方法 新建帧 <公开 静态 注释 = "新建SDL2帧" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplSDL2_NewFrame()
+    }
+
+    方法 处理事件 <公开 静态 类型 = 逻辑型 注释 = "让ImGui处理SDL2的部分输入输出事件" 折叠 @嵌入式方法 = "">
+    参数 事件指针 <类型 = 变整数>
+    {
+        @ ImGui_ImplSDL2_ProcessEvent(reinterpret_cast<const SDL_Event*>(@<事件指针>))
+    }
+}
+
+# 渲染器
+
+类 IM_DX9渲染器 <公开 注释 = "基于DirectX9的渲染器后端,兼容Windows XP以上系统." 折叠 折叠2 @文档 = "category = \"渲染器\""
+        @视窗.外部头文件 = "<backends/imgui_impl_dx9.h>\r\n<d3d9.h>"
+        @视窗.外部源文件 = "imgui\\backends\\imgui_impl_dx9.cpp" @视窗.外部库 = "d3d9.lib">
+{
+
+    # @begin
+    # <> <include>
+    # LPDIRECT3D9            m_pD3D = nullptr;
+    # LPDIRECT3DDEVICE9      m_pd3dDevice = nullptr;
+    # D3DPRESENT_PARAMETERS  m_d3dpp = {};
+    # <> </include>
+    # @end
+
+    方法 渲染器类型 <公开 属性读 类型 = 整数 注释 = "返回渲染器类型(固定返回0,表示DirectX渲染器)" 折叠>
+    {
+        返回 (0)
+    }
+
+    方法 初始化 <公开 类型 = 逻辑型 注释 = "在\"创建设备\"和\"ImGui.创建环境()\"后才能调用." 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplDX9_Init(@sn<this>.m_pd3dDevice)
+    }
+
+    方法 关闭 <公开 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplDX9_Shutdown()
+    }
+
+    方法 新建帧 <公开 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplDX9_NewFrame()
+    }
+
+    方法 渲染数据 <公开 折叠 @嵌入式方法 = "">
+    参数 绘制数据 <类型 = 变整数 注释 = "由\"ImGui.取渲染数据()\"返回">
+    {
+        @ ImGui_ImplDX9_RenderDrawData(reinterpret_cast<ImDrawData*>(@<绘制数据>))
+    }
+
+    方法 创建设备对象 <公开 注释 = "用于在不丢失ImGui状态的情况下重置渲染设备" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplDX9_CreateDeviceObjects()
+    }
+
+    方法 销毁设备对象 <公开 注释 = "用于在不丢失ImGui状态的情况下重置渲染设备" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplDX9_InvalidateDeviceObjects()
+    }
+
+    # 纹理图片 ---
+
+    方法 加载图片文件 <公开 类型 = 逻辑型 注释 = "从指定的图片文件加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 折叠2 @禁止流程检查 = 真
+            @视窗.外部头文件 = "<D3dx9tex.h>" @视窗.外部库 = "D3dx9.lib"
+            @视窗.需求系统头文件 = "<D3dx9tex.h>|需要安装 DirectX SDK 9 https://www.microsoft.com/zh-CN/download/details.aspx?id=6812">
+    参数 文件名 <类型 = 文本型 注释 = "支持格式: .bmp、.dds、.dib、.hdr、.jpg、.pfm、.png、.ppm 和 .tga">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ PDIRECT3DTEXTURE9 texture;
+        @ HRESULT hr = D3DXCreateTextureFromFileW(m_pd3dDevice, @<文件名>.GetText(), &texture);
+        @ if (hr != S_OK) return false;
+        @ D3DSURFACE_DESC my_image_desc;
+        @ texture->GetLevelDesc(0, &my_image_desc);
+        @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(texture);
+        @ @<图片信息.宽度> = static_cast<int>(my_image_desc.Width);
+        @ @<图片信息.高度> = static_cast<int>(my_image_desc.Height);
+        @ return true;
+    }
+
+    方法 加载图片资源 <公开 类型 = 逻辑型 注释 = "将程序文件中的图片资源加载到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 折叠2
+            @禁止流程检查 = 真 @视窗.外部头文件 = "<D3dx9tex.h>" @视窗.外部库 = "D3dx9.lib"
+            @视窗.需求系统头文件 = "<D3dx9tex.h>|需要安装 DirectX SDK 9 https://www.microsoft.com/zh-CN/download/details.aspx?id=6812">
+    参数 图片资源 <类型 = 视窗文件资源 注释 = "支持格式: 支持格式: .bmp、.dds、.dib、.hdr、.jpg、.pfm、.png、.ppm 和 .tga">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ PDIRECT3DTEXTURE9 texture;
+        @ HRESULT hr = D3DXCreateTextureFromResourceW(m_pd3dDevice, g_objVolApp.GetInstanceHandle(), MAKEINTRESOURCE(@<图片资源>), &texture);
+        @ if (hr != S_OK) return false;
+        @ D3DSURFACE_DESC my_image_desc;
+        @ texture->GetLevelDesc(0, &my_image_desc);
+        @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(texture);
+        @ @<图片信息.宽度> = static_cast<int>(my_image_desc.Width);
+        @ @<图片信息.高度> = static_cast<int>(my_image_desc.Height);
+        @ return true;
+    }
+
+    方法 加载图片字节集 <公开 类型 = 逻辑型 注释 = "从指定的图片字节集加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 折叠2
+            @禁止流程检查 = 真 @视窗.外部头文件 = "<D3dx9tex.h>" @视窗.外部库 = "D3dx9.lib"
+            @视窗.需求系统头文件 = "<D3dx9tex.h>|需要安装 DirectX SDK 9 https://www.microsoft.com/zh-CN/download/details.aspx?id=6812">
+    参数 图片数据 <类型 = 字节集类 注释 = "支持格式: 支持格式: .bmp、.dds、.dib、.hdr、.jpg、.pfm、.png、.ppm 和 .tga">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ PDIRECT3DTEXTURE9 texture;
+        @ HRESULT hr = D3DXCreateTextureFromFileInMemory(m_pd3dDevice, @<图片数据>.GetPtr(), static_cast<UINT>(@<图片数据>.GetSize()), &texture);
+        @ if (hr != S_OK) return false;
+        @ D3DSURFACE_DESC my_image_desc;
+        @ texture->GetLevelDesc(0, &my_image_desc);
+        @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(texture);
+        @ @<图片信息.宽度> = static_cast<int>(my_image_desc.Width);
+        @ @<图片信息.高度> = static_cast<int>(my_image_desc.Height);
+        @ return true;
+    }
+
+    方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠>
+    参数 图片信息 <类型 = IM图片信息类 注释 = "提供由\"本对象.加载图片××\"返回的图片信息,释放后会清空信息.">
+    {
+        如果 (图片信息.纹理ID != 0)
+        {
+            @ reinterpret_cast<PDIRECT3DTEXTURE9>(@<图片信息.纹理ID>)->Release();
+        }
+        图片信息.重置为空对象 ()
+    }
+
+    # Win32 ---
+
+    方法 创建设备 <公开 类型 = 逻辑型 折叠 @禁止流程检查 = 真>
+    参数 窗口句柄 <类型 = 变整数>
+    {
+        @ if ((m_pD3D = Direct3DCreate9(D3D_SDK_VERSION)) == nullptr)
+        @     return FALSE;
+        @ ZeroMemory(&m_d3dpp, sizeof(m_d3dpp));
+        @ m_d3dpp.Windowed = TRUE;
+        @ m_d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
+        @ m_d3dpp.BackBufferFormat = D3DFMT_UNKNOWN; // Need to use an explicit format with alpha if needing per-pixel alpha composition.
+        @ m_d3dpp.EnableAutoDepthStencil = TRUE;
+        @ m_d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
+        @ m_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;           // Present with vsync
+        @ //m_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   // Present without vsync, maximum unthrottled framerate
+        @ if (m_pD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, reinterpret_cast<HWND>(@<窗口句柄>), D3DCREATE_HARDWARE_VERTEXPROCESSING, &m_d3dpp, &m_pd3dDevice) < 0)
+        @     return FALSE;
+        @ return TRUE;
+    }
+
+    方法 释放设备 <公开 折叠>
+    参数 窗口句柄 <类型 = 变整数 @默认值 = 0>
+    {
+        @ if (m_pd3dDevice) { m_pd3dDevice->Release(); m_pd3dDevice = nullptr; }
+        @ if (m_pD3D) { m_pD3D->Release(); m_pD3D = nullptr; }
+    }
+
+    方法 重置设备 <公开 折叠>
+    {
+        @ ImGui_ImplDX9_InvalidateDeviceObjects();
+        @ HRESULT hr = m_pd3dDevice->Reset(&m_d3dpp);
+        @ if (hr == D3DERR_INVALIDCALL)
+        @     IM_ASSERT(0);
+        @ ImGui_ImplDX9_CreateDeviceObjects();
+    }
+
+    方法 重置尺寸 <公开 折叠>
+    参数 宽度 <类型 = 整数>
+    参数 高度 <类型 = 整数>
+    {
+        @ m_d3dpp.BackBufferWidth = @<宽度>;
+        @ m_d3dpp.BackBufferHeight = @<高度>;
+        @ this->@<重置设备>();
+    }
+
+    方法 渲染 <公开 折叠>
+    参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
+    {
+        @ ImGui::Render();
+        @ m_pd3dDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
+        @ m_pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+        @ m_pd3dDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
+        @ ImVec4* clear_color = @<背景颜色>.pdata();
+        @ D3DCOLOR clear_col_dx = D3DCOLOR_COLORVALUE(clear_color->x * clear_color->w, clear_color->y * clear_color->w, clear_color->z * clear_color->w, clear_color->w);
+        @ m_pd3dDevice->Clear(0, nullptr, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, clear_col_dx, 1.0f, 0);
+        @ if (m_pd3dDevice->BeginScene() >= 0)
+        @ {
+        @     ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
+        @     m_pd3dDevice->EndScene();
+        @ }
+        @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        @ {
+        @     ImGui::UpdatePlatformWindows();
+        @     ImGui::RenderPlatformWindowsDefault();
+        @ }
+        @ HRESULT result = m_pd3dDevice->Present(nullptr, nullptr, nullptr, nullptr);
+        @ // Handle loss of D3D9 device
+        @ if (result == D3DERR_DEVICELOST && m_pd3dDevice->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
+        @     this->@<重置设备>();
+    }
+
+    方法 准备 <公开>
+
+    # SDL ---
+
+    变量 局_窗口句柄 <类型 = 变整数>
+
+    方法 加载_SDL <公开 类型 = 逻辑型 折叠 @视窗.外部头文件 = "SDL_syswm.h">
+    参数 窗口句柄 <类型 = 变整数 @默认值 = 0>
+    {
+        @ SDL_SysWMinfo wmInfo;
+        @ SDL_VERSION(&wmInfo.version);
+        @ SDL_GetWindowWMInfo(reinterpret_cast<SDL_Window*>(@<窗口句柄>), &wmInfo);
+        @ @<局_窗口句柄> = reinterpret_cast<INT_P>(wmInfo.info.win.window);
+        返回 (创建设备 (局_窗口句柄))
+    }
+
+    方法 渲染_SDL <公开 折叠 @嵌入式方法 = "">
+    参数 窗口句柄 <类型 = 变整数>
+    参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
+    {
+        @ @sn<this>.@<渲染>(@<背景颜色>)
+    }
+
+    方法 加载字体纹理 <公开>
+
+    方法 清理 <公开 折叠>
+    {
+        释放设备 (局_窗口句柄)
+    }
+}
+
+类 IM_DX10渲染器 <公开 注释 = "基于DirectX10的渲染器后端,兼容Windows Vista以上系统." 折叠 折叠2 @文档 = "category = \"渲染器\""
+        @视窗.外部头文件 = "<backends/imgui_impl_dx10.h>\r\n<d3d10_1.h>\r\n<d3d10.h>"
+        @视窗.外部源文件 = "imgui\\backends\\imgui_impl_dx10.cpp"
+        @视窗.外部库 = "d3d10.lib\r\nd3dcompiler.lib\r\ndxgi.lib">
+{
+
+    # @begin
+    # <> <include>
+    # ID3D10Device*            m_pd3dDevice = nullptr;
+    # IDXGISwapChain*          m_pSwapChain = nullptr;
+    # ID3D10RenderTargetView*  m_mainRenderTargetView = nullptr;
+    # <> </include>
+    # @end
+
+    方法 渲染器类型 <公开 属性读 类型 = 整数 注释 = "返回渲染器类型(固定返回0,表示DirectX渲染器)" 折叠>
+    {
+        返回 (0)
+    }
+
+    方法 初始化 <公开 类型 = 逻辑型 注释 = "在\"创建设备\"和\"ImGui.创建环境()\"后才能调用." 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplDX10_Init(@sn<this>.m_pd3dDevice)
+    }
+
+    方法 关闭 <公开 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplDX10_Shutdown()
+    }
+
+    方法 新建帧 <公开 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplDX10_NewFrame()
+    }
+
+    方法 渲染数据 <公开 折叠 @嵌入式方法 = "">
+    参数 绘制数据 <类型 = 变整数 注释 = "由\"ImGui.取渲染数据()\"返回">
+    {
+        @ ImGui_ImplDX10_RenderDrawData(reinterpret_cast<ImDrawData*>(@<绘制数据>))
+    }
+
+    方法 创建设备对象 <公开 注释 = "用于在不丢失ImGui状态的情况下重置渲染设备" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplDX10_CreateDeviceObjects()
+    }
+
+    方法 销毁设备对象 <公开 注释 = "用于在不丢失ImGui状态的情况下重置渲染设备" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplDX10_InvalidateDeviceObjects()
+    }
+
+    # 图片纹理 ---
+
+    方法 加载图片文件 <公开 类型 = 逻辑型 注释 = "从指定的图片文件加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
+    参数 文件名 <类型 = 文本型 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ if (!m_pd3dDevice) return false;
+        @ FILE* file = _wfopen(@<文件名>.GetText(), L"rb");
+        @ if (!file) return false;
+        @ int image_width = 0, image_height = 0;
+        @ unsigned char* image_data = stbi_load_from_file(file, &image_width, &image_height, nullptr, 4);
+        @ fclose(file);
+        @ if (!image_data) return false;
+        // Create texture
+        @ D3D10_TEXTURE2D_DESC desc;
+        @ ZeroMemory(&desc, sizeof(desc));
+        @ desc.Width = image_width;
+        @ desc.Height = image_height;
+        @ desc.MipLevels = 1;
+        @ desc.ArraySize = 1;
+        @ desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ desc.SampleDesc.Count = 1;
+        @ desc.Usage = D3D10_USAGE_DEFAULT;
+        @ desc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
+        @ desc.CPUAccessFlags = 0;
+        @ ID3D10Texture2D *pTexture = NULL;
+        @ D3D10_SUBRESOURCE_DATA subResource {image_data, desc.Width * 4, 0};
+        @ m_pd3dDevice->CreateTexture2D(&desc, &subResource, &pTexture);
+        // Create texture view
+        @ D3D10_SHADER_RESOURCE_VIEW_DESC srvDesc;
+        @ ZeroMemory(&srvDesc, sizeof(srvDesc));
+        @ srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+        @ srvDesc.Texture2D.MipLevels = desc.MipLevels;
+        @ srvDesc.Texture2D.MostDetailedMip = 0;
+        @ ID3D10ShaderResourceView* out_srv;
+        @ m_pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, &out_srv);
+        @ pTexture->Release();
+        @ @<图片信息.宽度> = image_width;
+        @ @<图片信息.高度> = image_height;
+        @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(out_srv);
+        @ stbi_image_free(image_data);
+        @ return true;
+    }
+
+    方法 加载图片资源 <公开 类型 = 逻辑型 注释 = "将程序文件中的图片资源加载到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
+    参数 图片资源 <类型 = 视窗文件资源 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ HMODULE hModule = g_objVolApp.GetInstanceHandle();
+        @ HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE((WORD)@<图片资源>), RT_RCDATA);
+        @ if (!hSrc) return false;
+        @ HGLOBAL resdata = ::LoadResource(hModule, hSrc);
+        @ if (!resdata) return false;
+        @ int image_width = 0, image_height = 0;
+        @ unsigned char* image_data = stbi_load_from_memory((unsigned char*)::LockResource(resdata), static_cast<int>(::SizeofResource(hModule, hSrc)),
+        @                                                   &image_width, &image_height, nullptr, 4);
+        @ if (!image_data) return false;
+        // Create texture
+        @ D3D10_TEXTURE2D_DESC desc;
+        @ ZeroMemory(&desc, sizeof(desc));
+        @ desc.Width = image_width;
+        @ desc.Height = image_height;
+        @ desc.MipLevels = 1;
+        @ desc.ArraySize = 1;
+        @ desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ desc.SampleDesc.Count = 1;
+        @ desc.Usage = D3D10_USAGE_DEFAULT;
+        @ desc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
+        @ desc.CPUAccessFlags = 0;
+        @ ID3D10Texture2D *pTexture = NULL;
+        @ D3D10_SUBRESOURCE_DATA subResource {image_data, desc.Width * 4, 0};
+        @ m_pd3dDevice->CreateTexture2D(&desc, &subResource, &pTexture);
+        // Create texture view
+        @ D3D10_SHADER_RESOURCE_VIEW_DESC srvDesc;
+        @ ZeroMemory(&srvDesc, sizeof(srvDesc));
+        @ srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+        @ srvDesc.Texture2D.MipLevels = desc.MipLevels;
+        @ srvDesc.Texture2D.MostDetailedMip = 0;
+        @ ID3D10ShaderResourceView* out_srv;
+        @ m_pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, &out_srv);
+        @ pTexture->Release();
+        @ @<图片信息.宽度> = image_width;
+        @ @<图片信息.高度> = image_height;
+        @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(out_srv);
+        @ stbi_image_free(image_data);
+        @ return true;
+    }
+
+    方法 加载图片字节集 <公开 类型 = 逻辑型 注释 = "从指定的图片字节集加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
+    参数 图片数据 <类型 = 字节集类 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ int image_width = 0, image_height = 0;
+        @ unsigned char* image_data = stbi_load_from_memory(@<图片数据>.GetPtr(), static_cast<int>(@<图片数据>.GetSize()), &image_width, &image_height, nullptr, 4);
+        @ if (!image_data) return false;
+        // Create texture
+        @ D3D10_TEXTURE2D_DESC desc;
+        @ ZeroMemory(&desc, sizeof(desc));
+        @ desc.Width = image_width;
+        @ desc.Height = image_height;
+        @ desc.MipLevels = 1;
+        @ desc.ArraySize = 1;
+        @ desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ desc.SampleDesc.Count = 1;
+        @ desc.Usage = D3D10_USAGE_DEFAULT;
+        @ desc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
+        @ desc.CPUAccessFlags = 0;
+        @ ID3D10Texture2D *pTexture = NULL;
+        @ D3D10_SUBRESOURCE_DATA subResource {image_data, desc.Width * 4, 0};
+        @ m_pd3dDevice->CreateTexture2D(&desc, &subResource, &pTexture);
+        // Create texture view
+        @ D3D10_SHADER_RESOURCE_VIEW_DESC srvDesc;
+        @ ZeroMemory(&srvDesc, sizeof(srvDesc));
+        @ srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+        @ srvDesc.Texture2D.MipLevels = desc.MipLevels;
+        @ srvDesc.Texture2D.MostDetailedMip = 0;
+        @ ID3D10ShaderResourceView* out_srv;
+        @ m_pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, &out_srv);
+        @ pTexture->Release();
+        @ @<图片信息.宽度> = image_width;
+        @ @<图片信息.高度> = image_height;
+        @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(out_srv);
+        @ stbi_image_free(image_data);
+        @ return true;
+    }
+
+    方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠>
+    参数 图片信息 <类型 = IM图片信息类 注释 = "提供由\"本对象.加载图片××\"返回的图片信息,释放后会清空信息.">
+    {
+        如果 (图片信息.纹理ID != 0)
+        {
+            @ reinterpret_cast<ID3D10ShaderResourceView*>(@<图片信息.纹理ID>)->Release();
+        }
+        图片信息.重置为空对象 ()
+    }
+
+    # Win32 ---
+
+    方法 创建设备 <公开 类型 = 逻辑型 折叠 @禁止流程检查 = 真>
+    参数 窗口句柄 <类型 = 变整数>
+    {
+        @ DXGI_SWAP_CHAIN_DESC sd = {};
+        @ sd.BufferCount = 2;
+        @ sd.BufferDesc.Width = 0;
+        @ sd.BufferDesc.Height = 0;
+        @ sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ sd.BufferDesc.RefreshRate.Numerator = 60;
+        @ sd.BufferDesc.RefreshRate.Denominator = 1;
+        @ sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+        @ sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+        @ sd.OutputWindow = reinterpret_cast<HWND>(@<窗口句柄>);
+        @ sd.SampleDesc.Count = 1;
+        @ sd.SampleDesc.Quality = 0;
+        @ sd.Windowed = TRUE;
+        @ sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+        @ UINT createDeviceFlags = 0;
+        @ //createDeviceFlags |= D3D10_CREATE_DEVICE_DEBUG;
+        @ HRESULT res = D3D10CreateDeviceAndSwapChain(nullptr, D3D10_DRIVER_TYPE_HARDWARE, nullptr, createDeviceFlags, D3D10_SDK_VERSION, &sd, &m_pSwapChain, &m_pd3dDevice);
+        @ if (res == DXGI_ERROR_UNSUPPORTED) // Try high-performance WARP software driver if hardware is not available.
+        @     res = D3D10CreateDeviceAndSwapChain(nullptr, D3D10_DRIVER_TYPE_WARP, nullptr, createDeviceFlags, D3D10_SDK_VERSION, &sd, &m_pSwapChain, &m_pd3dDevice);
+        @ if (res != S_OK)
+        @     return FALSE;
+        @ this->@<创建渲染目标>();
+        @ return TRUE;
+    }
+
+    方法 释放设备 <公开 折叠>
+    参数 窗口句柄 <类型 = 变整数 @默认值 = 0>
+    {
+        @ this->@<释放渲染目标>();
+        @ if (m_pSwapChain) { m_pSwapChain->Release(); m_pSwapChain = nullptr; }
+        @ if (m_pd3dDevice) { m_pd3dDevice->Release(); m_pd3dDevice = nullptr; }
+    }
+
+    方法 创建渲染目标 <公开 折叠>
+    {
+        @ ID3D10Texture2D* pBackBuffer;
+        @ m_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
+        @ m_pd3dDevice->CreateRenderTargetView(pBackBuffer, nullptr, &m_mainRenderTargetView);
+        @ pBackBuffer->Release();
+    }
+
+    方法 释放渲染目标 <公开 折叠>
+    {
+        @ if (m_mainRenderTargetView) { m_mainRenderTargetView->Release(); m_mainRenderTargetView = nullptr; }
+    }
+
+    方法 重置尺寸 <公开 折叠>
+    参数 宽度 <类型 = 整数>
+    参数 高度 <类型 = 整数>
+    {
+        @ this->@<释放渲染目标>();
+        @ m_pSwapChain->ResizeBuffers(0, @<宽度>, @<高度>, DXGI_FORMAT_UNKNOWN, 0);
+        @ this->@<创建渲染目标>();
+    }
+
+    方法 渲染 <公开 折叠>
+    参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
+    {
+        @ ImGui::Render();
+        @ ImVec4* clear_color = @<背景颜色>.pdata();
+        @ const float clear_color_with_alpha[4] = { clear_color->x * clear_color->w, clear_color->y * clear_color->w, clear_color->z * clear_color->w, clear_color->w };
+        @ m_pd3dDevice->OMSetRenderTargets(1, &m_mainRenderTargetView, nullptr);
+        @ m_pd3dDevice->ClearRenderTargetView(m_mainRenderTargetView, clear_color_with_alpha);
+        @ ImGui_ImplDX10_RenderDrawData(ImGui::GetDrawData());
+        @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        @ {
+        @     ImGui::UpdatePlatformWindows();
+        @     ImGui::RenderPlatformWindowsDefault();
+        @ }
+        @ m_pSwapChain->Present(1, 0);
+    }
+
+    方法 准备 <公开>
+
+    # SDL ---
+
+    变量 局_窗口句柄 <类型 = 变整数>
+
+    方法 加载_SDL <公开 类型 = 逻辑型 折叠 @视窗.外部头文件 = "<SDL_syswm.h>">
+    参数 窗口句柄 <类型 = 变整数 @默认值 = 0>
+    {
+        @ SDL_SysWMinfo wmInfo;
+        @ SDL_VERSION(&wmInfo.version);
+        @ SDL_GetWindowWMInfo(reinterpret_cast<SDL_Window*>(@<窗口句柄>), &wmInfo);
+        @ @<局_窗口句柄> = reinterpret_cast<INT_P>(wmInfo.info.win.window);
+        返回 (创建设备 (局_窗口句柄))
+    }
+
+    方法 渲染_SDL <公开 折叠 @嵌入式方法 = "">
+    参数 窗口句柄 <类型 = 变整数>
+    参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
+    {
+        @ @sn<this>.@<渲染>(@<背景颜色>)
+    }
+
+    方法 加载字体纹理 <公开>
+
+    方法 清理 <公开 折叠>
+    {
+        释放设备 (局_窗口句柄)
+    }
+}
+
+类 IM_DX11渲染器 <公开 注释 = "基于DirectX11的渲染器后端,兼容Windows 7及以上系统." 折叠 折叠2 @文档 = "category = \"渲染器\""
+        @视窗.外部头文件 = "<backends/imgui_impl_dx11.h>\r\n<d3d11.h>"
+        @视窗.外部源文件 = "imgui\\backends\\imgui_impl_dx11.cpp"
+        @视窗.外部库 = "d3d11.lib\r\nd3dcompiler.lib\r\ndxgi.lib">
+{
+
+    # @begin
+    # <> <include>
+    # ID3D11Device*            m_pd3dDevice = nullptr;
+    # ID3D11DeviceContext*     m_pd3dDeviceContext = nullptr;
+    # IDXGISwapChain*          m_pSwapChain = nullptr;
+    # ID3D11RenderTargetView*  m_mainRenderTargetView = nullptr;
+    # <> </include>
+    # @end
+
+    方法 渲染器类型 <公开 属性读 类型 = 整数 注释 = "返回渲染器类型(固定返回0,表示DirectX渲染器)" 折叠>
+    {
+        返回 (0)
+    }
+
+    方法 初始化 <公开 类型 = 逻辑型 注释 = "在\"创建设备\"和\"ImGui.创建环境()\"后才能调用." 折叠 @禁止流程检查 = 真>
+    {
+        @ return ImGui_ImplDX11_Init(m_pd3dDevice, m_pd3dDeviceContext);
+    }
+
+    方法 关闭 <公开 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplDX11_Shutdown()
+    }
+
+    方法 新建帧 <公开 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplDX11_NewFrame()
+    }
+
+    方法 渲染数据 <公开 折叠 @嵌入式方法 = "">
+    参数 绘制数据 <类型 = 变整数 注释 = "由\"ImGui.取渲染数据()\"返回">
+    {
+        @ ImGui_ImplDX11_RenderDrawData(reinterpret_cast<ImDrawData*>(@<绘制数据>))
+    }
+
+    方法 创建设备对象 <公开 注释 = "用于在不丢失ImGui状态的情况下重置渲染设备" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplDX11_CreateDeviceObjects()
+    }
+
+    方法 销毁设备对象 <公开 注释 = "用于在不丢失ImGui状态的情况下重置渲染设备" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplDX11_InvalidateDeviceObjects()
+    }
+
+    # 纹理图片 ---
+
+    方法 加载图片文件 <公开 类型 = 逻辑型 注释 = "从指定的图片文件加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
+    参数 文件名 <类型 = 文本型 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ if (!m_pd3dDevice) return false;
+        @ FILE* file = _wfopen(@<文件名>.GetText(), L"rb");
+        @ if (!file) return false;
+        @ int image_width = 0, image_height = 0;
+        @ unsigned char* image_data = stbi_load_from_file(file, &image_width, &image_height, nullptr, 4);
+        @ fclose(file);
+        @ if (!image_data) return false;
+        // Create texture
+        @ D3D11_TEXTURE2D_DESC desc;
+        @ ZeroMemory(&desc, sizeof(desc));
+        @ desc.Width = image_width;
+        @ desc.Height = image_height;
+        @ desc.MipLevels = 1;
+        @ desc.ArraySize = 1;
+        @ desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ desc.SampleDesc.Count = 1;
+        @ desc.Usage = D3D11_USAGE_DEFAULT;
+        @ desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        @ desc.CPUAccessFlags = 0;
+        @ ID3D11Texture2D *pTexture = NULL;
+        @ D3D11_SUBRESOURCE_DATA subResource {image_data, desc.Width * 4, 0};
+        @ m_pd3dDevice->CreateTexture2D(&desc, &subResource, &pTexture);
+        // Create texture view
+        @ D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+        @ ZeroMemory(&srvDesc, sizeof(srvDesc));
+        @ srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+        @ srvDesc.Texture2D.MipLevels = desc.MipLevels;
+        @ srvDesc.Texture2D.MostDetailedMip = 0;
+        @ ID3D11ShaderResourceView* out_srv;
+        @ m_pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, &out_srv);
+        @ pTexture->Release();
+        @ @<图片信息.宽度> = image_width;
+        @ @<图片信息.高度> = image_height;
+        @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(out_srv);
+        @ stbi_image_free(image_data);
+        @ return true;
+    }
+
+    方法 加载图片资源 <公开 类型 = 逻辑型 注释 = "将程序文件中的图片资源加载到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
+    参数 图片资源 <类型 = 视窗文件资源 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ HMODULE hModule = g_objVolApp.GetInstanceHandle();
+        @ HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE((WORD)@<图片资源>), RT_RCDATA);
+        @ if (!hSrc) return false;
+        @ HGLOBAL resdata = ::LoadResource(hModule, hSrc);
+        @ if (!resdata) return false;
+        @ int image_width = 0, image_height = 0;
+        @ unsigned char* image_data = stbi_load_from_memory(reinterpret_cast<unsigned char*>(::LockResource(resdata)), static_cast<int>(::SizeofResource(hModule, hSrc)),
+        @                                                   &image_width, &image_height, nullptr, 4);
+        @ if (!image_data) return false;
+        // Create texture
+        @ D3D11_TEXTURE2D_DESC desc;
+        @ ZeroMemory(&desc, sizeof(desc));
+        @ desc.Width = image_width;
+        @ desc.Height = image_height;
+        @ desc.MipLevels = 1;
+        @ desc.ArraySize = 1;
+        @ desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ desc.SampleDesc.Count = 1;
+        @ desc.Usage = D3D11_USAGE_DEFAULT;
+        @ desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        @ desc.CPUAccessFlags = 0;
+        @ ID3D11Texture2D *pTexture = NULL;
+        @ D3D11_SUBRESOURCE_DATA subResource {image_data, desc.Width * 4, 0};
+        @ m_pd3dDevice->CreateTexture2D(&desc, &subResource, &pTexture);
+        // Create texture view
+        @ D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+        @ ZeroMemory(&srvDesc, sizeof(srvDesc));
+        @ srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+        @ srvDesc.Texture2D.MipLevels = desc.MipLevels;
+        @ srvDesc.Texture2D.MostDetailedMip = 0;
+        @ ID3D11ShaderResourceView* out_srv;
+        @ m_pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, &out_srv);
+        @ pTexture->Release();
+        @ @<图片信息.宽度> = image_width;
+        @ @<图片信息.高度> = image_height;
+        @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(out_srv);
+        @ stbi_image_free(image_data);
+        @ return true;
+    }
+
+    方法 加载图片字节集 <公开 类型 = 逻辑型 注释 = "从指定的图片字节集加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
+    参数 图片数据 <类型 = 字节集类 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ int image_width = 0, image_height = 0;
+        @ unsigned char* image_data = stbi_load_from_memory(@<图片数据>.GetPtr(), static_cast<int>(@<图片数据>.GetSize()), &image_width, &image_height, nullptr, 4);
+        @ if (!image_data) return false;
+        // Create texture
+        @ D3D11_TEXTURE2D_DESC desc;
+        @ ZeroMemory(&desc, sizeof(desc));
+        @ desc.Width = image_width;
+        @ desc.Height = image_height;
+        @ desc.MipLevels = 1;
+        @ desc.ArraySize = 1;
+        @ desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ desc.SampleDesc.Count = 1;
+        @ desc.Usage = D3D11_USAGE_DEFAULT;
+        @ desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        @ desc.CPUAccessFlags = 0;
+        @ ID3D11Texture2D *pTexture = NULL;
+        @ D3D11_SUBRESOURCE_DATA subResource {image_data, desc.Width * 4, 0};
+        @ m_pd3dDevice->CreateTexture2D(&desc, &subResource, &pTexture);
+        // Create texture view
+        @ D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+        @ ZeroMemory(&srvDesc, sizeof(srvDesc));
+        @ srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+        @ srvDesc.Texture2D.MipLevels = desc.MipLevels;
+        @ srvDesc.Texture2D.MostDetailedMip = 0;
+        @ ID3D11ShaderResourceView* out_srv;
+        @ m_pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, &out_srv);
+        @ pTexture->Release();
+        @ @<图片信息.宽度> = image_width;
+        @ @<图片信息.高度> = image_height;
+        @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(out_srv);
+        @ stbi_image_free(image_data);
+        @ return true;
+    }
+
+    方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠>
+    参数 图片信息 <类型 = IM图片信息类 注释 = "提供由\"本对象.加载图片××\"返回的图片信息,释放后会清空信息.">
+    {
+        如果 (图片信息.纹理ID != 0)
+        {
+            @ reinterpret_cast<ID3D11ShaderResourceView*>(@<图片信息.纹理ID>)->Release();
+        }
+        图片信息.重置为空对象 ()
+    }
+
+    # Win32 ---
+
+    方法 创建设备 <公开 类型 = 逻辑型 折叠 @禁止流程检查 = 真>
+    参数 窗口句柄 <类型 = 变整数>
+    {
+        @ DXGI_SWAP_CHAIN_DESC sd;
+        @ ZeroMemory(&sd, sizeof(sd));
+        @ sd.BufferCount = 2;
+        @ sd.BufferDesc.Width = 0;
+        @ sd.BufferDesc.Height = 0;
+        @ sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ sd.BufferDesc.RefreshRate.Numerator = 60;
+        @ sd.BufferDesc.RefreshRate.Denominator = 1;
+        @ sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+        @ sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+        @ sd.OutputWindow = reinterpret_cast<HWND>(@<窗口句柄>);
+        @ sd.SampleDesc.Count = 1;
+        @ sd.SampleDesc.Quality = 0;
+        @ sd.Windowed = TRUE;
+        @ sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+        @ UINT createDeviceFlags = 0;
+        @ // createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+        @ D3D_FEATURE_LEVEL featureLevel;
+        @ const D3D_FEATURE_LEVEL featureLevelArray[2] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_0, };
+        @ HRESULT res = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &m_pSwapChain, &m_pd3dDevice, &featureLevel, &m_pd3dDeviceContext);
+        @ if (res == DXGI_ERROR_UNSUPPORTED) // Try high-performance WARP software driver if hardware is not available.
+        @     res = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_WARP, nullptr, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &m_pSwapChain, &m_pd3dDevice, &featureLevel, &m_pd3dDeviceContext);
+        @ if (res != S_OK)
+        @     return FALSE;
+        @ this->@<创建渲染目标>();
+        @ return TRUE;
+    }
+
+    方法 释放设备 <公开 折叠>
+    参数 窗口句柄 <类型 = 变整数 @默认值 = 0>
+    {
+        @ this->@<释放渲染目标>();
+        @ if (m_pSwapChain) { m_pSwapChain->Release(); m_pSwapChain = nullptr; }
+        @ if (m_pd3dDeviceContext) { m_pd3dDeviceContext->Release(); m_pd3dDeviceContext = nullptr; }
+        @ if (m_pd3dDevice) { m_pd3dDevice->Release(); m_pd3dDevice = nullptr; }
+    }
+
+    方法 创建渲染目标 <公开 折叠>
+    {
+        @ ID3D11Texture2D* pBackBuffer;
+        @ m_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
+        @ m_pd3dDevice->CreateRenderTargetView(pBackBuffer, nullptr, &m_mainRenderTargetView);
+        @ pBackBuffer->Release();
+    }
+
+    方法 释放渲染目标 <公开 折叠>
+    {
+        @ if (m_mainRenderTargetView) { m_mainRenderTargetView->Release(); m_mainRenderTargetView = nullptr; }
+    }
+
+    方法 重置尺寸 <公开 折叠>
+    参数 宽度 <类型 = 整数>
+    参数 高度 <类型 = 整数>
+    {
+        @ this->@<释放渲染目标>();
+        @ m_pSwapChain->ResizeBuffers(0, @<宽度>, @<高度>, DXGI_FORMAT_UNKNOWN, 0);
+        @ this->@<创建渲染目标>();
+    }
+
+    方法 渲染 <公开 折叠>
+    参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
+    {
+        @ ImGui::Render();
+        @ ImVec4* clear_color = @<背景颜色>.pdata();
+        @ const float clear_color_with_alpha[4] = { clear_color->x * clear_color->w, clear_color->y * clear_color->w, clear_color->z * clear_color->w, clear_color->w };
+        @ m_pd3dDeviceContext->OMSetRenderTargets(1, &m_mainRenderTargetView, nullptr);
+        @ m_pd3dDeviceContext->ClearRenderTargetView(m_mainRenderTargetView, clear_color_with_alpha);
+        @ ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+        @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        @ {
+        @     ImGui::UpdatePlatformWindows();
+        @     ImGui::RenderPlatformWindowsDefault();
+        @ }
+        @ m_pSwapChain->Present(1, 0);
+    }
+
+    方法 准备 <公开>
+
+    # SDL ---
+
+    变量 局_窗口句柄 <类型 = 变整数>
+
+    方法 加载_SDL <公开 类型 = 逻辑型 折叠 @视窗.外部头文件 = "<SDL_syswm.h>">
+    参数 窗口句柄 <类型 = 变整数 @默认值 = 0>
+    {
+        @ SDL_SysWMinfo wmInfo;
+        @ SDL_VERSION(&wmInfo.version);
+        @ SDL_GetWindowWMInfo(reinterpret_cast<SDL_Window*>(@<窗口句柄>), &wmInfo);
+        @ @<局_窗口句柄> = reinterpret_cast<INT_P>(wmInfo.info.win.window);
+        返回 (创建设备 (局_窗口句柄))
+    }
+
+    方法 渲染_SDL <公开 折叠 @嵌入式方法 = "">
+    参数 窗口句柄 <类型 = 变整数>
+    参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
+    {
+        @ @sn<this>.@<渲染>(@<背景颜色>)
+    }
+
+    方法 加载字体纹理 <公开>
+
+    方法 清理 <公开 折叠>
+    {
+        释放设备 (局_窗口句柄)
+    }
+}
+
+类 IM_DX12渲染器 <公开 注释 = "基于DirectX12的渲染器后端,兼容Windows 10及以上系统." 折叠 @文档 = "category = \"渲染器\""
+        @视窗.外部头文件 = "<backends/imgui_impl_dx12.h>\r\n<d3d12.h>\r\n<dxgi1_4.h>"
+        @视窗.外部源文件 = "imgui\\backends\\imgui_impl_dx12.cpp"
+        @视窗.外部库 = "d3d12.lib\r\nd3dcompiler.lib\r\ndxgi.lib" @视窗.预定义宏 = "ImTextureID=ImU64">
+{
+
+    # @begin
+    # <> <include>
+    # #define NUM_FRAMES_IN_FLIGHT  3
+    # #define NUM_BACK_BUFFERS  3
+    # struct FrameContext
+    # {
+    #     ID3D12CommandAllocator*  CommandAllocator;
+    #     UINT64                   FenceValue;
+    # };
+    # FrameContext                 m_frameContext[NUM_FRAMES_IN_FLIGHT] = {};
+    # UINT                         m_frameIndex = 0;
+    # ID3D12Device*                m_pd3dDevice = nullptr;
+    # ID3D12DescriptorHeap*        m_pd3dRtvDescHeap = nullptr;
+    # ID3D12DescriptorHeap*        m_pd3dSrvDescHeap = nullptr;
+    # ID3D12CommandQueue*          m_pd3dCommandQueue = nullptr;
+    # ID3D12GraphicsCommandList*   m_pd3dCommandList = nullptr;
+    # ID3D12Fence*                 m_fence = nullptr;
+    # HANDLE                       m_fenceEvent = nullptr;
+    # UINT64                       m_fenceLastSignaledValue = 0;
+    # IDXGISwapChain3*             m_pSwapChain = nullptr;
+    # HANDLE                       m_hSwapChainWaitableObject = nullptr;
+    # ID3D12Resource*              m_mainRenderTargetResource[NUM_BACK_BUFFERS] = {};
+    # D3D12_CPU_DESCRIPTOR_HANDLE  m_mainRenderTargetDescriptor[NUM_BACK_BUFFERS] = {};
+    # int                          descriptor_index = 0;
+    # <> </include>
+    # @end
+
+    方法 渲染器类型 <公开 属性读 类型 = 整数 注释 = "返回渲染器类型(固定返回0,表示DirectX渲染器)" 折叠>
+    {
+        返回 (0)
+    }
+
+    方法 初始化 <公开 类型 = 逻辑型 注释 = "在\"创建设备\"和\"ImGui.创建环境()\"后才能调用." 折叠 @禁止流程检查 = 真>
+    {
+        @ return ImGui_ImplDX12_Init(m_pd3dDevice, NUM_FRAMES_IN_FLIGHT, DXGI_FORMAT_R8G8B8A8_UNORM, m_pd3dSrvDescHeap,
+        @                            m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),
+        @                            m_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
+    }
+
+    方法 关闭 <公开 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplDX12_Shutdown()
+    }
+
+    方法 新建帧 <公开 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplDX12_NewFrame()
+    }
+
+    方法 渲染数据 <公开 折叠 @嵌入式方法 = "">
+    参数 绘制数据 <类型 = 变整数 注释 = "由\"ImGui.取渲染数据()\"返回">
+    {
+        @ ImGui_ImplDX12_RenderDrawData(reinterpret_cast<ImDrawData*>(@<绘制数据>), @sn<this>.m_pd3dCommandList)
+    }
+
+    方法 创建设备对象 <公开 注释 = "用于在不丢失ImGui状态的情况下重置渲染设备" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplDX12_CreateDeviceObjects()
+    }
+
+    方法 销毁设备对象 <公开 注释 = "用于在不丢失ImGui状态的情况下重置渲染设备" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplDX12_InvalidateDeviceObjects()
+    }
+
+    # 纹理图片 ---
+
+    方法 加载图片文件 <公开 类型 = 逻辑型 注释 = "从指定的图片文件加载纹理到渲染器中,不再使用时请调用\"释放纹理\"."
+            注释 = "注意: 只能在\"IM_DX12渲染器.初始化\"之后使用,即\"准备渲染\"事件中." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
+    参数 文件名 <类型 = 文本型 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ if (!m_pd3dDevice) return false;
+        @ FILE* file = _wfopen(@<文件名>.GetText(), L"rb");
+        @ if (!file) return false;
+        @ unsigned char* image_data = stbi_load_from_file(file, &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
+        @ fclose(file);
+        @ if (!image_data) return false;
+        @ ID3D12Resource* my_texture = NULL;
+        @ UINT handle_increment = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        @ descriptor_index++;
+        @ D3D12_CPU_DESCRIPTOR_HANDLE my_texture_srv_cpu_handle = m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart();
+        @ my_texture_srv_cpu_handle.ptr += (handle_increment * descriptor_index);
+        @ D3D12_GPU_DESCRIPTOR_HANDLE my_texture_srv_gpu_handle = m_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart();
+        @ my_texture_srv_gpu_handle.ptr += (handle_increment * descriptor_index);
+        @ this->@<_加载图片>(image_data, my_texture_srv_cpu_handle, &my_texture, @<图片信息.宽度>, @<图片信息.高度>);
+        @ @<图片信息.纹理ID> = static_cast<INT64>(my_texture_srv_gpu_handle.ptr);
+        @ @<图片信息._内部数据> = reinterpret_cast<INT_P>(my_texture);
+        @ return true;
+    }
+
+    方法 加载图片资源 <公开 类型 = 逻辑型 注释 = "将程序文件中的图片资源加载到渲染器中,不再使用时请调用\"释放纹理\"."
+            注释 = "注意: 只能在\"IM_DX12渲染器.初始化\"之后使用,即\"准备渲染\"事件中." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
+    参数 图片资源 <类型 = 视窗文件资源 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ if (!m_pd3dDevice) return false;
+        @ HMODULE hModule = g_objVolApp.GetInstanceHandle();
+        @ HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE((WORD)@<图片资源>), RT_RCDATA);
+        @ if (!hSrc) return false;
+        @ HGLOBAL resdata = ::LoadResource(hModule, hSrc);
+        @ if (!resdata) return false;
+        @ unsigned char* data = reinterpret_cast<unsigned char*>(::LockResource(resdata));
+        @ int len = static_cast<int>(::SizeofResource(hModule, hSrc));
+        @ unsigned char* image_data = stbi_load_from_memory(data, len, &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
+        @ if (!image_data) return false;
+        @ ID3D12Resource* my_texture = NULL;
+        @ UINT handle_increment = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        @ descriptor_index++;
+        @ D3D12_CPU_DESCRIPTOR_HANDLE my_texture_srv_cpu_handle = m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart();
+        @ my_texture_srv_cpu_handle.ptr += (handle_increment * descriptor_index);
+        @ D3D12_GPU_DESCRIPTOR_HANDLE my_texture_srv_gpu_handle = m_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart();
+        @ my_texture_srv_gpu_handle.ptr += (handle_increment * descriptor_index);
+        @ this->@<_加载图片>(image_data, my_texture_srv_cpu_handle, &my_texture, @<图片信息.宽度>, @<图片信息.高度>);
+        @ @<图片信息.纹理ID> = static_cast<INT64>(my_texture_srv_gpu_handle.ptr);
+        @ @<图片信息._内部数据> = reinterpret_cast<INT_P>(my_texture);
+        @ return true;
+    }
+
+    方法 加载图片字节集 <公开 类型 = 逻辑型 注释 = "从指定的图片字节集加载纹理到渲染器中,不再使用时请调用\"释放纹理\"."
+            注释 = "注意: 只能在\"IM_DX12渲染器.初始化\"之后使用,即\"准备渲染\"事件中." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
+    参数 图片数据 <类型 = 字节集类 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ if (!m_pd3dDevice) return false;
+        @ unsigned char* image_data = stbi_load_from_memory(@<图片数据>.GetPtr(), static_cast<int>(@<图片数据>.GetSize()), &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
+        @ if (!image_data) return false;
+        @ ID3D12Resource* my_texture = NULL;
+        @ UINT handle_increment = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        @ descriptor_index++;
+        @ D3D12_CPU_DESCRIPTOR_HANDLE my_texture_srv_cpu_handle = m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart();
+        @ my_texture_srv_cpu_handle.ptr += (handle_increment * descriptor_index);
+        @ D3D12_GPU_DESCRIPTOR_HANDLE my_texture_srv_gpu_handle = m_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart();
+        @ my_texture_srv_gpu_handle.ptr += (handle_increment * descriptor_index);
+        @ this->@<_加载图片>(image_data, my_texture_srv_cpu_handle, &my_texture, @<图片信息.宽度>, @<图片信息.高度>);
+        @ @<图片信息.纹理ID> = static_cast<INT64>(my_texture_srv_gpu_handle.ptr);
+        @ @<图片信息._内部数据> = reinterpret_cast<INT_P>(my_texture);
+        @ return true;
+    }
+
+    方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠>
+    参数 图片信息 <类型 = IM图片信息类 注释 = "提供由\"本对象.加载图片××\"返回图片的信息,释放后会清空信息.">
+    {
+        如果 (图片信息._内部数据 != 0)
+        {
+            @ reinterpret_cast<ID3D12Resource*>(@<图片信息._内部数据>)->Release();
+        }
+        图片信息.重置为空对象 ()
+    }
+
+    方法 _加载图片 <注释 = "仅限内部嵌入式使用" 折叠>
+    参数 图片指针 <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/unsigned char*" @输出名 = "image_data">
+    参数 srv_cpu_handle <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/D3D12_CPU_DESCRIPTOR_HANDLE"
+            @输出名 = "srv_cpu_handle">
+    参数 out_tex_resource <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/ID3D12Resource**" @输出名 = "out_tex_resource">
+    参数 宽度 <类型 = 整数 @输出名 = "image_width">
+    参数 高度 <类型 = 整数 @输出名 = "image_height">
+    {
+        // Create texture resource
+        @ D3D12_HEAP_PROPERTIES props;
+        @ memset(&props, 0, sizeof(D3D12_HEAP_PROPERTIES));
+        @ props.Type = D3D12_HEAP_TYPE_DEFAULT;
+        @ props.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+        @ props.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+
+        @ D3D12_RESOURCE_DESC desc;
+        @ ZeroMemory(&desc, sizeof(desc));
+        @ desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+        @ desc.Alignment = 0;
+        @ desc.Width = image_width;
+        @ desc.Height = image_height;
+        @ desc.DepthOrArraySize = 1;
+        @ desc.MipLevels = 1;
+        @ desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ desc.SampleDesc.Count = 1;
+        @ desc.SampleDesc.Quality = 0;
+        @ desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+        @ desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+        @ ID3D12Resource* pTexture = NULL;
+        @ m_pd3dDevice->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &desc,
+        @     D3D12_RESOURCE_STATE_COPY_DEST, NULL, IID_PPV_ARGS(&pTexture));
+
+        // Create a temporary upload resource to move the data in
+        @ UINT uploadPitch = (image_width * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
+        @ UINT uploadSize = image_height * uploadPitch;
+        @ desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        @ desc.Alignment = 0;
+        @ desc.Width = uploadSize;
+        @ desc.Height = 1;
+        @ desc.DepthOrArraySize = 1;
+        @ desc.MipLevels = 1;
+        @ desc.Format = DXGI_FORMAT_UNKNOWN;
+        @ desc.SampleDesc.Count = 1;
+        @ desc.SampleDesc.Quality = 0;
+        @ desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+        @ desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+        @ props.Type = D3D12_HEAP_TYPE_UPLOAD;
+        @ props.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+        @ props.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+
+        @ ID3D12Resource* uploadBuffer = NULL;
+        @ HRESULT hr = m_pd3dDevice->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &desc,
+        @     D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(&uploadBuffer));
+        @ IM_ASSERT(SUCCEEDED(hr));
+
+        // Write pixels into the upload resource
+        @ void* mapped = NULL;
+        @ D3D12_RANGE range = { 0, uploadSize };
+        @ hr = uploadBuffer->Map(0, &range, &mapped);
+        @ IM_ASSERT(SUCCEEDED(hr));
+        @ for (int y = 0; y < image_height; y++)
+        @     memcpy(reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(mapped) + y * uploadPitch), image_data + y * image_width * 4, image_width * 4);
+        @ uploadBuffer->Unmap(0, &range);
+
+        // Copy the upload resource content into the real resource
+        @ D3D12_TEXTURE_COPY_LOCATION srcLocation = {};
+        @ srcLocation.pResource = uploadBuffer;
+        @ srcLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+        @ srcLocation.PlacedFootprint.Footprint.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ srcLocation.PlacedFootprint.Footprint.Width = image_width;
+        @ srcLocation.PlacedFootprint.Footprint.Height = image_height;
+        @ srcLocation.PlacedFootprint.Footprint.Depth = 1;
+        @ srcLocation.PlacedFootprint.Footprint.RowPitch = uploadPitch;
+
+        @ D3D12_TEXTURE_COPY_LOCATION dstLocation = {};
+        @ dstLocation.pResource = pTexture;
+        @ dstLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+        @ dstLocation.SubresourceIndex = 0;
+
+        @ D3D12_RESOURCE_BARRIER barrier = {};
+        @ barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        @ barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        @ barrier.Transition.pResource = pTexture;
+        @ barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        @ barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+        @ barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+
+        // Create a temporary command queue to do the copy with
+        @ ID3D12Fence* fence = NULL;
+        @ hr = m_pd3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+        @ IM_ASSERT(SUCCEEDED(hr));
+
+        @ HANDLE event = CreateEvent(0, 0, 0, 0);
+        @ IM_ASSERT(event != NULL);
+
+        @ D3D12_COMMAND_QUEUE_DESC queueDesc = {};
+        @ queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+        @ queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+        @ queueDesc.NodeMask = 1;
+
+        @ ID3D12CommandQueue* cmdQueue = NULL;
+        @ hr = m_pd3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&cmdQueue));
+        @ IM_ASSERT(SUCCEEDED(hr));
+
+        @ ID3D12CommandAllocator* cmdAlloc = NULL;
+        @ hr = m_pd3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&cmdAlloc));
+        @ IM_ASSERT(SUCCEEDED(hr));
+
+        @ ID3D12GraphicsCommandList* cmdList = NULL;
+        @ hr = m_pd3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc, NULL, IID_PPV_ARGS(&cmdList));
+        @ IM_ASSERT(SUCCEEDED(hr));
+
+        @ cmdList->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocation, NULL);
+        @ cmdList->ResourceBarrier(1, &barrier);
+
+        @ hr = cmdList->Close();
+        @ IM_ASSERT(SUCCEEDED(hr));
+
+        // Execute the copy
+        @ cmdQueue->ExecuteCommandLists(1, (ID3D12CommandList* const*)&cmdList);
+        @ hr = cmdQueue->Signal(fence, 1);
+        @ IM_ASSERT(SUCCEEDED(hr));
+
+        // Wait for everything to complete
+        @ fence->SetEventOnCompletion(1, event);
+        @ WaitForSingleObject(event, INFINITE);
+
+        // Tear down our temporary command queue and release the upload resource
+        @ cmdList->Release();
+        @ cmdAlloc->Release();
+        @ cmdQueue->Release();
+        @ CloseHandle(event);
+        @ fence->Release();
+        @ uploadBuffer->Release();
+
+        // Create a shader resource view for the texture
+        @ D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
+        @ ZeroMemory(&srvDesc, sizeof(srvDesc));
+        @ srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+        @ srvDesc.Texture2D.MipLevels = desc.MipLevels;
+        @ srvDesc.Texture2D.MostDetailedMip = 0;
+        @ srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        @ m_pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, srv_cpu_handle);
+        // Return results
+        @ *out_tex_resource = pTexture;
+        @ stbi_image_free(image_data);
+    }
+
+    # Win32 ---
+
+    方法 创建设备 <公开 类型 = 逻辑型 折叠 @禁止流程检查 = 真>
+    参数 窗口句柄 <类型 = 变整数>
+    {
+        @ DXGI_SWAP_CHAIN_DESC1 sd = {};
+        @ sd.BufferCount = NUM_BACK_BUFFERS;
+        @ sd.Width = 0;
+        @ sd.Height = 0;
+        @ sd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        @ sd.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+        @ sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+        @ sd.SampleDesc.Count = 1;
+        @ sd.SampleDesc.Quality = 0;
+        @ sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+        @ sd.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED; // DXGI_ALPHA_MODE_STRAIGHT
+        @ sd.Scaling = DXGI_SCALING_STRETCH;
+        @ sd.Stereo = FALSE;
+        @ if (D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_pd3dDevice)) != S_OK)
+        @     return FALSE;
+        @ {
+        @     D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+        @     desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+        @     desc.NumDescriptors = NUM_BACK_BUFFERS;
+        @     desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+        @     desc.NodeMask = 1;
+        @     if (m_pd3dDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_pd3dRtvDescHeap)) != S_OK)
+        @         return FALSE;
+        @ }
+        @ SIZE_T rtvDescriptorSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+        @ D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_pd3dRtvDescHeap->GetCPUDescriptorHandleForHeapStart();
+        @ for (INT i = 0; i < NUM_BACK_BUFFERS; i++)
+        @ {
+        @     m_mainRenderTargetDescriptor[i] = rtvHandle;
+        @     rtvHandle.ptr += rtvDescriptorSize;
+        @ }
+        @ {
+        @     D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+        @     desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+        @     desc.NumDescriptors = 2;
+        @     desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+        @     if (m_pd3dDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_pd3dSrvDescHeap)) != S_OK)
+        @         return FALSE;
+        @ }
+        @ {
+        @     D3D12_COMMAND_QUEUE_DESC desc = {};
+        @     desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+        @     desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+        @     desc.NodeMask = 1;
+        @     if (m_pd3dDevice->CreateCommandQueue(&desc, IID_PPV_ARGS(&m_pd3dCommandQueue)) != S_OK)
+        @         return FALSE;
+        @ }
+        @ for (INT i = 0; i < NUM_FRAMES_IN_FLIGHT; i++)
+        @ {
+        @     if (m_pd3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_frameContext[i].CommandAllocator)) != S_OK)
+        @         return FALSE;
+        @ }
+        @ if (m_pd3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_frameContext[0].CommandAllocator, nullptr, IID_PPV_ARGS(&m_pd3dCommandList)) != S_OK ||
+        @     m_pd3dCommandList->Close() != S_OK)
+        @     return FALSE;
+        @ if (m_pd3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)) != S_OK)
+        @     return FALSE;
+        @ m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+        @ if (m_fenceEvent == nullptr) return FALSE;
+        @ IDXGIFactory4* dxgiFactory = nullptr;
+        @ IDXGISwapChain1* swapChain1 = nullptr;
+        @ if (CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)) != S_OK)
+        @     return FALSE;
+        @ if (dxgiFactory->CreateSwapChainForHwnd(m_pd3dCommandQueue, reinterpret_cast<HWND>(@<窗口句柄>), &sd, nullptr, nullptr, &swapChain1) != S_OK)
+        @     return FALSE;
+        @ if (swapChain1->QueryInterface(IID_PPV_ARGS(&m_pSwapChain)) != S_OK)
+        @     return FALSE;
+        @ swapChain1->Release();
+        @ dxgiFactory->Release();
+        @ m_pSwapChain->SetMaximumFrameLatency(NUM_BACK_BUFFERS);
+        @ m_hSwapChainWaitableObject = m_pSwapChain->GetFrameLatencyWaitableObject();
+        @ this->@<创建渲染目标>();
+        @ return TRUE;
+    }
+
+    方法 释放设备 <公开 折叠>
+    参数 窗口句柄 <类型 = 变整数 @默认值 = 0>
+    {
+        @ this->@<释放渲染目标>();
+        @ if (m_pSwapChain) { m_pSwapChain->SetFullscreenState(false, nullptr); m_pSwapChain->Release(); m_pSwapChain = nullptr; }
+        @ if (m_hSwapChainWaitableObject != nullptr) { CloseHandle(m_hSwapChainWaitableObject); }
+        @ for (INT i = 0; i < NUM_FRAMES_IN_FLIGHT; i++)
+        @     if (m_frameContext[i].CommandAllocator) { m_frameContext[i].CommandAllocator->Release(); m_frameContext[i].CommandAllocator = nullptr; }
+        @ if (m_pd3dCommandQueue) { m_pd3dCommandQueue->Release(); m_pd3dCommandQueue = nullptr; }
+        @ if (m_pd3dCommandList) { m_pd3dCommandList->Release(); m_pd3dCommandList = nullptr; }
+        @ if (m_pd3dRtvDescHeap) { m_pd3dRtvDescHeap->Release(); m_pd3dRtvDescHeap = nullptr; }
+        @ if (m_pd3dSrvDescHeap) { m_pd3dSrvDescHeap->Release(); m_pd3dSrvDescHeap = nullptr; }
+        @ if (m_fence) { m_fence->Release(); m_fence = nullptr; }
+        @ if (m_fenceEvent) { CloseHandle(m_fenceEvent); m_fenceEvent = nullptr; }
+        @ if (m_pd3dDevice) { m_pd3dDevice->Release(); m_pd3dDevice = nullptr; }
+    }
+
+    方法 创建渲染目标 <公开 折叠>
+    {
+        @ for (INT i = 0; i < NUM_BACK_BUFFERS; i++)
+        @ {
+        @     ID3D12Resource* pBackBuffer = nullptr;
+        @     m_pSwapChain->GetBuffer(i, IID_PPV_ARGS(&pBackBuffer));
+        @     m_pd3dDevice->CreateRenderTargetView(pBackBuffer, nullptr, m_mainRenderTargetDescriptor[i]);
+        @     m_mainRenderTargetResource[i] = pBackBuffer;
+        @ }
+    }
+
+    方法 释放渲染目标 <公开 折叠>
+    {
+        @ this->@<等待最后一帧>();
+        @ for (INT i = 0; i < NUM_BACK_BUFFERS; i++)
+        @     if (m_mainRenderTargetResource[i]) { m_mainRenderTargetResource[i]->Release(); m_mainRenderTargetResource[i] = nullptr; }
+    }
+
+    方法 等待最后一帧 <公开 折叠>
+    {
+        @ FrameContext* frameCtx = &m_frameContext[m_frameIndex % NUM_FRAMES_IN_FLIGHT];
+        @ UINT64 fenceValue = frameCtx->FenceValue;
+        @ if (fenceValue == 0)
+        @     return; // No fence was signaled
+        @ frameCtx->FenceValue = 0;
+        @ if (m_fence->GetCompletedValue() >= fenceValue)
+        @     return;
+        @ m_fence->SetEventOnCompletion(fenceValue, m_fenceEvent);
+        @ ::WaitForSingleObject(m_fenceEvent, INFINITE);
+    }
+
+    方法 等待下一帧资源 <公开 类型 = 变整数 返回值注释 = "FrameContext*" 折叠 @禁止流程检查 = 真>
+    {
+        @ UINT nextFrameIndex = m_frameIndex + 1;
+        @ m_frameIndex = nextFrameIndex;
+        @ HANDLE waitableObjects[] = { m_hSwapChainWaitableObject, nullptr };
+        @ DWORD numWaitableObjects = 1;
+        @ FrameContext* frameCtx = &m_frameContext[nextFrameIndex % NUM_FRAMES_IN_FLIGHT];
+        @ UINT64 fenceValue = frameCtx->FenceValue;
+        @ if (fenceValue != 0) // means no fence was signaled
+        @ {
+        @     frameCtx->FenceValue = 0;
+        @     m_fence->SetEventOnCompletion(fenceValue, m_fenceEvent);
+        @     waitableObjects[1] = m_fenceEvent;
+        @     numWaitableObjects = 2;
+        @ }
+        @ WaitForMultipleObjects(numWaitableObjects, waitableObjects, TRUE, INFINITE);
+        @ return reinterpret_cast<INT_P>(frameCtx);
+    }
+
+    方法 重置尺寸 <公开 折叠>
+    参数 宽度 <类型 = 整数>
+    参数 高度 <类型 = 整数>
+    {
+        @ this->@<等待最后一帧>();
+        @ this->@<释放渲染目标>();
+        @ HRESULT result = m_pSwapChain->ResizeBuffers(0, @<宽度>, @<高度>, DXGI_FORMAT_UNKNOWN, DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT);
+        @ assert(SUCCEEDED(result) && "Failed to resize swapchain.");
+        @ this->@<创建渲染目标>();
+    }
+
+    方法 准备 <公开>
+
+    方法 渲染 <公开 折叠>
+    参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
+    {
+        @ FrameContext* frameCtx = (FrameContext*)this->@<等待下一帧资源>();
+        @ UINT backBufferIdx = m_pSwapChain->GetCurrentBackBufferIndex();
+        @ frameCtx->CommandAllocator->Reset();
+
+        @ D3D12_RESOURCE_BARRIER barrier = {};
+        @ barrier.Type                   = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        @ barrier.Flags                  = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        @ barrier.Transition.pResource   = m_mainRenderTargetResource[backBufferIdx];
+        @ barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        @ barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+        @ barrier.Transition.StateAfter  = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        @ m_pd3dCommandList->Reset(frameCtx->CommandAllocator, nullptr);
+        @ m_pd3dCommandList->ResourceBarrier(1, &barrier);
+
+        // Render Dear ImGui graphics
+        @ ImGui::Render();
+        @ ImVec4* clear_color = @<背景颜色>.pdata();
+        @ const float clear_color_with_alpha[4] = { clear_color->x * clear_color->w, clear_color->y * clear_color->w, clear_color->z * clear_color->w, clear_color->w };
+        @ m_pd3dCommandList->ClearRenderTargetView(m_mainRenderTargetDescriptor[backBufferIdx], clear_color_with_alpha, 0, nullptr);
+        @ m_pd3dCommandList->OMSetRenderTargets(1, &m_mainRenderTargetDescriptor[backBufferIdx], FALSE, nullptr);
+        @ m_pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dSrvDescHeap);
+        @ ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_pd3dCommandList);
+        @ barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        @ barrier.Transition.StateAfter  = D3D12_RESOURCE_STATE_PRESENT;
+        @ m_pd3dCommandList->ResourceBarrier(1, &barrier);
+        @ m_pd3dCommandList->Close();
+
+        @ m_pd3dCommandQueue->ExecuteCommandLists(1, (ID3D12CommandList* const*)&m_pd3dCommandList);
+        // Update and Render additional Platform Windows
+        @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        @ {
+        @     ImGui::UpdatePlatformWindows();
+        @     ImGui::RenderPlatformWindowsDefault(nullptr, reinterpret_cast<void*>(m_pd3dCommandList));
+        @ }
+        @ m_pSwapChain->Present(1, 0); // Present with vsync
+
+        @ UINT64 fenceValue = m_fenceLastSignaledValue + 1;
+        @ m_pd3dCommandQueue->Signal(m_fence, fenceValue);
+        @ m_fenceLastSignaledValue = fenceValue;
+        @ frameCtx->FenceValue = fenceValue;
+    }
+
+    # SDL ---
+
+    变量 局_窗口句柄 <类型 = 变整数>
+
+    方法 加载_SDL <公开 类型 = 逻辑型 折叠 @视窗.外部头文件 = "<SDL_syswm.h>">
+    参数 窗口句柄 <类型 = 变整数 @默认值 = 0>
+    {
+        @ SDL_SysWMinfo wmInfo;
+        @ SDL_VERSION(&wmInfo.version);
+        @ SDL_GetWindowWMInfo(reinterpret_cast<SDL_Window*>(@<窗口句柄>), &wmInfo);
+        @ @<局_窗口句柄> = reinterpret_cast<INT_P>(wmInfo.info.win.window);
+        返回 (创建设备 (局_窗口句柄))
+    }
+
+    方法 渲染_SDL <公开 折叠 @嵌入式方法 = "">
+    参数 窗口句柄 <类型 = 变整数>
+    参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
+    {
+        @ @sn<this>.@<渲染>(@<背景颜色>)
+    }
+
+    方法 加载字体纹理 <公开>
+
+    方法 清理 <公开 折叠>
+    {
+        释放设备 (局_窗口句柄)
+    }
+}
+
+类 IM_OpenGL渲染器 <公开 注释 = "基于现代OpenGL的渲染器后端,支持桌面OpenGL版本: 2.x 3.x 4.x" 折叠 折叠2 @文档 = "category = \"渲染器\""
+        @视窗.外部头文件 = "<backends/imgui_impl_opengl3.h>\r\nglad\\glad.h"
+        @视窗.外部源文件 = "imgui\\backends\\imgui_impl_opengl3.cpp\r\nFrameWork\\glad\\glad.c">
+{
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static HGLRC g_hRC;
+    # <> </include>
+    # <> </global>
+    # <> <include>
+    # struct WGL_WindowData { HDC hDC;};
+    # WGL_WindowData m_MainWindow { 0 };
+    # static void Hook_Renderer_CreateWindow(ImGuiViewport* viewport)
+    # {
+    #     WGL_WindowData* data = IM_NEW(WGL_WindowData);
+    #     @<CreateDeviceWGL>(reinterpret_cast<HWND>(viewport->PlatformHandle), data);
+    #     viewport->RendererUserData = data;
+    # }
+    # static void Hook_Renderer_DestroyWindow(ImGuiViewport* viewport)
+    # {
+    #     if (viewport->RendererUserData != NULL)
+    #     {
+    #         WGL_WindowData* data = reinterpret_cast<WGL_WindowData*>(viewport->RendererUserData);
+    #         wglMakeCurrent(NULL, NULL);
+    #         ::ReleaseDC(reinterpret_cast<HWND>(viewport->PlatformHandle), data->hDC);
+    #         IM_DELETE(data);
+    #         viewport->RendererUserData = NULL;
+    #     }
+    # }
+    # static void Hook_Platform_RenderWindow(ImGuiViewport* viewport, void*)
+    # {
+    #     if (WGL_WindowData* data = reinterpret_cast<WGL_WindowData*>(viewport->RendererUserData))
+    #         wglMakeCurrent(data->hDC, g_hRC);
+    # }
+    # static void Hook_Renderer_SwapBuffers(ImGuiViewport* viewport, void*)
+    # {
+    #     if (WGL_WindowData* data = reinterpret_cast<WGL_WindowData*>(viewport->RendererUserData))
+    #         ::SwapBuffers(data->hDC);
+    # }
+    # <> </include>
+    # @end
+
+    方法 渲染器类型 <公开 属性读 类型 = 整数 注释 = "返回渲染器类型(固定返回1,表示OpenGL渲染器)" 折叠>
+    {
+        返回 (1)
+    }
+
+    方法 初始化 <公开 类型 = 逻辑型 注释 = "在\"创建设备\"和\"ImGui.创建环境()\"后才能调用." 折叠 @禁止流程检查 = 真>
+    参数 GLSL版本 <类型 = 文本型 注释 = "请提供一个\"#version XXX\"的GLSL版本,留空为默认值\"#version 130\"."
+            注释 = "下列是OpenGL和GLSL版本的对应表:" 注释 = "// OpenGL    GLSL      GLSL" 注释 = "// version   version   string"
+            注释 = "//----------------------------------------" 注释 = "//  2.0       110       \"#version 110\""
+            注释 = "//  2.1       120       \"#version 120\"" 注释 = "//  3.0       130       \"#version 130\""
+            注释 = "//  3.1       140       \"#version 140\"" 注释 = "//  3.2       150       \"#version 150\""
+            注释 = "//  3.3       330       \"#version 330 core\""
+            注释 = "//  4.0       400       \"#version 400 core\""
+            注释 = "//  4.1       410       \"#version 410 core\""
+            注释 = "//  4.2       420       \"#version 410 core\""
+            注释 = "//  4.3       430       \"#version 430 core\""
+            注释 = "//  ES 2.0    100       \"#version 100\"      = WebGL 1.0"
+            注释 = "//  ES 3.0    300       \"#version 300 es\"   = WebGL 2.0" @默认值 = "#version 330 core">
+    {
+        @ return ImGui_ImplOpenGL3_Init(@<GLSL版本>.IsEmpty() ? nullptr : PivW2U(@<GLSL版本>).GetText());
+    }
+
+    方法 关闭 <公开 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplOpenGL3_Shutdown()
+    }
+
+    方法 新建帧 <公开 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplOpenGL3_NewFrame()
+    }
+
+    方法 渲染数据 <公开 折叠 @嵌入式方法 = "">
+    参数 绘制数据 <类型 = 变整数 注释 = "由\"ImGui.取渲染数据()\"返回">
+    {
+        @ ImGui_ImplOpenGL3_RenderDrawData(reinterpret_cast<ImDrawData*>(@<绘制数据>))
+    }
+
+    方法 加载字体纹理 <公开 注释 = "(可选项)已在\"初始化/关闭/新建帧\"时自动调用" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplOpenGL3_CreateFontsTexture()
+    }
+
+    方法 销毁字体纹理 <公开 注释 = "(可选项)已在\"初始化/关闭/新建帧\"时自动调用" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplOpenGL3_DestroyFontsTexture()
+    }
+
+    方法 创建设备对象 <公开 注释 = "(可选项)已在\"初始化/关闭/新建帧\"时自动调用" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplOpenGL3_CreateDeviceObjects()
+    }
+
+    方法 销毁设备对象 <公开 注释 = "(可选项)已在\"初始化/关闭/新建帧\"时自动调用" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplOpenGL3_DestroyDeviceObjects()
+    }
+
+    # 纹理图片 ---
+
+    方法 加载图片文件 <公开 类型 = 逻辑型 注释 = "从指定的图片文件加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
+    参数 文件名 <类型 = 文本型 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ FILE* file = _wfopen(@<文件名>.GetText(), L"rb");
+        @ if (!file) return false;
+        @ int image_width = 0, image_height = 0;
+        @ unsigned char* image_data = stbi_load_from_file(file, &image_width, &image_height, nullptr, 4);
+        @ fclose(file);
+        @ if (!image_data) return false;
+        @ GLuint image_texture;
+        @ glGenTextures(1, &image_texture);
+        @ glBindTexture(GL_TEXTURE_2D, image_texture);
+        // Setup filtering parameters for display
+        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
+        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
+        // Upload pixels into texture
+        @ #if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+        @     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        @ #endif
+        @ glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+        @ stbi_image_free(image_data);
+        @ @<图片信息.纹理ID> = static_cast<INT64>(image_texture);
+        @ @<图片信息.宽度> = image_width;
+        @ @<图片信息.高度> = image_height;
+        @ return true;
+    }
+
+    方法 加载图片资源 <公开 类型 = 逻辑型 注释 = "将程序文件中的图片资源加载到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
+    参数 图片资源 <类型 = 视窗文件资源 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ HMODULE hModule = g_objVolApp.GetInstanceHandle();
+        @ HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE((WORD)@<图片资源>), RT_RCDATA);
+        @ if (!hSrc) return false;
+        @ HGLOBAL resdata = ::LoadResource(hModule, hSrc);
+        @ if (!resdata) return false;
+        @ unsigned char* data = reinterpret_cast<unsigned char*>(::LockResource(resdata));
+        @ int len = static_cast<int>(::SizeofResource(hModule, hSrc));
+        @ int image_width = 0, image_height = 0;
+        @ unsigned char* image_data = stbi_load_from_memory(data, len, &image_width, &image_height, nullptr, 4);
+        @ if (!image_data) return false;
+        @ GLuint image_texture;
+        @ glGenTextures(1, &image_texture);
+        @ glBindTexture(GL_TEXTURE_2D, image_texture);
+        // Setup filtering parameters for display
+        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
+        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
+        // Upload pixels into texture
+        @ #if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+        @     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        @ #endif
+        @ glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+        @ stbi_image_free(image_data);
+        @ @<图片信息.纹理ID> = static_cast<INT64>(image_texture);
+        @ @<图片信息.宽度> = image_width;
+        @ @<图片信息.高度> = image_height;
+        @ return true;
+    }
+
+    方法 加载图片字节集 <公开 类型 = 逻辑型 注释 = "从指定的图片字节集加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
+    参数 图片数据 <类型 = 字节集类 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ int image_width = 0, image_height = 0;
+        @ unsigned char* image_data = stbi_load_from_memory(@<图片数据>.GetPtr(), static_cast<int>(@<图片数据>.GetSize()), &image_width, &image_height, nullptr, 4);
+        @ if (!image_data) return false;
+        @ GLuint image_texture;
+        @ glGenTextures(1, &image_texture);
+        @ glBindTexture(GL_TEXTURE_2D, image_texture);
+        // Setup filtering parameters for display
+        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
+        @ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
+        // Upload pixels into texture
+        @ #if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+        @ glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        @ #endif
+        @ glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+        @ stbi_image_free(image_data);
+        @ @<图片信息.纹理ID> = static_cast<INT64>(image_texture);
+        @ @<图片信息.宽度> = image_width;
+        @ @<图片信息.高度> = image_height;
+        @ return true;
+    }
+
+    方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠>
+    参数 图片信息 <类型 = IM图片信息类 注释 = "提供由\"本对象.加载图片××\"返回的图片信息">
+    {
+        如果 (图片信息.纹理ID != 0)
+        {
+            @ glDeleteTextures(1, reinterpret_cast<GLuint*>(&@<图片信息.纹理ID>));
+        }
+        图片信息.重置为空对象 ()
+    }
+
+    # Win32平台 ---
+
+    方法 创建设备 <公开 类型 = 逻辑型 折叠 折叠2 @视窗.外部库 = "OpenGL32.lib" @禁止流程检查 = 真>
+    参数 窗口句柄 <类型 = 变整数>
+    {
+        @ @<CreateDeviceWGL>(reinterpret_cast<HWND>(@<窗口句柄>), &m_MainWindow);
+        @ if (!g_hRC)
+        @     g_hRC = wglCreateContext(m_MainWindow.hDC);
+        @ wglMakeCurrent(m_MainWindow.hDC, g_hRC);
+        @ if (!gladLoadGL())
+        @ {
+        @     this->@<释放设备>(@<窗口句柄>);
+        @     return FALSE;
+        @ }
+        @ return TRUE;
+    }
+
+    方法 释放设备 <公开 折叠>
+    参数 窗口句柄 <类型 = 变整数>
+    {
+        @ wglMakeCurrent(NULL, NULL);
+        @ ::ReleaseDC(reinterpret_cast<HWND>(@<窗口句柄>), m_MainWindow.hDC);
+        @ m_MainWindow.hDC = nullptr;
+        @ if (!g_hRC)
+        @ {
+        @     wglDeleteContext(g_hRC);
+        @     g_hRC = nullptr;
+        @ }
+    }
+
+    方法 重置尺寸 <公开 折叠>
+    参数 宽度 <类型 = 整数>
+    参数 高度 <类型 = 整数>
+    {
+        @ glViewport(0, 0, @<宽度>, @<高度>);
+    }
+
+    方法 渲染 <公开 折叠>
+    参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
+    {
+        @ ImGui::Render();
+        @ ImVec4* clear_color = @<背景颜色>.pdata();
+        @ glClearColor(clear_color->x * clear_color->w, clear_color->y * clear_color->w, clear_color->z * clear_color->w, clear_color->w);
+        @ glClear(GL_COLOR_BUFFER_BIT);
+        @ ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        @ {
+        @     ImGui::UpdatePlatformWindows();
+        @     ImGui::RenderPlatformWindowsDefault();
+        @     wglMakeCurrent(m_MainWindow.hDC, g_hRC);
+        @ }
+        @ ::SwapBuffers(m_MainWindow.hDC);
+    }
+
+    方法 准备 <公开 折叠>
+    {
+        @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        @ {
+        @     ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
+        @     platform_io.Renderer_CreateWindow = Hook_Renderer_CreateWindow;
+        @     platform_io.Renderer_DestroyWindow = Hook_Renderer_DestroyWindow;
+        @     platform_io.Renderer_SwapBuffers = Hook_Renderer_SwapBuffers;
+        @     platform_io.Platform_RenderWindow = Hook_Platform_RenderWindow;
+        @ }
+    }
+
+    方法 CreateDeviceWGL <静态 类型 = 逻辑型 折叠 @禁止流程检查 = 真>
+    参数 hWnd <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/HWND" @输出名 = "hWnd">
+    参数 data <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/WGL_WindowData*" @输出名 = "data">
+    {
+        @ HDC hDc = ::GetDC(hWnd);
+        @ PIXELFORMATDESCRIPTOR pfd = { sizeof(pfd), 1, PFD_DRAW_TO_WINDOW | PFD_DRAW_TO_BITMAP | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_STEREO_DONTCARE,
+        @                               PFD_TYPE_RGBA, 32, 8, 16, 8, 8, 8, 0, 8, 24, 64, 16, 16, 16, 32, 8, 4, PFD_MAIN_PLANE, 0, 0, 0, 0};
+        @ const int pf = ::ChoosePixelFormat(hDc, &pfd);
+        @ if (pf == 0 || ::SetPixelFormat(hDc, pf, &pfd) == FALSE)
+        @     return FALSE;
+        @ ::ReleaseDC(hWnd, hDc);
+        @ data->hDC = ::GetDC(hWnd);
+        @ return TRUE;
+    }
+
+    # GLFW平台 ---
+
+    方法 加载_GLFW <公开 类型 = 逻辑型 注释 = "*适用于GLFW平台" 折叠 @嵌入式方法 = "">
+    参数 窗口句柄 <类型 = 变整数 @默认值 = 0>
+    {
+        @ gladLoadGL() != 0
+    }
+
+    方法 渲染_GLFW <公开 折叠>
+    参数 窗口句柄 <类型 = 变整数>
+    参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
+    {
+        @ ImGui::Render();
+        @ int display_w, display_h;
+        @ glfwGetFramebufferSize(reinterpret_cast<GLFWwindow*>(@<窗口句柄>), &display_w, &display_h);
+        @ glViewport(0, 0, display_w, display_h);
+        @ ImVec4* clear_color = @<背景颜色>.pdata();
+        @ glClearColor(clear_color->x * clear_color->w, clear_color->y * clear_color->w, clear_color->z * clear_color->w, clear_color->w);
+        @ glClear(GL_COLOR_BUFFER_BIT);
+        @ ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        @ {
+        @     GLFWwindow* backup_current_context = glfwGetCurrentContext();
+        @     ImGui::UpdatePlatformWindows();
+        @     ImGui::RenderPlatformWindowsDefault();
+        @     glfwMakeContextCurrent(backup_current_context);
+        @ }
+        @ glfwSwapBuffers(reinterpret_cast<GLFWwindow*>(@<窗口句柄>)); // 双缓冲: 交换缓冲区
+    }
+
+    方法 清理 <公开>
+
+    # SDL2平台 ---
+
+    方法 加载_SDL <公开 类型 = 逻辑型 注释 = "*适用于GLFW平台" 折叠 @嵌入式方法 = "">
+    参数 窗口句柄 <类型 = 变整数 @默认值 = 0>
+    {
+        @ gladLoadGL() != 0
+    }
+
+    方法 渲染_SDL <公开 折叠 @视窗.外部头文件 = "<SDL_opengl.h>">
+    参数 窗口句柄 <类型 = 变整数>
+    参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
+    {
+        @ ImGui::Render();
+        @ ImVec4* clear_color = @<背景颜色>.pdata();
+        @ glClearColor(clear_color->x * clear_color->w, clear_color->y * clear_color->w, clear_color->z * clear_color->w, clear_color->w);
+        @ glClear(GL_COLOR_BUFFER_BIT);
+        @ ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        @ {
+        @     SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
+        @     SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
+        @     ImGui::UpdatePlatformWindows();
+        @     ImGui::RenderPlatformWindowsDefault();
+        @     SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
+        @ }
+        @ SDL_GL_SwapWindow(reinterpret_cast<SDL_Window*>(@<窗口句柄>));
+    }
+}
+
+类 IM_Vulkan渲染器 <公开 注释 = "基于Vulkan的渲染器后端,Vulkan是OpenGL的下一代GPU API,目的就是取代OpenGL."
+        注释 = "注意旧型号的显卡和显卡驱动可能不支持Vulkan." 折叠 @文档 = "category = \"渲染器\""
+        @视窗.预定义宏 = "ImTextureID=ImU64\r\nGLFW_INCLUDE_VULKAN" @视窗.外部头文件 = "<backends/imgui_impl_vulkan.h>"
+        @视窗.外部源文件 = "imgui\\backends\\imgui_impl_vulkan.cpp"
+        @视窗.外部库 = "FrameWork\\vulkan\\$(p)\\vulkan-1.lib" @视窗.附属文件 = "FrameWork\\vulkan\\$(p)\\vulkan-1.dll">
+{
+    方法 渲染器类型 <公开 属性读 类型 = 整数 注释 = "返回渲染器类型(固定返回2,表示Vulkan渲染器)" 折叠>
+    {
+        返回 (2)
+    }
+
+    方法 加载_GLFW <公开 类型 = 逻辑型 折叠 @禁止流程检查 = 真>
+    参数 窗口句柄 <类型 = 变整数>
+    {
+        @ if (!glfwVulkanSupported()) return FALSE;
+        @ ImVector<const char*> extensions;
+        @ uint32_t extensions_count = 0;
+        @ const char** glfw_extensions = glfwGetRequiredInstanceExtensions(&extensions_count);
+        @ for (uint32_t i = 0; i < extensions_count; i++)
+        @     extensions.push_back(glfw_extensions[i]);
+        // SetupVulkan ---
+        @ VkResult err;
+        @ // Create Vulkan Instance
+        @ {
+        @     VkInstanceCreateInfo create_info = {};
+        @     create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+        @     // Enumerate available extensions
+        @     uint32_t properties_count;
+        @     ImVector<VkExtensionProperties> properties;
+        @     vkEnumerateInstanceExtensionProperties(nullptr, &properties_count, nullptr);
+        @     properties.resize(properties_count);
+        @     err = vkEnumerateInstanceExtensionProperties(nullptr, &properties_count, properties.Data);
+        @     check_vk_result(err);
+        @     // Enable required extensions
+        @     for (const VkExtensionProperties& p : properties) {
+        @         if (strcmp(p.extensionName, VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME) == 0)
+        @             extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+        @     }
+        @ #ifdef VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME
+        @     for (const VkExtensionProperties& p : properties) {
+        @         if (strcmp(p.extensionName, VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME) == 0)
+        @             extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+        @             create_info.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+        @     }
+        @ #endif
+        @     // Create Vulkan Instance
+        @     create_info.enabledExtensionCount = (uint32_t)extensions.Size;
+        @     create_info.ppEnabledExtensionNames = extensions.Data;
+        @     err = vkCreateInstance(&create_info, g_Allocator, &g_Instance);
+        @     check_vk_result(err);
+        @ }
+        @ // Select Physical Device (GPU)
+        @ uint32_t gpu_count;
+        @ err = vkEnumeratePhysicalDevices(g_Instance, &gpu_count, nullptr);
+        @ check_vk_result(err);
+        @ IM_ASSERT(gpu_count > 0);
+        @ ImVector<VkPhysicalDevice> gpus;
+        @ gpus.resize(gpu_count);
+        @ err = vkEnumeratePhysicalDevices(g_Instance, &gpu_count, gpus.Data);
+        @ check_vk_result(err);
+        @ for (VkPhysicalDevice& device : gpus)
+        @ {
+        @     VkPhysicalDeviceProperties properties;
+        @     vkGetPhysicalDeviceProperties(device, &properties);
+        @     if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+        @         g_PhysicalDevice = device; break;
+        @     }
+        @ }
+        @ if (g_PhysicalDevice == VK_NULL_HANDLE && gpu_count > 0)
+        @     g_PhysicalDevice = gpus[0];
+        @ // Select graphics queue family
+        @ {
+        @     uint32_t count;
+        @     vkGetPhysicalDeviceQueueFamilyProperties(g_PhysicalDevice, &count, nullptr);
+        @     VkQueueFamilyProperties* queues = (VkQueueFamilyProperties*)malloc(sizeof(VkQueueFamilyProperties) * count);
+        @     vkGetPhysicalDeviceQueueFamilyProperties(g_PhysicalDevice, &count, queues);
+        @     for (uint32_t i = 0; i < count; i++)
+        @         if (queues[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+        @         {
+        @             g_QueueFamily = i; break;
+        @         }
+        @     free(queues);
+        @     IM_ASSERT(g_QueueFamily != (uint32_t)-1);
+        @ }
+        @ // Create Logical Device (with 1 queue)
+        @ {
+        @     ImVector<const char*> device_extensions;
+        @     device_extensions.push_back("VK_KHR_swapchain");
+        @     // Enumerate physical device extension
+        @     uint32_t properties_count;
+        @     ImVector<VkExtensionProperties> properties;
+        @     vkEnumerateDeviceExtensionProperties(g_PhysicalDevice, nullptr, &properties_count, nullptr);
+        @     properties.resize(properties_count);
+        @     vkEnumerateDeviceExtensionProperties(g_PhysicalDevice, nullptr, &properties_count, properties.Data);
+        @ #ifdef VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME
+        @     for (const VkExtensionProperties& p : properties) {
+        @         if (strcmp(p.extensionName, VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME) == 0)
+        @             device_extensions.push_back(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
+        @     }
+        @ #endif
+        @     const float queue_priority[] = { 1.0f };
+        @     VkDeviceQueueCreateInfo queue_info[1] = {};
+        @     queue_info[0].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        @     queue_info[0].queueFamilyIndex = g_QueueFamily;
+        @     queue_info[0].queueCount = 1;
+        @     queue_info[0].pQueuePriorities = queue_priority;
+        @     VkDeviceCreateInfo create_info = {};
+        @     create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        @     create_info.queueCreateInfoCount = sizeof(queue_info) / sizeof(queue_info[0]);
+        @     create_info.pQueueCreateInfos = queue_info;
+        @     create_info.enabledExtensionCount = (uint32_t)device_extensions.Size;
+        @     create_info.ppEnabledExtensionNames = device_extensions.Data;
+        @     err = vkCreateDevice(g_PhysicalDevice, &create_info, g_Allocator, &g_Device);
+        @     check_vk_result(err);
+        @     vkGetDeviceQueue(g_Device, g_QueueFamily, 0, &g_Queue);
+        @ }
+        @ // Create Descriptor Pool
+        @ {
+        @     VkDescriptorPoolSize pool_sizes[] =
+        @     {
+        @         { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+        @         { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+        @         { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+        @         { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+        @         { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+        @         { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+        @         { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+        @         { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+        @         { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+        @         { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+        @         { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+        @     };
+        @     VkDescriptorPoolCreateInfo pool_info = {};
+        @     pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        @     pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+        @     pool_info.maxSets = 1000 * IM_ARRAYSIZE(pool_sizes);
+        @     pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
+        @     pool_info.pPoolSizes = pool_sizes;
+        @     err = vkCreateDescriptorPool(g_Device, &pool_info, g_Allocator, &g_DescriptorPool);
+        @     check_vk_result(err);
+        @ }
+        // ---
+        @ VkSurfaceKHR surface;
+        @ err = glfwCreateWindowSurface(g_Instance, reinterpret_cast<GLFWwindow*>(@<窗口句柄>), g_Allocator, &surface);
+        @ check_vk_result(err);
+        @ int width, height;
+        @ glfwGetFramebufferSize(reinterpret_cast<GLFWwindow*>(@<窗口句柄>), &width, &height);
+        @ // SetupVulkanWindow
+        @ m_MainWindowData.Surface = surface;
+        @ // Check for WSI support
+        @ VkBool32 res;
+        @ vkGetPhysicalDeviceSurfaceSupportKHR(g_PhysicalDevice, g_QueueFamily, m_MainWindowData.Surface, &res);
+        @ if (res != VK_TRUE) exit(-1);
+        @ // Select Surface Format
+        @ const VkFormat requestSurfaceImageFormat[] = { VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_B8G8R8_UNORM, VK_FORMAT_R8G8B8_UNORM };
+        @ const VkColorSpaceKHR requestSurfaceColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
+        @ m_MainWindowData.SurfaceFormat = ImGui_ImplVulkanH_SelectSurfaceFormat(g_PhysicalDevice, m_MainWindowData.Surface, requestSurfaceImageFormat, (size_t)IM_ARRAYSIZE(requestSurfaceImageFormat), requestSurfaceColorSpace);
+        @ // Select Present Mode
+        @ #ifdef IMGUI_UNLIMITED_FRAME_RATE
+        @     VkPresentModeKHR present_modes[] = { VK_PRESENT_MODE_MAILBOX_KHR, VK_PRESENT_MODE_IMMEDIATE_KHR, VK_PRESENT_MODE_FIFO_KHR };
+        @ #else
+        @     VkPresentModeKHR present_modes[] = { VK_PRESENT_MODE_FIFO_KHR };
+        @ #endif
+        @ m_MainWindowData.PresentMode = ImGui_ImplVulkanH_SelectPresentMode(g_PhysicalDevice, m_MainWindowData.Surface, &present_modes[0], IM_ARRAYSIZE(present_modes));
+        @ // Create SwapChain, RenderPass, Framebuffer, etc.
+        @ IM_ASSERT(g_MinImageCount >= 2);
+        @ ImGui_ImplVulkanH_CreateOrResizeWindow(g_Instance, g_PhysicalDevice, g_Device, &m_MainWindowData, g_QueueFamily, g_Allocator, width, height, g_MinImageCount);
+        @ return TRUE;
+    }
+
+    方法 初始化 <公开 类型 = 逻辑型 注释 = "在\"创建设备\"和\"ImGui.创建环境()\"后才能调用." 折叠 @禁止流程检查 = 真>
+    {
+        @ ImGui_ImplVulkan_InitInfo init_info = {};
+        @ init_info.Instance = g_Instance;
+        @ init_info.PhysicalDevice = g_PhysicalDevice;
+        @ init_info.Device = g_Device;
+        @ init_info.QueueFamily = g_QueueFamily;
+        @ init_info.Queue = g_Queue;
+        @ init_info.PipelineCache = g_PipelineCache;
+        @ init_info.DescriptorPool = g_DescriptorPool;
+        @ init_info.Subpass = 0;
+        @ init_info.MinImageCount = g_MinImageCount;
+        @ init_info.ImageCount = m_MainWindowData.ImageCount;
+        @ init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+        @ init_info.Allocator = g_Allocator;
+        @ init_info.CheckVkResultFn = @sn<current_class>::check_vk_result;
+        @ return ImGui_ImplVulkan_Init(&init_info, m_MainWindowData.RenderPass);
+    }
+
+    方法 新建帧 <公开 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplVulkan_NewFrame()
+    }
+
+    方法 关闭 <公开 折叠>
+    {
+        @ VkResult err = vkDeviceWaitIdle(g_Device);
+        @ check_vk_result(err);
+        @ ImGui_ImplVulkan_Shutdown();
+    }
+
+    方法 渲染数据 <公开 折叠 @嵌入式方法 = "">
+    参数 绘制数据 <类型 = 变整数 注释 = "由\"ImGui.取渲染数据()\"返回">
+    {
+        @ ImGui_ImplVulkan_RenderDrawData(reinterpret_cast<ImDrawData*>(@<绘制数据>))
+    }
+
+    方法 渲染_GLFW <公开 折叠>
+    参数 窗口句柄 <类型 = 变整数 @默认值 = 0>
+    参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
+    {
+        @ ImGui::Render();
+        @ ImDrawData* main_draw_data = ImGui::GetDrawData();
+        @ const bool main_is_minimized = (main_draw_data->DisplaySize.x <= 0.0f || main_draw_data->DisplaySize.y <= 0.0f);
+        @ ImVec4* clear_color = @<背景颜色>.pdata();
+        @ m_MainWindowData.ClearValue.color.float32[0] = clear_color->x * clear_color->w;
+        @ m_MainWindowData.ClearValue.color.float32[1] = clear_color->y * clear_color->w;
+        @ m_MainWindowData.ClearValue.color.float32[2] = clear_color->z * clear_color->w;
+        @ m_MainWindowData.ClearValue.color.float32[3] = clear_color->w;
+        @ if (!main_is_minimized)
+        @     @<_FrameRender>(main_draw_data);
+        // Update and Render additional Platform Windows
+        @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        @ {
+        @     ImGui::UpdatePlatformWindows();
+        @     ImGui::RenderPlatformWindowsDefault();
+        @ }
+        // Present Main Platform Window
+        @ if (!main_is_minimized)
+        @     @<_FramePresent>();
+    }
+
+    方法 加载字体纹理 <公开 注释 = "(可选项)已在\"新建帧\"时自动调用" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplVulkan_CreateFontsTexture()
+    }
+
+    方法 销毁字体纹理 <公开 注释 = "(可选项)用户无需调用" 折叠 @嵌入式方法 = "">
+    {
+        @ ImGui_ImplVulkan_DestroyFontsTexture()
+    }
+
+    方法 清理 <公开 折叠>
+    {
+        @ ImGui_ImplVulkanH_DestroyWindow(g_Instance, g_Device, &m_MainWindowData, g_Allocator);
+        @ vkDestroyDescriptorPool(g_Device, g_DescriptorPool, g_Allocator);
+        @ vkDestroyDevice(g_Device, g_Allocator);
+        @ vkDestroyInstance(g_Instance, g_Allocator);
+    }
+
+    方法 重置尺寸 <公开 折叠>
+    参数 宽度 <类型 = 整数>
+    参数 高度 <类型 = 整数>
+
+    方法 _FrameRender <注释 = "仅限内部嵌入式使用" 折叠>
+    参数 draw_data <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/ImDrawData*" @输出名 = "draw_data">
+    {
+        @ VkResult err;
+        @ VkSemaphore image_acquired_semaphore  = m_MainWindowData.FrameSemaphores[m_MainWindowData.SemaphoreIndex].ImageAcquiredSemaphore;
+        @ VkSemaphore render_complete_semaphore = m_MainWindowData.FrameSemaphores[m_MainWindowData.SemaphoreIndex].RenderCompleteSemaphore;
+        @ err = vkAcquireNextImageKHR(g_Device, m_MainWindowData.Swapchain, UINT64_MAX, image_acquired_semaphore, VK_NULL_HANDLE, &m_MainWindowData.FrameIndex);
+        @ if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR)
+        @ {
+        @     g_SwapChainRebuild = true; return;
+        @ }
+        @ check_vk_result(err);
+        @ ImGui_ImplVulkanH_Frame* fd = &m_MainWindowData.Frames[m_MainWindowData.FrameIndex];
+        @ {
+        @     err = vkWaitForFences(g_Device, 1, &fd->Fence, VK_TRUE, UINT64_MAX);    // wait indefinitely instead of periodically checking
+        @     check_vk_result(err);
+        @     err = vkResetFences(g_Device, 1, &fd->Fence);
+        @     check_vk_result(err);
+        @ }
+        @ {
+        @     err = vkResetCommandPool(g_Device, fd->CommandPool, 0);
+        @     check_vk_result(err);
+        @     VkCommandBufferBeginInfo info = {};
+        @     info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        @     info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        @     err = vkBeginCommandBuffer(fd->CommandBuffer, &info);
+        @     check_vk_result(err);
+        @ }
+        @ {
+        @     VkRenderPassBeginInfo info = {};
+        @     info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        @     info.renderPass = m_MainWindowData.RenderPass;
+        @     info.framebuffer = fd->Framebuffer;
+        @     info.renderArea.extent.width = m_MainWindowData.Width;
+        @     info.renderArea.extent.height = m_MainWindowData.Height;
+        @     info.clearValueCount = 1;
+        @     info.pClearValues = &m_MainWindowData.ClearValue;
+        @     vkCmdBeginRenderPass(fd->CommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
+        @ }
+        // Record dear imgui primitives into command buffer
+        @ ImGui_ImplVulkan_RenderDrawData(draw_data, fd->CommandBuffer);
+        // Submit command buffer
+        @ vkCmdEndRenderPass(fd->CommandBuffer);
+        @ {
+        @     VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        @     VkSubmitInfo info = {};
+        @     info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        @     info.waitSemaphoreCount = 1;
+        @     info.pWaitSemaphores = &image_acquired_semaphore;
+        @     info.pWaitDstStageMask = &wait_stage;
+        @     info.commandBufferCount = 1;
+        @     info.pCommandBuffers = &fd->CommandBuffer;
+        @     info.signalSemaphoreCount = 1;
+        @     info.pSignalSemaphores = &render_complete_semaphore;
+        @     err = vkEndCommandBuffer(fd->CommandBuffer);
+        @     check_vk_result(err);
+        @     err = vkQueueSubmit(g_Queue, 1, &info, fd->Fence);
+        @     check_vk_result(err);
+        @ }
+    }
+
+    方法 _FramePresent <注释 = "仅限内部嵌入式使用" 折叠>
+    {
+        @ if (g_SwapChainRebuild) return;
+        @ VkSemaphore render_complete_semaphore = m_MainWindowData.FrameSemaphores[m_MainWindowData.SemaphoreIndex].RenderCompleteSemaphore;
+        @ VkPresentInfoKHR info = {};
+        @ info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+        @ info.waitSemaphoreCount = 1;
+        @ info.pWaitSemaphores = &render_complete_semaphore;
+        @ info.swapchainCount = 1;
+        @ info.pSwapchains = &m_MainWindowData.Swapchain;
+        @ info.pImageIndices = &m_MainWindowData.FrameIndex;
+        @ VkResult err = vkQueuePresentKHR(g_Queue, &info);
+        @ if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR)
+        @ {
+        @     g_SwapChainRebuild = true; return;
+        @ }
+        @ check_vk_result(err);
+        @ m_MainWindowData.SemaphoreIndex = (m_MainWindowData.SemaphoreIndex + 1) % m_MainWindowData.ImageCount; // Now we can use the next set of semaphores
+    }
+
+    # 纹理图片 ---
+
+    方法 加载图片文件 <公开 类型 = 逻辑型 注释 = "从指定的图片文件加载纹理到渲染器中,不再使用时请调用\"释放纹理\"."
+            注释 = "注意: 只能在\"IM_Vulkan渲染器.初始化\"之后使用,即\"准备渲染\"事件中." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
+    参数 文件名 <类型 = 文本型 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ if (g_Device == VK_NULL_HANDLE) return false;
+        @ FILE* file = _wfopen(@<文件名>.GetText(), L"rb");
+        @ if (!file) return false;
+        @ unsigned char* image_data = stbi_load_from_file(file, &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
+        @ fclose(file);
+        @ if (!image_data) return false;
+        @ MyTextureData* tex_data = new MyTextureData{};
+        @ @<图片信息._内部数据> = reinterpret_cast<INT_P>(tex_data);
+        @ tex_data->Width = @<图片信息.宽度>;
+        @ tex_data->Height = @<图片信息.高度>;
+        @ tex_data->Channels = 4;
+        @ @<_加载图片>(image_data, tex_data);
+        @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(tex_data->DS);
+        @ return true;
+    }
+
+    方法 加载图片资源 <公开 类型 = 逻辑型 注释 = "将程序文件中的图片资源加载到渲染器中,不再使用时请调用\"释放纹理\"."
+            注释 = "注意: 只能在\"IM_Vulkan渲染器.初始化\"之后使用,即\"准备渲染\"事件中." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
+    参数 图片资源 <类型 = 视窗文件资源 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ if (g_Device == VK_NULL_HANDLE) return false;
+        @ HMODULE hModule = g_objVolApp.GetInstanceHandle();
+        @ HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE((WORD)@<图片资源>), RT_RCDATA);
+        @ if (!hSrc) return false;
+        @ HGLOBAL resdata = ::LoadResource(hModule, hSrc);
+        @ if (!resdata) return false;
+        @ unsigned char* data = reinterpret_cast<unsigned char*>(::LockResource(resdata));
+        @ int len = static_cast<int>(::SizeofResource(hModule, hSrc));
+        @ unsigned char* image_data = stbi_load_from_memory(data, len, &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
+        @ if (!image_data) return false;
+        @ MyTextureData* tex_data = new MyTextureData{};
+        @ tex_data->Width = @<图片信息.宽度>;
+        @ tex_data->Height = @<图片信息.高度>;
+        @ tex_data->Channels = 4;
+        @ @<图片信息._内部数据> = reinterpret_cast<INT_P>(tex_data);
+        @ @<_加载图片>(image_data, tex_data);
+        @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(tex_data->DS);
+        @ return true;
+    }
+
+    方法 加载图片字节集 <公开 类型 = 逻辑型 注释 = "从指定的图片字节集加载纹理到渲染器中,不再使用时请调用\"释放纹理\"."
+            注释 = "注意: 只能在\"IM_Vulkan渲染器.初始化\"之后使用,即\"准备渲染\"事件中." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
+    参数 图片数据 <类型 = 字节集类 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
+    参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
+    {
+        @ if (g_Device == VK_NULL_HANDLE) return false;
+        @ unsigned char* image_data = stbi_load_from_memory(@<图片数据>.GetPtr(), static_cast<int>(@<图片数据>.GetSize()), &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
+        @ if (!image_data) return false;
+        @ MyTextureData* tex_data = new MyTextureData{};
+        @ @<图片信息._内部数据> = reinterpret_cast<INT_P>(tex_data);
+        @ tex_data->Width = @<图片信息.宽度>;
+        @ tex_data->Height = @<图片信息.高度>;
+        @ tex_data->Channels = 4;
+        @ @<_加载图片>(image_data, tex_data);
+        @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(tex_data->DS);
+        @ return true;
+    }
+
+    方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠>
+    参数 图片信息 <类型 = IM图片信息类 注释 = "提供由\"本对象.加载图片××\"返回图片的信息,释放后会清空信息.">
+    {
+        如果 (图片信息._内部数据 != 0)
+        {
+            @ MyTextureData* tex_data = reinterpret_cast<MyTextureData*>(@<图片信息._内部数据>);
+            @ vkFreeMemory(g_Device, tex_data->UploadBufferMemory, nullptr);
+            @ vkDestroyBuffer(g_Device, tex_data->UploadBuffer, nullptr);
+            @ vkDestroySampler(g_Device, tex_data->Sampler, nullptr);
+            @ vkDestroyImageView(g_Device, tex_data->ImageView, nullptr);
+            @ vkDestroyImage(g_Device, tex_data->Image, nullptr);
+            @ vkFreeMemory(g_Device, tex_data->ImageMemory, nullptr);
+            @ ImGui_ImplVulkan_RemoveTexture(tex_data->DS);
+        }
+        图片信息.重置为空对象 ()
+    }
+
+    方法 _加载图片 <注释 = "仅限内部嵌入式使用" 折叠>
+    参数 image_data <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/unsigned char*" @输出名 = "image_data">
+    参数 tex_data <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/MyTextureData*" @输出名 = "tex_data">
+    {
+        // Calculate allocation size (in number of bytes)
+        @ size_t image_size = tex_data->Width * tex_data->Height * tex_data->Channels;
+        @ VkResult err;
+        // Create the Vulkan image.
+        @ {
+        @     VkImageCreateInfo info = {};
+        @     info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        @     info.imageType = VK_IMAGE_TYPE_2D;
+        @     info.format = VK_FORMAT_R8G8B8A8_UNORM;
+        @     info.extent.width = tex_data->Width;
+        @     info.extent.height = tex_data->Height;
+        @     info.extent.depth = 1;
+        @     info.mipLevels = 1;
+        @     info.arrayLayers = 1;
+        @     info.samples = VK_SAMPLE_COUNT_1_BIT;
+        @     info.tiling = VK_IMAGE_TILING_OPTIMAL;
+        @     info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        @     info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        @     info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        @     err = vkCreateImage(g_Device, &info, g_Allocator, &tex_data->Image);
+        @     check_vk_result(err);
+        @     VkMemoryRequirements req;
+        @     vkGetImageMemoryRequirements(g_Device, tex_data->Image, &req);
+        @     VkMemoryAllocateInfo alloc_info = {};
+        @     alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        @     alloc_info.allocationSize = req.size;
+        @     alloc_info.memoryTypeIndex = @<_findMemoryType>(req.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        @     err = vkAllocateMemory(g_Device, &alloc_info, g_Allocator, &tex_data->ImageMemory);
+        @     check_vk_result(err);
+        @     err = vkBindImageMemory(g_Device, tex_data->Image, tex_data->ImageMemory, 0);
+        @     check_vk_result(err);
+        @ }
+        // Create the Image View
+        @ {
+        @     VkImageViewCreateInfo info = {};
+        @     info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        @     info.image = tex_data->Image;
+        @     info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        @     info.format = VK_FORMAT_R8G8B8A8_UNORM;
+        @     info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        @     info.subresourceRange.levelCount = 1;
+        @     info.subresourceRange.layerCount = 1;
+        @     err = vkCreateImageView(g_Device, &info, g_Allocator, &tex_data->ImageView);
+        @     check_vk_result(err);
+        @ }
+        // Create Sampler
+        @ {
+        @     VkSamplerCreateInfo sampler_info{};
+        @     sampler_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        @     sampler_info.magFilter = VK_FILTER_LINEAR;
+        @     sampler_info.minFilter = VK_FILTER_LINEAR;
+        @     sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+        @     sampler_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT; // outside image bounds just use border color
+        @     sampler_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        @     sampler_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        @     sampler_info.minLod = -1000;
+        @     sampler_info.maxLod = 1000;
+        @     sampler_info.maxAnisotropy = 1.0f;
+        @     err = vkCreateSampler(g_Device, &sampler_info, g_Allocator, &tex_data->Sampler);
+        @     check_vk_result(err);
+        @ }
+        // Create Descriptor Set using ImGUI's implementation
+        @ tex_data->DS = ImGui_ImplVulkan_AddTexture(tex_data->Sampler, tex_data->ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        // Create Upload Buffer
+        @ {
+        @     VkBufferCreateInfo buffer_info = {};
+        @     buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        @     buffer_info.size = image_size;
+        @     buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+        @     buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        @     err = vkCreateBuffer(g_Device, &buffer_info, g_Allocator, &tex_data->UploadBuffer);
+        @     check_vk_result(err);
+        @     VkMemoryRequirements req;
+        @     vkGetBufferMemoryRequirements(g_Device, tex_data->UploadBuffer, &req);
+        @     VkMemoryAllocateInfo alloc_info = {};
+        @     alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        @     alloc_info.allocationSize = req.size;
+        @     alloc_info.memoryTypeIndex = @<_findMemoryType>(req.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+        @     err = vkAllocateMemory(g_Device, &alloc_info, g_Allocator, &tex_data->UploadBufferMemory);
+        @     check_vk_result(err);
+        @     err = vkBindBufferMemory(g_Device, tex_data->UploadBuffer, tex_data->UploadBufferMemory, 0);
+        @     check_vk_result(err);
+        @ }
+        // Upload to Buffer:
+        @ {
+        @     void* map = NULL;
+        @     err = vkMapMemory(g_Device, tex_data->UploadBufferMemory, 0, image_size, 0, &map);
+        @     check_vk_result(err);
+        @     memcpy(map, image_data, image_size);
+        @     VkMappedMemoryRange range[1] = {};
+        @     range[0].sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+        @     range[0].memory = tex_data->UploadBufferMemory;
+        @     range[0].size = image_size;
+        @     err = vkFlushMappedMemoryRanges(g_Device, 1, range);
+        @     check_vk_result(err);
+        @     vkUnmapMemory(g_Device, tex_data->UploadBufferMemory);
+        @ }
+        // Release image memory using stb
+        @ stbi_image_free(image_data);
+        // Create a command buffer that will perform following steps when hit in the command queue.
+        // TODO: this works in the example, but may need input if this is an acceptable way to access the pool/create the command buffer.
+        @ VkCommandPool command_pool = m_MainWindowData.Frames[m_MainWindowData.FrameIndex].CommandPool;
+        @ VkCommandBuffer command_buffer;
+        @ {
+        @     VkCommandBufferAllocateInfo alloc_info{};
+        @     alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        @     alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        @     alloc_info.commandPool = command_pool;
+        @     alloc_info.commandBufferCount = 1;
+        @     err = vkAllocateCommandBuffers(g_Device, &alloc_info, &command_buffer);
+        @     check_vk_result(err);
+        @     VkCommandBufferBeginInfo begin_info = {};
+        @     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        @     begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        @     err = vkBeginCommandBuffer(command_buffer, &begin_info);
+        @     check_vk_result(err);
+        @ }
+        // Copy to Image
+        @ {
+        @     VkImageMemoryBarrier copy_barrier[1] = {};
+        @     copy_barrier[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        @     copy_barrier[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        @     copy_barrier[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        @     copy_barrier[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        @     copy_barrier[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        @     copy_barrier[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        @     copy_barrier[0].image = tex_data->Image;
+        @     copy_barrier[0].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        @     copy_barrier[0].subresourceRange.levelCount = 1;
+        @     copy_barrier[0].subresourceRange.layerCount = 1;
+        @     vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_HOST_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, NULL, 0, NULL, 1, copy_barrier);
+        @     VkBufferImageCopy region = {};
+        @     region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        @     region.imageSubresource.layerCount = 1;
+        @     region.imageExtent.width = tex_data->Width;
+        @     region.imageExtent.height = tex_data->Height;
+        @     region.imageExtent.depth = 1;
+        @     vkCmdCopyBufferToImage(command_buffer, tex_data->UploadBuffer, tex_data->Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+        @     VkImageMemoryBarrier use_barrier[1] = {};
+        @     use_barrier[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        @     use_barrier[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        @     use_barrier[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        @     use_barrier[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        @     use_barrier[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        @     use_barrier[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        @     use_barrier[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        @     use_barrier[0].image = tex_data->Image;
+        @     use_barrier[0].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        @     use_barrier[0].subresourceRange.levelCount = 1;
+        @     use_barrier[0].subresourceRange.layerCount = 1;
+        @     vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, NULL, 0, NULL, 1, use_barrier);
+        @ }
+        // End command buffer
+        @ {
+        @     VkSubmitInfo end_info = {};
+        @     end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        @     end_info.commandBufferCount = 1;
+        @     end_info.pCommandBuffers = &command_buffer;
+        @     err = vkEndCommandBuffer(command_buffer);
+        @     check_vk_result(err);
+        @     err = vkQueueSubmit(g_Queue, 1, &end_info, VK_NULL_HANDLE);
+        @     check_vk_result(err);
+        @     err = vkDeviceWaitIdle(g_Device);
+        @     check_vk_result(err);
+        @ }
+    }
+
+    方法 _findMemoryType <类型 = 整数 注释 = "仅限内部嵌入式使用" 折叠 @禁止流程检查 = 真>
+    参数 type_filter <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/uint32_t" @输出名 = "type_filter">
+    参数 properties <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/VkMemoryPropertyFlags" @输出名 = "properties">
+    参数 ""
+    {
+        @ VkPhysicalDeviceMemoryProperties mem_properties;
+        @ vkGetPhysicalDeviceMemoryProperties(g_PhysicalDevice, &mem_properties);
+        @ for (uint32_t i = 0; i < mem_properties.memoryTypeCount; i++)
+        @     if ((type_filter & (1 << i)) && (mem_properties.memoryTypes[i].propertyFlags & properties) == properties)
+        @         return i;
+        @ return 0xFFFFFFFF; // Unable to find memoryType
+    }
+
+    # SDL2
+
+    方法 加载_SDL <公开 类型 = 逻辑型 折叠 @视窗.外部头文件 = "<SDL_vulkan.h>" @禁止流程检查 = 真>
+    参数 窗口句柄 <类型 = 变整数>
+    {
+        @ SDL_Window* window = reinterpret_cast<SDL_Window*>(@<窗口句柄>);
+        @ ImVector<const char*> extensions;
+        @ uint32_t extensions_count = 0;
+        @ SDL_Vulkan_GetInstanceExtensions(window, &extensions_count, nullptr);
+        @ extensions.resize(extensions_count);
+        @ SDL_Vulkan_GetInstanceExtensions(window, &extensions_count, extensions.Data);
+
+        // SetupVulkan ---
+        @ VkResult err;
+        @ // Create Vulkan Instance
+        @ {
+        @     VkInstanceCreateInfo create_info = {};
+        @     create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+        @     // Enumerate available extensions
+        @     uint32_t properties_count;
+        @     ImVector<VkExtensionProperties> properties;
+        @     vkEnumerateInstanceExtensionProperties(nullptr, &properties_count, nullptr);
+        @     properties.resize(properties_count);
+        @     err = vkEnumerateInstanceExtensionProperties(nullptr, &properties_count, properties.Data);
+        @     check_vk_result(err);
+        @     // Enable required extensions
+        @     for (const VkExtensionProperties& p : properties) {
+        @         if (strcmp(p.extensionName, VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME) == 0)
+        @             extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+        @     }
+        @ #ifdef VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME
+        @     for (const VkExtensionProperties& p : properties) {
+        @         if (strcmp(p.extensionName, VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME) == 0)
+        @             extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+        @             create_info.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+        @     }
+        @ #endif
+        @     // Create Vulkan Instance
+        @     create_info.enabledExtensionCount = static_cast<uint32_t>(extensions.Size);
+        @     create_info.ppEnabledExtensionNames = extensions.Data;
+        @     err = vkCreateInstance(&create_info, g_Allocator, &g_Instance);
+        @     check_vk_result(err);
+        @ }
+        @ // Select Physical Device (GPU)
+        @ uint32_t gpu_count;
+        @ err = vkEnumeratePhysicalDevices(g_Instance, &gpu_count, nullptr);
+        @ check_vk_result(err);
+        @ IM_ASSERT(gpu_count > 0);
+        @ ImVector<VkPhysicalDevice> gpus;
+        @ gpus.resize(gpu_count);
+        @ err = vkEnumeratePhysicalDevices(g_Instance, &gpu_count, gpus.Data);
+        @ check_vk_result(err);
+        @ for (VkPhysicalDevice& device : gpus)
+        @ {
+        @     VkPhysicalDeviceProperties properties;
+        @     vkGetPhysicalDeviceProperties(device, &properties);
+        @     if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+        @         g_PhysicalDevice = device; break;
+        @     }
+        @ }
+        @ if (g_PhysicalDevice == VK_NULL_HANDLE && gpu_count > 0)
+        @     g_PhysicalDevice = gpus[0];
+        @ // Select graphics queue family
+        @ {
+        @     uint32_t count;
+        @     vkGetPhysicalDeviceQueueFamilyProperties(g_PhysicalDevice, &count, nullptr);
+        @     VkQueueFamilyProperties* queues = (VkQueueFamilyProperties*)malloc(sizeof(VkQueueFamilyProperties) * count);
+        @     vkGetPhysicalDeviceQueueFamilyProperties(g_PhysicalDevice, &count, queues);
+        @     for (uint32_t i = 0; i < count; i++)
+        @         if (queues[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+        @         {
+        @             g_QueueFamily = i; break;
+        @         }
+        @     free(queues);
+        @     IM_ASSERT(g_QueueFamily != (uint32_t)-1);
+        @ }
+        @ // Create Logical Device (with 1 queue)
+        @ {
+        @     ImVector<const char*> device_extensions;
+        @     device_extensions.push_back("VK_KHR_swapchain");
+        @     // Enumerate physical device extension
+        @     uint32_t properties_count;
+        @     ImVector<VkExtensionProperties> properties;
+        @     vkEnumerateDeviceExtensionProperties(g_PhysicalDevice, nullptr, &properties_count, nullptr);
+        @     properties.resize(properties_count);
+        @     vkEnumerateDeviceExtensionProperties(g_PhysicalDevice, nullptr, &properties_count, properties.Data);
+        @ #ifdef VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME
+        @     for (const VkExtensionProperties& p : properties) {
+        @         if (strcmp(p.extensionName, VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME) == 0)
+        @             device_extensions.push_back(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
+        @     }
+        @ #endif
+        @     const float queue_priority[] = { 1.0f };
+        @     VkDeviceQueueCreateInfo queue_info[1] = {};
+        @     queue_info[0].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        @     queue_info[0].queueFamilyIndex = g_QueueFamily;
+        @     queue_info[0].queueCount = 1;
+        @     queue_info[0].pQueuePriorities = queue_priority;
+        @     VkDeviceCreateInfo create_info = {};
+        @     create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        @     create_info.queueCreateInfoCount = sizeof(queue_info) / sizeof(queue_info[0]);
+        @     create_info.pQueueCreateInfos = queue_info;
+        @     create_info.enabledExtensionCount = (uint32_t)device_extensions.Size;
+        @     create_info.ppEnabledExtensionNames = device_extensions.Data;
+        @     err = vkCreateDevice(g_PhysicalDevice, &create_info, g_Allocator, &g_Device);
+        @     check_vk_result(err);
+        @     vkGetDeviceQueue(g_Device, g_QueueFamily, 0, &g_Queue);
+        @ }
+        @ // Create Descriptor Pool
+        @ {
+        @     VkDescriptorPoolSize pool_sizes[] =
+        @     {
+        @         { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+        @         { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+        @         { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+        @         { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+        @         { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+        @         { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+        @         { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+        @         { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+        @         { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+        @         { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+        @         { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+        @     };
+        @     VkDescriptorPoolCreateInfo pool_info = {};
+        @     pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        @     pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+        @     pool_info.maxSets = 1000 * IM_ARRAYSIZE(pool_sizes);
+        @     pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
+        @     pool_info.pPoolSizes = pool_sizes;
+        @     err = vkCreateDescriptorPool(g_Device, &pool_info, g_Allocator, &g_DescriptorPool);
+        @     check_vk_result(err);
+        @ }
+        // Create Window Surface ---
+        @ VkSurfaceKHR surface;
+        @ if (SDL_Vulkan_CreateSurface(window, g_Instance, &surface) == 0)
+        @     return FALSE;
+        // Create Framebuffers
+        @ int width, height;
+        @ SDL_GetWindowSize(window, &width, &height);
+        // SetupVulkanWindow
+        @ m_MainWindowData.Surface = surface;
+        @ // Check for WSI support
+        @ VkBool32 res;
+        @ vkGetPhysicalDeviceSurfaceSupportKHR(g_PhysicalDevice, g_QueueFamily, m_MainWindowData.Surface, &res);
+        @ if (res != VK_TRUE) exit(-1);
+        @ // Select Surface Format
+        @ const VkFormat requestSurfaceImageFormat[] = { VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_B8G8R8_UNORM, VK_FORMAT_R8G8B8_UNORM };
+        @ const VkColorSpaceKHR requestSurfaceColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
+        @ m_MainWindowData.SurfaceFormat = ImGui_ImplVulkanH_SelectSurfaceFormat(g_PhysicalDevice, m_MainWindowData.Surface, requestSurfaceImageFormat, (size_t)IM_ARRAYSIZE(requestSurfaceImageFormat), requestSurfaceColorSpace);
+        @ // Select Present Mode
+        @ #ifdef IMGUI_UNLIMITED_FRAME_RATE
+        @     VkPresentModeKHR present_modes[] = { VK_PRESENT_MODE_MAILBOX_KHR, VK_PRESENT_MODE_IMMEDIATE_KHR, VK_PRESENT_MODE_FIFO_KHR };
+        @ #else
+        @     VkPresentModeKHR present_modes[] = { VK_PRESENT_MODE_FIFO_KHR };
+        @ #endif
+        @ m_MainWindowData.PresentMode = ImGui_ImplVulkanH_SelectPresentMode(g_PhysicalDevice, m_MainWindowData.Surface, &present_modes[0], IM_ARRAYSIZE(present_modes));
+        @ // Create SwapChain, RenderPass, Framebuffer, etc.
+        @ IM_ASSERT(g_MinImageCount >= 2);
+        @ ImGui_ImplVulkanH_CreateOrResizeWindow(g_Instance, g_PhysicalDevice, g_Device, &m_MainWindowData, g_QueueFamily, g_Allocator, width, height, g_MinImageCount);
+        @ return TRUE;
+    }
+
+    方法 渲染_SDL <公开 折叠 @嵌入式方法 = "">
+    参数 窗口句柄 <类型 = 变整数>
+    参数 背景颜色 <类型 = ImVec4>
+    {
+        @ @sn<this>.@<渲染_GLFW>(@<窗口句柄>, @<背景颜色>)
+    }
+
+    # @begin
+    # <> <include>
+    # VkAllocationCallbacks*   g_Allocator        = nullptr;
+    # VkInstance               g_Instance         = VK_NULL_HANDLE;
+    # VkPhysicalDevice         g_PhysicalDevice   = VK_NULL_HANDLE;
+    # VkDevice                 g_Device           = VK_NULL_HANDLE;
+    # uint32_t                 g_QueueFamily      = (uint32_t)-1;
+    # VkQueue                  g_Queue            = VK_NULL_HANDLE;
+    # VkDebugReportCallbackEXT g_DebugReport      = VK_NULL_HANDLE;
+    # VkPipelineCache          g_PipelineCache    = VK_NULL_HANDLE;
+    # VkDescriptorPool         g_DescriptorPool   = VK_NULL_HANDLE;
+    # ImGui_ImplVulkanH_Window m_MainWindowData   = {};
+    # uint32_t                 g_MinImageCount    = 2;
+    # bool                     g_SwapChainRebuild = false;
+    # struct MyTextureData // A struct to manage data related to one image in vulkan
+    # {
+    #     VkDescriptorSet DS;         // Descriptor set: this is what you'll pass to Image()
+    #     int             Width;
+    #     int             Height;
+    #     int             Channels;
+    #
+    #     // Need to keep track of these to properly cleanup
+    #     VkImageView     ImageView;
+    #     VkImage         Image;
+    #     VkDeviceMemory  ImageMemory;
+    #     VkSampler       Sampler;
+    #     VkBuffer        UploadBuffer;
+    #     VkDeviceMemory  UploadBufferMemory;
+    #     MyTextureData() { memset(this, 0, sizeof(*this)); }
+    # };
+    # static void check_vk_result(VkResult err)
+    # {
+    #     if (err == 0) return;
+    #     if (err < 0) abort();
+    # }
+    # <> </include>
+    # @end
+}
+
+#

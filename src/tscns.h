@@ -22,7 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#pragma once
+#ifndef _MENGRAO_TSCNS_H
+#define _MENGRAO_TSCNS_H
 #include <chrono>
 #include <atomic>
 #include <thread>
@@ -151,3 +152,42 @@ public:
   int64_t base_ns_err_;
   int64_t next_calibrate_tsc_;
 };
+
+#endif // _MENGRAO_TSCNS_H
+
+#ifndef _PIV_NSTIMER_H
+#define _PIV_NSTIMER_H
+
+class PivNSTimer
+{
+private:
+  TSCNS m_tscns;
+  PivNSTimer() {
+    m_tscns.init(20000000, 3000000000);
+    std::thread(&PivNSTimer::calibrate_loop, this).detach();
+  }
+  ~PivNSTimer() {}
+  PivNSTimer(const PivNSTimer &) = delete;
+  PivNSTimer(PivNSTimer &&) = delete;
+  PivNSTimer &operator=(const PivNSTimer &) = delete;
+  PivNSTimer &operator=(PivNSTimer &&) = delete;
+  void calibrate_loop()
+  {
+    while (true) {
+      m_tscns.calibrate();
+      std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+    }
+  }
+public:
+  static PivNSTimer &data()
+  {
+    static PivNSTimer instance;
+    return instance;
+  }
+  static int64_t rdns()
+  {
+    return PivNSTimer::data().m_tscns.rdns();
+  }
+};
+
+#endif // _PIV_NSTIMER_H

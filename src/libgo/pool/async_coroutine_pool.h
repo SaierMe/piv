@@ -24,18 +24,21 @@ public:
     void InitCoroutinePool(size_t maxCoroutineCount)
     {
         maxCoroutineCount_ = maxCoroutineCount;
+        maxCoroutineCount_ = (std::min<size_t>)(maxCoroutineCount_, (sizeof(size_t) == 8) ? 10240 : 1792);
     }
 
     // 启动协程池 
     void Start(int minThreadNumber, int maxThreadNumber = 0)
     {
         if (!started_.try_lock()) return ;
+        if (minThreadNumber < 1)
+            minThreadNumber = std::thread::hardware_concurrency();
         std::thread([=]{ 
                     scheduler_->Start(minThreadNumber, maxThreadNumber); 
                 }).detach();
         if (maxCoroutineCount_ == 0) {
             maxCoroutineCount_ = (std::max)(minThreadNumber * 128, maxThreadNumber);
-            maxCoroutineCount_ = (std::min<size_t>)(maxCoroutineCount_, 10240);
+            maxCoroutineCount_ = (std::min<size_t>)(maxCoroutineCount_, (sizeof(size_t) == 8) ? 10240 : 1792);
         }
         for (size_t i = 0; i < maxCoroutineCount_; ++i) {
             ::co::__go(__FILE__, __LINE__)-::co::__go_option<::co::opt_scheduler>{scheduler_}-[this]{
