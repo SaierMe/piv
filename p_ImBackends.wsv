@@ -7,7 +7,7 @@
 
 # 平台后端
 
-类 IM_Win32平台 <公开 注释 = "基于Windows API的平台后端,需要配合DirectX、OpenGL、Vulkan渲染器使用." 折叠
+类 IM_Win32平台 <公开 注释 = "基于Windows API的平台后端,需要配合DirectX、OpenGL、Vulkan渲染器使用." 折叠 折叠2
         @文档 = "category = \"平台后端\"" @视窗.外部头文件 = "<backends/imgui_impl_win32.h>"
         @视窗.外部源文件 = "imgui\\backends\\imgui_impl_win32.cpp">
 {
@@ -76,10 +76,8 @@
 }
 
 类 IM_GLFW平台 <公开 注释 = "基于GLFW的平台后端,GLFW是一个OpenGL应用框架,需要配合OpenGL、Vulkan渲染器使用." 折叠 折叠2
-        @文档 = "category = \"平台后端\"" @视窗.预定义宏 = "GLFW_INCLUDE_NONE\r\nGLFW_EXPOSE_NATIVE_WIN32"
-        @视窗.头文件搜寻目录 = "FrameWork\\glfw\\include"
-        @视窗.外部头文件 = "<backends/imgui_impl_glfw.h>\r\n<GLFW/glfw3.h>\r\n<GLFW/glfw3native.h>"
-        @视窗.外部源文件 = "imgui\\backends\\imgui_impl_glfw.cpp"
+        @文档 = "category = \"平台后端\"" @视窗.头文件搜寻目录 = "FrameWork\\glfw\\include"
+        @视窗.外部头文件 = "FrameWork\\glfw\\piv_glfw.h" @视窗.外部源文件 = "imgui\\backends\\imgui_impl_glfw.cpp"
         "@视窗.外部库.mt-non_dynamic" = "FrameWork\\glfw\\$(p)\\$(vs)\\glfw3_mt.lib"
         "@视窗.外部库.md-non_dynamic" = "FrameWork\\glfw\\$(p)\\$(vs)\\glfw3.lib"
         @视窗.外部库.dynamic = "FrameWork\\glfw\\$(p)\\$(vs)\\glfw3dll.lib"
@@ -323,8 +321,9 @@
     {
         @ ImGui_ImplDX9_InvalidateDeviceObjects();
         @ HRESULT hr = m_pd3dDevice->Reset(&m_d3dpp);
-        @ if (hr == D3DERR_INVALIDCALL)
+        @ if (hr == D3DERR_INVALIDCALL) {
         @     IM_ASSERT(0);
+        @ }
         @ ImGui_ImplDX9_CreateDeviceObjects();
     }
 
@@ -993,7 +992,7 @@
     }
 }
 
-类 IM_DX12渲染器 <公开 注释 = "基于DirectX12的渲染器后端,兼容Windows 10及以上系统." 折叠 @文档 = "category = \"渲染器\""
+类 IM_DX12渲染器 <公开 注释 = "基于DirectX12的渲染器后端,兼容Windows 10及以上系统." 折叠 折叠2 @文档 = "category = \"渲染器\""
         @视窗.外部头文件 = "<backends/imgui_impl_dx12.h>\r\n<d3d12.h>\r\n<dxgi1_4.h>"
         @视窗.外部源文件 = "imgui\\backends\\imgui_impl_dx12.cpp"
         @视窗.外部库 = "d3d12.lib\r\nd3dcompiler.lib\r\ndxgi.lib" @视窗.预定义宏 = "ImTextureID=ImU64">
@@ -1881,10 +1880,9 @@
     }
 }
 
-类 IM_Vulkan渲染器 <公开 注释 = "基于Vulkan的渲染器后端,Vulkan是OpenGL的下一代GPU API,目的就是取代OpenGL."
-        注释 = "注意旧型号的显卡和显卡驱动可能不支持Vulkan." 折叠 @文档 = "category = \"渲染器\""
-        @视窗.预定义宏 = "ImTextureID=ImU64\r\nGLFW_INCLUDE_VULKAN" @视窗.外部头文件 = "<backends/imgui_impl_vulkan.h>"
-        @视窗.外部源文件 = "imgui\\backends\\imgui_impl_vulkan.cpp"
+类 IM_Vulkan渲染器 <公开 注释 = "基于Vulkan的渲染器后端,Vulkan是OpenGL的下一代GPU API,目的就是取代OpenGL." 折叠 折叠2
+        @文档 = "category = \"渲染器\"" @视窗.预定义宏 = "ImTextureID=ImU64\r\nGLFW_INCLUDE_VULKAN"
+        @视窗.外部头文件 = "<backends/imgui_impl_vulkan.h>" @视窗.外部源文件 = "imgui\\backends\\imgui_impl_vulkan.cpp"
         @视窗.外部库 = "FrameWork\\vulkan\\$(p)\\vulkan-1.lib" @视窗.附属文件 = "FrameWork\\vulkan\\$(p)\\vulkan-1.dll">
 {
     方法 渲染器类型 <公开 属性读 类型 = 整数 注释 = "返回渲染器类型(固定返回2,表示Vulkan渲染器)" 折叠>

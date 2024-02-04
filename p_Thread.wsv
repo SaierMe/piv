@@ -13,7 +13,7 @@
     参数 线程数量 <类型 = 整数 注释 = "最大同时工作的线程数量,小于等于0为(CPU逻辑核心数 + 1)."
             注释 = "  - I/O密集型建议: CPU核数 * (1 + (I/O耗时 / CPU耗时))" 注释 = "  - 计算密集型建议: CPU核数 + 1" @默认值 = 0>
     {
-        @ @sn<this>.CreateThreadPool (@<线程数量>)
+        @ @sn<this>.CreateThreadPool(@<线程数量>)
     }
 
     方法 销毁 <公开 类型 = 逻辑型 注释 = "  销毁线程池,释放线程池占用的所有资源." 注释 = "  注意: 销毁线程池不会强制结束仍在运行的线程,请在线程的耗时或"
@@ -23,17 +23,17 @@
     参数 是否强制销毁 <类型 = 逻辑型 注释 = "假=正常销毁,等待任务执行完毕后返回;" 注释 = "真=强制销毁,不等待执行中的任务,清空后续的队列任务后立即返回." @默认值 = 假>
     参数 最长等待时间 <类型 = 整数 注释 = "此参数只对非强制销毁有效,单位为毫秒;" 注释 = "-1为一直等待所有任务完成,否则到了超时时间会清空任务并返回." @默认值 = -1>
     {
-        @ @sn<this>.DestroyThreadPool (@<是否强制销毁>, @<最长等待时间>)
+        @ @sn<this>.DestroyThreadPool(@<是否强制销毁>, @<最长等待时间>)
     }
 
     方法 暂停 <公开 类型 = 逻辑型 注释 = "停止执行新的任务,当前正在执行的任务不会被暂停." 返回值注释 = "返回是否暂停成功,线程池的不在工作状态返回假." 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.SuspendThreadPool ()
+        @ @sn<this>.SuspendThreadPool()
     }
 
     方法 继续 <公开 类型 = 逻辑型 注释 = "继续执行线程池任务" 返回值注释 = "返回是否继续成功,线程池的不在暂停状态返回假." 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.ResumeThreadPool ()
+        @ @sn<this>.ResumeThreadPool()
     }
 
     方法 投递静态方法 <公开 类型 = 逻辑型 注释 = "将静态方法投递到线程池中,线程池将按投递顺序执行任务."
@@ -44,7 +44,7 @@
     参数 参数列表 <注释 = "参数表的格式务必和\"静态方法\"的参数表一致;" 注释 = "默认将提交的参数按值复制,如果想引用传递,请用\"引用\"方法将参数包装." @可扩展 = ""
             @匹配类型 = 通用型>
     {
-        @ @sn<this>.PostTask (&@<静态方法>, @<参数列表>)
+        @ @sn<this>.PostTask(&@<静态方法>, @<参数列表>)
     }
 
     方法 投递动态方法 <公开 类型 = 逻辑型 注释 = "将类实例的动态方法投递到线程池中,线程池将按投递顺序执行任务."
@@ -58,7 +58,7 @@
     参数 参数列表 <注释 = "参数表的格式务必和类成员方法的参数表一致;" 注释 = "默认将提交的参数按值复制,如果想引用传递,请用\"引用\"方法将参数包装." @可扩展 = ""
             @匹配类型 = 通用型>
     {
-        @ @sn<this>.PostTask (&@pdt<对象实例>::@pvpt<方法输出名>, &@<对象实例>, @<参数列表>)
+        @ @sn<this>.PostTask(&@pdt<对象实例>::@pvpt<方法输出名>, &@<对象实例>, @<参数列表>)
     }
 
     方法 投递无参数静态方法 <公开 类型 = 逻辑型 注释 = "将无参数的静态方法投递到线程池中,线程池将按投递顺序执行任务." 注释 = "  1. 只能投递关联无参数的静态方法;"
@@ -66,7 +66,7 @@
             @嵌入式方法 = "">
     参数 静态方法 <注释 = "提供所欲线程执行的静态方法" @匹配方法 = "">
     {
-        @ @sn<this>.PostTask (&@<静态方法>)
+        @ @sn<this>.PostTask(&@<静态方法>)
     }
 
     方法 投递无参数动态方法 <公开 类型 = 逻辑型 注释 = "将无参数的类动态方法投递到线程池中,线程池将按投递顺序执行任务." 注释 = "  1. 只能投递关联无参数的类动态方法;"
@@ -77,7 +77,7 @@
     参数 方法输出名 <类型 = 文本型 注释 = "提供所欲线程执行的动态方法输出名." 注释 = "注意: 方法必须设置属性\"@输出名\",并设置\"@强制输出\"以确保被编译."
             @需求类型 = 立即数或常量>
     {
-        @ @sn<this>.PostTask (&@pdt<对象实例>::@pvpt<方法输出名>, &@<对象实例>)
+        @ @sn<this>.PostTask(&@pdt<对象实例>::@pvpt<方法输出名>, &@<对象实例>)
     }
 
     方法 投递无参数无返回值动态方法 <公开 类型 = 逻辑型 注释 = "将无参数的类动态方法投递到线程池中,线程池将按投递顺序执行任务." 注释 = "  1. 只能投递关联无参数及无返回值的类动态方法;"
@@ -87,7 +87,7 @@
     参数 对象实例 <类型 = 对象类 注释 = "提供动态方法所属的对象实例(即类变量),也可以填\"本对象\"、\"读指针处对象()\"." "">
     参数 动态方法 <注释 = "提供所欲线程执行的类动态方法." 注释 = "注意: 方法不需要设置输出名,但必须是无参数和无返回值." @匹配方法 = "无参数无返回值方法">
     {
-        @ @sn<this>.PostTask (&@pdt<对象实例>::@<动态方法>, &@<对象实例>)
+        @ @sn<this>.PostTask(&@pdt<对象实例>::@<动态方法>, &@<对象实例>)
     }
 
     方法 无参数无返回值方法
@@ -97,20 +97,20 @@
     参数 函数对象 <类型 = 函数对象类 注释 = "所欲投递到线程池执行的函数对象,可以调用下列方法创建:" 注释 = "- 绑定静态方法   绑定无参数静态方法"
             注释 = "- 绑定动态方法   绑定无参数动态方法" 注释 = "- 绑定函数指针   绑定无参数函数指针" 注释 = "- 绑定函数指针2  绑定无参数函数指针2">
     {
-        @ @sn<this>.PostTask2 (@<函数对象>)
+        @ @sn<this>.PostTask2(@<函数对象>)
     }
 
     方法 清空任务 <公开 类型 = 逻辑型 注释 = "清空已投递的队列任务,将队列任务占用的内存释放." 返回值注释 = "返回是否开始清空任务,线程池不在正常工作和暂停状态时始终返回假." 折叠
             @嵌入式方法 = "">
     {
-        @ @sn<this>.ClearTask ()
+        @ @sn<this>.ClearTask()
     }
 
     方法 是否需要退出 <公开 类型 = 逻辑型 注释 = "检查线程任务是否需要尽快退出." 注释 = "  1. 本方法返回真则表示正在销毁线程池,必须尽快结束线程任务;"
             注释 = "  2. 如果未退出死循环中的线程,则线程池资源不会得到释放,线程" 注释 = "也会一直运行下去,直到进程结束;" 折叠 @嵌入式方法 = "">
     参数 最大检查等待时间 <类型 = 整数 注释 = "指定检查线程池销毁通知(由\"销毁\"方法发出)的最大等待时间," 注释 = "单位为毫秒,为0表示不等待,为-1表示一直等待." @默认值 = 0>
     {
-        @ @sn<this>.IsNeedExit (@<最大检查等待时间>)
+        @ @sn<this>.IsNeedExit(@<最大检查等待时间>)
     }
 
     方法 调整线程池 <公开 类型 = 逻辑型 注释 = "调整线程池的容量(同时工作线程数量)." 注释 = "若新线程数量比原来大,会立即改变工作线程数量;"
@@ -118,55 +118,55 @@
             @嵌入式方法 = "">
     参数 新线程数量 <类型 = 整数 注释 = "最大同时工作的线程数量,小于等于0为(CPU核心数 + 1)." @默认值 = 0>
     {
-        @ @sn<this>.SetThreadPoolCapacity (@<新线程数量>)
+        @ @sn<this>.SetThreadPoolCapacity(@<新线程数量>)
     }
 
     方法 CPU核心数 <公开 属性读 类型 = 整数 注释 = "获取CPU的逻辑核心数量(如支持超线程的16核CPU,返回32)." 返回值注释 = "成功返回CPU逻辑核心数,失败时始终返回1." 折叠
             @嵌入式方法 = "">
     {
-        @ @sn<this>.GetProcessorsCount ()
+        @ @sn<this>.GetProcessorsCount()
     }
 
     方法 现行线程数 <公开 属性读 类型 = 整数 注释 = "获取线程池当前的工作线程数" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetThreadsCount ()
+        @ @sn<this>.GetThreadsCount()
     }
 
     方法 线程池容量 <公开 属性读 类型 = 整数 注释 = "获取线程池的最大工作线程数" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetThreadsCapacity ()
+        @ @sn<this>.GetThreadsCapacity()
     }
 
     方法 执行任务数 <公开 属性读 类型 = 整数 注释 = "获取正在执行的任务数量" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetWorkerTaskCount ()
+        @ @sn<this>.GetWorkerTaskCount()
     }
 
     方法 队列任务数 <公开 属性读 类型 = 长整数 注释 = "获取等待处理的任务数量,超过长整数最大值后将从0开始重新计数." 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetQueueTaskCount ()
+        @ @sn<this>.GetQueueTaskCount()
     }
 
     方法 已完成任务数 <公开 属性读 类型 = 长整数 注释 = "获取已完成的任务数量,超过长整数最大值后将从0开始重新计数." 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetComplateTaskCount ()
+        @ @sn<this>.GetComplateTaskCount()
     }
 
     方法 空闲线程数 <公开 属性读 类型 = 整数 注释 = "获取空闲的线程数量" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetFreeThreadsCount ()
+        @ @sn<this>.GetFreeThreadsCount()
     }
 
     方法 工作状态 <公开 属性读 类型 = 整数 注释 = "获取线程池的工作状态" 返回值注释 = "0=未启动;1=正在销毁;2=正在创建;3=正在工作;4=调整线程池;5=暂停中;6=正在清空任务"
             折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetThreadPoolState ()
+        @ @sn<this>.GetThreadPoolState()
     }
 
     方法 是否空闲 <公开 属性读 类型 = 逻辑型 注释 = "判断线程池是否处于彻底空闲状态,没有任何任务在执行." 返回值注释 = "真为空闲,假为繁忙,线程池未创建也返回真." 折叠
             @嵌入式方法 = "">
     {
-        @ @sn<this>.ThreadPoolIsFree ()
+        @ @sn<this>.ThreadPoolIsFree()
     }
 }
 
@@ -1087,8 +1087,8 @@
             注释 = "为0表示使用默认堆栈保留尺寸(1MB)." @默认值 = 0>
     参数 优先级 <类型 = 线程优先级 注释 = "提供线程的优先级别" @默认值 = 线程优先级.通常>
     {
-        @ return @sn<current_class_def>::StartThread (this, reinterpret_cast<ULONG_PTR>(&@sn<current_class_def>::ThreadObjWorkerProc), @<用户标记>,
-        @                                             @<用户对象>, @<用户数据>, @<是否等待线程执行完毕>, @<初始堆栈大小>, (INT)@<优先级>);
+        @ return StartThread(this, reinterpret_cast<ULONG_PTR>(&@sn<current_class_def>::ThreadObjWorkerProc), @<用户标记>,
+        @     @<用户对象>, @<用户数据>, @<是否等待线程执行完毕>, @<初始堆栈大小>, static_cast<INT>(@<优先级>));
     }
 
     方法 创建 <公开 类型 = 逻辑型 注释 = "创建线程池,必须成功创建后才能使用其他方法." 返回值注释 = "返回是否创建成功,重复创建亦返回真." 折叠 @嵌入式方法 = "">
@@ -1100,7 +1100,7 @@
     参数 是否初始化COM <类型 = 逻辑型 注释 = "  是否在线程池内部自动执行COM初始化和清理." 注释 = "  多线程中使用COM对象必须执行COM初始化,由于本线程池是一个线程队列执行"
             注释 = "多个任务,不太适合在\"任务回调/对象任务回调\"事件中进行初始化.如果你需要" 注释 = "使用COM对象,请将本参数设置为\"真\"." @默认值 = 假>
     {
-        @ @sn<this>.CreateThreadPool (@<线程数量>, @<初始堆栈大小>, (INT)@<优先级>, @<是否初始化COM>)
+        @ @sn<this>.CreateThreadPool(@<线程数量>, @<初始堆栈大小>, static_cast<INT>(@<优先级>), @<是否初始化COM>)
     }
 
     方法 销毁 <公开 类型 = 逻辑型 注释 = "销毁线程池,释放线程池占用的所有资源." 注释 = "  1. 销毁线程池不会强制结束仍在运行的线程,请在线程的耗时或"
@@ -1110,17 +1110,17 @@
     参数 是否强制销毁 <类型 = 逻辑型 注释 = "假=正常销毁,等待任务执行完毕后返回;" 注释 = "真=强制销毁,不等待执行中的任务,清空后续的队列任务后立即返回." @默认值 = 假>
     参数 最长等待时间 <类型 = 整数 注释 = "此参数只对非强制销毁有效,单位为毫秒." 注释 = "-1为一直等待所有任务完成,否则到了超时时间会清空任务并返回." @默认值 = -1>
     {
-        @ @sn<this>.DestroyThreadPool (@<是否强制销毁>, @<最长等待时间>)
+        @ @sn<this>.DestroyThreadPool(@<是否强制销毁>, @<最长等待时间>)
     }
 
     方法 暂停 <公开 类型 = 逻辑型 注释 = "停止执行新的任务,当前正在执行的任务不会被暂停." 返回值注释 = "返回是否暂停成功,线程池的不在工作状态返回假." 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.SuspendThreadPool ()
+        @ @sn<this>.SuspendThreadPool()
     }
 
     方法 继续 <公开 类型 = 逻辑型 注释 = "继续执行线程池任务" 返回值注释 = "返回是否继续成功,线程池的不在暂停状态返回假." 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.ResumeThreadPool ()
+        @ @sn<this>.ResumeThreadPool()
     }
 
     方法 投递任务 <公开 类型 = 逻辑型 注释 = "投递线程任务到线程池中,投递后请在接收事件\"任务回调\"中编写线程方法." 注释 = "本方法只支持基本数值参数."
@@ -1129,8 +1129,8 @@
     参数 用户参数 <类型 = 长整数 @默认值 = 0>
     参数 用户数据 <类型 = 变整数 注释 = "如果是指针,请注意指针引用的变量会不会提前被释放." @默认值 = 0>
     {
-        @ return @sn<current_class_def>::PostParamTask (this, reinterpret_cast<ULONG_PTR>(&@sn<current_class_def>::ThreadPoolWorkerProc),
-        @                                               @<用户标记>, @<用户参数>, @<用户数据>);
+        @ return PostParamTask(this, reinterpret_cast<ULONG_PTR>(&@sn<current_class_def>::ThreadPoolWorkerProc),
+        @     @<用户标记>, @<用户参数>, @<用户数据>);
     }
 
     方法 投递对象 <公开 类型 = 逻辑型 注释 = "  投递线程任务到线程池中,投递后请在接收事件\"对象任务回调\"中编写线程方法." 注释 = "本方法支持传递自定义对象类型,但请注意以下几点:"
@@ -1140,14 +1140,14 @@
     参数 用户对象 <类型 = 对象类 注释 = "使用自定义的对象类,可以传递使用任意数量和类型的参数给线程池." 注释 = "将创建用户对象的副本,因此可以直接使用局部变量." @默认值 = 空对象>
     参数 用户数据 <类型 = 变整数 注释 = "如果是指针,请注意指针引用的变量会不会提前被释放." @默认值 = 0>
     {
-        @ return @sn<current_class_def>::PostObjectTask (this, reinterpret_cast<ULONG_PTR>(&@sn<current_class_def>::ThreadPoolObjWorkerProc),
-        @                                                @<用户标记>, @<用户对象>, @<用户数据>);
+        @ return PostObjectTask(this, reinterpret_cast<ULONG_PTR>(&@sn<current_class_def>::ThreadPoolObjWorkerProc),
+        @     @<用户标记>, @<用户对象>, @<用户数据>);
     }
 
     方法 清空任务 <公开 类型 = 逻辑型 注释 = "清空已投递的队列任务,将队列任务占用的内存释放." 返回值注释 = "返回是否开始清空任务,线程池不在正常工作和暂停状态时始终返回假." 折叠
             @嵌入式方法 = "">
     {
-        @ @sn<this>.ClearTask ()
+        @ @sn<this>.ClearTask()
     }
 
     方法 任务回调 <公开 定义事件 类型 = 整数 注释 = "线程池\"投递任务\"的回调函数,请在本事件内写线程方法." 返回值注释 = "返回值无意义" 折叠>
@@ -1168,7 +1168,7 @@
             注释 = "才会彻底结束,如果线程内有死循环,可能将永远不会自己结束;" 返回值注释 = "返回线程是否需要尽快退出." 折叠 @嵌入式方法 = "">
     参数 最大检查等待时间 <类型 = 整数 注释 = "指定检查线程池销毁通知(由\"销毁\"方法发出)的最大等待时间," 注释 = "单位为毫秒,为0表示不等待,为-1表示一直等待." @默认值 = 0>
     {
-        @ @sn<this>.IsNeedExit (@<最大检查等待时间>)
+        @ @sn<this>.IsNeedExit(@<最大检查等待时间>)
     }
 
     方法 调整线程池 <公开 类型 = 逻辑型 注释 = "动态调整线程池的容量(同时工作线程数量)." 注释 = "若新线程数量比原来大,会立即改变工作线程数量;"
@@ -1176,67 +1176,67 @@
             @嵌入式方法 = "">
     参数 新线程数量 <类型 = 整数 注释 = "最大同时工作的线程数量,小于等于0为(CPU核心数 + 1)." @默认值 = 0>
     {
-        @ @sn<this>.SetThreadPoolCapacity (@<新线程数量>)
+        @ @sn<this>.SetThreadPoolCapacity(@<新线程数量>)
     }
 
     方法 CPU核心数 <公开 属性读 类型 = 整数 注释 = "获取CPU的逻辑核心数量(如支持超线程的16核CPU,返回32)." 返回值注释 = "成功返回CPU逻辑核心数,失败时始终返回1." 折叠
             @嵌入式方法 = "">
     {
-        @ @sn<this>.GetProcessorsCount ()
+        @ @sn<this>.GetProcessorsCount()
     }
 
     方法 现行线程数 <公开 属性读 类型 = 整数 注释 = "获取线程池当前的工作线程数" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetThreadsCount ()
+        @ @sn<this>.GetThreadsCount()
     }
 
     方法 线程池容量 <公开 属性读 类型 = 整数 注释 = "获取线程池的最大工作线程数" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetThreadsCapacity ()
+        @ @sn<this>.GetThreadsCapacity()
     }
 
     方法 执行任务数 <公开 属性读 类型 = 整数 注释 = "获取正在执行的任务数量" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetWorkerTaskCount ()
+        @ @sn<this>.GetWorkerTaskCount()
     }
 
     方法 队列任务数 <公开 属性读 类型 = 长整数 注释 = "获取等待处理的任务数量" 返回值注释 = "超过无符号整数最大值(4294967295)后从0开始重新计数." 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetQueueTaskCount ()
+        @ @sn<this>.GetQueueTaskCount()
     }
 
     方法 已完成任务数 <公开 属性读 类型 = 长整数 注释 = "获取已完成的任务数量" 返回值注释 = "超过无符号整数最大值(4294967295)后从0开始重新计数." 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetComplateTaskCount ()
+        @ @sn<this>.GetComplateTaskCount()
     }
 
     方法 空闲线程数 <公开 属性读 类型 = 整数 注释 = "获取空闲的线程数量" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetFreeThreadsCount ()
+        @ @sn<this>.GetFreeThreadsCount()
     }
 
     方法 工作状态 <公开 属性读 类型 = 整数 注释 = "获取线程池的工作状态" 返回值注释 = "0=未启动;1=正在销毁;2=正在创建;3=正在工作;4=调整线程池;5=暂停中;6=正在清空任务"
             折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetThreadPoolState ()
+        @ @sn<this>.GetThreadPoolState()
     }
 
     方法 是否空闲 <公开 属性读 类型 = 逻辑型 注释 = "判断线程池是否处于彻底空闲状态,没有任何任务在执行." 返回值注释 = "真为空闲,假为繁忙,线程池未创建也返回真." 折叠
             @嵌入式方法 = "">
     {
-        @ @sn<this>.ThreadPoolIsFree ()
+        @ @sn<this>.ThreadPoolIsFree()
     }
 
     # ---
     # @begin
     # <> <include>
-    # static INT CALLBACK ThreadPoolWorkerProc (@sn<current_class>* pThis, @sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
-    #     return pThis->@<任务回调> (lpThreadParam->nUserMark, lpThreadParam->lUserParam, lpThreadParam->lpUserData);
+    # static INT CALLBACK ThreadPoolWorkerProc(@sn<current_class>* pThis, @sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
+    #     return pThis->@<任务回调>(lpThreadParam->nUserMark, lpThreadParam->lUserParam, lpThreadParam->lpUserData);
     # }
-    # static INT CALLBACK ThreadPoolObjWorkerProc (@sn<current_class>* pThis, @sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
-    #     return pThis->@<对象任务回调> (lpThreadParam->nUserMark, *lpThreadParam->lpUserObj, lpThreadParam->lpUserData);
+    # static INT CALLBACK ThreadPoolObjWorkerProc(@sn<current_class>* pThis, @sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
+    #     return pThis->@<对象任务回调>(lpThreadParam->nUserMark, *lpThreadParam->lpUserObj, lpThreadParam->lpUserData);
     # }
-    # static INT CALLBACK ThreadObjWorkerProc (@sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
+    # static INT CALLBACK ThreadObjWorkerProc(@sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
     #     ((@sn<current_class>*)lpThreadParam->lpThis)->@<对象任务回调> (lpThreadParam->nUserMark, *lpThreadParam->lpUserObj, lpThreadParam->lpUserData);
     #     delete lpThreadParam;
     #     return 0;
@@ -1261,8 +1261,8 @@
             注释 = "为0表示使用默认堆栈保留尺寸(1MB)." @默认值 = 0>
     参数 优先级 <类型 = 线程优先级 注释 = "提供线程的优先级别" @默认值 = 线程优先级.通常>
     {
-        @ return @sn<current_class_def>::StartThread (this, reinterpret_cast<ULONG_PTR>(&@sn<current_class_def>::ThreadObjWorkerProc), @<用户标记>,
-        @                                             @<用户对象>, @<用户数据>, @<是否等待线程执行完毕>, @<初始堆栈大小>, (INT)@<优先级>);
+        @ return StartThread(this, reinterpret_cast<ULONG_PTR>(&@sn<current_class_def>::ThreadObjWorkerProc), @<用户标记>,
+        @     @<用户对象>, @<用户数据>, @<是否等待线程执行完毕>, @<初始堆栈大小>, static_cast<INT>(@<优先级>));
     }
 
     方法 创建 <公开 类型 = 逻辑型 注释 = "创建线程池,必须成功创建后才能使用其他方法." 返回值注释 = "返回是否创建成功,重复创建亦返回真." 折叠 @嵌入式方法 = "">
@@ -1277,7 +1277,7 @@
     参数 是否初始化COM <类型 = 逻辑型 注释 = "  是否在线程池内部自动执行COM初始化和清理." 注释 = "  多线程中使用COM对象必须执行COM初始化,由于本线程池是一个线程队列执行"
             注释 = "多个任务,不太适合在\"任务回调/对象任务回调\"事件中进行初始化.如果你需要" 注释 = "使用COM对象,请将本参数设置为\"真\"." @默认值 = 假>
     {
-        @ @sn<this>.CreateThreadPool (@<最小线程数>, @<最大线程数>, @<动态线程周期>, @<初始堆栈大小>, (INT)@<优先级>, @<是否初始化COM>)
+        @ @sn<this>.CreateThreadPool(@<最小线程数>, @<最大线程数>, @<动态线程周期>, @<初始堆栈大小>, static_cast<INT>(@<优先级>), @<是否初始化COM>)
     }
 
     方法 销毁 <公开 类型 = 逻辑型 注释 = "销毁线程池,释放线程池占用的所有资源." 注释 = "  1. 销毁线程池不会强制结束仍在运行的线程,请在线程的耗时或"
@@ -1287,17 +1287,17 @@
     参数 是否强制销毁 <类型 = 逻辑型 注释 = "假=正常销毁,等待任务执行完毕后返回;" 注释 = "真=强制销毁,不等待执行中的任务,清空后续的队列任务后立即返回." @默认值 = 假>
     参数 最长等待时间 <类型 = 整数 注释 = "此参数只对非强制销毁有效,单位为毫秒." 注释 = "-1为一直等待所有任务完成,否则到了超时时间会清空任务并返回." @默认值 = -1>
     {
-        @ @sn<this>.DestroyThreadPool (@<是否强制销毁>, @<最长等待时间>)
+        @ @sn<this>.DestroyThreadPool(@<是否强制销毁>, @<最长等待时间>)
     }
 
     方法 暂停 <公开 类型 = 逻辑型 注释 = "停止执行新的任务,当前正在执行的任务不会被暂停." 返回值注释 = "返回是否暂停成功,线程池的不在工作状态返回假." 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.SuspendThreadPool ()
+        @ @sn<this>.SuspendThreadPool()
     }
 
     方法 继续 <公开 类型 = 逻辑型 注释 = "继续执行线程池任务" 返回值注释 = "返回是否继续成功,线程池的不在暂停状态返回假." 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.ResumeThreadPool ()
+        @ @sn<this>.ResumeThreadPool()
     }
 
     方法 投递任务 <公开 类型 = 逻辑型 注释 = "投递线程任务到线程池中,投递后请在接收事件\"任务回调\"中编写线程方法." 注释 = "本方法只支持基本数值参数."
@@ -1306,8 +1306,8 @@
     参数 用户参数 <类型 = 长整数 @默认值 = 0>
     参数 用户数据 <类型 = 变整数 注释 = "如果是指针,请注意指针引用的变量会不会提前被释放." @默认值 = 0>
     {
-        @ return @sn<current_class_def>::PostParamTask (this, reinterpret_cast<ULONG_PTR>(&@sn<current_class_def>::ThreadPoolWorkerProc),
-        @                                               @<用户标记>, @<用户参数>, @<用户数据>);
+        @ return PostParamTask(this, reinterpret_cast<ULONG_PTR>(&@sn<current_class_def>::ThreadPoolWorkerProc),
+        @     @<用户标记>, @<用户参数>, @<用户数据>);
     }
 
     方法 投递对象 <公开 类型 = 逻辑型 注释 = "  投递线程任务到线程池中,投递后请在接收事件\"对象任务回调\"中编写线程方法." 注释 = "本方法支持传递自定义对象类型,但请注意以下几点:"
@@ -1317,14 +1317,14 @@
     参数 用户对象 <类型 = 对象类 注释 = "使用自定义的对象类,可以传递使用任意数量和类型的参数给线程池." 注释 = "将创建用户对象的副本,因此可以直接使用局部变量." @默认值 = 空对象>
     参数 用户数据 <类型 = 变整数 注释 = "如果是指针,请注意指针引用的变量会不会提前被释放." @默认值 = 0>
     {
-        @ return @sn<current_class_def>::PostObjectTask (this, reinterpret_cast<ULONG_PTR>(&@sn<current_class_def>::ThreadPoolObjWorkerProc),
-        @                                                @<用户标记>, @<用户对象>, @<用户数据>);
+        @ return PostObjectTask(this, reinterpret_cast<ULONG_PTR>(&@sn<current_class_def>::ThreadPoolObjWorkerProc),
+        @     @<用户标记>, @<用户对象>, @<用户数据>);
     }
 
     方法 清空任务 <公开 类型 = 逻辑型 注释 = "清空已投递的队列任务,将队列任务占用的内存释放." 返回值注释 = "返回是否开始清空任务,线程池不在正常工作和暂停状态时始终返回假." 折叠
             @嵌入式方法 = "">
     {
-        @ @sn<this>.ClearTask ()
+        @ @sn<this>.ClearTask()
     }
 
     方法 任务回调 <公开 定义事件 类型 = 整数 注释 = "线程池\"投递任务\"的回调函数,请在本事件内写线程方法." 返回值注释 = "返回值无意义" 折叠>
@@ -1345,7 +1345,7 @@
             注释 = "才会彻底结束,如果线程内有死循环,可能将永远不会自己结束;" 返回值注释 = "返回线程是否需要尽快退出." 折叠 @嵌入式方法 = "">
     参数 最大检查等待时间 <类型 = 整数 注释 = "指定检查线程池销毁通知(由\"销毁\"方法发出)的最大等待时间," 注释 = "单位为毫秒,为0表示不等待,为-1表示一直等待." @默认值 = 0>
     {
-        @ @sn<this>.IsNeedExit (@<最大检查等待时间>)
+        @ @sn<this>.IsNeedExit(@<最大检查等待时间>)
     }
 
     方法 调整线程池 <公开 类型 = 逻辑型 注释 = "动态调整线程池的容量(同时工作线程数量)." 注释 = "若新线程数量比原来大,会立即改变工作线程数量;"
@@ -1353,78 +1353,78 @@
             @嵌入式方法 = "">
     参数 新线程数量 <类型 = 整数 注释 = "最大同时工作的线程数量,小于等于0为(CPU核心数 + 1)." @默认值 = 0>
     {
-        @ @sn<this>.SetThreadPoolCapacity (@<新线程数量>)
+        @ @sn<this>.SetThreadPoolCapacity(@<新线程数量>)
     }
 
     方法 CPU核心数 <公开 属性读 类型 = 整数 注释 = "获取CPU的逻辑核心数量(如支持超线程的16核CPU,返回32)." 返回值注释 = "成功返回CPU逻辑核心数,失败时始终返回1." 折叠
             @嵌入式方法 = "">
     {
-        @ @sn<this>.GetProcessorsCount ()
+        @ @sn<this>.GetProcessorsCount()
     }
 
     方法 现行线程数 <公开 属性读 类型 = 整数 注释 = "获取线程池当前的工作线程数" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetThreadsCount ()
+        @ @sn<this>.GetThreadsCount()
     }
 
     方法 线程池容量 <公开 属性读 类型 = 整数 注释 = "获取线程池的最大工作线程数" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetThreadsCapacity ()
+        @ @sn<this>.GetThreadsCapacity()
     }
 
     方法 执行任务数 <公开 属性读 类型 = 整数 注释 = "获取正在执行的任务数量" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetWorkerTaskCount ()
+        @ @sn<this>.GetWorkerTaskCount()
     }
 
     方法 队列任务数 <公开 属性读 类型 = 长整数 注释 = "获取等待处理的任务数量" 返回值注释 = "超过无符号整数最大值(4294967295)后从0开始重新计数." 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetQueueTaskCount ()
+        @ @sn<this>.GetQueueTaskCount()
     }
 
     方法 已完成任务数 <公开 属性读 类型 = 长整数 注释 = "获取已完成的任务数量" 返回值注释 = "超过无符号整数最大值(4294967295)后从0开始重新计数." 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetComplateTaskCount ()
+        @ @sn<this>.GetComplateTaskCount()
     }
 
     方法 空闲线程数 <公开 属性读 类型 = 整数 注释 = "获取空闲的线程数量" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetFreeThreadsCount ()
+        @ @sn<this>.GetFreeThreadsCount()
     }
 
     方法 工作状态 <公开 属性读 类型 = 整数 注释 = "获取线程池的工作状态" 返回值注释 = "0=未启动;1=正在销毁;2=正在创建;3=正在工作;4=调整线程池;5=暂停中;6=正在清空任务"
             折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetThreadPoolState ()
+        @ @sn<this>.GetThreadPoolState()
     }
 
     方法 是否空闲 <公开 属性读 类型 = 逻辑型 注释 = "判断线程池是否处于彻底空闲状态,没有任何任务在执行." 返回值注释 = "真为空闲,假为繁忙,线程池未创建也返回真." 折叠
             @嵌入式方法 = "">
     {
-        @ @sn<this>.ThreadPoolIsFree ()
+        @ @sn<this>.ThreadPoolIsFree()
     }
 
     方法 动态线程周期 <公开 属性读 类型 = 整数 注释 = "获取动态调整线程的检测周期(单位毫秒)." 注释 = "一个周期时间后,如果队列任务过多将动态增加工作线程,直到达到最大线程数."
             注释 = "如果任务过少则自动回收动态线程." 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.GetCycleMs ()
+        @ @sn<this>.GetCycleMs()
     }
 
     方法 动态线程周期 <公开 属性写 注释 = "设置动态调整线程的检测周期." 注释 = "一个周期时间后,如果队列任务过多将动态增加工作线程,直到达到最大线程数."
             注释 = "如果任务过少则自动回收动态线程." 折叠>
     参数 新的周期 <类型 = 整数 注释 = "动态线程的检测周期时间,单位毫秒,最低100ms.">
     {
-        @ @sn<current_class_def>::SetCycleMs (@<新的周期>);
+        @ @sn<current_class_def>::SetCycleMs(@<新的周期>);
     }
 
     # ---
     # @begin
     # <> <include>
-    # static INT CALLBACK ThreadPoolWorkerProc (@sn<current_class>* pThis, @sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
-    #     return pThis->@<任务回调> (lpThreadParam->nUserMark, lpThreadParam->lUserParam, lpThreadParam->lpUserData);
+    # static INT CALLBACK ThreadPoolWorkerProc(@sn<current_class>* pThis, @sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
+    #     return pThis->@<任务回调>(lpThreadParam->nUserMark, lpThreadParam->lUserParam, lpThreadParam->lpUserData);
     # }
-    # static INT CALLBACK ThreadPoolObjWorkerProc (@sn<current_class>* pThis, @sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
-    #     return pThis->@<对象任务回调> (lpThreadParam->nUserMark, *lpThreadParam->lpUserObj, lpThreadParam->lpUserData);
+    # static INT CALLBACK ThreadPoolObjWorkerProc(@sn<current_class>* pThis, @sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
+    #     return pThis->@<对象任务回调>(lpThreadParam->nUserMark, *lpThreadParam->lpUserObj, lpThreadParam->lpUserData);
     # }
     # static INT CALLBACK ThreadObjWorkerProc (@sn<current_class>::THREADPOOL_PARAM* lpThreadParam) {
     #     ((@sn<current_class>*)lpThreadParam->lpThis)->@<对象任务回调> (lpThreadParam->nUserMark, *lpThreadParam->lpUserObj, lpThreadParam->lpUserData);

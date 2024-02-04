@@ -1,6 +1,6 @@
 <火山程序 类型 = "通常" 版本 = 1 />
 
-包 火山.PIV基础类 <注释 = "  源码: https://github.com/Tencent/MMKV" 注释 = "  版本: v1.3.1 / 2023-08-11"
+包 火山.PIV基础类 <注释 = "  源码: https://github.com/Tencent/MMKV" 注释 = "  版本: v1.3.2 / 2023-11-20"
         注释 = "  MMKV是腾讯开源的一个基于内存映射文件的持久化键值表,底层的" 注释 = "序列化/反序列化使用protobuf实现,性能高,稳定性强."
         注释 = "  从2015年中至今在微信上使用,其性能和稳定性经过了时间的验证." 编辑时信息 = "7248B, 0, 0, 0"
         @视窗.外部头文件 = "MMKV\\include\\piv_MMKV.hpp" @视窗.外部库 = "MMKV\\lib\\$(p)\\$(d)\\mmkv_$(crt).lib"
@@ -461,7 +461,7 @@
 }
 
 类 MMKV日志事件类 <公开 注释 = "  MMKV默认将日志打印到控制台,并不会输出日志文件," 注释 = "定义本事件会立即接管MMKV的日志记录处理."
-        注释 = "  全局只能有一个实例能生效,以最后定义的为准." @文档 = "category = \"数据处理.MMKV键值表\"">
+        注释 = "  全局只能有一个实例能生效,以最后定义的为准." 折叠 @文档 = "category = \"数据处理.MMKV键值表\"">
 {
     方法 类_初始化 <折叠>
     {
@@ -471,7 +471,7 @@
         @ MMKV::registerErrorHandler(&@sn<current_class>::ErrorHandler);
     }
 
-    方法 类_清理
+    方法 类_清理 <折叠>
     {
         @ if (piv::mmkvEvent::data().get<@sn<current_class>*>() == this)
         @ {

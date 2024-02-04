@@ -747,8 +747,9 @@ public:
         address_array.RemoveAll();
         if (!ProInfo || enum_modules() == 0)
             return 0;
-        PVOID64 StartAddress = (std::min)((std::max)(reinterpret_cast<PVOID64>(ProInfo->ModulesMap.begin()->first), start_ptr),
-                                          reinterpret_cast<PVOID64>(ProInfo->ModulesMap.rbegin()->first));
+        // PVOID64 StartAddress = (std::min)((std::max)(reinterpret_cast<PVOID64>(ProInfo->ModulesMap.begin()->first), start_ptr),
+        //                                   reinterpret_cast<PVOID64>(ProInfo->ModulesMap.rbegin()->first));
+        PVOID64 StartAddress = start_ptr;
         PVOID64 EndAddress = (end_ptr == 0) ? reinterpret_cast<PVOID64>(ProInfo->ModulesMap.rbegin()->first) : (std::max)(StartAddress, end_ptr);
         ULONGLONG RegionSize = 0;
         // 特征码转字节数组
@@ -880,8 +881,9 @@ public:
         address_array.RemoveAll();
         if (!ProInfo || enum_modules() == 0)
             return 0;
-        PVOID64 StartAddress = (std::min)((std::max)(reinterpret_cast<PVOID64>(ProInfo->ModulesMap.begin()->first), start_ptr),
-                                          reinterpret_cast<PVOID64>(ProInfo->ModulesMap.rbegin()->first));
+        // PVOID64 StartAddress = (std::min)((std::max)(reinterpret_cast<PVOID64>(ProInfo->ModulesMap.begin()->first), start_ptr),
+        //                                   reinterpret_cast<PVOID64>(ProInfo->ModulesMap.rbegin()->first));
+        PVOID64 StartAddress = start_ptr;
         PVOID64 EndAddress = (end_ptr == 0) ? reinterpret_cast<PVOID64>(ProInfo->ModulesMap.rbegin()->first) : (std::max)(StartAddress, end_ptr);
         ULONGLONG RegionSize = 0;
         CVolMem MemoryData;
@@ -1002,7 +1004,7 @@ public:
         bool result = false;
         if (ProInfo)
         {
-            if (ProInfo->isWow64 && !Nt.NtWow64WriteVirtualMemory64)
+            if (ProInfo->isWow64 && Nt.NtWow64WriteVirtualMemory64)
             {
                 result = NT_SUCCESS(Nt.NtWow64WriteVirtualMemory64(ProInfo->hProcess, write_address, data_address, data_size, NULL));
             }

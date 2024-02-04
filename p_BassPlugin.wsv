@@ -10,8 +10,9 @@
         @文档 = "category = \"WASAPI支持\"">
 {
     方法 加载动态库 <公开 静态 类型 = 逻辑型 注释 = "程序默认在执行本类的函数时加载与程序文件同位置的DLL文件."
-            注释 = "如果你想将DLL放在其他位置,请在执行其他方法前调用本方法手动加载." 折叠 @嵌入式方法 = "req_str_param_text_pointer = true">
-    参数 动态库路径 <类型 = 文本型 注释 = "basswasapi.dll的路径">
+            注释 = "如果你想将DLL放在其他位置,请在执行其他方法前调用本方法手动加载." 注释 = "注意: 请尽量在启动方法中加载,且不应将本对象的实例定义在启动类内." 折叠
+            @嵌入式方法 = "req_str_param_text_pointer = true">
+    参数 动态库路径 <类型 = 文本型 注释 = "bassBassWasApi::Fn().dll的路径">
     {
         @ BassWasApi::data().Load(@<动态库路径>)
     }
@@ -36,19 +37,19 @@
     }
 
     方法 置通知 <公开 类型 = 逻辑型 注释 = "设置是否开启设备更改通知的回调事件,开启后\"通知\"事件才会生效."
-            返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
+            返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 是否启用 <类型 = 逻辑型 注释 = "是否启用通知回调事件" @默认值 = 真>
     {
-        @ return wasapi.BASS_WASAPI_SetNotify((@<是否启用>) ? reinterpret_cast<WASAPINOTIFYPROC*>(&@<通知回调>) : NULL, this);
+        @ BassWasApi::Fn().BASS_WASAPI_SetNotify((@<是否启用>) ? &@sn<current_class_def>::WasApiNotify : NULL, &@sn<this>)
     }
 
     方法 通知 <公开 定义事件 类型 = 整数 注释 = "通知回调事件" 返回值注释 = "此返回值无意义" 折叠>
-    参数 通知事件 <类型 = 整数 注释 = "  通知中包含以下内容之一:" 注释 = "  0=BASS_WASAPI_NOTIFY_ENABLED   此设备已启用."
-            注释 = "  1=BASS_WASAPI_NOTIFY_DISABLED  此设备已禁用/断开连接."
-            注释 = "  2=BASS_WASAPI_NOTIFY_DEFINPUT  此设备现在是默认输入设备."
-            注释 = "  3=BASS_WASAPI_NOTIFY_DEFOUTPUT 此设备现在是默认输出设备."
-            注释 = "  256=BASS_WASAPI_NOTIFY_FAIL    此设备出现故障并已停止.如果设备仍处于启用状态且处于共享模式,"
-            注释 = "  则可能是设备的采样格式已更改.在此情况下,可以使用\"释放\"和\"初始化\"来恢复设备.">
+    参数 通知事件 <类型 = 整数 注释 = "通知中包含以下内容之一:" 注释 = " 0=BASS_WASAPI_NOTIFY_ENABLED   此设备已启用."
+            注释 = " 1=BASS_WASAPI_NOTIFY_DISABLED  此设备已禁用/断开连接."
+            注释 = " 2=BASS_WASAPI_NOTIFY_DEFINPUT  此设备现在是默认输入设备."
+            注释 = " 3=BASS_WASAPI_NOTIFY_DEFOUTPUT 此设备现在是默认输出设备."
+            注释 = " 256=BASS_WASAPI_NOTIFY_FAIL    此设备出现故障并已停止.如果设备仍处于启用状态且处于共享模式,"
+            注释 = " 则可能是设备的采样格式已更改.在此情况下,可以使用\"释放\"和\"初始化\"来恢复设备.">
     参数 设备号 <类型 = 整数 注释 = "发出通知的设备">
 
     方法 取所有设备信息 <公开 类型 = 整数 注释 = "获取所有可用的设备"
@@ -72,7 +73,7 @@
     参数 设备信息 <类型 = BASS_WASAPI_设备信息 注释 = "返回的设备信息" "">
     {
         @ BASS_WASAPI_DEVICEINFO info;
-        @ if (wasapi.BASS_WASAPI_GetDeviceInfo(static_cast<DWORD>(@<设备号>), &info)){
+        @ if (BassWasApi::Fn().BASS_WASAPI_GetDeviceInfo(static_cast<DWORD>(@<设备号>), &info)){
         @     @<设备信息>.SetInfo(&info);
         @     return TRUE;
         @ }
@@ -121,20 +122,20 @@
     参数 设备号 <类型 = 整数 注释 = "要获取电平的设备,从0开始">
     参数 通道 <类型 = 整数 注释 = "获取电平的声道,0=第一个通道,-1=所有通道." @默认值 = 0>
     {
-        @ @sn<this>.wasapi.BASS_WASAPI_GetDeviceLevel(static_cast<DWORD>(@<设备号>), @<通道>)
+        @ BassWasApi::Fn().BASS_WASAPI_GetDeviceLevel(static_cast<DWORD>(@<设备号>), @<通道>)
     }
 
     方法 置设备 <公开 类型 = 逻辑型 注释 = "设置当前线程后续使用的设备"
             返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 设备号 <类型 = 整数 注释 = "0 为第一个设备">
     {
-        @ @sn<this>.wasapi.BASS_WASAPI_SetDevice(static_cast<DWORD>(@<设备号>))
+        @ BassWasApi::Fn().BASS_WASAPI_SetDevice(static_cast<DWORD>(@<设备号>))
     }
 
     方法 取设备 <公开 类型 = 整数 注释 = "获取当前线程使用的设备" 返回值注释 = "成功返回设备号,失败返回-1,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
             折叠 @嵌入式方法 = "">
     {
-        @ static_cast<INT>(@sn<this>.wasapi.BASS_WASAPI_GetDevice())
+        @ static_cast<INT>(BassWasApi::Fn().BASS_WASAPI_GetDevice())
     }
 
     方法 取设备类型名 <公开 类型 = 文本型 注释 = "返回输出设备的类型名称(中文名称)" 返回值注释 = "成功返回输出设备的类型名称" 折叠>
@@ -186,7 +187,6 @@
             {
                 返回 ("未知设备")
             }
-
         }
         返回 ("未知设备")
     }
@@ -200,8 +200,8 @@
     参数 独占模式 <类型 = 逻辑型 注释 = "真为在独占模式下检查设备,假为在共享模式下检查；"
             注释 = "共享和独占模式可能支持不同的采样格式.共享模式通常只支持\"混合格式\"(可从\"取设备信息\"获取).">
     {
-        @ static_cast<INT>(@sn<this>.wasapi.BASS_WASAPI_CheckFormat(static_cast<DWORD>(@<设备号>), static_cast<DWORD>(@<采样率>),
-        @                  static_cast<DWORD>(@<声道>), (@<独占模式>) ? BASS_WASAPI_EXCLUSIVE : 0))
+        @ static_cast<INT>(BassWasApi::Fn().BASS_WASAPI_CheckFormat(@<设备号>, static_cast<DWORD>(@<采样率>),
+        @    static_cast<DWORD>(@<声道>), (@<独占模式>) ? BASS_WASAPI_EXCLUSIVE : 0))
     }
 
     方法 输出输入 <公开 定义事件 类型 = 整数 注释 = "用户在本事件中处理输出/输入的回调函数." 注释 = "输出/输入处理的方法应尽可能快,以避免缓冲区不足(输出)或溢出(输入)."
@@ -212,7 +212,7 @@
     参数 数据长度 <类型 = 整数 注释 = "缓冲区的数据长度">
 
     方法 初始化 <公开 类型 = 逻辑型 注释 = "初始化设备,之后在接收事件\"输出输入\"中处理输出/输出数据."
-            返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
+            返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 设备号 <类型 = 整数 注释 = "所欲使用的设备. -1=默认输出设备, -2=默认输入设备, -3=默认环回输入设备;" 注释 = "可使用\"取所有设备信息\"枚举可用设备."
             @默认值 = -1>
     参数 采样率 <类型 = 整数 注释 = "采样率,0=\"混合格式\"采样率." @默认值 = 0>
@@ -225,8 +225,8 @@
             注释 = "如果指定的周期低于最小更新周期,将自动升高;" 注释 = "当指定BASS_WASAPI_EVENT标志时,此选项将被忽略,但在Windows 10且\"缓冲长度\"=0的共享模式下除外."
             @默认值 = 0>
     {
-        @ return wasapi.BASS_WASAPI_Init(@<设备号>, static_cast<DWORD>(@<采样率>), static_cast<DWORD>(@<声道>), static_cast<DWORD>(@<标志>),
-        @                                @<缓冲长度>, @<周期>, reinterpret_cast<WASAPIPROC*>(&@<输出输入回调>), this);
+        @ BassWasApi::Fn().BASS_WASAPI_Init(@<设备号>, static_cast<DWORD>(@<采样率>), static_cast<DWORD>(@<声道>), static_cast<DWORD>(@<标志>),
+        @    @<缓冲长度>, @<周期>, &@sn<current_class_def>::WasApiBuffer, &@sn<this>)
     }
 
     方法 初始化_通道 <公开 类型 = 逻辑型 注释 = "初始化设备,本方法不启用接收事件\"输出输入\",而是从BASS通道交换数据."
@@ -244,7 +244,7 @@
             注释 = "如果指定的周期低于最小更新周期,将自动升高;" 注释 = "当指定BASS_WASAPI_EVENT标志时,此选项将被忽略,但在Windows 10且\"缓冲长度\"=0的共享模式下除外."
             @默认值 = 0>
     {
-        @ @sn<this>.wasapi.BASS_WASAPI_Init(@<设备号>, 0, 0, static_cast<DWORD>(@<标志>), @<缓冲长度>, @<周期>, WASAPIPROC_BASS, reinterpret_cast<void*>(@<BASS通道>))
+        @ BassWasApi::Fn().BASS_WASAPI_Init(@<设备号>, 0, 0, static_cast<DWORD>(@<标志>), @<缓冲长度>, @<周期>, WASAPIPROC_BASS, reinterpret_cast<void*>(@<BASS通道>))
     }
 
     方法 初始化_推送 <公开 类型 = 逻辑型
@@ -263,15 +263,15 @@
             注释 = "如果指定的周期低于最小更新周期,将自动升高;" 注释 = "当指定BASS_WASAPI_EVENT标志时,此选项将被忽略,但在Windows 10且\"缓冲长度\"=0的共享模式下除外."
             @默认值 = 0>
     {
-        @ @sn<this>.wasapi.BASS_WASAPI_Init(@<设备号>, static_cast<DWORD>(@<采样率>), static_cast<DWORD>(@<声道>), static_cast<DWORD>(@<标志>),
-        @                                   @<缓冲长度>, @<周期>, (WASAPIPROC*)WASAPIPROC_PUSH, NULL);
+        @ BassWasApi::Fn().BASS_WASAPI_Init(@<设备号>, static_cast<DWORD>(@<采样率>), static_cast<DWORD>(@<声道>), static_cast<DWORD>(@<标志>),
+        @    @<缓冲长度>, @<周期>, (WASAPIPROC*)WASAPIPROC_PUSH, NULL);
     }
 
     方法 释放 <公开 类型 = 逻辑型 注释 = "释放输出输入设备. 退出程序前应该释放设备,但不需要用户手段调用,类析构的时候会自动调用."
             注释 = "独占模式下,只要初始化后就会一直独占设备,如果想在停止播放的时候转让给其他应用,就应该调用释放."
             返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.wasapi.BASS_WASAPI_Free()
+        @ BassWasApi::Fn().BASS_WASAPI_Free()
     }
 
     方法 取信息 <公开 类型 = 逻辑型 注释 = "获取当前所用设备的信息" 返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
@@ -279,7 +279,7 @@
     参数 信息 <类型 = BASS_WASAPI_信息 注释 = "返回的信息">
     {
         @ BASS_WASAPI_INFO info;
-        @ if (wasapi.BASS_WASAPI_GetInfo(&info)) {
+        @ if (BassWasApi::Fn().BASS_WASAPI_GetInfo(&info)) {
         @     @<信息>.SetStruct((@dt<BASS_WASAPI_信息>::S*)&info);
         @     return TRUE;
         @ }
@@ -288,7 +288,7 @@
 
     方法 取CPU使用率 <公开 类型 = 单精度小数 注释 = "获取BASSWASAPI当前的CPU使用率" 返回值注释 = "返回CPU使用率" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.wasapi.BASS_WASAPI_GetCPU()
+        @ BassWasApi::Fn().BASS_WASAPI_GetCPU()
     }
 
     方法 锁定设备 <公开 类型 = 逻辑型 注释 = "将设备锁定到当前线程. 锁定设备会阻止其他线程访问设备缓冲区,包括WASAPIPROC回调函数."
@@ -296,13 +296,13 @@
             返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 是否锁定 <类型 = 逻辑型 注释 = "真为锁定,假为解锁">
     {
-        @ @sn<this>.wasapi.BASS_WASAPI_Lock(@<是否锁定>)
+        @ BassWasApi::Fn().BASS_WASAPI_Lock(@<是否锁定>)
     }
 
     方法 开启设备 <公开 类型 = 逻辑型 注释 = "开启或恢复设备." 返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
             @嵌入式方法 = "">
     {
-        @ @sn<this>.wasapi.BASS_WASAPI_Start()
+        @ BassWasApi::Fn().BASS_WASAPI_Start()
     }
 
     方法 停止设备 <公开 类型 = 逻辑型 注释 = "停止设备."
@@ -311,12 +311,12 @@
             折叠 @嵌入式方法 = "">
     参数 是否重置 <类型 = 逻辑型 注释 = "是否刷新设备缓冲区" @默认值 = 真>
     {
-        @ @sn<this>.wasapi.BASS_WASAPI_Stop(@<是否重置>)
+        @ BassWasApi::Fn().BASS_WASAPI_Stop(@<是否重置>)
     }
 
     方法 是否已启动 <公开 类型 = 逻辑型 注释 = "检查是否已经开始处理" 返回值注释 = "设备已启动返回真,其他返回假." 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.wasapi.BASS_WASAPI_IsStarted()
+        @ BassWasApi::Fn().BASS_WASAPI_IsStarted()
     }
 
     方法 置音量 <公开 类型 = 逻辑型 注释 = "设置输出设备的主音量" 返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
@@ -328,7 +328,7 @@
     参数 音量 <类型 = 单精度小数 注释 = "使用线性或Windows曲线时音量范围为0(静音)到1(最大值). 其他为dB级别;"
             注释 = "设备的有效dB级别范围请用\"取输出信息/BASS_WASAPI_GetInfo\"获取.">
     {
-        @ @sn<this>.wasapi.BASS_WASAPI_SetVolume(static_cast<DWORD>(@<模式>), @<音量>)
+        @ BassWasApi::Fn().BASS_WASAPI_SetVolume(static_cast<DWORD>(@<模式>), @<音量>)
     }
 
     方法 取音量 <公开 类型 = 单精度小数 注释 = "获取当前的主音量级别"
@@ -338,7 +338,7 @@
             注释 = " 2=BASS_WASAPI_CURVE_WINDOWS 使用WINDOWS的Hybrid曲线,跟WINDOWS的音量控制一样;"
             注释 = " 8=BASS_WASAPI_VOL_SESSION 获取会话的音量,其他为设备音量;" @默认值 = 2>
     {
-        @ @sn<this>.wasapi.BASS_WASAPI_GetVolume(static_cast<DWORD>(@<模式>))
+        @ BassWasApi::Fn().BASS_WASAPI_GetVolume(static_cast<DWORD>(@<模式>))
     }
 
     方法 置静音 <公开 类型 = 逻辑型 注释 = "使设备静音或取消静音" 返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
@@ -349,7 +349,7 @@
             注释 = " 8=BASS_WASAPI_VOL_SESSION 获取会话的音量,其他为设备音量;" @默认值 = 0>
     参数 是否静音 <类型 = 逻辑型 注释 = "是否将设备静音,真为静音,假为取消静音.">
     {
-        @ @sn<this>.wasapi.BASS_WASAPI_SetMute(static_cast<DWORD>(@<模式>), @<是否静音>)
+        @ BassWasApi::Fn().BASS_WASAPI_SetMute(static_cast<DWORD>(@<模式>), @<是否静音>)
     }
 
     方法 取静音 <公开 类型 = 逻辑型 注释 = "获取设备的静音状态" 返回值注释 = "成功返回静音的状态(真为静音)." 折叠 @嵌入式方法 = "">
@@ -358,7 +358,7 @@
             注释 = " 2=BASS_WASAPI_CURVE_WINDOWS 使用WINDOWS的Hybrid曲线,跟WINDOWS的音量控制一样;"
             注释 = " 8=BASS_WASAPI_VOL_SESSION 获取会话的音量,其他为设备音量;" @默认值 = 0>
     {
-        @ @sn<this>.wasapi.BASS_WASAPI_GetMute(static_cast<DWORD>(@<模式>))
+        @ BassWasApi::Fn().BASS_WASAPI_GetMute(static_cast<DWORD>(@<模式>))
     }
 
     方法 置数据 <公开 类型 = 整数 注释 = "将样本数据添加到输出设备缓冲区."
@@ -366,7 +366,7 @@
     参数 缓冲区 <类型 = 变整数 注释 = "样本数据的指针">
     参数 长度 <类型 = 整数 注释 = "数据的字节大小">
     {
-        @ static_cast<INT>(@sn<this>.wasapi.BASS_WASAPI_PutData(reinterpret_cast<void*>(@<缓冲区>), static_cast<DWORD>(@<长度>)))
+        @ static_cast<INT>(BassWasApi::Fn().BASS_WASAPI_PutData(reinterpret_cast<void*>(@<缓冲区>), static_cast<DWORD>(@<长度>)))
     }
 
     方法 取数据 <公开 类型 = 整数 注释 = "获取即时的样本数据或其FFT信号." 返回值注释 = "失败返回-1,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息.."
@@ -375,14 +375,14 @@
     参数 缓冲区 <类型 = 变整数 注释 = "用来接收数据的缓冲区指针.">
     参数 长度 <类型 = 整数 注释 = "你想要获取的数据字节数,也可以使用\"BASS_通道数据类型\"中常量的组合值.">
     {
-        @ static_cast<INT>(@sn<this>.wasapi.BASS_WASAPI_GetData(reinterpret_cast<void*>(@<缓冲区>), static_cast<DWORD>(@<长度>)))
+        @ static_cast<INT>(BassWasApi::Fn().BASS_WASAPI_GetData(reinterpret_cast<void*>(@<缓冲区>), static_cast<DWORD>(@<长度>)))
     }
 
     方法 置数据2 <公开 类型 = 整数 注释 = "将样本数据添加到输出设备缓冲区." 注释 = "\"置数据\"的二次封装版本,缓冲区改成字节集类,而原始版本更适合在回调事件中使用."
             返回值注释 = "成功返回使用的数据量,否则返回-1.可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
     参数 缓冲区 <类型 = 字节集类 注释 = "样本数据">
     {
-        @ return static_cast<INT>(wasapi.BASS_WASAPI_PutData(reinterpret_cast<void*>(@<缓冲区>.GetPtr()), static_cast<DWORD>(@<缓冲区>.GetSize())));
+        @ return static_cast<INT>(BassWasApi::Fn().BASS_WASAPI_PutData(reinterpret_cast<void*>(@<缓冲区>.GetPtr()), static_cast<DWORD>(@<缓冲区>.GetSize())));
     }
 
     方法 取数据2 <公开 类型 = 整数 注释 = "获取即时的样本数据或其FFT信号." 注释 = "\"取数据\"的二次封装版本,缓冲区改成字节集类,而原始版本更适合在回调事件中使用."
@@ -440,14 +440,14 @@
             缓冲区长度 = 长度  // 不是FFT,则使用长度参数中的数值
         }
         缓冲区.分配字节集 (缓冲区长度)
-        @ return static_cast<INT>(wasapi.BASS_WASAPI_GetData(reinterpret_cast<void*>(@<缓冲区>.GetPtr()), static_cast<DWORD>(@<长度>)));
+        @ return static_cast<INT>(BassWasApi::Fn().BASS_WASAPI_GetData(reinterpret_cast<void*>(@<缓冲区>.GetPtr()), static_cast<DWORD>(@<长度>)));
     }
 
     方法 取电平 <公开 类型 = 整数 注释 = "获取电平(峰值振幅)" 返回值注释 = "失败返回-1,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
             返回值注释 = "如果成功,左声道的电平在低位(低16位),右声道在高位(高16位)返回,若通道为单声道,则低位与高位重复."
             返回值注释 = "该级别的线性范围为0(无声)到32768(最大).通道暂停时将返回0." 折叠 @嵌入式方法 = "">
     {
-        @ static_cast<INT>(@sn<this>.wasapi.BASS_WASAPI_GetLevel())
+        @ static_cast<INT>(BassWasApi::Fn().BASS_WASAPI_GetLevel())
     }
 
     方法 取电平EX <公开 类型 = 逻辑型 注释 = "获取电平(峰值振幅)" 返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
@@ -464,42 +464,26 @@
         @ if (@<应用属性>) flags |= BASS_LEVEL_VOLPAN;
         @ if (@<声道> == 1) {
         @     @<电平数据>.data().InitCount(1, TRUE);
-        @     ret = wasapi.BASS_WASAPI_GetLevelEx(@<电平数据>.data().GetData(), @<数据长度>, flags);
+        @     ret = BassWasApi::Fn().BASS_WASAPI_GetLevelEx(@<电平数据>.data().GetData(), @<数据长度>, flags);
         @ } else if (@<声道> == 2) {
         @     @<电平数据>.data().InitCount(2, TRUE);
-        @     ret = wasapi.BASS_WASAPI_GetLevelEx(@<电平数据>.data().GetData(), @<数据长度>, flags);
+        @     ret = BassWasApi::Fn().BASS_WASAPI_GetLevelEx(@<电平数据>.data().GetData(), @<数据长度>, flags);
         @ } else {
         @     BASS_WASAPI_INFO ci;
-        @     wasapi.BASS_WASAPI_GetInfo(&ci);
+        @     BassWasApi::Fn().BASS_WASAPI_GetInfo(&ci);
         @     @<电平数据>.data().InitCount(ci.chans, TRUE);
-        @     ret = wasapi.BASS_WASAPI_GetLevelEx(@<电平数据>.data().GetData(), @<数据长度>, flags);
+        @     ret = BassWasApi::Fn().BASS_WASAPI_GetLevelEx(@<电平数据>.data().GetData(), @<数据长度>, flags);
         @ }
         @ return ret;
     }
 
-    # 内部使用的回调方法
-
-    方法 通知回调 <静态 折叠>
-    参数 通知 <类型 = 整数>
-    参数 设备号 <类型 = 整数>
-    参数 用户数据 <类型 = 变整数>
-    {
-        读指针处对象 (用户数据, BASS_WASAPI类).通知 (通知, 设备号)
-    }
-
-    方法 输出输入回调 <静态 类型 = 整数 折叠>
-    参数 缓冲区 <类型 = 变整数>
-    参数 数据长度 <类型 = 整数>
-    参数 用户数据 <类型 = 变整数>
-    {
-        返回 (读指针处对象 (用户数据, BASS_WASAPI类).输出输入 (缓冲区, 数据长度))
-    }
-
     # @begin
     # <> <include>
-    # BassWasApi & wasapi = BassWasApi::data();
-    # inline void @an<_OnInitExtra>() {
-    #     ASSERT(wasapi.Load() == TRUE);
+    # static void CALLBACK WasApiNotify(DWORD notify, DWORD device, void *user) {
+    #     reinterpret_cast<@sn<current_class>*>(user)->@<通知>(static_cast<INT>(notify), static_cast<INT>(device));
+    # }
+    # static DWORD CALLBACK WasApiBuffer(void *buffer, DWORD length, void *user) {
+    #     return static_cast<DWORD>(reinterpret_cast<@sn<current_class>*>(user)->@<输出输入>(reinterpret_cast<INT_P>(buffer), static_cast<INT>(length)));
     # }
     # <> </include>
     # @end
@@ -511,8 +495,9 @@
         @视窗.附属文件 = "BASS\\$(p)\\bassmix.dll" @文档 = "category = \"BASS混合器\"">
 {
     方法 加载动态库 <公开 静态 类型 = 逻辑型 注释 = "程序默认在执行本类的函数时加载与程序文件同位置的DLL文件."
-            注释 = "如果你想将DLL放在其他位置,请在执行其他方法前调用本方法手动加载." 折叠 @嵌入式方法 = "req_str_param_text_pointer = true">
-    参数 动态库路径 <类型 = 文本型 注释 = "bassmix.dll的路径">
+            注释 = "如果你想将DLL放在其他位置,请在执行其他方法前调用本方法手动加载." 注释 = "注意: 请尽量在启动方法中加载,且不应将本对象的实例定义在启动类内." 折叠
+            @嵌入式方法 = "req_str_param_text_pointer = true">
+    参数 动态库路径 <类型 = 文本型 注释 = "bassBassMix::Fn().dll的路径">
     {
         @ BassMix::data().Load(@<动态库路径>)
     }
@@ -525,7 +510,7 @@
     方法 取版本 <公开 类型 = 整数 注释 = "获取已加载的BASSmix的版本号" 返回值注释 = "返回BASSmix版本,其中高16位为主版本号,低16位为修订版本号;"
             返回值注释 = "例: 0x02040103(十六进制) = 2.4.1.3" 折叠 @嵌入式方法 = "">
     {
-        @ static_cast<INT>(@sn<this>.mix.BASS_Mixer_GetVersion())
+        @ static_cast<INT>(BassMix::Fn().BASS_Mixer_GetVersion())
     }
 
     # 混合器流
@@ -539,7 +524,7 @@
             注释 = " BASS_SAMPLE_FX、BASS_STREAM_AUTOFREE、BASS_STREAM_DECODE、BASS_SPEAKER_xxx"
             注释 = " BASS_混合器标志: BASS_MIXER_END、BASS_MIXER_NONSTOP、BASS_MIXER_POSEX、BASS_MIXER_RESUME" @默认值 = 0>
     {
-        @ static_cast<INT>(@sn<this>.mix.BASS_Mixer_StreamCreate(static_cast<DWORD>(@<采样率>), static_cast<DWORD>(@<声道>), static_cast<DWORD>(@<标志>)))
+        @ static_cast<INT>(BassMix::Fn().BASS_Mixer_StreamCreate(static_cast<DWORD>(@<采样率>), static_cast<DWORD>(@<声道>), static_cast<DWORD>(@<标志>)))
     }
 
     方法 加入通道 <公开 类型 = 逻辑型 注释 = "将一条通道插入到混合器" 返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
@@ -551,7 +536,7 @@
             注释 = " BASS_混合器标志: BASS_MIXER_CHAN_BUFFER、BASS_MIXER_CHAN_DOWNMIX、BASS_MIXER_CHAN_LIMIT、"
             注释 = " BASS_MIXER_CHAN_MATRIX、BASS_MIXER_CHAN_NORAMPIN、BASS_MIXER_CHAN_PAUSE" @默认值 = 0>
     {
-        @ @sn<this>.mix.BASS_Mixer_StreamAddChannel(static_cast<HSTREAM>(@<混合器句柄>), static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<标志>))
+        @ BassMix::Fn().BASS_Mixer_StreamAddChannel(static_cast<HSTREAM>(@<混合器句柄>), static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<标志>))
     }
 
     方法 加入通道EX <公开 类型 = 逻辑型 注释 = "将一条通道插入到混合器,可以选择延迟开始和限制长度."
@@ -566,7 +551,8 @@
     参数 延迟开始 <类型 = 长整数 注释 = "进入混合器之前的延迟(单位为字节)" @默认值 = 0>
     参数 长度 <类型 = 长整数 注释 = "混合的最大数据量(单位为字节),0=无限制;" 注释 = "一旦到达该值,通道将从混合器中移除." @默认值 = 0>
     {
-        @ @sn<this>.mix.BASS_Mixer_StreamAddChannelEx(static_cast<HSTREAM>(@<混合器句柄>), static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<标志>), static_cast<QWORD>(@<延迟开始>), static_cast<QWORD>(@<长度>))
+        @ BassMix::Fn().BASS_Mixer_StreamAddChannelEx(static_cast<HSTREAM>(@<混合器句柄>), static_cast<DWORD>(@<通道句柄>),
+        @     static_cast<DWORD>(@<标志>), static_cast<QWORD>(@<延迟开始>), static_cast<QWORD>(@<长度>))
     }
 
     方法 取混合器源通道 <公开 类型 = 整数 注释 = "获取混合器的源通道"
@@ -574,9 +560,9 @@
     参数 混合器句柄 <类型 = 整数 注释 = "混合器的句柄" "">
     参数 通道数组 <类型 = 整数数组类 注释 = "接收混合器源通道句柄的数组">
     {
-        @ INT count = static_cast<INT>(mix.BASS_Mixer_StreamGetChannels(static_cast<HSTREAM>(@<混合器句柄>), NULL, 0));
+        @ INT count = static_cast<INT>(BassMix::Fn().BASS_Mixer_StreamGetChannels(static_cast<HSTREAM>(@<混合器句柄>), NULL, 0));
         @ @<通道数组>.data().InitCount(count, TRUE);
-        @ mix.BASS_Mixer_StreamGetChannels(static_cast<HSTREAM>(@<混合器句柄>), reinterpret_cast<DWORD*>(@<通道数组>.data().GetData()), static_cast<DWORD>(count));
+        @ BassMix::Fn().BASS_Mixer_StreamGetChannels(static_cast<HSTREAM>(@<混合器句柄>), reinterpret_cast<DWORD*>(@<通道数组>.data().GetData()), static_cast<DWORD>(count));
         @ return count;
     }
 
@@ -584,13 +570,13 @@
             返回值注释 = "成功返回混合器流的句柄,失败返回0,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道的句柄">
     {
-        @ static_cast<INT>(@sn<this>.mix.BASS_Mixer_ChannelGetMixer(static_cast<DWORD>(@<通道句柄>)))
+        @ static_cast<INT>(BassMix::Fn().BASS_Mixer_ChannelGetMixer(static_cast<DWORD>(@<通道句柄>)))
     }
 
     方法 取混合器通道状态 <公开 类型 = 整数 注释 = "获取混合器源通道的状态,返回值请参考\"BASS_通道状态\"中的常量." 折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "通道的句柄">
     {
-        @ static_cast<INT>(@sn<this>.mix.BASS_Mixer_ChannelIsActive(static_cast<DWORD>(@<通道句柄>)))
+        @ static_cast<INT>(BassMix::Fn().BASS_Mixer_ChannelIsActive(static_cast<DWORD>(@<通道句柄>)))
     }
 
     方法 置取通道标志 <公开 类型 = 整数 注释 = "修改和获取通道的标志" 返回值注释 = "成功返回通道的新标志,失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
@@ -604,14 +590,14 @@
             注释 = "如果要添加标志,则需要在\"标志\"和\"掩码\"参数里都有一样的标志;" 注释 = "如果要移除标志,则在此参数填写要移除的标志,且确保这个标志不在\"标志参数\"中;"
             注释 = "要修改扬声器标志,可以在本参数中使用任意的\"BASS_SPEAKER_xxx\"标志(无需包括其所有标志).">
     {
-        @ static_cast<INT>(@sn<this>.mix.BASS_Mixer_ChannelFlags(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<标志>), static_cast<DWORD>(@<掩码>)))
+        @ static_cast<INT>(BassMix::Fn().BASS_Mixer_ChannelFlags(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<标志>), static_cast<DWORD>(@<掩码>)))
     }
 
     方法 删除通道 <公开 类型 = 逻辑型 注释 = "从混合器中移除一条通道" 返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
             折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "要从混合器中移除的通道">
     {
-        @ @sn<this>.mix.BASS_Mixer_ChannelRemove(static_cast<DWORD>(@<通道句柄>))
+        @ BassMix::Fn().BASS_Mixer_ChannelRemove(static_cast<DWORD>(@<通道句柄>))
     }
 
     # 混合器源通道(部分方法跟BASS音频类的一样)
@@ -625,7 +611,7 @@
             注释 = "以及混合器的以下两个标志:" 注释 = " BASS_MIXER_CHAN_NORAMPIN (0x800000) 开始播放时不淡入"
             注释 = " BASS_POS_MIXER_RESET (0x10000) 清空播放缓冲区" @默认值 = BASS_位置类型.BASS_POS_BYTE>
     {
-        @ @sn<this>.mix.BASS_Mixer_ChannelSetPosition(static_cast<DWORD>(@<通道句柄>), static_cast<QWORD>(@<播放位置>), static_cast<DWORD>(@<位置模式>))
+        @ BassMix::Fn().BASS_Mixer_ChannelSetPosition(static_cast<DWORD>(@<通道句柄>), static_cast<QWORD>(@<播放位置>), static_cast<DWORD>(@<位置模式>))
     }
 
     方法 取播放位置 <公开 类型 = 长整数 注释 = "获取混合器源通道的播放位置"
@@ -635,7 +621,7 @@
             注释 = " 1 = BASS_POS_MUSIC_ORDER,获取顺序长度(仅限MOD音乐)" 注释 = " 可选位或标志 BASS_POS_DECODE"
             @默认值 = BASS_位置类型.BASS_POS_BYTE>
     {
-        @ static_cast<INT64>(@sn<this>.mix.BASS_Mixer_ChannelGetPosition(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<位置模式>)))
+        @ static_cast<INT64>(BassMix::Fn().BASS_Mixer_ChannelGetPosition(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<位置模式>)))
     }
 
     方法 取播放位置EX <公开 类型 = 长整数 注释 = "获取混合器源通道的播放位置,可选加上延迟的影响."
@@ -646,7 +632,7 @@
             @默认值 = BASS_位置类型.BASS_POS_BYTE>
     参数 延迟 <类型 = 整数 注释 = "从混合器输出到取得源通道位置的距离(单位为字节)" @默认值 = 0>
     {
-        @ static_cast<INT64>(@sn<this>.mix.BASS_Mixer_ChannelGetPositionEx(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<位置模式>), static_cast<DWORD>(@<延迟>)))
+        @ static_cast<INT64>(BassMix::Fn().BASS_Mixer_ChannelGetPositionEx(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<位置模式>), static_cast<DWORD>(@<延迟>)))
     }
 
     方法 取通道电平 <公开 类型 = 整数 注释 = "获取混合器源通道的电平级别(峰值振幅)."
@@ -655,7 +641,7 @@
             返回值注释 = "该级别的线性范围为0(无声)到32768(最大).通道暂停时将返回0." 折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "源通道的句柄">
     {
-        @ static_cast<INT>(@sn<this>.mix.BASS_Mixer_ChannelGetLevel(static_cast<DWORD>(@<通道句柄>)))
+        @ static_cast<INT>(BassMix::Fn().BASS_Mixer_ChannelGetLevel(static_cast<DWORD>(@<通道句柄>)))
     }
 
     方法 取立体声电平 <公开 类型 = 逻辑型 注释 = "获取混合器源通道的通道级别(峰值振幅),本方法用于返回立体声的左右声道电平." 返回值注释 = "返回是否成功" 折叠 "">
@@ -692,10 +678,10 @@
         @     @<电平数据>.data().InitCount(2, TRUE);
         @ } else {
         @     BASS_CHANNELINFO ci;
-        @     mix.BASS_ChannelGetInfo(@<通道句柄>, &ci);
+        @     BassMix::Fn().BASS_ChannelGetInfo(@<通道句柄>, &ci);
         @     @<电平数据>.data().InitCount(ci.chans, TRUE);
         @ }
-        @ return mix.BASS_Mixer_ChannelGetLevelEx(static_cast<DWORD>(@<通道句柄>), @<电平数据>.data().GetData(), @<数据长度>, flags);
+        @ return BassMix::Fn().BASS_Mixer_ChannelGetLevelEx(static_cast<DWORD>(@<通道句柄>), @<电平数据>.data().GetData(), @<数据长度>, flags);
     }
 
     方法 取通道数据 <公开 类型 = 整数 注释 = "获取混合器源通道的即时样本数据(或其FFT信号)"
@@ -706,7 +692,7 @@
     参数 缓冲区 <类型 = 变整数 注释 = "用来接收数据的缓冲区指针;" 注释 = "当句柄是录制句柄(HRECORD)时,可以为0,以丢弃从录制缓冲区请求的数据." "">
     参数 长度 <类型 = 整数 注释 = "填写要获取的数据字节数(最多268435455或0xFFFFFFF),也可以使用\"BASS_通道数据类型\"中常量的组合值." "">
     {
-        @ static_cast<INT>(@sn<this>.mix.BASS_Mixer_ChannelGetData(static_cast<DWORD>(@<通道句柄>), reinterpret_cast<void*>(@<缓冲区>), static_cast<DWORD>(@<长度>)))
+        @ static_cast<INT>(BassMix::Fn().BASS_Mixer_ChannelGetData(static_cast<DWORD>(@<通道句柄>), reinterpret_cast<void*>(@<缓冲区>), static_cast<DWORD>(@<长度>)))
     }
 
     方法 同步回调 <公开 定义事件 类型 = 整数 注释 = "执行\"置通道同步器\",可以在本事件中处理同步回调." 返回值注释 = "返回值无意义" 折叠>
@@ -715,12 +701,13 @@
     参数 数据 <类型 = 整数 注释 = "与同步类型关联的其他数据">
 
     方法 置通道同步器 <公开 类型 = 整数 注释 = "在混合器源通道上设置同步器,可以在接收事件\"同步回调\"中处理同步操作."
-            返回值注释 = "成功返回同步句柄,失败返回0,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @禁止流程检查 = 真>
+            返回值注释 = "成功返回同步句柄,失败返回0,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 通道句柄 <类型 = 整数 注释 = "源通道的句柄">
     参数 同步类型 <类型 = 整数 注释 = "同步的类型,为\"BASS_同步类型\"中常量的组合值.">
     参数 同步参数 <类型 = 长整数 注释 = "设置同步参数. 参数值取决于同步类型,详细请看\"BASS_同步类型\"的常量备注.">
     {
-        @ return static_cast<INT>(mix.BASS_Mixer_ChannelSetSync(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<同步类型>), static_cast<QWORD>(@<同步参数>), reinterpret_cast<SYNCPROC*>(&@<同步回调函数>), this));
+        @ static_cast<INT>(BassMix::Fn().BASS_Mixer_ChannelSetSync(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<同步类型>),
+        @    static_cast<QWORD>(@<同步参数>), &@sn<current_class_def>::MixSync, &@sn<this>))
     }
 
     方法 移除通道同步器 <公开 类型 = 逻辑型 注释 = "从混合器源通道上移除同步器"
@@ -728,7 +715,7 @@
     参数 通道句柄 <类型 = 整数 注释 = "源通道的句柄">
     参数 同步句柄 <类型 = 整数 注释 = "欲移除的同步句柄">
     {
-        @ @sn<this>.mix.BASS_Mixer_ChannelRemoveSync(static_cast<DWORD>(@<通道句柄>), static_cast<HSYNC>(@<同步句柄>))
+        @ BassMix::Fn().BASS_Mixer_ChannelRemoveSync(static_cast<DWORD>(@<通道句柄>), static_cast<HSYNC>(@<同步句柄>))
     }
 
     方法 置通道矩阵 <公开 类型 = 逻辑型 注释 = "设置通道的混合矩阵" 返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
@@ -736,7 +723,7 @@
     参数 通道句柄 <类型 = 整数 注释 = "通道的句柄">
     参数 矩阵 <类型 = "单精度小数 [][]" 注释 = "矩阵,为二维单精度小数数组.">
     {
-        @ @sn<this>.mix.BASS_Mixer_ChannelSetMatrix(static_cast<DWORD>(@<通道句柄>), @<矩阵>)
+        @ BassMix::Fn().BASS_Mixer_ChannelSetMatrix(static_cast<DWORD>(@<通道句柄>), @<矩阵>)
     }
 
     方法 置通道矩阵EX <公开 类型 = 逻辑型 注释 = "设置通道的混合矩阵,从当前矩阵转换."
@@ -745,7 +732,7 @@
     参数 矩阵 <类型 = "单精度小数 [][]" 注释 = "矩阵,为二维单精度小数数组.">
     参数 时间 <类型 = 单精度小数 注释 = "从当前矩阵转换到指定矩阵所需的时间(秒)">
     {
-        @ @sn<this>.mix.BASS_Mixer_ChannelSetMatrixEx(static_cast<DWORD>(@<通道句柄>), @<矩阵>, @<时间>)
+        @ BassMix::Fn().BASS_Mixer_ChannelSetMatrixEx(static_cast<DWORD>(@<通道句柄>), @<矩阵>, @<时间>)
     }
 
     方法 取通道矩阵 <公开 类型 = 逻辑型 注释 = "获取存在的通道的混合矩阵"
@@ -753,7 +740,7 @@
     参数 通道句柄 <类型 = 整数 注释 = "通道的句柄">
     参数 矩阵 <类型 = "单精度小数 [][]" 注释 = "返回的矩阵,为二维单精度小数数组.">
     {
-        @ @sn<this>.mix.BASS_Mixer_ChannelGetMatrix(static_cast<DWORD>(@<通道句柄>), @<矩阵>)
+        @ BassMix::Fn().BASS_Mixer_ChannelGetMatrix(static_cast<DWORD>(@<通道句柄>), @<矩阵>)
     }
 
     方法 置通道包络线 <公开 类型 = 逻辑型 注释 = "设置包络线以在一个周期时间内修改通道的采样率、音量或声像."
@@ -764,7 +751,8 @@
             注释 = " 0x10000 BASS_MIXER_ENV_LOOP   循环包络线" 注释 = " 0x20000 BASS_MIXER_ENV_REMOVE 到达包络线的结尾时从混合器移除源通道">
     参数 节点数组 <类型 = BASS_MIXER_节点数组 注释 = "包络线节点的数组,应具有序列位置.">
     {
-        @ @sn<this>.mix.BASS_Mixer_ChannelSetEnvelope(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<类型>), reinterpret_cast<BASS_MIXER_NODE*>(@<节点数组.取数组指针>()), static_cast<DWORD>(@<节点数组.取成员数>()))
+        @ BassMix::Fn().BASS_Mixer_ChannelSetEnvelope(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<类型>),
+        @     reinterpret_cast<BASS_MIXER_NODE*>(@<节点数组.取数组指针>()), static_cast<DWORD>(@<节点数组.取成员数>()))
     }
 
     方法 置通道包络线位置 <公开 类型 = 逻辑型 注释 = "设置通道包络线的当前位置"
@@ -774,7 +762,7 @@
             注释 = " 2 BASS_MIXER_ENV_VOL   音量" 注释 = " 3 BASS_MIXER_ENV_PAN   声像">
     参数 位置 <类型 = 长整数 注释 = "新包络线位置,单位为字节;" 注释 = "如果超出包络线末端,则包络线将被封顶或循环,具体取决于包络线是否启用了循环.">
     {
-        @ @sn<this>.mix.BASS_Mixer_ChannelSetEnvelopePos(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<类型>), static_cast<DWORD>(@<位置>))
+        @ BassMix::Fn().BASS_Mixer_ChannelSetEnvelopePos(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<类型>), static_cast<DWORD>(@<位置>))
     }
 
     方法 取通道包络线位置 <公开 类型 = 长整数 注释 = "获取通道包络线的当前位置和值"
@@ -784,7 +772,7 @@
             注释 = " 2 BASS_MIXER_ENV_VOL   音量" 注释 = " 3 BASS_MIXER_ENV_PAN   声像">
     参数 值 <类型 = 单精度小数类 注释 = "返回包络线当前位置的值" @默认值 = 空对象>
     {
-        @ static_cast<INT64>(@sn<this>.mix.BASS_Mixer_ChannelGetEnvelopePos(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<类型>), &@<值.值>))
+        @ static_cast<INT64>(BassMix::Fn().BASS_Mixer_ChannelGetEnvelopePos(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<类型>), &@<值.值>))
     }
 
     # 分割流
@@ -797,15 +785,15 @@
             注释 = " BASS_STREAM_DECODE、BASS_SPEAKER_xxx" @默认值 = 0>
     参数 通道映射 <类型 = 整数数组类 注释 = "通道映射,指向通道索引数组(0=第一个,-1=数组末尾)的指针,空对象=一比一映射整个源" @默认值 = 空对象>
     {
-        @ return static_cast<INT>(mix.BASS_Split_StreamCreate(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<标志>),
-        @                         static_cast<DWORD>(@<标志>), @<通道映射>.data().IsEmpty() ? NULL : @<通道映射>.data().GetData()));
+        @ return static_cast<INT>(BassMix::Fn().BASS_Split_StreamCreate(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<标志>),
+        @    static_cast<DWORD>(@<标志>), @<通道映射>.data().IsEmpty() ? NULL : @<通道映射>.data().GetData()));
     }
 
     方法 取分离流源通道 <公开 类型 = 整数 注释 = "获取分离流的源通道"
             返回值注释 = "成功返回源通道的句柄,失败返回0,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 分离流句柄 <类型 = 整数 注释 = "分离流的句柄" "">
     {
-        @ static_cast<INT>(@sn<this>.mix.BASS_Split_StreamGetSource(static_cast<HSTREAM>(@<分离流句柄>)))
+        @ static_cast<INT>(BassMix::Fn().BASS_Split_StreamGetSource(static_cast<HSTREAM>(@<分离流句柄>)))
     }
 
     方法 取分离流 <公开 类型 = 整数 注释 = "获取通道所有的分离流"
@@ -813,9 +801,9 @@
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HMUSIC、HSTREAM或HRECORD句柄." "">
     参数 分离流数组 <类型 = 整数数组类 注释 = "返回分离流的句柄数组" @默认值 = 空对象>
     {
-        @ INT count = static_cast<INT>(mix.BASS_Split_StreamGetSplits(static_cast<HSTREAM>(@<通道句柄>), NULL, 0));
+        @ INT count = static_cast<INT>(BassMix::Fn().BASS_Split_StreamGetSplits(static_cast<HSTREAM>(@<通道句柄>), NULL, 0));
         @ @<分离流数组>.data().InitCount(count, TRUE);
-        @ mix.BASS_Split_StreamGetSplits(static_cast<DWORD>(@<通道句柄>), reinterpret_cast<HSTREAM *>(@<分离流数组>.data().GetData()), static_cast<DWORD>(count));
+        @ BassMix::Fn().BASS_Split_StreamGetSplits(static_cast<DWORD>(@<通道句柄>), reinterpret_cast<HSTREAM *>(@<分离流数组>.data().GetData()), static_cast<DWORD>(count));
         @ return count;
     }
 
@@ -823,7 +811,7 @@
             返回值注释 = "返回是否成功. 如果失败,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 流句柄 <类型 = 整数 注释 = "分离流或源通道的句柄" "">
     {
-        @ @sn<this>.mix.BASS_Split_StreamReset(static_cast<DWORD>(@<流句柄>))
+        @ BassMix::Fn().BASS_Split_StreamReset(static_cast<DWORD>(@<流句柄>))
     }
 
     方法 重置分离流EX <公开 类型 = 逻辑型 注释 = "重置分离流,并设置它在源缓冲区的位置."
@@ -831,32 +819,20 @@
     参数 分离流句柄 <类型 = 整数 注释 = "分离流的句柄" "">
     参数 偏移 <类型 = 整数 注释 = "在源缓冲区中放置分离器的距离(单位为字节).">
     {
-        @ @sn<this>.mix.BASS_Split_StreamResetEx(static_cast<DWORD>(@<分离流句柄>), static_cast<DWORD>(@<偏移>))
+        @ BassMix::Fn().BASS_Split_StreamResetEx(static_cast<DWORD>(@<分离流句柄>), static_cast<DWORD>(@<偏移>))
     }
 
     方法 取分离流可用缓冲区 <公开 类型 = 整数 注释 = "获取分流器可用的缓冲大小,或分流器源缓冲区中的数据量."
             返回值注释 = "返回数据量(单位为字节),失败返回-1,可以用BASS音频库的\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "">
     参数 流句柄 <类型 = 整数 注释 = "分离流或源通道的句柄" "">
     {
-        @ static_cast<INT>(@sn<this>.mix.BASS_Split_StreamGetAvailable(static_cast<DWORD>(@<流句柄>)))
-    }
-
-    # 内部使用的回调方法
-
-    方法 同步回调函数 <静态 折叠>
-    参数 同步句柄 <类型 = 整数 注释 = "同步器的句柄">
-    参数 通道句柄 <类型 = 整数 注释 = "进行同步的通道">
-    参数 数据 <类型 = 整数 注释 = "与同步类型关联的其他数据">
-    参数 用户数据 <类型 = 变整数>
-    {
-        读指针处对象 (用户数据, BASS混合器类).同步回调 (同步句柄, 通道句柄, 数据)
+        @ static_cast<INT>(BassMix::Fn().BASS_Split_StreamGetAvailable(static_cast<DWORD>(@<流句柄>)))
     }
 
     # @begin
     # <> <include>
-    # BassMix & mix = BassMix::data();
-    # inline void @an<_OnInitExtra>() {
-    #     ASSERT(mix.Load() == TRUE);
+    # static void CALLBACK MixSync(HSYNC handle, DWORD channel, DWORD data, void *user) {
+    #     reinterpret_cast<@sn<current_class>*>(user)->@<同步回调>(static_cast<INT>(handle), static_cast<INT>(channel), static_cast<INT>(data));
     # }
     # <> </include>
     # @end
@@ -871,7 +847,8 @@
         @强制依赖 = "BASS音频类">
 {
     方法 加载动态库 <公开 静态 类型 = 逻辑型 注释 = "程序默认在执行本类的函数时加载与程序文件同位置的DLL文件."
-            注释 = "如果你想将DLL放在其他位置,请在执行其他方法前调用本方法手动加载." 折叠 @嵌入式方法 = "req_str_param_text_pointer = true">
+            注释 = "如果你想将DLL放在其他位置,请在执行其他方法前调用本方法手动加载." 注释 = "注意: 请尽量在启动方法中加载." 折叠
+            @嵌入式方法 = "req_str_param_text_pointer = true">
     参数 动态库路径 <类型 = 文本型 注释 = "tags.dll的路径">
     {
         @ BassTags::data().Load(@<动态库路径>)

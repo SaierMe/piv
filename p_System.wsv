@@ -230,7 +230,7 @@
     }
 
     方法 全局处理事件 <公开 静态 注释 = "暂时转让控制权,以便让Windows操作系统有机会处理其它的如用户键盘或鼠标输入等事件."
-            注释 = "直到操作系统处理并发送完程序消息队列中的所有事件后,本方法才会返回.">
+            注释 = "直到操作系统处理并发送完程序消息队列中的所有事件后,本方法才会返回." 折叠>
     {
         @ MSG msg;
         @ while (::PeekMessage (&msg, NULL, NULL, NULL, PM_NOREMOVE) && msg.message != WM_QUIT)
@@ -621,7 +621,7 @@
     }
 }
 
-类 通用文件对话框 <公开 注释 = "调用系统的文件对话框选择文件." 折叠 @文档 = "category = \"文件操作\"" @禁止创建对象 = 真>
+类 通用文件对话框 <公开 注释 = "调用系统的文件对话框选择文件" 折叠 @文档 = "category = \"文件操作\"" @禁止创建对象 = 真>
 {
     方法 打开文件 <公开 静态 类型 = 逻辑型 注释 = "调用系统的文件对话框选择打开文件." 返回值注释 = "  返回是否成功,成功时在\"文件名\"参数中返回全路径文件名."
             返回值注释 = "  如失败或取消打开文件,则\"文件名\"参数返回空文本." 折叠 @禁止流程检查 = 真>
@@ -785,8 +785,9 @@
     # typedef BOOL(WINAPI* pChangeWindowMessageFilterEx)(HWND, UINT, DWORD, PVOID);
     # pChangeWindowMessageFilterEx API_ChangeWindowMessageFilterEx =
     #     (pChangeWindowMessageFilterEx)::GetProcAddress(::GetModuleHandle (L"User32.dll"), "ChangeWindowMessageFilterEx");
+    # static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
     # <> </include>
-    # LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    # LRESULT CALLBACK @sn<current_class>::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     #     @sn<current_class>* pThis = reinterpret_cast<@sn<current_class>*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
     #     if (pThis != NULL) {
     #         if (uMsg == WM_DROPFILES) {

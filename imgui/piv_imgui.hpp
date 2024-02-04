@@ -17,8 +17,18 @@
 #endif
 #include "../src/stb_image.h"
 
+#ifndef IM_ARRAY_AND_SIZE
 #define IM_ARRAY_AND_SIZE(_ARR) (_ARR), ((int)(sizeof(_ARR) / sizeof(*(_ARR))))
+#endif
+#ifndef IM_STRARRAY_PTR_AND_SIZE
 #define IM_STRARRAY_PTR_AND_SIZE(_ARR) (_ARR), ((int)((_ARR)->size()))
+#endif
+#ifndef GET_ImVec2_MaybeNull
+#define GET_ImVec2_MaybeNull(_vec, _x, _y) (_vec).IsNullObject() ? ImVec2((_x), (_y)) : (_vec).data()
+#endif
+#ifndef GET_ImVec4_MaybeNull
+#define GET_ImVec4_MaybeNull(_vec, _x, _y, _z, _w) (_vec).IsNullObject() ? ImVec4((_x), (_y), (_z), (_w)) : (_vec).data()
+#endif
 
 namespace ImGui
 {

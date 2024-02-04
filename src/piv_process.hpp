@@ -456,7 +456,7 @@ public:
     }
 
     // 寻找所有内存特征码
-    int32_t find_signatures(const wchar_t *signatures, CMArray<INT_P> &address_array, const BYTE *start_ptr, const BYTE *end_ptr, const ptrdiff_t &max_count = PTRDIFF_MAX)
+    int32_t find_signatures(const wchar_t *signatures, CMArray<INT_P> &address_array, const void *start_ptr, const void *end_ptr, const ptrdiff_t &max_count = PTRDIFF_MAX)
     {
         address_array.RemoveAll();
         if (hProcess == NULL)
@@ -466,8 +466,8 @@ public:
             if (!get_base_module_info())
                 return 0;
         }
-        const BYTE *StartAddress = MIN(MAX(ProcessStart, start_ptr), ProcessEnd);
-        const BYTE *EndAddress = (end_ptr == NULL) ? ProcessEnd : MAX(StartAddress, end_ptr);
+        const BYTE *StartAddress = reinterpret_cast<const BYTE *>(MIN(start_ptr, end_ptr));
+        const BYTE *EndAddress = (end_ptr == NULL) ? ProcessEnd : reinterpret_cast<const BYTE *>(MAX(StartAddress, end_ptr));
         const BYTE *RetAddress = 0;
         // 特征码转字节数组
         CVolMem sign_buf;
@@ -592,7 +592,7 @@ public:
     }
 
     // 寻找内存特征码
-    ptrdiff_t find_signatures(const wchar_t *signatures, const BYTE *start_ptr, const BYTE *end_ptr)
+    ptrdiff_t find_signatures(const wchar_t *signatures, const void *start_ptr, const void *end_ptr)
     {
         if (hProcess != NULL)
         {
@@ -606,7 +606,7 @@ public:
     }
 
     // 寻找所有内存字节集
-    int32_t find_memory(const CVolMem &mem_data, CMArray<INT_P> &address_array, const BYTE *start_ptr, const BYTE *end_ptr, const ptrdiff_t &max_count = PTRDIFF_MAX)
+    int32_t find_memory(const CVolMem &mem_data, CMArray<INT_P> &address_array, const void *start_ptr, const void *end_ptr, const ptrdiff_t &max_count = PTRDIFF_MAX)
     {
         address_array.RemoveAll();
         if (hProcess == NULL)
@@ -618,8 +618,8 @@ public:
             if (!get_base_module_info())
                 return 0;
         }
-        const BYTE *StartAddress = MIN(MAX(ProcessStart, start_ptr), ProcessEnd);
-        const BYTE *EndAddress = (end_ptr == NULL) ? ProcessEnd : MAX(StartAddress, end_ptr);
+        const BYTE *StartAddress = reinterpret_cast<const BYTE *>(MIN(start_ptr, ProcessEnd));
+        const BYTE *EndAddress = (end_ptr == NULL) ? ProcessEnd : reinterpret_cast<const BYTE *>(MAX(StartAddress, end_ptr));
         MEMORY_BASIC_INFORMATION mbi{0};
         CVolMem MemoryData;
         MemoryData.Alloc(BLOCKMAXSIZE, TRUE);
@@ -665,7 +665,7 @@ public:
     }
 
     // 寻找内存字节集
-    ptrdiff_t find_memory(const CVolMem &mem_data, const BYTE *start_ptr, const BYTE *end_ptr)
+    ptrdiff_t find_memory(const CVolMem &mem_data, const void *start_ptr, const void *end_ptr)
     {
         if (hProcess != NULL)
         {

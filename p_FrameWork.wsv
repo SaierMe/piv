@@ -44,6 +44,60 @@
     参数 所拖放文件 <类型 = 文本数组类 注释 = "提供所有被拖放到本组件上的文件名,数组成员数必定大于0.">
 
     方法 将被销毁 <公开 定义事件 类型 = 整数 注释 = "当本窗口被销毁前发送此事件">
+
+    方法 图标 <公开 属性写 注释 = "设置显示在本窗口左上角的图标" 折叠>
+    参数 所欲设置的图标 <类型 = 图标资源 注释 = "  本参数提供具体所欲设置的图标,如果该资源值为\"空资源.空图标\"" 注释 = "或载入失败,则将使用默认图标.">
+    {
+        @ HICON hIcon = reinterpret_cast<HICON>(g_objVolApp.LoadResImage(VRIT_ICON, @<所欲设置的图标>));
+        @ if (hIcon) {
+        @     ::SendMessage(m_hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+        @     ::SendMessage(m_hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+        @ }
+    }
+
+    方法 图标对象 <公开 属性写 注释 = "设置显示在本窗口左上角的图标" 折叠>
+    参数 所欲设置的图标 <类型 = 图标对象类 注释 = "  本参数提供具体所欲设置的图标对象."
+            注释 = "  注意: 在窗口存在期间必须保证本图标对象不被释放(可以将此对象保存在窗口类的成员变量中)," 注释 = "否则所置入图标将失效.">
+    {
+        @ HICON hIcon = reinterpret_cast<HICON>(@<所欲设置的图标>.GetGDIHandle());
+        @ if (hIcon) {
+        @     ::SendMessage(m_hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+        @     ::SendMessage(m_hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+        @ }
+    }
+
+    方法 隐藏任务栏图标 <公开 属性写 注释 = "是否将本窗口的图标从任务栏中删除" 折叠 "">
+    参数 是否隐藏 <类型 = 逻辑型>
+    {
+        @ if (m_hwnd == NULL) return;
+        @ if (this->TaskbarInit()) {
+        @     if (@<是否隐藏>)
+        @         this->m_pTaskbarList->DeleteTab(m_hwnd);
+        @     else
+        @         this->m_pTaskbarList->AddTab(m_hwnd);
+        @ }
+    }
+
+    # ---
+    # @begin
+    # <> <include>
+    # HWND m_hwnd = NULL;
+    # ITaskbarList* m_pTaskbarList = nullptr;
+    # BOOL TaskbarInit() {
+    #     if (!this->m_pTaskbarList) {
+    #         HRESULT hr = ::CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, IID_ITaskbarList, (LPVOID*)&this->m_pTaskbarList);
+    #         if (SUCCEEDED(hr)) { return SUCCEEDED(this->m_pTaskbarList->HrInit()); }
+    #     }
+    #     return TRUE;
+    # }
+    # void @an<_OnCleanupExtra>() {
+    #     if (this->m_pTaskbarList){
+    #         this->m_pTaskbarList->Release();
+    #         this->m_pTaskbarList = nullptr;
+    #     }
+    # }
+    # <> </include>
+    # @end
 }
 
 类 IM_Win32窗口 <公开 基础类 = IM_窗口模板类 注释 = "  基于Windows API的ImGui窗口,本模板类已经处理好ImGui创建和销毁的"
@@ -87,6 +141,7 @@
         变量 IO <类型 = ImGuiIO类>
         变量 样式 <类型 = IM样式类>
         @ if (m_window == NULL) goto Fail;
+        @ m_hwnd = m_window;
         @ if (@<透明帧缓冲区>) ImGui_ImplWin32_EnableAlphaCompositing(m_window);
         @ @<窗口句柄> = reinterpret_cast<INT_P>(m_window);
         如果 (渲染器.创建设备 (窗口句柄) == 假)
@@ -197,7 +252,8 @@
         @     ::DestroyWindow(m_window);
     }
 
-    方法 取窗口句柄 <公开 类型 = 变整数 注释 = "返回当前窗口组件的句柄,如果尚未创建或创建失败,则返回0." 折叠 @嵌入式方法 = "">
+    方法 取窗口句柄 <公开 类型 = 变整数 注释 = "返回本窗口的句柄,如果尚未创建或创建失败,则返回0." 注释 = "注意: 返回的是Win32窗口句柄,可以使用Win32的API进行操作." 折叠
+            @嵌入式方法 = "">
     {
         @ reinterpret_cast<INT_P>(@sn<this>.m_window)
     }
@@ -364,27 +420,6 @@
         @     ::SetWindowTextW(m_window, @<所欲设置的标题>.GetText());
     }
 
-    方法 图标 <公开 属性写 注释 = "设置显示在本窗口左上角的图标" 折叠>
-    参数 所欲设置的图标 <类型 = 图标资源 注释 = "  本参数提供具体所欲设置的图标,如果该资源值为\"空资源.空图标\"" 注释 = "或载入失败,则将使用默认图标.">
-    {
-        @ HICON hIcon = reinterpret_cast<HICON>(g_objVolApp.LoadResImage(VRIT_ICON, @<所欲设置的图标>));
-        @ if (hIcon) {
-        @     ::SendMessage(m_window, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
-        @     ::SendMessage(m_window, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
-        @ }
-    }
-
-    方法 图标对象 <公开 属性写 注释 = "设置显示在本窗口左上角的图标" 折叠>
-    参数 所欲设置的图标 <类型 = 图标对象类 注释 = "  本参数提供具体所欲设置的图标对象."
-            注释 = "  注意: 在窗口存在期间必须保证本图标对象不被释放(可以将此对象保存在窗口类的成员变量中)," 注释 = "否则所置入图标将失效.">
-    {
-        @ HICON hIcon = reinterpret_cast<HICON>(@<所欲设置的图标>.GetGDIHandle());
-        @ if (hIcon) {
-        @     ::SendMessage(m_window, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
-        @     ::SendMessage(m_window, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
-        @ }
-    }
-
     方法 显示边框 <公开 属性读 类型 = 逻辑型 注释 = "返回窗口是否显示标题栏和边框" 折叠 @禁止流程检查 = 真>
     {
         @ LONG_PTR lStyle = ::GetWindowLongPtrW(m_window, GWL_STYLE);
@@ -403,12 +438,22 @@
         @ ::SetWindowPos(m_window, NULL, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
     }
 
+    方法 可视 <公开 属性读 类型 = 逻辑型 注释 = "返回本窗口当前是否可视" 折叠 @嵌入式方法 = "">
+    {
+        @ ::IsWindowVisible(@sn<this>.m_window)
+    }
+
+    方法 可视 <公开 属性写 注释 = "设置本窗口当前是否可视,注意会连任务栏图标一起隐藏." 折叠>
+    参数 是否可视 <类型 = 逻辑型 注释 = "指定本组件是否可视">
+    {
+        @ ::ShowWindow(m_window, @<是否可视> ? SW_SHOW : SW_HIDE);
+    }
+
     # ---
     # @begin
     # <> <include>
     # WNDCLASSEXW m_wc = {0};
     # HWND m_window = NULL;
-    #
     # static LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     #     static @sn<current_class>* pThis;
     #     if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
@@ -489,11 +534,11 @@
         @ glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, @<透明帧缓冲区>);
         @ m_window = glfwCreateWindow(@<宽度>, @<高度>, PivW2U{@<标题>}.GetText(), @<全屏模式> ? m_monitor : nullptr, nullptr);
         @ if (!m_window) return FALSE;
-        @ HWND hWnd = glfwGetWin32Window(m_window);
+        @ m_hwnd = glfwGetWin32Window(m_window);
         @ HICON hIcon = ::LoadIconW(::GetModuleHandle(NULL), MAKEINTRESOURCEW(_VOL_USER_APP_ICON_RES_ID));
         @ if (hIcon) {
-        @     ::SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
-        @     ::SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+        @     ::SendMessage(m_hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+        @     ::SendMessage(m_hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
         @ }
         变量 窗口句柄 <类型 = 变整数>
         @ @<窗口句柄> = reinterpret_cast<INT_P>(m_window);
@@ -608,7 +653,13 @@
         @ glfwSetWindowShouldClose(@sn<this>.m_window, 1)
     }
 
-    方法 取窗口句柄 <公开 类型 = 变整数 注释 = "返回当前窗口的句柄,如果尚未创建或创建失败,则返回0." 折叠 @嵌入式方法 = "">
+    方法 取窗口句柄 <公开 类型 = 变整数 注释 = "返回本窗口的句柄,如果尚未创建或创建失败,则返回0." 注释 = "注意: 返回的是Win32窗口句柄,可以使用Win32的API进行操作." 折叠
+            @嵌入式方法 = "">
+    {
+        @ reinterpret_cast<INT_P>(@sn<this>.m_hwnd)
+    }
+
+    方法 取窗口对象指针 <公开 类型 = 变整数 注释 = "返回当前GLFW窗口的对象指针,如果尚未创建或创建失败,则返回0." 折叠 @嵌入式方法 = "">
     {
         @ reinterpret_cast<INT_P>(@sn<this>.m_window)
     }
@@ -674,11 +725,6 @@
     {
         @ glfwWindowShouldClose(@sn<this>.m_window)
     }
-
-    # 显示器
-
-    方法 "// 置当前显示器" <公开 折叠>
-    参数 显示器句柄 <类型 = 变整数>
 
     # 属性
 
@@ -817,29 +863,6 @@
         @ return glfwGetWindowAttrib(m_window, GLFW_TRANSPARENT_FRAMEBUFFER);
     }
 
-    方法 图标 <公开 属性写 注释 = "设置显示在本窗口左上角的图标" 折叠>
-    参数 所欲设置的图标 <类型 = 图标资源 注释 = "  本参数提供具体所欲设置的图标,如果该资源值为\"空资源.空图标\"" 注释 = "或载入失败,则将使用默认图标.">
-    {
-        @ HWND hWnd = glfwGetWin32Window(m_window);
-        @ HICON hIcon = reinterpret_cast<HICON>(g_objVolApp.LoadResImage(VRIT_ICON, @<所欲设置的图标>));
-        @ if (hIcon) {
-        @     ::SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
-        @     ::SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
-        @ }
-    }
-
-    方法 图标对象 <公开 属性写 注释 = "设置显示在本窗口左上角的图标" 折叠>
-    参数 所欲设置的图标 <类型 = 图标对象类 注释 = "  本参数提供具体所欲设置的图标对象."
-            注释 = "  注意: 在窗口存在期间必须保证本图标对象不被释放(可以将此对象保存在窗口类的成员变量中)," 注释 = "否则所置入图标将失效.">
-    {
-        @ HWND hWnd = glfwGetWin32Window(m_window);
-        @ HICON hIcon = reinterpret_cast<HICON>(@<所欲设置的图标>.GetGDIHandle());
-        @ if (hIcon) {
-        @     ::SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
-        @     ::SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
-        @ }
-    }
-
     # ---
     # @begin
     # <> <include>
@@ -922,6 +945,9 @@
         高度 = 乘于屏幕DPI (高度)
         @ m_window = SDL_CreateWindow(PivW2U{@<标题>}.GetText(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, @<宽度>, @<高度>, window_flags);
         @ if (!m_window) return FALSE;
+        @ SDL_SysWMinfo info{0};
+        @ if (SDL_GetWindowWMInfo(m_window, &info) == SDL_TRUE)
+        @     m_hwnd = info.info.win.window;
         变量 窗口句柄 <类型 = 变整数>
         @ @<窗口句柄> = reinterpret_cast<INT_P>(m_window);
         如果 (渲染器.渲染器类型 == 1)
@@ -1039,7 +1065,13 @@
         @ SDL_PushEvent(&_event);
     }
 
-    方法 取窗口句柄 <公开 类型 = 变整数 注释 = "返回当前窗口的句柄,如果尚未创建或创建失败,则返回0." 折叠 @嵌入式方法 = "">
+    方法 取窗口句柄 <公开 类型 = 变整数 注释 = "返回本窗口的句柄,如果尚未创建或创建失败,则返回0." 注释 = "注意: 返回的是Win32窗口句柄,可以使用Win32的API进行操作." 折叠
+            @嵌入式方法 = "">
+    {
+        @ reinterpret_cast<INT_P>(@sn<this>.m_hwnd)
+    }
+
+    方法 取窗口对象指针 <公开 类型 = 变整数 注释 = "返回本SDL窗口的对象指针,如果尚未创建或创建失败,则返回0." 折叠 @嵌入式方法 = "">
     {
         @ reinterpret_cast<INT_P>(@sn<this>.m_window)
     }
@@ -1203,7 +1235,7 @@
     方法 显示边框 <公开 属性写 注释 = "设置是否显示窗口的标题栏和边框" 折叠>
     参数 是否显示 <类型 = 逻辑型>
     {
-        @ SDL_SetWindowBordered(m_window, (SDL_bool)@<是否显示>);
+        @ SDL_SetWindowBordered(m_window, static_cast<SDL_bool>(@<是否显示>));
     }
 
     方法 可视 <公开 属性读 类型 = 逻辑型 注释 = "返回本窗口当前是否可视" 折叠 @禁止流程检查 = 真>
@@ -1214,7 +1246,10 @@
     方法 可视 <公开 属性写 注释 = "设置本窗口当前是否可视,注意会连任务栏图标一起隐藏." 折叠>
     参数 是否可视 <类型 = 逻辑型 注释 = "指定本组件是否可视">
     {
-        @ @<是否可视> ? SDL_ShowWindow(m_window) : SDL_HideWindow(m_window);
+        @ if (@<是否可视>)
+        @     SDL_ShowWindow(m_window);
+        @ else
+        @     SDL_HideWindow(m_window);
     }
 
     方法 置于顶层 <公开 属性读 类型 = 逻辑型 注释 = "返回本窗口当前是否已置于顶层" 折叠 @禁止流程检查 = 真>
@@ -1225,7 +1260,7 @@
     方法 置于顶层 <公开 属性写 注释 = "设置本窗口是否置于顶层" 折叠>
     参数 是否置于顶层 <类型 = 逻辑型 注释 = "指定本窗口是否置于顶层">
     {
-        @ SDL_SetWindowAlwaysOnTop(m_window, (SDL_bool)@<是否置于顶层>);
+        @ SDL_SetWindowAlwaysOnTop(m_window, static_cast<SDL_bool>(@<是否置于顶层>));
     }
 
     方法 窗口透明度 <公开 属性读 类型 = 单精度小数 注释 = "返回本窗口(包括标题栏和边框)的整体透明度,如果系统不支持窗口透明度将始终返回1" 折叠 @禁止流程检查 = 真>
@@ -1241,44 +1276,24 @@
         @ SDL_SetWindowOpacity(m_window, @<透明度>);
     }
 
-    方法 图标 <公开 属性写 注释 = "设置显示在本窗口左上角的图标" 折叠>
-    参数 所欲设置的图标 <类型 = 图标资源 注释 = "  本参数提供具体所欲设置的图标,如果该资源值为\"空资源.空图标\"" 注释 = "或载入失败,则将使用默认图标.">
-    {
-        @ SDL_SysWMinfo info;
-        @ SDL_VERSION(&info.version);
-        @ if (SDL_GetWindowWMInfo(m_window, &info))
-        @ {
-        @     HICON hIcon = reinterpret_cast<HICON>(g_objVolApp.LoadResImage(VRIT_ICON, @<所欲设置的图标>));
-        @     if (hIcon) {
-        @         ::SendMessage(info.info.win.window, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
-        @         ::SendMessage(info.info.win.window, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
-        @     }
-        @ }
-    }
-
-    方法 图标对象 <公开 属性写 注释 = "设置显示在本窗口左上角的图标" 折叠>
-    参数 所欲设置的图标 <类型 = 图标对象类 注释 = "  本参数提供具体所欲设置的图标对象."
-            注释 = "  注意: 在窗口存在期间必须保证本图标对象不被释放(可以将此对象保存在窗口类的成员变量中)," 注释 = "否则所置入图标将失效.">
-    {
-        @ SDL_SysWMinfo info;
-        @ SDL_VERSION(&info.version);
-        @ if (SDL_GetWindowWMInfo(m_window, &info))
-        @ {
-        @     HICON hIcon = reinterpret_cast<HICON>(@<所欲设置的图标>.GetGDIHandle());
-        @     if (hIcon) {
-        @         ::SendMessage(info.info.win.window, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
-        @         ::SendMessage(info.info.win.window, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
-        @     }
-        @ }
-    }
-
     # ---
     # @begin
     # <> <include>
     # SDL_Window* m_window = nullptr;
     # SDL_GLContext gl_context = nullptr;
-    #
-    # static void @an<_sOnBeforeAppInit>() { IM_ASSERT(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) == 0); }
+    # static void @an<_sOnBeforeAppInit>() {
+    #     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
+    #         HWND hParentWnd = NULL;
+    # #ifdef _AFX
+    #         CWinApp* pWinApp = AfxGetApp();
+    #         if (pWinApp != NULL) hParentWnd = pWinApp->m_pMainWnd->GetSafeHwnd ();
+    # #endif
+    #         if (hParentWnd == NULL) hParentWnd = ::GetActiveWindow();
+    #         if (hParentWnd == NULL) hParentWnd = ::GetDesktopWindow();
+    #         ::MessageBoxW(hParentWnd, L"初始化SDL引擎失败，即将退出应用程序!", L"错误", MB_OK | MB_ICONERROR | MB_SYSTEMMODAL | MB_TASKMODAL);
+    #         exit(0);
+    #     }
+    # }
     # static void @an<_sOnAfterAppExit>() { SDL_Quit(); }
     # <> </include>
     # @end
@@ -1304,6 +1319,11 @@
     方法 类_清理 <折叠>
     {
         释放 ()
+    }
+
+    方法 取窗口句柄 <公开 类型 = 变整数 注释 = "返回当前所绑定的Win32窗口句柄,如果尚未初始化或初始化失败,则返回0." 折叠>
+    {
+        返回 (_IM窗口句柄)
     }
 
     方法 初始化 <公开 类型 = 逻辑型 注释 = "将指定的窗口句柄绑定到ImGui并完成初始化" 折叠>

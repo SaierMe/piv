@@ -152,7 +152,6 @@ public:
   int64_t base_ns_err_;
   int64_t next_calibrate_tsc_;
 };
-
 #endif // _MENGRAO_TSCNS_H
 
 #ifndef _PIV_NSTIMER_H

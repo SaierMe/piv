@@ -165,7 +165,7 @@
     参数 子窗口标志 <类型 = 整数 注释 = "请参考\"IM子窗口标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM子窗口标志.无>
     参数 窗口标志 <类型 = 整数 注释 = "请参考\"IM窗口标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM窗口标志.无>
     {
-        @ ImGui::BeginChild(*PivAny2U{@<文本ID>}, @<子窗口尺寸>, (ImGuiChildFlags)@<子窗口标志>, static_cast<ImGuiWindowFlags>(@<窗口标志>))
+        @ ImGui::BeginChild(*PivAny2U{@<文本ID>}, @<子窗口尺寸>, static_cast<ImGuiChildFlags>(@<子窗口标志>), static_cast<ImGuiWindowFlags>(@<窗口标志>))
     }
 
     方法 子窗口末端 <公开 静态 注释 = "结束子窗口的布局设计." 注释 = "无论\"子窗口开端\"的返回值如何,都必须成对调用本方法." 折叠 @嵌入式方法 = "">
@@ -912,7 +912,7 @@
     参数 边框颜色 <类型 = ImVec4 注释 = "默认为黑色边框" @默认值 = 空对象>
     {
         @ ImGui::Image((ImTextureID)@<图片纹理ID>, @<图片尺寸>.data(), GET_ImVec2_MaybeNull(@<左上纹理坐标>, 0, 0), GET_ImVec2_MaybeNull(@<右下纹理坐标>, 1, 1),
-        @              GET_ImVec4_MaybeNull(@<色调>, 1, 1, 1, 1), GET_ImVec4_MaybeNull(@<边框颜色>, 0, 0, 0, 0))
+        @     GET_ImVec4_MaybeNull(@<色调>, 1, 1, 1, 1), GET_ImVec4_MaybeNull(@<边框颜色>, 0, 0, 0, 0))
     }
 
     方法 图片按钮 <公开 静态 类型 = 逻辑型 注释 = "创建一个图片按钮组件" 返回值注释 = "按钮被单击后返回真" 折叠 @嵌入式方法 = "">
@@ -924,8 +924,8 @@
     参数 背景颜色 <类型 = ImVec4 注释 = "默认为黑色背景" @默认值 = 空对象>
     参数 色调 <类型 = ImVec4 注释 = "默认为不添加色调" @默认值 = 空对象>
     {
-        @ ImGui::ImageButton(*PivAny2U{@<文本ID>}, (ImTextureID)@<图片纹理ID>, @<图片尺寸>.data(), GET_ImVec2_MaybeNull(@<左上纹理坐标>, 0, 0), GET_ImVec2_MaybeNull(@<右下纹理坐标>, 1, 1),
-        @                    GET_ImVec4_MaybeNull(@<背景颜色>, 0, 0, 0, 0), GET_ImVec4_MaybeNull(@<色调>, 1, 1, 1, 1))
+        @ ImGui::ImageButton(*PivAny2U{@<文本ID>}, (ImTextureID)@<图片纹理ID>, @<图片尺寸>.data(), GET_ImVec2_MaybeNull(@<左上纹理坐标>, 0, 0),
+        @     GET_ImVec2_MaybeNull(@<右下纹理坐标>, 1, 1), GET_ImVec4_MaybeNull(@<背景颜色>, 0, 0, 0, 0), GET_ImVec4_MaybeNull(@<色调>, 1, 1, 1, 1))
     }
 
     # 组件: 组合框(下拉) | Widgets: Combo Box (Dropdown)
@@ -968,7 +968,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::DragFloat(*PivAny2U{@<标签文本>}, &@<值变量>, @<速度>, @<最小值>, @<最大值>,
-        @                  u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 小数拖动框 <公开 静态 类型 = 逻辑型 注释 = "创建一个拖动框,可以拖动更改一个双精度小数变量的值." 注释 = "注: Ctrl+点击拖动框可以切换到手动输入数值."
@@ -984,7 +984,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::DragScalarT<double>(*PivAny2U{@<标签文本>}, ImGuiDataType_Double, &@<值变量>, @<速度>, @<最小值>,
-        @                            @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 字节拖动框 <公开 静态 类型 = 逻辑型 注释 = "创建一个拖动框,可以拖动更改一个8位字节变量的值." 注释 = "注: Ctrl+点击拖动框可以切换到手动输入数值."
@@ -1000,7 +1000,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::DragScalarT<char>(*PivAny2U{@<标签文本>}, ImGuiDataType_S8, &@<值变量>, @<速度>, @<最小值>,
-        @                          @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 短整数拖动框 <公开 静态 类型 = 逻辑型 注释 = "创建一个拖动框,可以拖动更改一个16位短整数变量的值." 注释 = "注: Ctrl+点击拖动框可以切换到手动输入数值."
@@ -1016,7 +1016,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::DragScalarT<short>(*PivAny2U{@<标签文本>}, ImGuiDataType_S16, &@<值变量>, @<速度>, @<最小值>,
-        @                           @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 整数拖动框 <公开 静态 类型 = 逻辑型 注释 = "创建一个拖动框,可以拖动更改一个32位整数变量的值." 注释 = "注: Ctrl+点击拖动框可以切换到手动输入数值."
@@ -1032,7 +1032,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::DragInt(*PivAny2U{@<标签文本>}, &@<值变量>, @<速度>, @<最小值>,
-        @                @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 长整数拖动框 <公开 静态 类型 = 逻辑型 注释 = "创建一个拖动框,可以拖动更改一个64位长整数变量的值." 注释 = "注: Ctrl+点击拖动框可以切换到手动输入数值."
@@ -1048,7 +1048,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::DragScalarT<INT64>(*PivAny2U{@<标签文本>}, ImGuiDataType_S64, &@<值变量>, @<速度>, @<最小值>,
-        @                           @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 单浮点数组拖动框 <公开 静态 类型 = 逻辑型 注释 = "提供一个单精度小数数组,在一行内创建跟数组成员数相同数量的拖动框." 注释 = "注: Ctrl+点击拖动框可以切换到手动输入数值."
@@ -1064,7 +1064,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::DragScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, IM_ARRAY_AND_SIZE(@<数组变量>), @<速度>,
-        @                            @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 小数数组拖动框 <公开 静态 类型 = 逻辑型 注释 = "提供一个双精度小数数组,在一行内创建跟数组成员数相同数量的拖动框." 注释 = "注: Ctrl+点击拖动框可以切换到手动输入数值."
@@ -1080,7 +1080,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::DragScalarTN<double>(*PivAny2U{@<标签文本>}, ImGuiDataType_Double, IM_ARRAY_AND_SIZE(@<数组变量>), @<速度>,
-        @                             @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 字节数组拖动框 <公开 静态 类型 = 逻辑型 注释 = "提供一个字节数组,在一行内创建跟数组成员数相同数量的拖动框." 注释 = "注: Ctrl+点击拖动框可以切换到手动输入数值."
@@ -1096,7 +1096,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::DragScalarTN<char>(*PivAny2U{@<标签文本>}, ImGuiDataType_S8, IM_ARRAY_AND_SIZE(@<数组变量>), @<速度>,
-        @                           @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 短整数数组拖动框 <公开 静态 类型 = 逻辑型 注释 = "提供一个短整数数组,在一行内创建跟数组成员数相同数量的拖动框." 注释 = "注: Ctrl+点击拖动框可以切换到手动输入数值."
@@ -1112,7 +1112,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::DragScalarTN<short>(*PivAny2U{@<标签文本>}, ImGuiDataType_S16, IM_ARRAY_AND_SIZE(@<数组变量>), @<速度>,
-        @                            @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 整数数组拖动框 <公开 静态 类型 = 逻辑型 注释 = "提供一个整数数组,在一行内创建跟数组成员数相同数量的拖动框." 注释 = "注: Ctrl+点击拖动框可以切换到手动输入数值."
@@ -1128,7 +1128,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::DragScalarTN<int>(*PivAny2U{@<标签文本>}, ImGuiDataType_S32, IM_ARRAY_AND_SIZE(@<数组变量>), @<速度>,
-        @                          @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 长整数数组拖动框 <公开 静态 类型 = 逻辑型 注释 = "提供一个长整数数组,在一行内创建跟数组成员数相同数量的拖动框." 注释 = "注: Ctrl+点击拖动框可以切换到手动输入数值."
@@ -1144,7 +1144,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::DragScalarTN<INT64>(*PivAny2U{@<标签文本>}, ImGuiDataType_S64, IM_ARRAY_AND_SIZE(@<数组变量>), @<速度>,
-        @                            @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 ImVec2拖动框 <公开 静态 类型 = 逻辑型 注释 = "创建一行两个拖动框,可以拖动更改ImVec2中两个成员值." 注释 = "注: Ctrl+点击拖动框可以切换到手动输入数值."
@@ -1160,7 +1160,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::DragScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, reinterpret_cast<float*>(@<数据变量>.pdata()), 2, @<速度>,
-        @                            @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 ImVec4拖动框 <公开 静态 类型 = 逻辑型 注释 = "创建一行四个拖动框,可以拖动更改ImVec4中四个成员值." 注释 = "注: Ctrl+点击拖动框可以切换到手动输入数值."
@@ -1176,7 +1176,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::DragScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, reinterpret_cast<float*>(@<数据变量>.pdata()), 4, @<速度>,
-        @                            @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 单浮点范围拖动框 <公开 静态 类型 = 逻辑型 注释 = "创建一组两个拖动框,可以拖动更改两个单精度小数变量的值,其中第一个值始终不大于第二个值."
@@ -1194,7 +1194,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.始终限制范围>
     {
         @ ImGui::DragFloatRange2(*PivAny2U{@<标签文本>}, &@<当前较小值>, &@<当前较大值> @<速度>, @<最小值>, @<最大值>,
-        @                        u8@sn<quot>@pvpt<较小值格式>@sn<quot>, u8@sn<quot>@pvpt<较大值格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     u8@sn<quot>@pvpt<较小值格式>@sn<quot>, u8@sn<quot>@pvpt<较大值格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 整数范围拖动框 <公开 静态 类型 = 逻辑型 注释 = "创建一组两个拖动框,可以拖动更改两个整数变量的值,其中第一个值始终不大于第二个值."
@@ -1212,7 +1212,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.始终限制范围>
     {
         @ ImGui::DragIntRange2(*PivAny2U{@<标签文本>}, &@<当前较小值>, &@<当前较大值>, @<速度>, @<最小值>, @<最大值>,
-        @                      u8@sn<quot>@pvpt<较小值格式>@sn<quot>, u8@sn<quot>@pvpt<较大值格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     u8@sn<quot>@pvpt<较小值格式>@sn<quot>, u8@sn<quot>@pvpt<较大值格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     # 组件: 常规滑块条 | Widgets: Regular Sliders
@@ -1229,7 +1229,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::SliderFloat(*PivAny2U{@<标签文本>}, &@<值变量>, @<最小值>, @<最大值>,
-        @                    u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 小数滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一个滑块条,可以在指定的的范围内拖动更改一个双精度小数变量的值." 注释 = "注: Ctrl+点击滑块可以切换到手动输入数值."
@@ -1244,7 +1244,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::SliderScalarT<double>(*PivAny2U{@<标签文本>}, ImGuiDataType_Double, &@<值变量>, @<最小值>, @<最大值>,
-        @                              u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 字节滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一个滑块条,可以在指定的的范围内拖动更改一个8位字节变量的值." 注释 = "注: Ctrl+点击滑块可以切换到手动输入数值."
@@ -1259,7 +1259,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::SliderScalarT<char>(*PivAny2U{@<标签文本>}, ImGuiDataType_S8, &@<值变量>, @<最小值>, @<最大值>,
-        @                            u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 短整数滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一个滑块条,可以在指定的的范围内拖动更改一个16位短整数变量的值." 注释 = "注: Ctrl+点击滑块可以切换到手动输入数值."
@@ -1274,7 +1274,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::SliderScalarT<short>(*PivAny2U{@<标签文本>}, ImGuiDataType_S16, &@<值变量>, @<最小值>, @<最大值>,
-        @                             u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 整数滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一个滑块条,可以在指定的的范围内拖动更改一个32位整数变量的值." 注释 = "注: Ctrl+点击滑块可以切换到手动输入数值."
@@ -1303,7 +1303,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::SliderScalarT<INT64>(*PivAny2U{@<标签文本>}, ImGuiDataType_S64, &@<值变量>, @<最小值>, @<最大值>,
-        @                             u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 角度滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一个滑块条,可以在指定的的范围内拖动更改一个单精度小数角度的值." 注释 = "注: Ctrl+点击滑块可以切换到手动输入数值."
@@ -1318,7 +1318,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::SliderAngle(*PivAny2U{@<标签文本>}, &@<值变量>, @<最小角度>, @<最大角度>,
-        @                    u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 单浮点数组滑块条 <公开 静态 类型 = 逻辑型 注释 = "提供一个单精度小数数组,在一行内创建跟数组成员数相同数量的滑块,可以在指定的的范围内拖动更改成员值."
@@ -1333,7 +1333,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::SliderScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, IM_ARRAY_AND_SIZE(@<数组变量>), @<最小值>, @<最大值>,
-        @                              u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 小数数组滑块条 <公开 静态 类型 = 逻辑型 注释 = "提供一个双精度小数数组,在一行内创建跟数组成员数相同数量的滑块,可以在指定的的范围内拖动更改成员值."
@@ -1348,7 +1348,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::SliderScalarTN<double>(*PivAny2U{@<标签文本>}, ImGuiDataType_Double, IM_ARRAY_AND_SIZE(@<数组变量>), @<最小值>, @<最大值>,
-        @                               u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 字节数组滑块条 <公开 静态 类型 = 逻辑型 注释 = "提供一个字节数组,在一行内创建跟数组成员数相同数量的滑块,可以在指定的的范围内拖动更改成员值."
@@ -1363,7 +1363,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::SliderScalarTN<char>(*PivAny2U{@<标签文本>}, ImGuiDataType_S8, IM_ARRAY_AND_SIZE(@<数组变量>), @<最小值>, @<最大值>,
-        @                             u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 短整数数组滑块条 <公开 静态 类型 = 逻辑型 注释 = "提供一个短整数数组,在一行内创建跟数组成员数相同数量的滑块,可以在指定的的范围内拖动更改成员值."
@@ -1378,7 +1378,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::SliderScalarTN<short>(*PivAny2U{@<标签文本>}, ImGuiDataType_S16, IM_ARRAY_AND_SIZE(@<数组变量>), @<最小值>, @<最大值>,
-        @                              u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 整数数组滑块条 <公开 静态 类型 = 逻辑型 注释 = "提供一个整数数组,在一行内创建跟数组成员数相同数量的滑块,可以在指定的的范围内拖动更改成员值."
@@ -1393,7 +1393,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::SliderScalarTN<int>(*PivAny2U{@<标签文本>}, ImGuiDataType_S32, IM_ARRAY_AND_SIZE(@<数组变量>), @<最小值>, @<最大值>,
-        @                            u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 长整数数组滑块条 <公开 静态 类型 = 逻辑型 注释 = "提供一个长整数数组,在一行内创建跟数组成员数相同数量的滑块,可以在指定的的范围内拖动更改成员值."
@@ -1408,7 +1408,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::SliderScalarTN<INT64>(*PivAny2U{@<标签文本>}, ImGuiDataType_S64, IM_ARRAY_AND_SIZE(@<数组变量>), @<最小值>,
-        @                              @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 ImVec2滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一行两个滑块,可以在指定的的范围内拖动更改ImVec2中两个成员值."
@@ -1423,7 +1423,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::SliderScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, reinterpret_cast<float*>(@<数据变量>.pdata()), 2, @<最小值>, @<最大值>,
-        @                              u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 ImVec4滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一行四个滑块,可以在指定的的范围内拖动更改ImVec4中四个成员值."
@@ -1438,7 +1438,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::SliderScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, reinterpret_cast<float*>(@<数据变量>.pdata()), 4, @<最小值>,
-        @                              @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 单浮点垂直滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一个垂直滑块条,可以在指定的的范围内拖动更改一个32位整数变量的值." 注释 = "注: Ctrl+点击滑块可以切换到手动输入数值."
@@ -1454,7 +1454,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::VSliderFloat(*PivAny2U{@<标签文本>}, @<尺寸>, &@<值变量>, @<最小值>, @<最大值>,
-        @                     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 小数垂直滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一个垂直滑块条,可以在指定的的范围内拖动更改一个32位整数变量的值." 注释 = "注: Ctrl+点击滑块可以切换到手动输入数值."
@@ -1470,7 +1470,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::VSliderScalarT<double>(*PivAny2U{@<标签文本>}, @<尺寸>, ImGuiDataType_Double, &@<值变量>, @<最小值>,
-        @                               @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 字节垂直滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一个垂直滑块条,可以在指定的的范围内拖动更改一个8位字节变量的值." 注释 = "注: Ctrl+点击滑块可以切换到手动输入数值."
@@ -1486,7 +1486,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::VSliderScalarT<char>(*PivAny2U{@<标签文本>}, @<尺寸>, ImGuiDataType_S8, &@<值变量>, @<最小值>,
-        @                             @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 短整数垂直滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一个垂直滑块条,可以在指定的的范围内拖动更改一个16位短整数变量的值."
@@ -1502,7 +1502,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::VSliderScalarT<short>(*PivAny2U{@<标签文本>}, @<尺寸>, ImGuiDataType_S16, &@<值变量>, @<最小值>,
-        @                              @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 整数垂直滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一个垂直滑块条,可以在指定的的范围内拖动更改一个32位整数变量的值." 注释 = "注: Ctrl+点击滑块可以切换到手动输入数值."
@@ -1518,7 +1518,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::VSliderInt(*PivAny2U{@<标签文本>}, @<尺寸>, &@<值变量>, @<最小值>, @<最大值>,
-        @                   u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 长整数垂直滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一个垂直滑块条,可以在指定的的范围内拖动更改一个32位整数变量的值." 注释 = "注: Ctrl+点击滑块可以切换到手动输入数值."
@@ -1534,7 +1534,7 @@
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
         @ ImGui::VSliderScalarT<INT64>(*PivAny2U{@<标签文本>}, @<尺寸>, ImGuiDataType_S64, &@<值变量>, @<最小值>,
-        @                              @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     # 组件: 键盘输入  | Widgets: Input with Keyboard
@@ -1585,7 +1585,7 @@
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
         @ ImGui::InputFloat(*PivAny2U{@<标签文本>}, &@<值变量>, @<增减量>, @<快速增减量>,
-        @                   u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
     方法 小数输入框 <公开 静态 类型 = 逻辑型 注释 = "创建一个输入框,用于输入双精度小数值,可选添加两个增加按钮." 返回值注释 = "值被改变时返回真" 折叠 @嵌入式方法 = "">
@@ -1605,28 +1605,28 @@
     参数 标签文本 <注释 = "提供显示在输入框旁边的标签文本;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;"
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
-    参数 值变量 <类型 = 字节 注释 = "必须提供一个小数变量,而且要确保变量的生命周期." @需求类型 = 可写入变量>
+    参数 值变量 <类型 = 字节 注释 = "必须提供一个字节变量,而且要确保变量的生命周期." @需求类型 = 可写入变量>
     参数 增减量 <类型 = 字节 注释 = "如果大于0,会在输入框显示\"-/+\"两个按钮,每单击一次就会增加或减少本参数的值." @默认值 = 0>
     参数 快速增减量 <类型 = 整数 注释 = "Ctrl+单击\"-/+\"按钮时的增减值." @默认值 = 0>
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
         @ ImGui::InputScalarT<char>(*PivAny2U{@<标签文本>}, ImGuiDataType_S8, &@<值变量>, @<增减量>, @<快速增减量>,
-        @                           u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
     方法 短整数输入框 <公开 静态 类型 = 逻辑型 注释 = "创建一个输入框,用于输入16位短整数值,可选添加两个增加按钮." 返回值注释 = "值被改变时返回真" 折叠 @嵌入式方法 = "">
     参数 标签文本 <注释 = "提供显示在输入框旁边的标签文本;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;"
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
-    参数 值变量 <类型 = 整数 注释 = "必须提供一个小数变量,而且要确保变量的生命周期." @需求类型 = 可写入变量>
-    参数 增减量 <类型 = 整数 注释 = "如果大于0,会在输入框显示\"-/+\"两个按钮,每单击一次就会增加或减少本参数的值." @默认值 = 0>
-    参数 快速增减量 <类型 = 整数 注释 = "Ctrl+单击\"-/+\"按钮时的增减值." @默认值 = 0>
+    参数 值变量 <类型 = 短整数 注释 = "必须提供一个短整数变量,而且要确保变量的生命周期." @需求类型 = 可写入变量>
+    参数 增减量 <类型 = 短整数 注释 = "如果大于0,会在输入框显示\"-/+\"两个按钮,每单击一次就会增加或减少本参数的值." @默认值 = 0>
+    参数 快速增减量 <类型 = 短整数 注释 = "Ctrl+单击\"-/+\"按钮时的增减值." @默认值 = 0>
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
         @ ImGui::InputScalarT<short>(*PivAny2U{@<标签文本>}, ImGuiDataType_S16, &@<值变量>, @<增减量>, @<快速增减量>,
-        @                            u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
     方法 整数输入框 <公开 静态 类型 = 逻辑型 注释 = "创建一个输入框,用于输入32位整数值,可选添加两个增加按钮." 返回值注释 = "值被改变时返回真" 折叠 @嵌入式方法 = "">
@@ -1636,11 +1636,9 @@
     参数 值变量 <类型 = 整数 注释 = "必须提供一个小数变量,而且要确保变量的生命周期." @需求类型 = 可写入变量>
     参数 增减量 <类型 = 整数 注释 = "如果大于0,会在输入框显示\"-/+\"两个按钮,每单击一次就会增加或减少本参数的值." @默认值 = 0>
     参数 快速增减量 <类型 = 整数 注释 = "Ctrl+单击\"-/+\"按钮时的增减值." @默认值 = 0>
-    参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." 注释 = "输入十六进制文本时请使用\"%08X\""
-            @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
-        @ ImGui::InputInt(*PivAny2U{@<标签文本>}, &@<值变量>, @<增减量>, @<快速增减量>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
+        @ ImGui::InputInt(*PivAny2U{@<标签文本>}, &@<值变量>, @<增减量>, @<快速增减量>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
     方法 长整数输入框 <公开 静态 类型 = 逻辑型 注释 = "创建一个输入框,用于输入62位长整数值,可选添加两个增加按钮." 返回值注释 = "值被改变时返回真" 折叠 @嵌入式方法 = "">
@@ -1654,7 +1652,7 @@
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
         @ ImGui::InputScalarT<INT64>(*PivAny2U{@<标签文本>}, ImGuiDataType_S64, &@<值变量>, @<增减量>, @<快速增减量>,
-        @                            u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
     方法 单浮点数组输入框 <公开 静态 类型 = 逻辑型 注释 = "提供一个单精度小数数组,在一行内创建跟数组成员数相同数量的输入框." 返回值注释 = "成员值被改变时返回真" 折叠
@@ -1669,7 +1667,7 @@
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
         @ ImGui::InputScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, IM_ARRAY_AND_SIZE(@<数组变量>), @<增减量>, @<快速增减量>,
-        @                             u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
     方法 小数数组输入框 <公开 静态 类型 = 逻辑型 注释 = "提供一个双精度小数数组,在一行内创建跟数组成员数相同数量的输入框." 返回值注释 = "成员值被改变时返回真" 折叠 @嵌入式方法 = "">
@@ -1683,7 +1681,7 @@
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
         @ ImGui::InputScalarTN<double>(*PivAny2U{@<标签文本>}, ImGuiDataType_Double, IM_ARRAY_AND_SIZE(@<数组变量>), @<增减量>, @<快速增减量>,
-        @                              u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
     方法 字节数组输入框 <公开 静态 类型 = 逻辑型 注释 = "提供一个字节数组,在一行内创建跟数组成员数相同数量的输入框." 返回值注释 = "成员值被改变时返回真" 折叠 @嵌入式方法 = "">
@@ -1697,7 +1695,7 @@
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
         @ ImGui::InputScalarTN<char>(*PivAny2U{@<标签文本>}, ImGuiDataType_S8, IM_ARRAY_AND_SIZE(@<数组变量>), @<增减量>, @<快速增减量>,
-        @                            u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
     方法 短整数数组输入框 <公开 静态 类型 = 逻辑型 注释 = "提供一个短整数数组,在一行内创建跟数组成员数相同数量的输入框." 返回值注释 = "成员值被改变时返回真" 折叠 @嵌入式方法 = "">
@@ -1711,7 +1709,7 @@
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
         @ ImGui::InputScalarTN<short>(*PivAny2U{@<标签文本>}, ImGuiDataType_S16, IM_ARRAY_AND_SIZE(@<数组变量>), @<增减量>, @<快速增减量>,
-        @                             u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
     方法 整数数组输入框 <公开 静态 类型 = 逻辑型 注释 = "提供一个整数数组,在一行内创建跟数组成员数相同数量的输入框." 返回值注释 = "成员值被改变时返回真" 折叠 @嵌入式方法 = "">
@@ -1725,7 +1723,7 @@
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
         @ ImGui::InputScalarTN<int>(*PivAny2U{@<标签文本>}, ImGuiDataType_S32, IM_ARRAY_AND_SIZE(@<数组变量>), @<增减量>, @<快速增减量>,
-        @                           u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
     方法 长整数数组输入框 <公开 静态 类型 = 逻辑型 注释 = "提供一个长整数数组,在一行内创建跟数组成员数相同数量的输入框." 返回值注释 = "成员值被改变时返回真" 折叠 @嵌入式方法 = "">
@@ -1739,7 +1737,7 @@
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
         @ ImGui::InputScalarTN<INT64>(*PivAny2U{@<标签文本>}, ImGuiDataType_S64, IM_ARRAY_AND_SIZE(@<数组变量>), @<增减量>, @<快速增减量>,
-        @                             u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
+        @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
     # 组件: 颜色编辑器/拾色器 | Widgets: Color Editor/Picker
@@ -1963,7 +1961,7 @@
             @嵌入式方法 = "has_body = true\r\nbody_tail = \"ImGui::EndTooltip();\\r\\n}\"">
     参数 是否显示 <类型 = 逻辑型 注释 = "设置是否显示工具提示窗口,建议使用\"可有悬停项目\"来判断" @默认值 = 真>
     {
-        @ if (@<是否显示> && ImGui::BeginTooltip())
+        @ if (@<是否显示> && ImGui::BeginTooltip() == true)
     }
 
     方法 置工具提示 <公开 静态 注释 = "创建一个仅显示文本的工具提示窗口,通常配合\"可有悬停项目\"使用." 注释 = "工具提示窗口将跟随鼠标显示,它不会获得焦点." 折叠 @嵌入式方法 = "">
@@ -1974,10 +1972,10 @@
         @ ImGui::SetTooltip(*PivAny2U{@<格式文本>}, @<替换数据>)
     }
 
-    方法 创建项目工具提示 <公开 静态 注释 = "创建一个功能齐全的工具提示窗口,可以在子语句体中使用任意项目." 注释 = "跟\"创建工具提示\"不同,只要有项目悬停它就会自动弹出." 折叠
+    方法 创建项目工具提示 <公开 静态 注释 = "创建一个功能齐全的工具提示窗口,可以在子语句体中使用任意项目." 注释 = "跟\"创建工具提示\"不同,只要有项目悬停它就会自动弹出." 折叠 折叠2
             隐藏值属性 = "0" @嵌入式方法 = "has_body = true\r\nbody_tail = \"ImGui::EndTooltip();\\r\\n}\"">
     {
-        @ if (ImGui::BeginItemTooltip())
+        @ if (ImGui::BeginItemTooltip() == true)
     }
 
     方法 置项目工具提示 <公开 静态 注释 = "创建一个仅显示文本的工具提示窗口,只要有项目悬停它就会自动弹出." 注释 = "工具提示窗口将跟随鼠标显示,它不会获得焦点." 折叠 @嵌入式方法 = "">
@@ -4498,7 +4496,7 @@
 
 # 标志常量
 
-类 IM窗口标志 <公开 注释 = "ImGui.窗口开端()" 注释 = "ImGuiWindowFlags" @文档 = "category = \"标志类\"">
+类 IM窗口标志 <公开 注释 = "ImGui.窗口开端()" 注释 = "ImGuiWindowFlags" 折叠 @文档 = "category = \"标志类\"">
 {
     常量 无 <公开 类型 = 整数 值 = @ImGuiWindowFlags_None 注释 = "无标志">
     常量 禁止标题栏 <公开 类型 = 整数 值 = @ImGuiWindowFlags_NoTitleBar 注释 = "禁止显示标题栏">
@@ -4520,7 +4518,7 @@
             注释 = "当窗口获得焦点时,禁止将窗口置于顶层(例如单击窗口或以编程方式让窗口获得焦点).">
     常量 始终显示垂直滚动条 <公开 类型 = 整数 值 = @ImGuiWindowFlags_AlwaysVerticalScrollbar 注释 = "始终显示垂直滚动条,即使内容高度小于窗口高度.">
     常量 始终显示水平滚动条 <公开 类型 = 整数 值 = @ImGuiWindowFlags_AlwaysHorizontalScrollbar 注释 = "始终显示水平滚动条,即使内容宽度小于窗口宽度.">
-    常量 始终使用窗口边距 <公开 类型 = 整数 值 = @ImGuiWindowFlags_AlwaysUseWindowPadding
+    常量 "// 始终使用窗口边距" <类型 = 整数 值 = @ImGuiWindowFlags_AlwaysUseWindowPadding
             注释 = "Ensure child windows without border uses style.WindowPadding (ignored by default for non-bordered child windows, because more convenient)">
     常量 禁止导航输入 <公开 类型 = 整数 值 = @ImGuiWindowFlags_NoNavInputs 注释 = "禁止使用游戏手柄和鼠标导航窗口(控制窗口的前进、后退、刷新等)">
     常量 禁止导航焦点 <公开 类型 = 整数 值 = @ImGuiWindowFlags_NoNavFocus 注释 = "使用游戏手柄和鼠标导航窗口将无法焦点到此窗口,除了CTRL+TAB">
@@ -4557,7 +4555,7 @@
 类 IM输入框标志 <公开 注释 = "ImGuiInputTextFlags" 注释 = "Flags for ImGui::InputText()"
         注释 = "(Those are per-item flags."
         注释 = "There are shared flags in ImGuiIO: io.ConfigInputTextCursorBlink"
-        注释 = "and io.ConfigInputTextEnterKeepActive)" 折叠 @文档 = "category = \"标志类\"">
+        注释 = "and io.ConfigInputTextEnterKeepActive)" @文档 = "category = \"标志类\"">
 {
     常量 无 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_None>
     常量 十进制数字 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_CharsDecimal 注释 = "允许输入 0123456789.+-*/">
@@ -4829,7 +4827,7 @@
             注释 = "ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_SizingFixedSame | ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_SizingStretchSame">
 }
 
-类 IM表格列标志 <公开 注释 = "ImGuiTableColumnFlags Flags for ImGui::TableSetupColumn()"
+类 IM表格列标志 <公开 注释 = "ImGuiTableColumnFlags Flags for ImGui::TableSetupColumn()" 折叠
         @文档 = "category = \"标志类\"">
 {
     常量 无 <公开 类型 = 整数 值 = @ImGuiTableColumnFlags_None>
@@ -4886,7 +4884,7 @@
             注释 = "[Internal] Disable user resizing this column directly (it may however we resized indirectly from its left edge)">
 }
 
-类 IM表格行标志 <公开 注释 = "ImGuiTableRowFlags Flags for ImGui::TableNextRow()" @文档 = "category = \"标志类\"">
+类 IM表格行标志 <公开 注释 = "ImGuiTableRowFlags Flags for ImGui::TableNextRow()" 折叠 @文档 = "category = \"标志类\"">
 {
     常量 无 <公开 类型 = 整数 值 = @ImGuiTableRowFlags_None>
     常量 标题 <公开 类型 = 整数 值 = @ImGuiTableRowFlags_Headers 注释 = "标识表头标题行(设置默认背景颜色+其内容的宽度,以不同方式考虑自动列宽)"
@@ -5573,11 +5571,4 @@
     常量 向下 <公开 值 = @ImGuiDir_Down>
 }
 
-# @begin
-# <> <global>
-# <> <include>
-# #define GET_ImVec2_MaybeNull(_vec, _x, _y) (_vec).IsNullObject() ? ImVec2(_x, _y) : (_vec).data()
-# #define GET_ImVec4_MaybeNull(_vec, _x, _y, _z, _w) (_vec).IsNullObject() ? ImVec4(_x, _y, _z, _w) : (_vec).data()
-# <> </include>
-# <> </global>
-# @end
+#
