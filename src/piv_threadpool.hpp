@@ -118,8 +118,7 @@ public:
         {
             WaitTime = (std::max)(WaitTime, -1);
             std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
-            // 循环到线程都退出或超时
-            while (m_ThreadPool->ThreadsCount > 0)
+            while (m_ThreadPool->QueueTask > 0)
             {
                 // 超时退出循环,将强制销毁线程池
                 if (WaitTime >= 0)

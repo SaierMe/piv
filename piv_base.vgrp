@@ -32,6 +32,7 @@ file
     name = "p_Thread.wsv"
     name = "p_Time.wsv"
     name = "p_TOML.wsv"
+    name = "p_Typedef.wsv"
     name = "p_VMProtect.wsv"
     name = "p_Windows.wsv"
     name = "p_WinHTTP.wsv"

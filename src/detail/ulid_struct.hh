@@ -249,6 +249,86 @@ struct ULID {
 
 		return *this;
 	}
+
+	inline int Compare(const ULID& rhs) const {
+		if (data[0] != rhs.data[0]) {
+			return (data[0] < rhs.data[0]) * -2 + 1;
+		}
+
+		if (data[1] != rhs.data[1]) {
+			return (data[1] < rhs.data[1]) * -2 + 1;
+		}
+
+		if (data[2] != rhs.data[2]) {
+			return (data[2] < rhs.data[2]) * -2 + 1;
+		}
+
+		if (data[3] != rhs.data[3]) {
+			return (data[3] < rhs.data[3]) * -2 + 1;
+		}
+
+		if (data[4] != rhs.data[4]) {
+			return (data[4] < rhs.data[4]) * -2 + 1;
+		}
+
+		if (data[5] != rhs.data[5]) {
+			return (data[5] < rhs.data[5]) * -2 + 1;
+		}
+
+		if (data[6] != rhs.data[6]) {
+			return (data[6] < rhs.data[6]) * -2 + 1;
+		}
+
+		if (data[7] != rhs.data[7]) {
+			return (data[7] < rhs.data[7]) * -2 + 1;
+		}
+
+		if (data[8] != rhs.data[8]) {
+			return (data[8] < rhs.data[8]) * -2 + 1;
+		}
+
+		if (data[9] != rhs.data[9]) {
+			return (data[9] < rhs.data[9]) * -2 + 1;
+		}
+
+		if (data[10] != rhs.data[10]) {
+			return (data[10] < rhs.data[10]) * -2 + 1;
+		}
+
+		if (data[11] != rhs.data[11]) {
+			return (data[11] < rhs.data[11]) * -2 + 1;
+		}
+
+		if (data[12] != rhs.data[12]) {
+			return (data[12] < rhs.data[12]) * -2 + 1;
+		}
+
+		if (data[13] != rhs.data[13]) {
+			return (data[13] < rhs.data[13]) * -2 + 1;
+		}
+
+		if (data[14] != rhs.data[14]) {
+			return (data[14] < rhs.data[14]) * -2 + 1;
+		}
+
+		if (data[15] != rhs.data[15]) {
+			return (data[15] < rhs.data[15]) * -2 + 1;
+		}
+
+		return 0;
+	}
+
+	bool operator<(const ULID& rhs) const {
+		return (Compare(rhs) == -1);
+	}
+
+	bool operator>(const ULID& rhs) const {
+		return (Compare(rhs) == 1);
+	}
+
+	bool operator==(const ULID& rhs) const {
+		return (Compare(rhs) == 0);
+	}
 };
 
 /**

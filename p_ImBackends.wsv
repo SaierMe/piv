@@ -133,7 +133,7 @@
     }
 }
 
-类 IM_SDL2平台 <公开 注释 = "基于SDL(Simple DirectMedia Layer)的平台后端,需要配合DirectX、OpenGL、Vulkan渲染器使用." 折叠 折叠2
+类 IM_SDL2平台 <公开 注释 = "基于SDL(Simple DirectMedia Layer)的平台后端,需要配合DirectX、OpenGL、Vulkan渲染器使用." 折叠
         @文档 = "category = \"平台后端\"" @视窗.头文件搜寻目录 = "FrameWork\\SDL2\\include"
         @视窗.外部头文件 = "<backends/imgui_impl_sdl2.h>\r\n<SDL.h>"
         @视窗.外部源文件 = "imgui\\backends\\imgui_impl_sdl2.cpp"
@@ -343,8 +343,7 @@
         @ m_pd3dDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
         @ m_pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
         @ m_pd3dDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
-        @ ImVec4* clear_color = @<背景颜色>.pdata();
-        @ D3DCOLOR clear_col_dx = D3DCOLOR_COLORVALUE(clear_color->x * clear_color->w, clear_color->y * clear_color->w, clear_color->z * clear_color->w, clear_color->w);
+        @ D3DCOLOR clear_col_dx = D3DCOLOR_COLORVALUE(@<背景颜色>.x * @<背景颜色>.w, @<背景颜色>.y * @<背景颜色>.w, @<背景颜色>.z * @<背景颜色>.w, @<背景颜色>.w);
         @ m_pd3dDevice->Clear(0, nullptr, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, clear_col_dx, 1.0f, 0);
         @ if (m_pd3dDevice->BeginScene() >= 0)
         @ {
@@ -646,8 +645,7 @@
     参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
     {
         @ ImGui::Render();
-        @ ImVec4* clear_color = @<背景颜色>.pdata();
-        @ const float clear_color_with_alpha[4] = { clear_color->x * clear_color->w, clear_color->y * clear_color->w, clear_color->z * clear_color->w, clear_color->w };
+        @ const float clear_color_with_alpha[4] = { @<背景颜色>.x * @<背景颜色>.w, @<背景颜色>.y * @<背景颜色>.w, @<背景颜色>.z * @<背景颜色>.w, @<背景颜色>.w };
         @ m_pd3dDevice->OMSetRenderTargets(1, &m_mainRenderTargetView, nullptr);
         @ m_pd3dDevice->ClearRenderTargetView(m_mainRenderTargetView, clear_color_with_alpha);
         @ ImGui_ImplDX10_RenderDrawData(ImGui::GetDrawData());
@@ -665,7 +663,7 @@
 
     变量 局_窗口句柄 <类型 = 变整数>
 
-    方法 加载_SDL <公开 类型 = 逻辑型 折叠 @视窗.外部头文件 = "<SDL_syswm.h>">
+    方法 加载_SDL <公开 类型 = 逻辑型 @视窗.外部头文件 = "<SDL_syswm.h>">
     参数 窗口句柄 <类型 = 变整数 @默认值 = 0>
     {
         @ SDL_SysWMinfo wmInfo;
@@ -948,8 +946,7 @@
     参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
     {
         @ ImGui::Render();
-        @ ImVec4* clear_color = @<背景颜色>.pdata();
-        @ const float clear_color_with_alpha[4] = { clear_color->x * clear_color->w, clear_color->y * clear_color->w, clear_color->z * clear_color->w, clear_color->w };
+        @ const float clear_color_with_alpha[4] = { @<背景颜色>.x * @<背景颜色>.w, @<背景颜色>.y * @<背景颜色>.w, @<背景颜色>.z * @<背景颜色>.w, @<背景颜色>.w };
         @ m_pd3dDeviceContext->OMSetRenderTargets(1, &m_mainRenderTargetView, nullptr);
         @ m_pd3dDeviceContext->ClearRenderTargetView(m_mainRenderTargetView, clear_color_with_alpha);
         @ ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
@@ -1478,8 +1475,7 @@
 
         // Render Dear ImGui graphics
         @ ImGui::Render();
-        @ ImVec4* clear_color = @<背景颜色>.pdata();
-        @ const float clear_color_with_alpha[4] = { clear_color->x * clear_color->w, clear_color->y * clear_color->w, clear_color->z * clear_color->w, clear_color->w };
+        @ const float clear_color_with_alpha[4] = { @<背景颜色>.x * @<背景颜色>.w, @<背景颜色>.y * @<背景颜色>.w, @<背景颜色>.z * @<背景颜色>.w, @<背景颜色>.w };
         @ m_pd3dCommandList->ClearRenderTargetView(m_mainRenderTargetDescriptor[backBufferIdx], clear_color_with_alpha, 0, nullptr);
         @ m_pd3dCommandList->OMSetRenderTargets(1, &m_mainRenderTargetDescriptor[backBufferIdx], FALSE, nullptr);
         @ m_pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dSrvDescHeap);
@@ -1779,8 +1775,7 @@
     参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
     {
         @ ImGui::Render();
-        @ ImVec4* clear_color = @<背景颜色>.pdata();
-        @ glClearColor(clear_color->x * clear_color->w, clear_color->y * clear_color->w, clear_color->z * clear_color->w, clear_color->w);
+        @ glClearColor(@<背景颜色>.x * @<背景颜色>.w, @<背景颜色>.y * @<背景颜色>.w, @<背景颜色>.z * @<背景颜色>.w, @<背景颜色>.w);
         @ glClear(GL_COLOR_BUFFER_BIT);
         @ ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -1835,8 +1830,7 @@
         @ int display_w, display_h;
         @ glfwGetFramebufferSize(reinterpret_cast<GLFWwindow*>(@<窗口句柄>), &display_w, &display_h);
         @ glViewport(0, 0, display_w, display_h);
-        @ ImVec4* clear_color = @<背景颜色>.pdata();
-        @ glClearColor(clear_color->x * clear_color->w, clear_color->y * clear_color->w, clear_color->z * clear_color->w, clear_color->w);
+        @ glClearColor(@<背景颜色>.x * @<背景颜色>.w, @<背景颜色>.y * @<背景颜色>.w, @<背景颜色>.z * @<背景颜色>.w, @<背景颜色>.w);
         @ glClear(GL_COLOR_BUFFER_BIT);
         @ ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -1853,7 +1847,7 @@
 
     # SDL2平台 ---
 
-    方法 加载_SDL <公开 类型 = 逻辑型 注释 = "*适用于GLFW平台" 折叠 @嵌入式方法 = "">
+    方法 加载_SDL <公开 类型 = 逻辑型 注释 = "*适用于GLFW平台" 折叠 @视窗.外部头文件 = "<SDL_syswm.h>" @嵌入式方法 = "">
     参数 窗口句柄 <类型 = 变整数 @默认值 = 0>
     {
         @ gladLoadGL() != 0
@@ -1864,8 +1858,7 @@
     参数 背景颜色 <类型 = ImVec4 注释 = "必须为4个以上成员的单精度小数数组的地址">
     {
         @ ImGui::Render();
-        @ ImVec4* clear_color = @<背景颜色>.pdata();
-        @ glClearColor(clear_color->x * clear_color->w, clear_color->y * clear_color->w, clear_color->z * clear_color->w, clear_color->w);
+        @ glClearColor(@<背景颜色>.x * @<背景颜色>.w, @<背景颜色>.y * @<背景颜色>.w, @<背景颜色>.z * @<背景颜色>.w, @<背景颜色>.w);
         @ glClear(GL_COLOR_BUFFER_BIT);
         @ ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         @ if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -2093,11 +2086,10 @@
         @ ImGui::Render();
         @ ImDrawData* main_draw_data = ImGui::GetDrawData();
         @ const bool main_is_minimized = (main_draw_data->DisplaySize.x <= 0.0f || main_draw_data->DisplaySize.y <= 0.0f);
-        @ ImVec4* clear_color = @<背景颜色>.pdata();
-        @ m_MainWindowData.ClearValue.color.float32[0] = clear_color->x * clear_color->w;
-        @ m_MainWindowData.ClearValue.color.float32[1] = clear_color->y * clear_color->w;
-        @ m_MainWindowData.ClearValue.color.float32[2] = clear_color->z * clear_color->w;
-        @ m_MainWindowData.ClearValue.color.float32[3] = clear_color->w;
+        @ m_MainWindowData.ClearValue.color.float32[0] = @<背景颜色>.x * @<背景颜色>.w;
+        @ m_MainWindowData.ClearValue.color.float32[1] = @<背景颜色>.y * @<背景颜色>.w;
+        @ m_MainWindowData.ClearValue.color.float32[2] = @<背景颜色>.z * @<背景颜色>.w;
+        @ m_MainWindowData.ClearValue.color.float32[3] = @<背景颜色>.w;
         @ if (!main_is_minimized)
         @     @<_FrameRender>(main_draw_data);
         // Update and Render additional Platform Windows
@@ -2483,7 +2475,7 @@
 
     # SDL2
 
-    方法 加载_SDL <公开 类型 = 逻辑型 折叠 @视窗.外部头文件 = "<SDL_vulkan.h>" @禁止流程检查 = 真>
+    方法 加载_SDL <公开 类型 = 逻辑型 折叠 @视窗.外部头文件 = "<SDL_vulkan.h>\r\n<SDL_syswm.h>" @禁止流程检查 = 真>
     参数 窗口句柄 <类型 = 变整数>
     {
         @ SDL_Window* window = reinterpret_cast<SDL_Window*>(@<窗口句柄>);

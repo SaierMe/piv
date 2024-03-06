@@ -2531,7 +2531,7 @@ namespace piv
         template <typename = void>
         CVolString &UrlStrDecode(const CVolMem &str, const bool &utf8 = true, CVolString &decoded = CVolString{})
         {
-            if (piv::encoding::UrlDecodeNeed(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.size())))
+            if (piv::encoding::UrlDecodeNeed(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())))
             {
                 CVolMem buffer;
                 piv::encoding::UrlStrDecode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), buffer, utf8);

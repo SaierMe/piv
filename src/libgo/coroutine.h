@@ -61,7 +61,7 @@
 // typedef ::co::CoTimer::TimerId co_timer_id;
 
 // co_await
-//#define co_await(type) ::co::__async_wait<type>()-
+// #define co_await(type) ::co::__async_wait<type>()-
 
 // co_debugger
 // #define co_debugger ::co::CoDebugger::getInstance()

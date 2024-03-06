@@ -18,10 +18,6 @@
 #ifndef INCLUDE_NLOHMANN_JSON_HPP_
 #define INCLUDE_NLOHMANN_JSON_HPP_
 
-#ifndef __VOL_BASE_H__
-#include <sys/base/libs/win_base/vol_base.h>
-#endif
-
 #include <algorithm> // all_of, find, for_each
 #include <cstddef> // nullptr_t, ptrdiff_t, size_t
 #include <functional> // hash, less
@@ -4372,7 +4368,7 @@ namespace detail
 
 /// @brief general exception of the @ref basic_json class
 /// @sa https://json.nlohmann.me/api/basic_json/exception/
-class exception : public std::exception, public CVolObject
+class exception : public std::exception
 {
   public:
     /// returns the explanatory string
@@ -7275,9 +7271,9 @@ class json_sax_dom_callback_parser
     /// stack to model hierarchy of values
     std::vector<BasicJsonType*> ref_stack {};
     /// stack to manage which values to keep
-    std::vector<bool> keep_stack {};
+    std::vector<bool> keep_stack {}; // NOLINT(readability-redundant-member-init)
     /// stack to manage which object keys to keep
-    std::vector<bool> key_keep_stack {};
+    std::vector<bool> key_keep_stack {}; // NOLINT(readability-redundant-member-init)
     /// helper to hold the reference for the next object element
     BasicJsonType* object_element = nullptr;
     /// whether a syntax error occurred
@@ -19402,32 +19398,8 @@ The invariants are checked by member function assert_invariant().
 */
 NLOHMANN_BASIC_JSON_TPL_DECLARATION
 class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-special-member-functions)
-    : public CVolObject, public ::nlohmann::detail::json_base_class<CustomBaseClass>
+    : public ::nlohmann::detail::json_base_class<CustomBaseClass>
 {
-  public:
-    virtual void GetDumpString(CVolString& strDump, INT nMaxDumpSize) override
-    {
-        strDump.AddText(this->dump().c_str());
-    }
-    virtual void LoadFromStream(CVolBaseInputStream &stream)
-    {
-        *this = nullptr;
-        if (stream.eof()) return;
-        std::string ss;
-        uint32_t Size;
-        stream.read(&Size, 4);
-        ss.resize(Size);
-        if (stream.ReadExact(const_cast<char *>(ss.data()), Size))
-            *this = parse(ss, nullptr, false, true);
-    }
-    virtual void SaveIntoStream(CVolBaseOutputStream &stream)
-    {
-        std::string ss = this->dump();
-        uint32_t Size = static_cast<uint32_t>(ss.size() + 1);
-        stream.write(&Size, 4);
-        stream.write(ss.data(), Size);
-    }
-
   private:
     template<detail::value_t> friend struct detail::external_constructor;
 
@@ -24178,7 +24150,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
                 auto it = val.m_data.m_value.object->find(member);
 
                 // context-sensitive error message
-                const auto error_msg = (op == "op") ? "operation" : detail::concat("operation '", op, '\'');
+                const auto error_msg = (op == "op") ? "operation" : detail::concat("operation '", op, '\''); // NOLINT(bugprone-unused-local-non-trivial-variable)
 
                 // check if desired value is present
                 if (JSON_HEDLEY_UNLIKELY(it == val.m_data.m_value.object->end()))

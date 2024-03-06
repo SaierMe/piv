@@ -3240,10 +3240,10 @@ public:
 		Clear(true);
 		if (m_rgx.parse(reg, false, flag)) {
 			if (flag & 0x4) {
+				m_reader.reset(new regex_fast_reader_t<CharT>(text, text_len));
+			} else {
 				m_buffer.reset(new std::basic_string<CharT>(text, text_len));
 				m_reader.reset(new regex_fast_reader_t<CharT>(m_buffer->c_str(), m_buffer->size()));
-			} else {
-				m_reader.reset(new regex_fast_reader_t<CharT>(text, text_len));
 			}
 			return m_rgx.search(*m_reader);
 		}

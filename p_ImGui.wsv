@@ -1,7 +1,7 @@
 <火山程序 类型 = "通常" 版本 = 1 />
 
 包 火山.ImGui <注释 = "例程下载: https://saier.lanzoul.com/b016cwvle"
-        注释 = "ImGui 1.90.1 https://github.com/ocornut/imgui" @视窗.外部头文件 = "<piv_imgui.hpp>"
+        注释 = "ImGui 1.90.4 https://github.com/ocornut/imgui" 注释 = "" @视窗.外部头文件 = "<piv_imgui.hpp>"
         @视窗.外部源文件 = "imgui\\imgui.cpp\r\nimgui\\imgui_draw.cpp\r\nimgui\\imgui_tables.cpp\r\nimgui\\imgui_widgets.cpp\r\nimgui\\imgui_demo.cpp\r\nimgui\\misc\\cpp\\imgui_stdlib.cpp"
         @视窗.头文件搜寻目录 = "imgui">
 
@@ -41,19 +41,19 @@
 
     方法 取字体图集 <公开 静态 类型 = IM字体图集类 折叠 @嵌入式方法 = "">
     {
-        @ @dt<IM字体图集类>{ImGui::GetIO().Fonts}
+        @ ImGui::GetIO().Fonts
     }
 
     # 主体 | Main
 
     方法 取IO <公开 静态 类型 = ImGuiIO类 注释 = "返回ImGui的IO结构体(鼠标/键盘/游戏手柄的输入、时间、各种配置选项和标志)" 折叠 @嵌入式方法 = "">
     {
-        @ @dt<ImGuiIO类>{&ImGui::GetIO()}
+        @ &ImGui::GetIO()
     }
 
     方法 取样式 <公开 静态 类型 = IM样式类 注释 = "返回当前的样式配置" 折叠 @嵌入式方法 = "">
     {
-        @ @dt<IM样式类>{ImGui::GetStyle()}
+        @ &ImGui::GetStyle()
     }
 
     方法 新建帧 <公开 静态 注释 = "创建一个新的Dear ImGUI帧,然后在调用\"渲染/结束帧\"之前执行界面布局的相关命令." 折叠 @嵌入式方法 = "">
@@ -101,18 +101,21 @@
     # 样式 | Styles
 
     方法 深色样式 <公开 静态 注释 = "将ImGui的配色主题设置为深色样式(默认值)" 折叠 @嵌入式方法 = "">
+    参数 样式指针 <类型 = 变整数 注释 = "默认使用ImGui默认的样式;" 注释 = "如需自定义,请使用\"IM样式类.取变整数指针()\"." @默认值 = 0>
     {
-        @ ImGui::StyleColorsDark()
+        @ ImGui::StyleColorsDark(reinterpret_cast<ImGuiStyle*>(@<样式指针>))
     }
 
     方法 浅色样式 <公开 静态 注释 = "将ImGui的配色主题设置为浅色样式" 折叠 @嵌入式方法 = "">
+    参数 样式指针 <类型 = 变整数 注释 = "默认使用ImGui默认的样式;" 注释 = "如需自定义,请使用\"IM样式类.取变整数指针()\"." @默认值 = 0>
     {
-        @ ImGui::StyleColorsLight()
+        @ ImGui::StyleColorsLight(reinterpret_cast<ImGuiStyle*>(@<样式指针>))
     }
 
     方法 经典样式 <公开 静态 注释 = "将ImGui的配色主题设置为经典样式" 折叠 @嵌入式方法 = "">
+    参数 样式指针 <类型 = 变整数 注释 = "默认使用ImGui默认的样式;" 注释 = "如需自定义,请使用\"IM样式类.取变整数指针()\"." @默认值 = 0>
     {
-        @ ImGui::StyleColorsClassic()
+        @ ImGui::StyleColorsClassic(reinterpret_cast<ImGuiStyle*>(@<样式指针>))
     }
 
     # 窗口 | Windows
@@ -133,8 +136,7 @@
             注释 = "如果子窗口已被折叠或被完全裁剪,则子语句体中的代码不会被执行." 注释 = "注意: 本方法是\"子窗口开端\"和\"子窗口末端\"的结合体." 折叠 隐藏值属性 = "0"
             @嵌入式方法 = "has_body = true\r\nbody_tail = \"}\\r\\nImGui::EndChild();\"">
     参数 文本ID <注释 = "提供子窗口的文本ID(子窗口没有可显示的标签文本);" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
-    参数 子窗口尺寸 <类型 = ImVec2 注释 = "提供子窗口的尺寸,等于0.0f: 使用剩余的主窗口大小; 大于0.0f: 使用固定大小; 小于0.0f: 使用剩余窗口大小减去绝对大小"
-            @默认值 = 空对象>
+    参数 子窗口尺寸 <类型 = ImVec2 注释 = "提供子窗口的尺寸,等于0.0f: 使用剩余的主窗口大小; 大于0.0f: 使用固定大小; 小于0.0f: 使用剩余窗口大小减去绝对大小">
     参数 子窗口标志 <类型 = 整数 注释 = "请参考\"IM子窗口标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM子窗口标志.无>
     参数 窗口标志 <类型 = 整数 注释 = "请参考\"IM窗口标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM窗口标志.无>
     {
@@ -160,8 +162,7 @@
     方法 子窗口开端 <公开 静态 类型 = 逻辑型 注释 = "使用子窗口开始进入主窗口内独立的滚动/剪切区域,子窗口也可以嵌入自己的子窗口."
             返回值注释 = "返回假表示子窗口已被折叠或被完全裁剪,此时你可以省略往子窗口中提交内容." 折叠 @嵌入式方法 = "">
     参数 文本ID <注释 = "提供子窗口的文本ID(子窗口没有可显示的标签文本);" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
-    参数 子窗口尺寸 <类型 = ImVec2 注释 = "提供子窗口的尺寸,等于0.0f: 使用剩余的主窗口大小; 大于0.0f: 使用固定大小; 小于0.0f: 使用剩余窗口大小减去绝对大小"
-            @默认值 = 空对象>
+    参数 子窗口尺寸 <类型 = ImVec2 注释 = "提供子窗口的尺寸,等于0.0f: 使用剩余的主窗口大小; 大于0.0f: 使用固定大小; 小于0.0f: 使用剩余窗口大小减去绝对大小">
     参数 子窗口标志 <类型 = 整数 注释 = "请参考\"IM子窗口标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM子窗口标志.无>
     参数 窗口标志 <类型 = 整数 注释 = "请参考\"IM窗口标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM窗口标志.无>
     {
@@ -197,9 +198,9 @@
         @ ImGui::IsWindowHovered(static_cast<ImGuiHoveredFlags>(@<悬停标志>))
     }
 
-    方法 取窗口绘制列表 <公开 静态 类型 = IM绘制列表类 注释 = "获取与当前窗口关联的绘制列表,可以附加你自己绘制的基本图形." 折叠 @嵌入式方法 = "">
+    方法 取窗口绘制列表 <公开 静态 类型 = IM绘制列表 注释 = "获取与当前窗口关联的绘制列表,可以附加你自己绘制的基本图形." 折叠 @嵌入式方法 = "">
     {
-        @ @dt<IM绘制列表类>{ImGui::GetWindowDrawList()}
+        @ ImGui::GetWindowDrawList()
     }
 
     方法 取窗口DPI缩放 <公开 静态 类型 = 单精度小数 注释 = "返回与当前窗口视口关联的DPI缩放" 折叠 @嵌入式方法 = "">
@@ -209,12 +210,12 @@
 
     方法 取窗口位置 <公开 静态 类型 = ImVec2 注释 = "返回当前窗口的位置" 折叠 @嵌入式方法 = "">
     {
-        @ @dt<ImVec2>{ImGui::GetWindowPos()}
+        @ ImGui::GetWindowPos()
     }
 
     方法 取窗口尺寸 <公开 静态 类型 = ImVec2 注释 = "返回当前窗口的尺寸" 折叠 @嵌入式方法 = "">
     {
-        @ @dt<ImVec2>{ImGui::GetWindowSize()}
+        @ ImGui::GetWindowSize()
     }
 
     方法 取窗口宽度 <公开 静态 类型 = 单精度小数 注释 = "返回当前窗口的宽度" 折叠 @嵌入式方法 = "">
@@ -227,9 +228,9 @@
         @ ImGui::GetWindowHeight()
     }
 
-    方法 取窗口视口 <公开 静态 类型 = IM视口类 注释 = "返回与当前窗口关联的视口" 折叠 @嵌入式方法 = "">
+    方法 取窗口视口 <公开 静态 类型 = IM视口指针 注释 = "返回与当前窗口关联的视口" 折叠 @嵌入式方法 = "">
     {
-        @ @dt<IM视口类>{ImGui::GetWindowViewport()}
+        @ ImGui::GetWindowViewport()
     }
 
     # 窗口操作 | Window manipulation
@@ -237,7 +238,7 @@
     方法 置下一窗口位置 <公开 静态 注释 = "设置下一个窗口的位置,请在\"窗口/窗口开端\"之前调用." 折叠 @嵌入式方法 = "">
     参数 窗口位置 <类型 = ImVec2>
     参数 执行条件 <类型 = IM执行条件 @默认值 = IM执行条件.无>
-    参数 窗口中心点 <类型 = ImVec2 注释 = "提供窗口的中心点位置,(0.5,0.5)为中间." @默认值 = 空对象>
+    参数 窗口中心点 <类型 = ImVec2 注释 = "提供窗口的中心点位置,(0.5,0.5)为中间.">
     {
         @ ImGui::SetNextWindowPos(@<窗口位置>, static_cast<ImGuiCond>(@<执行条件>), @<窗口中心点>)
     }
@@ -341,28 +342,28 @@
 
     方法 取可用内容区域 <公开 静态 类型 = ImVec2 注释 = "等同于\"取最大内容区域() - 取光标位置()\"." 折叠 @嵌入式方法 = "">
     {
-        @ @dt<ImVec2>{ImGui::GetContentRegionAvail()}
+        @ ImGui::GetContentRegionAvail()
     }
 
     方法 取最大内容区域 <公开 静态 类型 = ImVec2
             注释 = "current content boundaries (typically window boundaries including scrolling, or current column boundaries), in windows coordinates"
             折叠 @嵌入式方法 = "">
     {
-        @ @dt<ImVec2>{ImGui::GetContentRegionMax()}
+        @ ImGui::GetContentRegionMax()
     }
 
     方法 取最小窗口内容区域 <公开 静态 类型 = ImVec2
             注释 = "content boundaries min for the full window (roughly (0,0)-Scroll), in window coordinates" 折叠
             @嵌入式方法 = "">
     {
-        @ @dt<ImVec2>{ImGui::GetWindowContentRegionMin()}
+        @ ImGui::GetWindowContentRegionMin()
     }
 
     方法 取最大窗口内容区域 <公开 静态 类型 = ImVec2
             注释 = "content boundaries max for the full window (roughly (0,0)+Size-Scroll) where Size can be overridden with SetNextWindowContentSize(), in window coordinates"
             折叠 @嵌入式方法 = "">
     {
-        @ @dt<ImVec2>{ImGui::GetWindowContentRegionMax()}
+        @ ImGui::GetWindowContentRegionMax()
     }
 
     # 滚动窗口 | Windows Scrolling
@@ -443,7 +444,7 @@
 
     方法 设置字体 <公开 静态 注释 = "将指定的字体压入到堆栈,然后在子语句体中更改字体的参数." 注释 = "本方法不需要手动弹出堆栈." 折叠 隐藏值属性 = "0"
             @嵌入式方法 = "has_body = true\r\nbody_tail = \"}\\r\\nImGui::PopFont();\"">
-    参数 字体 <类型 = IM字体类>
+    参数 字体 <类型 = IM字体指针>
     {
         @ ImGui::PushFont(@<字体>)
     }
@@ -538,9 +539,9 @@
 
     # 只读访问样式 | Style read access
 
-    方法 取当前字体 <公开 静态 类型 = IM字体类 注释 = "返回当前字体" 折叠 @嵌入式方法 = "">
+    方法 取当前字体 <公开 静态 类型 = IM字体指针 注释 = "返回当前字体" 折叠 @嵌入式方法 = "">
     {
-        @ @dt<IM字体类>{ImGui::GetFont()}
+        @ ImGui::GetFont()
     }
 
     方法 取字体大小 <公开 静态 类型 = 单精度小数 注释 = "获取基于当前字体的字体大小(等于像素高度),该大小应用了当前的缩放比例." 折叠 @嵌入式方法 = "">
@@ -552,7 +553,7 @@
             注释 = "get UV coordinate for a white pixel, useful to draw custom shapes via the ImDrawList API" 折叠
             @嵌入式方法 = "">
     {
-        @ @dt<ImVec2>{ImGui::GetFontTexUvWhitePixel()}
+        @ ImGui::GetFontTexUvWhitePixel()
     }
 
     方法 取32位颜色 <公开 静态 类型 = 整数
@@ -576,8 +577,9 @@
             注释 = "retrieve given color with style alpha applied, packed as a 32-bit value suitable for ImDrawList"
             折叠 @嵌入式方法 = "">
     参数 颜色 <类型 = 整数>
+    参数 Alpha乘数 <类型 = 单精度小数 @默认值 = 1.0>
     {
-        @ ImGui::GetColorU32(@<颜色>)
+        @ ImGui::GetColorU32(@<颜色>, @<Alpha乘数>)
     }
 
     方法 取样式颜色 <公开 静态 类型 = ImVec4
@@ -585,7 +587,7 @@
             注释 = "otherwise use GetColorU32() to get style color with style alpha baked in." 折叠 @嵌入式方法 = "">
     参数 颜色ID <类型 = IM颜色标识符>
     {
-        @ @dt<ImVec4>{ImGui::GetStyleColorVec4(static_cast<ImGuiCol>(@<颜色ID>))}
+        @ ImGui::GetStyleColorVec4(static_cast<ImGuiCol>(@<颜色ID>))
     }
 
     # 光标位置 | Layout cursor positioning
@@ -595,7 +597,7 @@
             注释 = "and bottom-right == GetMainViewport()->Pos+Size == io.DisplaySize in single-viewport mode." 折叠
             @嵌入式方法 = "">
     {
-        @ @dt<ImVec2>{ImGui::GetCursorScreenPos()}
+        @ ImGui::GetCursorScreenPos()
     }
 
     方法 置光标屏幕位置 <公开 静态 注释 = "设置光标位置的绝对坐标" 折叠 @嵌入式方法 = "">
@@ -606,7 +608,7 @@
 
     方法 取光标位置 <公开 静态 类型 = ImVec2 注释 = "返回相对于窗口坐标的光标位置" 折叠 @嵌入式方法 = "">
     {
-        @ @dt<ImVec2>{ImGui::GetCursorPos()}
+        @ ImGui::GetCursorPos()
     }
 
     方法 取光标水平位置 <公开 静态 类型 = 单精度小数 注释 = "返回相对于窗口坐标的水平光标位置" 折叠 @嵌入式方法 = "">
@@ -639,7 +641,7 @@
 
     方法 取光标起始位置 <公开 静态 类型 = ImVec2 注释 = "返回相对于窗口坐标的初始光标位置" 折叠 @嵌入式方法 = "">
     {
-        @ @dt<ImVec2>{ImGui::GetCursorStartPos()}
+        @ ImGui::GetCursorStartPos()
     }
 
     # 其他布局函数 | Other layout functions
@@ -819,7 +821,7 @@
     参数 标签文本 <注释 = "提供显示在按钮旁边的标签文本;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;"
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
-    参数 按钮尺寸 <类型 = ImVec2 注释 = "提供按钮的宽高,留空为自动根据标签文本的长度调整宽度." @默认值 = 空对象>
+    参数 按钮尺寸 <类型 = ImVec2 注释 = "提供按钮的宽高,ImVec2.创建(0, 0)为自动根据标签文本的长度调整宽度.">
     {
         @ ImGui::Button(*PivAny2U{@<标签文本>}, @<按钮尺寸>)
     }
@@ -890,10 +892,10 @@
     方法 进度条 <公开 静态 注释 = "创建一个进度条组件" 折叠 @嵌入式方法 = "">
     参数 进度 <类型 = 单精度小数 注释 = "提供当前的进度位置,范围[0.0-1.0].">
     参数 尺寸 <类型 = ImVec2 注释 = "提供进度条的像素尺寸,小于0.0将使用全部可用宽度/高度," 注释 = "等于0.0为默认的项目宽度/高度,大于0.0则使用提供的宽度/高度."
-            @默认值 = 空对象>
+            注释 = "推荐默认值: ImVec2.创建(-1.0, 0)">
     参数 覆盖文本 <类型 = 标准文本类U 注释 = "默认在进度条上显示如\"95%\"的当前进度文本,若提供了自定义的文本,将覆盖原来的进度文本." @默认值 = 空对象>
     {
-        @ ImGui::ProgressBar(@<进度>, GET_ImVec2_MaybeNull(@<尺寸>, -FLT_MIN, 0), @<覆盖文本>.GetTextMaybeNull())
+        @ ImGui::ProgressBar(@<进度>, @<尺寸>, @<覆盖文本>.GetTextMaybeNull())
     }
 
     方法 项目符号 <公开 静态 注释 = "绘制一个小圆点并将光标保持在同一行." 折叠 @嵌入式方法 = "">
@@ -906,26 +908,24 @@
     方法 图片框 <公开 静态 注释 = "创建一个图片框组件" 折叠 @嵌入式方法 = "">
     参数 图片纹理ID <类型 = 长整数 注释 = "提供图片纹理ID,请使用\"IM_×××渲染器.加载图片××()\".">
     参数 图片尺寸 <类型 = ImVec2 注释 = "提供纹理图片的显示尺寸,单位为像素,本参数可以缩放图片.">
-    参数 左上纹理坐标 <类型 = ImVec2 注释 = "提供纹理的左上坐标,默认的(0.0, 0.0)表示最左上角,修改该值可以裁剪显示部分图像." @默认值 = 空对象>
-    参数 右下纹理坐标 <类型 = ImVec2 注释 = "提供纹理的右下坐标,默认的(1.0, 1.0)表示最右下角,修改该值可以裁剪显示部分图像." @默认值 = 空对象>
-    参数 色调 <类型 = ImVec4 注释 = "默认为不添加色调" @默认值 = 空对象>
-    参数 边框颜色 <类型 = ImVec4 注释 = "默认为黑色边框" @默认值 = 空对象>
+    参数 左上纹理坐标 <类型 = ImVec2 注释 = "提供纹理的左上坐标,ImVec2.创建(0.0, 0.0) 表示最左上角,修改该值可以裁剪显示部分图像.">
+    参数 右下纹理坐标 <类型 = ImVec2 注释 = "提供纹理的右下坐标,ImVec2.创建(1.0, 1.0) 表示最右下角,修改该值可以裁剪显示部分图像.">
+    参数 色调 <类型 = ImVec4 注释 = "ImVec4.创建(1, 1, 1, 1) 表示不添加色调">
+    参数 边框颜色 <类型 = ImVec4 注释 = "ImVec4.创建(0, 0, 0, 0) 为黑色边框">
     {
-        @ ImGui::Image((ImTextureID)@<图片纹理ID>, @<图片尺寸>.data(), GET_ImVec2_MaybeNull(@<左上纹理坐标>, 0, 0), GET_ImVec2_MaybeNull(@<右下纹理坐标>, 1, 1),
-        @     GET_ImVec4_MaybeNull(@<色调>, 1, 1, 1, 1), GET_ImVec4_MaybeNull(@<边框颜色>, 0, 0, 0, 0))
+        @ ImGui::Image((ImTextureID)@<图片纹理ID>, @<图片尺寸>, @<左上纹理坐标>, @<右下纹理坐标>, @<色调>, @<边框颜色>)
     }
 
     方法 图片按钮 <公开 静态 类型 = 逻辑型 注释 = "创建一个图片按钮组件" 返回值注释 = "按钮被单击后返回真" 折叠 @嵌入式方法 = "">
     参数 文本ID <注释 = "提供组件的唯一文本ID,本ID不会显示在按钮中;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     参数 图片纹理ID <类型 = 长整数 注释 = "提供图片纹理ID,请使用\"IM_×××渲染器.加载图片××()\".">
     参数 图片尺寸 <类型 = ImVec2 注释 = "提供纹理图片的显示尺寸,单位为像素,本参数可以缩放图片.">
-    参数 左上纹理坐标 <类型 = ImVec2 注释 = "提供纹理的左上坐标,默认的(0.0, 0.0)表示最左上角,修改该值可以裁剪显示部分图像." @默认值 = 空对象>
-    参数 右下纹理坐标 <类型 = ImVec2 注释 = "提供纹理的右下坐标,默认的(1.0, 1.0)表示最右下角,修改该值可以裁剪显示部分图像." @默认值 = 空对象>
-    参数 背景颜色 <类型 = ImVec4 注释 = "默认为黑色背景" @默认值 = 空对象>
-    参数 色调 <类型 = ImVec4 注释 = "默认为不添加色调" @默认值 = 空对象>
+    参数 左上纹理坐标 <类型 = ImVec2 注释 = "提供纹理的左上坐标,ImVec2.创建(0.0, 0.0) 表示最左上角,修改该值可以裁剪显示部分图像.">
+    参数 右下纹理坐标 <类型 = ImVec2 注释 = "提供纹理的右下坐标,ImVec2.创建(1.0, 1.0) 表示最右下角,修改该值可以裁剪显示部分图像.">
+    参数 背景颜色 <类型 = ImVec4 注释 = "ImVec4.创建(0, 0, 0, 0) 为黑色背景">
+    参数 色调 <类型 = ImVec4 注释 = "ImVec4.创建(1, 1, 1, 1) 表示不添加色调">
     {
-        @ ImGui::ImageButton(*PivAny2U{@<文本ID>}, (ImTextureID)@<图片纹理ID>, @<图片尺寸>.data(), GET_ImVec2_MaybeNull(@<左上纹理坐标>, 0, 0),
-        @     GET_ImVec2_MaybeNull(@<右下纹理坐标>, 1, 1), GET_ImVec4_MaybeNull(@<背景颜色>, 0, 0, 0, 0), GET_ImVec4_MaybeNull(@<色调>, 1, 1, 1, 1))
+        @ ImGui::ImageButton(*PivAny2U{@<文本ID>}, (ImTextureID)@<图片纹理ID>, @<图片尺寸>, @<左上纹理坐标>, @<右下纹理坐标>, @<背景颜色>, @<色调>)
     }
 
     # 组件: 组合框(下拉) | Widgets: Combo Box (Dropdown)
@@ -1159,7 +1159,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.3f">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::DragScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, reinterpret_cast<float*>(@<数据变量>.pdata()), 2, @<速度>,
+        @ ImGui::DragScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, reinterpret_cast<float*>(&@<数据变量>), 2, @<速度>,
         @     @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1175,7 +1175,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.3f">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::DragScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, reinterpret_cast<float*>(@<数据变量>.pdata()), 4, @<速度>,
+        @ ImGui::DragScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, reinterpret_cast<float*>(&@<数据变量>), 4, @<速度>,
         @     @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1422,7 +1422,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.3f">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::SliderScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, reinterpret_cast<float*>(@<数据变量>.pdata()), 2, @<最小值>, @<最大值>,
+        @ ImGui::SliderScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, reinterpret_cast<float*>(&@<数据变量>), 2, @<最小值>, @<最大值>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1437,7 +1437,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.3f">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::SliderScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, reinterpret_cast<float*>(@<数据变量>.pdata()), 4, @<最小值>,
+        @ ImGui::SliderScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, reinterpret_cast<float*>(&@<数据变量>), 4, @<最小值>,
         @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1556,7 +1556,7 @@
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
     参数 文本内容 <类型 = 标准文本类U 注释 = "必须提供一个\"标准文本类U\"变量,并确保其生命周期,输入的内容将保存在此变量中." @需求类型 = 可写入变量>
-    参数 尺寸 <类型 = ImVec2 注释 = "提供输入框的尺寸" @默认值 = 空对象>
+    参数 尺寸 <类型 = ImVec2 注释 = "提供输入框的尺寸">
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
         @ ImGui::InputTextMultiline(*PivAny2U{@<标签文本>}, @<文本内容>.pdata(), @<尺寸>, static_cast<ImGuiInputTextFlags>(@<输入框标志>), nullptr, nullptr)
@@ -1751,7 +1751,7 @@
     参数 颜色 <类型 = ImVec4 注释 = "必须提供一个变量,而且要确保变量的生命周期." @需求类型 = 可写入变量>
     参数 颜色编辑标志 <类型 = 整数 注释 = "请使用\"IM颜色编辑标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM颜色编辑标志.无>
     {
-        @ ImGui::ColorEdit3(*PivAny2U{@<标签文本>}, reinterpret_cast<float*>(@<颜色>.pdata()), static_cast<ImGuiColorEditFlags>(@<颜色编辑标志>))
+        @ ImGui::ColorEdit3(*PivAny2U{@<标签文本>}, reinterpret_cast<float*>(&@<颜色>), static_cast<ImGuiColorEditFlags>(@<颜色编辑标志>))
     }
 
     方法 颜色编辑器RGBA <公开 静态 类型 = 逻辑型 注释 = "创建一个颜色编辑框,可以设置RGBA颜色."
@@ -1763,7 +1763,7 @@
     参数 颜色 <类型 = ImVec4 注释 = "必须提供一个变量,而且要确保变量的生命周期." @需求类型 = 可写入变量>
     参数 颜色编辑标志 <类型 = 整数 注释 = "请使用\"IM颜色编辑标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM颜色编辑标志.无>
     {
-        @ ImGui::ColorEdit4(*PivAny2U{@<标签文本>}, reinterpret_cast<float*>(@<颜色>.pdata()), static_cast<ImGuiColorEditFlags>(@<颜色编辑标志>))
+        @ ImGui::ColorEdit4(*PivAny2U{@<标签文本>}, reinterpret_cast<float*>(&@<颜色>), static_cast<ImGuiColorEditFlags>(@<颜色编辑标志>))
     }
 
     方法 颜色选取器RGB <公开 静态 类型 = 逻辑型 注释 = "创建一个颜色选取器,可以选取RGB颜色."
@@ -1775,7 +1775,7 @@
     参数 选取颜色 <类型 = ImVec4 注释 = "必须提供一个变量,而且要确保变量的生命周期." @需求类型 = 可写入变量>
     参数 颜色编辑标志 <类型 = 整数 注释 = "请使用\"IM颜色编辑标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM颜色编辑标志.无>
     {
-        @ ImGui::ColorPicker3(*PivAny2U{@<标签文本>}, reinterpret_cast<float*>(@<选取颜色>.pdata()), static_cast<ImGuiColorEditFlags>(@<颜色编辑标志>))
+        @ ImGui::ColorPicker3(*PivAny2U{@<标签文本>}, reinterpret_cast<float*>(&@<选取颜色>), static_cast<ImGuiColorEditFlags>(@<颜色编辑标志>))
     }
 
     方法 颜色选取器RGBA <公开 静态 类型 = 逻辑型 注释 = "创建一个颜色选取器,可以选取RGBA颜色."
@@ -1785,10 +1785,10 @@
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
     参数 选取颜色 <类型 = ImVec4 注释 = "选取的颜色保存在此参数中,必须提供一个变量,而且要确保变量的生命周期." @需求类型 = 可写入变量>
-    参数 参考颜色 <类型 = ImVec4 注释 = "提供一个参考颜色,例如原来的颜色,可以留空." @默认值 = 空对象>
+    参数 参考颜色地址 <类型 = 变整数 注释 = "提供一个参考颜色的指针(ImVec4.取变整数地址),例如原来的颜色,可以留空." @默认值 = 0>
     参数 颜色编辑标志 <类型 = 整数 注释 = "请使用\"IM颜色编辑标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM颜色编辑标志.无>
     {
-        @ ImGui::ColorPicker4(*PivAny2U{@<标签文本>}, reinterpret_cast<float*>(@<选取颜色>.pdata()), static_cast<ImGuiColorEditFlags>(@<颜色编辑标志>), reinterpret_cast<float*>(@<参考颜色>.GetPtr()))
+        @ ImGui::ColorPicker4(*PivAny2U{@<标签文本>}, reinterpret_cast<float*>(&@<选取颜色>), static_cast<ImGuiColorEditFlags>(@<颜色编辑标志>), reinterpret_cast<float*>(@<参考颜色地址>))
     }
 
     方法 色板按钮 <公开 静态 类型 = 逻辑型 注释 = "创建一个色板按钮,鼠标在按钮上悬停时会显示颜色的详细信息."
@@ -1797,9 +1797,9 @@
     参数 描述文本 <注释 = "提供色板的描述文本,会显示在悬停提示框中;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;"
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
-    参数 颜色 <类型 = ImVec4 注释 = "选取的颜色保存在此参数中,必须提供一个变量,而且要确保变量的生命周期." @需求类型 = 可写入变量>
+    参数 颜色 <类型 = ImVec4 注释 = "提供色板的颜色">
     参数 颜色编辑标志 <类型 = 整数 注释 = "请使用\"IM颜色编辑标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM颜色编辑标志.无>
-    参数 尺寸 <类型 = ImVec2 注释 = "提供按钮的尺寸,留空使用默认尺寸." @默认值 = 空对象>
+    参数 尺寸 <类型 = ImVec2 注释 = "提供按钮的尺寸,ImVec2.创建(0, 0)为默认尺寸.">
     {
         @ ImGui::ColorButton(*PivAny2U{@<描述文本>}, @<颜色>, static_cast<ImGuiColorEditFlags>(@<颜色编辑标志>), @<尺寸>)
     }
@@ -1865,7 +1865,7 @@
     参数 是否选中 <类型 = 逻辑型 注释 = "指定当前是否被选中" @默认值 = 假>
     参数 可选项标志 <类型 = 整数 注释 = "请使用\"IM可选项标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM可选项标志.无>
     参数 尺寸 <类型 = ImVec2 注释 = "x等于0.0：使用剩余宽度,x大于0.0：使用指定宽度;" 注释 = "y等于0.0: 使用标签文本高度,y大于0.0: 使用指定高度;"
-            @默认值 = 空对象>
+            注释 = "推荐默认值: ImVec2.创建(0, 0)">
     {
         @ ImGui::Selectable(*PivAny2U{@<标签文本>}, static_cast<bool>(@<是否选中>), static_cast<ImGuiSelectableFlags>(@<可选项标志>), @<尺寸>)
     }
@@ -1878,7 +1878,7 @@
     参数 是否选中 <类型 = 逻辑型 注释 = "必须提供一个逻辑型变量,并确保它的生命周期." @需求类型 = 可写入变量>
     参数 可选项标志 <类型 = 整数 注释 = "请使用\"IM可选项标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM可选项标志.无>
     参数 尺寸 <类型 = ImVec2 注释 = "x等于0.0：使用剩余宽度,x大于0.0：使用指定宽度;" 注释 = "y等于0.0: 使用标签文本高度,y大于0.0: 使用指定高度;"
-            @默认值 = 空对象>
+            注释 = "推荐默认值: ImVec2.创建(0, 0)">
     {
         @ ImGui::Selectable(*PivAny2U{@<标签文本>}, reinterpret_cast<bool*>(&@<是否选中>), static_cast<ImGuiSelectableFlags>(@<可选项标志>), @<尺寸>)
     }
@@ -1890,7 +1890,7 @@
     参数 标签文本 <注释 = "提供显示在列表框旁边的标签文本;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;"
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
-    参数 尺寸 <类型 = ImVec2 注释 = "提供列表框的尺寸" @默认值 = 空对象>
+    参数 尺寸 <类型 = ImVec2 注释 = "提供列表框的尺寸,推荐默认值: ImVec2.创建(0, 0)">
     {
         @ if (ImGui::BeginListBox(*PivAny2U{@<标签文本>}, @<尺寸>) == true)
     }
@@ -2109,19 +2109,19 @@
             注释 = "create an explicit dock node _within_ an existing window. See Docking demo for details." 折叠
             @嵌入式方法 = "">
     参数 ID <类型 = 整数>
-    参数 尺寸 <类型 = ImVec2 @默认值 = 空对象>
+    参数 尺寸 <类型 = ImVec2>
     参数 标志 <类型 = 整数 @默认值 = IM停靠节点标志.无>
-    参数 窗口类 <类型 = IM窗口类 @默认值 = 空对象>
+    参数 窗口类指针 <类型 = 变整数 注释 = "IM窗口类指针.取变整数指针()" @默认值 = 0>
     {
-        @ static_cast<INT>(ImGui::DockSpace(static_cast<ImGuiID>(@<ID>), @<尺寸>, static_cast<ImGuiDockNodeFlags>(@<标志>), @<窗口类>.GetPtr()))
+        @ static_cast<INT>(ImGui::DockSpace(static_cast<ImGuiID>(@<ID>), @<尺寸>, static_cast<ImGuiDockNodeFlags>(@<标志>), reinterpret_cast<ImGuiWindowClass*>(@<窗口类指针>)))
     }
 
     方法 覆盖式停靠空间 <公开 静态 类型 = 整数 注释 = "创建一个覆盖屏幕或特定视口的显式停靠节点." 折叠 @嵌入式方法 = "">
-    参数 视口 <类型 = IM视口类 @默认值 = 空对象>
+    参数 视口 <类型 = IM视口指针 @默认值 = 空对象>
     参数 标志 <类型 = 整数 @默认值 = IM停靠节点标志.无>
-    参数 窗口类 <类型 = IM窗口类 @默认值 = 空对象>
+    参数 窗口类指针 <类型 = 变整数 注释 = "IM窗口类指针.取变整数指针()" @默认值 = 0>
     {
-        @ static_cast<INT>(ImGui::DockSpaceOverViewport(@<视口>.GetPtr(), static_cast<ImGuiDockNodeFlags>(@<标志>), @<窗口类>.GetPtr()))
+        @ static_cast<INT>(ImGui::DockSpaceOverViewport(@<视口>, static_cast<ImGuiDockNodeFlags>(@<标志>), reinterpret_cast<ImGuiWindowClass*>(@<窗口类指针>)))
     }
 
     方法 置下一窗口停靠ID <公开 静态 折叠 @嵌入式方法 = "">
@@ -2134,9 +2134,9 @@
     方法 置下一窗口类 <公开 静态 注释 = "set next window class (control docking compatibility +"
             注释 = "provide hints to platform backend via custom viewport flags and platform parent/child relationship)"
             折叠 @嵌入式方法 = "">
-    参数 窗口类 <类型 = IM窗口类 @默认值 = 空对象>
+    参数 窗口类 <类型 = IM窗口类指针>
     {
-        @ ImGui::SetNextWindowClass(@<窗口类>.GetPtr())
+        @ ImGui::SetNextWindowClass(@<窗口类>)
     }
 
     方法 取窗口停靠ID <公开 静态 类型 = 整数 折叠 @嵌入式方法 = "">
@@ -2210,18 +2210,18 @@
         @ if (ImGui::BeginDragDropTarget() == true)
     }
 
-    方法 接收拖放有效载荷 <公开 静态 类型 = IM有效载荷类 注释 = "接收指定类型的有效载荷" 折叠 隐藏值属性 = "0"
+    方法 接收拖放有效载荷 <公开 静态 类型 = IM有效载荷指针 注释 = "接收指定类型的有效载荷" 折叠 隐藏值属性 = "0"
             @嵌入式方法 = "parent = \"DragDropTarget\"">
     参数 类型 <注释 = "类型是用户定义的文本,最多32个UTF-8字符,字符\'_\'开头的是ImGui的内部保留类型." 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;"
             @匹配类型 = 通用型>
     参数 标志 <类型 = 整数 注释 = "请参考\"IM拖放标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM拖放标志.无>
     {
-        @ @dt<IM有效载荷类>{ImGui::AcceptDragDropPayload(*PivAny2U{@<类型>},  static_cast<ImGuiDragDropFlags>(@<标志>))}
+        @ ImGui::AcceptDragDropPayload(*PivAny2U{@<类型>},  static_cast<ImGuiDragDropFlags>(@<标志>))
     }
 
-    方法 取拖放有效载荷 <公开 静态 类型 = IM有效载荷类 注释 = "从任何位置直接查看当前有效有效载荷." 折叠 @嵌入式方法 = "">
+    方法 取拖放有效载荷 <公开 静态 类型 = IM有效载荷指针 注释 = "从任何位置直接查看当前有效有效载荷." 折叠 @嵌入式方法 = "">
     {
-        @ @dt<IM有效载荷类>{ImGui::GetDragDropPayload()}
+        @ ImGui::GetDragDropPayload()
     }
 
     # 剪切 | Clipping
@@ -2326,17 +2326,17 @@
 
     方法 取项目左上矩形 <公开 静态 类型 = ImVec2 注释 = "获取最后一个项目的左上角边界矩形(屏幕空间)" 折叠 @嵌入式方法 = "">
     {
-        @ @dt<ImVec2>{ImGui::GetItemRectMin()}
+        @ ImGui::GetItemRectMin()
     }
 
     方法 取项目右下矩形 <公开 静态 类型 = ImVec2 注释 = "获取最后一个项目的右下角边界矩形(屏幕空间)" 折叠 @嵌入式方法 = "">
     {
-        @ @dt<ImVec2>{ImGui::GetItemRectMax()}
+        @ ImGui::GetItemRectMax()
     }
 
     方法 取项目尺寸 <公开 静态 类型 = ImVec2 注释 = "获取最后一个项目的尺寸(宽度和高度)" 折叠 @嵌入式方法 = "">
     {
-        @ @dt<ImVec2>{ImGui::GetItemRectSize()}
+        @ ImGui::GetItemRectSize()
     }
 
     方法 允许项目重叠 <公开 静态 注释 = "将最后一个项目设置为允许和后面的项目重叠." 注释 = "有时与\"隐身按钮\"、\"可选项\"等配合使用,可以捕获未使用的区域." 折叠
@@ -2347,21 +2347,21 @@
 
     # 视口 | Viewports
 
-    方法 取主视口 <公开 静态 类型 = IM视口类 注释 = "返回主视口" 折叠 @嵌入式方法 = "">
+    方法 取主视口 <公开 静态 类型 = IM视口指针 注释 = "返回主视口" 折叠 @嵌入式方法 = "">
     {
-        @ @dt<IM视口类>{ImGui::GetMainViewport()}
+        @ ImGui::GetMainViewport()
     }
 
     # 背景/前景绘制列表 | Background/Foreground Draw Lists
 
-    方法 取背景绘制列表 <公开 静态 类型 = IM绘制列表类 注释 = "此为第一个渲染的绘制列表,用于在ImGui内容后面快速绘制形状与文本." 折叠 @嵌入式方法 = "">
+    方法 取背景绘制列表 <公开 静态 类型 = IM绘制列表 注释 = "此为第一个渲染的绘制列表,用于在ImGui内容后面快速绘制形状与文本." 折叠 @嵌入式方法 = "">
     {
-        @ @dt<IM绘制列表类>{ImGui::GetBackgroundDrawList()}
+        @ ImGui::GetBackgroundDrawList()
     }
 
-    方法 取前景绘制列表 <公开 静态 类型 = IM绘制列表类 注释 = "此为最后一个渲染的绘制列表,用于在ImGui内容上快速绘制形状与文本." 折叠 @嵌入式方法 = "">
+    方法 取前景绘制列表 <公开 静态 类型 = IM绘制列表 注释 = "此为最后一个渲染的绘制列表,用于在ImGui内容上快速绘制形状与文本." 折叠 @嵌入式方法 = "">
     {
-        @ @dt<IM绘制列表类>{ImGui::GetForegroundDrawList()}
+        @ ImGui::GetForegroundDrawList()
     }
 
     # 杂项实用工具 | Miscellaneous Utilities
@@ -2389,7 +2389,7 @@
         @ ImGui::GetFrameCount()
     }
 
-    方法 "// 取绘制列表共享数据" <公开 静态 类型 = 整数 注释 = "可以在创建自己的绘制列表实例时使用此选项" 折叠 @嵌入式方法 = "">
+    方法 取绘制列表共享数据 <公开 静态 类型 = IM绘制列表共享数据指针 注释 = "可以在创建自己的绘制列表实例时使用此选项" 折叠 @嵌入式方法 = "">
     {
         @ ImGui::ImDrawListSharedData()
     }
@@ -2407,7 +2407,7 @@
     参数 隐藏两个井号后面 <类型 = 逻辑型 注释 = "隐藏两个井号后面的文本" @默认值 = 假>
     参数 换行宽度 <类型 = 小数 注释 = "小于0时表示不换行." @默认值 = -1.0>
     {
-        @ @dt<ImVec2>{ImGui::CalcTextSize(*PivAny2U{@<文本内容>}, nullptr, static_cast<bool>(@<隐藏两个井号后面>), @<换行宽度>)}
+        @ ImGui::CalcTextSize(*PivAny2U{@<文本内容>}, nullptr, static_cast<bool>(@<隐藏两个井号后面>), @<换行宽度>)
     }
 
     # 颜色实用工具 | Color Utilities
@@ -2415,7 +2415,7 @@
     方法 颜色值到ImVec4 <公开 静态 类型 = ImVec4 注释 = "将32位RGB颜色值转换到ImVec4类型" 折叠 @嵌入式方法 = "">
     参数 颜色值 <类型 = 整数 注释 = "32位RGB颜色值">
     {
-        @ @dt<ImVec4>{ImGui::ColorConvertU32ToFloat4(static_cast<ImU32>(@<颜色值>))}
+        @ ImGui::ColorConvertU32ToFloat4(static_cast<ImU32>(@<颜色值>))
     }
 
     方法 ImVec4到颜色值 <公开 静态 类型 = 整数 注释 = "将ImVec4类型的RGB颜色值转换到32位整数" 折叠 @嵌入式方法 = "">
@@ -2481,10 +2481,10 @@
         @ ImGui::GetKeyPressedAmount(static_cast<ImGuiKey>(@<按键码>), @<重复延迟>, @<重复率>)
     }
 
-    方法 取键名称 <公开 静态 类型 = 文本视图类U 注释 = "返回指定按键码的英文名称" 折叠 @嵌入式方法 = "">
+    方法 取键名称 <公开 静态 类型 = 标准文本类U 注释 = "返回指定按键码的英文名称" 折叠 @嵌入式方法 = "">
     参数 按键码 <类型 = 整数 注释 = "请使用\"IM按键码\"中的常量">
     {
-        @ @dt<文本视图类U>{ImGui::GetKeyPressedAmount(static_cast<ImGuiKey>(@<按键码>))}
+        @ @dt<标准文本类U>{ImGui::GetKeyName(static_cast<ImGuiKey>(@<按键码>))}
     }
 
     方法 置下一帧捕获键盘 <公开 静态 注释 = "强制下一帧捕获键盘" 折叠 @嵌入式方法 = "">
@@ -2535,19 +2535,19 @@
     }
 
     方法 鼠标位置是否有效 <公开 静态 类型 = 逻辑型 注释 = "返回指定的鼠标位置是否有效" 折叠 @嵌入式方法 = "">
-    参数 鼠标位置 <类型 = ImVec2 注释 = "留空时为当前的鼠标位置" @默认值 = 空对象>
+    参数 鼠标位置 <类型 = 变整数 注释 = "请提供 ImVec2.取变整数地址 ()" 注释 = "留空时为当前的鼠标位置" @默认值 = 0>
     {
-        @ ImGui::IsMousePosValid(@<鼠标位置>.GetPtr())
+        @ ImGui::IsMousePosValid(reinterpret_cast<const ImVec2*>(@<鼠标位置>))
     }
 
     方法 取鼠标位置 <公开 静态 类型 = ImVec2 注释 = "返回当前的鼠标位置" 折叠 @嵌入式方法 = "">
     {
-        @ @dt<ImVec2>{ImGui::GetMousePos()}
+        @ ImGui::GetMousePos()
     }
 
     方法 取鼠标弹出项位置 <公开 静态 类型 = ImVec2 注释 = "返回鼠标在弹出项中的位置(需要在弹出项的子语体内使用)" 折叠 @嵌入式方法 = "">
     {
-        @ @dt<ImVec2>{ImGui::GetMousePosOnOpeningCurrentPopup()}
+        @ ImGui::GetMousePosOnOpeningCurrentPopup()
     }
 
     方法 鼠标被拖动 <公开 静态 类型 = 逻辑型 注释 = "返回指定的鼠标键是否正在被拖动" 折叠 @嵌入式方法 = "">
@@ -2561,7 +2561,7 @@
     参数 按键 <类型 = IM鼠标按钮>
     参数 锁定阈值 <类型 = 单精度小数 注释 = "如果鼠标移动超过提供的距离,则判断为正在拖动." 注释 = "小于-1.0f时使用默认的鼠标拖动阈值." @默认值 = -1.0>
     {
-        @ @dt<ImVec2>{ImGui::GetMouseDragDelta(static_cast<ImGuiMouseButton>(@<按键>), @<锁定阈值>)}
+        @ ImGui::GetMouseDragDelta(static_cast<ImGuiMouseButton>(@<按键>), @<锁定阈值>)
     }
 
     方法 重置鼠标拖动增量 <公开 静态 注释 = "重置指定鼠标键的拖动增量" 折叠 @嵌入式方法 = "">
@@ -2592,7 +2592,7 @@
     方法 取平台IO <公开 静态 类型 = IM平台IO类 注释 = "platform/renderer functions, for backend to setup + viewports list."
             折叠 @嵌入式方法 = "">
     {
-        @ @dt<IM平台IO类>{&ImGui::GetPlatformIO()}
+        @ &ImGui::GetPlatformIO()
     }
 
     方法 更新平台窗口 <公开 静态 注释 = "call in main loop. will call CreateWindow/ResizeWindow/etc."
@@ -2619,18 +2619,18 @@
         @ ImGui::DestroyPlatformWindows()
     }
 
-    方法 寻找视口_ID <公开 静态 类型 = IM视口类 注释 = "this is a helper for backends." 折叠 @嵌入式方法 = "">
+    方法 寻找视口_ID <公开 静态 类型 = IM视口指针 注释 = "this is a helper for backends." 折叠 @嵌入式方法 = "">
     参数 视口ID <类型 = 整数>
     {
-        @ @dt<IM视口类>{&ImGui::FindViewportByID(static_cast<ImGuiID>(@<视口ID>))}
+        @ ImGui::FindViewportByID(static_cast<ImGuiID>(@<视口ID>))
     }
 
-    方法 寻找视口_平台句柄 <公开 静态 类型 = IM视口类
+    方法 寻找视口_平台句柄 <公开 静态 类型 = IM视口指针
             注释 = "this is a helper for backends. the type platform_handle is decided by the backend"
             注释 = "(e.g. HWND, MyWindow*, GLFWwindow* etc.)" 折叠 @嵌入式方法 = "">
     参数 平台句柄 <类型 = 变整数>
     {
-        @ @dt<IM视口类>{&ImGui::FindViewportByPlatformHandle(reinterpret_cast<void*>(@<平台句柄>))}
+        @ ImGui::FindViewportByPlatformHandle(reinterpret_cast<void*>(@<平台句柄>))
     }
 }
 
@@ -2644,7 +2644,7 @@
     参数 文本ID <注释 = "设置表格的唯一文本ID,本ID不会显示在表格中;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     参数 列数 <类型 = 整数 注释 = "提供表格的列数">
     参数 表格标志 <类型 = 整数 注释 = "请参考\"IM表格标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM表格标志.无>
-    参数 外边框尺寸 <类型 = ImVec2 @默认值 = 空对象>
+    参数 外边框尺寸 <类型 = ImVec2 注释 = "推荐默认值: ImVec2.创建(0, 0)">
     参数 内宽度 <类型 = 单精度小数 @默认值 = 0.0>
     {
         @ if (ImGui::BeginTable(*PivAny2U{@<文本ID>}, @<列数>, static_cast<ImGuiTableFlags>(@<表格标志>), @<外边框尺寸>, @<内宽度>) == true)
@@ -2751,57 +2751,82 @@
     }
 }
 
-类 IM绘制列表类 <公开 基础类 = 结构指针基础类 注释 = "ImDrawList" 折叠>
+类 IM绘制列表 <公开 注释 = "ImDrawList 本类使用指针封装,必须在创建或赋值后使用(用\"为空指针\"判断)."
+        注释 = "ImGui.取窗口绘制列表、ImGui.取前景绘制列表、ImGui.取背景绘制列表" 折叠 @别名 = "ImDrawList*" @别名类型 = 本地参考类型>
 {
-
-    # @ @m<PIV_DECLARE_STRUCT_PTR> (ImDrawList)
-
-    方法 标志 <公开 属性读 类型 = 整数 注释 = "返回绘制列表标志,为\"IM绘制列表标志\"的组合值." 折叠 @嵌入式方法 = "">
+    方法 创建 <公开 静态 类型 = IM绘制列表 注释 = "创建一个IM绘制列表实例" 折叠 @嵌入式方法 = "">
+    参数 共享数据 <类型 = IM绘制列表共享数据指针 注释 = "由\"ImGui.取绘制列表共享数据()\"返回">
     {
-        @ @sn<this>.data().Flags
+        @ new ImDrawList(@<共享数据>)
     }
 
-    方法 标志 <公开 属性写 注释 = "设置绘制列表标志,请使用\"IM绘制列表标志\"的位或组合值." 折叠>
-    参数 新标志 <类型 = 整数>
+    方法 销毁 <公开 静态 注释 = "销毁先前调用\"创建\"方法所创建的本类指针" 注释 = "注意: 非自己创建的指针请勿用本方法销毁." 折叠 @嵌入式方法 = "">
+    参数 指针值 <类型 = IM绘制列表>
     {
-        @ data().Flags = (ImDrawListFlags)@<新标志>;
+        @ delete @<指针值>
     }
+
+    方法 取指针 <公开 静态 类型 = 通用指针 注释 = "取回本类指针对应的通用指针" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
+    {
+        @ (void*)@<欲操作本对象>
+    }
+
+    方法 取变整数指针 <公开 静态 类型 = 变整数 注释 = "将本数据类型值转换到变整数后返回" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
+    {
+        @ (INT_P)@<欲操作本对象>
+    }
+
+    方法 为空指针 <公开 静态 注释 = "返回本指针是否为空" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
+    {
+        @ @<欲操作本对象> == nullptr
+    }
+
+    # ---
+
+    变量 标志 <公开 类型 = 整数 注释 = "绘制列表标志,为\"IM绘制列表标志\"的组合值." @输出名 = "Flags">
 
     # 基本图形 | Primitives
 
-    方法 添加直线 <公开 折叠 @嵌入式方法 = "">
+    方法 添加直线 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 端点1 <类型 = ImVec2>
     参数 端点2 <类型 = ImVec2>
     参数 颜色 <类型 = 整数>
     参数 粗细 <类型 = 单精度小数 @默认值 = 1.0>
     {
-        @ @sn<this>.data().AddLine(@<端点1>, @<端点2>, static_cast<ImU32>(@<颜色>), @<粗细>)
+        @ @<欲操作本对象>->AddLine(@<端点1>, @<端点2>, static_cast<ImU32>(@<颜色>), @<粗细>)
     }
 
-    方法 添加矩形 <公开 折叠 @嵌入式方法 = "">
+    方法 添加矩形 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 左上矩形 <类型 = ImVec2>
     参数 右下矩形 <类型 = ImVec2>
     参数 颜色 <类型 = 整数>
     参数 圆角半径 <类型 = 单精度小数 @默认值 = 0.0>
-    参数 标志 <类型 = 整数 @默认值 = IM绘制标志.无>
+    参数 绘制标志 <类型 = 整数 @默认值 = IM绘制标志.无>
     参数 粗细 <类型 = 单精度小数 @默认值 = 1.0>
     {
-        @ @sn<this>.data().AddRect(@<左上矩形>, @<右下矩形>, static_cast<ImU32>(@<颜色>),
-        @                          @<圆角半径>, static_cast<ImDrawFlags>(@<标志>), @<粗细>)
+        @ @<欲操作本对象>->AddRect(@<左上矩形>, @<右下矩形>, static_cast<ImU32>(@<颜色>),
+        @     @<圆角半径>, static_cast<ImDrawFlags>(@<绘制标志>), @<粗细>)
     }
 
-    方法 添加矩形填充 <公开 折叠 @嵌入式方法 = "">
+    方法 添加矩形填充 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 左上矩形 <类型 = ImVec2>
     参数 右下矩形 <类型 = ImVec2>
     参数 颜色 <类型 = 整数>
     参数 圆角半径 <类型 = 单精度小数 @默认值 = 0.0>
-    参数 标志 <类型 = 整数 @默认值 = IM绘制标志.无>
+    参数 绘制标志 <类型 = 整数 @默认值 = IM绘制标志.无>
     {
-        @ @sn<this>.data().AddRectFilled(@<左上矩形>, @<右下矩形>, static_cast<ImU32>(@<颜色>),
-        @                                @<圆角半径>, static_cast<ImDrawFlags>(@<标志>))
+        @ @<欲操作本对象>->AddRectFilled(@<左上矩形>, @<右下矩形>, static_cast<ImU32>(@<颜色>),
+        @     @<圆角半径>, static_cast<ImDrawFlags>(@<绘制标志>))
     }
 
-    方法 添加多色矩形填充 <公开 折叠 @嵌入式方法 = "">
+    方法 添加多色矩形填充 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 左上矩形 <类型 = ImVec2>
     参数 右下矩形 <类型 = ImVec2>
     参数 左上颜色 <类型 = 整数>
@@ -2809,11 +2834,12 @@
     参数 右下颜色 <类型 = 整数>
     参数 左下颜色 <类型 = 整数>
     {
-        @ @sn<this>.data().AddRectFilled(@<左上矩形>, @<右下矩形>, static_cast<ImU32>(@<左上颜色>),
-        @                                static_cast<ImU32>(@<右上颜色>), static_cast<ImU32>(@<右下颜色>), static_cast<ImU32>(@<左下颜色>))
+        @ @<欲操作本对象>->AddRectFilled(@<左上矩形>, @<右下矩形>, static_cast<ImU32>(@<左上颜色>),
+        @     static_cast<ImU32>(@<右上颜色>), static_cast<ImU32>(@<右下颜色>), static_cast<ImU32>(@<左下颜色>))
     }
 
-    方法 添加四边形 <公开 折叠 @嵌入式方法 = "">
+    方法 添加四边形 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 端点1 <类型 = ImVec2>
     参数 端点2 <类型 = ImVec2>
     参数 端点3 <类型 = ImVec2>
@@ -2821,77 +2847,85 @@
     参数 颜色 <类型 = 整数>
     参数 粗细 <类型 = 单精度小数 @默认值 = 1.0>
     {
-        @ @sn<this>.data().AddQuad(@<端点1>, @<端点2>, @<端点3>, @<端点4>, static_cast<ImU32>(@<颜色>), @<粗细>)
+        @ @<欲操作本对象>->AddQuad(@<端点1>, @<端点2>, @<端点3>, @<端点4>, static_cast<ImU32>(@<颜色>), @<粗细>)
     }
 
-    方法 添加四边形填充 <公开 折叠 @嵌入式方法 = "">
+    方法 添加四边形填充 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 端点1 <类型 = ImVec2>
     参数 端点2 <类型 = ImVec2>
     参数 端点3 <类型 = ImVec2>
     参数 端点4 <类型 = ImVec2>
     参数 颜色 <类型 = 整数>
     {
-        @ @sn<this>.data().AddQuadFilled(@<端点1>, @<端点2>, @<端点3>, @<端点4>, static_cast<ImU32>(@<颜色>))
+        @ @<欲操作本对象>->AddQuadFilled(@<端点1>, @<端点2>, @<端点3>, @<端点4>, static_cast<ImU32>(@<颜色>))
     }
 
-    方法 添加三角形 <公开 折叠 @嵌入式方法 = "">
+    方法 添加三角形 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 端点1 <类型 = ImVec2>
     参数 端点2 <类型 = ImVec2>
     参数 端点3 <类型 = ImVec2>
     参数 颜色 <类型 = 整数>
     参数 粗细 <类型 = 单精度小数 @默认值 = 1.0>
     {
-        @ @sn<this>.data().AddTriangle(@<端点1>, @<端点2>, @<端点3>, static_cast<ImU32>(@<颜色>), @<粗细>)
+        @ @<欲操作本对象>->AddTriangle(@<端点1>, @<端点2>, @<端点3>, static_cast<ImU32>(@<颜色>), @<粗细>)
     }
 
-    方法 添加三角形填充 <公开 折叠 @嵌入式方法 = "">
+    方法 添加三角形填充 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 端点1 <类型 = ImVec2>
     参数 端点2 <类型 = ImVec2>
     参数 端点3 <类型 = ImVec2>
     参数 颜色 <类型 = 整数>
     {
-        @ @sn<this>.data().AddTriangleFilled(@<端点1>, @<端点2>, @<端点3>, static_cast<ImU32>(@<颜色>))
+        @ @<欲操作本对象>->AddTriangleFilled(@<端点1>, @<端点2>, @<端点3>, static_cast<ImU32>(@<颜色>))
     }
 
-    方法 添加圆形 <公开 折叠 @嵌入式方法 = "">
+    方法 添加圆形 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 圆心 <类型 = ImVec2>
     参数 半径 <类型 = 单精度小数>
     参数 颜色 <类型 = 整数>
     参数 分段数 <类型 = 整数 @默认值 = 0>
     参数 粗细 <类型 = 单精度小数 @默认值 = 1.0>
     {
-        @ @sn<this>.data().AddCircle(@<圆心>, @<半径>, static_cast<ImU32>(@<颜色>), @<分段数>, @<粗细>)
+        @ @<欲操作本对象>->AddCircle(@<圆心>, @<半径>, static_cast<ImU32>(@<颜色>), @<分段数>, @<粗细>)
     }
 
-    方法 添加圆形填充 <公开 折叠 @嵌入式方法 = "">
+    方法 添加圆形填充 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 圆心 <类型 = ImVec2>
     参数 半径 <类型 = 单精度小数>
     参数 颜色 <类型 = 整数>
     参数 分段数 <类型 = 整数 @默认值 = 0>
     {
-        @ @sn<this>.data().AddCircleFilled(@<圆心>, @<半径>, static_cast<ImU32>(@<颜色>), @<分段数>)
+        @ @<欲操作本对象>->AddCircleFilled(@<圆心>, @<半径>, static_cast<ImU32>(@<颜色>), @<分段数>)
     }
 
-    方法 添加多边形 <公开 折叠 @嵌入式方法 = "">
+    方法 添加多边形 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 中心点 <类型 = ImVec2>
     参数 半径 <类型 = 单精度小数>
     参数 颜色 <类型 = 整数>
     参数 分段数 <类型 = 整数 @默认值 = 0>
     参数 粗细 <类型 = 单精度小数 @默认值 = 1.0>
     {
-        @ @sn<this>.data().AddCircle(@<中心点>, @<半径>, static_cast<ImU32>(@<颜色>), @<分段数>, @<粗细>)
+        @ @<欲操作本对象>->AddCircle(@<中心点>, @<半径>, static_cast<ImU32>(@<颜色>), @<分段数>, @<粗细>)
     }
 
-    方法 添加多边形填充 <公开 折叠 @嵌入式方法 = "">
+    方法 添加多边形填充 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 中心点 <类型 = ImVec2>
     参数 半径 <类型 = 单精度小数>
     参数 颜色 <类型 = 整数>
     参数 分段数 <类型 = 整数 @默认值 = 0>
     {
-        @ @sn<this>.data().AddNgonFilled(@<中心点>, @<半径>, static_cast<ImU32>(@<颜色>), @<分段数>)
+        @ @<欲操作本对象>->AddNgonFilled(@<中心点>, @<半径>, static_cast<ImU32>(@<颜色>), @<分段数>)
     }
 
-    方法 添加椭圆 <公开 折叠 @嵌入式方法 = "">
+    方法 添加椭圆 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 圆心 <类型 = ImVec2>
     参数 水平半径 <类型 = 单精度小数>
     参数 垂直半径 <类型 = 单精度小数>
@@ -2900,10 +2934,11 @@
     参数 分段数 <类型 = 整数 @默认值 = 0>
     参数 粗细 <类型 = 单精度小数 @默认值 = 1.0>
     {
-        @ @sn<this>.data().AddEllipse(@<圆心>, @<水平半径>, @<垂直半径> static_cast<ImU32>(@<颜色>), @<rot>, @<分段数>, @<粗细>)
+        @ @<欲操作本对象>->AddEllipse(@<圆心>, @<水平半径>, @<垂直半径> static_cast<ImU32>(@<颜色>), @<rot>, @<分段数>, @<粗细>)
     }
 
-    方法 添加椭圆填充 <公开 折叠 @嵌入式方法 = "">
+    方法 添加椭圆填充 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 圆心 <类型 = ImVec2>
     参数 水平半径 <类型 = 单精度小数>
     参数 垂直半径 <类型 = 单精度小数>
@@ -2911,46 +2946,51 @@
     参数 rot <类型 = 单精度小数 @默认值 = 0.0>
     参数 分段数 <类型 = 整数 @默认值 = 0>
     {
-        @ @sn<this>.data().AddEllipseFilled(@<圆心>, @<水平半径>, @<垂直半径>, static_cast<ImU32>(@<颜色>), @<rot>, @<分段数>)
+        @ @<欲操作本对象>->AddEllipseFilled(@<圆心>, @<水平半径>, @<垂直半径>, static_cast<ImU32>(@<颜色>), @<rot>, @<分段数>)
     }
 
-    方法 添加文本 <公开 折叠 @嵌入式方法 = "">
+    方法 添加文本 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 位置 <类型 = ImVec2>
     参数 颜色 <类型 = 整数>
     参数 文本内容 <注释 = "所欲添加的文本内容;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     {
-        @ @sn<this>.data().AddText(@<位置>, static_cast<ImU32>(@<颜色>), *PivAny2U{@<文本内容>}, nullptr)
+        @ @<欲操作本对象>->AddText(@<位置>, static_cast<ImU32>(@<颜色>), *PivAny2U{@<文本内容>}, nullptr)
     }
 
-    方法 添加文本Ex <公开 折叠 @嵌入式方法 = "">
-    参数 字体 <类型 = IM字体类>
+    方法 添加文本Ex <公开 静态 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
+    参数 字体 <类型 = IM字体指针>
     参数 字体大小 <类型 = 单精度小数>
     参数 位置 <类型 = ImVec2>
     参数 颜色 <类型 = 整数>
     参数 文本内容 <注释 = "所欲添加的文本内容;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     参数 换行宽度 <类型 = 单精度小数 @默认值 = 0.0>
-    参数 精细剪切矩形 <类型 = ImVec4 注释 = "CPU精细剪切矩形" @默认值 = 空对象>
+    参数 精细剪切矩形 <类型 = 变整数 注释 = "CPU精细剪切矩形,ImVec4.取变整数地址()" @默认值 = 0>
     {
-        @ @sn<this>.data().AddText(@<字体>, @<字体大小>, @<位置>, static_cast<ImU32>(@<颜色>), *PivAny2U{@<文本内容>}, nullptr, @<换行宽度>, @<精细剪切矩形>.GetPtr())
+        @ @<欲操作本对象>->AddText(@<字体>, @<字体大小>, @<位置>, static_cast<ImU32>(@<颜色>), *PivAny2U{@<文本内容>}, nullptr, @<换行宽度>, reinterpret_cast<const ImVec4*>(@<精细剪切矩形>))
     }
 
-    方法 添加折线 <公开 折叠>
+    方法 添加折线 <公开 静态 折叠>
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 端点数组 <类型 = ImVec2数组类>
     参数 颜色 <类型 = 整数>
-    参数 标志 <类型 = 整数 @默认值 = IM绘制标志.无>
+    参数 绘制标志 <类型 = 整数 @默认值 = IM绘制标志.无>
     参数 粗细 <类型 = 单精度小数 @默认值 = 1.0>
     {
-        @ data().AddPolyline(@<端点数组>.data().data(), @<端点数组>.data().size(), static_cast<ImU32>(@<颜色>), static_cast<ImDrawFlags>(@<标志>), @<粗细>);
+        @ @<欲操作本对象>->AddPolyline(@<端点数组>.data(), @<端点数组>.size(), static_cast<ImU32>(@<颜色>), static_cast<ImDrawFlags>(@<绘制标志>), @<粗细>);
     }
 
-    方法 添加凸多边形填充 <公开 折叠>
+    方法 添加凸多边形填充 <公开 静态 折叠>
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 端点数组 <类型 = ImVec2数组类>
     参数 颜色 <类型 = 整数>
     {
-        @ data().AddConvexPolyFilled(@<端点数组>.data().data(), @<端点数组>.data().size(), static_cast<ImU32>(@<颜色>));
+        @ @<欲操作本对象>->AddConvexPolyFilled(@<端点数组>.data(), @<端点数组>.size(), static_cast<ImU32>(@<颜色>));
     }
 
-    方法 添加三次贝塞尔曲线 <公开 折叠 @嵌入式方法 = "">
+    方法 添加三次贝塞尔曲线 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 端点1 <类型 = ImVec2>
     参数 端点2 <类型 = ImVec2>
     参数 端点3 <类型 = ImVec2>
@@ -2959,10 +2999,11 @@
     参数 粗细 <类型 = 单精度小数 @默认值 = 1.0>
     参数 分段数 <类型 = 整数 @默认值 = 0>
     {
-        @ @sn<this>.data().AddBezierCubic(@<端点1>, @<端点2>, @<端点3>, <端点4>, static_cast<ImU32>(@<颜色>), @<粗细>, @<分段数>)
+        @ @<欲操作本对象>->AddBezierCubic(@<端点1>, @<端点2>, @<端点3>, <端点4>, static_cast<ImU32>(@<颜色>), @<粗细>, @<分段数>)
     }
 
-    方法 添加二次贝塞尔曲线 <公开 折叠 @嵌入式方法 = "">
+    方法 添加二次贝塞尔曲线 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 端点1 <类型 = ImVec2>
     参数 端点2 <类型 = ImVec2>
     参数 端点3 <类型 = ImVec2>
@@ -2970,107 +3011,116 @@
     参数 粗细 <类型 = 单精度小数 @默认值 = 1.0>
     参数 分段数 <类型 = 整数 @默认值 = 0>
     {
-        @ @sn<this>.data().AddBezierQuadratic(@<端点1>, @<端点2>, @<端点3>, static_cast<ImU32>(@<颜色>), @<粗细>, @<分段数>)
+        @ @<欲操作本对象>->AddBezierQuadratic(@<端点1>, @<端点2>, @<端点3>, static_cast<ImU32>(@<颜色>), @<粗细>, @<分段数>)
     }
 
     # 图像基元 | Image primitives
 
-    方法 添加图像 <公开 @嵌入式方法 = "">
+    方法 添加图像 <公开 静态 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 用户纹理ID <类型 = 长整数>
     参数 左上矩形 <类型 = ImVec2>
     参数 右下矩形 <类型 = ImVec2>
-    参数 左上纹理坐标 <类型 = ImVec2 注释 = "提供纹理的左上坐标,默认的(0.0, 0.0)表示最左上角,修改该值可以裁剪显示部分图像." @默认值 = 空对象>
-    参数 右下纹理坐标 <类型 = ImVec2 注释 = "提供纹理的右下坐标,默认的(1.0, 1.0)表示最右下角,修改该值可以裁剪显示部分图像." @默认值 = 空对象>
+    参数 左上纹理坐标 <类型 = ImVec2 注释 = "提供纹理的左上坐标,ImVec2.创建(0.0, 0.0) 表示最左上角,修改该值可以裁剪显示部分图像.">
+    参数 右下纹理坐标 <类型 = ImVec2 注释 = "提供纹理的右下坐标,ImVec2.创建(1.0, 1.0) 表示最右下角,修改该值可以裁剪显示部分图像.">
     参数 颜色 <类型 = 整数 注释 = "默认为白色" @默认值 = 0xFFFFFFFF>
     {
-        @ @sn<this>.data().AddImage((ImTextureID)@<用户纹理ID>, @<左上矩形>, @<右下矩形>, GET_ImVec2_MaybeNull(@<左上纹理坐标>, 0, 0),
-        @                           GET_ImVec2_MaybeNull(@<右下纹理坐标>, 1, 1), static_cast<ImU32>(@<颜色>))
+        @ @<欲操作本对象>->AddImage((ImTextureID)@<用户纹理ID>, @<左上矩形>, @<右下矩形>, @<左上纹理坐标>, @<右下纹理坐标>, static_cast<ImU32>(@<颜色>))
     }
 
-    方法 添加四边形图像 <公开 @嵌入式方法 = "">
+    方法 添加四边形图像 <公开 静态 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 用户纹理ID <类型 = 长整数>
     参数 端点1 <类型 = ImVec2>
     参数 端点2 <类型 = ImVec2>
     参数 端点3 <类型 = ImVec2>
     参数 端点4 <类型 = ImVec2>
-    参数 纹理坐标1 <类型 = ImVec2 注释 = "提供纹理的左上坐标,默认的(0.0, 0.0)表示最左上角,修改该值可以裁剪显示部分图像." @默认值 = 空对象>
-    参数 纹理坐标2 <类型 = ImVec2 注释 = "提供纹理的右下坐标,默认的(1.0, 1.0)表示最右下角,修改该值可以裁剪显示部分图像." @默认值 = 空对象>
-    参数 纹理坐标3 <类型 = ImVec2 @默认值 = 空对象>
-    参数 纹理坐标4 <类型 = ImVec2 @默认值 = 空对象>
+    参数 纹理坐标1 <类型 = ImVec2 注释 = "推荐默认值: ImVec2.创建(0, 0)" @默认值 = 空对象>
+    参数 纹理坐标2 <类型 = ImVec2 注释 = "推荐默认值: ImVec2.创建(1, 0)" @默认值 = 空对象>
+    参数 纹理坐标3 <类型 = ImVec2 注释 = "推荐默认值: ImVec2.创建(1, 1)" @默认值 = 空对象>
+    参数 纹理坐标4 <类型 = ImVec2 注释 = "推荐默认值: ImVec2.创建(0, 1)" @默认值 = 空对象>
     参数 颜色 <类型 = 整数 注释 = "默认为白色" @默认值 = 0xFFFFFFFF>
     {
-        @ @sn<this>.data().AddImageQuad((ImTextureID)@<用户纹理ID>, @<端点1>, @<端点2>, @<端点3>, @<端点4>, GET_ImVec2_MaybeNull(@<纹理坐标1>, 0, 0),
-        @                               GET_ImVec2_MaybeNull(@<纹理坐标2>, 1, 0), GET_ImVec2_MaybeNull(@<纹理坐标3>, 1, 1), GET_ImVec2_MaybeNull(@<纹理坐标4>, 0, 1),
-        @                               static_cast<ImU32>(@<颜色>))
+        @ @<欲操作本对象>->AddImageQuad((ImTextureID)@<用户纹理ID>, @<端点1>, @<端点2>, @<端点3>, @<端点4>, @<纹理坐标1>,
+        @     @<纹理坐标2>, @<纹理坐标3>, @<纹理坐标4>, static_cast<ImU32>(@<颜色>))
     }
 
-    方法 添加圆角矩形图像 <公开 @嵌入式方法 = "">
+    方法 添加圆角矩形图像 <公开 静态 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 用户纹理ID <类型 = 长整数>
     参数 左上矩形 <类型 = ImVec2>
     参数 右下矩形 <类型 = ImVec2>
-    参数 左上纹理坐标 <类型 = ImVec2 注释 = "提供纹理的左上坐标,默认的(0.0, 0.0)表示最左上角,修改该值可以裁剪显示部分图像." @默认值 = 空对象>
-    参数 右下纹理坐标 <类型 = ImVec2 注释 = "提供纹理的右下坐标,默认的(1.0, 1.0)表示最右下角,修改该值可以裁剪显示部分图像." @默认值 = 空对象>
+    参数 左上纹理坐标 <类型 = ImVec2 注释 = "提供纹理的左上坐标,ImVec2.创建(0.0, 0.0)表示最左上角,修改该值可以裁剪显示部分图像.">
+    参数 右下纹理坐标 <类型 = ImVec2 注释 = "提供纹理的右下坐标,ImVec2.创建(1.0, 1.0)表示最右下角,修改该值可以裁剪显示部分图像.">
     参数 颜色 <类型 = 整数 注释 = "默认为白色" @默认值 = 0xFFFFFFFF>
     参数 圆角半径 <类型 = 单精度小数>
-    参数 标志 <类型 = 整数 @默认值 = IM绘制标志.无>
+    参数 绘制标志 <类型 = 整数 @默认值 = IM绘制标志.无>
     {
-        @ @sn<this>.data().AddImage((ImTextureID)@<用户纹理ID>, @<左上矩形>, @<右下矩形>, GET_ImVec2_MaybeNull(@<左上纹理坐标>, 0, 0),
-        @                           GET_ImVec2_MaybeNull(@<右下纹理坐标>, 1, 1), static_cast<ImU32>(@<颜色>), @<圆角半径>, static_cast<ImDrawFlags>(@<标志>))
+        @ @<欲操作本对象>->AddImage((ImTextureID)@<用户纹理ID>, @<左上矩形>, @<右下矩形>, @<左上纹理坐标>,
+        @     @<右下纹理坐标>, static_cast<ImU32>(@<颜色>), @<圆角半径>, static_cast<ImDrawFlags>(@<绘制标志>))
     }
 
     # Stateful path API, add points then finish with PathFillConvex() or PathStroke()
 
-    方法 清除路径 <公开 折叠 @嵌入式方法 = "">
+    方法 清除路径 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     {
-        @ @sn<this>.data().PathClear()
+        @ @<欲操作本对象>->PathClear()
     }
 
-    方法 连接折线路径 <公开 折叠 @嵌入式方法 = "">
+    方法 连接折线路径 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 位置 <类型 = ImVec2>
     {
-        @ @sn<this>.data().PathLineTo(@<位置>)
+        @ @<欲操作本对象>->PathLineTo(@<位置>)
     }
 
-    方法 连接折线路径_去重 <公开 折叠 @嵌入式方法 = "">
+    方法 连接折线路径_去重 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 位置 <类型 = ImVec2>
     {
-        @ @sn<this>.data().PathLineToMergeDuplicate(@<位置>)
+        @ @<欲操作本对象>->PathLineToMergeDuplicate(@<位置>)
     }
 
-    方法 填充凸多边形路径 <公开 折叠 @嵌入式方法 = "">
+    方法 填充凸多边形路径 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 颜色 <类型 = 整数>
     {
-        @ @sn<this>.data().PathFillConvex(static_cast<ImU32>(@<颜色>))
+        @ @<欲操作本对象>->PathFillConvex(static_cast<ImU32>(@<颜色>))
     }
 
-    方法 描边路径 <公开 折叠 @嵌入式方法 = "">
+    方法 描边路径 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 颜色 <类型 = 整数>
-    参数 标志 <类型 = 整数 @默认值 = IM绘制标志.无>
+    参数 绘制标志 <类型 = 整数 @默认值 = IM绘制标志.无>
     参数 粗细 <类型 = 单精度小数 @默认值 = 1.0>
     {
-        @ @sn<this>.data().PathStroke(static_cast<ImU32>(@<颜色>), static_cast<ImDrawFlags>(@<标志>), @<粗细>)
+        @ @<欲操作本对象>->PathStroke(static_cast<ImU32>(@<颜色>), static_cast<ImDrawFlags>(@<绘制标志>), @<粗细>)
     }
 
-    方法 连接弧形路径 <公开 折叠 @嵌入式方法 = "">
+    方法 连接弧形路径 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 圆心 <类型 = ImVec2>
     参数 半径 <类型 = 单精度小数>
     参数 a_min <类型 = 单精度小数>
     参数 a_max <类型 = 单精度小数>
     参数 分段数 <类型 = 整数 @默认值 = 0>
     {
-        @ @sn<this>.data().PathArcTo(@<圆心>, @<半径>, @<a_min>, @<a_max>, @<分段数>)
+        @ @<欲操作本对象>->PathArcTo(@<圆心>, @<半径>, @<a_min>, @<a_max>, @<分段数>)
     }
 
-    方法 连接弧形路径_快速 <公开 折叠 @嵌入式方法 = "">
+    方法 连接弧形路径_快速 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 圆心 <类型 = ImVec2>
     参数 半径 <类型 = 单精度小数>
     参数 a_min_of_12 <类型 = 单精度小数>
     参数 a_max_of_12 <类型 = 单精度小数>
     {
-        @ @sn<this>.data().PathArcToFast(@<圆心>, @<半径>, @<a_min_of_12>, @<a_max_of_12>)
+        @ @<欲操作本对象>->PathArcToFast(@<圆心>, @<半径>, @<a_min_of_12>, @<a_max_of_12>)
     }
 
-    方法 连接椭圆弧形路径 <公开 折叠 @嵌入式方法 = "">
+    方法 连接椭圆弧形路径 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 圆心 <类型 = ImVec2>
     参数 水平半径 <类型 = 单精度小数>
     参数 垂直半径 <类型 = 单精度小数>
@@ -3079,33 +3129,36 @@
     参数 a_max <类型 = 单精度小数>
     参数 分段数 <类型 = 整数 @默认值 = 0>
     {
-        @ @sn<this>.data().PathEllipticalArcTo(@<圆心>, @<水平半径>, @<垂直半径>, @<rot>, @<a_min>, @<a_max>, @<分段数>)
+        @ @<欲操作本对象>->PathEllipticalArcTo(@<圆心>, @<水平半径>, @<垂直半径>, @<rot>, @<a_min>, @<a_max>, @<分段数>)
     }
 
-    方法 连接三次贝塞尔曲线路径 <公开 折叠 @嵌入式方法 = "">
+    方法 连接三次贝塞尔曲线路径 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 端点2 <类型 = ImVec2>
     参数 端点3 <类型 = ImVec2>
     参数 端点4 <类型 = ImVec2>
     参数 分段数 <类型 = 整数 @默认值 = 0>
     {
-        @ @sn<this>.data().PathBezierCubicCurveTo(@<端点2>, @<端点3>, @<端点4>, @<分段数>)
+        @ @<欲操作本对象>->PathBezierCubicCurveTo(@<端点2>, @<端点3>, @<端点4>, @<分段数>)
     }
 
-    方法 连接二次贝塞尔曲线路径 <公开 折叠 @嵌入式方法 = "">
+    方法 连接二次贝塞尔曲线路径 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 端点2 <类型 = ImVec2>
     参数 端点3 <类型 = ImVec2>
     参数 分段数 <类型 = 整数 @默认值 = 0>
     {
-        @ @sn<this>.data().PathBezierQuadraticCurveTo(@<端点2>, @<端点3>, @<分段数>)
+        @ @<欲操作本对象>->PathBezierQuadraticCurveTo(@<端点2>, @<端点3>, @<分段数>)
     }
 
-    方法 矩形路径 <公开 折叠 @嵌入式方法 = "">
+    方法 矩形路径 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM绘制列表>
     参数 左上矩形 <类型 = ImVec2>
     参数 右下矩形 <类型 = ImVec2>
     参数 圆角半径 <类型 = 单精度小数 @默认值 = 0.0>
-    参数 标志 <类型 = 整数 @默认值 = IM绘制标志.无>
+    参数 绘制标志 <类型 = 整数 @默认值 = IM绘制标志.无>
     {
-        @ @sn<this>.data().PathRect(@<左上矩形>, @<右下矩形>, @<圆角半径>, static_cast<ImDrawFlags>(@<标志>))
+        @ @<欲操作本对象>->PathRect(@<左上矩形>, @<右下矩形>, @<圆角半径>, static_cast<ImDrawFlags>(@<绘制标志>))
     }
 }
 
@@ -3129,7 +3182,7 @@
     参数 蓝色值 <类型 = 单精度小数 注释 = "数值范围从 0.0 到 1.0,表示颜色中的蓝色分量值." @默认值 = 0>
     参数 透明值 <类型 = 单精度小数 注释 = "数值范围从 0.0 到 1.0,表示颜色中的透明分量值." @默认值 = 0>
     {
-        @ @dt<ImVec4>{ImVec4(@<红色值>, @<绿色值>, @<蓝色值>, @<透明值>)}
+        @ ImVec4(@<红色值>, @<绿色值>, @<蓝色值>, @<透明值>)
     }
 
     方法 RGB到RGBA <公开 静态 类型 = 整数 注释 = "将指定的RGB颜色转换为RGBA颜色值并返回." 注释 = "注: 可用于转换\"颜色类\"中的常量." 折叠 @嵌入式方法 = "">
@@ -3158,7 +3211,7 @@
     方法 颜色值到ImVec4 <公开 静态 类型 = ImVec4 注释 = "将32位整数的RGBA颜色值转换到4个单精度小数" 折叠 @嵌入式方法 = "">
     参数 颜色值 <类型 = 整数 注释 = "32位RGBA颜色值">
     {
-        @ @dt<ImVec4>{ImGui::ColorConvertU32ToFloat4(static_cast<ImU32>(@<颜色值>))}
+        @ ImGui::ColorConvertU32ToFloat4(static_cast<ImU32>(@<颜色值>))
     }
 
     方法 ImVec4到颜色值 <公开 静态 类型 = 整数 注释 = "将4个单精度小数的RGBA颜色值转换到32位整数" 折叠 @嵌入式方法 = "">
@@ -3328,225 +3381,220 @@
     # @end
 }
 
-类 IM字体类 <公开 基础类 = 数据类型基础类 注释 = "ImFont" 折叠 @文档 = "category = \"辅助类\"">
+类 IM字体指针 <公开 基础类 = PIV结构指针模板 注释 = "ImFont 本类使用指针封装,必须在创建或赋值后使用(用\"为空指针\"判断)." 折叠
+        @文档 = "category = \"辅助类\"" @别名 = "ImFont*" @模板实现类 = "IM字体指针">
 {
 
-    # @ @m<PIV_DECLARE_STRUCT_CLASS> (ImFont)
+    #
 }
 
-类 IM字体图集类 <公开 基础类 = 数据类型基础类 注释 = "ImFontAtlas" 折叠 @文档 = "category = \"辅助类\"">
+类 IM字体图集类 <公开 基础类 = PIV结构指针模板 注释 = "ImFontAtlas 本类使用指针封装,必须在创建或赋值后使用(用\"为空指针\"判断)." 折叠
+        @文档 = "category = \"辅助类\"" @别名 = "ImFontAtlas*" @模板实现类 = "IM字体图集类">
 {
-
-    # @ @m<PIV_DECLARE_STRUCT_CLASS> (ImFontAtlas)
-
-    方法 添加默认字体 <公开 类型 = IM字体类 注释 = "添加ImGui的默认字体(ProggyClean.ttf)" 返回值注释 = "返回字体指针" 折叠 @嵌入式方法 = "">
+    方法 添加默认字体 <公开 静态 类型 = IM字体指针 注释 = "添加ImGui的默认字体(ProggyClean.ttf)" 返回值注释 = "返回字体指针" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM字体图集类>
     {
-        @ @dt<IM字体类>{@sn<this>.pdata()->AddFontDefault(nullptr)}
+        @ @<欲操作本对象>->AddFontDefault(nullptr)
     }
 
-    方法 添加字体文件 <公开 类型 = IM字体类 注释 = "从文件中添加字体" 返回值注释 = "返回字体" 折叠 @嵌入式方法 = "">
+    方法 添加字体文件 <公开 静态 类型 = IM字体指针 注释 = "从文件中添加字体" 返回值注释 = "返回字体" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM字体图集类>
     参数 文件名 <类型 = 文本型 注释 = "提供所欲添加的字体文件路径">
     参数 像素大小 <类型 = 单精度小数 注释 = "栅格化字体时的像素大小,每种字体的大小都不一样,请自行测试找到合适的大小.">
     参数 字形范围 <类型 = IM字形范围 注释 = "选择字体的字形范围,范围内的字符将栅格化为图集,如果范围过大将消耗更多的内存." 注释 = "但如果有不在范围内字符,将无法正常显示."
             @默认值 = IM字形范围.中文>
     {
-        @ @dt<IM字体类>{@sn<this>.pdata()->AddFontFromFileTTF(*PivAny2U{@<文件名>}, @<像素大小>, nullptr, ImFontAtlas().@pvpt<字形范围>())}
+        @ @<欲操作本对象>->AddFontFromFileTTF(*PivAny2U{@<文件名>}, @<像素大小>, nullptr, ImFontAtlas().@pvpt<字形范围>())
     }
 
-    方法 添加内存字体 <公开 类型 = IM字体类 注释 = "从内存数据添加字体,添加后请勿自行释放字体的内存数据." 返回值注释 = "返回字体指针" 折叠 @嵌入式方法 = "">
+    方法 添加内存字体 <公开 静态 类型 = IM字体指针 注释 = "从内存数据添加字体,添加后请勿自行释放字体的内存数据." 返回值注释 = "返回字体指针" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM字体图集类>
     参数 字体数据地址 <类型 = 变整数 注释 = "提供所欲添加的字体数据地址,字体数据的所有权将自动转移到ImGui内部,由ImGui释放相关内存,所以请勿自行释放.">
     参数 字体数据大小 <类型 = 整数 注释 = "提供所欲添加的字体数据大小">
     参数 像素大小 <类型 = 单精度小数 注释 = "栅格化字体时的像素大小,每种字体的大小都不一样,请自行测试找到合适的大小.">
     参数 字形范围 <类型 = IM字形范围 注释 = "选择字体的字形范围,范围内的字符将栅格化为图集,如果范围过大将消耗更多的内存." 注释 = "但如果有不在范围内字符,将无法正常显示."
             @默认值 = IM字形范围.中文>
     {
-        @ @dt<IM字体类>{@sn<this>.pdata()->AddFontFromMemoryTTF(reinterpret_cast<void*>(@<字体数据地址>), @<字体数据大小>,
-        @                                                       @<像素大小>, nullptr, ImFontAtlas().@pvpt<字形范围>())}
+        @ @<欲操作本对象>->AddFontFromMemoryTTF(reinterpret_cast<void*>(@<字体数据地址>), @<字体数据大小>,
+        @     @<像素大小>, nullptr, ImFontAtlas().@pvpt<字形范围>())
     }
 
-    方法 添加字体文件Ex <公开 类型 = IM字体类 注释 = "从文件中添加字体" 返回值注释 = "返回字体" 折叠 @嵌入式方法 = "">
+    方法 添加字体文件Ex <公开 静态 类型 = IM字体指针 注释 = "从文件中添加字体" 返回值注释 = "返回字体" 折叠 @禁止流程检查 = 真>
+    参数 欲操作本对象 <类型 = IM字体图集类>
     参数 文件名 <类型 = 文本型 注释 = "提供所欲添加的字体文件路径">
     参数 像素大小 <类型 = 单精度小数 注释 = "栅格化字体时的像素大小,每种字体的大小都不一样,请自行测试找到合适的大小.">
     参数 字形范围 <类型 = IM字形范围构建类 注释 = "选择字体的字形范围,范围内的字符将栅格化为图集,如果范围过大将消耗更多的内存." 注释 = "但如果有不在范围内字符,将无法正常显示.">
     {
-        @ @dt<IM字体类>{@sn<this>.pdata()->AddFontFromFileTTF(*PivAny2U{@<文件名>}, @<像素大小>, nullptr, @<字形范围>.ranges())}
+        @ ImVector<ImWchar>* out_ranges = new ImVector<ImWchar>;
+        @ @<字形范围>.BuildRanges(out_ranges);
+        @ return @<欲操作本对象>->AddFontFromFileTTF(*PivAny2U{@<文件名>}, @<像素大小>, nullptr, out_ranges->Data);
     }
 
-    方法 添加内存字体Ex <公开 类型 = IM字体类 注释 = "从内存数据添加字体,添加后请勿自行释放字体的内存数据." 返回值注释 = "返回字体指针" 折叠 @嵌入式方法 = "">
+    方法 添加内存字体Ex <公开 静态 类型 = IM字体指针 注释 = "从内存数据添加字体,添加后请勿自行释放字体的内存数据." 返回值注释 = "返回字体指针" 折叠 @禁止流程检查 = 真>
+    参数 欲操作本对象 <类型 = IM字体图集类>
     参数 字体数据地址 <类型 = 变整数 注释 = "提供所欲添加的字体数据地址,字体数据的所有权将自动转移到ImGui内部,由ImGui释放相关内存,所以请勿自行释放.">
     参数 字体数据大小 <类型 = 整数 注释 = "提供所欲添加的字体数据大小">
     参数 像素大小 <类型 = 单精度小数 注释 = "栅格化字体时的像素大小,每种字体的大小都不一样,请自行测试找到合适的大小.">
     参数 字形范围 <类型 = IM字形范围构建类 注释 = "选择字体的字形范围,范围内的字符将栅格化为图集,如果范围过大将消耗更多的内存." 注释 = "但如果有不在范围内字符,将无法正常显示.">
     {
-        @ @dt<IM字体类>{@sn<this>.pdata()->AddFontFromMemoryTTF(reinterpret_cast<void*>(@<字体数据地址>), @<字体数据大小>, @<像素大小>, nullptr, @<字形范围>.ranges())}
+        @ ImVector<ImWchar>* out_ranges = new ImVector<ImWchar>;
+        @ @<字形范围>.BuildRanges(out_ranges);
+        @ return @<欲操作本对象>->AddFontFromMemoryTTF(reinterpret_cast<void*>(@<字体数据地址>), @<字体数据大小>, @<像素大小>, nullptr, out_ranges->Data);
     }
 
-    方法 清除输入数据 <公开 注释 = "清除字体的输入数据(所有ImFontConfig结构,包括大小、字体内存数据、字形范围等),即用于生成纹理和字体的所有数据." 折叠 @嵌入式方法 = "">
+    方法 清除输入数据 <公开 静态 注释 = "清除字体的输入数据(所有ImFontConfig结构,包括大小、字体内存数据、字形范围等),即用于生成纹理和字体的所有数据." 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM字体图集类>
     {
-        @ @sn<this>.pdata()->ClearInputData()
+        @ @<欲操作本对象>->ClearInputData()
     }
 
-    方法 清除纹理数据 <公开 注释 = "清除输出的字体纹理数据(CPU侧),每当字体纹理复制到显卡内存后保存到内存中." 折叠 @嵌入式方法 = "">
+    方法 清除纹理数据 <公开 静态 注释 = "清除输出的字体纹理数据(CPU侧),每当字体纹理复制到显卡内存后保存到内存中." 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM字体图集类>
     {
-        @ @sn<this>.pdata()->ClearTexData()
+        @ @<欲操作本对象>->ClearTexData()
     }
 
-    方法 清除字体 <公开 注释 = "清除输出的字体数据(字形存储、UV坐标等)" 折叠 @嵌入式方法 = "">
+    方法 清除字体 <公开 静态 注释 = "清除输出的字体数据(字形存储、UV坐标等)" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM字体图集类>
     {
-        @ @sn<this>.pdata()->ClearFonts()
+        @ @<欲操作本对象>->ClearFonts()
     }
 
-    方法 清除 <公开 注释 = "清除字体图集的所有输入和输出数据" 折叠 @嵌入式方法 = "">
+    方法 清除 <公开 静态 注释 = "清除字体图集的所有输入和输出数据" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM字体图集类>
     {
-        @ @sn<this>.pdata()->Clear()
+        @ @<欲操作本对象>->Clear()
     }
 
-    方法 生成 <公开 注释 = "生成8位单通道Alpha颜色的字体图集像素,本方法亦会在执行\"取纹理数据_xxx\"时自动调用." 折叠 @嵌入式方法 = "">
+    方法 生成 <公开 静态 注释 = "生成8位单通道Alpha颜色的字体图集像素,本方法亦会在执行\"取纹理数据_xxx\"时自动调用." 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM字体图集类>
     {
-        @ @sn<this>.pdata()->Build()
+        @ @<欲操作本对象>->Build()
     }
 
-    方法 取纹理数据_Alpha8 <公开 类型 = 变整数 注释 = "生成8位单通道Alpha颜色的字体图集像素(1字节/像素),然后返回纹理的指针和宽高."
+    方法 取纹理数据_Alpha8 <公开 静态 类型 = 变整数 注释 = "生成8位单通道Alpha颜色的字体图集像素(1字节/像素),然后返回纹理的指针和宽高."
             返回值注释 = "返回字体纹理的指针,可以转换到字节集: 字节集.指针添加字节集 (纹理指针, 纹理宽度 * 纹理高度 * 1)" 折叠 @禁止流程检查 = 真>
+    参数 欲操作本对象 <类型 = IM字体图集类>
     参数 纹理宽度 <类型 = 整数类 注释 = "返回字体图集纹理的宽度." @默认值 = 空对象>
     参数 纹理高度 <类型 = 整数类 注释 = "返回字体图集纹理的高度." @默认值 = 空对象>
     {
         @ unsigned char* tex_pixels = nullptr;
-        @ pdata()->GetTexDataAsAlpha8(&tex_pixels, &@<纹理宽度.值>, &@<纹理高度.值>, nullptr);
+        @ @<欲操作本对象>->GetTexDataAsAlpha8(&tex_pixels, &@<纹理宽度.值>, &@<纹理高度.值>, nullptr);
         @ return reinterpret_cast<INT_P>(tex_pixels);
     }
 
-    方法 取纹理数据_RGBA32 <公开 类型 = 变整数 注释 = "生成32位RGBA颜色的字体图集像素(4字节/像素),然后返回纹理的指针和宽高."
+    方法 取纹理数据_RGBA32 <公开 静态 类型 = 变整数 注释 = "生成32位RGBA颜色的字体图集像素(4字节/像素),然后返回纹理的指针和宽高."
             注释 = "注意: 提供RGBA32格式主要为了方便和兼容性,除非手动操作或将颜色数据复制到纹理中," 注释 = "否则生成的RGB像素将始终是白色(约浪费75%的内存占用)."
             注释 = "无论如何,内部都会先生成8位Alpha颜色,再转换到RGBA32."
             返回值注释 = "返回字体纹理的指针,可以转换到字节集: 字节集.指针添加字节集 (纹理指针, 纹理宽度 * 纹理高度 * 4)" 折叠 @禁止流程检查 = 真>
+    参数 欲操作本对象 <类型 = IM字体图集类>
     参数 纹理宽度 <类型 = 整数类 注释 = "返回字体图集纹理的宽度." @默认值 = 空对象>
     参数 纹理高度 <类型 = 整数类 注释 = "返回字体图集纹理的高度." @默认值 = 空对象>
     {
         @ unsigned char* tex_pixels = nullptr;
-        @ pdata()->GetTexDataAsRGBA32(&tex_pixels, &@<纹理宽度.值>, &@<纹理高度.值>, nullptr);
+        @ @<欲操作本对象>->GetTexDataAsRGBA32(&tex_pixels, &@<纹理宽度.值>, &@<纹理高度.值>, nullptr);
         @ return reinterpret_cast<INT_P>(tex_pixels);
     }
 
-    方法 是否已生成 <公开 类型 = 逻辑型 注释 = "返回是否已经生成了纹理数据" 折叠 @嵌入式方法 = "">
+    方法 是否已生成 <公开 静态 类型 = 逻辑型 注释 = "返回是否已经生成了纹理数据" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM字体图集类>
     {
-        @ @sn<this>.pdata()->IsBuilt()
+        @ @<欲操作本对象>->IsBuilt()
     }
 }
 
-类 IM字形范围构建类 <公开 基础类 = 数据类型基础类 注释 = "ImFontGlyphRangesBuilder,用于自定义字体的字形范围,"
-        注释 = "可实现只渲染字体中需要的文字,可以有效缩减字体纹理数据的内存占用." 折叠 @文档 = "category = \"辅助类\"">
+类 IM字形范围构建类 <公开 注释 = "ImFontGlyphRangesBuilder,用于自定义字体的字形范围," 注释 = "可实现只渲染字体中需要的文字,可以有效缩减字体纹理数据的内存占用."
+        折叠 @文档 = "category = \"辅助类\"" @别名 = "ImFontGlyphRangesBuilder" @别名类型 = 本地类>
 {
-
-    # @ @m<PIV_DECLARE_STRUCT_CLASS> (ImFontGlyphRangesBuilder)
-
-    方法 清空 <公开 注释 = "清空当前的字形范围" 折叠 @嵌入式方法 = "">
+    方法 清空 <公开 静态 注释 = "清空当前的字形范围" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM字形范围构建类>
     {
-        @ @sn<this>.data().Clear()
+        @ @<欲操作本对象>.Clear()
     }
 
-    方法 加入字符 <公开 注释 = "添加一个宽字库到字形范围中" 折叠 @嵌入式方法 = "">
+    方法 加入字符 <公开 静态 注释 = "添加一个宽字库到字形范围中" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM字形范围构建类>
     参数 所加入字符 <类型 = 字符 注释 = "所欲添加的字符,可以用单引号输入汉字,比如: \'火\'">
     {
-        @ @sn<this>.data().AddChar(@<所加入字符>)
+        @ @<欲操作本对象>.AddChar(@<所加入字符>)
     }
 
-    方法 加入文本 <公开 注释 = "以火山的文本型添加一组文字到自定义的字形范围中." 注释 = "本方法不会产生编码转换,推荐使用." 折叠>
+    方法 加入文本 <公开 静态 注释 = "以火山的文本型添加一组文字到自定义的字形范围中." 注释 = "本方法不会产生编码转换,推荐使用." 折叠>
+    参数 欲操作本对象 <类型 = IM字形范围构建类>
     参数 所加入文本 <类型 = 文本型>
     {
         @ for (INT_P i = 0; i < @<所加入文本>.GetLength(); i++) {
-        @     this->data().AddChar(@<所加入文本>.GetCharAt (i));
+        @     @<欲操作本对象>.AddChar(@<所加入文本>.GetCharAt(i));
         @ }
     }
 
-    方法 加入文本U <公开 注释 = "添加UTF-8编码的文本数据到自定义的字形范围中."
+    方法 加入文本U <公开 静态 注释 = "添加UTF-8编码的文本数据到自定义的字形范围中."
             注释 = "注意: 由于内部会将UTF-8字符转换到Unicode字符,因此会产生一到两次的编码转换,不太建议使用." 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM字形范围构建类>
     参数 所加入文本 <注释 = "支持类型(*表示会进行编码转换):" 注释 = " 标准文本类U、文本视图类U、字节集类(UTF-8编码)" 注释 = " *文本型、*标准文本类、*文本视图类"
             @匹配类型 = 通用型>
     {
-        @ @sn<this>.data().AddText(*PivAny2U{@<所加入文本>})
+        @ @<欲操作本对象>.AddText(*PivAny2U{@<所加入文本>})
     }
 
-    方法 加入范围 <公开 注释 = "添加\"IM字形范围\"常量中的字形范围,可以方便添加英文数字等常用文字类型." 折叠 @嵌入式方法 = "">
+    方法 加入范围 <公开 静态 注释 = "添加\"IM字形范围\"常量中的字形范围,可以方便添加英文数字等常用文字类型." 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM字形范围构建类>
     参数 字形范围 <类型 = IM字形范围 注释 = "选择字体的字形范围,范围内的字符将栅格化为图集,如果范围过大将消耗更多的内存." 注释 = "但如果有不在范围内字符,将无法正常显示."
             @默认值 = IM字形范围.中文>
     {
-        @ @sn<this>.data().AddRanges(ImFontAtlas().@pvpt<字形范围>())
+        @ @<欲操作本对象>.AddRanges(ImFontAtlas().@pvpt<字形范围>())
     }
 
-    # @begin
-    # <> <include>
-    # ImVector<ImWchar>* m_ranges = nullptr;
-    # // 下面的方法找不到释放内存的时机,但只内存泄漏一次,问题不大...
-    # inline ImWchar* ranges() {
-    #     if (!m_ranges) { m_ranges = new ImVector<ImWchar>; }
-    #     this->data().BuildRanges(m_ranges);
-    #     return m_ranges->Data;
-    # }
-    # <> </include>
-    # @end
+    方法 构建字形范围 <公开 静态 注释 = "获取当前已添加的字形范围" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM字形范围构建类>
+    参数 输出范围 <类型 = IM字符数组类>
+    {
+        @ @<欲操作本对象>.BuildRanges(&@<输出范围>)
+    }
 }
 
-类 ImVec2 <公开 基础类 = 数据类型基础类 注释 = "ImVec2" 折叠 @文档 = "category = \"辅助类\"">
+类 ImVec2 <公开 基础类 = PIV本地类模板 注释 = "ImVec2" 折叠 @文档 = "category = \"辅助类\"" @别名 = "ImVec2"
+        @模板实现类 = "ImVec2">
 {
+    变量 x <公开 类型 = 单精度小数 @输出名 = "x" @属性变量 = 真>
+    变量 y <公开 类型 = 单精度小数 @输出名 = "y" @属性变量 = 真>
 
-    # @ @m<PIV_DECLARE_STRUCT_CLASS> (ImVec2)
-
-    方法 创建 <公开 静态 类型 = ImVec2 注释 = "带参构造一个ImVec2实例,请以类名使用本方法." 折叠 @嵌入式方法 = "">
+    方法 创建 <公开 静态 类型 = ImVec2 注释 = "带参构造一个ImVec2实例,请以类名使用本方法." @嵌入式方法 = "">
     参数 x值 <类型 = 单精度小数 @默认值 = 0>
     参数 y值 <类型 = 单精度小数 @默认值 = 0>
     {
-        @ @dt<ImVec2>{ImVec2(@<x值>, @<y值>)}
+        @ ImVec2(@<x值>, @<y值>)
     }
 
-    方法 x <公开 属性读 类型 = 单精度小数 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.pdata()->x
-    }
-
-    方法 x <公开 属性写 折叠>
-    参数 所欲设置值 <类型 = 单精度小数>
-    {
-        @ pdata()->x = @<所欲设置值>;
-    }
-
-    方法 y <公开 属性读 类型 = 单精度小数 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.pdata()->y
-    }
-
-    方法 y <公开 属性写 折叠>
-    参数 所欲设置值 <类型 = 单精度小数>
-    {
-        @ pdata()->y = @<所欲设置值>;
-    }
-
-    方法 置值 <公开 注释 = "一个命令设置ImVec2的所有值" 折叠>
+    方法 置值 <公开 静态 注释 = "一个命令设置ImVec2的所有值" 折叠>
+    参数 欲操作本对象 <类型 = ImVec2>
     参数 x值 <类型 = 单精度小数>
     参数 y值 <类型 = 单精度小数>
     {
-        @ pdata()->x = @<x值>;
-        @ pdata()->y = @<y值>;
+        @ @<欲操作本对象>.x = @<x值>;
+        @ @<欲操作本对象>.y = @<y值>;
     }
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖>
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠>
+    参数 欲操作本对象 <类型 = ImVec2>
     {
-        加入格式文本 (展示内容, "<ImVec2> {x: %.2f, y: %.2f}", x, y)
+        返回 (取格式文本 ("<ImVec2> {x: %.2f, y: %.2f}", 欲操作本对象.x, 欲操作本对象.y))
     }
 }
 
-类 ImVec2数组类 <公开 基础类 = 数据容器模板类 折叠 @文档 = "category = \"辅助类\"" @模板实现类 = "ImVec2">
+类 ImVec2数组类 <公开 基础类 = IM数组模板 折叠 @文档 = "category = \"辅助类\"" @模板实现类 = "ImVec2">
 {
 
     # @ @m<PIV_DECLARE_VECTOR_CLASS> (ImVec2)
 }
 
-类 ImVec4 <公开 基础类 = 数据类型基础类 注释 = "ImVec4" 折叠 @文档 = "category = \"辅助类\"">
+类 ImVec4 <公开 基础类 = PIV本地类模板 注释 = "ImVec4" 折叠 @文档 = "category = \"辅助类\"" @别名 = "ImVec4"
+        @模板实现类 = "ImVec4">
 {
-
-    # @ @m<PIV_DECLARE_STRUCT_CLASS> (ImVec4)
+    变量 x <公开 类型 = 单精度小数 @输出名 = "x" @属性变量 = 真>
+    变量 y <公开 类型 = 单精度小数 @输出名 = "y" @属性变量 = 真>
+    变量 z <公开 类型 = 单精度小数 @输出名 = "z" @属性变量 = 真>
+    变量 w <公开 类型 = 单精度小数 @输出名 = "w" @属性变量 = 真>
 
     方法 创建 <公开 静态 类型 = ImVec4 注释 = "带参构造一个ImVec4实例,请以类名使用本方法." 折叠 @嵌入式方法 = "">
     参数 x值 <类型 = 单精度小数 @默认值 = 0>
@@ -3554,70 +3602,26 @@
     参数 z值 <类型 = 单精度小数 @默认值 = 0>
     参数 w值 <类型 = 单精度小数 @默认值 = 0>
     {
-        @ @dt<ImVec4>{ImVec4(@<x值>, @<y值>, @<z值>, @<w值>)}
+        @ ImVec4(@<x值>, @<y值>, @<z值>, @<w值>)
     }
 
-    方法 x <公开 属性读 类型 = 单精度小数 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.pdata()->x
-    }
-
-    方法 x <公开 属性写 折叠>
-    参数 所欲设置值 <类型 = 单精度小数>
-    {
-        @ pdata()->x = @<所欲设置值>;
-    }
-
-    方法 y <公开 属性读 类型 = 单精度小数 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.pdata()->y
-    }
-
-    方法 y <公开 属性写 折叠>
-    参数 所欲设置值 <类型 = 单精度小数>
-    {
-        @ pdata()->y = @<所欲设置值>;
-    }
-
-    方法 z <公开 属性读 类型 = 单精度小数 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.pdata()->z
-    }
-
-    方法 z <公开 属性写 折叠>
-    参数 所欲设置值 <类型 = 单精度小数>
-    {
-        @ pdata()->z = @<所欲设置值>;
-    }
-
-    方法 w <公开 属性读 类型 = 单精度小数 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.pdata()->w
-    }
-
-    方法 w <公开 属性写 折叠>
-    参数 所欲设置值 <类型 = 单精度小数>
-    {
-        @ pdata()->w = @<所欲设置值>;
-    }
-
-    方法 置值 <公开 注释 = "一个命令设置ImVec4的所有值" 折叠>
+    方法 置值 <公开 静态 注释 = "一个命令设置ImVec4的所有值" 折叠>
+    参数 欲操作本对象 <类型 = ImVec4>
     参数 x值 <类型 = 单精度小数>
     参数 y值 <类型 = 单精度小数>
     参数 z值 <类型 = 单精度小数>
     参数 w值 <类型 = 单精度小数>
     {
-        @ pdata()->x = @<x值>;
-        @ pdata()->y = @<y值>;
-        @ pdata()->z = @<z值>;
-        @ pdata()->w = @<w值>;
+        @ @<欲操作本对象>.x = @<x值>;
+        @ @<欲操作本对象>.y = @<y值>;
+        @ @<欲操作本对象>.z = @<z值>;
+        @ @<欲操作本对象>.w = @<w值>;
     }
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖>
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠>
+    参数 欲操作本对象 <类型 = ImVec4>
     {
-        加入格式文本 (展示内容, "<ImVec4> {x: %.2f, y: %.2f, z: %.2f, w: %.2f}", x, y, z, w)
+        返回 (取格式文本 ("<ImVec4> {x: %.2f, y: %.2f, z: %.2f, w: %.2f}", 欲操作本对象.x, 欲操作本对象.y, 欲操作本对象.z, 欲操作本对象.w))
     }
 }
 
@@ -3629,870 +3633,554 @@
     变量 _内部数据 <公开 类型 = 变整数>
 }
 
-类 ImGuiIO类 <公开 基础类 = 数据类型基础类 注释 = "必须接收\"ImGui.取IO()\"的返回结果后,才能使用本类." 折叠 @文档 = "category = \"辅助类\"">
+类 ImGuiIO类 <公开 基础类 = PIV结构指针模板 注释 = "必须接收\"ImGui.取IO()\"的返回结果后,才能使用本类." 折叠 @文档 = "category = \"辅助类\""
+        @别名 = "ImGuiIO*" @模板实现类 = "ImGuiIO类">
 {
+    变量 配置标志 <公开 类型 = 整数 注释 = "IM配置标志,请参考\"IM配置标志\"的常量" @输出名 = "ConfigFlags">
+    变量 后端标志 <公开 类型 = 整数 注释 = "请参考\"IM后端标志\"的常量,一般由后端程序设置,用于查询后端支持哪些特性." @输出名 = "BackendFlags">
+    变量 显示尺寸 <公开 类型 = ImVec2
+            注释 = "Main display size, in pixels (generally == GetMainViewport()->Size). May change every frame."
+            @输出名 = "DisplaySize">
+    变量 增量时间 <公开 类型 = 单精度小数 注释 = "为帧与帧之间的时间,单位为秒.本值每帧变动." @输出名 = "DeltaTime">
+    变量 INI保存间隔 <公开 类型 = 单精度小数 注释 = "INI保存设置的时间间隔,默认为5.0(单位为秒)." @输出名 = "IniSavingRate">
 
-    # @ @m<PIV_DECLARE_STRUCT_CLASS> (ImGuiIO)
-
-    方法 帧速率 <公开 属性读 类型 = 单精度小数 注释 = "返回应用程序的平均帧速率" 折叠 @嵌入式方法 = "">
+    方法 INI文件名 <公开 静态 属性读 类型 = 文本型 注释 = "返回.ini文件的路径(默认为当前工作目录下的\"imgui.ini\")." 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = ImGuiIO类>
     {
-        @ @sn<this>.data().Framerate
+        @ *PivU2Ws{@<欲操作本对象>->IniFilename}
     }
 
-    方法 标志 <公开 属性读 类型 = 整数 注释 = "IM配置标志,请参考\"IM配置标志\"的常量" 折叠 @嵌入式方法 = "">
-    {
-        @ static_cast<INT>(@sn<this>.data().ConfigFlags)
-    }
-
-    方法 标志 <公开 属性写 注释 = "IM配置标志" 折叠>
-    参数 新标志 <类型 = 整数 注释 = "\"IM配置标志\"常量的位或值">
-    {
-        @ data().ConfigFlags = static_cast<ImGuiConfigFlags>(@<新标志>);
-    }
-
-    方法 INI保存间隔 <公开 属性读 类型 = 单精度小数 注释 = "返回INI保存设置的时间间隔,默认为5.0(单位为秒)." 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().IniSavingRate
-    }
-
-    方法 INI保存间隔 <公开 属性写 注释 = "设置INI保存设置的时间间隔,单位为秒." 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().IniSavingRate = @<所欲设置的值>;
-    }
-
-    方法 INI文件名 <公开 属性读 类型 = 文本型 注释 = "返回.ini文件的路径(默认为当前工作目录下的\"imgui.ini\")." 折叠 @嵌入式方法 = "">
-    {
-        @ *PivU2Ws{@sn<this>.data().IniFilename}
-    }
-
-    方法 INI文件名 <公开 属性写 注释 = "设置.ini文件的路径,设置为空文本可以禁止自动加载和保存窗口设置到ini文件." 折叠>
+    方法 INI文件名 <公开 静态 属性写 注释 = "设置.ini文件的路径,设置为空文本可以禁止自动加载和保存窗口设置到ini文件." 折叠>
+    参数 欲操作本对象 <类型 = ImGuiIO类>
     参数 新文件名 <类型 = 文本型 注释 = "空文本可以关掉自动读写.ini文件功能">
     {
         @ static PivW2U u8str;
         @ u8str.Convert(@<新文件名>);
-        @ data().IniFilename = u8str.GetText();
+        @ @<欲操作本对象>->IniFilename = u8str.GetText();
     }
 
-    方法 用户数据 <公开 属性读 类型 = 变整数 注释 = "返回用户自定义的数据" 折叠 @嵌入式方法 = "">
+    方法 日志文件名 <公开 静态 属性读 类型 = 文本型 注释 = "返回日志文件的路径(默认为当前工作目录下的\"imgui_log.txt\")."
+            注释 = "如果调用\"ImGui.记录到文件\"时未指定文件,则使用这里的默认文件名." 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = ImGuiIO类>
     {
-        @ reinterpret_cast<INT_P>(@sn<this>.data().UserData)
+        @ *PivU2Ws{@<欲操作本对象>->LogFilename}
     }
 
-    方法 用户数据 <公开 属性写 注释 = "设置用户自定义的数据(可以为任意的指针)" 折叠>
-    参数 所欲设置的值 <类型 = 变整数>
+    方法 日志文件名 <公开 静态 属性写 注释 = "设置日志文件的路径,如果调用\"ImGui.记录到文件\"时未指定文件,则使用这里的默认文件名." 折叠>
+    参数 欲操作本对象 <类型 = ImGuiIO类>
+    参数 新文件名 <类型 = 文本型 注释 = "空文本可以关掉自动读写.ini文件功能">
     {
-        @ data().UserData = reinterpret_cast<void*>(@<所欲设置的值>);
+        @ static PivW2U u8str;
+        @ u8str.Convert(@<新文件名>);
+        @ @<欲操作本对象>->LogFilename = u8str.GetText();
     }
 
-    方法 字体全局缩放 <公开 属性写 折叠>
-    参数 新值 <类型 = 单精度小数>
+    变量 用户数据 <公开 类型 = 通用指针 注释 = "用户自定义的数据" @输出名 = "UserData">
+    变量 字体图集 <公开 类型 = IM字体图集类
+            注释 = "Font atlas: load, rasterize and pack one or more fonts into a single texture." @输出名 = "Fonts">
+    变量 字体全局缩放 <公开 类型 = 单精度小数 注释 = "字体全局缩放" @输出名 = "FontGlobalScale">
+    变量 允许用户缩放字体 <公开 类型 = 逻辑型 注释 = "是否允许用户通过CTRL+鼠标滚轮缩放窗口中的字体" @输出名 = "FontAllowUserScaling">
+    变量 默认字体 <公开 类型 = IM字体指针 注释 = "Font to use on NewFrame(). Use NULL to uses Fonts->Fonts[0]."
+            @输出名 = "FontDefault">
+    变量 显示帧缓冲缩放 <公开 类型 = ImVec2
+            注释 = "For retina display or other situations where window coordinates are different from framebuffer coordinates. This generally ends up in ImDrawData::FramebufferScale."
+            @输出名 = "DisplayFramebufferScale">
+
+    # 停靠选项
+
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "Simplified docking mode: disable window splitting, so docking is limited to merging multiple windows together into tab-bars."
+            @输出名 = "ConfigDockingNoSplit">
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "Enable docking with holding Shift key (reduce visual noise, allows dropping in wider space)"
+            @输出名 = "ConfigDockingWithShift">
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "[BETA] [FIXME: This currently creates regression with auto-sizing and general overhead] Make every single floating window display within a docking node."
+            @输出名 = "ConfigDockingAlwaysTabBar">
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "[BETA] Make window or viewport transparent when docking and only display docking boxes on the target viewport. Useful if rendering of multiple viewport cannot be synced. Best used with ConfigViewportsNoAutoMerge."
+            @输出名 = "ConfigDockingTransparentPayload">
+
+    # 视口选项
+
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "Set to make all floating imgui windows always create their own viewport. Otherwise, they are merged into the main host viewports when overlapping it. May also set ImGuiViewportFlags_NoAutoMerge on individual viewport."
+            @输出名 = "ConfigViewportsNoAutoMerge">
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "Disable default OS task bar icon flag for secondary viewports. When a viewport doesn\'t want a task bar icon, ImGuiViewportFlags_NoTaskBarIcon will be set on it."
+            @输出名 = "ConfigViewportsNoTaskBarIcon">
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "Disable default OS window decoration flag for secondary viewports. When a viewport doesn\'t want window decorations, ImGuiViewportFlags_NoDecoration will be set on it. Enabling decoration can create subsequent issues at OS levels (e.g. minimum window size)."
+            @输出名 = "ConfigViewportsNoDecoration">
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "Disable default OS parenting to main viewport for secondary viewports. By default, viewports are marked with ParentViewportId = <main_viewport>, expecting the platform backend to setup a parent/child relationship between the OS windows (some backend may ignore this). Set to true if you want the default to be 0, then all viewports will be top-level OS windows."
+            @输出名 = "ConfigViewportsNoDefaultParent">
+
+    # 杂项
+
+    变量 鼠标绘制光标 <公开 类型 = 逻辑型
+            注释 = "Request ImGui to draw a mouse cursor for you (if you are on a platform without a mouse cursor). Cannot be easily renamed to \'io.ConfigXXX\' because this is frequently used by backend implementations."
+            @输出名 = "MouseDrawCursor">
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "OS X style: Text editing cursor movement using Alt instead of Ctrl, Shortcuts using Cmd/Super instead of Ctrl, Line/Text Start and End using Cmd+Arrows instead of Home/End, Double click selects by word instead of selecting whole text, Multi-selection in lists uses Cmd/Super instead of Ctrl."
+            @输出名 = "ConfigMacOSXBehaviors">
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "Enable input queue trickling: some types of events submitted during the same frame (e.g. button down + up) will be spread over multiple frames, improving interactions with low framerates."
+            @输出名 = "ConfigInputTrickleEventQueue">
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "Enable blinking cursor (optional as some users consider it to be distracting)."
+            @输出名 = "ConfigInputTextCursorBlink">
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "[BETA] Pressing Enter will keep item active and select contents (single-line only)."
+            @输出名 = "ConfigInputTextEnterKeepActive">
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "[BETA] Enable turning DragXXX widgets into text input with a simple mouse click-release (without moving). Not desirable on devices without a keyboard."
+            @输出名 = "ConfigDragClickToInputText">
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "Enable resizing of windows from their edges and from the lower-left corner. This requires (io.BackendFlags & ImGuiBackendFlags_HasMouseCursors) because it needs mouse cursor feedback. (This used to be a per-window ImGuiWindowFlags_ResizeFromAnySide flag)"
+            @输出名 = "ConfigWindowsResizeFromEdges">
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "Enable allowing to move windows only when clicking on their title bar. Does not apply to windows without a title bar."
+            @输出名 = "ConfigWindowsMoveFromTitleBarOnly">
+    变量 "" <公开 类型 = 单精度小数
+            注释 = "Timer (in seconds) to free transient windows/tables memory buffers when unused. Set to -1.0f to disable."
+            @输出名 = "ConfigMemoryCompactTimer">
+
+    # Inputs Behaviors
+
+    变量 鼠标双击时间 <公开 类型 = 单精度小数 注释 = "Time for a double-click, in seconds." @输出名 = "MouseDoubleClickTime">
+    变量 鼠标双击距离 <公开 类型 = 单精度小数 注释 = "Distance threshold to stay in to validate a double-click, in pixels."
+            @输出名 = "MouseDoubleClickMaxDist">
+    变量 鼠标拖动阈值 <公开 类型 = 单精度小数 注释 = "Distance threshold before considering we are dragging."
+            @输出名 = "MouseDragThreshold">
+    变量 按键重复延迟 <公开 类型 = 单精度小数
+            注释 = "When holding a key/button, time before it starts repeating, in seconds (for buttons in Repeat mode, etc.)."
+            @输出名 = "KeyRepeatDelay">
+    变量 按键重复频率 <公开 类型 = 单精度小数 注释 = "When holding a key/button, rate at which it repeats, in seconds."
+            @输出名 = "KeyRepeatRate">
+
+    # Output - Updated by NewFrame() or EndFrame()/Render()
+
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "Set when Dear ImGui will use mouse inputs, in this case do not dispatch them to your main game/application (either way, always pass on mouse inputs to imgui). (e.g. unclicked mouse is hovering over an imgui window, widget is active, mouse was clicked over an imgui window, etc.)."
+            @输出名 = "WantCaptureMouse">
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "Set when Dear ImGui will use keyboard inputs, in this case do not dispatch them to your main game/application (either way, always pass keyboard inputs to imgui). (e.g. InputText active, or an imgui window is focused and navigation is enabled, etc.)."
+            @输出名 = "WantCaptureKeyboard">
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "Mobile/console: when set, you may display an on-screen keyboard. This is set by Dear ImGui when it wants textual keyboard input to happen (e.g. when a InputText widget is active)."
+            @输出名 = "WantTextInput">
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "MousePos has been altered, backend should reposition mouse on next frame. Rarely used! Set only when ImGuiConfigFlags_NavEnableSetMousePos flag is enabled."
+            @输出名 = "WantSetMousePos">
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "When manual .ini load/save is active (io.IniFilename == NULL), this will be set to notify your application that you can call SaveIniSettingsToMemory() and save yourself. Important: clear io.WantSaveIniSettings yourself after saving!"
+            @输出名 = "WantSaveIniSettings">
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "Keyboard/Gamepad navigation is currently allowed (will handle ImGuiKey_NavXXX events) = a window is focused and it doesn\'t use the ImGuiWindowFlags_NoNavInputs flag."
+            @输出名 = "NavActive">
+    变量 "" <公开 类型 = 逻辑型
+            注释 = "Keyboard/Gamepad navigation is visible and allowed (will handle ImGuiKey_NavXXX events)."
+            @输出名 = "NavVisible">
+    变量 帧速率 <公开 类型 = 单精度小数 注释 = "应用程序的平均帧速率fps,本值每帧变动."
+            注释 = "Estimate of application framerate (rolling average over 60 frames, based on io.DeltaTime), in frame per second. Solely for convenience. Slow applications may not want to use a moving average or may want to reset underlying buffers occasionally."
+            @输出名 = "Framerate">
+    变量 "" <公开 类型 = 逻辑型 注释 = "Vertices output during last call to Render()" @输出名 = "MetricsRenderVertices">
+    变量 "" <公开 类型 = 整数 注释 = "Indices output during last call to Render() = number of triangles * 3"
+            @输出名 = "MetricsRenderIndices">
+    变量 "" <公开 类型 = 整数 注释 = "Number of visible windows" @输出名 = "MetricsRenderWindows">
+    变量 "" <公开 类型 = 整数 注释 = "Number of active windows" @输出名 = "MetricsActiveWindows">
+    变量 "" <公开 类型 = ImVec2
+            注释 = "Mouse delta. Note that this is zero if either current or previous position are invalid (-FLT_MAX,-FLT_MAX), so a disappearing/reappearing mouse won\'t have a huge delta."
+            @输出名 = "MouseDelta">
+
+    # 输入函数
+
+    方法 添加按键事件 <公开 静态
+            注释 = "Queue a new key down/up event. Key should be \"translated\" (as in, generally ImGuiKey_A matches the key end-user would use to emit an \'A\' character)"
+            折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = ImGuiIO类>
+    参数 按键码 <类型 = 整数 注释 = "请使用\"IM按键码\"中的常量">
+    参数 是否按下 <类型 = 逻辑型>
     {
-        @ data().FontGlobalScale = @<新值>;
+        @ @<欲操作本对象>->AddKeyEvent(static_cast<ImGuiKey>(@<按键码>), static_cast<bool>(@<是否按下>))
     }
 
-    方法 允许用户缩放字体 <公开 属性读 类型 = 逻辑型 注释 = "返回是否允许用户通过CTRL+Wheel缩放窗口中的字体" 折叠 @嵌入式方法 = "">
+    方法 添加模拟按键事件 <公开 静态
+            注释 = "Queue a new key down/up event for analog values (e.g. ImGuiKey_Gamepad_ values). Dead-zones should be handled by the backend."
+            折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = ImGuiIO类>
+    参数 按键码 <类型 = 整数 注释 = "请使用\"IM按键码\"中的常量">
+    参数 是否按下 <类型 = 逻辑型>
+    参数 模拟值 <类型 = 单精度小数>
     {
-        @ @sn<this>.data().FontAllowUserScaling
+        @ @ @<欲操作本对象>->AddKeyAnalogEvent(static_cast<ImGuiKey>(@<按键码>), static_cast<bool>(@<是否按下>), @<模拟值>)
     }
 
-    方法 允许用户缩放字体 <公开 属性写 注释 = "设置是否允许用户通过CTRL+Wheel缩放窗口中的字体" 折叠>
-    参数 所欲设置的值 <类型 = 逻辑型>
+    方法 添加鼠标位置事件 <公开 静态
+            注释 = "Queue a mouse position update. Use -FLT_MAX,-FLT_MAX to signify no mouse (e.g. app not focused and not hovered)"
+            折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = ImGuiIO类>
+    参数 x <类型 = 单精度小数>
+    参数 y <类型 = 单精度小数>
     {
-        @ data().FontAllowUserScaling = static_cast<bool>(@<所欲设置的值>);
+        @ @<欲操作本对象>->AddMousePosEvent(@<x>, @<y>)
     }
 
-    #
+    方法 添加鼠标按钮事件 <公开 静态 注释 = "Queue a mouse button change" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = ImGuiIO类>
+    参数 按钮 <类型 = IM鼠标按钮>
+    参数 是否按下 <类型 = 逻辑型>
+    {
+        @ @<欲操作本对象>->AddMouseButtonEvent(@<按钮>, static_cast<bool>(@<是否按下>))
+    }
+
+    方法 添加鼠标滚轮事件 <公开 静态
+            注释 = "Queue a mouse wheel update. wheel_y<0: scroll down, wheel_y>0: scroll up, wheel_x<0: scroll right, wheel_x>0: scroll left."
+            折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = ImGuiIO类>
+    参数 横向滚轮 <类型 = 单精度小数>
+    参数 纵向滚轮 <类型 = 单精度小数>
+    {
+        @ @<欲操作本对象>->AddMouseWheelEvent(@<横向滚轮>, @<纵向滚轮>)
+    }
+
+    方法 添加鼠标来源事件 <公开 静态 注释 = "Queue a mouse source change (Mouse/TouchScreen/Pen)" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = ImGuiIO类>
+    参数 来源 <类型 = IM鼠标来源>
+    {
+        @ @<欲操作本对象>->AddMouseSourceEvent(static_cast<ImGuiMouseSource>(@<来源>))
+    }
+
+    方法 添加鼠标视口事件 <公开 静态
+            注释 = "Queue a mouse hovered viewport. Requires backend to set ImGuiBackendFlags_HasMouseHoveredViewport to call this (for multi-viewport support)."
+            折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = ImGuiIO类>
+    参数 视口ID <类型 = 整数>
+    {
+        @ @<欲操作本对象>->AddMouseViewportEvent(static_cast<ImGuiID>(@<视口ID>))
+    }
+
+    方法 添加焦点事件 <公开 静态
+            注释 = "Queue a gain/loss of focus for the application (generally based on OS/platform focus of your window)"
+            折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = ImGuiIO类>
+    参数 获得焦点 <类型 = 逻辑型>
+    {
+        @ @<欲操作本对象>->AddFocusEvent(static_cast<bool>(@<获得焦点>))
+    }
+
+    方法 添加字符输入 <公开 静态 注释 = "Queue a new character input" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = ImGuiIO类>
+    参数 字符值 <类型 = 整数>
+    {
+        @ @<欲操作本对象>->AddInputCharacter(static_cast<unsigned int>(@<字符值>))
+    }
+
+    方法 添加UFT16字符输入 <公开 静态 注释 = "Queue a new character input from a UTF-16 character, it can be a surrogate"
+            折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = ImGuiIO类>
+    参数 字符值 <类型 = 字符>
+    {
+        @ @<欲操作本对象>->AddInputCharacterUTF16(static_cast<ImWchar16>(@<字符值>))
+    }
+
+    方法 添加UTF8文本输入 <公开 静态 注释 = "Queue a new characters input from a UTF-8 string" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = ImGuiIO类>
+    参数 字符串指针 <类型 = 变整数>
+    {
+        @ @<欲操作本对象>->AddInputCharacterUTF16((const char*)@<字符串指针>)
+    }
+
+    方法 置App接收事件 <公开 静态
+            注释 = "Set master flag for accepting key/mouse/text events (default to true). Useful if you have native dialog boxes that are interrupting your application loop/refresh, and you want to disable events being queued while your app is frozen."
+            折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = ImGuiIO类>
+    参数 是否接收事件 <类型 = 逻辑型>
+    {
+        @ @<欲操作本对象>->SetAppAcceptingEvents(static_cast<bool>(@<是否接收事件>))
+    }
+
+    方法 清空事件队列 <公开 静态 注释 = "Clear all incoming events." 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = ImGuiIO类>
+    {
+        @ @<欲操作本对象>->ClearEventsQueue()
+    }
+
+    方法 清空输入按键 <公开 静态
+            注释 = "Clear current keyboard/mouse/gamepad state + current frame text input buffer. Equivalent to releasing all keys/buttons."
+            折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = ImGuiIO类>
+    {
+        @ @<欲操作本对象>->ClearInputKeys()
+    }
 }
 
-类 IM样式类 <公开 基础类 = 数据类型基础类 注释 = "ImGuiStyle" 注释 = "这些样式可以在\"新建帧\"之前更改,当然在当前帧更改也可以,但在下一帧生效."
-        注释 = "如果需要更改当前帧的样式,请用\"ImGui.压入样式变量\"" 折叠 @文档 = "category = \"辅助类\"">
+类 IM样式类 <公开 基础类 = PIV结构指针模板 注释 = "本类使用指针封装,必须在创建或赋值后使用(用\"为空指针\"判断)."
+        注释 = "这些样式可以在新建帧之前的\"帧被创建\"事件中更改,当然在当前帧更改也可以,但在下一帧生效." 注释 = "如果需要更改当前帧的样式,请用\"ImGui.压入样式变量\"" 折叠
+        @文档 = "category = \"辅助类\"" @别名 = "ImGuiStyle*" @模板实现类 = "IM样式类">
 {
-
-    # @ @m<PIV_DECLARE_STRUCT_CLASS> (ImGuiStyle)
-
-    方法 不透明度 <公开 属性读 类型 = 单精度小数 注释 = "Global alpha applies to everything in Dear ImGui." 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().Alpha
-    }
-
-    方法 不透明度 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().Alpha = @<所欲设置的值>;
-    }
-
-    方法 禁用项不透明度 <公开 属性读 类型 = 单精度小数
+    变量 不透明度 <公开 类型 = 单精度小数 注释 = "Global alpha applies to everything in Dear ImGui." @输出名 = "Alpha">
+    变量 禁用项不透明度 <公开 类型 = 单精度小数
             注释 = "Additional alpha multiplier applied by BeginDisabled(). Multiply over current value of Alpha."
-            折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().DisabledAlpha
-    }
-
-    方法 禁用项不透明度 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().DisabledAlpha = @<所欲设置的值>;
-    }
-
-    方法 窗口内边距 <公开 属性读 类型 = ImVec2 注释 = "Padding within a window." 折叠 @禁止流程检查 = 真>
-    {
-        @ return @dt<ImVec2>{data().WindowPadding}
-    }
-
-    方法 窗口内边距 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = ImVec2>
-    {
-        @ data().WindowPadding = @<所欲设置的值>;
-    }
-
-    方法 窗口圆角 <公开 属性读 类型 = 单精度小数
+            @输出名 = "DisabledAlpha">
+    变量 窗口内边距 <公开 类型 = ImVec2 注释 = "Padding within a window." @输出名 = "WindowPadding">
+    变量 窗口圆角 <公开 类型 = 单精度小数
             注释 = "Radius of window corners rounding. Set to 0.0f to have rectangular windows. Large values tend to lead to variety of artifacts and are not recommended."
-            折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().WindowRounding
-    }
-
-    方法 窗口圆角 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().WindowRounding = @<所欲设置的值>;
-    }
-
-    方法 窗口边框粗细 <公开 属性读 类型 = 单精度小数
+            @输出名 = "WindowRounding">
+    变量 窗口边框粗细 <公开 类型 = 单精度小数
             注释 = "Thickness of border around windows. Generally set to 0.0f or 1.0f. (Other values are not well tested and more CPU/GPU costly)."
-            折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().WindowBorderSize
-    }
-
-    方法 窗口边框粗细 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().WindowBorderSize = @<所欲设置的值>;
-    }
-
-    方法 窗口最小尺寸 <公开 属性读 类型 = ImVec2
+            @输出名 = "WindowBorderSize">
+    变量 窗口最小尺寸 <公开 类型 = ImVec2
             注释 = "Minimum window size. This is a global setting. If you want to constrain individual windows, use SetNextWindowSizeConstraints()."
-            折叠 @禁止流程检查 = 真>
-    {
-        @ return @dt<ImVec2>{data().WindowMinSize}
-    }
-
-    方法 窗口最小尺寸 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = ImVec2>
-    {
-        @ data().WindowMinSize = @<所欲设置的值>;
-    }
-
-    方法 窗口标题对齐 <公开 属性读 类型 = ImVec2
-            注释 = "Alignment for title bar text. Defaults to (0.0f,0.5f) for left-aligned,vertically centered." 折叠
-            @禁止流程检查 = 真>
-    {
-        @ return @dt<ImVec2>{data().WindowTitleAlign}
-    }
-
-    方法 窗口标题对齐 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = ImVec2>
-    {
-        @ data().WindowTitleAlign = @<所欲设置的值>;
-    }
-
-    方法 窗口菜单按钮位置 <公开 属性读 类型 = IM基本方向
+            @输出名 = "WindowMinSize">
+    变量 窗口标题对齐 <公开 类型 = ImVec2 @输出名 = "WindowTitleAlign">
+    变量 窗口菜单按钮位置 <公开 类型 = IM基本方向
             注释 = "Side of the collapsing/docking button in the title bar (None/Left/Right). Defaults to ImGuiDir_Left."
-            折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().WindowMenuButtonPosition
-    }
-
-    方法 窗口菜单按钮位置 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = IM基本方向>
-    {
-        @ data().WindowMenuButtonPosition = static_cast<ImGuiDir>(@<所欲设置的值>);
-    }
-
-    方法 子窗口圆角 <公开 属性读 类型 = 单精度小数
-            注释 = "Radius of child window corners rounding. Set to 0.0f to have rectangular windows." 折叠
-            @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().ChildRounding
-    }
-
-    方法 子窗口圆角 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().ChildRounding = @<所欲设置的值>;
-    }
-
-    方法 子窗口边框粗细 <公开 属性读 类型 = 单精度小数
+            @输出名 = "WindowMenuButtonPosition">
+    变量 子窗口圆角 <公开 类型 = 单精度小数
+            注释 = "Radius of child window corners rounding. Set to 0.0f to have rectangular windows."
+            @输出名 = "ChildRounding">
+    变量 子窗口边框粗细 <公开 类型 = 单精度小数
             注释 = "Thickness of border around child windows. Generally set to 0.0f or 1.0f. (Other values are not well tested and more CPU/GPU costly)."
-            折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().ChildBorderSize
-    }
-
-    方法 子窗口边框粗细 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().ChildBorderSize = @<所欲设置的值>;
-    }
-
-    方法 弹出项圆角 <公开 属性读 类型 = 单精度小数
-            注释 = "Radius of popup window corners rounding. (Note that tooltip windows use WindowRounding)" 折叠
-            @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().PopupRounding
-    }
-
-    方法 弹出项圆角 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().PopupRounding = @<所欲设置的值>;
-    }
-
-    方法 弹出项边框粗细 <公开 属性读 类型 = 单精度小数
+            @输出名 = "ChildBorderSize">
+    变量 弹出项圆角 <公开 类型 = 单精度小数
+            注释 = "Radius of popup window corners rounding. (Note that tooltip windows use WindowRounding)"
+            @输出名 = "PopupRounding">
+    变量 弹出项边框粗细 <公开 类型 = 单精度小数
             注释 = "Thickness of border around popup/tooltip windows. Generally set to 0.0f or 1.0f. (Other values are not well tested and more CPU/GPU costly)."
-            折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().PopupBorderSize
-    }
-
-    方法 弹出项边框粗细 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().PopupBorderSize = @<所欲设置的值>;
-    }
-
-    方法 框体内边距 <公开 属性读 类型 = ImVec2 注释 = "Padding within a framed rectangle (used by most widgets)." 折叠
-            @禁止流程检查 = 真>
-    {
-        @ return @dt<ImVec2>{data().FramePadding}
-    }
-
-    方法 框体内边距 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = ImVec2>
-    {
-        @ data().FramePadding = @<所欲设置的值>;
-    }
-
-    方法 框体圆角 <公开 属性读 类型 = 单精度小数
+            @输出名 = "PopupBorderSize">
+    变量 框体内边距 <公开 类型 = ImVec2 注释 = "Padding within a framed rectangle (used by most widgets)."
+            @输出名 = "FramePadding">
+    变量 框体圆角 <公开 类型 = 单精度小数
             注释 = "Radius of frame corners rounding. Set to 0.0f to have rectangular frame (used by most widgets)."
-            折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().FrameRounding
-    }
-
-    方法 框体圆角 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().FrameRounding = @<所欲设置的值>;
-    }
-
-    方法 框体边框粗细 <公开 属性读 类型 = 单精度小数
+            @输出名 = "FrameRounding">
+    变量 框体边框框粗细 <公开 类型 = 单精度小数
             注释 = "Thickness of border around frames. Generally set to 0.0f or 1.0f. (Other values are not well tested and more CPU/GPU costly)."
-            折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().FrameBorderSize
-    }
-
-    方法 框体边框框粗细 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().FrameBorderSize = @<所欲设置的值>;
-    }
-
-    方法 项目行间距 <公开 属性读 类型 = ImVec2 注释 = "Horizontal and vertical spacing between widgets/lines." 折叠
-            @禁止流程检查 = 真>
-    {
-        @ return @dt<ImVec2>{data().ItemSpacing}
-    }
-
-    方法 项目行间距 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = ImVec2>
-    {
-        @ data().ItemSpacing = @<所欲设置的值>;
-    }
-
-    方法 项目内间距 <公开 属性读 类型 = ImVec2
+            @输出名 = "FrameBorderSize">
+    变量 项目行间距 <公开 类型 = ImVec2 注释 = "Horizontal and vertical spacing between widgets/lines."
+            @输出名 = "ItemSpacing">
+    变量 项目内间距 <公开 类型 = ImVec2
             注释 = "Horizontal and vertical spacing between within elements of a composed widget (e.g. a slider and its label)."
-            折叠 @禁止流程检查 = 真>
-    {
-        @ return @dt<ImVec2>{data().ItemInnerSpacing}
-    }
-
-    方法 项目内间距 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = ImVec2>
-    {
-        @ data().ItemInnerSpacing = @<所欲设置的值>;
-    }
-
-    方法 单元格内边距 <公开 属性读 类型 = ImVec2
-            注释 = "Padding within a table cell. CellPadding.y may be altered between different rows." 折叠
-            @禁止流程检查 = 真>
-    {
-        @ return @dt<ImVec2>{data().CellPadding}
-    }
-
-    方法 单元格内边距 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = ImVec2>
-    {
-        @ data().CellPadding = @<所欲设置的值>;
-    }
-
-    方法 触摸扩展内边距 <公开 属性读 类型 = ImVec2
-            注释 = "Expand reactive bounding box for touch-based system where touch position is not accurate enough."
-            注释 = "Unfortunately we don\'t sort widgets so priority on overlap will always be given to the first widget. So don\'t grow this too much!"
-            折叠 @禁止流程检查 = 真>
-    {
-        @ return @dt<ImVec2>{data().TouchExtraPadding}
-    }
-
-    方法 触摸扩展内边距 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = ImVec2>
-    {
-        @ data().TouchExtraPadding = @<所欲设置的值>;
-    }
-
-    方法 缩进间距 <公开 属性读 类型 = 单精度小数
+            @输出名 = "ItemInnerSpacing">
+    变量 单元格内边距 <公开 类型 = ImVec2
+            注释 = "Padding within a table cell. CellPadding.y may be altered between different rows."
+            @输出名 = "CellPadding">
+    变量 触摸扩展内边距 <公开 类型 = ImVec2
+            注释 = "Expand reactive bounding box for touch-based system where touch position is not accurate enough. Unfortunately we don\'t sort widgets so priority on overlap will always be given to the first widget. So don\'t grow this too much!"
+            @输出名 = "TouchExtraPadding">
+    变量 缩进间距 <公开 类型 = 单精度小数
             注释 = "Horizontal indentation when e.g. entering a tree node. Generally == (FontSize + FramePadding.x*2)."
-            折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().IndentSpacing
-    }
-
-    方法 缩进间距 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().IndentSpacing = @<所欲设置的值>;
-    }
-
-    方法 最小列间距 <公开 属性读 类型 = 单精度小数
-            注释 = "Minimum horizontal spacing between two columns. Preferably > (FramePadding.x + 1)." 折叠
-            @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().ColumnsMinSpacing
-    }
-
-    方法 最小列间距 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().ColumnsMinSpacing = @<所欲设置的值>;
-    }
-
-    方法 滚动条大小 <公开 属性读 类型 = 单精度小数 注释 = "Width of the vertical scrollbar, Height of the horizontal scrollbar."
-            折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().ScrollbarSize
-    }
-
-    方法 滚动条大小 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().ScrollbarSize = @<所欲设置的值>;
-    }
-
-    方法 滚动条圆角 <公开 属性读 类型 = 单精度小数 注释 = "Radius of grab corners for scrollbar." 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().ScrollbarRounding
-    }
-
-    方法 滚动条圆角 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().ScrollbarRounding = @<所欲设置的值>;
-    }
-
-    方法 抓取框最小尺寸 <公开 属性读 类型 = 单精度小数 注释 = "Minimum width/height of a grab box for slider/scrollbar." 折叠
-            @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().GrabMinSize
-    }
-
-    方法 抓取框最小尺寸 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().GrabMinSize = @<所欲设置的值>;
-    }
-
-    方法 抓取框圆角 <公开 属性读 类型 = 单精度小数
-            注释 = "Radius of grabs corners rounding. Set to 0.0f to have rectangular slider grabs." 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().GrabRounding
-    }
-
-    方法 抓取框圆角 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().GrabRounding = @<所欲设置的值>;
-    }
-
-    方法 对数滑块条死区 <公开 属性读 类型 = 单精度小数
-            注释 = "The size in pixels of the dead-zone around zero on logarithmic sliders that cross zero." 折叠
-            @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().LogSliderDeadzone
-    }
-
-    方法 对数滑块条死区 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().LogSliderDeadzone = @<所欲设置的值>;
-    }
-
-    方法 选项卡圆角 <公开 属性读 类型 = 单精度小数
-            注释 = "Radius of upper corners of a tab. Set to 0.0f to have rectangular tabs." 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().TabRounding
-    }
-
-    方法 选项卡圆角 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().TabRounding = @<所欲设置的值>;
-    }
-
-    方法 选项卡边框粗细 <公开 属性读 类型 = 单精度小数 注释 = "Thickness of border around tabs." 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().TabBorderSize
-    }
-
-    方法 选项卡边框粗细 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().TabBorderSize = @<所欲设置的值>;
-    }
-
-    方法 选项卡关闭按钮的最小宽度 <公开 属性读 类型 = 单精度小数
+            @输出名 = "IndentSpacing">
+    变量 最小列间距 <公开 类型 = 单精度小数
+            注释 = "Minimum horizontal spacing between two columns. Preferably > (FramePadding.x + 1)."
+            @输出名 = "ColumnsMinSpacing">
+    变量 滚动条大小 <公开 类型 = 单精度小数 注释 = "Width of the vertical scrollbar, Height of the horizontal scrollbar."
+            @输出名 = "ScrollbarSize">
+    变量 滚动条圆角 <公开 类型 = 单精度小数 注释 = "Radius of grab corners for scrollbar." @输出名 = "ScrollbarRounding">
+    变量 抓取框最小尺寸 <公开 类型 = 单精度小数 注释 = "Minimum width/height of a grab box for slider/scrollbar."
+            @输出名 = "GrabMinSize">
+    变量 抓取框圆角 <公开 类型 = 单精度小数
+            注释 = "Radius of grabs corners rounding. Set to 0.0f to have rectangular slider grabs."
+            @输出名 = "GrabRounding">
+    变量 对数滑块条死区 <公开 类型 = 单精度小数
+            注释 = "The size in pixels of the dead-zone around zero on logarithmic sliders that cross zero."
+            @输出名 = "LogSliderDeadzone">
+    变量 选项卡圆角 <公开 类型 = 单精度小数 注释 = "Radius of upper corners of a tab. Set to 0.0f to have rectangular tabs."
+            @输出名 = "TabRounding">
+    变量 选项卡边框粗细 <公开 类型 = 单精度小数 注释 = "Thickness of border around tabs." @输出名 = "TabBorderSize">
+    变量 选项卡关闭按钮的最小宽度 <公开 类型 = 单精度小数
             注释 = "Minimum width for close button to appear on an unselected tab when hovered. Set to 0.0f to always show when hovering, set to FLT_MAX to never show close button unless selected."
-            折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().TabMinWidthForCloseButton
-    }
-
-    方法 选项卡关闭按钮的最小宽度 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().TabMinWidthForCloseButton = @<所欲设置的值>;
-    }
-
-    方法 选项卡栏边框粗细 <公开 属性读 类型 = 单精度小数
-            注释 = "Thickness of tab-bar separator, which takes on the tab active color to denote focus." 折叠
-            @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().TabBarBorderSize
-    }
-
-    方法 选项卡栏边框粗细 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().TabBarBorderSize = @<所欲设置的值>;
-    }
-
-    方法 表格标题倾斜角度 <公开 属性读 类型 = 单精度小数
-            注释 = "Angle of angled headers (supported values range from -50.0f degrees to +50.0f degrees)." 折叠
-            @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().TableAngledHeadersAngle
-    }
-
-    方法 表格标题倾斜角度 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().TableAngledHeadersAngle = @<所欲设置的值>;
-    }
-
-    方法 颜色按钮位置 <公开 属性读 类型 = IM基本方向
-            注释 = "Side of the color button in the ColorEdit4 widget (left/right). Defaults to ImGuiDir_Right." 折叠
-            @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().ColorButtonPosition
-    }
-
-    方法 颜色按钮位置 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = IM基本方向>
-    {
-        @ data().ColorButtonPosition = static_cast<ImGuiDir>(@<所欲设置的值>);
-    }
-
-    方法 按钮文本对齐 <公开 属性读 类型 = ImVec2
+            @输出名 = "TabMinWidthForCloseButton">
+    变量 选项卡栏边框粗细 <公开 类型 = 单精度小数
+            注释 = "Thickness of tab-bar separator, which takes on the tab active color to denote focus."
+            @输出名 = "TabBarBorderSize">
+    变量 表格标题倾斜角度 <公开 类型 = 单精度小数
+            注释 = "Angle of angled headers (supported values range from -50.0f degrees to +50.0f degrees)."
+            @输出名 = "TableAngledHeadersAngle">
+    变量 颜色按钮位置 <公开 类型 = IM基本方向
+            注释 = "Side of the color button in the ColorEdit4 widget (left/right). Defaults to ImGuiDir_Right."
+            @输出名 = "ColorButtonPosition">
+    变量 按钮文本对齐 <公开 类型 = ImVec2
             注释 = "Alignment of button text when button is larger than text. Defaults to (0.5f, 0.5f) (centered)."
-            折叠 @禁止流程检查 = 真>
-    {
-        @ return @dt<ImVec2>{data().ButtonTextAlign}
-    }
-
-    方法 按钮文本对齐 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = ImVec2>
-    {
-        @ data().ButtonTextAlign = @<所欲设置的值>;
-    }
-
-    方法 可选项文本对齐 <公开 属性读 类型 = ImVec2
-            注释 = "Alignment of selectable text. Defaults to (0.0f, 0.0f) (top-left aligned)."
-            注释 = "It\'s generally important to keep this left-aligned if you want to lay multiple items on a same line."
-            折叠 @禁止流程检查 = 真>
-    {
-        @ return @dt<ImVec2>{data().SelectableTextAlign}
-    }
-
-    方法 可选项文本对齐 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = ImVec2>
-    {
-        @ data().SelectableTextAlign = @<所欲设置的值>;
-    }
-
-    方法 分隔条文本框粗细 <公开 属性读 类型 = 单精度小数 注释 = "Thickkness of border in SeparatorText()" 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().SeparatorTextBorderSize
-    }
-
-    方法 分隔条文本框粗细 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().SeparatorTextBorderSize = @<所欲设置的值>;
-    }
-
-    方法 分隔条文本对齐 <公开 属性读 类型 = ImVec2
-            注释 = "Alignment of text within the separator. Defaults to (0.0f, 0.5f) (left aligned, center)." 折叠
-            @禁止流程检查 = 真>
-    {
-        @ return @dt<ImVec2>{data().SeparatorTextAlign}
-    }
-
-    方法 分隔条文本对齐 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = ImVec2>
-    {
-        @ data().SeparatorTextAlign = @<所欲设置的值>;
-    }
-
-    方法 分隔条文本内边距 <公开 属性读 类型 = ImVec2
+            @输出名 = "ButtonTextAlign">
+    变量 可选项文本对齐 <公开 类型 = ImVec2
+            注释 = "Alignment of selectable text. Defaults to (0.0f, 0.0f) (top-left aligned). It\'s generally important to keep this left-aligned if you want to lay multiple items on a same line."
+            @输出名 = "SelectableTextAlign">
+    变量 分隔条文本框粗细 <公开 类型 = 单精度小数 注释 = "Thickkness of border in SeparatorText()"
+            @输出名 = "SeparatorTextBorderSize">
+    变量 分隔条文本对齐 <公开 类型 = ImVec2
+            注释 = "Alignment of text within the separator. Defaults to (0.0f, 0.5f) (left aligned, center)."
+            @输出名 = "SeparatorTextAlign">
+    变量 分隔条文本内边距 <公开 类型 = ImVec2
             注释 = "Horizontal offset of text from each edge of the separator + spacing on other axis. Generally small values. .y is recommended to be == FramePadding.y."
-            折叠 @禁止流程检查 = 真>
-    {
-        @ return @dt<ImVec2>{data().SeparatorTextPadding}
-    }
-
-    方法 分隔条文本内边距 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = ImVec2>
-    {
-        @ data().SeparatorTextPadding = @<所欲设置的值>;
-    }
-
-    方法 显示窗口内边距 <公开 属性读 类型 = ImVec2
+            @输出名 = "SeparatorTextPadding">
+    变量 显示窗口内边距 <公开 类型 = ImVec2
             注释 = "Window position are clamped to be visible within the display area or monitors by at least this amount. Only applies to regular windows."
-            折叠 @禁止流程检查 = 真>
-    {
-        @ return @dt<ImVec2>{data().DisplayWindowPadding}
-    }
-
-    方法 显示窗口内边距 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = ImVec2>
-    {
-        @ data().DisplayWindowPadding = @<所欲设置的值>;
-    }
-
-    方法 显示安全区内边距 <公开 属性读 类型 = ImVec2
+            @输出名 = "DisplayWindowPadding">
+    变量 显示安全区内边距 <公开 类型 = ImVec2
             注释 = "If you cannot see the edges of your screen (e.g. on a TV) increase the safe area padding. Apply to popups/tooltips as well regular windows. NB: Prefer configuring your TV sets correctly!"
-            折叠 @禁止流程检查 = 真>
-    {
-        @ return @dt<ImVec2>{data().DisplaySafeAreaPadding}
-    }
-
-    方法 显示安全区内边距 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = ImVec2>
-    {
-        @ data().DisplaySafeAreaPadding = @<所欲设置的值>;
-    }
-
-    方法 停靠分隔条大小 <公开 属性读 类型 = 单精度小数 注释 = "Thickness of resizing border between docked windows" 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().DockingSeparatorSize
-    }
-
-    方法 停靠分隔条大小 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().DockingSeparatorSize = @<所欲设置的值>;
-    }
-
-    方法 鼠标光标缩放 <公开 属性读 类型 = 单精度小数
+            @输出名 = "DisplaySafeAreaPadding">
+    变量 停靠分隔条大小 <公开 类型 = 单精度小数 注释 = "Thickness of resizing border between docked windows"
+            @输出名 = "DockingSeparatorSize">
+    变量 鼠标光标缩放 <公开 类型 = 单精度小数
             注释 = "Scale software rendered mouse cursor (when io.MouseDrawCursor is enabled). We apply per-monitor DPI scaling over this scale. May be removed later."
-            折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().MouseCursorScale
-    }
-
-    方法 鼠标光标缩放 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().MouseCursorScale = @<所欲设置的值>;
-    }
-
-    方法 抗锯齿线条 <公开 属性读 类型 = 逻辑型
+            @输出名 = "MouseCursorScale">
+    变量 抗锯齿线条 <公开 类型 = 逻辑型
             注释 = "Enable anti-aliased lines/borders. Disable if you are really tight on CPU/GPU. Latched at the beginning of the frame (copied to ImDrawList)."
-            折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().AntiAliasedLines
-    }
-
-    方法 抗锯齿线条 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 逻辑型>
-    {
-        @ data().AntiAliasedLines = static_cast<bool>(@<所欲设置的值>);
-    }
-
-    方法 抗锯齿纹理线条 <公开 属性读 类型 = 逻辑型 注释 = "Enable anti-aliased lines/borders using textures where possible."
-            注释 = "Require backend to render with bilinear filtering (NOT point/nearest filtering)."
-            注释 = "Latched at the beginning of the frame (copied to ImDrawList)." 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().AntiAliasedLinesUseTex
-    }
-
-    方法 抗锯齿纹理线条 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 逻辑型>
-    {
-        @ data().AntiAliasedLinesUseTex = static_cast<bool>(@<所欲设置的值>);
-    }
-
-    方法 抗锯齿填充 <公开 属性读 类型 = 逻辑型
-            注释 = "Enable anti-aliased edges around filled shapes (rounded rectangles, circles, etc.)."
-            注释 = "Disable if you are really tight on CPU/GPU."
-            注释 = "Latched at the beginning of the frame (copied to ImDrawList)." 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().AntiAliasedFill
-    }
-
-    方法 抗锯齿填充 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 逻辑型>
-    {
-        @ data().AntiAliasedFill = static_cast<bool>(@<所欲设置的值>);
-    }
-
-    方法 曲线细分公差 <公开 属性读 类型 = 单精度小数
-            注释 = "Tessellation tolerance when using PathBezierCurveTo() without a specific number of segments."
-            注释 = "Decrease for highly tessellated curves (higher quality, more polygons), increase to reduce quality."
-            折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().CurveTessellationTol
-    }
-
-    方法 曲线细分公差 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().CurveTessellationTol = @<所欲设置的值>;
-    }
-
-    方法 曲线细分最大误差 <公开 属性读 类型 = 单精度小数
+            @输出名 = "AntiAliasedLines">
+    变量 抗锯齿纹理线条 <公开 类型 = 逻辑型
+            注释 = "Enable anti-aliased lines/borders using textures where possible. Require backend to render with bilinear filtering (NOT point/nearest filtering). Latched at the beginning of the frame (copied to ImDrawList)."
+            @输出名 = "AntiAliasedLinesUseTex">
+    变量 抗锯齿填充 <公开 类型 = 逻辑型
+            注释 = "Enable anti-aliased edges around filled shapes (rounded rectangles, circles, etc.). Disable if you are really tight on CPU/GPU. Latched at the beginning of the frame (copied to ImDrawList)."
+            @输出名 = "AntiAliasedFill">
+    变量 曲线细分公差 <公开 类型 = 单精度小数
+            注释 = "Tessellation tolerance when using PathBezierCurveTo() without a specific number of segments. Decrease for highly tessellated curves (higher quality, more polygons), increase to reduce quality."
+            @输出名 = "CurveTessellationTol">
+    变量 曲线细分最大误差 <公开 类型 = 单精度小数
             注释 = "Maximum error (in pixels) allowed when using AddCircle()/AddCircleFilled() or drawing rounded corner rectangles with no explicit segment count specified. Decrease for higher quality but more geometry."
-            折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().CircleTessellationMaxError
-    }
+            @输出名 = "CircleTessellationMaxError">
+    变量 "// 颜色" <公开 类型 = "ImVec4 [55]" @输出名 = "Colors">
+    变量 固定悬停延迟 <公开 类型 = 单精度小数
+            注释 = "可以在当前帧修改 Delay for IsItemHovered(ImGuiHoveredFlags_Stationary). Time required to consider mouse stationary."
+            @输出名 = "HoverStationaryDelay">
+    变量 短悬停延迟 <公开 类型 = 单精度小数
+            注释 = "可以在当前帧修改 Delay for IsItemHovered(ImGuiHoveredFlags_DelayShort). Usually used along with HoverStationaryDelay."
+            @输出名 = "HoverDelayShort">
+    变量 正常悬停延迟 <公开 类型 = 单精度小数 注释 = "可以在当前帧修改 Delay for IsItemHovered(ImGuiHoveredFlags_DelayNormal)."
+            @输出名 = "HoverDelayNormal">
+    变量 工具提示鼠标悬停标志 <公开 类型 = 整数 注释 = "请参考常量\"IM悬停标志\",可以在当前帧修改."
+            注释 = "Default flags when using IsItemHovered(ImGuiHoveredFlags_ForTooltip) or BeginItemTooltip()/SetItemTooltip() while using mouse."
+            @输出名 = "HoverFlagsForTooltipMouse">
+    变量 工具提示键盘悬停标志 <公开 类型 = 整数 注释 = "请参考常量\"IM悬停标志\",可以在当前帧修改."
+            注释 = "Default flags when using IsItemHovered(ImGuiHoveredFlags_ForTooltip) or BeginItemTooltip()/SetItemTooltip() while using keyboard/gamepad."
+            @输出名 = "HoverFlagsForTooltipNav">
 
-    方法 曲线细分最大误差 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().CircleTessellationMaxError = @<所欲设置的值>;
-    }
-
-    方法 颜色 <公开 类型 = ImVec4 折叠 @嵌入式方法 = "" @视窗.返回参考 = 真>
+    方法 颜色 <公开 静态 类型 = ImVec4 折叠 @嵌入式方法 = "" @视窗.返回参考 = 真>
+    参数 欲操作本对象 <类型 = IM样式类>
     参数 颜色索引 <类型 = IM颜色标识符>
     {
-        @ @dt<ImVec4>{&@sn<this>.data().Colors[(int)@<颜色索引>]}
-    }
-
-    # 以下选项可以在当前帧修改 ---
-
-    方法 固定悬停延迟 <公开 属性读 类型 = 单精度小数
-            注释 = "Delay for IsItemHovered(ImGuiHoveredFlags_Stationary). Time required to consider mouse stationary."
-            折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().HoverStationaryDelay
-    }
-
-    方法 固定悬停延迟 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().HoverStationaryDelay = @<所欲设置的值>;
-    }
-
-    方法 短悬停延迟 <公开 属性读 类型 = 单精度小数
-            注释 = "Delay for IsItemHovered(ImGuiHoveredFlags_DelayShort). Usually used along with HoverStationaryDelay."
-            折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().HoverDelayShort
-    }
-
-    方法 短悬停延迟 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().HoverDelayShort = @<所欲设置的值>;
-    }
-
-    方法 正常悬停延迟 <公开 属性读 类型 = 单精度小数 注释 = "Delay for IsItemHovered(ImGuiHoveredFlags_DelayNormal)." 折叠
-            @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().HoverDelayNormal
-    }
-
-    方法 正常悬停延迟 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().HoverDelayNormal = @<所欲设置的值>;
-    }
-
-    方法 工具提示鼠标悬停标志 <公开 属性读 类型 = 整数
-            注释 = "Default flags when using IsItemHovered(ImGuiHoveredFlags_ForTooltip) or BeginItemTooltip()/SetItemTooltip() while using mouse."
-            注释 = "请参考常量\"IM悬停标志\"" 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().HoverFlagsForTooltipMouse
-    }
-
-    方法 工具提示鼠标悬停标志 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 整数 注释 = "请参考常量\"IM悬停标志\"">
-    {
-        @ data().HoverFlagsForTooltipMouse = static_cast<ImGuiHoveredFlags>(@<所欲设置的值>);
-    }
-
-    方法 工具提示键盘悬停标志 <公开 属性读 类型 = 整数
-            注释 = "Default flags when using IsItemHovered(ImGuiHoveredFlags_ForTooltip) or BeginItemTooltip()/SetItemTooltip() while using keyboard/gamepad."
-            注释 = "请参考常量\"IM悬停标志\"" 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().HoverFlagsForTooltipNav
-    }
-
-    方法 工具提示键盘悬停标志 <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 整数 注释 = "请参考常量\"IM悬停标志\"">
-    {
-        @ data().HoverFlagsForTooltipNav = static_cast<ImGuiHoveredFlags>(@<所欲设置的值>);
+        @ @<欲操作本对象>->Colors[(int)@<颜色索引>]
     }
 }
 
-类 IM有效载荷类 <公开 基础类 = 数据类型基础类 注释 = "ImGuiPayload 拖放的有效载荷" 折叠 @文档 = "category = \"辅助类\"">
+类 IM有效载荷指针 <公开 注释 = "拖放的有效载荷" 注释 = "本对象为常量指针,只能通过\"ImGui.接收拖放有效载荷\"和\"ImGui.取拖放有效载荷\"获取." 折叠
+        @文档 = "category = \"辅助类\"" @别名 = "const ImGuiPayload*" @别名类型 = 本地参考类型>
 {
-
-    # @ @m<PIV_DECLARE_STRUCT_CLASS> (ImGuiPayload)
-
-    方法 数据指针 <公开 属性读 类型 = 变整数 折叠 @嵌入式方法 = "">
+    方法 数据指针 <公开 静态 属性读 类型 = 变整数 注释 = "返回数据指针(内容由ImGui内部拷贝和拥有)" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM有效载荷指针>
     {
-        @ reinterpret_cast<INT_P>(@sn<this>.data().Data)
+        @ reinterpret_cast<INT_P>(@<欲操作本对象>->Data)
     }
 
-    方法 数据长度 <公开 属性读 类型 = 整数 折叠 @嵌入式方法 = "">
+    方法 数据长度 <公开 静态 属性读 类型 = 整数 注释 = "返回数据长度" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM有效载荷指针>
     {
-        @ @sn<this>.data().DataSize
+        @ @<欲操作本对象>.DataSize
     }
 
-    方法 是否预览 <公开 属性读 类型 = 逻辑型 注释 = "当调用了\"接收拖放有效载荷\"且鼠标悬停在目标项目时返回真." 折叠 @嵌入式方法 = "">
+    方法 是否预览 <公开 静态 属性读 类型 = 逻辑型 注释 = "当调用了\"接收拖放有效载荷\"且鼠标悬停在目标项目时返回真." 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM有效载荷指针>
     {
-        @ @sn<this>.data().IsPreview()
+        @ @<欲操作本对象>->IsPreview()
     }
 
-    方法 是否传递 <公开 属性读 类型 = 逻辑型 注释 = "当调用了\"接收拖放有效载荷\"且鼠标按钮在目标按钮上释放时返回真." 折叠 @嵌入式方法 = "">
+    方法 是否传递 <公开 静态 属性读 类型 = 逻辑型 注释 = "当调用了\"接收拖放有效载荷\"且鼠标按钮在目标按钮上释放时返回真." 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM有效载荷指针>
     {
-        @ @sn<this>.data().IsDelivery()
+        @ @<欲操作本对象>->IsDelivery()
     }
 
-    方法 是否为指定类型 <公开 类型 = 逻辑型 注释 = "检查当前的数据类型是否为指定的类型" 折叠 @嵌入式方法 = "">
+    方法 是否为指定类型 <公开 静态 类型 = 逻辑型 注释 = "检查当前的数据类型是否为指定的类型" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM有效载荷指针>
     参数 类型 <注释 = "类型是用户定义的文本,最多32个UTF-8字符,字符\'_\'开头的是ImGui的内部保留类型." 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;"
             @匹配类型 = 通用型>
     {
-        @ @sn<this>.data().IsDataType(*PivAny2U{@<类型>})
+        @ @<欲操作本对象>->IsDataType(*PivAny2U{@<类型>})
+    }
+
+    # ---
+
+    方法 为空指针 <公开 静态 类型 = 逻辑型 注释 = "返回本指针是否为空" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM有效载荷指针>
+    {
+        @ @<欲操作本对象> == nullptr
     }
 }
 
-类 IM视口类 <公开 基础类 = 数据类型基础类 注释 = "ImGuiViewport 用于接收\"ImGui.取主视口()\"的返回结果" 折叠 @文档 = "category = \"辅助类\"">
+类 IM视口指针 <公开 基础类 = PIV结构指针模板 注释 = "ImGuiViewport指针 用于接收\"ImGui.取主视口()\"的返回结果"
+        注释 = "本类使用指针封装,必须在创建或赋值后使用(用\"为空指针\"判断)." 折叠 @文档 = "category = \"辅助类\"" @别名 = "ImGuiViewport*"
+        @模板实现类 = "IM视口指针">
 {
-
-    # @ @m<PIV_DECLARE_STRUCT_CLASS> (ImGuiViewport)
-
-    方法 ID <公开 属性读 类型 = 整数 折叠 @嵌入式方法 = "">
-    {
-        @ static_cast<INT>(@sn<this>.data().ID)
-    }
-
-    方法 标志 <公开 属性读 类型 = 整数 注释 = "请参考\"IM视口标志\"" 折叠 @嵌入式方法 = "">
-    {
-        @ static_cast<INT>(@sn<this>.data().Flags)
-    }
-
-    方法 标志 <公开 属性写 注释 = "请参考\"IM视口标志\"" 折叠>
-    参数 所欲设置的值 <类型 = 整数>
-    {
-        @ data().Flags = static_cast<ImGuiViewportFlags>(@<所欲设置的值>);
-    }
-
-    方法 平台句柄 <公开 属性读 类型 = 变整数 注释 = "Windows平台下返回Win32的窗口句柄" 折叠 @嵌入式方法 = "">
-    {
-        @ reinterpret_cast<INT_P>(@sn<this>.data().PlatformHandleRaw)
-    }
-
-    方法 DPI缩放 <公开 属性读 类型 = 单精度小数 注释 = "1.0f = 96 DPI,即没有额外缩放." 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().DpiScale
-    }
-
-    方法 DPI缩放 <公开 属性写 注释 = "1.0f = 96 DPI,即没有额外缩放." 折叠>
-    参数 所欲设置的值 <类型 = 单精度小数>
-    {
-        @ data().DpiScale = @<所欲设置的值>;
-    }
-
-    方法 父视口ID <公开 属性读 类型 = 整数
+    变量 ID <公开 类型 = 整数 注释 = "视口的唯一ID" @输出名 = "ID">
+    变量 标志 <公开 类型 = 整数 注释 = "请参考\"IM视口标志\"" @输出名 = "Flags">
+    变量 位置 <公开 类型 = ImVec2
+            注释 = "Main Area: Position of the viewport (Dear ImGui coordinates are the same as OS desktop/native coordinates)"
+            @输出名 = "Pos">
+    变量 尺寸 <公开 类型 = ImVec2 注释 = "Main Area: Size of the viewport." @输出名 = "Size">
+    变量 工作区位置 <公开 类型 = ImVec2
+            注释 = "Work Area: Position of the viewport minus task bars, menus bars, status bars (>= Pos)"
+            @输出名 = "WorkPos">
+    变量 工作区尺寸 <公开 类型 = ImVec2
+            注释 = "Work Area: Size of the viewport minus task bars, menu bars, status bars (<= Size)"
+            @输出名 = "WorkSize">
+    变量 DPI缩放 <公开 类型 = 单精度小数 注释 = "1.0f = 96 DPI,即没有额外缩放." @输出名 = "DpiScale">
+    变量 父视口ID <公开 类型 = 整数
             注释 = "(Advanced) 0: no parent. Instruct the platform backend to setup a parent/child relationship between platform windows."
-            折叠 @嵌入式方法 = "">
+            @输出名 = "ParentViewportId">
+    变量 "//绘制数据指针" <公开 类型 = IM绘制数据指针
+            注释 = "The ImDrawData corresponding to this viewport. Valid after Render() and until the next call to NewFrame()."
+            @输出名 = "DrawData">
+    变量 渲染器用户数据 <公开 类型 = 通用指针
+            注释 = "void* to hold custom data structure for the renderer (e.g. swap chain, framebuffers etc.). generally set by your Renderer_CreateWindow function."
+            @输出名 = "RendererUserData">
+    变量 平台用户数据 <公开 类型 = 通用指针
+            注释 = "void* to hold custom data structure for the OS / platform (e.g. windowing info, render context). generally set by your Platform_CreateWindow function."
+            @输出名 = "PlatformUserData">
+    变量 平台句柄 <公开 类型 = 通用指针
+            注释 = "void* for FindViewportByPlatformHandle(). (e.g. suggested to use natural platform handle such as HWND, GLFWWindow*, SDL_Window*)"
+            @输出名 = "PlatformHandle">
+    变量 原生平台句柄 <公开 类型 = 通用指针 注释 = "Windows平台下返回Win32的窗口句柄"
+            注释 = "void* to hold lower-level, platform-native window handle (under Win32 this is expected to be a HWND, unused for other platforms), when using an abstraction layer like GLFW or SDL (where PlatformHandle would be a SDL_Window*)"
+            @输出名 = "PlatformHandleRaw">
+    变量 已创建平台窗口 <公开 类型 = 逻辑型
+            注释 = "Platform window has been created (Platform_CreateWindow() has been called). This is false during the first frame where a viewport is being created."
+            @输出名 = "PlatformWindowCreated">
+    变量 请求移动平台窗口 <公开 类型 = 逻辑型
+            注释 = "Platform window requested move (e.g. window was moved by the OS / host window manager, authoritative position will be OS window position)"
+            @输出名 = "PlatformRequestMove">
+    变量 请求重设平台窗口大小 <公开 类型 = 逻辑型
+            注释 = "Platform window requested resize (e.g. window was resized by the OS / host window manager, authoritative size will be OS window size)"
+            @输出名 = "PlatformRequestResize">
+    变量 请求关闭平台窗口 <公开 类型 = 逻辑型
+            注释 = "Platform window requested closure (e.g. window was moved by the OS / host window manager, e.g. pressing ALT-F4)"
+            @输出名 = "PlatformRequestClose">
+
+    方法 取中心 <公开 静态 类型 = ImVec2 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM视口指针>
     {
-        @ static_cast<INT>(@sn<this>.data().ParentViewportId)
+        @ @<欲操作本对象>->GetCenter()
     }
 
-    方法 父视口ID <公开 属性写 折叠>
-    参数 所欲设置的值 <类型 = 整数>
+    方法 取工作区中心 <公开 静态 类型 = ImVec2 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = IM视口指针>
     {
-        @ data().ParentViewportId = static_cast<ImGuiID>(@<所欲设置的值>);
-    }
-
-    方法 取位置 <公开 类型 = ImVec2 注释 = "返回主区域的视口位置,坐标与操作系统桌面/本地坐标相同." 折叠 @嵌入式方法 = "">
-    {
-        @ @dt<ImVec2>{@sn<this>.data().Pos}
-    }
-
-    方法 取尺寸 <公开 类型 = ImVec2 注释 = "返回主区域的视口尺寸" 折叠 @嵌入式方法 = "">
-    {
-        @ @dt<ImVec2>{@sn<this>.data().Size}
-    }
-
-    方法 取工作区位置 <公开 类型 = ImVec2 注释 = "返回工作区的位置,即视口位置减去任务栏、菜单栏、状态栏" 折叠 @嵌入式方法 = "">
-    {
-        @ @dt<ImVec2>{@sn<this>.data().WorkPos}
-    }
-
-    方法 取工作区尺寸 <公开 类型 = ImVec2 注释 = "返回工作区的尺寸,即视口尺寸减去任务栏、菜单栏、状态栏" 折叠 @嵌入式方法 = "">
-    {
-        @ @dt<ImVec2>{@sn<this>.data().WorkSize}
-    }
-
-    方法 取中心 <公开 类型 = ImVec2 折叠 @嵌入式方法 = "">
-    {
-        @ @dt<ImVec2>{@sn<this>.data().GetCenter()}
-    }
-
-    方法 取工作区中心 <公开 类型 = ImVec2 折叠 @嵌入式方法 = "">
-    {
-        @ @dt<ImVec2>{@sn<this>.data().GetWorkCenter()}
+        @ @<欲操作本对象>->GetWorkCenter()
     }
 }
 
-类 IM窗口类 <公开 基础类 = 数据类型基础类 折叠 @文档 = "category = \"辅助类\"">
-{
+类 IM窗口类指针 <公开 基础类 = PIV结构指针模板 @文档 = "category = \"辅助类\"" @别名 = "ImGuiWindowClass*" @模板实现类 = "IM窗口类指针">
 
-    # @ @m<PIV_DECLARE_STRUCT_CLASS> (ImGuiWindowClass)
-}
+类 IM平台IO类 <公开 基础类 = PIV结构指针模板 注释 = "本类使用指针封装,必须在创建或赋值后使用(用\"为空指针\"判断)." @文档 = "category = \"辅助类\""
+        @别名 = "ImGuiPlatformIO*" @模板实现类 = "IM平台IO类">
 
-类 IM平台IO类 <公开 基础类 = 数据类型基础类 折叠 @文档 = "category = \"辅助类\"">
-{
+类 IM字符 <公开 基础类 = PIV数值模板 注释 = "ImWchar" @别名 = "ImWchar" @模板实现类 = "IM字符">
 
-    # @ @m<PIV_DECLARE_STRUCT_CLASS> (ImGuiPlatformIO)
-}
+类 IM字符数组类 <公开 基础类 = IM数组模板 注释 = "ImVector<ImWchar>" @模板实现类 = "IM字符">
+
+类 IM绘制列表共享数据指针 <公开 注释 = "可用于自行创建\"IM绘制列表\"实例,只能由\"ImGUI.取绘制列表共享数据()\"返回." @别名 = "ImDrawListSharedData*"
+        @别名类型 = 本地参考类型>
 
 # 标志常量
 
@@ -4543,11 +4231,11 @@
     常量 允许调整垂直大小 <公开 类型 = 整数 值 = @ImGuiChildFlags_ResizeY
             注释 = "Allow resize from bottom border (layout direction).">
     常量 自动调整水平大小 <公开 类型 = 整数 值 = @ImGuiChildFlags_AutoResizeX
-            注释 = "Enable auto-resizing width. Read \"IMPORTANT: Size measurement\" details above.">
+            注释 = "启用自动调整宽度. Read \"IMPORTANT: Size measurement\" details above.">
     常量 自动调整垂直大小 <公开 类型 = 整数 值 = @ImGuiChildFlags_AutoResizeY
-            注释 = "Enable auto-resizing height. Read \"IMPORTANT: Size measurement\" details above.">
+            注释 = "启用自动调整高度. Read \"IMPORTANT: Size measurement\" details above.">
     常量 始终自动调整大小 <公开 类型 = 整数 值 = @ImGuiChildFlags_AlwaysAutoResize
-            注释 = "Combined with AutoResizeX/AutoResizeY. Always measure size even when child is hidden, always return true, always disable clipping optimization! NOT RECOMMENDED.">
+            注释 = "[不推荐选项] 需要跟\"自动调整水平大小/自动调整垂直大小\"一起使用(单独使用会报错)." 注释 = "即使子窗口被隐藏也始终调整大小,始终返回真,始终禁止裁剪优化!">
     常量 使用框体样式 <公开 类型 = 整数 值 = @ImGuiChildFlags_FrameStyle
             注释 = "Style the child window like a framed item: use FrameBg, FrameRounding, FrameBorderSize, FramePadding instead of ChildBg, ChildRounding, ChildBorderSize, WindowPadding.">
 }
@@ -4555,7 +4243,7 @@
 类 IM输入框标志 <公开 注释 = "ImGuiInputTextFlags" 注释 = "Flags for ImGui::InputText()"
         注释 = "(Those are per-item flags."
         注释 = "There are shared flags in ImGuiIO: io.ConfigInputTextCursorBlink"
-        注释 = "and io.ConfigInputTextEnterKeepActive)" @文档 = "category = \"标志类\"">
+        注释 = "and io.ConfigInputTextEnterKeepActive)" 折叠 @文档 = "category = \"标志类\"">
 {
     常量 无 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_None>
     常量 十进制数字 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_CharsDecimal 注释 = "允许输入 0123456789.+-*/">
@@ -4626,7 +4314,7 @@
 }
 
 类 IM弹出标志 <公开
-        注释 = "ImGuiPopupFlags Flags for OpenPopup*(), BeginPopupContext*(), IsPopupOpen() functions." 折叠
+        注释 = "ImGuiPopupFlags Flags for OpenPopup*(), BeginPopupContext*(), IsPopupOpen() functions."
         @文档 = "category = \"标志类\"">
 {
     常量 无 <公开 类型 = 整数 值 = @ImGuiPopupFlags_None>
@@ -4638,6 +4326,8 @@
             注释 = "For BeginPopupContext*(): open on Middle Mouse release. Guaranteed to always be == 2 (same as ImGuiMouseButton_Middle)">
     常量 "" <类型 = 整数 值 = @ImGuiPopupFlags_MouseButtonMask_>
     常量 "" <类型 = 整数 值 = @ImGuiPopupFlags_MouseButtonDefault_>
+    常量 "" <公开 类型 = 整数 值 = @ImGuiPopupFlags_NoReopen
+            注释 = "For OpenPopup*(), BeginPopupContext*(): don\'t reopen same popup if already open (won\'t reposition, won\'t reinitialize navigation)">
     常量 "" <公开 类型 = 整数 值 = @ImGuiPopupFlags_NoOpenOverExistingPopup
             注释 = "For OpenPopup*(), BeginPopupContext*(): don\'t open if there\'s already a popup at the same level of the popup stack">
     常量 "" <公开 类型 = 整数 值 = @ImGuiPopupFlags_NoOpenOverItems
@@ -5126,7 +4816,7 @@
     常量 禁止输入 <公开 类型 = 整数 值 = @ImGuiSliderFlags_NoInput 注释 = "禁止使用Ctrl+单击、双击、回车键来直接输入数值到组件中">
 }
 
-类 IM视口标志 <公开 注释 = "ImGuiViewportFlags" 折叠 @文档 = "category = \"标志类\"">
+类 IM视口标志 <公开 注释 = "ImGuiViewportFlags" @文档 = "category = \"标志类\"">
 {
     常量 无 <公开 类型 = 整数 值 = @ImGuiViewportFlags_None>
     常量 平台窗口 <公开 类型 = 整数 值 = @ImGuiViewportFlags_IsPlatformWindow 注释 = "显示一个平台窗口">
@@ -5459,7 +5149,7 @@
     常量 导航窗口高亮颜色 <公开 值 = @ImGuiCol_NavWindowingHighlight 注释 = "使用CTRL+TAB时突出显示窗口">
     常量 导航窗口暗背景 <公开 值 = @ImGuiCol_NavWindowingDimBg 注释 = "活动时,使CTRL+TAB窗口列表背后的整个屏幕变暗或着色">
     常量 模态窗口暗背景 <公开 值 = @ImGuiCol_ModalWindowDimBg 注释 = "当模态窗口处于活动状态时,使模态窗口后面的整个屏幕变暗或着色">
-    常量 "// 标识符数量" <公开 值 = @ImGuiCol_COUNT>
+    常量 总数 <公开 值 = @ImGuiCol_COUNT>
 }
 
 类 IM样式标识符 <公开

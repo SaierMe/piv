@@ -745,14 +745,14 @@ namespace piv
         }
 
         template <typename J, typename T, typename... Args>
-        inline void PushBack(J &json, const T &val, const Args... args)
+        inline void PushBack(J &json, const T &val, Args&&... args)
         {
             json.push_back(to_value(val));
             PushBack(json, args...);
         }
 
         template <typename J, typename... Args>
-        inline void PushBack(J &json, const J &val, const Args... args)
+        inline void PushBack(J &json, const J &val, Args&&... args)
         {
             json.push_back(val);
             PushBack(json, args...);
@@ -781,14 +781,14 @@ namespace piv
         }
 
         template <typename J, typename K, typename V, typename... Args>
-        inline void Emplace(J &json, const K &key, const V &val, const Args... args)
+        inline void Emplace(J &json, const K &key, const V &val, Args&&... args)
         {
             json[to_key(key)] = to_value(val);
             Emplace(json, args...);
         }
 
         template <typename J, typename K, typename... Args>
-        inline void Emplace(J &json, const K &key, const J &val, const Args... args)
+        inline void Emplace(J &json, const K &key, const J &val, Args&&... args)
         {
             json[to_key(key)] = val;
             Emplace(json, args...);
@@ -800,7 +800,7 @@ namespace piv
          * @return 返回创建的数组
          */
         template <typename J, typename... Args>
-        inline J CreateArray(const Args... args)
+        inline J CreateArray(Args&&... args)
         {
             J array = J::array();
             PushBack(array, args...);
@@ -814,7 +814,7 @@ namespace piv
          * @return 返回自身
          */
         template <typename J, typename... Args>
-        inline J &SetArray(J &json, const Args... args)
+        inline J &SetArray(J &json, Args&&... args)
         {
             json = J::array();
             PushBack(json, args...);
@@ -828,7 +828,7 @@ namespace piv
          * @return 返回自身
          */
         template <typename J, typename... Args>
-        inline J &PushBackArgs(J &json, const Args... args)
+        inline J &PushBackArgs(J &json, Args&&... args)
         {
             PushBack(json, args...);
             return json;
@@ -862,7 +862,7 @@ namespace piv
          * @return 返回所创建的JSON对象
          */
         template <typename J, typename... Args>
-        inline J CreateObject(Args... args)
+        inline J CreateObject(Args&&... args)
         {
             J json = J::object();
             Emplace(json, args...);
@@ -876,7 +876,7 @@ namespace piv
          * @return 返回自身
          */
         template <typename J, typename... Args>
-        inline J &SetObject(J &json, Args... args)
+        inline J &SetObject(J &json, Args&&... args)
         {
             json = J::object();
             Emplace(json, args...);

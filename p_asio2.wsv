@@ -551,7 +551,7 @@
 
 # 辅助类 ===
 
-类 ASIO2_HTTP请求类 <公开 基础类 = 扩展对象类 注释 = "提供HTTP请求的URI、请求头字段和请求消息体" 折叠 @文档 = "category = \"辅助类\"">
+类 ASIO2_HTTP请求类 <公开 基础类 = 扩展对象类 注释 = "提供HTTP请求的URI、请求头字段和请求消息体" @文档 = "category = \"辅助类\"">
 {
 
     # @ @m<PIV_DECLARE_BASE_CLASS> (asio2::http::web_request)
@@ -882,7 +882,7 @@
     # @end
 }
 
-类 ASIO2_HTTP响应类 <公开 基础类 = 扩展对象类 注释 = "提供HTTP响应的响应头字段和响应消息体" 折叠 @文档 = "category = \"辅助类\"">
+类 ASIO2_HTTP响应类 <公开 基础类 = 扩展对象类 注释 = "提供HTTP响应的响应头字段和响应消息体" @文档 = "category = \"辅助类\"">
 {
 
     # @ @m<PIV_DECLARE_BASE_CLASS> (asio2::http::web_response)

@@ -1,0 +1,636 @@
+<!doctype html>
+<html>
+<head>
+<meta charset='UTF-8'><meta name='viewport' content='width=device-width initial-scale=1'>
+
+<link href='https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,700,400&subset=latin,latin-ext' rel='stylesheet' type='text/css' /><style type='text/css'>html {overflow-x: initial !important;}:root { --bg-color: #ffffff; --text-color: #333333; --select-text-bg-color: #B5D6FC; --select-text-font-color: auto; --monospace: "Lucida Console",Consolas,"Courier",monospace; --title-bar-height: 20px; }
+.mac-os-11 { --title-bar-height: 28px; }
+html { font-size: 14px; background-color: var(--bg-color); color: var(--text-color); font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4, h5 { white-space: pre-wrap; }
+body { margin: 0px; padding: 0px; height: auto; inset: 0px; font-size: 1rem; line-height: 1.42857; overflow-x: hidden; background: inherit; }
+iframe { margin: auto; }
+a.url { word-break: break-all; }
+a:active, a:hover { outline: 0px; }
+.in-text-selection, ::selection { text-shadow: none; background: var(--select-text-bg-color); color: var(--select-text-font-color); }
+#write { margin: 0px auto; height: auto; width: inherit; word-break: normal; overflow-wrap: break-word; position: relative; white-space: normal; overflow-x: visible; padding-top: 36px; }
+#write.first-line-indent p { text-indent: 2em; }
+#write.first-line-indent li p, #write.first-line-indent p * { text-indent: 0px; }
+#write.first-line-indent li { margin-left: 2em; }
+.for-image #write { padding-left: 8px; padding-right: 8px; }
+body.typora-export { padding-left: 30px; padding-right: 30px; }
+.typora-export .footnote-line, .typora-export li, .typora-export p { white-space: pre-wrap; }
+.typora-export .task-list-item input { pointer-events: none; }
+@media screen and (max-width: 500px) {
+  body.typora-export { padding-left: 0px; padding-right: 0px; }
+  #write { padding-left: 20px; padding-right: 20px; }
+}
+#write li > figure:last-child { margin-bottom: 0.5rem; }
+#write ol, #write ul { position: relative; }
+img { max-width: 100%; vertical-align: middle; image-orientation: from-image; }
+button, input, select, textarea { color: inherit; font: inherit; }
+input[type="checkbox"], input[type="radio"] { line-height: normal; padding: 0px; }
+*, ::after, ::before { box-sizing: border-box; }
+#write h1, #write h2, #write h3, #write h4, #write h5, #write h6, #write p, #write pre { width: inherit; }
+#write h1, #write h2, #write h3, #write h4, #write h5, #write h6, #write p { position: relative; }
+p { line-height: inherit; }
+h1, h2, h3, h4, h5, h6 { break-after: avoid-page; break-inside: avoid; orphans: 4; }
+p { orphans: 4; }
+h1 { font-size: 2rem; }
+h2 { font-size: 1.8rem; }
+h3 { font-size: 1.6rem; }
+h4 { font-size: 1.4rem; }
+h5 { font-size: 1.2rem; }
+h6 { font-size: 1rem; }
+.md-math-block, .md-rawblock, h1, h2, h3, h4, h5, h6, p { margin-top: 1rem; margin-bottom: 1rem; }
+.hidden { display: none; }
+.md-blockmeta { color: rgb(204, 204, 204); font-weight: 700; font-style: italic; }
+a { cursor: pointer; }
+sup.md-footnote { padding: 2px 4px; background-color: rgba(238, 238, 238, 0.7); color: rgb(85, 85, 85); border-radius: 4px; cursor: pointer; }
+sup.md-footnote a, sup.md-footnote a:hover { color: inherit; text-transform: inherit; text-decoration: inherit; }
+#write input[type="checkbox"] { cursor: pointer; width: inherit; height: inherit; }
+figure { overflow-x: auto; margin: 1.2em 0px; max-width: calc(100% + 16px); padding: 0px; }
+figure > table { margin: 0px; }
+thead, tr { break-inside: avoid; break-after: auto; }
+thead { display: table-header-group; }
+table { border-collapse: collapse; border-spacing: 0px; width: 100%; overflow: auto; break-inside: auto; text-align: left; }
+table.md-table td { min-width: 32px; }
+.CodeMirror-gutters { border-right: 0px; background-color: inherit; }
+.CodeMirror-linenumber { user-select: none; }
+.CodeMirror { text-align: left; }
+.CodeMirror-placeholder { opacity: 0.3; }
+.CodeMirror pre { padding: 0px 4px; }
+.CodeMirror-lines { padding: 0px; }
+div.hr:focus { cursor: none; }
+#write pre { white-space: pre-wrap; }
+#write.fences-no-line-wrapping pre { white-space: pre; }
+#write pre.ty-contain-cm { white-space: normal; }
+.CodeMirror-gutters { margin-right: 4px; }
+.md-fences { font-size: 0.9rem; display: block; break-inside: avoid; text-align: left; overflow: visible; white-space: pre; background: inherit; position: relative !important; }
+.md-fences-adv-panel { width: 100%; margin-top: 10px; text-align: center; padding-top: 0px; padding-bottom: 8px; overflow-x: auto; }
+#write .md-fences.mock-cm { white-space: pre-wrap; }
+.md-fences.md-fences-with-lineno { padding-left: 0px; }
+#write.fences-no-line-wrapping .md-fences.mock-cm { white-space: pre; overflow-x: auto; }
+.md-fences.mock-cm.md-fences-with-lineno { padding-left: 8px; }
+.CodeMirror-line, twitterwidget { break-inside: avoid; }
+svg { break-inside: avoid; }
+.footnotes { opacity: 0.8; font-size: 0.9rem; margin-top: 1em; margin-bottom: 1em; }
+.footnotes + .footnotes { margin-top: 0px; }
+.md-reset { margin: 0px; padding: 0px; border: 0px; outline: 0px; vertical-align: top; background: 0px 0px; text-decoration: none; text-shadow: none; float: none; position: static; width: auto; height: auto; white-space: nowrap; cursor: inherit; -webkit-tap-highlight-color: transparent; line-height: normal; font-weight: 400; text-align: left; box-sizing: content-box; direction: ltr; }
+li div { padding-top: 0px; }
+blockquote { margin: 1rem 0px; }
+li .mathjax-block, li p { margin: 0.5rem 0px; }
+li blockquote { margin: 1rem 0px; }
+li { margin: 0px; position: relative; }
+blockquote > :last-child { margin-bottom: 0px; }
+blockquote > :first-child, li > :first-child { margin-top: 0px; }
+.footnotes-area { color: rgb(136, 136, 136); margin-top: 0.714rem; padding-bottom: 0.143rem; white-space: normal; }
+#write .footnote-line { white-space: pre-wrap; }
+@media print {
+  body, html { border: 1px solid transparent; height: 99%; break-after: avoid; break-before: avoid; font-variant-ligatures: no-common-ligatures; }
+  #write { margin-top: 0px; border-color: transparent !important; padding-top: 0px !important; padding-bottom: 0px !important; }
+  .typora-export * { -webkit-print-color-adjust: exact; }
+  .typora-export #write { break-after: avoid; }
+  .typora-export #write::after { height: 0px; }
+  .is-mac table { break-inside: avoid; }
+  #write > p:nth-child(1) { margin-top: 0px; }
+  .typora-export-show-outline .typora-export-sidebar { display: none; }
+  figure { overflow-x: visible; }
+}
+.footnote-line { margin-top: 0.714em; font-size: 0.7em; }
+a img, img a { cursor: pointer; }
+pre.md-meta-block { font-size: 0.8rem; min-height: 0.8rem; white-space: pre-wrap; background: rgb(204, 204, 204); display: block; overflow-x: hidden; }
+p > .md-image:only-child:not(.md-img-error) img, p > img:only-child { display: block; margin: auto; }
+#write.first-line-indent p > .md-image:only-child:not(.md-img-error) img { left: -2em; position: relative; }
+p > .md-image:only-child { display: inline-block; width: 100%; }
+#write .MathJax_Display { margin: 0.8em 0px 0px; }
+.md-math-block { width: 100%; }
+.md-math-block:not(:empty)::after { display: none; }
+.MathJax_ref { fill: currentcolor; }
+[contenteditable="true"]:active, [contenteditable="true"]:focus, [contenteditable="false"]:active, [contenteditable="false"]:focus { outline: 0px; box-shadow: none; }
+.md-task-list-item { position: relative; list-style-type: none; }
+.task-list-item.md-task-list-item { padding-left: 0px; }
+.md-task-list-item > input { position: absolute; top: 0px; left: 0px; margin-left: -1.2em; margin-top: calc(1em - 10px); border: none; }
+.math { font-size: 1rem; }
+.md-toc { min-height: 3.58rem; position: relative; font-size: 0.9rem; border-radius: 10px; }
+.md-toc-content { position: relative; margin-left: 0px; }
+.md-toc-content::after, .md-toc::after { display: none; }
+.md-toc-item { display: block; color: rgb(65, 131, 196); }
+.md-toc-item a { text-decoration: none; }
+.md-toc-inner:hover { text-decoration: underline; }
+.md-toc-inner { display: inline-block; cursor: pointer; }
+.md-toc-h1 .md-toc-inner { margin-left: 0px; font-weight: 700; }
+.md-toc-h2 .md-toc-inner { margin-left: 2em; }
+.md-toc-h3 .md-toc-inner { margin-left: 4em; }
+.md-toc-h4 .md-toc-inner { margin-left: 6em; }
+.md-toc-h5 .md-toc-inner { margin-left: 8em; }
+.md-toc-h6 .md-toc-inner { margin-left: 10em; }
+@media screen and (max-width: 48em) {
+  .md-toc-h3 .md-toc-inner { margin-left: 3.5em; }
+  .md-toc-h4 .md-toc-inner { margin-left: 5em; }
+  .md-toc-h5 .md-toc-inner { margin-left: 6.5em; }
+  .md-toc-h6 .md-toc-inner { margin-left: 8em; }
+}
+a.md-toc-inner { font-size: inherit; font-style: inherit; font-weight: inherit; line-height: inherit; }
+.footnote-line a:not(.reversefootnote) { color: inherit; }
+.reversefootnote { font-family: ui-monospace, sans-serif; }
+.md-attr { display: none; }
+.md-fn-count::after { content: "."; }
+code, pre, samp, tt { font-family: var(--monospace); }
+kbd { margin: 0px 0.1em; padding: 0.1em 0.6em; font-size: 0.8em; color: rgb(36, 39, 41); background: rgb(255, 255, 255); border: 1px solid rgb(173, 179, 185); border-radius: 3px; box-shadow: rgba(12, 13, 14, 0.2) 0px 1px 0px, rgb(255, 255, 255) 0px 0px 0px 2px inset; white-space: nowrap; vertical-align: middle; }
+.md-comment { color: rgb(162, 127, 3); opacity: 0.6; font-family: var(--monospace); }
+code { text-align: left; vertical-align: initial; }
+a.md-print-anchor { white-space: pre !important; border-width: initial !important; border-style: none !important; border-color: initial !important; display: inline-block !important; position: absolute !important; width: 1px !important; right: 0px !important; outline: 0px !important; background: 0px 0px !important; text-decoration: initial !important; text-shadow: initial !important; }
+.os-windows.monocolor-emoji .md-emoji { font-family: "Segoe UI Symbol", sans-serif; }
+.md-diagram-panel > svg { max-width: 100%; }
+[lang="flow"] svg, [lang="mermaid"] svg { max-width: 100%; height: auto; }
+[lang="mermaid"] .node text { font-size: 1rem; }
+table tr th { border-bottom: 0px; }
+video { max-width: 100%; display: block; margin: 0px auto; }
+iframe { max-width: 100%; width: 100%; border: none; }
+.highlight td, .highlight tr { border: 0px; }
+mark { background: rgb(255, 255, 0); color: rgb(0, 0, 0); }
+.md-html-inline .md-plain, .md-html-inline strong, mark .md-inline-math, mark strong { color: inherit; }
+.md-expand mark .md-meta { opacity: 0.3 !important; }
+mark .md-meta { color: rgb(0, 0, 0); }
+@media print {
+  .typora-export h1, .typora-export h2, .typora-export h3, .typora-export h4, .typora-export h5, .typora-export h6 { break-inside: avoid; }
+}
+.md-diagram-panel .messageText { stroke: none !important; }
+.md-diagram-panel .start-state { fill: var(--node-fill); }
+.md-diagram-panel .edgeLabel rect { opacity: 1 !important; }
+.md-fences.md-fences-math { font-size: 1em; }
+.md-fences-advanced:not(.md-focus) { padding: 0px; white-space: nowrap; border: 0px; }
+.md-fences-advanced:not(.md-focus) { background: inherit; }
+.typora-export-show-outline .typora-export-content { max-width: 1440px; margin: auto; display: flex; flex-direction: row; }
+.typora-export-sidebar { width: 300px; font-size: 0.8rem; margin-top: 80px; margin-right: 18px; }
+.typora-export-show-outline #write { --webkit-flex: 2; flex: 2 1 0%; }
+.typora-export-sidebar .outline-content { position: fixed; top: 0px; max-height: 100%; overflow: hidden auto; padding-bottom: 30px; padding-top: 60px; width: 300px; }
+@media screen and (max-width: 1024px) {
+  .typora-export-sidebar, .typora-export-sidebar .outline-content { width: 240px; }
+}
+@media screen and (max-width: 800px) {
+  .typora-export-sidebar { display: none; }
+}
+.outline-content li, .outline-content ul { margin-left: 0px; margin-right: 0px; padding-left: 0px; padding-right: 0px; list-style: none; overflow-wrap: anywhere; }
+.outline-content ul { margin-top: 0px; margin-bottom: 0px; }
+.outline-content strong { font-weight: 400; }
+.outline-expander { width: 1rem; height: 1.42857rem; position: relative; display: table-cell; vertical-align: middle; cursor: pointer; padding-left: 4px; }
+.outline-expander::before { content: ""; position: relative; font-family: Ionicons; display: inline-block; font-size: 8px; vertical-align: middle; }
+.outline-item { padding-top: 3px; padding-bottom: 3px; cursor: pointer; }
+.outline-expander:hover::before { content: ""; }
+.outline-h1 > .outline-item { padding-left: 0px; }
+.outline-h2 > .outline-item { padding-left: 1em; }
+.outline-h3 > .outline-item { padding-left: 2em; }
+.outline-h4 > .outline-item { padding-left: 3em; }
+.outline-h5 > .outline-item { padding-left: 4em; }
+.outline-h6 > .outline-item { padding-left: 5em; }
+.outline-label { cursor: pointer; display: table-cell; vertical-align: middle; text-decoration: none; color: inherit; }
+.outline-label:hover { text-decoration: underline; }
+.outline-item:hover { border-color: rgb(245, 245, 245); background-color: var(--item-hover-bg-color); }
+.outline-item:hover { margin-left: -28px; margin-right: -28px; border-left: 28px solid transparent; border-right: 28px solid transparent; }
+.outline-item-single .outline-expander::before, .outline-item-single .outline-expander:hover::before { display: none; }
+.outline-item-open > .outline-item > .outline-expander::before { content: ""; }
+.outline-children { display: none; }
+.info-panel-tab-wrapper { display: none; }
+.outline-item-open > .outline-children { display: block; }
+.typora-export .outline-item { padding-top: 1px; padding-bottom: 1px; }
+.typora-export .outline-item:hover { margin-right: -8px; border-right: 8px solid transparent; }
+.typora-export .outline-expander::before { content: "+"; font-family: inherit; top: -1px; }
+.typora-export .outline-expander:hover::before, .typora-export .outline-item-open > .outline-item > .outline-expander::before { content: "−"; }
+.typora-export-collapse-outline .outline-children { display: none; }
+.typora-export-collapse-outline .outline-item-open > .outline-children, .typora-export-no-collapse-outline .outline-children { display: block; }
+.typora-export-no-collapse-outline .outline-expander::before { content: "" !important; }
+.typora-export-show-outline .outline-item-active > .outline-item .outline-label { font-weight: 700; }
+.md-inline-math-container mjx-container { zoom: 0.95; }
+mjx-container { break-inside: avoid; }
+.md-alert.md-alert-note { border-left-color: rgb(9, 105, 218); }
+.md-alert.md-alert-important { border-left-color: rgb(130, 80, 223); }
+.md-alert.md-alert-warning { border-left-color: rgb(154, 103, 0); }
+.md-alert.md-alert-tip { border-left-color: rgb(31, 136, 61); }
+.md-alert.md-alert-caution { border-left-color: rgb(207, 34, 46); }
+.md-alert { padding: 0px 1em; margin-bottom: 16px; color: inherit; border-left: 0.25em solid rgb(0, 0, 0); }
+.md-alert-text-note { color: rgb(9, 105, 218); }
+.md-alert-text-important { color: rgb(130, 80, 223); }
+.md-alert-text-warning { color: rgb(154, 103, 0); }
+.md-alert-text-tip { color: rgb(31, 136, 61); }
+.md-alert-text-caution { color: rgb(207, 34, 46); }
+.md-alert-text { font-size: 0.9rem; font-weight: 700; }
+.md-alert-text svg { fill: currentcolor; position: relative; top: 0.125em; margin-right: 1ch; overflow: visible; }
+.md-alert-text-container::after { content: attr(data-text); text-transform: capitalize; pointer-events: none; margin-right: 1ch; }
+
+
+:root {
+    --side-bar-bg-color: #fafafa;
+    --control-text-color: #777;
+}
+
+@include-when-export url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,700,400&subset=latin,latin-ext);
+
+/* open-sans-regular - latin-ext_latin */
+  /* open-sans-italic - latin-ext_latin */
+    /* open-sans-700 - latin-ext_latin */
+    /* open-sans-700italic - latin-ext_latin */
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    font-family: "Open Sans","Clear Sans", "Helvetica Neue", Helvetica, Arial, 'Segoe UI Emoji', sans-serif;
+    color: rgb(51, 51, 51);
+    line-height: 1.6;
+}
+
+#write {
+    max-width: 860px;
+  	margin: 0 auto;
+  	padding: 30px;
+    padding-bottom: 100px;
+}
+
+@media only screen and (min-width: 1400px) {
+	#write {
+		max-width: 1024px;
+	}
+}
+
+@media only screen and (min-width: 1800px) {
+	#write {
+		max-width: 1200px;
+	}
+}
+
+#write > ul:first-child,
+#write > ol:first-child{
+    margin-top: 30px;
+}
+
+a {
+    color: #4183C4;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    position: relative;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+    line-height: 1.4;
+    cursor: text;
+}
+h1:hover a.anchor,
+h2:hover a.anchor,
+h3:hover a.anchor,
+h4:hover a.anchor,
+h5:hover a.anchor,
+h6:hover a.anchor {
+    text-decoration: none;
+}
+h1 tt,
+h1 code {
+    font-size: inherit;
+}
+h2 tt,
+h2 code {
+    font-size: inherit;
+}
+h3 tt,
+h3 code {
+    font-size: inherit;
+}
+h4 tt,
+h4 code {
+    font-size: inherit;
+}
+h5 tt,
+h5 code {
+    font-size: inherit;
+}
+h6 tt,
+h6 code {
+    font-size: inherit;
+}
+h1 {
+    font-size: 2.25em;
+    line-height: 1.2;
+    border-bottom: 1px solid #eee;
+}
+h2 {
+    font-size: 1.75em;
+    line-height: 1.225;
+    border-bottom: 1px solid #eee;
+}
+
+/*@media print {
+    .typora-export h1,
+    .typora-export h2 {
+        border-bottom: none;
+        padding-bottom: initial;
+    }
+
+    .typora-export h1::after,
+    .typora-export h2::after {
+        content: "";
+        display: block;
+        height: 100px;
+        margin-top: -96px;
+        border-top: 1px solid #eee;
+    }
+}*/
+
+h3 {
+    font-size: 1.5em;
+    line-height: 1.43;
+}
+h4 {
+    font-size: 1.25em;
+}
+h5 {
+    font-size: 1em;
+}
+h6 {
+   font-size: 1em;
+    color: #777;
+}
+p,
+blockquote,
+ul,
+ol,
+dl,
+table{
+    margin: 0.8em 0;
+}
+li>ol,
+li>ul {
+    margin: 0 0;
+}
+hr {
+    height: 2px;
+    padding: 0;
+    margin: 16px 0;
+    background-color: #e7e7e7;
+    border: 0 none;
+    overflow: hidden;
+    box-sizing: content-box;
+}
+
+li p.first {
+    display: inline-block;
+}
+ul,
+ol {
+    padding-left: 30px;
+}
+ul:first-child,
+ol:first-child {
+    margin-top: 0;
+}
+ul:last-child,
+ol:last-child {
+    margin-bottom: 0;
+}
+blockquote {
+    border-left: 4px solid #dfe2e5;
+    padding: 0 15px;
+    color: #777777;
+}
+blockquote blockquote {
+    padding-right: 0;
+}
+table {
+    padding: 0;
+    word-break: initial;
+}
+table tr {
+    border: 1px solid #dfe2e5;
+    margin: 0;
+    padding: 0;
+}
+table tr:nth-child(2n),
+thead {
+    background-color: #f8f8f8;
+}
+table th {
+    font-weight: bold;
+    border: 1px solid #dfe2e5;
+    border-bottom: 0;
+    margin: 0;
+    padding: 6px 13px;
+}
+table td {
+    border: 1px solid #dfe2e5;
+    margin: 0;
+    padding: 6px 13px;
+}
+table th:first-child,
+table td:first-child {
+    margin-top: 0;
+}
+table th:last-child,
+table td:last-child {
+    margin-bottom: 0;
+}
+
+.CodeMirror-lines {
+    padding-left: 4px;
+}
+
+.code-tooltip {
+    box-shadow: 0 1px 1px 0 rgba(0,28,36,.3);
+    border-top: 1px solid #eef2f2;
+}
+
+.md-fences,
+code,
+tt {
+    border: 1px solid #e7eaed;
+    background-color: #f8f8f8;
+    border-radius: 3px;
+    padding: 0;
+    padding: 2px 4px 0px 4px;
+    font-size: 0.9em;
+}
+
+code {
+    background-color: #f3f4f4;
+    padding: 0 2px 0 2px;
+}
+
+.md-fences {
+    margin-bottom: 15px;
+    margin-top: 15px;
+    padding-top: 8px;
+    padding-bottom: 6px;
+}
+
+
+.md-task-list-item > input {
+  margin-left: -1.3em;
+}
+
+@media print {
+    html {
+        font-size: 13px;
+    }
+    pre {
+        page-break-inside: avoid;
+        word-wrap: break-word;
+    }
+}
+
+.md-fences {
+	background-color: #f8f8f8;
+}
+#write pre.md-meta-block {
+	padding: 1rem;
+    font-size: 85%;
+    line-height: 1.45;
+    background-color: #f7f7f7;
+    border: 0;
+    border-radius: 3px;
+    color: #777777;
+    margin-top: 0 !important;
+}
+
+.mathjax-block>.code-tooltip {
+	bottom: .375rem;
+}
+
+.md-mathjax-midline {
+    background: #fafafa;
+}
+
+#write>h3.md-focus:before{
+	left: -1.5625rem;
+	top: .375rem;
+}
+#write>h4.md-focus:before{
+	left: -1.5625rem;
+	top: .285714286rem;
+}
+#write>h5.md-focus:before{
+	left: -1.5625rem;
+	top: .285714286rem;
+}
+#write>h6.md-focus:before{
+	left: -1.5625rem;
+	top: .285714286rem;
+}
+.md-image>.md-meta {
+    /*border: 1px solid #ddd;*/
+    border-radius: 3px;
+    padding: 2px 0px 0px 4px;
+    font-size: 0.9em;
+    color: inherit;
+}
+
+.md-tag {
+    color: #a7a7a7;
+    opacity: 1;
+}
+
+.md-toc { 
+    margin-top:20px;
+    padding-bottom:20px;
+}
+
+.sidebar-tabs {
+    border-bottom: none;
+}
+
+#typora-quick-open {
+    border: 1px solid #ddd;
+    background-color: #f8f8f8;
+}
+
+#typora-quick-open-item {
+    background-color: #FAFAFA;
+    border-color: #FEFEFE #e5e5e5 #e5e5e5 #eee;
+    border-style: solid;
+    border-width: 1px;
+}
+
+/** focus mode */
+.on-focus-mode blockquote {
+    border-left-color: rgba(85, 85, 85, 0.12);
+}
+
+header, .context-menu, .megamenu-content, footer{
+    font-family: "Segoe UI", "Arial", sans-serif;
+}
+
+.file-node-content:hover .file-node-icon,
+.file-node-content:hover .file-node-open-state{
+    visibility: visible;
+}
+
+.mac-seamless-mode #typora-sidebar {
+    background-color: #fafafa;
+    background-color: var(--side-bar-bg-color);
+}
+
+.mac-os #write{
+    caret-color: AccentColor;
+}
+
+.md-lang {
+    color: #b4654d;
+}
+
+/*.html-for-mac {
+    --item-hover-bg-color: #E6F0FE;
+}*/
+
+#md-notification .btn {
+    border: 0;
+}
+
+.dropdown-menu .divider {
+    border-color: #e5e5e5;
+    opacity: 0.4;
+}
+
+.ty-preferences .window-content {
+    background-color: #fafafa;
+}
+
+.ty-preferences .nav-group-item.active {
+    color: white;
+    background: #999;
+}
+
+.menu-item-container a.menu-style-btn {
+    background-color: #f5f8fa;
+    background-image: linear-gradient( 180deg , hsla(0, 0%, 100%, 0.8), hsla(0, 0%, 100%, 0)); 
+}
+
+
+
+</style><title>README_CN</title>
+</head>
+<body class='typora-export os-windows typora-export-show-outline typora-export-no-collapse-outline'><div class='typora-export-content'>
+<div class="typora-export-sidebar"><div class="outline-content"><li class="outline-item-wrapper outline-h1"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#🌋火山视窗---piv模块">🌋火山视窗 - PIV模块</a></div><ul class="outline-children"><li class="outline-item-wrapper outline-h2"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📢">📢</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h2"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#💽-安装">💽 安装</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h2"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#🎯-简介">🎯 简介</a></div><ul class="outline-children"><li class="outline-item-wrapper outline-h4"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#piv-是什么意思"><strong>PIV</strong> 是什么意思？</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h4"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#关于过时功能">关于过时功能</a></div><ul class="outline-children"></ul></li></ul></li><li class="outline-item-wrapper outline-h2"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📝-更新日志">📝 更新日志</a></div><ul class="outline-children"><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20240206">📅 2024/02/06</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20240118">📅 2024/01/18</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20240107">📅 2024/01/07</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20231211">📅 2023/12/11</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20231031">📅 2023/10/31</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20231012">📅 2023/10/12</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20231005">📅 2023/10/05</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230929">📅 2023/09/29</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230927">📅 2023/09/27</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230923">📅 2023/09/23</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230922">📅 2023/09/22</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230905">📅 2023/09/05</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230809">📅 2023/08/09</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230722">📅 2023/07/22</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230629">📅 2023/06/29</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230625">📅 2023/06/25</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230623">📅 2023/06/23</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230507">📅 2023/05/07</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230428">📅 2023/04/28</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230415">📅 2023/04/15</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230414">📅 2023/04/14</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230409">📅 2023/04/09</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230404">📅 2023/04/04</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230402">📅 2023/04/02</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230310">📅 2023/03/10</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230221">📅 2023/02/21</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230220">📅 2023/02/20</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230219">📅 2023/02/19</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230217">📅 2023/02/17</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20230119">📅 2023/01/19</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20221215">📅 2022/12/15</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20221213">📅 2022/12/13</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20221203">📅 2022/12/03</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20221125">📅 2022/11/25</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20221118">📅 2022/11/18</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20221110">📅 2022/11/10</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20221031">📅 2022/10/31</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20221030">📅 2022/10/30</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20221029">📅 2022/10/29</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20220916">📅 2022/09/16</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20220822">📅 2022/08/22</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20220818">📅 2022/08/18</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20220726">📅 2022/07/26</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20220725">📅 2022/07/25</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20220715">📅 2022/07/15</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20220708">📅 2022/07/08</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20220705">📅 2022/07/05</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20220614">📅 2022/06/14</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20220613">📅 2022/06/13</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20220608">📅 2022/06/08</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20220605">📅 2022/06/05</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h3"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#📅-20220530">📅 2022/05/30</a></div><ul class="outline-children"></ul></li></ul></li><li class="outline-item-wrapper outline-h2"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#💌-开源项目">💌 开源项目</a></div><ul class="outline-children"></ul></li><li class="outline-item-wrapper outline-h2"><div class="outline-item"><span class="outline-expander"></span><a class="outline-label" href="#🧰-闭源项目">🧰 闭源项目</a></div><ul class="outline-children"></ul></li></ul></li></div></div><div id='write'  class=''><h1 id='🌋火山视窗---piv模块'><span>🌋火山视窗 - PIV模块</span></h1><p>&nbsp;</p><blockquote><p><span>👨🏻‍💻作者: Xelloss</span></p><p><span>🔗网址: </span><a href='https://piv.ink/volpiv' target='_blank' class='url'>https://piv.ink/volpiv</a></p><p><span>🛞 Github: </span><a href='https://github.com/SaierMe/piv' target='_blank' class='url'>https://github.com/SaierMe/piv</a></p><p><span>📧邮箱: </span><a href='mailto:xelloss@vip.qq.com' target='_blank' class='url'>xelloss@vip.qq.com</a></p></blockquote><p>&nbsp;</p><h2 id='📢'><span>📢</span></h2><p><span>之前我单独公开了几个库，维护起来甚是麻烦，现在我把自用的模块整理分享出来，以后有什么新功能，基本就在这里更新了。</span></p><p><span>如果遇到bug和模块冲突，欢迎找我报错，最好带上例子。</span></p><p>&nbsp;</p><h2 id='💽-安装'><span>💽 安装</span></h2><p><span>下载地址：</span><a href='https://saier.lanzoul.com/b016cwvle' target='_blank' class='url'>https://saier.lanzoul.com/b016cwvle</a></p><p><span>在线更新：</span><a href='https://www.lkuaiy.com/rsdetails?id=16201836568092'><span>火山平台升级工具</span></a><span> by 仰望</span></p><p><span>安装本模块前，必须将 </span><a href='http://www.voldp.com/'><span>火山软件开发平台</span></a><span> 更新到最新版本，</span><strong><span>及时安装论坛的更新包才是最新版</span></strong><span>。</span></p><p><span>本模块部分功能需要 VS 2017 以上才能编译使用。</span></p><p><span>现在提供两种形式的安装包：</span></p><ul><li><h5 id='火山模块安装包-vcip'><span>火山模块安装包 [.vcip]</span></h5><p><strong><span>模块本体的安装包。</span></strong></p><p><span>火山自身的模块安装包格式，双击 </span><code>.vcip</code><span> 文件即可打开火山程序进行安装，但压缩率比较低。</span></p><p><span>如果安装失败，请对火山主程序按鼠标右键打开「属性」，勾选「兼容性」选项卡里的「以管理员身份运行此程序」。</span></p></li><li><h5 id='静态库文件-7z'><span>静态库文件 [.7z]</span></h5><p><span>由于部分静态库文件太大，而且不会经常更新，所以另外用 7z 格式压缩。</span></p><p><span>请手动解压安装到 </span><code>火山目录\plugins\vprj_win\classlib\user\piv\</code></p></li></ul><p>&nbsp;</p><h2 id='🎯-简介'><span>🎯 简介</span></h2><p><span>本模块总共有两个子模块，子模块之间功能不重叠，主要是收录标准有以下差别：</span></p><ul><li><p><strong><span>PIV基础类</span></strong></p><p><span>除了视窗基本类，不依赖其他任何模块。</span></p></li><li><p><strong><span>PIV扩展类</span></strong></p><p><span>会依赖部分官方模块，但不会依赖界面库和其他第三方模块。</span></p></li></ul><blockquote><p><span>PIV静态库已经合并到PIV基础类，请自行删除旧源码的相关模块配置</span></p></blockquote><p><span>本模块封装遵从以下标准：</span></p><ul><li><p><strong><span>不重复造轮子</span></strong></p><p><span>核心库已有的功能，如果没有可明显改进的地方，不会重复封装。</span></p></li><li><p><strong><span>开源</span></strong></p><p><span>所有封装的代码均公开源码。</span></p></li><li><p><strong><span>效率优先</span></strong></p><p><span>以执行效率为优先，基本使用C++和嵌入式语法封装。</span></p></li><li><p><strong><span>源码编译</span></strong></p><p><span>能直接用源码编译的库，就不会编译成 dll 再封装，缺点是会增加编译耗时，如果其他代码出错，可能会一下子蹦出大量报错。</span></p></li><li><p><strong><span>面向对象</span></strong></p><p><span>关联性的功能封装成类，以类实例使用。除了常用命令，尽量减少使用全局类，以「类名.静态方法」调用，减少同名冲突。</span></p></li><li><p><del><strong><span>解耦</span></strong></del></p><p><del><span>减少不同类库之间的互相依赖，能以最小的代价把类库抠出来单独使用。</span></del></p><p><span>随着基础功能的广泛应用，类库之间耦合度增大，已经难以解耦了。</span></p></li></ul><h4 id='piv-是什么意思'><strong><span>PIV</span></strong><span> 是什么意思？</span></h4><blockquote><p><span>我也不知道，作为起名废，这名称是沿用了我注册的一个域名，而当初注册这三个字母域名的时候，拼凑的思路上比较靠近 pic、pixiv。</span></p><p><span>有人说 PIV 是 VIP 的取反，虽然不是我本意，但这的确很恰当，因为PIV模块会一直免费开源。</span></p></blockquote><h4 id='关于过时功能'><span>关于过时功能</span></h4><blockquote><p><span>本模块已有一定的历史，一些早期功能已经不合时宜，但为了兼容用户较早前写的源码，我一直有保留</span></p><p><span>为了让用户尝试新的东西，所以从 2023/07 版开始，我通过火山的条件编译功能屏蔽了一些过时功能</span></p><p><span>如果你有旧源码不想改的话，请在项目属性的「编译时预定义宏」中添加 PIV_ENABLE_OBSOLETE</span></p></blockquote><p>&nbsp;</p><h2 id='📝-更新日志'><span>📝 更新日志</span></h2><p><span>※我经常修改现有的代码，比如修正bug、优化效率、规范格式、修订备注等……如果功能和用法没有改变，一般不会写在更新日志里，所以每次更新改动的地方其实还是有不少的。</span></p><h3 id='📅-20240206'><span>📅 2024/02/06</span></h3><ol start='' ><li><p><span>修正已知问题；</span></p><p><span>注意：下一版将使用别名类型等新特性，将不再兼容 2024 年之前的火山；</span></p></li></ol><h3 id='📅-20240118'><span>📅 2024/01/18</span></h3><ol start='' ><li><p><span>修正「BASS音频支持库」在发布版下会崩溃的问题；</span></p></li><li><p><span>ImGui 的各种窗口框架中增加「隐藏任务栏图标」属性，以及「取窗口句柄」统一改为返回 Win32 的窗口句柄（HWND）；</span></p></li><li><p><span>其他优化与修正；</span></p></li></ol><h3 id='📅-20240107'><span>📅 2024/01/07</span></h3><ol start='' ><li><p><span>恢复了旧版的「进程操作类」，新版的改名成「NT进程操作类」；</span></p></li><li><p><span>将「BASS音频支持库」改为显式链接动态库，支持动态加载 DLL 文件；</span></p></li><li><p><span>ImGui 源码升级到 1.90.1，完善 ImGui 各窗口框架的主要属性设置，补完了常量名（备注有空再填）；</span></p></li><li><p><span>7-zip 文件解压缩的库版本升级到 bit7z v4.0.5；</span></p></li><li><p><span>MMKV键值表 升级到 1.3.2，请下载更新静态库文件；</span></p></li><li><p><span>新增「界面时钟类」，跟时钟组件一样，在主窗口的消息循环中执行周期事件；</span></p></li><li><p><span>优化「文本到Usc2编码」和「Usc2编码到文本」；</span></p></li><li><p><span>其他多处优化调整；</span></p></li></ol><h3 id='📅-20231211'><span>📅 2023/12/11</span></h3><ol start='' ><li><p><span>升级了「进程操作类」，部分 API 改用了 Ntdll 版，支持 32 位程序读取 64 位进程的信息和内存；注意：类库中的内存地址和句柄改为长整数，你之前的源码需要小量修改；</span></p></li><li><p><span>std::Vector 数组容器增加了「升序排序、降序排序」，其中「对象容器模板类」需要在模板实现类的接收事件「小于比较、大于比较」中实现对应的比较函数，才能正确排序；</span></p></li><li><p><span>标准文本类和文本视图增加了读写属性「代码页」，可用于处理非本地编码的多字节文本转换；</span></p></li><li><p><span>ImGui 增加了「IM字形范围构建类」，提供了自定义字形范围的相关方法，具体请看例程；</span></p></li><li><p><span>新增「IM颜色类」，提供了 ImGui 中的各种颜色的快捷创建与转换（ImGui 不能直接使用火山颜色类中的常量）；</span></p></li><li><p><span>新增「内存模块PP」，封装了 MemoryModulePP，这是官方「内存模块库」MemoryModule 的分支；</span></p></li></ol><h3 id='📅-20231031'><span>📅 2023/10/31</span></h3><ol start='' ><li><p><span>新增全局方法 _u8 和 _sv，为「创建文本对象U」和「创建文本视图U」的别名；</span></p></li><li><p><span>新增全局方法「取全局单例、构造对象、带参构造对象」，前两个相比系统的「取全局对象、新建对象」，返回值即为所提供的对象类型，无需做类型转换；</span></p></li><li><p><span>其他优化和修正；</span></p></li></ol><h3 id='📅-20231012'><span>📅 2023/10/12</span></h3><ol start='' ><li><p><span>新增「无锁队列模板类、无锁阻塞队列模板类」及其常用类型，为多生产者线程、多消费者线程并发的无锁队列；</span></p></li><li><p><span>新增「读写队列模板类、读写阻塞队列模板类、读写循环队列模板类」及其常用类型，为支持单生产者线程、单消费者线程的无锁读写队列；</span></p></li><li><p><span>新增「VMP注册机类.导入密钥对文件」;</span></p></li><li><p><span>调整分类目录，其他优化和修正；</span></p></li></ol><h3 id='📅-20231005'><span>📅 2023/10/05</span></h3><ol start='' ><li><p><span>新增「正则匹配类、正则查找类、正则查找类U」，封装了一个简单的正则表达式，大部分场景下速度比官方现在的两个正则库都要快，具体介绍请看例程；</span></p></li><li><p><span>7-zip 文件解压缩的库版本升级到 bit7z v4.0.1；</span></p></li><li><p><span>更新了 PIV 的静态库包，删除了多余的静态库文件（VS 2015 之后 ABI 向后兼容，只需要编译一个较早 VS 版本的静态库就可以）；</span>
+<span>建议更新后执行 piv 目录里的 清理文件.bat，删除旧版的无用文件；</span></p></li></ol><h3 id='📅-20230929'><span>📅 2023/09/29</span></h3><ol start='' ><li><p><span>修正存档压缩类和配置文件操作类的部分问题；</span></p></li></ol><h3 id='📅-20230927'><span>📅 2023/09/27</span></h3><ol start='' ><li><p><span>修正「存档解压类、存档压缩类、存档编辑类」的进度改变事件在 32 位下出错的问题，「启用进度反馈」改为属性读/写方法；</span></p></li><li><p><span>「存档解压类」增加「打开文件资源」，相比文件资源到字节集，可以减少一次内存分配与复制；</span></p></li><li><p><span>「存档读写类」增加一系列一键解压视窗文件资源的方法；</span></p></li><li><p><span>「MD5校验类、xxHash类」增加了取视窗文件资源哈希值的方法；</span></p></li><li><p><span>修正「配置文件操作类」打开 UTF-16LE 文件出错的问题；</span></p></li></ol><h3 id='📅-20230923'><span>📅 2023/09/23</span></h3><ol start='' ><li><p><span>修正「存档编辑类」的部分方法无法成功执行的问题；</span></p></li><li><p><span>其他优化和修正；</span></p></li></ol><h3 id='📅-20230922'><span>📅 2023/09/22</span></h3><ol start='' ><li><p><span>适配火山飞扬#22版09-21更新包新增的单精度小数，注意此版本不再兼容旧版火山，相关例子也有调整；</span></p></li><li><p><span>移除子模块「PIV静态库」，将其内容合并到「PIV基础类」，由于静态库体积太大，仍需要在网盘单独下载静态库文件；</span></p></li><li><p><span>PivJSON 改为按插入顺序输出，并新增 无序PivJSON（等同于旧版的 PivJSON），PivOrderJSON 将继续保留以兼容旧版源码；</span></p></li><li><p><span>更新 7-zip 文件解压缩的库版本；</span></p></li><li><p><span>MMKV 更新到 1.3.1，新版置入键值时支持设置有效期，可以自动删除到期的键值对；</span></p></li><li><p><span>更新 {fmt}、xxHash、simpleini、simdutf、OpenCC 等开源项目的版本；</span></p></li><li><p><span>修正「线程池对象类」一个容易导致崩溃的 bug；</span></p></li><li><p><span>修正标准文本类的多处 BUG，以及其他优化和修正；</span></p></li></ol><h3 id='📅-20230905'><span>📅 2023/09/05</span></h3><ol start='' ><li><p><span>其他优化和修正；</span></p></li></ol><h3 id='📅-20230809'><span>📅 2023/08/09</span></h3><ol start='' ><li><p><span>新增「ULID类」，即可排序的唯一标识符，相比 UUID/GUID，它可以按字典序排序；</span></p></li><li><p><span>修正与 Ex_DirectUI 模块的一处冲突；</span></p></li></ol><h3 id='📅-20230722'><span>📅 2023/07/22</span></h3><ol start='' ><li><p><span>新增 libgo 协程库，相关类库：</span>
+<span>Go协程：协程的常用操作；</span>
+<span>协程调度器：负责管理协程的调度线程；</span>
+<span>协程池类、协程池回调处理器：可以在协程池中运行带回调的任务；</span>
+<span>协程配置选项：协程的全局配置选项；</span>
+<span>协程定时器、协程定时ID：在协程中执行一次性的定时任务；</span>
+<span>协程互斥锁类、协程读写锁类、协程唯一互斥锁类、协程条件变量类：用于协程间的互斥通信；</span>
+<span>信道模板类：用于协程的安全通信，已经定义了常用的模板实现类；</span></p></li><li><p><span>新增「异步线程类」、「函数对象类」、「唯一互斥锁类」、「条件变量类」、「未来对象模板类」、「承诺对象模板」，以及后两个模板类的常用模板实现类，完善了线程对象（std::thread）异步获取返回值的功能；</span></p></li><li><p><span>通过条件编译屏蔽了模块的过时功能，如果你不想改动旧源码，可以在项目属性的「编译时预定义宏」中添加「PIV_ENABLE_OBSOLETE」，即可继续使用过时功能；</span></p></li></ol><h3 id='📅-20230629'><span>📅 2023/06/29</span></h3><ol start='' ><li><p><span>新增「线程对象类」，为 std::thread 的封装，支持任意格式参数和返回值类型的方法，还支持绑定类的非静态方法，线程中调用类的非静态成员不再需要接收事件；</span></p></li><li><p><span>新增「线程池对象类」，跟旧版线程池类一样是 IOCP 模型，但线程实现改用了 C++11 标准库，支持任意格式参数和返回值类型，也不限静态和非静态方法；</span></p></li><li><p><span>新增「互斥对象类」，为 std::mutex 的封装，主要使用其中的全局方法「互斥自动锁」，即使线程异常结束，也能保证不会出现死锁；</span></p></li><li><p><span>新增「线程池对象」和「线程操作」两个例程，简单演示以上新增功能；</span></p></li><li><p><span>新增全局方法「取现行纳秒时间戳」；</span></p></li></ol><h3 id='📅-20230625'><span>📅 2023/06/25</span></h3><ol start='' ><li><p><span>优化 ImGui：补全 DX12 和 Vulkan 的图片加载；降低窗口不显示时的资源占用；完善例程，特别是完全重写了 WTL/MFC 的例程；</span></p></li><li><p><span>ImGui 切换到 Docking 分支，支持窗口停靠、窗口合并和分离；</span></p></li></ol><h3 id='📅-20230623'><span>📅 2023/06/23</span></h3><ol start='' ><li><p><span>新增 ImGui 支持库（预览版），使用方法请看相关例程（另外下载）；</span>
+<span>预览版已经封装了 ImGUI 的主要功能，但有部分细节和常量名未写好；</span>
+<span>预览版的方法和常量名可能会修改，我尽量在下一版固定下来，有意见请尽快向我提交；</span></p></li><li><p><span>「程序信息类」新增「取文件版本」和「取产品版本」，获取的版本结构跟「取程序版本」不同，支持火山程序的文件版本（等同项目属性中的版本号），方法的返回值是长整数，更适合用来做版本比较；</span></p></li><li><p><span>其他优化和修正；</span></p></li></ol><h3 id='📅-20230507'><span>📅 2023/05/07</span></h3><ol start='' ><li><p><span>优化「管道命令行类」，将「收到输出信息」事件的参数改为字节集类，以兼容 ANSI 和 UTF-8 编码；增加方法「终止命令」，用于中断正在执行的命令；增加属性读方法「是否空闲」，用于判断是否正在执行命令；</span></p></li><li><p><span>完善 WinHTTP 的代理设置和备注；</span></p></li><li><p><span>修正其他 bug；</span></p></li></ol><h3 id='📅-20230428'><span>📅 2023/04/28</span></h3><ol start='' ><li><p><span>优化 MD5 和 xxHash 的取文件哈希，将读取缓存增大到 64Kb，加快大文件的哈希速度；</span></p></li><li><p><span>修正进程操作相关的一些小问题；</span></p></li></ol><h3 id='📅-20230415'><span>📅 2023/04/15</span></h3><ol start='' ><li><p><span>修复上一版的BUG，主要影响标准文本类与文本视图类；</span></p></li></ol><h3 id='📅-20230414'><span>📅 2023/04/14</span></h3><ol start='' ><li><p><span>新增「xxHash类」，速度最快的摘要算法之一，工作速度接近内存的速度限制，实测比 MD5 快几倍以上；</span></p></li><li><p><span>完善「CNG加解密」对 PEM 格式 RSA 密钥的支持，抛弃坑爹的 Windows API，改为纯手写转换；</span></p></li><li><p><span>线程池类的创建方法增加参数「是否初始化COM」，用于指定是否在线程中自动初始化和清理COM；</span></p></li><li><p><span>其他优化；</span></p></li></ol><h3 id='📅-20230409'><span>📅 2023/04/09</span></h3><ol start='' ><li><p><span>统一将空格URL编码为%20，而不是 + 号；</span></p></li><li><p><span>优化和修正部分代码；</span></p></li></ol><h3 id='📅-20230404'><span>📅 2023/04/04</span></h3><ol start='' ><li><p><span>修正部分 bug；</span></p></li></ol><h3 id='📅-20230402'><span>📅 2023/04/02</span></h3><ol start='' ><li><p><span>全面使用火山文本程序格式(*.wsv)，因此必须将火山更新到 2023-03-29 之后的版本才能使用本模块，建议在安装模块后执行「清理文件.bat」删除旧版残留的文件；</span></p></li><li><p><span>「CNG加解密」增加对 PEM 格式 RSA 密钥的部分支持（只支持PEM转BLOB）；</span></p></li><li><p><span>修正「通用文件对话框.打开选择多个文件」；</span></p></li><li><p><span>修正「进程操作类」的模块内存操作；</span></p></li><li><p><span>合并 MinHook 的源文件，避免源文件同名冲突；</span></p></li><li><p><span>此版本开始公开本模块的 GitHub 仓库（地址本文开头里）；</span></p></li></ol><h3 id='📅-20230310'><span>📅 2023/03/10</span></h3><ol start='' ><li><p><span>「标准文本类」、「文本视图类」迎来一个里程版，经过多个版本的迭代，已经实现了文本类和字节集类的主要功能，并集成了更多的便捷文本操作和常用的编码转换（如URL编码、十六进制、USC2、BASE64、BASE85、BASE91、MD5）；</span>
+<span>优点：这两个类配合使用，可以在多种场景下减少内存分配和文本编码转换，比文本型和字节集类的执行效率更高，操作 UTF-8 和多字节文本比使用字节集类更方便；</span>
+<span>缺点：其他类库不支持这两个类型，传参需要转换到文本型或字节集类。目前本模块的部分类库已经应用了这两个类型，以后会继续增加支持；</span></p></li><li><p><span>部分类库实装对象序列化（取对象数据/置对象数据）：标准文本类、文本视图类、PivJSON、URL地址构造类、URL地址解析类、表单构造类、表单解析类；</span></p></li><li><p><span>「URL地址解析类」和「表单解析类」，取参数值时不需要区分参数名称的大小写；</span></p></li><li><p><span>修正「高并发网络访问类」在32位下无法下载的问题；</span></p></li><li><p><span>重新封装了一些 排序集(std::set)、排序表(std::map)、哈希集(std::unordered_set)、哈希表(std::unordered_map) 的模板类，补充了一些官方库没完善的地方，比如支持大小写无关文本作为关键字，可以在「PIV基础类/数据处理」分类中找到；</span></p></li></ol><h3 id='📅-20230221'><span>📅 2023/02/21</span></h3><ol start='' ><li><p><span>修复线程池类EX；</span></p></li><li><p><span>优化并修正「标准文本类」、「文本视图类」；</span></p></li></ol><h3 id='📅-20230220'><span>📅 2023/02/20</span></h3><ol start='' ><li><p><span>修正线程池类的两处bug；</span></p></li></ol><h3 id='📅-20230219'><span>📅 2023/02/19</span></h3><ol start='' ><li><p><span>「简易HOOK类/多重HOOK类」改为使用源码编译；</span></p></li><li><p><span>修正部分代码错误，主要影响 PivJSON；</span></p></li></ol><h3 id='📅-20230217'><span>📅 2023/02/17</span></h3><ol start='' ><li><p><span>拆分子模块「</span><strong><span>PIV静态库</span></strong><span>」，将 bit7z 和 MMKV 等体积较大的静态库移动到该子模块，主体模块的体积再次缩减到几十MB内；</span></p></li><li><p><span>更新了 bit7z，用最新源码重新编译了，应该修复了某些情况下可能出现的编译错误，32 位下压缩失败的原因已查明，不开启进度回调就可以了；</span></p></li><li><p><span>优化「标准文本类」、「文本视图类」，增加更多功能；</span></p></li><li><p><span>重构「PivJSON」，支持更多文本类型，合并和调整部分方法；</span></p></li><li><p><span>新增「表单构造类」、「表单构造类U」、「表单构造类A」，用于快捷填写网络POST请求的表单参数，其中 UTF-8 编码的「表单构造类U」最常用；</span></p></li><li><p><span>新增「表单解析类」、「表单解析类U」、「表单解析类A」，用于在服务端解析POST的表单参数；</span></p></li><li><p><span>新增「URL地址构造类」，用于快捷创建经过URL编码的地址；</span></p></li><li><p><span>「线程池类」、「线程池类EX」现在支持在暂停状态下清空任务，修改了销毁的默认值，优化内部代码；</span></p></li><li><p><span>优化了URL编解码；</span></p></li></ol><h3 id='📅-20230119'><span>📅 2023/01/19</span></h3><ol start='' ><li><p><span>新增「文本视图类」、「文本视图类U」和「文本视图类A」，封装了对应 Unicode、UTF-8 和 ANSI 编码的 std::basic_string_view；</span>
+<span>文本视图本身不拥有文本数据，而是引用其他文本的字符缓冲区，因此使用文本视图不会复制文本数据，速度极高，缺点是不能通过视图修改文本数据；</span></p></li><li><p><span>新增「文本视图容器类」、「文本视图容器类U」和「文本视图容器类A」，为对应文本视图的数组类（基于std::vector实现）；</span></p></li><li><p><span>优化重构「标准文本类」（std::basic_string），实现了官方文本类中的大部分功能；</span></p></li><li><p><span>新增对应 UTF-8 和 ANSI 编码的「标准文本类U」和「标准文本类A」，以及新增对应的数组类「标准文本容器类U」和「标准文本容器类A」；</span></p></li><li><p><span>新增「纳秒时钟类」，这是「格式日志类」中的同款时钟，能获取 1 纳秒级精度的时间戳（Windows API 最高只支持 100 纳秒精度），但用起来比较麻烦，需要在后台定期校准时间，有高精度要求才用吧；</span></p></li><li><p><span>「VMProtect」类新增「保护」、「虚拟化保护」、「变异保护」、「超级保护」、「虚拟化保护</span><span>_</span><span>锁定序列号」、「超级保护</span><span>_</span><span>锁定序列号」等方法，与之前的区别是可以自定义标记名称；</span></p></li><li><p><span>优化重构「URL地址解析类」，基于文本视图提升了解析速度；</span></p></li><li><p><span>「通用文件对话框」增加参数「不改变目录」；</span></p></li><li><p><span>「BASS音频类」的「取所有设备信息」和「取所有录制设备信息」，不再跳过设备号0，所以用法和例子有所改变；</span></p></li><li><p><span>修正多处 bug</span></p></li></ol><h3 id='📅-20221215'><span>📅 2022/12/15</span></h3><ol start='' ><li><p><span>修正「simdutf」编码转换的两处代码错误；</span></p></li></ol><h3 id='📅-20221213'><span>📅 2022/12/13</span></h3><ol start='' ><li><p><span>适配火山12-12的更新，所有静态库已经同时支持MT和MD版，也就是项目属性是否开启「使用静态C++运行时库」都能正常编译；</span></p></li><li><p><span>删除全局方法「十六进制文本到整数」和「十六进制文本到长整数」，因为最新版本的视窗基本类已经提供了同名方法；</span></p></li><li><p><span>修正多处 bug；</span></p></li></ol><h3 id='📅-20221203'><span>📅 2022/12/03</span></h3><ol start='' ><li><p><span>修复上一版导致的一些 bug 和模块冲突（新库继续慢慢磨）；</span></p></li></ol><h3 id='📅-20221125'><span>📅 2022/11/25</span></h3><ol start='' ><li><p><span>优化 Unicode 编码转换逻辑，PivJson、MMKV 等需要 Unicode 编码转换的库，默认使用系统 API 转码，如果项目编译了 simdutf，就自动切换为使用 simdutf 转码；</span>
+<span>现在避免了跟火山模块冲突，因为火山模块也有 simdutf，两个模块同时编译一样的 cpp 源码会报错；</span></p></li><li><p><span>将「进程操作类」的嵌入语句全部转移到 C++ 文件中，并修正部分问题；</span></p></li><li><p><span>移除bit7z的 VS 2015 静态库，因为 VS 2015 不支持火山的文本哈希表；</span></p></li></ol><h3 id='📅-20221118'><span>📅 2022/11/18</span></h3><ol start='' ><li><p><span>新增「MMKV键值表」，重新封装了腾讯MMKV，跟官方的相比：</span></p><ul><li><p><span>完全开源，使用静态库编译，不带dll</span></p></li><li><p><span>封装了所有能封装的功能，支持存取更多值类型</span></p></li><li><p><span>更完善的备注（吐槽一下腾讯的开源质量，注释太少甚至没有）</span></p></li></ul></li><li><p><span>修正「格式日志类」不兼容Windows 7 SDK的问题，增加方法「加入来源日志」用于处理「MMKV日志事件类」的日志；</span></p></li><li><p><span>其他优化；</span></p></li><li><p><span>火山模块安装包的压缩率太低，增加EXE版安装包（体积缩减一半以上）</span></p><ul><li><p><span>火山模块安装包：PIV模块[2022-11-18]</span><span>[</span><span>vcip].zip</span></p></li><li><p><span>可执行安装文件：PIV模块[2022-11-18]</span><span>[</span><span>exe].zip</span></p></li><li><p><span>可执行安装文件使用 Inno Setup 6 打包，便携式安装（无注册表写入和卸载程序），所使用的脚本已包含在压缩包中；</span></p></li></ul></li></ol><h3 id='📅-20221110'><span>📅 2022/11/10</span></h3><ol start='' ><li><p><span>重构JSON库</span></p><ul><li><p><span>新增「PivJSON」和「PivOrderJSON」，移除「nmJson」和「nmOrderJson」</span></p></li><li><p><span>调整了大量的方法和参数，旧项目不想改动的话，可以安装 kyozy 封装的 </span><a href='https://bbs.125.la/thread-14698393-1-6.html'><strong><span>nlohmann json 解析库</span></strong></a></p></li><li><p><span>使用 simdutf 加速 Unicode 的编码转换，修订注释，完善功能的封装</span></p></li></ul></li><li><p><span>「simdUTF」的部分方法增加后缀为「</span><span>_</span><span>Ex」的版本，区别是在参数中返回转换后的文本数据，在某些情况下可以减少内存分配；</span></p></li><li><p><span>WinHTTP的网络异步访问类增加一个「用户数据」参数，用于标识访问来源或传递指针；</span></p></li><li><p><span>将WinHTTP嵌入语句的部分常量名改成数值，以兼容旧版本的Windows SDK（起码7.0以上）；</span></p></li><li><p><span>其他优化和修正；</span></p></li></ol><h3 id='📅-20221031'><span>📅 2022/10/31</span></h3><ol start='' ><li><p><span>simdutf的源码更新至2.0.2并重构，新增「simdUTF」，删除「SIMDUTF编码库」；</span></p></li><li><p><span>修正了无论是否使用bit7z都附带7z.dll的问题，原因是我定义了一个模板基础类，模板基础类会被强制解析，连带写在包名的头文件、附属文件之类也生效了；</span></p></li><li><p><span>WinHTTP网页访问返回的Cookies现在包含了重定向过程中的Cookies，「网络请求响应类」增加一个方法「取合并Cookies」；</span></p></li></ol><h3 id='📅-20221030'><span>📅 2022/10/30</span></h3><ol start='' ><li><p><span>增加「简易HOOK类」和「多重HOOK类」，封装了GitHub上非常热门的一个Inline Hook库；</span></p></li><li><p><span>修正「配置文件操作类」的数个 BUG；</span></p></li><li><p><span>修正bit7z的部分问题，由于之前的参数设置错误，重新编译了bit7z的静态库；</span></p></li><li><p><span>更新例程；</span></p></li></ol><h3 id='📅-20221029'><span>📅 2022/10/29</span></h3><ol start='' ><li><p><span>封装了基于 7z.dll 的 C++ 包装类 bit7z，火山目前最强的文件压缩和解压类库，支持 7-zip 程序的所有格式和基本功能；</span></p><ul><li><p><span>存档读写类：简易版的封装，只需要执行一个方法就能压缩和解压文件</span></p></li><li><p><span>存档解压类：功能完备的解压类，除了解压外可以读取压缩包里的各种信息和属性，支持解压进度反馈</span></p></li><li><p><span>存档压缩类：功能完备的压缩类，可以设置所有的压缩选项，支持压缩进度反馈</span></p></li><li><p><span>存档编辑类：在压缩类上增加了压缩文件编辑功能，可以对压缩包的项目进行[改名/更新/删除]等操作</span></p></li><li><p><span>未封装文件流读写的相关方法，过一两个版本解决</span></p></li></ul></li><li><p><span>优化「格式日志类」：</span></p><ul><li><p><span>魔改了 fmtlog 的源码，将内部编码从 UTF-8 改为 UTF-16LE，不再需要进行编码转换，大幅增加效率</span></p></li><li><p><span>输出的日志文件从 UTF-8 编码改为 UTF-16LE，请注意别把日志写到旧版的文件后面</span></p></li><li><p><span>增加「加入文本日志、加入文本日志</span><span>_</span><span>间隔」，用于添加不进行格式化的文本内容</span></p></li></ul></li><li><p><span>优化「线程池类」和「线程池类EX」：</span></p><ul><li><p><span>增加方法「是否需要退出」，用于在销毁线程池时通知线程应该尽快结束</span></p></li><li><p><span>「线程池类EX」增加属性读写方法「动态线程周期」，用于后续更改动态调整线程数量的周期时间</span></p></li><li><p><span>调整源码结构，优化事件流程，修复调试版销毁线程池时容易与窗口事件冲突的问题</span></p></li></ul></li><li><p><span>新增类「数组P」，提供一些增强的数组操作，部分参考了龙纹的「FP函数扩展」模块；</span></p></li><li><p><span>「文本P」增加多字节数组到文本、UTF8字节数组到文本；</span></p></li><li><p><span>其他多处优化和修正；</span></p></li></ol><h3 id='📅-20220916'><span>📅 2022/09/16</span></h3><ol start='' ><li><p><span>增加类「文本P」，「文本处理类」中的全局方法已标记为弃用；</span>
+<span>因此</span><strong><span>必须将火山更新到飞扬#21 09-15或更新的版本</span></strong><span>；</span></p></li><li><p><span>增加类「编码P」，为「编码辅助类」的别名；</span></p></li><li><p><span>fmt 的源码更新到 9.1.0、fmtlog 更新到 2.2.1；</span></p></li><li><p><span>修正「格式日志类」在盘符路径创建日志文件失败的问题；</span></p></li><li><p><span>其他细微修正与优化；</span></p></li></ol><h3 id='📅-20220822'><span>📅 2022/08/22</span></h3><ol start='' ><li><p><span>文本处理类增加全局方法：整数到中文小写数字、整数到中文大写数字、小数到中文小写数字、小数到中文大写数字、小数到中文小写金额、小数到中文大写金额；</span></p></li><li><p><span>编码辅助类增加全局方法「取整数值位数」，可计算整数值的十进制位数，比如10000返回5位；</span></p></li></ol><h3 id='📅-20220818'><span>📅 2022/08/18</span></h3><ol start='' ><li><p><span>「网络同步访问类」、「网络异步访问类」等增加成员变量「是否编码网址」，用于控制是否在访问类的内部对网址进行 URL 编码，默认为假；</span></p></li><li><p><span>调整「文本</span><span>_</span><span>取文本中间」的参数；</span></p></li><li><p><span>其他多处细微优化和修正；</span></p></li></ol><h3 id='📅-20220726'><span>📅 2022/07/26</span></h3><ol start='' ><li><p><span>新增「简易加解密」，纯 C++ 源码实现，支持 AES、DES、RC4、MD5、SHA1、SHA256、SHA512 几个算法。其中 RC4 支持不固定长度的密码，可以获得与易语言一致的加解密结果；</span></p></li></ol><h3 id='📅-20220725'><span>📅 2022/07/25</span></h3><ol start='' ><li><p><span>新增全局类「SIMDUTF编码库」，提供高速的 Unicode 验证和编码转换支持（UTF-8、UTF-16LE、UTF-32LE互转），64 位比火山核心库快几倍，32 位仍有微弱优势，但不支持 Unicode 与 ANSCII 互转；</span>
+<span>本模块中编码转换需求较多的类库将逐步改为使用「SIMDUTF编码库」；</span></p></li><li><p><span>新增「OpenCC简繁转换类」，提供词汇级别的本地中文简繁转换；</span></p></li><li><p><span>新增全局类「BASE编解码类」：字节集到BASE91文本、BASE91文本到字节集、字节集到BASE85文本、BASE85文本到字节集；</span>
+<span>BASE91 相比 BASE64 节省了 10% 到 19% 的长度，BASE64请用字节集类自带的，自测速度最快，何必用第三方的来DeBuff；</span></p></li><li><p><span>「标准随机数类」增加方法：取随机字符、取随机汉字、取随机字节集；</span></p></li><li><p><span>修正 fmt 与「炫彩界面支持库」冲突的问题；</span></p></li><li><p><span>修改部分C++源码的文件名，解决不同模块间的重名冲突；</span></p></li></ol><h3 id='📅-20220715'><span>📅 2022/07/15</span></h3><ol start='' ><li><p><span>WinHTTP 相关类库的「网页访问」增加两个参数，在内部对 POST 的提交数据进行 URL 编码（默认不编码）；</span></p></li><li><p><span>修正「配置文件操作类」的部分方法；</span></p></li><li><p><span>其他修正；</span></p></li></ol><h3 id='📅-20220708'><span>📅 2022/07/08</span></h3><ol start='' ><li><p><span>修正「CNG加解密.密钥派生函数」会崩溃的问题；</span></p></li><li><p><span>「快捷方式解析类」改名为「快捷方式操作」，并修复大量问题；</span></p></li><li><p><span>新增「全局内存管理类」和「本地内存管理类」，开销较大，一般不建议使用，只用来释放系统API或某些DLL申请的全局或本地内存。</span></p></li><li><p><span>新增全局方法「取千位分隔数值文本」；</span></p></li><li><p><span>「标准时间类」新增方法「置文件时间」和「到文件时间」，可以转换FILETIME结构体的时间；</span></p></li><li><p><span>重新梳理测试，修复和优化调整多处代码；</span></p></li></ol><h3 id='📅-20220705'><span>📅 2022/07/05</span></h3><ol start='' ><li><p><span>新增「WinHTTP网络类」，完整封装了WinHTTP，面向精通 HTTP 协议的开发者；</span></p></li><li><p><span>新增「网络同步访问类」，面向普通用户的 WinHTTP 二次封装，用法跟官方 Curl 的「网络访问类」一样；</span></p></li><li><p><span>新增「网络异步访问类」，面向普通用户的 WinHTTP 二次封装，提供异步的并发式网络访问；</span></p></li><li><p><span>新增「网络同步访问类EX」和「网络异步访问类EX」，EX版加了自写的持久 Cookie 管理；</span></p></li><li><p><span>「格式日志类」的源码更新到 fmtlog 2.2.0；</span></p></li><li><p><span>新增「对象容器类」和「对象容器模板类」；</span></p></li><li><p><span>新增类方法「标准时间类.置格林威治时间」；</span></p></li><li><p><span>新增全局方法「写文本数组注册项」和「取文本数组注册项」；</span></p></li><li><p><span>调整「高并发网络访问类」的部分方法和参数；</span></p></li><li><p><span>修正若干错误；</span></p></li></ol><h3 id='📅-20220614'><span>📅 2022/06/14</span></h3><ol start='' ><li><p><span>修正和优化「URL编解码类」；</span></p></li></ol><h3 id='📅-20220613'><span>📅 2022/06/13</span></h3><ol start='' ><li><p><span>「CNG加解密」增加了下列返回字节集型哈希值的方法：</span>
+<span>取数据HMAC</span><span>_</span><span>MD5</span><span>_</span><span>字节集、取数据HMAC</span><span>_</span><span>MD4</span><span>_</span><span>字节集、取数据HMAC</span><span>_</span><span>MD2</span><span>_</span><span>字节集、取数据HMAC</span><span>_</span><span>SHA1</span><span>_</span><span>字节集、取数据HMAC</span><span>_</span><span>SHA256</span><span>_</span><span>字节集、取数据HMAC</span><span>_</span><span>SHA384</span><span>_</span><span>字节集、取数据HMAC</span><span>_</span><span>SHA512</span><span>_</span><span>字节集</span></p></li><li><p><span>修正了「CNG加解密」中 RC4 算法加解密失败的问题；</span></p></li><li><p><span>修正了「CNG加解密」解密所得字节集类的尾部，可能有冗余 0 数据的问题；</span></p></li></ol><h3 id='📅-20220608'><span>📅 2022/06/08</span></h3><ol start='' ><li><p><span>修正「格式日志类.打开每日日志」的日期错误，增加「日期格式」参数，可以自定义每日日志文件名中的日期格式；</span></p></li><li><p><span>格式日志类运行时不再独占日志文件；</span></p></li><li><p><span>增加全局方法「小数向上取整」；</span></p></li><li><p><span>修正「线程池类」和「线程池类EX」中「是否空闲」的封装错误；</span></p></li></ol><h3 id='📅-20220605'><span>📅 2022/06/05</span></h3><ol start='' ><li><p><span>增加「标准随机数类」对象类，及「随机数类</span><span>_</span><span>xxx」等一系列不同随机数算法的对象类，为</span><span>&lt;</span><span>std::random</span><span>&gt;</span><span>的封装，可以产生高质量的伪随机数；</span></p></li><li><p><span>增加「配置文件操作类」，提供简易的 ini 配置文件读写操作，支持多字节、UTF8和UTF-16LE编码；</span></p></li><li><p><span>增加全局方法「取标准格式文本U8」，能正确处理</span><span>&lt;</span><span>std::format</span><span>&gt;</span><span>的汉字填充对齐；</span></p></li><li><p><span>增加全局方法「创建数值型数组类」和「创建文本型数组类」；</span></p></li><li><p><span>「连续加入××」改名「数组连续加入XX」；</span></p></li></ol><h3 id='📅-20220530'><span>📅 2022/05/30</span></h3><p><span>相对于之前单独发布的版本，有以下重要更新：</span></p><ul><li><p><strong><span>BASS音频库</span></strong></p><ol start='' ><li><p><span>将 dll 文件更新到最新版；</span></p></li><li><p><span>调整「BASS音频类.录制回调」事件的返回值，现在是返回0为继续录制，请注意修改源码；</span></p></li></ol></li><li><p><strong><span>格式日志类</span></strong><span>（fmtlog）</span></p><ol start='' ><li><p><span>优化代码，减少非必要的编码转换，降低性能损失；</span></p></li><li><p><span>日志文件名现在支持 Unicode 了；</span></p></li></ol></li></ul><ul><li><p><strong><span>CNG加解密</span></strong></p><ol start='' ><li><p><span>调整类名，避免跟仰望火山模块冲突；</span></p></li><li><p><span>将加解密失败后返回原数据，改为返回空字节集；</span></p></li><li><p><span>屏蔽「CNG加解密.解密</span><span>_</span><span>RSA</span><span>_</span><span>公钥」，因为 CNG 的 RSA 公钥不能用来解密；</span></p></li><li><p><span>将「CNG_填充方式.对称</span><span>_</span><span>块填充」改名为「对称</span><span>_</span><span>PKCS7」；</span></p></li></ol></li></ul><ul><li><p><strong><span>高并发网络访问类</span></strong></p><ol start='' ><li><p><span>优化请求信息的提交，提交 JSON 数据时自动加入相关请求头；</span></p></li><li><p><span>优化代码结构，减少使用「读指针处对象」；</span></p></li><li><p><span>所有事件回调中的「对象指针」改为「传输对象」；</span></p></li></ol></li><li><p><strong><span>时钟队列类</span></strong></p><ol start='' ><li><p><span>弃用自增的时钟序号，改为添加时钟时由用户自定义「时钟标记」；</span></p></li></ol></li><li><p><strong><span>其他</span></strong><span>（大量未发布过的新内容，这里就不一一列举了）</span></p></li></ul><p>&nbsp;</p><h2 id='💌-开源项目'><span>💌 开源项目</span></h2><ul><li><p><a href='https://github.com/nlohmann/json'><span>nlohmann </span><strong><span>JSON</span></strong></a><span> </span><code>3.11.3</code><span> </span><code>MIT license</code><span>  现代 C++ 的 JSON 库</span></p></li><li><p><strong><a href='https://github.com/MengRao/fmtlog'><span>fmtlog</span></a></strong><span>  </span><code>2.2.1</code><span>  </span><code>MIT license</code><span> 纳秒级精度的高性能异步日志记录库</span></p></li><li><p><strong><a href='https://github.com/fmtlib/fmt'><span>{fmt}</span></a></strong><span>  </span><code>10.1.1</code><span>  </span><code>MIT license</code><span> 格式化文本库，等同 C++20 std::format 的实现 </span></p></li><li><p><strong><a href='https://github.com/mity/md4c'><span>md4c</span></a></strong><span> </span><code>0.4.8</code><span>  </span><code>MIT license</code><span> CommonMark 0.30 规范 + GFM 的 Markdown 解析库</span></p></li><li><p><strong><a href='https://github.com/brofield/simpleini'><span>simpleini</span></a></strong><span> </span><code>4.20</code><span> </span><code>MIT license</code><span> 简易的 INI 配置文件读写库</span></p></li><li><p><strong><a href='https://github.com/simdutf/simdutf'><span>simdutf</span></a></strong><span> </span><code>4.0.9</code><span> </span><code>Apache-2.0, MIT license</code><span>  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库</span></p></li><li><p><strong><a href='https://github.com/BYVoid/OpenCC'><span>OpenCC</span></a></strong><span> </span><code>1.1.6</code><span> </span><code>Apache-2.0 license</code><span> 中文简繁转换开源项目，支持词汇级别的转换、异体字转换和地区习惯用词转换</span></p></li><li><p><strong><a href='https://www.7-zip.org/'><span>7-zip</span></a></strong><span> </span><code>23.01</code><span> </span><code>GNU LGPL license</code><span> 免费的开源压缩软件（采用GNU LGPL协议，只使用它的 dll 文件不会传染）</span></p></li><li><p><strong><a href='https://github.com/rikyoz/bit7z'><span>bit7z</span></a></strong><span> </span><code>4.0.5</code><span> </span><code>Mozilla Public License v2.0</code><span> 7-zip 的封装类</span></p></li><li><p><strong><a href='https://github.com/TsudaKageyu/minhook'><span>MinHook</span></a></strong><span> </span><code>1.3.3</code><span> </span><code>BSD-2-Clause License</code><span> 极简的 x86/x64 API Hook 库</span></p></li><li><p><strong><a href='https://github.com/Tencent/MMKV'><span>MMKV</span></a></strong><span> </span><code>1.3.2</code><span> </span><code>BSD-3-Clause License</code><span> 腾讯的高性能键值表</span></p></li><li><p><strong><a href='https://github.com/Cyan4973/xxHash'><span>xxHash</span></a></strong><span> </span><code>8.0.2</code><span> </span><code>BSD-2-Clause License</code><span> 速度接近 RAM 限制的高速散列算法</span></p></li><li><p><strong><a href='https://github.com/ocornut/imgui'><span>Dear ImGui</span></a></strong><span> </span><code>1.90.1</code><span> </span><code>MIT license</code><span> 轻量级的即时渲染界面开发框架</span></p></li><li><p><strong><a href='https://www.glfw.org'><span>GLFW</span></a></strong><span> </span><code>3.3.8</code><span> </span><code>zlib/libpng license</code><span> 跨平台的 OpenGL/Vulkan 桌面应用框架</span></p></li><li><p><strong><a href='https://github.com/Dav1dde/glad'><span>glad</span></a></strong><span> </span><code>2023-04-04</code><span> </span><code>MIT License</code><span> 多语言的Vulkan/GL/GLES/EGL/GLX/WGL加载程序生成器</span></p></li><li><p><strong><a href='https://github.com/libsdl-org/SDL'><span>SDL</span></a></strong><span> </span><code>2.26.5</code><span> </span><code>Zlib license</code><span> Simple DirectMedia Layer 是一个跨平台的多媒体开发库</span></p></li><li><p><strong><a href='https://vulkan.lunarg.com/sdk/home'><span>Vulkan SDK</span></a></strong><span> </span><code>1.3.246.1</code><span> </span><code>Apache-2.0</code><span> 一个跨平台的2D和3D绘图应用程序接口</span></p></li><li><p><strong><a href='https://github.com/yyzybb537/libgo'><span>libgo</span></a></strong><span> </span><code>3.0</code><span> </span><code>MIT license</code><span> Golang 风格的 C++11 协程库</span></p></li></ul><p><span>※本模块封装的开源项目均采用较宽松的开源协议，如 MIT、BSD、MPLv2 ……</span></p><p>&nbsp;</p><h2 id='🧰-闭源项目'><span>🧰 闭源项目</span></h2><p><span>本模块封装了以下闭源项目：</span></p><ul><li><p><strong><a href='http://www.un4seen.com'><span>BASS</span></a></strong><span> </span><code>2.4</code><span>  音频播放支持库</span></p><p><span>可以在非盈利软件中免费使用，商用需要购买许可证</span></p></li><li><p><strong><a href='https://vmpsoft.com'><span>VMProtect</span></a></strong><span> </span><code>3.7.2</code><span>  软件加密壳</span></p><p><span>需要购买正版才能正常使用</span></p></li></ul><p>&nbsp;</p></div></div>
+
+<script>(function(){function e(e,n,i){document.addEventListener(e,function(e){if(!e.defaultPrevented)for(var t=e.target;t&&t!=this;t=t.parentNode)if(t.matches(n)){!1===i.call(t,e)&&(e.preventDefault(),e.stopPropagation());break}},!1)}var t=document.body.parentElement,i=[],r=null,o=document.body.classList.contains("typora-export-collapse-outline");function a(){return t.scrollTop}e("click",".outline-expander",function(e){var t=this.closest(".outline-item-wrapper").classList;return t.contains("outline-item-open")?t.remove("outline-item-open"):t.add("outline-item-open"),u(),!1}),e("click",".outline-item",function(e){var t=this.querySelector(".outline-label");location.hash="#"+t.getAttribute("href"),o&&((t=this.closest(".outline-item-wrapper").classList).contains("outline-item-open")||t.add("outline-item-open"),d(),t.add("outline-item-active"))});function s(){var e=a();r=null;for(var t=0;t<i.length&&i[t][1]-e<60;t++)r=i[t]}function n(){c=setTimeout(function(){var n;i=[],n=a(),document.querySelector("#write").querySelectorAll("h1, h2, h3, h4, h5, h6").forEach(e=>{var t=e.getAttribute("id");i.push([t,n+e.getBoundingClientRect().y])}),s(),u()},300)}var l,c,d=function(){document.querySelectorAll(".outline-item-active").forEach(e=>e.classList.remove("outline-item-active")),document.querySelectorAll(".outline-item-single.outline-item-open").forEach(e=>e.classList.remove("outline-item-open"))},u=function(){if(r&&(d(),t=document.querySelector('.outline-label[href="#'+(CSS.escape?CSS.escape(r[0]):r[0])+'"]')))if(o){var e=t.closest(".outline-item-open>ul>.outline-item-wrapper");if(e)e.classList.add("outline-item-active");else{for(var t,n=(t=t.closest(".outline-item-wrapper")).parentElement.closest(".outline-item-wrapper");n;)n=(t=n).parentElement.closest(".outline-item-wrapper");t.classList.add("outline-item-active")}}else t.closest(".outline-item-wrapper").classList.add("outline-item-active")};window.addEventListener("scroll",function(e){l&&clearTimeout(l),l=setTimeout(function(){s(),u()},300)});window.addEventListener("resize",function(e){c&&clearTimeout(c),n()}),n()})();</script></body>
+</html>

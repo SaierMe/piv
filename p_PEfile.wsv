@@ -2,7 +2,7 @@
 
 包 火山.PIV基础类 <注释 = "PE文件解析与操作" 注释 = "https://github.com/SaierMe/piv" @视窗.外部头文件 = "src\\PEfile.hpp">
 
-类 PE文件操作类 <公开 注释 = "解析可执行文件的各种数据" @文档 = "category = \"PE文件操作\"">
+类 PE文件操作类 <公开 注释 = "解析可执行文件的各种数据" 折叠 @文档 = "category = \"PE文件操作\"">
 {
 
     # @ @m<DECLARE_REF_OBJECT_CLASS_WITH_DATA> (PivPeFile)
@@ -23,7 +23,7 @@
         @ @sn<this>.data().OpenPeData(reinterpret_cast<void*>(@<数据指针>), static_cast<DWORD>(@<数据大小>), @<是否已对齐>, @<是否已加载>)
     }
 
-    方法 打开模块 <公开 类型 = 逻辑型 注释 = "打开并解析系统中已加载的模块" 返回值注释 = "返回是否解析成功" @禁止流程检查 = 真>
+    方法 打开模块 <公开 类型 = 逻辑型 注释 = "打开并解析系统中已加载的模块" 返回值注释 = "返回是否解析成功" 折叠 @禁止流程检查 = 真>
     参数 进程ID <类型 = 整数 注释 = "0为当前进程" @默认值 = 0>
     参数 模块名称 <类型 = 文本型 注释 = "请提供模块的文件名称(区分大小写);" 注释 = "如省略扩展名则默认为\".dll\". 结尾为\".\"则表示模块名称没有扩展名;"
             注释 = "该名称可以不包含路径,如果指定路径,必须用反斜杠\"\\\\\";" 注释 = "留空为打开进程的exe文件." @默认值 = 空对象>
@@ -129,87 +129,80 @@
 
     方法 取DOS头 <公开 类型 = IMAGE_DOS_HEADER 注释 = "获取可执行文件的DOS头数据." 折叠 @禁止流程检查 = 真>
     {
-        变量 DOS头部 <类型 = IMAGE_DOS_HEADER>
-        @ PIMAGE_DOS_HEADER pDos = data ().GetDosHeader ();
-        @ if (pDos)
-        @     @<DOS头部>.SetStruct ((@dt<IMAGE_DOS_HEADER>::S*)pDos);
-        返回 (DOS头部)
+        @ PIMAGE_DOS_HEADER dos = data().GetDosHeader();
+        @ if (dos)
+        @     return *dos;
+        @ return IMAGE_DOS_HEADER{0};
     }
 
-    方法 取NT头32 <公开 类型 = IMAGE_NT_HEADERS32 注释 = "获取32位可执行文件的NT头数据." 折叠>
+    方法 取NT头32 <公开 类型 = IMAGE_NT_HEADERS32 注释 = "获取32位可执行文件的NT头数据." 折叠 @禁止流程检查 = 真>
     {
-        变量 NT头部32 <类型 = IMAGE_NT_HEADERS32 注释 = "成功在此返回NT头信息">
         @ if (data ().Is64Pe () == FALSE)
         @ {
-        @     PIMAGE_NT_HEADERS32 pNt32 = data ().GetNtHeader ();
+        @     PIMAGE_NT_HEADERS32 pNt32 = data().GetNtHeader();
         @     if (pNt32)
-        @         @<NT头部32>.SetStruct ((@dt<IMAGE_NT_HEADERS32>::S*)pNt32);
+        @         return *pNt32;
         @ }
-        返回 (NT头部32)
+        @ return IMAGE_NT_HEADERS32{0};
     }
 
-    方法 取NT头64 <公开 类型 = IMAGE_NT_HEADERS64 注释 = "获取64位可执行文件的NT头数据." 折叠>
+    方法 取NT头64 <公开 类型 = IMAGE_NT_HEADERS64 注释 = "获取64位可执行文件的NT头数据." 折叠 @禁止流程检查 = 真>
     {
-        变量 NT头部64 <类型 = IMAGE_NT_HEADERS64 注释 = "成功在此返回NT头信息">
         @ if (data ().Is64Pe ())
         @ {
-        @     PIMAGE_NT_HEADERS64 pNt64 = (PIMAGE_NT_HEADERS64)data ().GetNtHeader ();
+        @     PIMAGE_NT_HEADERS64 pNt64 = (PIMAGE_NT_HEADERS64)data().GetNtHeader();
         @     if (pNt64)
-        @         @<NT头部64>.SetStruct ((@dt<IMAGE_NT_HEADERS64>::S*)pNt64);
+        @         return *pNt64;
         @ }
-        返回 (NT头部64)
+        @ return IMAGE_NT_HEADERS64{0};
     }
 
     方法 取节区表 <公开 类型 = 整数 注释 = "获取可执行文件的节区表." 返回值注释 = "成功返回节区数量,失败返回0." 折叠 @禁止流程检查 = 真>
     参数 节区表数组 <类型 = 节区表数组类 注释 = "成功在此返回节区表数组">
     {
-        @ @<节区表数组>.ResetToNullObject ();
+        @ @<节区表数组>.clear();
         @ DWORD dwSectionCount;
-        @ PIMAGE_SECTION_HEADER pSection = data ().GetSectionHeader (&dwSectionCount);
+        @ PIMAGE_SECTION_HEADER pSection = data().GetSectionHeader(&dwSectionCount);
         @ if (dwSectionCount > 0)
         @ {
         @     for (DWORD i = 0; i < dwSectionCount; ++i) // 解析节区表
         @     {
-        @         @dt<IMAGE_SECTION_HEADER> Section;
-        @         Section.SetStruct ((@dt<IMAGE_SECTION_HEADER>::S*)&pSection[i]);
-        @         @<节区表数组>.Add (Section, NULL);
+        @         @<节区表数组>.push_back(pSection[i]);
         @     }
-        @     return (INT)@<节区表数组>.GetCount ();
+        @     return (INT)@<节区表数组>.size();
         @ }
         @ return 0;
     }
 
-    方法 取导出表头 <公开 类型 = IMAGE_EXPORT_DIRECTORY 注释 = "获取DLL文件的函数导出表头数据,EXE文件没有导出表." 返回值注释 = "返回是否成功." 折叠>
+    方法 取导出表头 <公开 类型 = IMAGE_EXPORT_DIRECTORY 注释 = "获取DLL文件的函数导出表头数据,EXE文件没有导出表." 返回值注释 = "返回是否成功." 折叠
+            @禁止流程检查 = 真>
     {
-        变量 导出表头 <类型 = IMAGE_EXPORT_DIRECTORY>
-        @ PIMAGE_EXPORT_DIRECTORY pExport = data ().GetExportHeader();
+        @ PIMAGE_EXPORT_DIRECTORY pExport = data().GetExportHeader();
         @ if (pExport)
-        @     @<导出表头>.SetStruct ((@dt<IMAGE_EXPORT_DIRECTORY>::S*)pExport);
-        返回 (导出表头)
+        @     return *pExport;
+        @ return IMAGE_EXPORT_DIRECTORY{0};
     }
 
     方法 取导入表描述符 <公开 类型 = 整数 注释 = "获取可执行文件的导入表头数据." 返回值注释 = "成功返回导入表描述符数量,失败返回0." 折叠 @禁止流程检查 = 真>
     参数 导入表描述符数组 <类型 = 导入表描述符数组类 注释 = "成功在此返回导入表描述符数组">
     {
-        @ @<导入表描述符数组>.ResetToNullObject ();
-        @ PIMAGE_IMPORT_DESCRIPTOR pImport = data ().GetImportDescriptor ();
+        @ @<导入表描述符数组>.clear();
+        @ PIMAGE_IMPORT_DESCRIPTOR pImport = data().GetImportDescriptor();
         @ if (pImport)
         @ {
         @     while (pImport->Name)
         @     {
-        @         @dt<IMAGE_IMPORT_DESCRIPTOR> ImportDes;
-        @         ImportDes.SetStruct ((@dt<IMAGE_IMPORT_DESCRIPTOR>::S*)pImport);
-        @         @<导入表描述符数组>.Add (ImportDes, NULL);
+        @         @<导入表描述符数组>.push_back(*pImport);
         @         pImport++;
         @     }
-        @     return (INT)@<导入表描述符数组>.GetCount ();
+        @     return (INT)@<导入表描述符数组>.size();
         @ }
         @ return 0;
     }
 
     # ---
 
-    方法 取导入表 <公开 类型 = 整数 注释 = "获取可执行文件的模块导入表信息." 返回值注释 = "成功返回导入的模块数量,失败返回0." @禁止流程检查 = 真>
+    方法 取导入表 <公开 类型 = 整数 注释 = "获取可执行文件的模块导入表信息." 返回值注释 = "成功返回导入的模块数量,失败返回0." 折叠 @禁止流程检查 = 真>
     参数 导入表 <类型 = 导入表数组类 注释 = "成功在此返回导入表信息">
     {
         @ @<导入表>.data().clear();
@@ -231,7 +224,7 @@
         @ return (INT)@<导入表>.data().size();
     }
 
-    方法 取导出表 <公开 类型 = 整数 注释 = "获取DLL文件的函数导出表信息,EXE文件没有导出表." 返回值注释 = "成功返回导出的函数数量,失败返回0." @禁止流程检查 = 真>
+    方法 取导出表 <公开 类型 = 整数 注释 = "获取DLL文件的函数导出表信息,EXE文件没有导出表." 返回值注释 = "成功返回导出的函数数量,失败返回0." 折叠 @禁止流程检查 = 真>
     参数 导出表 <类型 = 导出表类 注释 = "成功在此返回导出表信息">
     {
         @ @<导出表>.ResetToNullObject ();
@@ -337,30 +330,32 @@
 
 # ------
 
-类 IMAGE_DOS_HEADER <公开 注释 = "PE文件DOS头,64字节" 折叠 @文档 = "category = \"PE文件操作.辅助类\"" @视窗.结构类 = 0>
+类 IMAGE_DOS_HEADER <公开 基础类 = PIV结构模板 注释 = "PE文件DOS头,64字节" 折叠 @文档 = "category = \"PE文件操作.辅助类\""
+        @别名 = "IMAGE_DOS_HEADER" @模板实现类 = "IMAGE_DOS_HEADER">
 {
-    变量 e_magic <公开 类型 = 短整数 注释 = "DOS可执行文件头标记,必定为\"MZ\"(0x5A4D 4Dh 5Ah/23117)IMAGE_DOS_SIGNATURE">
-    变量 e_cblp <公开 类型 = 短整数 注释 = "文件最后页的字节数">
-    变量 e_cp <公开 类型 = 短整数 注释 = "文件中的全部和部分页数">
-    变量 e_crlc <公开 类型 = 短整数 注释 = "重定位表中的指针数">
-    变量 e_cparhdr <公开 类型 = 短整数 注释 = "头部尺寸,以段落为单位">
-    变量 e_minalloc <公开 类型 = 短整数 注释 = "所需的最小附加段">
-    变量 e_maxalloc <公开 类型 = 短整数 注释 = "所需的最大附加段">
-    变量 e_ss <公开 类型 = 短整数 注释 = "初始的堆栈段(SS)相对偏移量值">
-    变量 e_sp <公开 类型 = 短整数 注释 = "初始的堆栈指针(SP)值">
-    变量 e_csum <公开 类型 = 短整数 注释 = "校验和">
-    变量 e_ip <公开 类型 = 短整数 注释 = "初始的指令指针(IP)值">
-    变量 e_cs <公开 类型 = 短整数 注释 = "初始的代码段(CS)相对偏移量值">
-    变量 e_lfarlc <公开 类型 = 短整数 注释 = "重定位表在文件中的偏移地址">
-    变量 e_ovno <公开 类型 = 短整数 注释 = "覆盖号">
-    变量 e_res <公开 类型 = "短整数 [4]" 注释 = "保留字(一般是为确保对齐而预留)">
-    变量 e_oemid <公开 类型 = 短整数 注释 = "OEM标识符(相对于e_oeminfo)">
-    变量 e_oeminfo <公开 类型 = 短整数 注释 = "OEM信息,即e_oemid的细节">
-    变量 e_res2 <公开 类型 = "短整数 [10]" 注释 = "保留字(一般是为确保对齐而预留)">
-    变量 e_lfanew <公开 类型 = 整数 注释 = "NT头(IMAGE_NT_HEADERS)在文件中的偏移地址">
+    变量 e_magic <公开 类型 = 短整数 注释 = "DOS可执行文件头标记,必定为\"MZ\"(0x5A4D 4Dh 5Ah/23117)IMAGE_DOS_SIGNATURE"
+            @输出名 = "e_magic">
+    变量 e_cblp <公开 类型 = 短整数 注释 = "文件最后页的字节数" @输出名 = "e_cblp">
+    变量 e_cp <公开 类型 = 短整数 注释 = "文件中的全部和部分页数" @输出名 = "e_cp">
+    变量 e_crlc <公开 类型 = 短整数 注释 = "重定位表中的指针数" @输出名 = "e_crlc">
+    变量 e_cparhdr <公开 类型 = 短整数 注释 = "头部尺寸,以段落为单位" @输出名 = "e_cparhdr">
+    变量 e_minalloc <公开 类型 = 短整数 注释 = "所需的最小附加段" @输出名 = "e_minalloc">
+    变量 e_maxalloc <公开 类型 = 短整数 注释 = "所需的最大附加段" @输出名 = "e_maxalloc">
+    变量 e_ss <公开 类型 = 短整数 注释 = "初始的堆栈段(SS)相对偏移量值" @输出名 = "e_ss">
+    变量 e_sp <公开 类型 = 短整数 注释 = "初始的堆栈指针(SP)值" @输出名 = "e_sp">
+    变量 e_csum <公开 类型 = 短整数 注释 = "校验和" @输出名 = "e_csum">
+    变量 e_ip <公开 类型 = 短整数 注释 = "初始的指令指针(IP)值" @输出名 = "e_ip">
+    变量 e_cs <公开 类型 = 短整数 注释 = "初始的代码段(CS)相对偏移量值" @输出名 = "e_cs">
+    变量 e_lfarlc <公开 类型 = 短整数 注释 = "重定位表在文件中的偏移地址" @输出名 = "e_lfarlc">
+    变量 e_ovno <公开 类型 = 短整数 注释 = "覆盖号" @输出名 = "e_ovno">
+    变量 e_res <公开 类型 = "短整数 [4]" 注释 = "保留字(一般是为确保对齐而预留)" @输出名 = "e_res">
+    变量 e_oemid <公开 类型 = 短整数 注释 = "OEM标识符(相对于e_oeminfo)" @输出名 = "e_oemid">
+    变量 e_oeminfo <公开 类型 = 短整数 注释 = "OEM信息,即e_oemid的细节" @输出名 = "e_oeminfo">
+    变量 e_res2 <公开 类型 = "短整数 [10]" 注释 = "保留字(一般是为确保对齐而预留)" @输出名 = "e_res2">
+    变量 e_lfanew <公开 类型 = 整数 注释 = "NT头(IMAGE_NT_HEADERS)在文件中的偏移地址" @输出名 = "e_lfanew">
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
-            @视窗.后缀文本 = "override">
+    方法 "//取展示内容" <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖
+            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
     {
@@ -398,66 +393,21 @@
     }
 }
 
-类 IMAGE_NT_HEADERS32 <公开 注释 = "32位PE文件NT头"
-        注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_nt_headers32" 折叠
-        @文档 = "category = \"PE文件操作.辅助类\"" @视窗.结构类 = 0>
-{
-    变量 Signature <公开 类型 = 整数 注释 = "  PE文件的标识,固定为\"PE\\0\\0\"{50,45,00,00},整数为 0x4550/17744"
-            注释 = "  IMAGE_DOS_SIGNATURE    0x5A4D      MZ" 注释 = "  IMAGE_OS2_SIGNATURE    0x454E      NE"
-            注释 = "  IMAGE_OS2_SIGNATURE_LE 0x454C      LE" 注释 = "  IMAGE_VXD_SIGNATURE    0x454C      LE"
-            注释 = "  IMAGE_NT_SIGNATURE     0x00004550  PE00">
-    变量 FileHeader <公开 类型 = IMAGE_FILE_HEADER 注释 = "映像文件头结构体(20个字节)">
-    变量 OptionalHeader <公开 类型 = IMAGE_OPTIONAL_HEADER32 注释 = "映像可选头结构体32位">
-
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
-            @视窗.后缀文本 = "override">
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
-    {
-        展示内容 = "<IMAGE_NT_HEADERS32> 总共 3 个成员:\r\n"
-        加入文本 (展示内容, "1. Signature: " + 取调试文本2 (最大展示数据尺寸, Signature) + "\r\n")
-        加入文本 (展示内容, "2. FileHeader: " + 取调试文本2 (最大展示数据尺寸, FileHeader) + "\r\n")
-        加入文本 (展示内容, "3. OptionalHeader: " + 取调试文本2 (最大展示数据尺寸, OptionalHeader) + "\r\n")
-    }
-}
-
-类 IMAGE_NT_HEADERS64 <公开 注释 = "64位PE文件NT头"
-        注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_nt_headers64" 折叠
-        @文档 = "category = \"PE文件操作.辅助类\"" @视窗.结构类 = 0>
-{
-    变量 Signature <公开 类型 = 整数 注释 = "  PE文件的标识,固定为\"PE\\0\\0\"{50,45,00,00},整数为 0x4550/17744"
-            注释 = "  IMAGE_DOS_SIGNATURE    0x5A4D      MZ" 注释 = "  IMAGE_OS2_SIGNATURE    0x454E      NE"
-            注释 = "  IMAGE_OS2_SIGNATURE_LE 0x454C      LE" 注释 = "  IMAGE_VXD_SIGNATURE    0x454C      LE"
-            注释 = "  IMAGE_NT_SIGNATURE     0x00004550  PE00">
-    变量 FileHeader <公开 类型 = IMAGE_FILE_HEADER 注释 = "映像文件头部结构体(20个字节)">
-    变量 OptionalHeader <公开 类型 = IMAGE_OPTIONAL_HEADER64 注释 = "映像可选头部结构体64位">
-
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
-            @视窗.后缀文本 = "override">
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
-    {
-        展示内容 = "<IMAGE_NT_HEADERS64> 总共 3 个成员:\r\n"
-        加入文本 (展示内容, "1. Signature: " + 取调试文本2 (最大展示数据尺寸, Signature) + "\r\n")
-        加入文本 (展示内容, "2. FileHeader: " + 取调试文本2 (最大展示数据尺寸, FileHeader) + "\r\n")
-        加入文本 (展示内容, "3. OptionalHeader: " + 取调试文本2 (最大展示数据尺寸, OptionalHeader) + "\r\n")
-    }
-}
-
-类 IMAGE_FILE_HEADER <公开 注释 = "PE文件逻辑分布信息,20字节."
+类 IMAGE_FILE_HEADER <公开 基础类 = PIV结构模板 注释 = "PE文件逻辑分布信息,20字节."
         注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_file_header" 折叠
-        @文档 = "category = \"PE文件操作.辅助类\"" @视窗.结构类 = 0>
+        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_FILE_HEADER" @模板实现类 = "IMAGE_FILE_HEADER">
 {
     变量 Machine <公开 类型 = 短整数 注释 = "  可执行文件的目标CPU类型" 注释 = "  IMAGE_FILE_MACHINE_I386   0x014c  x86"
             注释 = "  IMAGE_FILE_MACHINE_IA64   0x0200  Intel Itanium"
-            注释 = "  IMAGE_FILE_MACHINE_AMD64  0x8664  x64">
-    变量 NumberOfSections <公开 类型 = 短整数 注释 = "节区的数目,如果我们要在文件中增加或删除一个节区,就需要修改这个值.">
-    变量 TimeDateStamp <公开 类型 = 整数 注释 = "文件创建的时间戳">
+            注释 = "  IMAGE_FILE_MACHINE_AMD64  0x8664  x64" @输出名 = "Machine">
+    变量 NumberOfSections <公开 类型 = 短整数 注释 = "节区的数目,如果我们要在文件中增加或删除一个节区,就需要修改这个值." @输出名 = "NumberOfSections">
+    变量 TimeDateStamp <公开 类型 = 整数 注释 = "文件创建的时间戳" @输出名 = "TimeDateStamp">
     变量 PointerToSymbolTable <公开 类型 = 整数 注释 = "COFF符号表格的文件偏移位置"
-            注释 = "仅用于带有COFF类型调试信息的COFF类型的object files和PE files.">
+            注释 = "仅用于带有COFF类型调试信息的COFF类型的object files和PE files." @输出名 = "PointerToSymbolTable">
     变量 NumberOfSymbols <公开 类型 = 整数 注释 = "如果有COFF符号表格,它代表其中的符号数目"
-            注释 = "COFF符号是一个大小固定的结构,如果想找到COFF符号表的结束位置,则需要这个变量">
-    变量 SizeOfOptionalHeader <公开 类型 = 短整数 注释 = "IMAGE_OPTIONAL_HEADER结构体的大小,32位和64位有差别">
+            注释 = "COFF符号是一个大小固定的结构,如果想找到COFF符号表的结束位置,则需要这个变量" @输出名 = "NumberOfSymbols">
+    变量 SizeOfOptionalHeader <公开 类型 = 短整数 注释 = "IMAGE_OPTIONAL_HEADER结构体的大小,32位和64位有差别"
+            @输出名 = "SizeOfOptionalHeader">
     变量 Characteristics <公开 类型 = 短整数 注释 = "  文件属性标志,比如文件是exe还是dll.标志的值定义在 WINNT.H 中,是为组合值."
             注释 = "  IMAGE_FILE_RELOCS_STRIPPED     0x0001  文件中不存在重定位信息"
             注释 = "  IMAGE_FILE_EXECUTABLE_IMAGE    0x0002  文件可执行"
@@ -465,10 +415,10 @@
             注释 = "  IMAGE_FILE_LOCAL_SYMS_STRIPPED 0x0008  符号信息已从文件中移除"
             注释 = "  IMAGE_FILE_DLL                 0x2000  DLL文件"
             注释 = "  IMAGE_FILE_SYSTEM              0x1000  系统文件"
-            注释 = "  IMAGE_FILE_32BIT_MACHINE       0x0100  目标平台为32位平台">
+            注释 = "  IMAGE_FILE_32BIT_MACHINE       0x0100  目标平台为32位平台" @输出名 = "Characteristics">
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
-            @视窗.后缀文本 = "override">
+    方法 "// 取展示内容" <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖
+            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
     {
@@ -483,37 +433,40 @@
     }
 }
 
-类 IMAGE_OPTIONAL_HEADER32 <公开 注释 = "32位PE文件可选头"
+类 IMAGE_OPTIONAL_HEADER32 <公开 基础类 = PIV结构模板 注释 = "32位PE文件可选头"
         注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_optional_header32" 折叠
-        @文档 = "category = \"PE文件操作.辅助类\"" @视窗.结构类 = 0>
+        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_OPTIONAL_HEADER32" @模板实现类 = "IMAGE_OPTIONAL_HEADER32">
 {
     变量 Magic <公开 类型 = 短整数 注释 = "  映像文件类型" 注释 = "  IMAGE_NT_OPTIONAL_HDR32_MAGIC  0x10b  32位程序"
             注释 = "  IMAGE_NT_OPTIONAL_HDR64_MAGIC  0x20b  64位程序"
-            注释 = "  IMAGE_ROM_OPTIONAL_HDR_MAGIC   0x107  ROM文件">
-    变量 MajorLinkerVersion <公开 类型 = 字节 注释 = "链接器的主版本号">
-    变量 MinorLinkerVersion <公开 类型 = 字节 注释 = "链接器的副版本号">
-    变量 SizeOfCode <公开 类型 = 整数 注释 = "可执行代码的大小,这些值(包括下面2个也是不可靠的,你可以通过查看可选头后面的各个\"节\"来获得更准确的大小.">
-    变量 SizeOfInitializedData <公开 类型 = 整数 注释 = "已初始化数据的大小">
-    变量 SizeOfUninitializedData <公开 类型 = 整数 注释 = "未初始化数据的大小,所谓的\"bss段\"">
-    变量 AddressOfEntryPoint <公开 类型 = 整数 注释 = "代码入口点的偏移量,RVA">
-    变量 BaseOfCode <公开 类型 = 整数 注释 = "代码基址,可执行代码的偏移量,RVA">
-    变量 BaseOfData <公开 类型 = 整数 注释 = "数据基址,已初始化数据的偏移量,RVA">
-    变量 ImageBase <公开 类型 = 整数 注释 = "PE文件的优先装载地址,提供整个二进制文件包括所有头的优先(线性)载入地址,RVA">
-    变量 SectionAlignment <公开 类型 = 整数 注释 = "内存中节对齐的粒度">
-    变量 FileAlignment <公开 类型 = 整数 注释 = "文件中节对齐的粒度">
-    变量 MajorOperatingSystemVersion <公开 类型 = 短整数 注释 = "主操作系统最低主版本号">
-    变量 MinorOperatingSystemVersion <公开 类型 = 短整数 注释 = "主操作系统最低副版本号">
-    变量 MajorImageVersion <公开 类型 = 短整数 注释 = "主映像文件版本">
-    变量 MinorImageVersion <公开 类型 = 短整数 注释 = "副映像文件版本">
-    变量 MajorSubsystemVersion <公开 类型 = 短整数 注释 = "子系统主版本号">
-    变量 MinorSubsystemVersion <公开 类型 = 短整数 注释 = "子系统副版本号">
-    变量 Win32VersionValue <公开 类型 = 整数 注释 = "Win32版本值,可能为0">
-    变量 SizeOfImage <公开 类型 = 整数 注释 = "内存中整个PE映像体的尺寸.它是所有头和节经过节对齐处理后的大小.">
-    变量 SizeOfHeaders <公开 类型 = 整数 注释 = "所有头+节表的大小,也就等于文件尺寸减去文件中所有节的尺寸.可以以此值作为PE文件第一节的文件偏移量.">
-    变量 CheckSum <公开 类型 = 整数 注释 = "校验和">
+            注释 = "  IMAGE_ROM_OPTIONAL_HDR_MAGIC   0x107  ROM文件" @输出名 = "Magic">
+    变量 MajorLinkerVersion <公开 类型 = 字节 注释 = "链接器的主版本号" @输出名 = "MajorLinkerVersion">
+    变量 MinorLinkerVersion <公开 类型 = 字节 注释 = "链接器的副版本号" @输出名 = "MinorLinkerVersion">
+    变量 SizeOfCode <公开 类型 = 整数 注释 = "可执行代码的大小,这些值(包括下面2个也是不可靠的,你可以通过查看可选头后面的各个\"节\"来获得更准确的大小."
+            @输出名 = "SizeOfCode">
+    变量 SizeOfInitializedData <公开 类型 = 整数 注释 = "已初始化数据的大小" @输出名 = "SizeOfInitializedData">
+    变量 SizeOfUninitializedData <公开 类型 = 整数 注释 = "未初始化数据的大小,所谓的\"bss段\"" @输出名 = "SizeOfUninitializedData">
+    变量 AddressOfEntryPoint <公开 类型 = 整数 注释 = "代码入口点的偏移量,RVA" @输出名 = "AddressOfEntryPoint">
+    变量 BaseOfCode <公开 类型 = 整数 注释 = "代码基址,可执行代码的偏移量,RVA" @输出名 = "BaseOfCode">
+    变量 BaseOfData <公开 类型 = 整数 注释 = "数据基址,已初始化数据的偏移量,RVA" @输出名 = "BaseOfData">
+    变量 ImageBase <公开 类型 = 整数 注释 = "PE文件的优先装载地址,提供整个二进制文件包括所有头的优先(线性)载入地址,RVA" @输出名 = "ImageBase">
+    变量 SectionAlignment <公开 类型 = 整数 注释 = "内存中节对齐的粒度" @输出名 = "SectionAlignment">
+    变量 FileAlignment <公开 类型 = 整数 注释 = "文件中节对齐的粒度" @输出名 = "FileAlignment">
+    变量 MajorOperatingSystemVersion <公开 类型 = 短整数 注释 = "主操作系统最低主版本号" @输出名 = "MajorOperatingSystemVersion">
+    变量 MinorOperatingSystemVersion <公开 类型 = 短整数 注释 = "主操作系统最低副版本号" @输出名 = "MinorOperatingSystemVersion">
+    变量 MajorImageVersion <公开 类型 = 短整数 注释 = "主映像文件版本" @输出名 = "MajorImageVersion">
+    变量 MinorImageVersion <公开 类型 = 短整数 注释 = "副映像文件版本" @输出名 = "MinorImageVersion">
+    变量 MajorSubsystemVersion <公开 类型 = 短整数 注释 = "子系统主版本号" @输出名 = "MajorSubsystemVersion">
+    变量 MinorSubsystemVersion <公开 类型 = 短整数 注释 = "子系统副版本号" @输出名 = "MinorSubsystemVersion">
+    变量 Win32VersionValue <公开 类型 = 整数 注释 = "Win32版本值,可能为0" @输出名 = "Win32VersionValue">
+    变量 SizeOfImage <公开 类型 = 整数 注释 = "内存中整个PE映像体的尺寸.它是所有头和节经过节对齐处理后的大小." @输出名 = "SizeOfImage">
+    变量 SizeOfHeaders <公开 类型 = 整数 注释 = "所有头+节表的大小,也就等于文件尺寸减去文件中所有节的尺寸.可以以此值作为PE文件第一节的文件偏移量."
+            @输出名 = "SizeOfHeaders">
+    变量 CheckSum <公开 类型 = 整数 注释 = "校验和" @输出名 = "CheckSum">
     变量 Subsystem <公开 类型 = 短整数 注释 = "  子系统,NT用来识别PE文件属于哪个子系统."
             注释 = "  IMAGE_SUBSYSTEM_WINDOWS_GUI  2  Windows graphical user interface (GUI) subsystem."
-            注释 = "  IMAGE_SUBSYSTEM_WINDOWS_CUI  3  Windows character-mode user interface (CUI) subsystem.">
+            注释 = "  IMAGE_SUBSYSTEM_WINDOWS_CUI  3  Windows character-mode user interface (CUI) subsystem."
+            @输出名 = "Subsystem">
     变量 DllCharacteristics <公开 类型 = 短整数 注释 = "  DLL特性,指明,如果是DLL文件,何时调用DLL文件的入口点,一般不用"
             注释 = "  IMAGE_DLLCHARACTERISTICS_HIGH_ENTROPY_VA       0x0020  Image can handle a high entropy 64-bit virtual address space."
             注释 = "  IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE          0x0040  DLL can move."
@@ -525,13 +478,13 @@
             注释 = "  IMAGE_DLLCHARACTERISTICS_APPCONTAINER          0x1000  Image should execute in an AppContainer"
             注释 = "  IMAGE_DLLCHARACTERISTICS_WDM_DRIVER            0x2000  Driver uses WDM model"
             注释 = "  IMAGE_DLLCHARACTERISTICS_GUARD_CF              0x4000  Image supports Control Flow Guard."
-            注释 = "  IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE 0x8000">
-    变量 SizeOfStackReserve <公开 类型 = 整数 注释 = "保留栈的大小">
-    变量 SizeOfStackCommit <公开 类型 = 整数 注释 = "初始时指定栈大小">
-    变量 SizeOfHeapReserve <公开 类型 = 整数 注释 = "保留堆的大小">
-    变量 SizeOfHeapCommit <公开 类型 = 整数 注释 = "指定堆大小">
-    变量 LoaderFlags <公开 类型 = 整数 注释 = "加载器标志(已废弃)">
-    变量 NumberOfRvaAndSizes <公开 类型 = 整数 注释 = "Rva数和大小">
+            注释 = "  IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE 0x8000" @输出名 = "DllCharacteristics">
+    变量 SizeOfStackReserve <公开 类型 = 整数 注释 = "保留栈的大小" @输出名 = "SizeOfStackReserve">
+    变量 SizeOfStackCommit <公开 类型 = 整数 注释 = "初始时指定栈大小" @输出名 = "SizeOfStackCommit">
+    变量 SizeOfHeapReserve <公开 类型 = 整数 注释 = "保留堆的大小" @输出名 = "SizeOfHeapReserve">
+    变量 SizeOfHeapCommit <公开 类型 = 整数 注释 = "指定堆大小" @输出名 = "SizeOfHeapCommit">
+    变量 LoaderFlags <公开 类型 = 整数 注释 = "加载器标志(已废弃)" @输出名 = "LoaderFlags">
+    变量 NumberOfRvaAndSizes <公开 类型 = 整数 注释 = "Rva数和大小" @输出名 = "NumberOfRvaAndSizes">
     变量 DataDirectory <公开 类型 = "IMAGE_DATA_DIRECTORY [16]" 注释 = "  映像文件数据目录,索引可选:"
             注释 = "  IMAGE_DIRECTORY_ENTRY_EXPORT          0   // Export Directory"
             注释 = "  IMAGE_DIRECTORY_ENTRY_IMPORT          1   // Import Directory"
@@ -548,10 +501,10 @@
             注释 = "  IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT   11   // Bound Import Directory in headers"
             注释 = "  IMAGE_DIRECTORY_ENTRY_IAT            12   // Import Address Table"
             注释 = "  IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT   13   // Delay Load Import Descriptors"
-            注释 = "  IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR 14   // COM Runtime descriptor">
+            注释 = "  IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR 14   // COM Runtime descriptor" @输出名 = "DataDirectory">
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
-            @视窗.后缀文本 = "override">
+    方法 "// 取展示内容" <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖
+            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
     {
@@ -590,36 +543,39 @@
     }
 }
 
-类 IMAGE_OPTIONAL_HEADER64 <公开 注释 = "64位PE文件可选头"
+类 IMAGE_OPTIONAL_HEADER64 <公开 基础类 = PIV结构模板 注释 = "64位PE文件可选头"
         注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_optional_header64" 折叠
-        @文档 = "category = \"PE文件操作.辅助类\"" @视窗.结构类 = 0>
+        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_OPTIONAL_HEADER64" @模板实现类 = "IMAGE_OPTIONAL_HEADER64">
 {
     变量 Magic <公开 类型 = 短整数 注释 = "  映像文件类型" 注释 = "  IMAGE_NT_OPTIONAL_HDR32_MAGIC  0x10b  32位程序"
             注释 = "  IMAGE_NT_OPTIONAL_HDR64_MAGIC  0x20b  64位程序"
-            注释 = "  IMAGE_ROM_OPTIONAL_HDR_MAGIC   0x107  ROM文件">
-    变量 MajorLinkerVersion <公开 类型 = 字节 注释 = "链接器的主版本号">
-    变量 MinorLinkerVersion <公开 类型 = 字节 注释 = "链接器的副版本号">
-    变量 SizeOfCode <公开 类型 = 整数 注释 = "可执行代码的大小,这些值(包括下面2个也是不可靠的,你可以通过查看可选头后面的各个\"节\"来获得更准确的大小.">
-    变量 SizeOfInitializedData <公开 类型 = 整数 注释 = "已初始化数据的大小">
-    变量 SizeOfUninitializedData <公开 类型 = 整数 注释 = "未初始化数据的大小,所谓的\"bss段\"">
-    变量 AddressOfEntryPoint <公开 类型 = 整数 注释 = "代码入口点的偏移量,RVA">
-    变量 BaseOfCode <公开 类型 = 整数 注释 = "代码基址,可执行代码的偏移值,RVA">
-    变量 ImageBase <公开 类型 = 长整数 注释 = "PE文件的优先装载地址,提供整个二进制文件包括所有头的优先(线性)载入地址,RVA">
-    变量 SectionAlignment <公开 类型 = 整数 注释 = "内存中节对齐的粒度">
-    变量 FileAlignment <公开 类型 = 整数 注释 = "文件中节对齐的粒度">
-    变量 MajorOperatingSystemVersion <公开 类型 = 短整数 注释 = "主操作系统最低主版本号">
-    变量 MinorOperatingSystemVersion <公开 类型 = 短整数 注释 = "主操作系统最低副版本号">
-    变量 MajorImageVersion <公开 类型 = 短整数 注释 = "主映像文件版本">
-    变量 MinorImageVersion <公开 类型 = 短整数 注释 = "副映像文件版本">
-    变量 MajorSubsystemVersion <公开 类型 = 短整数 注释 = "主子系统版本">
-    变量 MinorSubsystemVersion <公开 类型 = 短整数 注释 = "副子系统版本">
-    变量 Win32VersionValue <公开 类型 = 整数 注释 = "Win32版本值,可能为0">
-    变量 SizeOfImage <公开 类型 = 整数 注释 = "内存中整个PE映像体的尺寸.它是所有头和节经过节对齐处理后的大小.">
-    变量 SizeOfHeaders <公开 类型 = 整数 注释 = "所有头+节表的大小,也就等于文件尺寸减去文件中所有节的尺寸.可以以此值作为PE文件第一节的文件偏移量.">
-    变量 CheckSum <公开 类型 = 整数 注释 = "校验和">
+            注释 = "  IMAGE_ROM_OPTIONAL_HDR_MAGIC   0x107  ROM文件" @输出名 = "Magic">
+    变量 MajorLinkerVersion <公开 类型 = 字节 注释 = "链接器的主版本号" @输出名 = "MajorLinkerVersion">
+    变量 MinorLinkerVersion <公开 类型 = 字节 注释 = "链接器的副版本号" @输出名 = "MinorLinkerVersion">
+    变量 SizeOfCode <公开 类型 = 整数 注释 = "可执行代码的大小,这些值(包括下面2个也是不可靠的,你可以通过查看可选头后面的各个\"节\"来获得更准确的大小."
+            @输出名 = "SizeOfCode">
+    变量 SizeOfInitializedData <公开 类型 = 整数 注释 = "已初始化数据的大小" @输出名 = "SizeOfInitializedData">
+    变量 SizeOfUninitializedData <公开 类型 = 整数 注释 = "未初始化数据的大小,所谓的\"bss段\"" @输出名 = "SizeOfUninitializedData">
+    变量 AddressOfEntryPoint <公开 类型 = 整数 注释 = "代码入口点的偏移量,RVA" @输出名 = "AddressOfEntryPoint">
+    变量 BaseOfCode <公开 类型 = 整数 注释 = "代码基址,可执行代码的偏移值,RVA" @输出名 = "BaseOfCode">
+    变量 ImageBase <公开 类型 = 长整数 注释 = "PE文件的优先装载地址,提供整个二进制文件包括所有头的优先(线性)载入地址,RVA" @输出名 = "ImageBase">
+    变量 SectionAlignment <公开 类型 = 整数 注释 = "内存中节对齐的粒度" @输出名 = "SectionAlignment">
+    变量 FileAlignment <公开 类型 = 整数 注释 = "文件中节对齐的粒度" @输出名 = "FileAlignment">
+    变量 MajorOperatingSystemVersion <公开 类型 = 短整数 注释 = "主操作系统最低主版本号" @输出名 = "MajorOperatingSystemVersion">
+    变量 MinorOperatingSystemVersion <公开 类型 = 短整数 注释 = "主操作系统最低副版本号" @输出名 = "MinorOperatingSystemVersion">
+    变量 MajorImageVersion <公开 类型 = 短整数 注释 = "主映像文件版本" @输出名 = "MajorImageVersion">
+    变量 MinorImageVersion <公开 类型 = 短整数 注释 = "副映像文件版本" @输出名 = "MinorImageVersion">
+    变量 MajorSubsystemVersion <公开 类型 = 短整数 注释 = "主子系统版本" @输出名 = "MajorSubsystemVersion">
+    变量 MinorSubsystemVersion <公开 类型 = 短整数 注释 = "副子系统版本" @输出名 = "MinorSubsystemVersion">
+    变量 Win32VersionValue <公开 类型 = 整数 注释 = "Win32版本值,可能为0" @输出名 = "Win32VersionValue">
+    变量 SizeOfImage <公开 类型 = 整数 注释 = "内存中整个PE映像体的尺寸.它是所有头和节经过节对齐处理后的大小." @输出名 = "SizeOfImage">
+    变量 SizeOfHeaders <公开 类型 = 整数 注释 = "所有头+节表的大小,也就等于文件尺寸减去文件中所有节的尺寸.可以以此值作为PE文件第一节的文件偏移量."
+            @输出名 = "SizeOfHeaders">
+    变量 CheckSum <公开 类型 = 整数 注释 = "校验和" @输出名 = "CheckSum">
     变量 Subsystem <公开 类型 = 短整数 注释 = "  子系统,NT用来识别PE文件属于哪个子系统."
             注释 = "  IMAGE_SUBSYSTEM_WINDOWS_GUI  2  Windows graphical user interface (GUI) subsystem."
-            注释 = "  IMAGE_SUBSYSTEM_WINDOWS_CUI  3  Windows character-mode user interface (CUI) subsystem.">
+            注释 = "  IMAGE_SUBSYSTEM_WINDOWS_CUI  3  Windows character-mode user interface (CUI) subsystem."
+            @输出名 = "Subsystem">
     变量 DllCharacteristics <公开 类型 = 短整数 注释 = "  DLL特性,指明,如果是DLL文件,何时调用DLL文件的入口点,一般不用"
             注释 = "  IMAGE_DLLCHARACTERISTICS_HIGH_ENTROPY_VA       0x0020  Image can handle a high entropy 64-bit virtual address space."
             注释 = "  IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE          0x0040  DLL can move."
@@ -631,13 +587,13 @@
             注释 = "  IMAGE_DLLCHARACTERISTICS_APPCONTAINER          0x1000  Image should execute in an AppContainer"
             注释 = "  IMAGE_DLLCHARACTERISTICS_WDM_DRIVER            0x2000  Driver uses WDM model"
             注释 = "  IMAGE_DLLCHARACTERISTICS_GUARD_CF              0x4000  Image supports Control Flow Guard."
-            注释 = "  IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE 0x8000">
-    变量 SizeOfStackReserve <公开 类型 = 长整数 注释 = "保留栈的大小">
-    变量 SizeOfStackCommit <公开 类型 = 长整数 注释 = "初始时指定栈大小">
-    变量 SizeOfHeapReserve <公开 类型 = 长整数 注释 = "保留堆的大小">
-    变量 SizeOfHeapCommit <公开 类型 = 长整数 注释 = "指定堆大小">
-    变量 LoaderFlags <公开 类型 = 整数 注释 = "加载器标志">
-    变量 NumberOfRvaAndSizes <公开 类型 = 整数 注释 = "Rva数和大小">
+            注释 = "  IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE 0x8000" @输出名 = "DllCharacteristics">
+    变量 SizeOfStackReserve <公开 类型 = 长整数 注释 = "保留栈的大小" @输出名 = "SizeOfStackReserve">
+    变量 SizeOfStackCommit <公开 类型 = 长整数 注释 = "初始时指定栈大小" @输出名 = "SizeOfStackCommit">
+    变量 SizeOfHeapReserve <公开 类型 = 长整数 注释 = "保留堆的大小" @输出名 = "SizeOfHeapReserve">
+    变量 SizeOfHeapCommit <公开 类型 = 长整数 注释 = "指定堆大小" @输出名 = "SizeOfHeapCommit">
+    变量 LoaderFlags <公开 类型 = 整数 注释 = "加载器标志" @输出名 = "LoaderFlags">
+    变量 NumberOfRvaAndSizes <公开 类型 = 整数 注释 = "Rva数和大小" @输出名 = "NumberOfRvaAndSizes">
     变量 DataDirectory <公开 类型 = "IMAGE_DATA_DIRECTORY [16]"
             注释 = "  IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];"
             注释 = "  映像文件数据目录,索引可选:" 注释 = "  IMAGE_DIRECTORY_ENTRY_EXPORT          0   // Export Directory"
@@ -655,10 +611,10 @@
             注释 = "  IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT   11   // Bound Import Directory in headers"
             注释 = "  IMAGE_DIRECTORY_ENTRY_IAT            12   // Import Address Table"
             注释 = "  IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT   13   // Delay Load Import Descriptors"
-            注释 = "  IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR 14   // COM Runtime descriptor">
+            注释 = "  IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR 14   // COM Runtime descriptor" @输出名 = "DataDirectory">
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
-            @视窗.后缀文本 = "override">
+    方法 "// 取展示内容" <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖
+            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
     {
@@ -696,15 +652,61 @@
     }
 }
 
-类 IMAGE_DATA_DIRECTORY <公开 注释 = "PE文件数据目录"
-        注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_data_directory" 折叠
-        @文档 = "category = \"PE文件操作.辅助类\"" @视窗.结构类 = 0>
+类 IMAGE_NT_HEADERS32 <公开 基础类 = PIV结构模板 注释 = "32位PE文件NT头"
+        注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_nt_headers32" 折叠
+        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_NT_HEADERS32" @模板实现类 = "IMAGE_NT_HEADERS32">
 {
-    变量 VirtualAddress <公开 类型 = 整数 注释 = "指向的数据结构的虚拟地址(RAV)">
-    变量 Size <公开 类型 = 整数 注释 = "数据结构的大小">
+    变量 Signature <公开 类型 = 整数 注释 = "  PE文件的标识,固定为\"PE\\0\\0\"{50,45,00,00},整数为 0x4550/17744"
+            注释 = "  IMAGE_DOS_SIGNATURE    0x5A4D      MZ" 注释 = "  IMAGE_OS2_SIGNATURE    0x454E      NE"
+            注释 = "  IMAGE_OS2_SIGNATURE_LE 0x454C      LE" 注释 = "  IMAGE_VXD_SIGNATURE    0x454C      LE"
+            注释 = "  IMAGE_NT_SIGNATURE     0x00004550  PE00" @输出名 = "Signature">
+    变量 FileHeader <公开 类型 = IMAGE_FILE_HEADER 注释 = "映像文件头结构体(20个字节)" @输出名 = "FileHeader">
+    变量 OptionalHeader <公开 类型 = IMAGE_OPTIONAL_HEADER32 注释 = "映像可选头结构体32位" @输出名 = "OptionalHeader">
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
-            @视窗.后缀文本 = "override">
+    方法 "//取展示内容" <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖
+            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
+    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
+    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    {
+        展示内容 = "<IMAGE_NT_HEADERS32> 总共 3 个成员:\r\n"
+        加入文本 (展示内容, "1. Signature: " + 取调试文本2 (最大展示数据尺寸, Signature) + "\r\n")
+        加入文本 (展示内容, "2. FileHeader: " + 取调试文本2 (最大展示数据尺寸, FileHeader) + "\r\n")
+        加入文本 (展示内容, "3. OptionalHeader: " + 取调试文本2 (最大展示数据尺寸, OptionalHeader) + "\r\n")
+    }
+}
+
+类 IMAGE_NT_HEADERS64 <公开 基础类 = PIV结构模板 注释 = "64位PE文件NT头"
+        注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_nt_headers64" 折叠
+        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_NT_HEADERS64" @模板实现类 = "IMAGE_NT_HEADERS64">
+{
+    变量 Signature <公开 类型 = 整数 注释 = "  PE文件的标识,固定为\"PE\\0\\0\"{50,45,00,00},整数为 0x4550/17744"
+            注释 = "  IMAGE_DOS_SIGNATURE    0x5A4D      MZ" 注释 = "  IMAGE_OS2_SIGNATURE    0x454E      NE"
+            注释 = "  IMAGE_OS2_SIGNATURE_LE 0x454C      LE" 注释 = "  IMAGE_VXD_SIGNATURE    0x454C      LE"
+            注释 = "  IMAGE_NT_SIGNATURE     0x00004550  PE00" @输出名 = "Signature">
+    变量 FileHeader <公开 类型 = IMAGE_FILE_HEADER 注释 = "映像文件头部结构体(20个字节)" @输出名 = "FileHeader">
+    变量 OptionalHeader <公开 类型 = IMAGE_OPTIONAL_HEADER64 注释 = "映像可选头部结构体64位" @输出名 = "OptionalHeader">
+
+    方法 "// 取展示内容" <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 折叠2 @虚拟方法 = 可覆盖
+            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
+    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
+    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    {
+        展示内容 = "<IMAGE_NT_HEADERS64> 总共 3 个成员:\r\n"
+        加入文本 (展示内容, "1. Signature: " + 取调试文本2 (最大展示数据尺寸, Signature) + "\r\n")
+        加入文本 (展示内容, "2. FileHeader: " + 取调试文本2 (最大展示数据尺寸, FileHeader) + "\r\n")
+        加入文本 (展示内容, "3. OptionalHeader: " + 取调试文本2 (最大展示数据尺寸, OptionalHeader) + "\r\n")
+    }
+}
+
+类 IMAGE_DATA_DIRECTORY <公开 基础类 = PIV结构模板 注释 = "PE文件数据目录"
+        注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_data_directory" 折叠
+        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_DATA_DIRECTORY" @模板实现类 = "IMAGE_DATA_DIRECTORY">
+{
+    变量 VirtualAddress <公开 类型 = 整数 注释 = "指向的数据结构的虚拟地址(RAV)" @输出名 = "VirtualAddress">
+    变量 Size <公开 类型 = 整数 注释 = "数据结构的大小" @输出名 = "Size">
+
+    方法 "// 取展示内容" <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖
+            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
     {
@@ -714,23 +716,28 @@
     }
 }
 
-类 IMAGE_SECTION_HEADER <公开 注释 = "PE文件的节区表"
+类 IMAGE_SECTION_HEADER <公开 基础类 = PIV结构模板 注释 = "PE文件的节区表"
         注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_section_header" 折叠
-        @文档 = "category = \"PE文件操作.辅助类\"" @视窗.结构类 = 0>
+        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_SECTION_HEADER" @模板实现类 = "IMAGE_SECTION_HEADER">
 {
-    变量 Name <公开 类型 = "字节 [8]" 注释 = "节名称">
-    变量 VirtualSize <公开 类型 = 整数 注释 = "也可是PhysicalAddress,在可执行文件中,它是内容的大小.在目标文件中,它是内容重定位到的地址.">
-    变量 VirtualAddress <公开 类型 = 整数 注释 = "节的RVA(相对虚拟地址)节中数据的RVA.">
-    变量 SizeOfRawData <公开 类型 = 整数 注释 = "原始数据大小,经过文件对齐处理后节尺寸,PE装载器提取本值了解需映射入内存的节字节数.">
-    变量 PointerToRawData <公开 类型 = 整数 注释 = "文件偏移,这是节基于文件的偏移量,PE装载器通过本值找到节数据在文件中的位置.">
-    变量 PointerToRelocations <公开 类型 = 整数 注释 = "重定位指针">
-    变量 PointerToLinenumbers <公开 类型 = 整数 注释 = "行数指针">
-    变量 NumberOfRelocations <公开 类型 = 短整数 注释 = "重定位数">
-    变量 NumberOfLinenumbers <公开 类型 = 短整数 注释 = "行数数">
-    变量 Characteristics <公开 类型 = 整数 注释 = "特性,包含标记以指示节属性,比如节是否含有可执行代码、初始化数据、未初始数据、是否可写、可读等.">
+    变量 Name <公开 类型 = "字节 [8]" 注释 = "节名称" @输出名 = "Name">
+    变量 PhysicalAddress <公开 类型 = 整数 注释 = "也可以是VirtualSize,在可执行文件中,它是内容的大小.在目标文件中,它是内容重定位到的地址."
+            @输出名 = "Misc.PhysicalAddress">
+    变量 VirtualSize <公开 类型 = 整数 注释 = "也可以是PhysicalAddress,在可执行文件中,它是内容的大小.在目标文件中,它是内容重定位到的地址."
+            @输出名 = "Misc.VirtualSize">
+    变量 VirtualAddress <公开 类型 = 整数 注释 = "节的RVA(相对虚拟地址)节中数据的RVA." @输出名 = "VirtualAddress">
+    变量 SizeOfRawData <公开 类型 = 整数 注释 = "原始数据大小,经过文件对齐处理后节尺寸,PE装载器提取本值了解需映射入内存的节字节数." @输出名 = "SizeOfRawData">
+    变量 PointerToRawData <公开 类型 = 整数 注释 = "文件偏移,这是节基于文件的偏移量,PE装载器通过本值找到节数据在文件中的位置."
+            @输出名 = "PointerToRawData">
+    变量 PointerToRelocations <公开 类型 = 整数 注释 = "重定位指针" @输出名 = "PointerToRelocations">
+    变量 PointerToLinenumbers <公开 类型 = 整数 注释 = "行数指针" @输出名 = "PointerToLinenumbers">
+    变量 NumberOfRelocations <公开 类型 = 短整数 注释 = "重定位数" @输出名 = "NumberOfRelocations">
+    变量 NumberOfLinenumbers <公开 类型 = 短整数 注释 = "行数数" @输出名 = "NumberOfLinenumbers">
+    变量 Characteristics <公开 类型 = 整数 注释 = "特性,包含标记以指示节属性,比如节是否含有可执行代码、初始化数据、未初始数据、是否可写、可读等."
+            @输出名 = "Characteristics">
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
-            @视窗.后缀文本 = "override">
+    方法 "// 取展示内容" <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖
+            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
     {
@@ -748,23 +755,25 @@
     }
 }
 
-类 节区表数组类 <公开 基础类 = 对象数组模板类 注释 = "节区表数组" @文档 = "category = \"PE文件操作.辅助类\""
+类 节区表数组类 <公开 基础类 = PIV数组模板 注释 = "节区表数组" @文档 = "category = \"PE文件操作.辅助类\""
         @模板实现类 = "IMAGE_SECTION_HEADER">
 
-类 IMAGE_IMPORT_DESCRIPTOR <公开 注释 = "PE文件的导入表描述符结构体" 折叠 @文档 = "category = \"PE文件操作.辅助类\"" @视窗.结构类 = 0>
+类 IMAGE_IMPORT_DESCRIPTOR <公开 基础类 = PIV结构模板 注释 = "PE文件的导入表描述符结构体" 折叠 @文档 = "category = \"PE文件操作.辅助类\""
+        @别名 = "IMAGE_IMPORT_DESCRIPTOR" @模板实现类 = "IMAGE_IMPORT_DESCRIPTOR">
 {
-    变量 OriginalFirstThunk <公开 类型 = 整数 注释 = "联合体{" 注释 = "  Characteristics     0为空导入表描述符的结束符"
-            注释 = "  OriginalFirstThunk  原始未绑定IAT(PIMAGE_THUNK_DATA)的相对虚拟地址" 注释 = "}"
-            注释 = "由于存在单桥结构的DLL,最好别用该成员进程分析">
+    变量 Characteristics <公开 类型 = 整数 注释 = "如果是数组的最后一项,则为0" @输出名 = "Characteristics">
+    变量 OriginalFirstThunk <公开 类型 = 整数 注释 = "原始未绑定IAT(PIMAGE_THUNK_DATA)的相对虚拟地址"
+            注释 = "由于存在单桥结构的DLL,最好别用该成员进程分析" @输出名 = "OriginalFirstThunk">
     变量 TimeDateStamp <公开 类型 = 整数 注释 = "文件创建时间戳" 注释 = "  0    未绑定导入表"
             注释 = "  -1   如果已绑定,真实的时间戳在IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT表中"
-            注释 = "  其他 导入表已绑定,该时间戳与IMAGE_FILE_HEADER.TimeDateStamp一致">
-    变量 ForwarderChain <公开 类型 = 短整数 注释 = "链表的前一结构">
-    变量 Name <公开 类型 = 整数 注释 = "模块的名称地址(ASCII字符串的RVA)">
-    变量 FirstThunk <公开 类型 = 整数 注释 = "  导入表的IAT结构的相对虚拟地址" 注释 = "  绑定导入表后,该地址数组指向真实的函数地址(VA)">
+            注释 = "  其他 导入表已绑定,该时间戳与IMAGE_FILE_HEADER.TimeDateStamp一致" @输出名 = "TimeDateStamp">
+    变量 ForwarderChain <公开 类型 = 短整数 注释 = "链表的前一结构" @输出名 = "ForwarderChain">
+    变量 Name <公开 类型 = 整数 注释 = "模块的名称地址(ASCII字符串的RVA)" @输出名 = "Name">
+    变量 FirstThunk <公开 类型 = 整数 注释 = "  导入表的IAT结构的相对虚拟地址" 注释 = "  绑定导入表后,该地址数组指向真实的函数地址(VA)"
+            @输出名 = "FirstThunk">
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
-            @视窗.后缀文本 = "override">
+    方法 "// 取展示内容" <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖
+            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
     {
@@ -776,26 +785,29 @@
     }
 }
 
-类 导入表描述符数组类 <公开 基础类 = 对象数组模板类 @文档 = "category = \"PE文件操作.辅助类\"" @模板实现类 = "IMAGE_IMPORT_DESCRIPTOR">
+类 导入表描述符数组类 <公开 基础类 = PIV数组模板 @文档 = "category = \"PE文件操作.辅助类\"" @模板实现类 = "IMAGE_IMPORT_DESCRIPTOR">
 
-类 IMAGE_EXPORT_DIRECTORY <公开 注释 = "PE文件的导出表结构体" @文档 = "category = \"PE文件操作.辅助类\"" @视窗.结构类 = 0>
+类 IMAGE_EXPORT_DIRECTORY <公开 基础类 = PIV结构模板 注释 = "PE文件的导出表结构体" 折叠 @文档 = "category = \"PE文件操作.辅助类\""
+        @别名 = "IMAGE_EXPORT_DIRECTORY" @模板实现类 = "IMAGE_EXPORT_DIRECTORY">
 {
-    变量 Characteristics <公开 类型 = 整数 注释 = "未使用,总为0">
-    变量 TimeDateStamp <公开 类型 = 整数 注释 = "文件创建时间戳">
-    变量 MajorVersion <公开 类型 = 短整数 注释 = "未使用,总为0">
-    变量 MinorVersion <公开 类型 = 短整数 注释 = "未使用,总为0">
-    变量 Name <公开 类型 = 整数 注释 = "模块的内部名称地址(UTF8编码字符串的RVA)" 注释 = "即使DLL文件的名称被修改,仍可以从这个字符串得知编译时的名称">
+    变量 Characteristics <公开 类型 = 整数 注释 = "未使用,总为0" @输出名 = "Characteristics">
+    变量 TimeDateStamp <公开 类型 = 整数 注释 = "文件创建时间戳" @输出名 = "TimeDateStamp">
+    变量 MajorVersion <公开 类型 = 短整数 注释 = "未使用,总为0" @输出名 = "MajorVersion">
+    变量 MinorVersion <公开 类型 = 短整数 注释 = "未使用,总为0" @输出名 = "MinorVersion">
+    变量 Name <公开 类型 = 整数 注释 = "模块的内部名称地址(UTF8编码字符串的RVA)" 注释 = "即使DLL文件的名称被修改,仍可以从这个字符串得知编译时的名称"
+            @输出名 = "Name">
     变量 Base <公开 类型 = 整数 注释 = "函数的起始序号." 注释 = "比如一个函数的序号是4,Base是2,就表示该函数位于导出地址列表第三个成员."
-            注释 = "导出地址列表中的首成员(索引0)对应序号1,而不是序号0." 注释 = "序号的起始数字可以在.DEF文件中定义.">
-    变量 NumberOfFunctions <公开 类型 = 整数 注释 = "导出函数的个数">
-    变量 NumberOfNames <公开 类型 = 整数 注释 = "以名称导出的函数的个数">
-    变量 AddressOfFunctions <公开 类型 = 整数 注释 = "导出地址列表(Export Address Table, EAT 其实就是一个地址数组)的首地址(RVA)">
-    变量 AddressOfNames <公开 类型 = 整数 注释 = "导出名称列表(Export Name Table, ENT)的首地址(RVA)">
+            注释 = "导出地址列表中的首成员(索引0)对应序号1,而不是序号0." 注释 = "序号的起始数字可以在.DEF文件中定义." @输出名 = "Base">
+    变量 NumberOfFunctions <公开 类型 = 整数 注释 = "导出函数的个数" @输出名 = "NumberOfFunctions">
+    变量 NumberOfNames <公开 类型 = 整数 注释 = "以名称导出的函数的个数" @输出名 = "NumberOfNames">
+    变量 AddressOfFunctions <公开 类型 = 整数 注释 = "导出地址列表(Export Address Table, EAT 其实就是一个地址数组)的首地址(RVA)"
+            @输出名 = "AddressOfFunctions">
+    变量 AddressOfNames <公开 类型 = 整数 注释 = "导出名称列表(Export Name Table, ENT)的首地址(RVA)" @输出名 = "AddressOfNames">
     变量 AddressOfNameOrdinals <公开 类型 = 整数 注释 = "导出序号列表(Export Ordinal Table, EOT)的首地址(RVA)"
-            注释 = "该数组的元素都是16-bit(一个字)长度的整数.">
+            注释 = "该数组的元素都是16-bit(一个字)长度的整数." @输出名 = "AddressOfNameOrdinals">
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
-            @视窗.后缀文本 = "override">
+    方法 "// 取展示内容" <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖
+            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
     {
@@ -820,7 +832,7 @@
     变量 函数地址 <公开 类型 = 长整数 @输出名 = "FunctionAddress">
     变量 函数序号 <公开 类型 = 整数 @输出名 = "FunctionOrdinal">
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
+    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
             @视窗.后缀文本 = "override">
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
@@ -844,7 +856,7 @@
 
 类 PE函数数组类 <公开 基础类 = 对象容器模板类 注释 = "PE文件导出表中的函数信息数组" @文档 = "category = \"PE文件操作.辅助类\"" @模板实现类 = "PE函数类">
 
-类 导出表类 <公开 注释 = "导出表" @文档 = "category = \"PE文件操作.辅助类\"">
+类 导出表类 <公开 注释 = "导出表" 折叠 @文档 = "category = \"PE文件操作.辅助类\"">
 {
     变量 模块名称 <公开 类型 = 文本型 @输出名 = "ModuleName">
     变量 函数列表 <公开 类型 = PE函数数组类 @输出名 = "aFunctions">
