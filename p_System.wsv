@@ -784,7 +784,7 @@
     # HWND m_hWnd = NULL;
     # typedef BOOL(WINAPI* pChangeWindowMessageFilterEx)(HWND, UINT, DWORD, PVOID);
     # pChangeWindowMessageFilterEx API_ChangeWindowMessageFilterEx =
-    #     (pChangeWindowMessageFilterEx)::GetProcAddress(::GetModuleHandle (L"User32.dll"), "ChangeWindowMessageFilterEx");
+    #     (pChangeWindowMessageFilterEx)::GetProcAddress(::GetModuleHandle(L"User32.dll"), "ChangeWindowMessageFilterEx");
     # static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
     # <> </include>
     # LRESULT CALLBACK @sn<current_class>::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -855,15 +855,17 @@
 {
 
     # @begin
-    # BOOL CALLBACK nEnumFontFamExProc(LPLOGFONTW lplf, LPTEXTMETRIC lptm, DWORD iType, LPARAM lpData) {
+    # <> <include>
+    # static BOOL CALLBACK nEnumFontFamExProc(LPLOGFONTW lplf, LPTEXTMETRIC lptm, DWORD iType, LPARAM lpData) {
     #     (*(@dt<文本数组类>*)lpData).data().Add(CVolString (lplf->lfFaceName));
     #     return TRUE;
     # }
-    # BOOL CALLBACK eEnumFontFamExProc(LPLOGFONTW lplf, LPTEXTMETRIC lptm, DWORD iType, LPARAM lpData) {
+    # static BOOL CALLBACK eEnumFontFamExProc(LPLOGFONTW lplf, LPTEXTMETRIC lptm, DWORD iType, LPARAM lpData) {
     #     if (((@sn<current_class>*)lpData)->@<字体回调>(@an<CVolString>(lplf->lfFaceName), (INT)iType) == 0)
     #         return TRUE;
     #     return FALSE;
     # }
+    # <> </include>
     # @end
 
     方法 取系统字体列表 <公开 类型 = 整数 注释 = "枚举系统中的字体到文本数组类中" 返回值注释 = "成功返回字体数量" 折叠 @禁止流程检查 = 真>
@@ -873,13 +875,14 @@
     参数 窗口句柄 <类型 = 变整数 注释 = "可空" @默认值 = 0>
     {
         @ @<字体列表>.data().RemoveAll();
-        @ HDC hdc = ::GetDC((@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>);
+        @ HWND hwnd = (@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>;
+        @ HDC hdc = ::GetDC(hwnd);
         @ LOGFONTW lf;
-        @ memset(&lf, 0, sizeof (LOGFONTW));
+        @ memset(&lf, 0, sizeof(LOGFONTW));
         @ lf.lfCharSet = (BYTE)@<字符集>;
-        @ if (@<检索字体>.GetLength()<= 32) lstrcat(lf.lfFaceName, @<检索字体>.GetText());
-        @ ::EnumFontFamiliesExW(hdc, (LPLOGFONTW)&lf, (FONTENUMPROCW)&nEnumFontFamExProc, (LPARAM)&@<字体列表>, 0);
-        @ ::ReleaseDC((@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>, hdc);
+        @ wcscpy_s(lf.lfFaceName, 32, @<检索字体>.GetText());
+        @ ::EnumFontFamiliesExW(hdc, &lf, (FONTENUMPROCW)&@sn<current_class>::nEnumFontFamExProc, (LPARAM)&@<字体列表>, 0);
+        @ ::ReleaseDC(hwnd, hdc);
         @ return (INT)@<字体列表>.data().GetCount();
     }
 
@@ -888,13 +891,14 @@
     参数 检索字体 <类型 = 文本型 注释 = "为空返回所有字体, 否则只返回指定名称的字体(文本超长将被忽略)." @默认值 = 空对象>
     参数 窗口句柄 <类型 = 变整数 注释 = "可空" @默认值 = 0>
     {
+        @ HWND hwnd = (@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>;
         @ HDC hdc = ::GetDC((@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>);
         @ LOGFONTW lf;
-        @ memset(&lf, 0, sizeof (LOGFONTW));
-        @ lf.lfCharSet = @<字符集>;
-        @ if (@<检索字体>.GetLength()<= 32) lstrcat(lf.lfFaceName, @<检索字体>.GetText());
-        @ ::EnumFontFamiliesExW(hdc, (LPLOGFONTW)&lf, (FONTENUMPROCW)&eEnumFontFamExProc, (LPARAM)this, 0);
-        @ ::ReleaseDC((@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>, hdc);
+        @ memset(&lf, 0, sizeof(LOGFONTW));
+        @ lf.lfCharSet = (BYTE)@<字符集>;
+        @ wcscpy_s(lf.lfFaceName, 32, @<检索字体>.GetText());
+        @ ::EnumFontFamiliesExW(hdc, (LPLOGFONTW)&lf, (FONTENUMPROCW)&@sn<current_class>::eEnumFontFamExProc, (LPARAM)this, 0);
+        @ ::ReleaseDC(hwnd, hdc);
     }
 
     方法 字体回调 <公开 定义事件 类型 = 整数 注释 = "执行\"枚举系统字体\"后,本事件会收到枚举的字体,每次事件返回一个字体"
@@ -1138,7 +1142,7 @@
     方法 删除卷装载点 <公开 静态 类型 = 逻辑型 注释 = "删除驱动器号或装载的文件夹." 返回值注释 = "返回是否成功." 折叠 @嵌入式方法 = "">
     参数 卷装载路径 <类型 = 文本型 注释 = " 所欲删除的驱动器号或装载的文件夹." 注释 = " 需要以反斜杠结尾,例如\"X:\\\"或\"Y:\\\\MountX\\\".">
     {
-        @ ::DeleteVolumeMountPointW ((LPCWSTR)@<卷装载路径>.GetText ())
+        @ ::DeleteVolumeMountPointW(@<卷装载路径>.GetText())
     }
 
     方法 置卷装载点 <公开 静态 类型 = 逻辑型 注释 = "将卷与另一卷上的驱动器号或目录相关联." 返回值注释 = "返回是否成功." 折叠 @嵌入式方法 = "">
@@ -1147,7 +1151,7 @@
     参数 卷GUID <类型 = 文本型 注释 = " 卷的GUID路径(可用\"取卷装载点路径\"获取)."
             注释 = " 字符串格式必须为\"\\\\?\\Volume{GUID}\\\",其中GUID是卷的标识GUID," 注释 = " \"\\\\?\\\"用于关闭路径解析,在路径中会被忽略.">
     {
-        @ ::SetVolumeMountPointW ((LPCWSTR)@<卷装载路径>.GetText (), (LPCWSTR)@<卷GUID>.GetText ())
+        @ ::SetVolumeMountPointW(@<卷装载路径>.GetText(), @<卷GUID>.GetText())
     }
 
     方法 取卷装载点路径 <公开 静态 类型 = 逻辑型 注释 = "获取与指定卷装载点(驱动器号、卷GUID路径或装载的文件夹)关联的卷GUID路径."
@@ -1158,11 +1162,11 @@
             注释 = " 如果该卷有多个卷GUID路径,则只返回装载管理器缓存中的第一个路径.">
     {
         @ TCHAR szVolumeName[50];
-        @ if ( ::GetVolumeNameForVolumeMountPointW ((LPCWSTR)@<卷装载路径>.GetText (), szVolumeName, 50) ) {
-        @     @<卷GUID>.SetText (szVolumeName);
+        @ if (::GetVolumeNameForVolumeMountPointW(@<卷装载路径>.GetText(), szVolumeName, 50)) {
+        @     @<卷GUID>.SetText(szVolumeName);
         @     return TRUE;
         @ }
-        @ @<卷GUID>.Empty ();
+        @ @<卷GUID>.Empty();
         @ return FALSE;
     }
 }
@@ -1453,3 +1457,167 @@
     常量 获取共享文件 <公开 值 = @OFN_SHAREAWARE 注释 = "如果调用OpenFile函数因为网络共享冲突而失败,将忽略错误并返回对话框选择的文件名.">
     常量 显示帮助按钮 <公开 值 = @OFN_SHOWHELP 注释 = "文件对话框显示帮助按钮.">
 }
+
+类 磁盘监视类 <公开 基础类 = PIV对象类 注释 = "通过NTFS的USN日志来监视文件和目录的更改,实现原理跟文件搜索软件Everything相同."
+        注释 = " 1. 监视USN日志的效率相当高,但只能在NTFS文件系统上使用;" 注释 = " 2. USN日志会监视整个本地磁盘,但可以只输出特定目录下的更改记录;"
+        注释 = " 3. 本类的接收事件在子线程中触发,每个盘符一条线程;" 注释 = " 4. 程序需要以管理员权限运行;" 折叠 @文档 = "category = \"文件操作\""
+        @视窗.外部头文件 = "src\\piv_UsnMonitor.hpp">
+{
+    方法 枚举所有盘符 <公开 静态 类型 = 整数 注释 = "获取所有的盘符,返回盘符数量." 返回值注释 = "成功返回盘符数量,失败返回0." 折叠 @禁止流程检查 = 真>
+    参数 盘符数组 <类型 = 字符数组类 注释 = "成功返回包含所有盘符的数组">
+    参数 仅枚举本地磁盘 <类型 = 逻辑型 注释 = "默认剔除光驱及网络驱动器,如需枚举所有盘符请设置为假." @默认值 = 真>
+    {
+        @ @<盘符数组>.data().RemoveAll();
+        @ WCHAR szBuffer[MAX_PATH + 1] {0};
+        @ DWORD dwBufLen = ::GetLogicalDriveStringsW(MAX_PATH, szBuffer);
+        @ if (dwBufLen == 0) return 0;
+        @ for (DWORD i = 0; i < dwBufLen; i += 4) {
+        @     if (@<仅枚举本地磁盘> == TRUE && ::GetDriveTypeW(szBuffer + i) != DRIVE_FIXED)
+        @         continue;
+        @     @<盘符数组>.data().Add(szBuffer[i]);
+        @ }
+        @ return (INT)@<盘符数组>.data().GetCount();
+    }
+
+    # ---
+
+    方法 开始监视 <公开 类型 = 逻辑型 注释 = "开始监视某个本地磁盘中所有文件和目录的更改:" 注释 = " 1. 指定的盘符必须为NTFS文件格式,且不能为网络驱动器;"
+            注释 = " 2. 程序必须以管理员身份运行;" 注释 = " 3. 可以重复调用本方法监视不同的盘符;" 折叠 @禁止流程检查 = 真>
+    参数 盘符 <类型 = 字符 注释 = "提供本地磁盘的盘符(不区分大小写),请以单引号输入,如: \'C\'">
+    参数 监视目录组 <类型 = 文本数组类 注释 = "可以将监视范围限定在所提供的一或多个目录中,请确保提供的目录已经存在." 注释 = "默认的空数组表示监视整个本地磁盘;"
+            注释 = "注意: 本参数有效时,内部会维护一个包含文件夹主从关系的键值表,会占用较大内存." @默认值 = 空对象>
+    参数 延迟时间 <类型 = 整数 注释 = "如果上次读取USN日志没有发现新的更改,将延迟指定的时间(单位为毫秒)." @默认值 = 1000>
+    参数 路径获取方式 <类型 = 整数 注释 = "选择文件更改事件中\"当前路径\"的获取方式:" 注释 = " 0 不获取路径(速度最快);"
+            注释 = " 1 使用系统API获取,需要确保文件夹存在,文件夹被删除后会获取不了;" 注释 = " 2 由本类维护一个数据表,即使文件夹被删除后仍能获取路径,"
+            注释 = "但占用内存较大(Win11的系统盘需要500MB以上内存)." @默认值 = 1>
+    {
+        @ PivUsnMonitor& monitor = m_map.emplace(std::piecewise_construct, std::forward_as_tuple(@<盘符>), std::forward_as_tuple()).first->second;
+        @ if (!monitor.Start(@<盘符>, @<监视目录组>.data(), @<延迟时间>, @<路径获取方式>)) {
+        @     m_map.erase(@<盘符>);
+        @     return FALSE;
+        @ }
+        @ monitor.BindInited(&@sn<current_class>::@<初始化完毕>, this, @<盘符>);
+        @ monitor.BindCreated(&@sn<current_class>::@<文件被创建>, this, @<盘符>, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+        @ monitor.BindDeleted(&@sn<current_class>::@<文件被删除>, this, @<盘符>, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+        @ monitor.BindDataChanged(&@sn<current_class>::@<文件内容改变>, this, @<盘符>, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
+        @ monitor.BindRenamed(&@sn<current_class>::@<文件被重命名>, this, @<盘符>, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
+        @ monitor.BindAttributeChange(&@sn<current_class>::@<文件属性改变>, this, @<盘符>, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
+        @ monitor.BindOtherChange(&@sn<current_class>::@<其他状态改变>, this, @<盘符>, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
+        @ return TRUE;
+    }
+
+    方法 停止监视 <公开 类型 = 逻辑型 注释 = "停止监视某个本地磁盘,返回是否实际停止了监视." 注释 = "注: 类析构时会自动停止监视所有盘符." 折叠 @禁止流程检查 = 真>
+    参数 盘符 <类型 = 字符 注释 = "提供本地磁盘的盘符(不区分大小写),请以单引号输入,如: \'C\'">
+    参数 删除USN日志 <类型 = 逻辑型 注释 = "是否删除(禁用)USN日志,删除操作是全局的,会影响其他使用了USN日志的软件." @默认值 = 假>
+    {
+        @ auto it = m_map.find(@<盘符>);
+        @ if (it != m_map.end()) {
+        @     it->second.Stop(@<删除USN日志>);
+        @     return m_map.erase(it) > 0;
+        @ }
+        @ return FALSE;
+    }
+
+    方法 全部停止 <公开 注释 = "停止所有正在运行的监视." 注释 = "注: 类析构时会自动停止监视所有盘符." 折叠 @嵌入式方法 = "">
+    {
+        @ @sn<this>.m_map.clear()
+    }
+
+    方法 取监视盘符 <公开 类型 = 整数 注释 = "获取当前正在监视的所有盘符,返回监视的盘符数量." 折叠 @禁止流程检查 = 真>
+    参数 盘符数组 <类型 = 字符数组类 注释 = "返回所有正在监视的盘符">
+    {
+        @ @<盘符数组>.data().RemoveAll();
+        @ for (auto& it = m_map.begin(); it != m_map.end(); it++) {
+        @     @<盘符数组>.data().Add(it->first);
+        @ }
+        @ return (INT)@<盘符数组>.data().GetCount();
+    }
+
+    # ---
+
+    方法 初始化完毕 <公开 定义事件 类型 = 整数 注释 = "USN日志初始化完毕后将发送一次本事件,表示将开始监视文件的更改." 折叠>
+    参数 盘符 <类型 = 字符 注释 = "当前监视的盘符">
+
+    方法 文件被创建 <公开 定义事件 类型 = 整数 注释 = "监视到创建了新文件或目录" 折叠>
+    参数 盘符 <类型 = 字符 注释 = "当前监视的盘符">
+    参数 文件名称 <类型 = 文本型 注释 = "触发更改的文件或目录名称">
+    参数 当前路径 <类型 = 文本型 注释 = "本次更改的所在路径,以路径符结尾.">
+    参数 时间戳 <类型 = 文件时间结构 注释 = "本次更改的文件时间戳(非Unix时间戳)">
+
+    方法 文件被删除 <公开 定义事件 类型 = 整数 注释 = "监视到某个文件或目录被删除" 折叠>
+    参数 盘符 <类型 = 字符 注释 = "当前监视的盘符">
+    参数 文件名称 <类型 = 文本型 注释 = "触发更改的文件或目录名称">
+    参数 当前路径 <类型 = 文本型 注释 = "本次更改的所在路径,以路径符结尾.">
+    参数 时间戳 <类型 = 文件时间结构 注释 = "本次更改的文件时间戳(非Unix时间戳)">
+
+    方法 文件内容改变 <公开 定义事件 类型 = 整数 注释 = "监视到某个文件的内容数据被修改" 折叠>
+    参数 盘符 <类型 = 字符 注释 = "当前监视的盘符">
+    参数 文件名称 <类型 = 文本型 注释 = "触发更改的文件或目录名称">
+    参数 当前路径 <类型 = 文本型 注释 = "本次更改的所在路径,以路径符结尾.">
+    参数 更改原因 <类型 = 整数 注释 = "文件或目录被更改的原因,请与\"USN更改原因\"的常量进行位与判断.">
+    参数 时间戳 <类型 = 文件时间结构 注释 = "本次更改的文件时间戳(非Unix时间戳)">
+
+    方法 文件被重命名 <公开 定义事件 类型 = 整数 注释 = "监视到某个文件或目录被重命名,\"文件名称\"为重命名后的新名称." 折叠>
+    参数 盘符 <类型 = 字符 注释 = "当前监视的盘符">
+    参数 旧名称 <类型 = 文本型 注释 = "重命名前的旧名称">
+    参数 新名称 <类型 = 文本型 注释 = "重命名后的新名称">
+    参数 当前路径 <类型 = 文本型 注释 = "本次更改的所在路径,以路径符结尾.">
+    参数 时间戳 <类型 = 文件时间结构 注释 = "本次更改的文件时间戳(非Unix时间戳)">
+
+    方法 文件属性改变 <公开 定义事件 类型 = 整数 注释 = "监视到某个文件或目录的属性被改变" 折叠>
+    参数 盘符 <类型 = 字符 注释 = "当前监视的盘符">
+    参数 文件名称 <类型 = 文本型 注释 = "触发更改的文件或目录名称">
+    参数 当前路径 <类型 = 文本型 注释 = "本次更改的所在路径,以路径符结尾.">
+    参数 更改原因 <类型 = 整数 注释 = "文件或目录被更改的原因,请与\"USN更改原因\"的常量进行位与判断.">
+    参数 时间戳 <类型 = 文件时间结构 注释 = "本次更改的文件时间戳(非Unix时间戳)">
+
+    方法 其他状态改变 <公开 定义事件 类型 = 整数 注释 = "监视到其他不常用的文件或目录的状态或属性被改变" 折叠>
+    参数 盘符 <类型 = 字符 注释 = "当前监视的盘符">
+    参数 文件名称 <类型 = 文本型 注释 = "触发更改的文件或目录名称">
+    参数 当前路径 <类型 = 文本型 注释 = "本次更改的所在路径,以路径符结尾.">
+    参数 更改原因 <类型 = 整数 注释 = "文件或目录被更改的原因,请与\"USN更改原因\"的常量进行位与判断.">
+    参数 时间戳 <类型 = 文件时间结构 注释 = "本次更改的文件时间戳(非Unix时间戳)">
+
+    # ---
+    # @begin
+    # <> <include>
+    # std::map<wchar_t, PivUsnMonitor> m_map;
+    # inline void @an<_OnCleanupExtra>() { m_map.clear(); }
+    # <> </include>
+    # @end
+    # ---
+}
+
+类 USN更改原因 <公开 注释 = "USN日志的文件更改理由常量" 折叠 @文档 = "category = \"文件操作.辅助类\"">
+{
+    常量 覆盖数据 <公开 类型 = 整数 值 = @USN_REASON_DATA_OVERWRITE 注释 = "文件或目录中的流数据被覆盖">
+    常量 扩展数据 <公开 类型 = 整数 值 = @USN_REASON_DATA_EXTEND 注释 = "文件的流被附加了数据">
+    常量 截断数据 <公开 类型 = 整数 值 = @USN_REASON_DATA_TRUNCATION 注释 = "文件的流数据被截断">
+    常量 覆盖命名数据 <公开 类型 = 整数 值 = @USN_REASON_NAMED_DATA_OVERWRITE 注释 = "文件或目录中的命名流数据被覆盖">
+    常量 扩展命名数据 <公开 类型 = 整数 值 = @USN_REASON_NAMED_DATA_EXTEND 注释 = "文件或目录中的命名流被附加了数据">
+    常量 截断命名数据 <公开 类型 = 整数 值 = @USN_REASON_NAMED_DATA_TRUNCATION 注释 = "文件或目录中的命名流被截断">
+    常量 创建文件 <公开 类型 = 整数 值 = @USN_REASON_FILE_CREATE 注释 = "创建文件或目录">
+    常量 删除文件 <公开 类型 = 整数 值 = @USN_REASON_FILE_DELETE 注释 = "文件或目录被删除">
+    常量 扩展属性改变 <公开 类型 = 整数 值 = @USN_REASON_EA_CHANGE 注释 = "用户对文件或目录的扩展属性进行了更改."
+            注释 = "基于Windows的应用程序无法访问这些NTFS文件系统属性.">
+    常量 安全权限改变 <公开 类型 = 整数 值 = @USN_REASON_SECURITY_CHANGE 注释 = "文件或目录的访问权限被改变">
+    常量 重命名前旧名称 <公开 类型 = 整数 值 = @USN_REASON_RENAME_OLD_NAME 注释 = "文件或目录被重命名,当前USN_RECORD结构体中的文件名为旧名称.">
+    常量 重命名后新名称 <公开 类型 = 整数 值 = @USN_REASON_RENAME_NEW_NAME 注释 = "文件或目录被重命名,当前USN_RECORD结构体中的文件名为新名称.">
+    常量 索引属性改变 <公开 类型 = 整数 值 = @USN_REASON_INDEXABLE_CHANGE
+            注释 = "用户更改了FILE_ATTRIBUTE_NOT_CONTENT_INDEXED属性.">
+    常量 基本信息被改变 <公开 类型 = 整数 值 = @USN_REASON_BASIC_INFO_CHANGE
+            注释 = "用户更改了一个或多个文件或目录的属性(例如:只读、隐藏、系统、存档或稀疏属性),或者更改了一个或多个时间戳.">
+    常量 硬链接改变 <公开 类型 = 整数 值 = @USN_REASON_HARD_LINK_CHANGE 注释 = "此文件被添加或移除了一个NTFS硬链接">
+    常量 压缩状态改变 <公开 类型 = 整数 值 = @USN_REASON_COMPRESSION_CHANGE 注释 = "文件或目录的压缩状态改变">
+    常量 加密状态改变 <公开 类型 = 整数 值 = @USN_REASON_ENCRYPTION_CHANGE 注释 = "文件或目录被加密或解密">
+    常量 标识符改变 <公开 类型 = 整数 值 = @USN_REASON_OBJECT_ID_CHANGE 注释 = "文件或目录的对象标识符被改变">
+    常量 重解析点改变 <公开 类型 = 整数 值 = @USN_REASON_REPARSE_POINT_CHANGE 注释 = "文件或目录的NTFS重解析点属性被添加、更改或删除.">
+    常量 命名流改变 <公开 类型 = 整数 值 = @USN_REASON_STREAM_CHANGE 注释 = "文件或目录被被添加、重命名或移除了一个命名流.">
+    常量 事务改变 <公开 类型 = 整数 值 = @USN_REASON_TRANSACTED_CHANGE 注释 = "通过TxF事务修改给定的流">
+    常量 完整性改变 <公开 类型 = 整数 值 = 0x00800000
+            注释 = "用户更改了给定流的FILE_ATTRIBUTE_INTEGRITY_STREAM属性的状态 USN_REASON_INTEGRITY_CHANGE">
+    常量 "" <公开 类型 = 整数 值 = 0x01000000 注释 = "USN_REASON_DESIRED_STORAGE_CLASS_CHANGE">
+    常量 关闭文件 <公开 类型 = 整数 值 = @USN_REASON_CLOSE 注释 = "关闭文件或目录(大部分更改以关闭文件结束)">
+}
+
+#

@@ -42,7 +42,107 @@ namespace piv
     {
     } // namespace detail
 
-
 } // namespace piv
+
+#ifndef _PIV_BUFFER_CLASS
+#define _PIV_BUFFER_CLASS
+template <typename ELEMENT_T = BYTE, typename MEM_SIZE = DWORD>
+class PivBuffer
+{
+private:
+    ELEMENT_T *p = nullptr;
+    MEM_SIZE size = 0;
+
+public:
+    PivBuffer() {}
+    ~PivBuffer() { Free(); }
+
+    /**
+     * @brief 带参构造
+     * @param npSize 成员数
+     * @param zero 是否清零
+     */
+    PivBuffer(MEM_SIZE npSize, bool zero = true) { Alloc(npSize); }
+
+    /**
+     * @brief 分配缓存
+     * @param npSize 成员数
+     * @param zero 是否清零
+     * @return 缓存指针
+     */
+    ELEMENT_T *Alloc(MEM_SIZE npSize, bool zero = true)
+    {
+        size = npSize * sizeof(ELEMENT_T);
+        if (!p)
+            p = reinterpret_cast<ELEMENT_T *>(g_objVolApp.GetPoolMem()->Alloc(static_cast<INT_P>(size)));
+        else
+            p = reinterpret_cast<ELEMENT_T *>(g_objVolApp.GetPoolMem()->Realloc((void *)p, static_cast<INT_P>(size)));
+        if (zero)
+            memset(p, 0, static_cast<size_t>(size));
+        return p;
+    }
+
+    /**
+     * @brief 重分配缓存
+     * @param npNewSize 新成员数
+     * @param zero 是否清零
+     * @return 缓存指针
+     */
+    inline ELEMENT_T *Realloc(MEM_SIZE npNewSize, bool zero = true)
+    {
+        size = npNewSize * sizeof(ELEMENT_T);
+        p = reinterpret_cast<ELEMENT_T *>(g_objVolApp.GetPoolMem()->Realloc((void *)p, static_cast<INT_P>(size)));
+        if (zero)
+            memset(p, 0, static_cast<size_t>(size));
+        return p;
+    }
+
+    /**
+     * @brief 释放缓存
+     */
+    inline void Free()
+    {
+        if (p)
+            g_objVolApp.GetPoolMem()->Free((void *)p);
+        size = 0;
+    }
+
+    /**
+     * @brief 取指针
+     * @return
+     */
+    inline ELEMENT_T *GetPtr() { return p; }
+
+    /**
+     * @brief 取指定类型指针
+     * @tparam R 数据类型
+     * @return
+     */
+    template <typename R = ELEMENT_T>
+    inline R *Get() { return reinterpret_cast<R *>(p); }
+
+    /**
+     * @brief 取字节长度
+     * @return
+     */
+    inline MEM_SIZE GetSize() { return size; }
+
+    /**
+     * @brief 取成员数
+     * @return
+     */
+    inline MEM_SIZE GetCount() { return size / sizeof(ELEMENT_T); }
+
+    /**
+     * @brief 取成员
+     * @param pos 索引
+     * @return
+     */
+    ELEMENT_T &At(MEM_SIZE pos) { return p[pos]; }
+
+    ELEMENT_T *operator*() { return p; }
+    ELEMENT_T &operator[](MEM_SIZE pos) { return p[pos]; }
+};     // PivBuffer
+#endif // _PIV_BUFFER_CLASS
 
 #endif // _PIV_BASE_HPP

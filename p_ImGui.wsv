@@ -136,7 +136,8 @@
             注释 = "如果子窗口已被折叠或被完全裁剪,则子语句体中的代码不会被执行." 注释 = "注意: 本方法是\"子窗口开端\"和\"子窗口末端\"的结合体." 折叠 隐藏值属性 = "0"
             @嵌入式方法 = "has_body = true\r\nbody_tail = \"}\\r\\nImGui::EndChild();\"">
     参数 文本ID <注释 = "提供子窗口的文本ID(子窗口没有可显示的标签文本);" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
-    参数 子窗口尺寸 <类型 = ImVec2 注释 = "提供子窗口的尺寸,等于0.0f: 使用剩余的主窗口大小; 大于0.0f: 使用固定大小; 小于0.0f: 使用剩余窗口大小减去绝对大小">
+    参数 子窗口尺寸 <类型 = ImVec2 注释 = "提供子窗口的尺寸,等于0.0f: 使用剩余的主窗口大小; 大于0.0f: 使用固定大小; 小于0.0f: 使用剩余窗口大小减去绝对大小"
+            @默认值 = ImVec2默认值.零值>
     参数 子窗口标志 <类型 = 整数 注释 = "请参考\"IM子窗口标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM子窗口标志.无>
     参数 窗口标志 <类型 = 整数 注释 = "请参考\"IM窗口标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM窗口标志.无>
     {
@@ -162,7 +163,8 @@
     方法 子窗口开端 <公开 静态 类型 = 逻辑型 注释 = "使用子窗口开始进入主窗口内独立的滚动/剪切区域,子窗口也可以嵌入自己的子窗口."
             返回值注释 = "返回假表示子窗口已被折叠或被完全裁剪,此时你可以省略往子窗口中提交内容." 折叠 @嵌入式方法 = "">
     参数 文本ID <注释 = "提供子窗口的文本ID(子窗口没有可显示的标签文本);" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
-    参数 子窗口尺寸 <类型 = ImVec2 注释 = "提供子窗口的尺寸,等于0.0f: 使用剩余的主窗口大小; 大于0.0f: 使用固定大小; 小于0.0f: 使用剩余窗口大小减去绝对大小">
+    参数 子窗口尺寸 <类型 = ImVec2 注释 = "提供子窗口的尺寸,等于0.0f: 使用剩余的主窗口大小; 大于0.0f: 使用固定大小; 小于0.0f: 使用剩余窗口大小减去绝对大小"
+            @默认值 = ImVec2默认值.零值>
     参数 子窗口标志 <类型 = 整数 注释 = "请参考\"IM子窗口标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM子窗口标志.无>
     参数 窗口标志 <类型 = 整数 注释 = "请参考\"IM窗口标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM窗口标志.无>
     {
@@ -238,7 +240,7 @@
     方法 置下一窗口位置 <公开 静态 注释 = "设置下一个窗口的位置,请在\"窗口/窗口开端\"之前调用." 折叠 @嵌入式方法 = "">
     参数 窗口位置 <类型 = ImVec2>
     参数 执行条件 <类型 = IM执行条件 @默认值 = IM执行条件.无>
-    参数 窗口中心点 <类型 = ImVec2 注释 = "提供窗口的中心点位置,(0.5,0.5)为中间.">
+    参数 窗口中心点 <类型 = ImVec2 注释 = "提供窗口的中心点位置,(0.5,0.5)为中间." @默认值 = ImVec2默认值.零值>
     {
         @ ImGui::SetNextWindowPos(@<窗口位置>, static_cast<ImGuiCond>(@<执行条件>), @<窗口中心点>)
     }
@@ -476,9 +478,9 @@
         @ ImGui::PushStyleVar(static_cast<ImGuiStyleVar>(@<样式变量ID>), @<新值>)
     }
 
-    方法 压入样式变量2 <公开 静态 注释 = "在\"新建帧\"之后需要调用本方法修改一个\"ImVec4\"变量的样式,必须与\"弹出样式变量\"成对使用." 折叠 @嵌入式方法 = "">
+    方法 压入样式变量2 <公开 静态 注释 = "在\"新建帧\"之后需要调用本方法修改一个\"ImVec2\"变量的样式,必须与\"弹出样式变量\"成对使用." 折叠 @嵌入式方法 = "">
     参数 样式变量ID <类型 = IM样式标识符>
-    参数 新值 <类型 = ImVec4>
+    参数 新值 <类型 = ImVec2>
     {
         @ ImGui::PushStyleVar(static_cast<ImGuiStyleVar>(@<样式变量ID>), @<新值>)
     }
@@ -821,7 +823,7 @@
     参数 标签文本 <注释 = "提供显示在按钮旁边的标签文本;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;"
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
-    参数 按钮尺寸 <类型 = ImVec2 注释 = "提供按钮的宽高,ImVec2.创建(0, 0)为自动根据标签文本的长度调整宽度.">
+    参数 按钮尺寸 <类型 = ImVec2 注释 = "提供按钮的宽高,ImVec2(0, 0)为自动根据标签文本的长度调整宽度." @默认值 = ImVec2默认值.零值>
     {
         @ ImGui::Button(*PivAny2U{@<标签文本>}, @<按钮尺寸>)
     }
@@ -892,7 +894,7 @@
     方法 进度条 <公开 静态 注释 = "创建一个进度条组件" 折叠 @嵌入式方法 = "">
     参数 进度 <类型 = 单精度小数 注释 = "提供当前的进度位置,范围[0.0-1.0].">
     参数 尺寸 <类型 = ImVec2 注释 = "提供进度条的像素尺寸,小于0.0将使用全部可用宽度/高度," 注释 = "等于0.0为默认的项目宽度/高度,大于0.0则使用提供的宽度/高度."
-            注释 = "推荐默认值: ImVec2.创建(-1.0, 0)">
+            注释 = "推荐默认值: ImVec2(-FLT_MIN, 0)" @默认值 = ImVec2默认值.最小_零>
     参数 覆盖文本 <类型 = 标准文本类U 注释 = "默认在进度条上显示如\"95%\"的当前进度文本,若提供了自定义的文本,将覆盖原来的进度文本." @默认值 = 空对象>
     {
         @ ImGui::ProgressBar(@<进度>, @<尺寸>, @<覆盖文本>.GetTextMaybeNull())
@@ -908,10 +910,10 @@
     方法 图片框 <公开 静态 注释 = "创建一个图片框组件" 折叠 @嵌入式方法 = "">
     参数 图片纹理ID <类型 = 长整数 注释 = "提供图片纹理ID,请使用\"IM_×××渲染器.加载图片××()\".">
     参数 图片尺寸 <类型 = ImVec2 注释 = "提供纹理图片的显示尺寸,单位为像素,本参数可以缩放图片.">
-    参数 左上纹理坐标 <类型 = ImVec2 注释 = "提供纹理的左上坐标,ImVec2.创建(0.0, 0.0) 表示最左上角,修改该值可以裁剪显示部分图像.">
-    参数 右下纹理坐标 <类型 = ImVec2 注释 = "提供纹理的右下坐标,ImVec2.创建(1.0, 1.0) 表示最右下角,修改该值可以裁剪显示部分图像.">
-    参数 色调 <类型 = ImVec4 注释 = "ImVec4.创建(1, 1, 1, 1) 表示不添加色调">
-    参数 边框颜色 <类型 = ImVec4 注释 = "ImVec4.创建(0, 0, 0, 0) 为黑色边框">
+    参数 左上纹理坐标 <类型 = ImVec2 注释 = "提供纹理的左上坐标,ImVec2(0, 0) 表示最左上角,修改该值可以裁剪显示部分图像." @默认值 = ImVec2默认值.零值>
+    参数 右下纹理坐标 <类型 = ImVec2 注释 = "提供纹理的右下坐标,ImVec2(1, 1) 表示最右下角,修改该值可以裁剪显示部分图像." @默认值 = ImVec2默认值.双一值>
+    参数 色调 <类型 = ImVec4 注释 = "ImVec4(1, 1, 1, 1) 表示不添加色调" @默认值 = ImVec4默认值.全一值>
+    参数 边框颜色 <类型 = ImVec4 注释 = "ImVec4(0, 0, 0, 0) 为黑色边框" @默认值 = ImVec4默认值.零值>
     {
         @ ImGui::Image((ImTextureID)@<图片纹理ID>, @<图片尺寸>, @<左上纹理坐标>, @<右下纹理坐标>, @<色调>, @<边框颜色>)
     }
@@ -920,10 +922,10 @@
     参数 文本ID <注释 = "提供组件的唯一文本ID,本ID不会显示在按钮中;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     参数 图片纹理ID <类型 = 长整数 注释 = "提供图片纹理ID,请使用\"IM_×××渲染器.加载图片××()\".">
     参数 图片尺寸 <类型 = ImVec2 注释 = "提供纹理图片的显示尺寸,单位为像素,本参数可以缩放图片.">
-    参数 左上纹理坐标 <类型 = ImVec2 注释 = "提供纹理的左上坐标,ImVec2.创建(0.0, 0.0) 表示最左上角,修改该值可以裁剪显示部分图像.">
-    参数 右下纹理坐标 <类型 = ImVec2 注释 = "提供纹理的右下坐标,ImVec2.创建(1.0, 1.0) 表示最右下角,修改该值可以裁剪显示部分图像.">
-    参数 背景颜色 <类型 = ImVec4 注释 = "ImVec4.创建(0, 0, 0, 0) 为黑色背景">
-    参数 色调 <类型 = ImVec4 注释 = "ImVec4.创建(1, 1, 1, 1) 表示不添加色调">
+    参数 左上纹理坐标 <类型 = ImVec2 注释 = "提供纹理的左上坐标,ImVec2(0, 0) 表示最左上角,修改该值可以裁剪显示部分图像." @默认值 = ImVec2默认值.零值>
+    参数 右下纹理坐标 <类型 = ImVec2 注释 = "提供纹理的右下坐标,ImVec2(1, 1) 表示最右下角,修改该值可以裁剪显示部分图像." @默认值 = ImVec2默认值.双一值>
+    参数 背景颜色 <类型 = ImVec4 注释 = "ImVec4.创建(0, 0, 0, 0) 为黑色背景" @默认值 = ImVec4默认值.零值>
+    参数 色调 <类型 = ImVec4 注释 = "ImVec4.创建(1, 1, 1, 1) 表示不添加色调" @默认值 = ImVec4默认值.全一值>
     {
         @ ImGui::ImageButton(*PivAny2U{@<文本ID>}, (ImTextureID)@<图片纹理ID>, @<图片尺寸>, @<左上纹理坐标>, @<右下纹理坐标>, @<背景颜色>, @<色调>)
     }
@@ -1556,7 +1558,7 @@
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
     参数 文本内容 <类型 = 标准文本类U 注释 = "必须提供一个\"标准文本类U\"变量,并确保其生命周期,输入的内容将保存在此变量中." @需求类型 = 可写入变量>
-    参数 尺寸 <类型 = ImVec2 注释 = "提供输入框的尺寸">
+    参数 尺寸 <类型 = ImVec2 注释 = "提供输入框的尺寸" @默认值 = ImVec2默认值.零值>
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
         @ ImGui::InputTextMultiline(*PivAny2U{@<标签文本>}, @<文本内容>.pdata(), @<尺寸>, static_cast<ImGuiInputTextFlags>(@<输入框标志>), nullptr, nullptr)
@@ -1799,7 +1801,7 @@
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
     参数 颜色 <类型 = ImVec4 注释 = "提供色板的颜色">
     参数 颜色编辑标志 <类型 = 整数 注释 = "请使用\"IM颜色编辑标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM颜色编辑标志.无>
-    参数 尺寸 <类型 = ImVec2 注释 = "提供按钮的尺寸,ImVec2.创建(0, 0)为默认尺寸.">
+    参数 尺寸 <类型 = ImVec2 注释 = "提供按钮的尺寸,ImVec2(0, 0)为默认尺寸." @默认值 = ImVec2默认值.零值>
     {
         @ ImGui::ColorButton(*PivAny2U{@<描述文本>}, @<颜色>, static_cast<ImGuiColorEditFlags>(@<颜色编辑标志>), @<尺寸>)
     }
@@ -1865,7 +1867,7 @@
     参数 是否选中 <类型 = 逻辑型 注释 = "指定当前是否被选中" @默认值 = 假>
     参数 可选项标志 <类型 = 整数 注释 = "请使用\"IM可选项标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM可选项标志.无>
     参数 尺寸 <类型 = ImVec2 注释 = "x等于0.0：使用剩余宽度,x大于0.0：使用指定宽度;" 注释 = "y等于0.0: 使用标签文本高度,y大于0.0: 使用指定高度;"
-            注释 = "推荐默认值: ImVec2.创建(0, 0)">
+            @默认值 = ImVec2默认值.零值>
     {
         @ ImGui::Selectable(*PivAny2U{@<标签文本>}, static_cast<bool>(@<是否选中>), static_cast<ImGuiSelectableFlags>(@<可选项标志>), @<尺寸>)
     }
@@ -1878,7 +1880,7 @@
     参数 是否选中 <类型 = 逻辑型 注释 = "必须提供一个逻辑型变量,并确保它的生命周期." @需求类型 = 可写入变量>
     参数 可选项标志 <类型 = 整数 注释 = "请使用\"IM可选项标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM可选项标志.无>
     参数 尺寸 <类型 = ImVec2 注释 = "x等于0.0：使用剩余宽度,x大于0.0：使用指定宽度;" 注释 = "y等于0.0: 使用标签文本高度,y大于0.0: 使用指定高度;"
-            注释 = "推荐默认值: ImVec2.创建(0, 0)">
+            @默认值 = ImVec2默认值.零值>
     {
         @ ImGui::Selectable(*PivAny2U{@<标签文本>}, reinterpret_cast<bool*>(&@<是否选中>), static_cast<ImGuiSelectableFlags>(@<可选项标志>), @<尺寸>)
     }
@@ -1890,7 +1892,7 @@
     参数 标签文本 <注释 = "提供显示在列表框旁边的标签文本;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;"
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
-    参数 尺寸 <类型 = ImVec2 注释 = "提供列表框的尺寸,推荐默认值: ImVec2.创建(0, 0)">
+    参数 尺寸 <类型 = ImVec2 注释 = "提供列表框的尺寸" @默认值 = ImVec2默认值.零值>
     {
         @ if (ImGui::BeginListBox(*PivAny2U{@<标签文本>}, @<尺寸>) == true)
     }
@@ -2109,7 +2111,7 @@
             注释 = "create an explicit dock node _within_ an existing window. See Docking demo for details." 折叠
             @嵌入式方法 = "">
     参数 ID <类型 = 整数>
-    参数 尺寸 <类型 = ImVec2>
+    参数 尺寸 <类型 = ImVec2 @默认值 = ImVec2默认值.零值>
     参数 标志 <类型 = 整数 @默认值 = IM停靠节点标志.无>
     参数 窗口类指针 <类型 = 变整数 注释 = "IM窗口类指针.取变整数指针()" @默认值 = 0>
     {
@@ -2529,7 +2531,7 @@
     方法 矩形可有鼠标悬停 <公开 静态 类型 = 逻辑型 注释 = "返回鼠标是否悬停在给定的边界矩形上" 折叠 @嵌入式方法 = "">
     参数 左上矩形 <类型 = ImVec2>
     参数 右下矩形 <类型 = ImVec2>
-    参数 是否剪切 <类型 = 逻辑型>
+    参数 是否剪切 <类型 = 逻辑型 @默认值 = 真>
     {
         @ ImGui::IsMouseHoveringRect(@<左上矩形>, @<右下矩形>, static_cast<bool>(@<是否剪切>))
     }
@@ -2644,7 +2646,7 @@
     参数 文本ID <注释 = "设置表格的唯一文本ID,本ID不会显示在表格中;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     参数 列数 <类型 = 整数 注释 = "提供表格的列数">
     参数 表格标志 <类型 = 整数 注释 = "请参考\"IM表格标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM表格标志.无>
-    参数 外边框尺寸 <类型 = ImVec2 注释 = "推荐默认值: ImVec2.创建(0, 0)">
+    参数 外边框尺寸 <类型 = ImVec2 @默认值 = ImVec2默认值.零值>
     参数 内宽度 <类型 = 单精度小数 @默认值 = 0.0>
     {
         @ if (ImGui::BeginTable(*PivAny2U{@<文本ID>}, @<列数>, static_cast<ImGuiTableFlags>(@<表格标志>), @<外边框尺寸>, @<内宽度>) == true)
@@ -2958,7 +2960,7 @@
         @ @<欲操作本对象>->AddText(@<位置>, static_cast<ImU32>(@<颜色>), *PivAny2U{@<文本内容>}, nullptr)
     }
 
-    方法 添加文本Ex <公开 静态 @嵌入式方法 = "">
+    方法 添加文本Ex <公开 静态 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = IM绘制列表>
     参数 字体 <类型 = IM字体指针>
     参数 字体大小 <类型 = 单精度小数>
@@ -3016,36 +3018,36 @@
 
     # 图像基元 | Image primitives
 
-    方法 添加图像 <公开 静态 @嵌入式方法 = "">
+    方法 添加图像 <公开 静态 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = IM绘制列表>
     参数 用户纹理ID <类型 = 长整数>
     参数 左上矩形 <类型 = ImVec2>
     参数 右下矩形 <类型 = ImVec2>
-    参数 左上纹理坐标 <类型 = ImVec2 注释 = "提供纹理的左上坐标,ImVec2.创建(0.0, 0.0) 表示最左上角,修改该值可以裁剪显示部分图像.">
-    参数 右下纹理坐标 <类型 = ImVec2 注释 = "提供纹理的右下坐标,ImVec2.创建(1.0, 1.0) 表示最右下角,修改该值可以裁剪显示部分图像.">
+    参数 左上纹理坐标 <类型 = ImVec2 注释 = "提供纹理的左上坐标,ImVec2(0, 0) 表示最左上角,修改该值可以裁剪显示部分图像." @默认值 = ImVec2默认值.零值>
+    参数 右下纹理坐标 <类型 = ImVec2 注释 = "提供纹理的右下坐标,ImVec2(1, 1) 表示最右下角,修改该值可以裁剪显示部分图像." @默认值 = ImVec2默认值.双一值>
     参数 颜色 <类型 = 整数 注释 = "默认为白色" @默认值 = 0xFFFFFFFF>
     {
         @ @<欲操作本对象>->AddImage((ImTextureID)@<用户纹理ID>, @<左上矩形>, @<右下矩形>, @<左上纹理坐标>, @<右下纹理坐标>, static_cast<ImU32>(@<颜色>))
     }
 
-    方法 添加四边形图像 <公开 静态 @嵌入式方法 = "">
+    方法 添加四边形图像 <公开 静态 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = IM绘制列表>
     参数 用户纹理ID <类型 = 长整数>
     参数 端点1 <类型 = ImVec2>
     参数 端点2 <类型 = ImVec2>
     参数 端点3 <类型 = ImVec2>
     参数 端点4 <类型 = ImVec2>
-    参数 纹理坐标1 <类型 = ImVec2 注释 = "推荐默认值: ImVec2.创建(0, 0)" @默认值 = 空对象>
-    参数 纹理坐标2 <类型 = ImVec2 注释 = "推荐默认值: ImVec2.创建(1, 0)" @默认值 = 空对象>
-    参数 纹理坐标3 <类型 = ImVec2 注释 = "推荐默认值: ImVec2.创建(1, 1)" @默认值 = 空对象>
-    参数 纹理坐标4 <类型 = ImVec2 注释 = "推荐默认值: ImVec2.创建(0, 1)" @默认值 = 空对象>
+    参数 纹理坐标1 <类型 = ImVec2 @默认值 = ImVec2默认值.零值>
+    参数 纹理坐标2 <类型 = ImVec2 @默认值 = ImVec2默认值.壹_零>
+    参数 纹理坐标3 <类型 = ImVec2 @默认值 = ImVec2默认值.双一值>
+    参数 纹理坐标4 <类型 = ImVec2 @默认值 = ImVec2默认值.零_壹>
     参数 颜色 <类型 = 整数 注释 = "默认为白色" @默认值 = 0xFFFFFFFF>
     {
         @ @<欲操作本对象>->AddImageQuad((ImTextureID)@<用户纹理ID>, @<端点1>, @<端点2>, @<端点3>, @<端点4>, @<纹理坐标1>,
         @     @<纹理坐标2>, @<纹理坐标3>, @<纹理坐标4>, static_cast<ImU32>(@<颜色>))
     }
 
-    方法 添加圆角矩形图像 <公开 静态 @嵌入式方法 = "">
+    方法 添加圆角矩形图像 <公开 静态 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = IM绘制列表>
     参数 用户纹理ID <类型 = 长整数>
     参数 左上矩形 <类型 = ImVec2>
@@ -3553,13 +3555,13 @@
     }
 }
 
-类 ImVec2 <公开 基础类 = PIV本地类模板 注释 = "ImVec2" 折叠 @文档 = "category = \"辅助类\"" @别名 = "ImVec2"
+类 ImVec2 <公开 基础类 = PIV本地值模板 注释 = "ImVec2" 折叠 @文档 = "category = \"辅助类\"" @别名 = "ImVec2"
         @模板实现类 = "ImVec2">
 {
     变量 x <公开 类型 = 单精度小数 @输出名 = "x" @属性变量 = 真>
     变量 y <公开 类型 = 单精度小数 @输出名 = "y" @属性变量 = 真>
 
-    方法 创建 <公开 静态 类型 = ImVec2 注释 = "带参构造一个ImVec2实例,请以类名使用本方法." @嵌入式方法 = "">
+    方法 创建 <公开 静态 类型 = ImVec2 注释 = "带参构造一个ImVec2实例,请以类名使用本方法." 折叠 @嵌入式方法 = "">
     参数 x值 <类型 = 单精度小数 @默认值 = 0>
     参数 y值 <类型 = 单精度小数 @默认值 = 0>
     {
@@ -3567,7 +3569,7 @@
     }
 
     方法 置值 <公开 静态 注释 = "一个命令设置ImVec2的所有值" 折叠>
-    参数 欲操作本对象 <类型 = ImVec2>
+    参数 欲操作本对象 <类型 = ImVec2 @视窗.后缀文本 = "&">
     参数 x值 <类型 = 单精度小数>
     参数 y值 <类型 = 单精度小数>
     {
@@ -3582,13 +3584,18 @@
     }
 }
 
-类 ImVec2数组类 <公开 基础类 = IM数组模板 折叠 @文档 = "category = \"辅助类\"" @模板实现类 = "ImVec2">
+类 ImVec2默认值 <公开 注释 = "提供ImVec2的常用默认值" 折叠 @文档 = "category = \"常量类\"">
 {
-
-    # @ @m<PIV_DECLARE_VECTOR_CLASS> (ImVec2)
+    常量 零值 <公开 类型 = ImVec2 值 = @"@ImVec2(0, 0)" 注释 = "(0, 0)">
+    常量 最小_零 <公开 类型 = ImVec2 值 = @"@ImVec2(-FLT_MIN, 0)" 注释 = "(-FLT_MIN, 0)">
+    常量 双一值 <公开 类型 = ImVec2 值 = @"@ImVec2(1, 1)" 注释 = "(1, 1)">
+    常量 壹_零 <公开 类型 = ImVec2 值 = @"@ImVec2(1, 0)" 注释 = "(1, 0)">
+    常量 零_壹 <公开 类型 = ImVec2 值 = @"@ImVec2(0, 1)" 注释 = "(0, 1)">
 }
 
-类 ImVec4 <公开 基础类 = PIV本地类模板 注释 = "ImVec4" 折叠 @文档 = "category = \"辅助类\"" @别名 = "ImVec4"
+类 ImVec2数组类 <公开 基础类 = IM数组模板 @文档 = "category = \"辅助类\"" @模板实现类 = "ImVec2">
+
+类 ImVec4 <公开 基础类 = PIV本地值模板 注释 = "ImVec4" 折叠 @文档 = "category = \"辅助类\"" @别名 = "ImVec4"
         @模板实现类 = "ImVec4">
 {
     变量 x <公开 类型 = 单精度小数 @输出名 = "x" @属性变量 = 真>
@@ -3606,7 +3613,7 @@
     }
 
     方法 置值 <公开 静态 注释 = "一个命令设置ImVec4的所有值" 折叠>
-    参数 欲操作本对象 <类型 = ImVec4>
+    参数 欲操作本对象 <类型 = ImVec4 @视窗.后缀文本 = "&">
     参数 x值 <类型 = 单精度小数>
     参数 y值 <类型 = 单精度小数>
     参数 z值 <类型 = 单精度小数>
@@ -3623,6 +3630,13 @@
     {
         返回 (取格式文本 ("<ImVec4> {x: %.2f, y: %.2f, z: %.2f, w: %.2f}", 欲操作本对象.x, 欲操作本对象.y, 欲操作本对象.z, 欲操作本对象.w))
     }
+}
+
+类 ImVec4默认值 <公开 注释 = "提供ImVec4的常用默认值" 折叠 @文档 = "category = \"常量类\"">
+{
+    常量 零值 <公开 类型 = ImVec4 值 = @"@ImVec4(0, 0, 0, 0)" 注释 = "(0, 0, 0, 0)">
+    常量 全一值 <公开 类型 = ImVec4 值 = @"@ImVec4(1, 1, 1, 1)" 注释 = "(1, 1, 1, 1)">
+    常量 默认背景色 <公开 类型 = ImVec4 值 = @"@ImVec4(0.45, 0.55, 0.60, 1.00)" 注释 = "(0.45, 0.55, 0.60, 1.00)">
 }
 
 类 IM图片信息类 <公开 基础类 = 扩展对象类 折叠 @文档 = "category = \"辅助类\"">
@@ -3688,10 +3702,10 @@
 
     # 停靠选项
 
-    变量 "" <公开 类型 = 逻辑型
+    变量 禁止分拆停靠 <公开 类型 = 逻辑型
             注释 = "Simplified docking mode: disable window splitting, so docking is limited to merging multiple windows together into tab-bars."
             @输出名 = "ConfigDockingNoSplit">
-    变量 "" <公开 类型 = 逻辑型
+    变量 按住Shift启用停靠 <公开 类型 = 逻辑型
             注释 = "Enable docking with holding Shift key (reduce visual noise, allows dropping in wider space)"
             @输出名 = "ConfigDockingWithShift">
     变量 "" <公开 类型 = 逻辑型
@@ -3703,16 +3717,16 @@
 
     # 视口选项
 
-    变量 "" <公开 类型 = 逻辑型
+    变量 禁止自动合并视口 <公开 类型 = 逻辑型
             注释 = "Set to make all floating imgui windows always create their own viewport. Otherwise, they are merged into the main host viewports when overlapping it. May also set ImGuiViewportFlags_NoAutoMerge on individual viewport."
             @输出名 = "ConfigViewportsNoAutoMerge">
-    变量 "" <公开 类型 = 逻辑型
+    变量 子视口无任务栏图标 <公开 类型 = 逻辑型
             注释 = "Disable default OS task bar icon flag for secondary viewports. When a viewport doesn\'t want a task bar icon, ImGuiViewportFlags_NoTaskBarIcon will be set on it."
             @输出名 = "ConfigViewportsNoTaskBarIcon">
-    变量 "" <公开 类型 = 逻辑型
+    变量 子视口无边框 <公开 类型 = 逻辑型
             注释 = "Disable default OS window decoration flag for secondary viewports. When a viewport doesn\'t want window decorations, ImGuiViewportFlags_NoDecoration will be set on it. Enabling decoration can create subsequent issues at OS levels (e.g. minimum window size)."
             @输出名 = "ConfigViewportsNoDecoration">
-    变量 "" <公开 类型 = 逻辑型
+    变量 子视口无父视口 <公开 类型 = 逻辑型
             注释 = "Disable default OS parenting to main viewport for secondary viewports. By default, viewports are marked with ParentViewportId = <main_viewport>, expecting the platform backend to setup a parent/child relationship between the OS windows (some backend may ignore this). Set to true if you want the default to be 0, then all viewports will be top-level OS windows."
             @输出名 = "ConfigViewportsNoDefaultParent">
 
@@ -3724,10 +3738,10 @@
     变量 "" <公开 类型 = 逻辑型
             注释 = "OS X style: Text editing cursor movement using Alt instead of Ctrl, Shortcuts using Cmd/Super instead of Ctrl, Line/Text Start and End using Cmd+Arrows instead of Home/End, Double click selects by word instead of selecting whole text, Multi-selection in lists uses Cmd/Super instead of Ctrl."
             @输出名 = "ConfigMacOSXBehaviors">
-    变量 "" <公开 类型 = 逻辑型
+    变量 减慢输入事件队列 <公开 类型 = 逻辑型
             注释 = "Enable input queue trickling: some types of events submitted during the same frame (e.g. button down + up) will be spread over multiple frames, improving interactions with low framerates."
             @输出名 = "ConfigInputTrickleEventQueue">
-    变量 "" <公开 类型 = 逻辑型
+    变量 输入文本闪烁光标 <公开 类型 = 逻辑型
             注释 = "Enable blinking cursor (optional as some users consider it to be distracting)."
             @输出名 = "ConfigInputTextCursorBlink">
     变量 "" <公开 类型 = 逻辑型
@@ -3736,13 +3750,13 @@
     变量 "" <公开 类型 = 逻辑型
             注释 = "[BETA] Enable turning DragXXX widgets into text input with a simple mouse click-release (without moving). Not desirable on devices without a keyboard."
             @输出名 = "ConfigDragClickToInputText">
-    变量 "" <公开 类型 = 逻辑型
+    变量 拖动边框重设窗口大小 <公开 类型 = 逻辑型
             注释 = "Enable resizing of windows from their edges and from the lower-left corner. This requires (io.BackendFlags & ImGuiBackendFlags_HasMouseCursors) because it needs mouse cursor feedback. (This used to be a per-window ImGuiWindowFlags_ResizeFromAnySide flag)"
             @输出名 = "ConfigWindowsResizeFromEdges">
-    变量 "" <公开 类型 = 逻辑型
+    变量 只能通过标题栏移动窗口 <公开 类型 = 逻辑型
             注释 = "Enable allowing to move windows only when clicking on their title bar. Does not apply to windows without a title bar."
             @输出名 = "ConfigWindowsMoveFromTitleBarOnly">
-    变量 "" <公开 类型 = 单精度小数
+    变量 内存规整时钟 <公开 类型 = 单精度小数
             注释 = "Timer (in seconds) to free transient windows/tables memory buffers when unused. Set to -1.0f to disable."
             @输出名 = "ConfigMemoryCompactTimer">
 
@@ -3761,36 +3775,37 @@
 
     # Output - Updated by NewFrame() or EndFrame()/Render()
 
-    变量 "" <公开 类型 = 逻辑型
+    变量 需要捕获鼠标 <公开 类型 = 逻辑型
             注释 = "Set when Dear ImGui will use mouse inputs, in this case do not dispatch them to your main game/application (either way, always pass on mouse inputs to imgui). (e.g. unclicked mouse is hovering over an imgui window, widget is active, mouse was clicked over an imgui window, etc.)."
             @输出名 = "WantCaptureMouse">
-    变量 "" <公开 类型 = 逻辑型
+    变量 需要捕获键盘 <公开 类型 = 逻辑型
             注释 = "Set when Dear ImGui will use keyboard inputs, in this case do not dispatch them to your main game/application (either way, always pass keyboard inputs to imgui). (e.g. InputText active, or an imgui window is focused and navigation is enabled, etc.)."
             @输出名 = "WantCaptureKeyboard">
-    变量 "" <公开 类型 = 逻辑型
+    变量 需要输入文本 <公开 类型 = 逻辑型
             注释 = "Mobile/console: when set, you may display an on-screen keyboard. This is set by Dear ImGui when it wants textual keyboard input to happen (e.g. when a InputText widget is active)."
             @输出名 = "WantTextInput">
-    变量 "" <公开 类型 = 逻辑型
+    变量 需要置鼠标位置 <公开 类型 = 逻辑型
             注释 = "MousePos has been altered, backend should reposition mouse on next frame. Rarely used! Set only when ImGuiConfigFlags_NavEnableSetMousePos flag is enabled."
             @输出名 = "WantSetMousePos">
-    变量 "" <公开 类型 = 逻辑型
+    变量 需要保存INI配置 <公开 类型 = 逻辑型
             注释 = "When manual .ini load/save is active (io.IniFilename == NULL), this will be set to notify your application that you can call SaveIniSettingsToMemory() and save yourself. Important: clear io.WantSaveIniSettings yourself after saving!"
             @输出名 = "WantSaveIniSettings">
-    变量 "" <公开 类型 = 逻辑型
+    变量 导航已激活 <公开 类型 = 逻辑型
             注释 = "Keyboard/Gamepad navigation is currently allowed (will handle ImGuiKey_NavXXX events) = a window is focused and it doesn\'t use the ImGuiWindowFlags_NoNavInputs flag."
             @输出名 = "NavActive">
-    变量 "" <公开 类型 = 逻辑型
+    变量 导航已可见 <公开 类型 = 逻辑型
             注释 = "Keyboard/Gamepad navigation is visible and allowed (will handle ImGuiKey_NavXXX events)."
             @输出名 = "NavVisible">
     变量 帧速率 <公开 类型 = 单精度小数 注释 = "应用程序的平均帧速率fps,本值每帧变动."
             注释 = "Estimate of application framerate (rolling average over 60 frames, based on io.DeltaTime), in frame per second. Solely for convenience. Slow applications may not want to use a moving average or may want to reset underlying buffers occasionally."
             @输出名 = "Framerate">
-    变量 "" <公开 类型 = 逻辑型 注释 = "Vertices output during last call to Render()" @输出名 = "MetricsRenderVertices">
-    变量 "" <公开 类型 = 整数 注释 = "Indices output during last call to Render() = number of triangles * 3"
+    变量 渲染顶点数 <公开 类型 = 逻辑型 注释 = "Vertices output during last call to Render()"
+            @输出名 = "MetricsRenderVertices">
+    变量 渲染索引数 <公开 类型 = 整数 注释 = "Indices output during last call to Render() = number of triangles * 3"
             @输出名 = "MetricsRenderIndices">
-    变量 "" <公开 类型 = 整数 注释 = "Number of visible windows" @输出名 = "MetricsRenderWindows">
-    变量 "" <公开 类型 = 整数 注释 = "Number of active windows" @输出名 = "MetricsActiveWindows">
-    变量 "" <公开 类型 = ImVec2
+    变量 可见窗口数 <公开 类型 = 整数 注释 = "Number of visible windows" @输出名 = "MetricsRenderWindows">
+    变量 活动窗口数 <公开 类型 = 整数 注释 = "Number of active windows" @输出名 = "MetricsActiveWindows">
+    变量 鼠标增量 <公开 类型 = ImVec2
             注释 = "Mouse delta. Note that this is zero if either current or previous position are invalid (-FLT_MAX,-FLT_MAX), so a disappearing/reappearing mouse won\'t have a huge delta."
             @输出名 = "MouseDelta">
 
@@ -4175,12 +4190,12 @@
 类 IM平台IO类 <公开 基础类 = PIV结构指针模板 注释 = "本类使用指针封装,必须在创建或赋值后使用(用\"为空指针\"判断)." @文档 = "category = \"辅助类\""
         @别名 = "ImGuiPlatformIO*" @模板实现类 = "IM平台IO类">
 
-类 IM字符 <公开 基础类 = PIV数值模板 注释 = "ImWchar" @别名 = "ImWchar" @模板实现类 = "IM字符">
+类 IM字符 <公开 基础类 = PIV数值模板 注释 = "ImWchar" @文档 = "category = \"辅助类\"" @别名 = "ImWchar" @模板实现类 = "IM字符">
 
-类 IM字符数组类 <公开 基础类 = IM数组模板 注释 = "ImVector<ImWchar>" @模板实现类 = "IM字符">
+类 IM字符数组类 <公开 基础类 = IM数组模板 注释 = "ImVector<ImWchar>" @文档 = "category = \"辅助类\"" @模板实现类 = "IM字符">
 
-类 IM绘制列表共享数据指针 <公开 注释 = "可用于自行创建\"IM绘制列表\"实例,只能由\"ImGUI.取绘制列表共享数据()\"返回." @别名 = "ImDrawListSharedData*"
-        @别名类型 = 本地参考类型>
+类 IM绘制列表共享数据指针 <公开 注释 = "可用于自行创建\"IM绘制列表\"实例,只能由\"ImGUI.取绘制列表共享数据()\"返回." @文档 = "category = \"辅助类\""
+        @别名 = "ImDrawListSharedData*" @别名类型 = 本地参考类型>
 
 # 标志常量
 
@@ -4206,8 +4221,6 @@
             注释 = "当窗口获得焦点时,禁止将窗口置于顶层(例如单击窗口或以编程方式让窗口获得焦点).">
     常量 始终显示垂直滚动条 <公开 类型 = 整数 值 = @ImGuiWindowFlags_AlwaysVerticalScrollbar 注释 = "始终显示垂直滚动条,即使内容高度小于窗口高度.">
     常量 始终显示水平滚动条 <公开 类型 = 整数 值 = @ImGuiWindowFlags_AlwaysHorizontalScrollbar 注释 = "始终显示水平滚动条,即使内容宽度小于窗口宽度.">
-    常量 "// 始终使用窗口边距" <类型 = 整数 值 = @ImGuiWindowFlags_AlwaysUseWindowPadding
-            注释 = "Ensure child windows without border uses style.WindowPadding (ignored by default for non-bordered child windows, because more convenient)">
     常量 禁止导航输入 <公开 类型 = 整数 值 = @ImGuiWindowFlags_NoNavInputs 注释 = "禁止使用游戏手柄和鼠标导航窗口(控制窗口的前进、后退、刷新等)">
     常量 禁止导航焦点 <公开 类型 = 整数 值 = @ImGuiWindowFlags_NoNavFocus 注释 = "使用游戏手柄和鼠标导航窗口将无法焦点到此窗口,除了CTRL+TAB">
     常量 未保存文档 <公开 类型 = 整数 值 = @ImGuiWindowFlags_UnsavedDocument 注释 = "在窗口标题后面显示一个小圆点"
@@ -4286,13 +4299,13 @@
             注释 = "Draw frame with background (e.g. for CollapsingHeader)">
     常量 允许项目重叠 <公开 类型 = 整数 值 = @ImGuiTreeNodeFlags_AllowItemOverlap
             注释 = "Hit testing to allow subsequent widgets to overlap this one">
-    常量 "" <公开 类型 = 整数 值 = @ImGuiTreeNodeFlags_NoTreePushOnOpen
+    常量 打开时不压入堆栈 <公开 类型 = 整数 值 = @ImGuiTreeNodeFlags_NoTreePushOnOpen
             注释 = "Don\'t do a TreePush() when open (e.g. for CollapsingHeader) = no extra indent nor pushing on ID stack">
-    常量 "" <公开 类型 = 整数 值 = @ImGuiTreeNodeFlags_NoAutoOpenOnLog
+    常量 记录日志时不自动打开 <公开 类型 = 整数 值 = @ImGuiTreeNodeFlags_NoAutoOpenOnLog
             注释 = "Don\'t automatically and temporarily open node when Logging is active (by default logging will automatically open tree nodes)">
     常量 默认打开节点 <公开 类型 = 整数 值 = @ImGuiTreeNodeFlags_DefaultOpen 注释 = "Default node to be open">
     常量 以双击打开 <公开 类型 = 整数 值 = @ImGuiTreeNodeFlags_OpenOnDoubleClick 注释 = "Need double-click to open node">
-    常量 以剪头打开 <公开 类型 = 整数 值 = @ImGuiTreeNodeFlags_OpenOnArrow
+    常量 以箭头打开 <公开 类型 = 整数 值 = @ImGuiTreeNodeFlags_OpenOnArrow
             注释 = "Only open when clicking on the arrow part. If ImGuiTreeNodeFlags_OpenOnDoubleClick is also set, single-click arrow or double-click all box to open.">
     常量 书页 <公开 类型 = 整数 值 = @ImGuiTreeNodeFlags_Leaf
             注释 = "No collapsing, no arrow (use as a convenience for leaf nodes).">
@@ -4314,7 +4327,7 @@
 }
 
 类 IM弹出标志 <公开
-        注释 = "ImGuiPopupFlags Flags for OpenPopup*(), BeginPopupContext*(), IsPopupOpen() functions."
+        注释 = "ImGuiPopupFlags Flags for OpenPopup*(), BeginPopupContext*(), IsPopupOpen() functions." 折叠
         @文档 = "category = \"标志类\"">
 {
     常量 无 <公开 类型 = 整数 值 = @ImGuiPopupFlags_None>
@@ -4324,19 +4337,19 @@
             注释 = "For BeginPopupContext*(): open on Right Mouse release. Guaranteed to always be == 1 (same as ImGuiMouseButton_Right)">
     常量 鼠标中键 <公开 类型 = 整数 值 = @ImGuiPopupFlags_MouseButtonMiddle
             注释 = "For BeginPopupContext*(): open on Middle Mouse release. Guaranteed to always be == 2 (same as ImGuiMouseButton_Middle)">
-    常量 "" <类型 = 整数 值 = @ImGuiPopupFlags_MouseButtonMask_>
-    常量 "" <类型 = 整数 值 = @ImGuiPopupFlags_MouseButtonDefault_>
-    常量 "" <公开 类型 = 整数 值 = @ImGuiPopupFlags_NoReopen
+    常量 鼠标按键掩码_ <类型 = 整数 值 = @ImGuiPopupFlags_MouseButtonMask_>
+    常量 默认鼠标键_ <类型 = 整数 值 = @ImGuiPopupFlags_MouseButtonDefault_>
+    常量 不重新打开 <公开 类型 = 整数 值 = @ImGuiPopupFlags_NoReopen
             注释 = "For OpenPopup*(), BeginPopupContext*(): don\'t reopen same popup if already open (won\'t reposition, won\'t reinitialize navigation)">
-    常量 "" <公开 类型 = 整数 值 = @ImGuiPopupFlags_NoOpenOverExistingPopup
+    常量 不在现有弹出项上打开 <公开 类型 = 整数 值 = @ImGuiPopupFlags_NoOpenOverExistingPopup
             注释 = "For OpenPopup*(), BeginPopupContext*(): don\'t open if there\'s already a popup at the same level of the popup stack">
-    常量 "" <公开 类型 = 整数 值 = @ImGuiPopupFlags_NoOpenOverItems
+    常量 不在项目上打开 <公开 类型 = 整数 值 = @ImGuiPopupFlags_NoOpenOverItems
             注释 = "For BeginPopupContextWindow(): don\'t return true when hovering items, only when hovering empty space">
-    常量 "" <公开 类型 = 整数 值 = @ImGuiPopupFlags_AnyPopupId
+    常量 任意弹出ID <公开 类型 = 整数 值 = @ImGuiPopupFlags_AnyPopupId
             注释 = "For IsPopupOpen(): ignore the ImGuiID parameter and test for any popup.">
-    常量 "" <公开 类型 = 整数 值 = @ImGuiPopupFlags_AnyPopupLevel
+    常量 任意弹出层级 <公开 类型 = 整数 值 = @ImGuiPopupFlags_AnyPopupLevel
             注释 = "For IsPopupOpen(): search/test at any level of the popup stack (default test in the current level)">
-    常量 "" <公开 类型 = 整数 值 = @ImGuiPopupFlags_AnyPopup
+    常量 任意弹出项 <公开 类型 = 整数 值 = @ImGuiPopupFlags_AnyPopup
             注释 = "ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel">
 }
 
@@ -4816,7 +4829,7 @@
     常量 禁止输入 <公开 类型 = 整数 值 = @ImGuiSliderFlags_NoInput 注释 = "禁止使用Ctrl+单击、双击、回车键来直接输入数值到组件中">
 }
 
-类 IM视口标志 <公开 注释 = "ImGuiViewportFlags" @文档 = "category = \"标志类\"">
+类 IM视口标志 <公开 注释 = "ImGuiViewportFlags" 折叠 @文档 = "category = \"标志类\"">
 {
     常量 无 <公开 类型 = 整数 值 = @ImGuiViewportFlags_None>
     常量 平台窗口 <公开 类型 = 整数 值 = @ImGuiViewportFlags_IsPlatformWindow 注释 = "显示一个平台窗口">
@@ -4833,7 +4846,7 @@
             注释 = "Platform Window: Don\'t take focus when clicked on.">
     常量 禁止输入 <公开 类型 = 整数 值 = @ImGuiViewportFlags_NoInputs
             注释 = "Platform Window: Make mouse pass through so we can drag this window while peaking behind it.">
-    常量 禁止渲染器清除 <公开 类型 = 整数 值 = @ImGuiViewportFlags_NoRendererClear
+    常量 无渲染器清除 <公开 类型 = 整数 值 = @ImGuiViewportFlags_NoRendererClear
             注释 = "Platform Window: Renderer doesn\'t need to clear the framebuffer ahead (because we will fill it entirely).">
     常量 禁止自动合并 <公开 类型 = 整数 值 = @ImGuiViewportFlags_NoAutoMerge
             注释 = "Platform Window: Avoid merging this window into another host window."
@@ -5240,16 +5253,16 @@
 
 类 IM数据类型 <公开 注释 = "主要数据类型 ImGuiDataType" 折叠 @文档 = "category = \"常量类\"" @常量类 = 整数>
 {
-    常量 字节型 <公开 值 = @ImGuiDataType_S8>
-    常量 无符号字节 <公开 值 = @ImGuiDataType_U8>
-    常量 短整数型 <公开 值 = @ImGuiDataType_S16>
-    常量 无符号短整数 <公开 值 = @ImGuiDataType_U16>
-    常量 整数型 <公开 值 = @ImGuiDataType_S32>
-    常量 无符号整数 <公开 值 = @ImGuiDataType_U32>
-    常量 长整数型 <公开 值 = @ImGuiDataType_S64>
-    常量 无符号长整数 <公开 值 = @ImGuiDataType_U64>
-    常量 单精度浮点数 <公开 值 = @ImGuiDataType_Float>
-    常量 双精度浮点数 <公开 值 = @ImGuiDataType_Double>
+    常量 字节型 <公开 值 = @ImGuiDataType_S8 注释 = "8位有符号字节">
+    常量 无符号字节 <公开 值 = @ImGuiDataType_U8 注释 = "8位无符号字节">
+    常量 短整数型 <公开 值 = @ImGuiDataType_S16 注释 = "16位有符号短整数">
+    常量 无符号短整数 <公开 值 = @ImGuiDataType_U16 注释 = "16位无符号短整数">
+    常量 整数型 <公开 值 = @ImGuiDataType_S32 注释 = "32位有符号整数">
+    常量 无符号整数 <公开 值 = @ImGuiDataType_U32 注释 = "32位无符号整数">
+    常量 长整数型 <公开 值 = @ImGuiDataType_S64 注释 = "64位有符号长整数">
+    常量 无符号长整数 <公开 值 = @ImGuiDataType_U64 注释 = "64位无符号长整数">
+    常量 单精度浮点数 <公开 值 = @ImGuiDataType_Float 注释 = "32位单精度小数">
+    常量 双精度浮点数 <公开 值 = @ImGuiDataType_Double 注释 = "64位双精度小数">
 }
 
 类 IM基本方向 <公开 注释 = "ImGuiDir" 折叠 @文档 = "category = \"常量类\"" @常量类 = 整数>

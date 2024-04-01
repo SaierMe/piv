@@ -6,12 +6,19 @@
         @视窗.外部头文件 = "src\\piv_process.hpp" @视窗.附加编译参数 = "cpp: -DPSAPI_VERSION=1"
         @视窗.后缀文本 = "public PivProcess">
 {
-    方法 打开进程 <公开 类型 = 逻辑型 注释 = "打开一个进程句柄,使用本类时必须先使用本方法." 注释 = "再次调用本方法将自动关闭之前打开的句柄." 返回值注释 = "返回是否成功" 折叠
+    方法 打开进程 <公开 类型 = 逻辑型 注释 = "打开一个进程句柄,使用本类时必须先使用本方法." 注释 = "注: 调用本方法前将关闭之前打开的句柄." 返回值注释 = "返回是否成功" 折叠
             @嵌入式方法 = "">
     参数 进程ID <类型 = 整数 注释 = "所欲打开的进程ID,0为当前进程ID." @默认值 = 0>
     参数 进程访问权限 <类型 = 整数 注释 = "进程的访问权限,默认为全部权限;" 注释 = "使用进程方法需要对应的权限." @默认值 = 进程访问权限.全部权限>
     {
         @ @sn<this>.open_process(static_cast<DWORD>(@<进程ID>), static_cast<DWORD>(@<进程访问权限>))
+    }
+
+    方法 打开句柄 <公开 类型 = 逻辑型 注释 = "将一个外部的进程句柄置入到本类中." 注释 = "注: 调用本方法前将关闭之前打开的句柄." 返回值注释 = "返回是否成功" 折叠
+            @嵌入式方法 = "">
+    参数 外部句柄 <类型 = 变整数>
+    {
+        @ @sn<this>.open_handle((HANDLE)@<外部句柄>)
     }
 
     方法 关闭进程 <公开 注释 = "关闭进程的句柄." 注释 = "对象实例离开作用域时会自动关闭,除非有必要提前释放进程句柄,一般不需要手动调用." 折叠 @嵌入式方法 = "">
@@ -550,10 +557,10 @@
     }
 }
 
-类 NT进程操作类 <公开 注释 = "使用NT API,面向对象操作进程、模块和虚拟内存.本类可以在32位程序操作64位进程." 折叠 @文档 = "category = \"进程操作\""
+类 NT进程操作类 <公开 注释 = "使用NT API,面向对象操作进程、模块和虚拟内存.本类可以在32位程序操作64位进程." 折叠 折叠2 @文档 = "category = \"进程操作\""
         @视窗.外部头文件 = "src\\piv_NtProcess.hpp" @视窗.后缀文本 = "public PivProcessNT">
 {
-    方法 打开进程 <公开 类型 = 逻辑型 注释 = "打开一个进程句柄,使用本类时必须先使用本方法." 注释 = "再次调用本方法将自动关闭之前打开的句柄." 返回值注释 = "返回是否成功" 折叠
+    方法 打开进程 <公开 类型 = 逻辑型 注释 = "打开一个进程句柄,使用本类时必须先使用本方法." 注释 = "注: 调用本方法前将关闭之前打开的句柄." 返回值注释 = "返回是否成功" 折叠
             @嵌入式方法 = "">
     参数 进程ID <类型 = 整数 注释 = "所欲打开的进程ID,0为当前进程ID." @默认值 = 0>
     参数 进程访问权限 <类型 = 整数 注释 = "进程的访问权限,默认为全部权限;" 注释 = "使用进程方法需要对应的权限." @默认值 = 进程访问权限.全部权限>
@@ -1394,15 +1401,13 @@
     方法 取所有逻辑驱动器根路径 <公开 静态 类型 = 整数 注释 = "获取所有逻辑驱动器的根路径,如\"C:\\\"" 返回值注释 = "成功返回根路径数量,失败返回0." 折叠 @禁止流程检查 = 真>
     参数 根路径数组 <类型 = 文本数组类 注释 = "成功返回包含所有根路径的数组" @输出名 = "aRootPath">
     {
-        @ aRootPath.data ().RemoveAll ();
-        @ WCHAR szBuffer[512] = L"\0";
-        @ DWORD dwBufLen = ::GetLogicalDriveStringsW (512 - 1, szBuffer);
+        @ aRootPath.data().RemoveAll();
+        @ WCHAR szBuffer[MAX_PATH + 1]{0};
+        @ DWORD dwBufLen = ::GetLogicalDriveStringsW(MAX_PATH, szBuffer);
         @ if (dwBufLen == 0) return 0;
-        @ for (DWORD i = 0; i < dwBufLen / 3; i++)
-        @ {
-        @     aRootPath.data ().Add (szBuffer + i * 4);
-        @ }
-        @ return (INT)aRootPath.data ().GetCount ();
+        @ for (DWORD i = 0; i < dwBufLen; i += 4)
+        @     aRootPath.data().Add(szBuffer + i);
+        @ return (INT)aRootPath.data().GetCount();
     }
 
     方法 取DOS驱动器名称 <公开 静态 类型 = 文本型 注释 = "获取MS-DOS格式的驱动器名称,如\"\\Device\\HarddiskVolume1\""
@@ -1730,7 +1735,7 @@
     {
         @ if (m_module) return FALSE;
         @ HMODULE hModule = g_objVolApp.GetInstanceHandle();
-        @ HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE(@<模块资源>, RT_RCDATA);
+        @ HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE(@<模块资源>, RT_RCDATA));
         @ if (hSrc == NULL) return FALSE;
         @ HGLOBAL resdata = ::LoadResource(hModule, ::FindResourceW(hModule, MAKEINTRESOURCE(@<模块资源>, RT_RCDATA));
         @ if (resdata == NULL) return FALSE;

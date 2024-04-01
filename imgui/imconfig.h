@@ -129,3 +129,31 @@ namespace ImGui
     void MyFunction(const char* name, MyMatrix44* mtx);
 }
 */
+#define IM_VEC2_CLASS_EXTRA                                                     \
+        bool operator ==(const ImVec2& rhs) const {                             \
+            if (x != rhs.x) return false;                                       \
+            if (y != rhs.y) return false;                                       \
+            return true;                                                        \
+        }                                                                       \
+        bool operator !=(const ImVec2& rhs) const {                             \
+            if (x != rhs.x) return true;                                        \
+            if (y != rhs.y) return true;                                        \
+            return false;                                                       \
+        }
+
+#define IM_VEC4_CLASS_EXTRA                                                     \
+        bool operator ==(const ImVec4& rhs) const {                             \
+            if (x != rhs.x) return false;                                       \
+            if (y != rhs.y) return false;                                       \
+            if (z != rhs.z) return false;                                       \
+            if (w != rhs.w) return false;                                       \
+            return true;                                                        \
+        }                                                                       \
+        bool operator !=(const ImVec4& rhs) const {                             \
+            if (x != rhs.x) return true;                                        \
+            if (y != rhs.y) return true;                                        \
+            if (z != rhs.z) return true;                                        \
+            if (w != rhs.w) return true;                                        \
+            return false;                                                       \
+        }
+
