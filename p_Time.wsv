@@ -851,6 +851,9 @@
         @ BOOL bRes = ::DeleteTimerQueueEx(m_hTimerQueue, (HANDLE)hCompletionEvent);
         @ m_hTimerQueue = NULL;
         @ CMutexLocker locker(m_locker);
+        @ for (auto it = m_hTimerMap.begin(); it != m_hTimerMap.end(); it++) {
+        @     delete it->second;
+        @ }
         @ m_hTimerMap.clear();
         @ return bRes;
     }
@@ -870,13 +873,13 @@
         @ if (m_hTimerQueue == NULL) return FALSE;
         @ CMutexLocker locker(m_locker);
         @ if (m_hTimerMap.find(szTimerID) != m_hTimerMap.end()) return FALSE;
-        @ TIMERCALLBACKPARAMETER TimerParam{this, NULL, szTimerID, lpUserData};
-        @ if (::CreateTimerQueueTimer(&TimerParam.hTimer, m_hTimerQueue, (WAITORTIMERCALLBACK)onTimerFunc,
-        @         pTimerParam, (DWORD)dwDueTime, (DWORD)dwPeriod, bInThreadPool ? WT_EXECUTEDEFAULT : WT_EXECUTEINTIMERTHREAD))
-        @ {
-        @     m_hTimerMap[szTimerID] = TimerParam;
+        @ TIMERCALLBACKPARAMETER* pTimerParam = new TIMERCALLBACKPARAMETER{this, NULL, szTimerID, lpUserData};
+        @ if (::CreateTimerQueueTimer(&pTimerParam->hTimer, m_hTimerQueue, (WAITORTIMERCALLBACK)onTimerFunc,
+        @         pTimerParam, (DWORD)dwDueTime, (DWORD)dwPeriod, bInThreadPool ? WT_EXECUTEDEFAULT : WT_EXECUTEINTIMERTHREAD)) {
+        @     m_hTimerMap[szTimerID] = pTimerParam;
         @     return TRUE;
         @ }
+        @ delete pTimerParam;
         @ return FALSE;
     }
 
@@ -902,9 +905,11 @@
         @ if (m_hTimerQueue == NULL) return FALSE;
         @ BOOL bRes = FALSE;
         @ CMutexLocker locker(m_locker);
-        @ if (m_hTimerMap.find(szTimerID) != m_hTimerMap.end()) {
-        @     bRes = ::DeleteTimerQueueTimer(m_hTimerQueue, m_hTimerMap[szTimerID].hTimer, (HANDLE)hCompletionEvent);
-        @     m_hTimerMap.erase(szTimerID);
+        @ auto it = m_hTimerMap.find(szTimerID);
+        @ if (it != m_hTimerMap.end()) {
+        @     bRes = ::DeleteTimerQueueTimer(m_hTimerQueue, it->second->hTimer, (HANDLE)hCompletionEvent);
+        @     delete it->second;
+        @     m_hTimerMap.erase(it);
         @ }
         @ return bRes;
     }
@@ -978,25 +983,26 @@
     #         CVolString szTimerID;
     #         INT_P lpUserData;
     #     };
-    #     std::map<CVolString, TIMERCALLBACKPARAMETER> m_hTimerMap; // 时钟标记到时钟参数哈希表
+    #     std::map<CVolString, TIMERCALLBACKPARAMETER*> m_hTimerMap; // 时钟标记到时钟参数哈希表
     #     CMMutex m_locker; // 互斥锁,临界区
     #     static VOID CALLBACK onTimerFunc(PVOID lpParameter, BOOLEAN TimerOrWaitFired) {
     #         TIMERCALLBACKPARAMETER* pTimerParam = (TIMERCALLBACKPARAMETER*)lpParameter;
-    #         CVolString szTimerID = pTimerParam->szTimerID;
-    #         pTimerParam->pThis->@<周期事件>(szTimerID, pTimerParam->lpUserData);
+    #         //CVolString szTimerID{pTimerParam->szTimerID};
+    #         pTimerParam->pThis->@<周期事件>(pTimerParam->szTimerID, pTimerParam->lpUserData);
     #     }
     # public:
     #     HANDLE m_hTimerQueue = NULL; // 时钟队列句柄
     #     BOOL AddTimerQueue(CVolString& szTimerID, WAITORTIMERCALLBACK lpTimerCallBack, PVOID lpUserData, DWORD dwDueTime, DWORD dwPeriod, BOOL bInThreadPool) {
     #         if (m_hTimerQueue == NULL) return FALSE;
-    #         @ CMutexLocker locker(m_locker);
+    #         CMutexLocker locker(m_locker);
     #         if (m_hTimerMap.find(szTimerID) != m_hTimerMap.end()) return FALSE;
-    #         TIMERCALLBACKPARAMETER TimerParam{nullptr, NULL, szTimerID, (INT_P)lpUserData};
-    #         if (::CreateTimerQueueTimer(&TimerParam.hTimer, m_hTimerQueue, lpTimerCallBack,
+    #         TIMERCALLBACKPARAMETER* pTimerParam = new TIMERCALLBACKPARAMETER{nullptr, NULL, szTimerID, (INT_P)lpUserData};
+    #         if (::CreateTimerQueueTimer(&pTimerParam->hTimer, m_hTimerQueue, lpTimerCallBack,
     #                 lpUserData, dwDueTime, dwPeriod, bInThreadPool ? WT_EXECUTEDEFAULT : WT_EXECUTEINTIMERTHREAD)) {
-    #             m_hTimerMap[szTimerID] = TimerParam;
+    #             m_hTimerMap[szTimerID] = pTimerParam;
     #             return TRUE;
     #         }
+    #         delete pTimerParam;
     #         return FALSE;
     #     }
     # <> </include>
@@ -1036,6 +1042,9 @@
         @ BOOL bRes = ::DeleteTimerQueueEx(m_hTimerQueue, (HANDLE)hCompletionEvent);
         @ m_hTimerQueue = NULL;
         @ CMutexLocker locker(m_locker);
+        @ for (auto it = m_hTimerMap.begin(); it != m_hTimerMap.end(); it++) {
+        @     delete it->second;
+        @ }
         @ m_hTimerMap.clear();
         @ m_TimerIndex = 0;
         @ return bRes;
@@ -1053,14 +1062,14 @@
             @输出名 = "bInThreadPool">
     {
         @ if (m_hTimerQueue == NULL) return -1;
-        @ TIMERCALLBACKPARAMETER TimerParam{this, NULL, m_TimerIndex, lpUserData};
-        @ if (::CreateTimerQueueTimer(&TimerParam.hTimer, m_hTimerQueue, (WAITORTIMERCALLBACK)onTimerFunc,
-        @         pTimerParam, (DWORD)dwDueTime, (DWORD)dwPeriod, bInThreadPool ? WT_EXECUTEDEFAULT : WT_EXECUTEINTIMERTHREAD) )
-        @ {
-        @     CMutexLocker locker(m_locker);
-        @     m_hTimerMap[m_TimerIndex] = TimerParam;
+        @ CMutexLocker locker(m_locker);
+        @ TIMERCALLBACKPARAMETER* pTimerParam = new TIMERCALLBACKPARAMETER{this, NULL, m_TimerIndex, lpUserData};
+        @ if (::CreateTimerQueueTimer(&pTimerParam->hTimer, m_hTimerQueue, (WAITORTIMERCALLBACK)onTimerFunc,
+        @         pTimerParam, (DWORD)dwDueTime, (DWORD)dwPeriod, bInThreadPool ? WT_EXECUTEDEFAULT : WT_EXECUTEINTIMERTHREAD) ) {
+        @     m_hTimerMap[m_TimerIndex] = pTimerParam;
         @     return m_TimerIndex++;
         @ }
+        @ delete pTimerParam;
         @ return -1;
     }
 
@@ -1085,9 +1094,11 @@
         @ if (m_hTimerQueue == NULL) return FALSE;
         @ BOOL bRes = FALSE;
         @ CMutexLocker locker(m_locker);
-        @ if (m_hTimerMap.find(nIndex) != m_hTimerMap.end()) {
-        @     bRes = ::DeleteTimerQueueTimer(m_hTimerQueue, m_hTimerMap[nIndex].hTimer, (HANDLE)hCompletionEvent);
-        @     m_hTimerMap.erase(nIndex);
+        @ auto it = m_hTimerMap.find(nIndex);
+        @ if (it != m_hTimerMap.end()) {
+        @     bRes = ::DeleteTimerQueueTimer(m_hTimerQueue, it->second->hTimer, (HANDLE)hCompletionEvent);
+        @     delete it->second;
+        @     m_hTimerMap.erase(it);
         @ }
         @ return bRes;
     }
@@ -1165,24 +1176,25 @@
     #         INT nTimerIndex;
     #         INT_P lpUserData;
     #     };
-    #     std::map<INT, TIMERCALLBACKPARAMETER> m_hTimerMap;
+    #     std::map<INT, TIMERCALLBACKPARAMETER*> m_hTimerMap;
     #     INT m_TimerIndex = 0; // 原子操作记录添加的时钟数量
     #     CMMutex m_locker; // 互斥锁,临界区
     #     static VOID CALLBACK onTimerFunc(PVOID lpParameter, BOOLEAN TimerOrWaitFired) {
     #         TIMERCALLBACKPARAMETER* pTimerParam = (TIMERCALLBACKPARAMETER*)lpParameter;
-    #         pTimerParam->pThis->@<周期事件> ((INT_P)pTimerParam->nTimerIndex, pTimerParam->lpUserData);
+    #         pTimerParam->pThis->@<周期事件> ((INT)pTimerParam->nTimerIndex, pTimerParam->lpUserData);
     #     }
     # public:
     #     HANDLE m_hTimerQueue = NULL; // 时钟队列句柄
     #     INT AddTimerQueue(WAITORTIMERCALLBACK lpTimerCallBack, PVOID lpUserData, DWORD dwDueTime, DWORD dwPeriod, BOOL bInThreadPool) {
     #         if (m_hTimerQueue == NULL) return -1;
-    #         TIMERCALLBACKPARAMETER TimerParam{nullptr, NULL, m_TimerIndex, (INT_P)lpUserData};
-    #         if (::CreateTimerQueueTimer(&TimerParam.hTimer, m_hTimerQueue, lpTimerCallBack,
+    #         CMutexLocker locker(m_locker);
+    #         TIMERCALLBACKPARAMETER* pTimerParam = new TIMERCALLBACKPARAMETER{nullptr, NULL, m_TimerIndex, (INT_P)lpUserData};
+    #         if (::CreateTimerQueueTimer(&pTimerParam->hTimer, m_hTimerQueue, lpTimerCallBack,
     #                 lpUserData, dwDueTime, dwPeriod, bInThreadPool ? WT_EXECUTEDEFAULT : WT_EXECUTEINTIMERTHREAD) ) {
-    #             CMutexLocker locker(m_locker);
-    #             m_hTimerMap[m_TimerIndex] = TimerParam;
+    #             m_hTimerMap[m_TimerIndex] = pTimerParam;
     #             return m_TimerIndex++;
     #         }
+    #         delete pTimerParam;
     #         return -1;
     #     }
     # <> </include>
