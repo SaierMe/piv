@@ -4,11 +4,11 @@
         注释 = "  MMKV是腾讯开源的一个基于内存映射文件的持久化键值表,底层的" 注释 = "序列化/反序列化使用protobuf实现,性能高,稳定性强."
         注释 = "  从2015年中至今在微信上使用,其性能和稳定性经过了时间的验证." 编辑时信息 = "7248B, 0, 0, 0"
         @视窗.外部头文件 = "MMKV\\include\\piv_MMKV.hpp" @视窗.外部库 = "MMKV\\lib\\$(p)\\$(d)\\mmkv_$(crt).lib"
-        @视窗.需求VS版本 = "14-"
+        @视窗.需求VS版本 = "15-"
         @视窗.需求系统头文件 = "user\\piv\\MMKV\\lib\\$(p)\\$(d)\\mmkv_$(crt).lib | 缺少MMKV的静态库文件(文件太大，默认未安装),请自行下载安装PIV模块的附加静态库文件 https://piv.ink/volpiv/">
 
 类 MMKV键值表 <公开 基础类 = PIV本地类模板 注释 = "一个基于内存映射文件的持久化键值表." 注释 = " 1. MMKV的内存占用基本与表文件相同;"
-        注释 = " 2. 单个表不能保存超过4GB的数据;" @文档 = "category = \"数据处理.MMKV键值表\"" @别名 = "PivMMKV" @模板实现类 = "MMKV键值表">
+        注释 = " 2. 单个表不能保存超过4GB的数据;" 折叠 @文档 = "category = \"数据处理.MMKV键值表\"" @别名 = "PivMMKV" @模板实现类 = "MMKV键值表">
 {
     常量 单进程模式 <公开 类型 = 整数 值 = 1 注释 = "MMKV键值表会被独占,只有当前进程能读写.">
     常量 多进程模式 <公开 类型 = 整数 值 = 2 注释 = "多个进程可以同时读写同一个MMKV键值表.">
@@ -77,6 +77,14 @@
     参数 相对路径 <类型 = 文本型 注释 = "表文件所在的路径,如果为空则使用到MMKV的全局\"根目录\"." 编辑时信息 = "464BF, 0, 0, 0" @默认值 = 空对象>
     {
         @ piv::mmkv::IsFileValid(@<表名称>, @<相对路径>)
+    }
+
+    方法 删除表文件 <公开 静态 类型 = 逻辑型 注释 = "删除指定的MMKV键值表文件,包括数据文件和元文件(.crc)." 注释 = "注: 如果当前表被打开,它将被自动关闭."
+            注释 = "*此静态方法需要以类名调用." 折叠 @嵌入式方法 = "req_str_param_text_pointer = true">
+    参数 表名称 <类型 = 文本型 注释 = "所欲删除的键值表名称(mmapID)">
+    参数 相对路径 <类型 = 文本型 注释 = "表文件所在的路径,如果为空则使用到MMKV的全局\"根目录\"." @默认值 = 空对象>
+    {
+        @ piv::mmkv::RemoveStorage(@<表名称>, @<相对路径>)
     }
 
     # ====
@@ -560,28 +568,22 @@
 
     # @begin
     # <> <include>
-    # static void ContentChangeHandler(const std::string &mmapID)
-    # {
+    # static void ContentChangeHandler(const std::string &mmapID) {
     #     @sn<current_class>* pthis = piv::mmkvEvent::data().get<@sn<current_class>*>();
-    #     if (pthis) {
-    #         pthis->@<内容更改>(*PivU2Ws {mmapID});
-    #     }
+    #     if (pthis)
+    #         pthis->@<内容更改>(*PivU2Ws{mmapID});
     # }
-    # static MMKVRecoverStrategic ErrorHandler(const std::string &mmapID, MMKVErrorType errorType)
-    # {
+    # static MMKVRecoverStrategic ErrorHandler(const std::string &mmapID, MMKVErrorType errorType) {
     #     @sn<current_class>* pthis = piv::mmkvEvent::data().get<@sn<current_class>*>();
-    #     if (pthis) {
+    #     if (pthis)
     #         return static_cast<MMKVRecoverStrategic>(pthis->@<错误处理>(*PivU2Ws{mmapID}, static_cast<INT>(errorType)));
-    #     }
     #     return OnErrorDiscard;
     # }
-    # static void LogHandler(MMKVLogLevel level, const char *file, int line, const char *function, MMKVLog_t message)
-    # {
+    # static void LogHandler(MMKVLogLevel level, const char *file, int line, const char *function, MMKVLog_t message) {
     #     @sn<current_class>* pthis = piv::mmkvEvent::data().get<@sn<current_class>*>();
-    #     if (pthis) {
+    #     if (pthis)
     #         pthis->@<日志记录处理>(static_cast<INT>(level), @an<CVolString>(file), line,
     #                                @an<CVolString>(function), @an<CVolString>(message.c_str()));
-    #     }
     # }
     # <> </include>
     # @end

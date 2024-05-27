@@ -62,7 +62,7 @@ public:
      * @param npSize 成员数
      * @param zero 是否清零
      */
-    PivBuffer(MEM_SIZE npSize, bool zero = true) { Alloc(npSize); }
+    PivBuffer(MEM_SIZE npSize, bool zero = true) { Alloc(npSize, zero); }
 
     /**
      * @brief 分配缓存

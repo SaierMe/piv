@@ -2,7 +2,7 @@
 
 包 火山.PIV基础类 <注释 = "PE文件解析与操作" 注释 = "https://github.com/SaierMe/piv" @视窗.外部头文件 = "src\\PEfile.hpp">
 
-类 PE文件操作类 <公开 注释 = "解析可执行文件的各种数据" 折叠 @文档 = "category = \"PE文件操作\"">
+类 PE文件操作类 <公开 注释 = "解析可执行文件的各种数据" @文档 = "category = \"PE文件操作\"">
 {
 
     # @ @m<DECLARE_REF_OBJECT_CLASS_WITH_DATA> (PivPeFile)
@@ -112,7 +112,7 @@
         @ @sn<this>.data().IsDllData()
     }
 
-    方法 是否为EXE <公开 注释 = "返回可执行文件是否为EXE文件." 折叠 @嵌入式方法 = "">
+    方法 是否为EXE <公开 类型 = 逻辑型 注释 = "返回可执行文件是否为EXE文件." 折叠 @嵌入式方法 = "">
     {
         @ @sn<this>.data().IsExeData()
     }
@@ -202,7 +202,7 @@
 
     # ---
 
-    方法 取导入表 <公开 类型 = 整数 注释 = "获取可执行文件的模块导入表信息." 返回值注释 = "成功返回导入的模块数量,失败返回0." 折叠 @禁止流程检查 = 真>
+    方法 取导入表 <公开 类型 = 整数 注释 = "获取可执行文件的模块导入表信息." 返回值注释 = "成功返回导入的模块数量,失败返回0." @禁止流程检查 = 真>
     参数 导入表 <类型 = 导入表数组类 注释 = "成功在此返回导入表信息">
     {
         @ @<导入表>.data().clear();
@@ -224,7 +224,7 @@
         @ return (INT)@<导入表>.data().size();
     }
 
-    方法 取导出表 <公开 类型 = 整数 注释 = "获取DLL文件的函数导出表信息,EXE文件没有导出表." 返回值注释 = "成功返回导出的函数数量,失败返回0." 折叠 @禁止流程检查 = 真>
+    方法 取导出表 <公开 类型 = 整数 注释 = "获取DLL文件的函数导出表信息,EXE文件没有导出表." 返回值注释 = "成功返回导出的函数数量,失败返回0." @禁止流程检查 = 真>
     参数 导出表 <类型 = 导出表类 注释 = "成功在此返回导出表信息">
     {
         @ @<导出表>.ResetToNullObject ();
@@ -354,42 +354,23 @@
     变量 e_res2 <公开 类型 = "短整数 [10]" 注释 = "保留字(一般是为确保对齐而预留)" @输出名 = "e_res2">
     变量 e_lfanew <公开 类型 = 整数 注释 = "NT头(IMAGE_NT_HEADERS)在文件中的偏移地址" @输出名 = "e_lfanew">
 
-    方法 "//取展示内容" <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖
-            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用." 折叠>
+    参数 欲操作本对象 <类型 = IMAGE_DOS_HEADER 注释 = "用作填入本对象中所有数据的展示文本">
     {
+        变量 展示内容 <类型 = 文本型>
+        变量 格式文本 <类型 = 文本型
+                值 = "<IMAGE_DOS_HEADER> 总共 19 个成员:\r\n1. e_magic: %u\r\n2. e_cblp: %u\r\n3. e_cp: %u\r\n4. e_crlc: %u\r\n5. e_cparhdr: %u\r\n6. e_minalloc: %u\r\n7. e_maxalloc: %u\r\n8. e_ss: %u\r\n9. e_sp: %u\r\n10. e_csum: %u\r\n11. e_ip: %u\r\n12. e_cs: %u\r\n13. e_lfarlc: %u\r\n14. e_ovno: %u\r\n">
         变量 i <类型 = 整数>
-        展示内容 = "<IMAGE_DOS_HEADER> 总共 19 个成员:\r\n"
-        加入文本 (展示内容, "1. e_magic: " + 取调试文本2 (最大展示数据尺寸, e_magic) + "\r\n")
-        加入文本 (展示内容, "2. e_cblp: " + 取调试文本2 (最大展示数据尺寸, e_cblp) + "\r\n")
-        加入文本 (展示内容, "3. e_cp: " + 取调试文本2 (最大展示数据尺寸, e_cp) + "\r\n")
-        加入文本 (展示内容, "4. e_crlc: " + 取调试文本2 (最大展示数据尺寸, e_crlc) + "\r\n")
-        加入文本 (展示内容, "5. e_cparhdr: " + 取调试文本2 (最大展示数据尺寸, e_cparhdr) + "\r\n")
-        加入文本 (展示内容, "6. e_minalloc: " + 取调试文本2 (最大展示数据尺寸, e_minalloc) + "\r\n")
-        加入文本 (展示内容, "7. e_maxalloc: " + 取调试文本2 (最大展示数据尺寸, e_maxalloc) + "\r\n")
-        加入文本 (展示内容, "8. e_ss: " + 取调试文本2 (最大展示数据尺寸, e_ss) + "\r\n")
-        加入文本 (展示内容, "9. e_sp: " + 取调试文本2 (最大展示数据尺寸, e_sp) + "\r\n")
-        加入文本 (展示内容, "10. e_csum: " + 取调试文本2 (最大展示数据尺寸, e_csum) + "\r\n")
-        加入文本 (展示内容, "11. e_ip: " + 取调试文本2 (最大展示数据尺寸, e_ip) + "\r\n")
-        加入文本 (展示内容, "12. e_cs: " + 取调试文本2 (最大展示数据尺寸, e_cs) + "\r\n")
-        加入文本 (展示内容, "13. e_lfarlc: " + 取调试文本2 (最大展示数据尺寸, e_lfarlc) + "\r\n")
-        加入文本 (展示内容, "14. e_ovno: " + 取调试文本2 (最大展示数据尺寸, e_ovno) + "\r\n")
-        加入文本 (展示内容, "15. e_res: {" + 到文本 (e_res [0]))
-        循环 (1, 4, i, 1)
-        {
-            加入文本 (展示内容, ", " + 到文本 (e_res [i]))
-        }
-        加入文本 (展示内容, "}\r\n")
-        加入文本 (展示内容, "16. e_oemid: " + 取调试文本2 (最大展示数据尺寸, e_oemid) + "\r\n")
-        加入文本 (展示内容, "17. e_oeminfo: " + 取调试文本2 (最大展示数据尺寸, e_oeminfo) + "\r\n")
-        加入文本 (展示内容, "18. e_res2: {" + 到文本 (e_res2 [0]))
+        加入格式文本 (展示内容, 格式文本, 欲操作本对象.e_magic, 欲操作本对象.e_cblp, 欲操作本对象.e_cp, 欲操作本对象.e_crlc, 欲操作本对象.e_cparhdr, 欲操作本对象.e_minalloc, 欲操作本对象.e_maxalloc, 欲操作本对象.e_ss, 欲操作本对象.e_sp, 欲操作本对象.e_csum, 欲操作本对象.e_ip, 欲操作本对象.e_cs, 欲操作本对象.e_lfarlc, 欲操作本对象.e_ovno)
+        加入格式文本 (展示内容, "15. e_res: {%u, %u, %u, %u}\r\n", 欲操作本对象.e_res [0], 欲操作本对象.e_res [1], 欲操作本对象.e_res [2], 欲操作本对象.e_res [3])
+        加入格式文本 (展示内容, "16. e_oemid: %u\r\n17. e_oeminfo: %u\r\n", 欲操作本对象.e_oemid, 欲操作本对象.e_oeminfo)
+        加入格式文本 (展示内容, "18. e_res2: {%u", 欲操作本对象.e_res2 [0])
         循环 (1, 10, i, 1)
         {
-            加入文本 (展示内容, ", " + 到文本 (e_res2 [i]))
+            加入格式文本 (展示内容, ", %u", 欲操作本对象.e_res2 [i])
         }
-        加入文本 (展示内容, "}\r\n")
-        加入文本 (展示内容, "19. e_lfanew: " + 取调试文本2 (最大展示数据尺寸, e_lfanew) + "\r\n")
+        加入格式文本 (展示内容, "}\r\n19. e_lfanew: %u", 欲操作本对象.e_lfanew)
+        返回 (展示内容)
     }
 }
 
@@ -417,19 +398,14 @@
             注释 = "  IMAGE_FILE_SYSTEM              0x1000  系统文件"
             注释 = "  IMAGE_FILE_32BIT_MACHINE       0x0100  目标平台为32位平台" @输出名 = "Characteristics">
 
-    方法 "// 取展示内容" <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖
-            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用." 折叠>
+    参数 欲操作本对象 <类型 = IMAGE_FILE_HEADER 注释 = "用作填入本对象中所有数据的展示文本">
     {
-        展示内容 = "<IMAGE_FILE_HEADER> 总共 7 个成员:\r\n"
-        加入文本 (展示内容, "1. Machine: " + 取调试文本2 (最大展示数据尺寸, Machine) + "\r\n")
-        加入文本 (展示内容, "2. NumberOfSections: " + 取调试文本2 (最大展示数据尺寸, NumberOfSections) + "\r\n")
-        加入文本 (展示内容, "3. TimeDateStamp: " + 取调试文本2 (最大展示数据尺寸, TimeDateStamp) + "\r\n")
-        加入文本 (展示内容, "4. PointerToSymbolTable: " + 取调试文本2 (最大展示数据尺寸, PointerToSymbolTable) + "\r\n")
-        加入文本 (展示内容, "5. NumberOfSymbols: " + 取调试文本2 (最大展示数据尺寸, NumberOfSymbols) + "\r\n")
-        加入文本 (展示内容, "6. SizeOfOptionalHeader: " + 取调试文本2 (最大展示数据尺寸, SizeOfOptionalHeader) + "\r\n")
-        加入文本 (展示内容, "7. Characteristics: " + 取调试文本2 (最大展示数据尺寸, Characteristics) + "\r\n")
+        变量 展示内容 <类型 = 文本型>
+        变量 格式文本 <类型 = 文本型
+                值 = "<IMAGE_FILE_HEADER> 总共 7 个成员:\r\n1. Machine: %u\r\n2. NumberOfSections: %u\r\n3. TimeDateStamp: %u\r\n4. PointerToSymbolTable: %u\r\n5. NumberOfSymbols: %u\r\n6. SizeOfOptionalHeader: %u\r\n7. Characteristics: %u">
+        加入格式文本 (展示内容, 格式文本, 欲操作本对象.Machine, 欲操作本对象.NumberOfSections, 欲操作本对象.TimeDateStamp, 欲操作本对象.PointerToSymbolTable, 欲操作本对象.NumberOfSymbols, 欲操作本对象.SizeOfOptionalHeader, 欲操作本对象.Characteristics)
+        返回 (展示内容)
     }
 }
 
@@ -503,43 +479,14 @@
             注释 = "  IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT   13   // Delay Load Import Descriptors"
             注释 = "  IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR 14   // COM Runtime descriptor" @输出名 = "DataDirectory">
 
-    方法 "// 取展示内容" <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖
-            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用." 折叠>
+    参数 欲操作本对象 <类型 = IMAGE_OPTIONAL_HEADER32 注释 = "用作填入本对象中所有数据的展示文本">
     {
-        展示内容 = "<IMAGE_OPTIONAL_HEADER32> 总共 31 个成员:\r\n"
-        加入文本 (展示内容, "1. Magic: " + 取调试文本2 (最大展示数据尺寸, Magic) + "\r\n")
-        加入文本 (展示内容, "2. MajorLinkerVersion: " + 取调试文本2 (最大展示数据尺寸, MajorLinkerVersion) + "\r\n")
-        加入文本 (展示内容, "3. MinorLinkerVersion: " + 取调试文本2 (最大展示数据尺寸, MinorLinkerVersion) + "\r\n")
-        加入文本 (展示内容, "4. SizeOfCode: " + 取调试文本2 (最大展示数据尺寸, SizeOfCode) + "\r\n")
-        加入文本 (展示内容, "5. SizeOfInitializedData: " + 取调试文本2 (最大展示数据尺寸, SizeOfInitializedData) + "\r\n")
-        加入文本 (展示内容, "6. SizeOfUninitializedData: " + 取调试文本2 (最大展示数据尺寸, SizeOfUninitializedData) + "\r\n")
-        加入文本 (展示内容, "7. AddressOfEntryPoint: " + 取调试文本2 (最大展示数据尺寸, AddressOfEntryPoint) + "\r\n")
-        加入文本 (展示内容, "8. BaseOfCode: " + 取调试文本2 (最大展示数据尺寸, BaseOfCode) + "\r\n")
-        加入文本 (展示内容, "9. BaseOfData: " + 取调试文本2 (最大展示数据尺寸, BaseOfData) + "\r\n")
-        加入文本 (展示内容, "10. ImageBase: " + 取调试文本2 (最大展示数据尺寸, ImageBase) + "\r\n")
-        加入文本 (展示内容, "11. SectionAlignment: " + 取调试文本2 (最大展示数据尺寸, SectionAlignment) + "\r\n")
-        加入文本 (展示内容, "12. FileAlignment: " + 取调试文本2 (最大展示数据尺寸, FileAlignment) + "\r\n")
-        加入文本 (展示内容, "13. MajorOperatingSystemVersion: " + 取调试文本2 (最大展示数据尺寸, MajorOperatingSystemVersion) + "\r\n")
-        加入文本 (展示内容, "14. MinorOperatingSystemVersion: " + 取调试文本2 (最大展示数据尺寸, MinorOperatingSystemVersion) + "\r\n")
-        加入文本 (展示内容, "15. MajorImageVersion: " + 取调试文本2 (最大展示数据尺寸, MajorImageVersion) + "\r\n")
-        加入文本 (展示内容, "16. MinorImageVersion: " + 取调试文本2 (最大展示数据尺寸, MinorImageVersion) + "\r\n")
-        加入文本 (展示内容, "17. MajorSubsystemVersion: " + 取调试文本2 (最大展示数据尺寸, MajorSubsystemVersion) + "\r\n")
-        加入文本 (展示内容, "18. MinorSubsystemVersion: " + 取调试文本2 (最大展示数据尺寸, MinorSubsystemVersion) + "\r\n")
-        加入文本 (展示内容, "19. Win32VersionValue: " + 取调试文本2 (最大展示数据尺寸, Win32VersionValue) + "\r\n")
-        加入文本 (展示内容, "20. SizeOfImage: " + 取调试文本2 (最大展示数据尺寸, SizeOfImage) + "\r\n")
-        加入文本 (展示内容, "21. SizeOfHeaders: " + 取调试文本2 (最大展示数据尺寸, SizeOfHeaders) + "\r\n")
-        加入文本 (展示内容, "22. CheckSum: " + 取调试文本2 (最大展示数据尺寸, CheckSum) + "\r\n")
-        加入文本 (展示内容, "23. Subsystem: " + 取调试文本2 (最大展示数据尺寸, Subsystem) + "\r\n")
-        加入文本 (展示内容, "24. DllCharacteristics: " + 取调试文本2 (最大展示数据尺寸, DllCharacteristics) + "\r\n")
-        加入文本 (展示内容, "25. SizeOfStackReserve: " + 取调试文本2 (最大展示数据尺寸, SizeOfStackReserve) + "\r\n")
-        加入文本 (展示内容, "26. SizeOfStackCommit: " + 取调试文本2 (最大展示数据尺寸, SizeOfStackCommit) + "\r\n")
-        加入文本 (展示内容, "27. SizeOfHeapReserve: " + 取调试文本2 (最大展示数据尺寸, SizeOfHeapReserve) + "\r\n")
-        加入文本 (展示内容, "28. SizeOfHeapCommit: " + 取调试文本2 (最大展示数据尺寸, SizeOfHeapCommit) + "\r\n")
-        加入文本 (展示内容, "29. LoaderFlags: " + 取调试文本2 (最大展示数据尺寸, LoaderFlags) + "\r\n")
-        加入文本 (展示内容, "30. NumberOfRvaAndSizes: " + 取调试文本2 (最大展示数据尺寸, NumberOfRvaAndSizes) + "\r\n")
-        加入文本 (展示内容, "31. DataDirectory: IMAGE_DATA_DIRECTORY [16]\r\n")
+        变量 展示内容 <类型 = 文本型>
+        变量 格式文本 <类型 = 文本型
+                值 = "<IMAGE_OPTIONAL_HEADER32> 总共 31 个成员:\r\n1. Magic: %u\r\n2. MajorLinkerVersion: %u\r\n3. MinorLinkerVersion: %u\r\n4. SizeOfCode: %u\r\n5. SizeOfInitializedData: %u\r\n6. SizeOfUninitializedData: %u\r\n7. AddressOfEntryPoint: %u\r\n8. BaseOfCode: %u\r\n9. BaseOfData: %u\r\n10. ImageBase: %u\r\n11. SectionAlignment: %u\r\n12. FileAlignment: %u\r\n13. MajorOperatingSystemVersion: %u\r\n14. MinorOperatingSystemVersion: %u\r\n15. MajorImageVersion: %u\r\n16. MinorImageVersion: %u\r\n17. MajorSubsystemVersion: %u\r\n18. MinorSubsystemVersion: %u\r\n19. Win32VersionValue: %u\r\n20. SizeOfImage: %u\r\n21. SizeOfHeaders: %u\r\n22. CheckSum: %u\r\n23. Subsystem: %u\r\n24. DllCharacteristics: %u\r\n25. SizeOfStackReserve: %u\r\n26. SizeOfStackCommit: %u\r\n27. SizeOfHeapReserve: %u\r\n28. SizeOfHeapCommit: %u\r\n29. LoaderFlags: %u\r\n30. NumberOfRvaAndSizes: %u\r\n31. DataDirectory: IMAGE_DATA_DIRECTORY [16]">
+        加入格式文本 (展示内容, 格式文本, 欲操作本对象.Magic, 欲操作本对象.MajorLinkerVersion, 欲操作本对象.MinorLinkerVersion, 欲操作本对象.SizeOfCode, 欲操作本对象.SizeOfInitializedData, 欲操作本对象.SizeOfUninitializedData, 欲操作本对象.AddressOfEntryPoint, 欲操作本对象.BaseOfCode, 欲操作本对象.BaseOfData, 欲操作本对象.ImageBase, 欲操作本对象.SectionAlignment, 欲操作本对象.FileAlignment, 欲操作本对象.MajorOperatingSystemVersion, 欲操作本对象.MinorOperatingSystemVersion, 欲操作本对象.MajorImageVersion, 欲操作本对象.MinorImageVersion, 欲操作本对象.MajorSubsystemVersion, 欲操作本对象.MinorSubsystemVersion, 欲操作本对象.Win32VersionValue, 欲操作本对象.SizeOfImage, 欲操作本对象.SizeOfHeaders, 欲操作本对象.CheckSum, 欲操作本对象.Subsystem, 欲操作本对象.DllCharacteristics, 欲操作本对象.SizeOfStackReserve, 欲操作本对象.SizeOfStackCommit, 欲操作本对象.SizeOfHeapReserve, 欲操作本对象.SizeOfHeapCommit, 欲操作本对象.LoaderFlags, 欲操作本对象.NumberOfRvaAndSizes)
+        返回 (展示内容)
     }
 }
 
@@ -613,42 +560,14 @@
             注释 = "  IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT   13   // Delay Load Import Descriptors"
             注释 = "  IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR 14   // COM Runtime descriptor" @输出名 = "DataDirectory">
 
-    方法 "// 取展示内容" <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖
-            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用." 折叠>
+    参数 欲操作本对象 <类型 = IMAGE_OPTIONAL_HEADER64 注释 = "用作填入本对象中所有数据的展示文本">
     {
-        展示内容 = "<IMAGE_OPTIONAL_HEADER64> 总共 30 个成员:\r\n"
-        加入文本 (展示内容, "1. Magic: " + 取调试文本2 (最大展示数据尺寸, Magic) + "\r\n")
-        加入文本 (展示内容, "2. MajorLinkerVersion: " + 取调试文本2 (最大展示数据尺寸, MajorLinkerVersion) + "\r\n")
-        加入文本 (展示内容, "3. MinorLinkerVersion: " + 取调试文本2 (最大展示数据尺寸, MinorLinkerVersion) + "\r\n")
-        加入文本 (展示内容, "4. SizeOfCode: " + 取调试文本2 (最大展示数据尺寸, SizeOfCode) + "\r\n")
-        加入文本 (展示内容, "5. SizeOfInitializedData: " + 取调试文本2 (最大展示数据尺寸, SizeOfInitializedData) + "\r\n")
-        加入文本 (展示内容, "6. SizeOfUninitializedData: " + 取调试文本2 (最大展示数据尺寸, SizeOfUninitializedData) + "\r\n")
-        加入文本 (展示内容, "7. AddressOfEntryPoint: " + 取调试文本2 (最大展示数据尺寸, AddressOfEntryPoint) + "\r\n")
-        加入文本 (展示内容, "8. BaseOfCode: " + 取调试文本2 (最大展示数据尺寸, BaseOfCode) + "\r\n")
-        加入文本 (展示内容, "9. ImageBase: " + 取调试文本2 (最大展示数据尺寸, ImageBase) + "\r\n")
-        加入文本 (展示内容, "10. SectionAlignment: " + 取调试文本2 (最大展示数据尺寸, SectionAlignment) + "\r\n")
-        加入文本 (展示内容, "11. FileAlignment: " + 取调试文本2 (最大展示数据尺寸, FileAlignment) + "\r\n")
-        加入文本 (展示内容, "12. MajorOperatingSystemVersion: " + 取调试文本2 (最大展示数据尺寸, MajorOperatingSystemVersion) + "\r\n")
-        加入文本 (展示内容, "13. MinorOperatingSystemVersion: " + 取调试文本2 (最大展示数据尺寸, MinorOperatingSystemVersion) + "\r\n")
-        加入文本 (展示内容, "14. MajorImageVersion: " + 取调试文本2 (最大展示数据尺寸, MajorImageVersion) + "\r\n")
-        加入文本 (展示内容, "15. MinorImageVersion: " + 取调试文本2 (最大展示数据尺寸, MinorImageVersion) + "\r\n")
-        加入文本 (展示内容, "16. MajorSubsystemVersion: " + 取调试文本2 (最大展示数据尺寸, MajorSubsystemVersion) + "\r\n")
-        加入文本 (展示内容, "17. MinorSubsystemVersion: " + 取调试文本2 (最大展示数据尺寸, MinorSubsystemVersion) + "\r\n")
-        加入文本 (展示内容, "18. Win32VersionValue: " + 取调试文本2 (最大展示数据尺寸, Win32VersionValue) + "\r\n")
-        加入文本 (展示内容, "19. SizeOfImage: " + 取调试文本2 (最大展示数据尺寸, SizeOfImage) + "\r\n")
-        加入文本 (展示内容, "20. SizeOfHeaders: " + 取调试文本2 (最大展示数据尺寸, SizeOfHeaders) + "\r\n")
-        加入文本 (展示内容, "21. CheckSum: " + 取调试文本2 (最大展示数据尺寸, CheckSum) + "\r\n")
-        加入文本 (展示内容, "22. Subsystem: " + 取调试文本2 (最大展示数据尺寸, Subsystem) + "\r\n")
-        加入文本 (展示内容, "23. DllCharacteristics: " + 取调试文本2 (最大展示数据尺寸, DllCharacteristics) + "\r\n")
-        加入文本 (展示内容, "24. SizeOfStackReserve: " + 取调试文本2 (最大展示数据尺寸, SizeOfStackReserve) + "\r\n")
-        加入文本 (展示内容, "25. SizeOfStackCommit: " + 取调试文本2 (最大展示数据尺寸, SizeOfStackCommit) + "\r\n")
-        加入文本 (展示内容, "26. SizeOfHeapReserve: " + 取调试文本2 (最大展示数据尺寸, SizeOfHeapReserve) + "\r\n")
-        加入文本 (展示内容, "27. SizeOfHeapCommit: " + 取调试文本2 (最大展示数据尺寸, SizeOfHeapCommit) + "\r\n")
-        加入文本 (展示内容, "28. LoaderFlags: " + 取调试文本2 (最大展示数据尺寸, LoaderFlags) + "\r\n")
-        加入文本 (展示内容, "29. NumberOfRvaAndSizes: " + 取调试文本2 (最大展示数据尺寸, NumberOfRvaAndSizes) + "\r\n")
-        加入文本 (展示内容, "30. DataDirectory: IMAGE_DATA_DIRECTORY [16]\r\n")
+        变量 展示内容 <类型 = 文本型>
+        变量 格式文本 <类型 = 文本型
+                值 = "<IMAGE_OPTIONAL_HEADER64> 总共 30 个成员:\r\n1. Magic: %u\r\n2. MajorLinkerVersion: %u\r\n3. MinorLinkerVersion: %u\r\n4. SizeOfCode: %u\r\n5. SizeOfInitializedData: %u\r\n6. SizeOfUninitializedData: %u\r\n7. AddressOfEntryPoint: %u\r\n8. BaseOfCode: %u\r\n9. ImageBase: %I64u\r\n10. SectionAlignment: %u\r\n11. FileAlignment: %u\r\n12. MajorOperatingSystemVersion: %u\r\n13. MinorOperatingSystemVersion: %u\r\n14. MajorImageVersion: %u\r\n15. MinorImageVersion: %u\r\n16. MajorSubsystemVersion: %u\r\n17. MinorSubsystemVersion: %u\r\n18. Win32VersionValue: %u\r\n19. SizeOfImage: %u\r\n20. SizeOfHeaders: %u\r\n21. CheckSum: %u\r\n22. Subsystem: %u\r\n23. DllCharacteristics: %u\r\n24. SizeOfStackReserve: %I64u\r\n25. SizeOfStackCommit: %I64u\r\n26. SizeOfHeapReserve: %I64u\r\n27. SizeOfHeapCommit: %I64u\r\n28. LoaderFlags: %u\r\n39. NumberOfRvaAndSizes: %u\r\n30. DataDirectory: IMAGE_DATA_DIRECTORY [16]">
+        加入格式文本 (展示内容, 格式文本, 欲操作本对象.Magic, 欲操作本对象.MajorLinkerVersion, 欲操作本对象.MinorLinkerVersion, 欲操作本对象.SizeOfCode, 欲操作本对象.SizeOfInitializedData, 欲操作本对象.SizeOfUninitializedData, 欲操作本对象.AddressOfEntryPoint, 欲操作本对象.BaseOfCode, 欲操作本对象.ImageBase, 欲操作本对象.SectionAlignment, 欲操作本对象.FileAlignment, 欲操作本对象.MajorOperatingSystemVersion, 欲操作本对象.MinorOperatingSystemVersion, 欲操作本对象.MajorImageVersion, 欲操作本对象.MinorImageVersion, 欲操作本对象.MajorSubsystemVersion, 欲操作本对象.MinorSubsystemVersion, 欲操作本对象.Win32VersionValue, 欲操作本对象.SizeOfImage, 欲操作本对象.SizeOfHeaders, 欲操作本对象.CheckSum, 欲操作本对象.Subsystem, 欲操作本对象.DllCharacteristics, 欲操作本对象.SizeOfStackReserve, 欲操作本对象.SizeOfStackCommit, 欲操作本对象.SizeOfHeapReserve, 欲操作本对象.SizeOfHeapCommit, 欲操作本对象.LoaderFlags, 欲操作本对象.NumberOfRvaAndSizes)
+        返回 (展示内容)
     }
 }
 
@@ -656,22 +575,23 @@
         注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_nt_headers32" 折叠
         @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_NT_HEADERS32" @模板实现类 = "IMAGE_NT_HEADERS32">
 {
-    变量 Signature <公开 类型 = 整数 注释 = "  PE文件的标识,固定为\"PE\\0\\0\"{50,45,00,00},整数为 0x4550/17744"
+    变量 Signature <公开 类型 = 整数 注释 = "PE文件的标识,固定为\"PE\\0\\0\"{50,45,00,00},整数为 0x4550/17744"
             注释 = "  IMAGE_DOS_SIGNATURE    0x5A4D      MZ" 注释 = "  IMAGE_OS2_SIGNATURE    0x454E      NE"
             注释 = "  IMAGE_OS2_SIGNATURE_LE 0x454C      LE" 注释 = "  IMAGE_VXD_SIGNATURE    0x454C      LE"
             注释 = "  IMAGE_NT_SIGNATURE     0x00004550  PE00" @输出名 = "Signature">
     变量 FileHeader <公开 类型 = IMAGE_FILE_HEADER 注释 = "映像文件头结构体(20个字节)" @输出名 = "FileHeader">
     变量 OptionalHeader <公开 类型 = IMAGE_OPTIONAL_HEADER32 注释 = "映像可选头结构体32位" @输出名 = "OptionalHeader">
 
-    方法 "//取展示内容" <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖
-            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用." 折叠>
+    参数 欲操作本对象 <类型 = IMAGE_NT_HEADERS32 注释 = "用作填入本对象中所有数据的展示文本">
     {
-        展示内容 = "<IMAGE_NT_HEADERS32> 总共 3 个成员:\r\n"
-        加入文本 (展示内容, "1. Signature: " + 取调试文本2 (最大展示数据尺寸, Signature) + "\r\n")
-        加入文本 (展示内容, "2. FileHeader: " + 取调试文本2 (最大展示数据尺寸, FileHeader) + "\r\n")
-        加入文本 (展示内容, "3. OptionalHeader: " + 取调试文本2 (最大展示数据尺寸, OptionalHeader) + "\r\n")
+        变量 展示内容 <类型 = 文本型>
+        加入格式文本 (展示内容, "<IMAGE_NT_HEADERS32> 总共 3 个成员:\r\n1. Signature: %u\r\n", 欲操作本对象.Signature)
+        加入文本 (展示内容, "2. FileHeader:\r\n")
+        加入多行文本 (展示内容, 欲操作本对象.FileHeader.取展示内容 (), 2)
+        加入文本 (展示内容, "3. OptionalHeader:\r\n")
+        加入多行文本 (展示内容, 欲操作本对象.OptionalHeader.取展示内容 (), 2)
+        返回 (展示内容)
     }
 }
 
@@ -686,15 +606,16 @@
     变量 FileHeader <公开 类型 = IMAGE_FILE_HEADER 注释 = "映像文件头部结构体(20个字节)" @输出名 = "FileHeader">
     变量 OptionalHeader <公开 类型 = IMAGE_OPTIONAL_HEADER64 注释 = "映像可选头部结构体64位" @输出名 = "OptionalHeader">
 
-    方法 "// 取展示内容" <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 折叠2 @虚拟方法 = 可覆盖
-            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用." 折叠>
+    参数 欲操作本对象 <类型 = IMAGE_NT_HEADERS64 注释 = "用作填入本对象中所有数据的展示文本">
     {
-        展示内容 = "<IMAGE_NT_HEADERS64> 总共 3 个成员:\r\n"
-        加入文本 (展示内容, "1. Signature: " + 取调试文本2 (最大展示数据尺寸, Signature) + "\r\n")
-        加入文本 (展示内容, "2. FileHeader: " + 取调试文本2 (最大展示数据尺寸, FileHeader) + "\r\n")
-        加入文本 (展示内容, "3. OptionalHeader: " + 取调试文本2 (最大展示数据尺寸, OptionalHeader) + "\r\n")
+        变量 展示内容 <类型 = 文本型>
+        加入格式文本 (展示内容, "<IMAGE_NT_HEADERS64> 总共 3 个成员:\r\n1. Signature: %u\r\n", 欲操作本对象.Signature)
+        加入文本 (展示内容, "2. FileHeader:\r\n")
+        加入多行文本 (展示内容, 欲操作本对象.FileHeader.取展示内容 (), 2)
+        加入文本 (展示内容, "3. OptionalHeader:\r\n")
+        加入多行文本 (展示内容, 欲操作本对象.OptionalHeader.取展示内容 (), 2)
+        返回 (展示内容)
     }
 }
 
@@ -702,17 +623,13 @@
         注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_data_directory" 折叠
         @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_DATA_DIRECTORY" @模板实现类 = "IMAGE_DATA_DIRECTORY">
 {
-    变量 VirtualAddress <公开 类型 = 整数 注释 = "指向的数据结构的虚拟地址(RAV)" @输出名 = "VirtualAddress">
+    变量 VirtualAddress <公开 类型 = 整数 注释 = "指向的数据结构的虚拟地址(RAV)" 折叠 @输出名 = "VirtualAddress">
     变量 Size <公开 类型 = 整数 注释 = "数据结构的大小" @输出名 = "Size">
 
-    方法 "// 取展示内容" <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖
-            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用.">
+    参数 欲操作本对象 <类型 = IMAGE_DATA_DIRECTORY 注释 = "用作填入本对象中所有数据的展示文本">
     {
-        展示内容 = "<IMAGE_DATA_DIRECTORY> 总共 2 个成员:\r\n"
-        加入文本 (展示内容, "1. VirtualAddress: " + 取调试文本2 (最大展示数据尺寸, VirtualAddress) + "\r\n")
-        加入文本 (展示内容, "2. Size: " + 取调试文本2 (最大展示数据尺寸, Size) + "\r\n")
+        返回 (取格式文本 ("<IMAGE_DATA_DIRECTORY> 总共 2 个成员:\r\n1. VirtualAddress: %u\r\n2. Size: %u", 欲操作本对象.VirtualAddress, 欲操作本对象.Size))
     }
 }
 
@@ -736,22 +653,14 @@
     变量 Characteristics <公开 类型 = 整数 注释 = "特性,包含标记以指示节属性,比如节是否含有可执行代码、初始化数据、未初始数据、是否可写、可读等."
             @输出名 = "Characteristics">
 
-    方法 "// 取展示内容" <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖
-            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用." 折叠>
+    参数 欲操作本对象 <类型 = IMAGE_SECTION_HEADER 注释 = "用作填入本对象中所有数据的展示文本">
     {
-        展示内容 = "<IMAGE_SECTION_HEADER> 总共 10 个成员:\r\n"
-        加入文本 (展示内容, "1. Name: " + 多字节到文本 (数组到字节集 (Name)) + "\r\n")
-        加入文本 (展示内容, "2. VirtualSize: " + 取调试文本2 (最大展示数据尺寸, VirtualSize) + "\r\n")
-        加入文本 (展示内容, "3. VirtualAddress: " + 取调试文本2 (最大展示数据尺寸, VirtualAddress) + "\r\n")
-        加入文本 (展示内容, "4. SizeOfRawData: " + 取调试文本2 (最大展示数据尺寸, SizeOfRawData) + "\r\n")
-        加入文本 (展示内容, "5. PointerToRawData: " + 取调试文本2 (最大展示数据尺寸, PointerToRawData) + "\r\n")
-        加入文本 (展示内容, "6. PointerToRelocations: " + 取调试文本2 (最大展示数据尺寸, PointerToRelocations) + "\r\n")
-        加入文本 (展示内容, "7. PointerToLinenumbers: " + 取调试文本2 (最大展示数据尺寸, PointerToLinenumbers) + "\r\n")
-        加入文本 (展示内容, "8. NumberOfRelocations: " + 取调试文本2 (最大展示数据尺寸, NumberOfRelocations) + "\r\n")
-        加入文本 (展示内容, "9. NumberOfLinenumbers: " + 取调试文本2 (最大展示数据尺寸, NumberOfLinenumbers) + "\r\n")
-        加入文本 (展示内容, "10. Characteristics: " + 取调试文本2 (最大展示数据尺寸, Characteristics) + "\r\n")
+        变量 展示内容 <类型 = 文本型>
+        变量 格式文本 <类型 = 文本型
+                值 = "<IMAGE_SECTION_HEADER> 总共 10 个成员:\r\n1. Name: %s\r\n2. VirtualSize: %u\r\n3. VirtualAddress: %u\r\n4. SizeOfRawData: %u\r\n5. PointerToRawData: %u\r\n6. PointerToRelocations: %u\r\n7. PointerToLinenumbers: %u\r\n8. NumberOfRelocations: %u\r\n9. NumberOfLinenumbers: %u\r\n10. Characteristics: %u">
+        加入格式文本 (展示内容, 格式文本, 多字节指针到文本 (取数组变量地址 (欲操作本对象.Name)), 欲操作本对象.VirtualSize, 欲操作本对象.VirtualAddress, 欲操作本对象.SizeOfRawData, 欲操作本对象.PointerToRawData, 欲操作本对象.PointerToRelocations, 欲操作本对象.PointerToLinenumbers, 欲操作本对象.NumberOfRelocations, 欲操作本对象.NumberOfLinenumbers, 欲操作本对象.Characteristics)
+        返回 (展示内容)
     }
 }
 
@@ -772,16 +681,14 @@
     变量 FirstThunk <公开 类型 = 整数 注释 = "  导入表的IAT结构的相对虚拟地址" 注释 = "  绑定导入表后,该地址数组指向真实的函数地址(VA)"
             @输出名 = "FirstThunk">
 
-    方法 "// 取展示内容" <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖
-            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用." 折叠>
+    参数 欲操作本对象 <类型 = IMAGE_IMPORT_DESCRIPTOR 注释 = "用作填入本对象中所有数据的展示文本">
     {
-        展示内容 = "<IMAGE_IMPORT_DESCRIPTOR> 总共 4 个成员:\r\n"
-        加入文本 (展示内容, "1. OriginalFirstThunk: " + 取调试文本2 (最大展示数据尺寸, OriginalFirstThunk) + "\r\n")
-        加入文本 (展示内容, "2. TimeDateStamp: " + 取调试文本2 (最大展示数据尺寸, TimeDateStamp) + "\r\n")
-        加入文本 (展示内容, "3. ForwarderChain: " + 取调试文本2 (最大展示数据尺寸, ForwarderChain) + "\r\n")
-        加入文本 (展示内容, "4. FirstThunk: " + 取调试文本2 (最大展示数据尺寸, FirstThunk) + "\r\n")
+        变量 展示内容 <类型 = 文本型>
+        变量 格式文本 <类型 = 文本型
+                值 = "<IMAGE_IMPORT_DESCRIPTOR> 总共 5 个成员:\r\n1. OriginalFirstThunk: %u\r\n2. TimeDateStamp: %u\r\n3. ForwarderChain: %u\r\n4. Name: %u\r\n5. FirstThunk: %u">
+        加入格式文本 (展示内容, 格式文本, 欲操作本对象.OriginalFirstThunk, 欲操作本对象.TimeDateStamp, 欲操作本对象.ForwarderChain, 欲操作本对象.Name, 欲操作本对象.FirstThunk)
+        返回 (展示内容)
     }
 }
 
@@ -806,41 +713,28 @@
     变量 AddressOfNameOrdinals <公开 类型 = 整数 注释 = "导出序号列表(Export Ordinal Table, EOT)的首地址(RVA)"
             注释 = "该数组的元素都是16-bit(一个字)长度的整数." @输出名 = "AddressOfNameOrdinals">
 
-    方法 "// 取展示内容" <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖
-            @输出名 = "GetDumpString" @视窗.后缀文本 = "override">
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用." 折叠>
+    参数 欲操作本对象 <类型 = IMAGE_EXPORT_DIRECTORY 注释 = "用作填入本对象中所有数据的展示文本">
     {
-        展示内容 = "<IMAGE_EXPORT_DIRECTORY> 总共 11 个成员:\r\n"
-        加入文本 (展示内容, "1. Characteristics: " + 取调试文本2 (最大展示数据尺寸, Characteristics) + "\r\n")
-        加入文本 (展示内容, "2. TimeDateStamp: " + 取调试文本2 (最大展示数据尺寸, TimeDateStamp) + "\r\n")
-        加入文本 (展示内容, "3. MajorVersion: " + 取调试文本2 (最大展示数据尺寸, MajorVersion) + "\r\n")
-        加入文本 (展示内容, "4. MinorVersion: " + 取调试文本2 (最大展示数据尺寸, MinorVersion) + "\r\n")
-        加入文本 (展示内容, "5. Name: " + 取调试文本2 (最大展示数据尺寸, Name) + "\r\n")
-        加入文本 (展示内容, "6. Base: " + 取调试文本2 (最大展示数据尺寸, Base) + "\r\n")
-        加入文本 (展示内容, "7. NumberOfFunctions: " + 取调试文本2 (最大展示数据尺寸, NumberOfFunctions) + "\r\n")
-        加入文本 (展示内容, "8. NumberOfNames: " + 取调试文本2 (最大展示数据尺寸, NumberOfNames) + "\r\n")
-        加入文本 (展示内容, "9. AddressOfFunctions: " + 取调试文本2 (最大展示数据尺寸, AddressOfFunctions) + "\r\n")
-        加入文本 (展示内容, "10. AddressOfNames: " + 取调试文本2 (最大展示数据尺寸, AddressOfNames) + "\r\n")
-        加入文本 (展示内容, "11. AddressOfNameOrdinals: " + 取调试文本2 (最大展示数据尺寸, AddressOfNameOrdinals) + "\r\n")
+        变量 展示内容 <类型 = 文本型>
+        变量 格式文本 <类型 = 文本型
+                值 = "<IMAGE_EXPORT_DIRECTORY> 总共 11 个成员:\r\n1. Characteristics: %u\r\n2. TimeDateStamp: %u\r\n3. MajorVersion: %u\r\n4. MinorVersion: %u\r\n5. Name: %u\r\n6. Base: %u\r\n7. NumberOfFunctions: %u\r\n8. NumberOfNames: %u\r\n9. AddressOfFunctions: %u\r\n10. AddressOfNames: %u\r\n11. AddressOfNameOrdinals: %u">
+        加入格式文本 (展示内容, 格式文本, 欲操作本对象.Characteristics, 欲操作本对象.TimeDateStamp, 欲操作本对象.MajorVersion, 欲操作本对象.MinorVersion, 欲操作本对象.Name, 欲操作本对象.Base, 欲操作本对象.NumberOfFunctions, 欲操作本对象.NumberOfNames, 欲操作本对象.AddressOfFunctions, 欲操作本对象.AddressOfNames, 欲操作本对象.AddressOfNameOrdinals)
+        返回 (展示内容)
     }
 }
 
-类 PE函数类 <公开 注释 = "PE文件导出表中的函数信息" 折叠 @文档 = "category = \"PE文件操作.辅助类\"">
+类 PE函数类 <公开 基础类 = 扩展对象类 注释 = "PE文件导出表中的函数信息" 折叠 @文档 = "category = \"PE文件操作.辅助类\"">
 {
     变量 函数名称 <公开 类型 = 文本型 @输出名 = "FunctionName">
     变量 函数地址 <公开 类型 = 长整数 @输出名 = "FunctionAddress">
     变量 函数序号 <公开 类型 = 整数 @输出名 = "FunctionOrdinal">
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
-            @视窗.后缀文本 = "override">
+    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 注释 = "" 折叠 @虚拟方法 = 可覆盖>
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
     {
-        展示内容 = "<PE函数类> 总共 3 个成员:\r\n"
-        加入文本 (展示内容, "1. 函数名称: " + 取调试文本2 (最大展示数据尺寸, 函数名称) + "\r\n")
-        加入文本 (展示内容, "2. 函数地址: " + 取调试文本2 (最大展示数据尺寸, 函数地址) + "\r\n")
-        加入文本 (展示内容, "3. 函数序号: " + 取调试文本2 (最大展示数据尺寸, 函数序号) + "\r\n")
+        加入格式文本 (展示内容, "<PE函数类> 总共 3 个成员:\r\n1. 函数名称: %s\r\n2. 函数地址: %I64u\r\n3. 函数序号: %u", 函数名称, 函数地址, 函数序号)
     }
 
     # @begin
@@ -854,22 +748,22 @@
     # @end
 }
 
-类 PE函数数组类 <公开 基础类 = 对象容器模板类 注释 = "PE文件导出表中的函数信息数组" @文档 = "category = \"PE文件操作.辅助类\"" @模板实现类 = "PE函数类">
+类 PE函数数组类 <公开 基础类 = 对象动态数组模板 注释 = "PE文件导出表中的函数信息数组" @文档 = "category = \"PE文件操作.辅助类\"" @模板实现类 = "PE函数类">
 
 类 导出表类 <公开 注释 = "导出表" 折叠 @文档 = "category = \"PE文件操作.辅助类\"">
 {
     变量 模块名称 <公开 类型 = 文本型 @输出名 = "ModuleName">
     变量 函数列表 <公开 类型 = PE函数数组类 @输出名 = "aFunctions">
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
+    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
             @视窗.后缀文本 = "override">
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
     {
         展示内容 = "<PE函数表类> 总共 2 个成员:\r\n"
         加入文本 (展示内容, "1. 模块名称: " + 取调试文本2 (最大展示数据尺寸, 模块名称) + "\r\n")
-        加入文本 (展示内容, "2. 函数列表: " + 取调试文本2 (最大展示数据尺寸, 函数列表) + "\r\n")
+        加入文本 (展示内容, "2. 函数列表: " + 取调试文本2 (最大展示数据尺寸, 函数列表))
     }
 }
 
-类 导入表数组类 <公开 基础类 = 对象容器模板类 注释 = "导入表数组" @文档 = "category = \"PE文件操作.辅助类\"" @模板实现类 = "导出表类">
+类 导入表数组类 <公开 基础类 = 对象动态数组模板 注释 = "导入表数组" @文档 = "category = \"PE文件操作.辅助类\"" @模板实现类 = "导出表类">

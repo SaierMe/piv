@@ -13,7 +13,6 @@
 #endif
 
 #include <cstdint>
-#include <string>
 #include <psapi.h>
 #include <winternl.h>
 #pragma comment(lib, "Psapi.lib")
@@ -21,6 +20,7 @@
 class PivProcess
 {
 private:
+    BOOL m_NeedClose = true;
     HANDLE hProcess = NULL;
     const BYTE *ProcessStart = NULL;
     const BYTE *ProcessEnd = NULL;
@@ -58,7 +58,7 @@ private:
 
 public:
     PivProcess() {}
-    PivProcess(DWORD process_id, DWORD desired_access)
+    PivProcess(const DWORD &process_id, const DWORD &desired_access)
     {
         open_process(process_id, desired_access);
     }
@@ -68,7 +68,7 @@ public:
     }
 
     // 打开进程
-    BOOL open_process(DWORD process_id, DWORD desired_access)
+    BOOL open_process(const DWORD &process_id, const DWORD &desired_access)
     {
         close_process();
         PID = process_id ? process_id : ::GetCurrentProcessId();
@@ -80,30 +80,32 @@ public:
     }
 
     // 打开自句柄
-    BOOL open_handle(HANDLE process)
+    BOOL open_handle(const HANDLE &process, const BOOL &auto_close = false)
     {
         close_process();
         hProcess = process;
         PID = ::GetProcessId(hProcess);
+        /*
         if (!get_base_module_info())
         {
             close_process();
             return FALSE;
         }
+        */
+        m_NeedClose = auto_close;
         return TRUE;
     }
 
     // 关闭进程
     void close_process()
     {
-        if (hProcess != NULL)
-        {
+        if (m_NeedClose && hProcess != NULL)
             ::CloseHandle(hProcess);
-            hProcess = NULL;
-            ProcessStart = NULL;
-            ProcessEnd = NULL;
-            PID = 0;
-        }
+        hProcess = NULL;
+        ProcessStart = NULL;
+        ProcessEnd = NULL;
+        PID = 0;
+        m_NeedClose = true;
     }
 
     // 取进程句柄
@@ -128,7 +130,7 @@ public:
     }
 
     // 取创建时间
-    double get_creation_time(int32_t time_zoon) const
+    double get_creation_time(const int32_t &time_zoon) const
     {
         double dtime = 0.0;
         if (hProcess != NULL)
@@ -160,7 +162,7 @@ public:
     }
 
     // 置优先级
-    BOOL set_priority_class(DWORD priority)
+    BOOL set_priority_class(const DWORD &priority)
     {
         return ::SetPriorityClass(hProcess, priority);
     }
@@ -183,7 +185,7 @@ public:
     }
 
     // 是否为WOW64模式
-    BOOL is_wow64(BOOL currentProcess = TRUE)
+    BOOL is_wow64(const BOOL &currentProcess = TRUE)
     {
         BOOL result = FALSE;
         if (hProcess != NULL)
@@ -241,18 +243,19 @@ public:
             ::EnumProcessModulesEx(hProcess, NULL, 0, &dwNeeded, 3);
             hModuleArray.InitCount(dwNeeded / sizeof(HMODULE), TRUE);
             ::EnumProcessModulesEx(hProcess, hModuleArray.GetData(), dwNeeded, &dwNeeded, 3);
-            std::wstring module_name_sv{module_name};
-            if (module_name_sv.empty())
+            CVolString module_name_sv{module_name};
+            wchar_t buf[MAX_PATH];
+            if (module_name_sv.IsEmpty())
             {
-                module_name_sv.resize(MAX_PATH);
-                ::GetModuleBaseNameW(hProcess, 0, const_cast<wchar_t *>(module_name_sv.data()), MAX_PATH);
+                ::GetModuleBaseNameW(hProcess, 0, buf, MAX_PATH);
+                module_name_sv.SetText(buf);
             }
-            std::wstring sFileName;
-            sFileName.resize(MAX_PATH);
+            CVolString sFileName;
             for (INT_P i = 0; i < hModuleArray.GetCount(); i++)
             {
-                ::GetModuleFileNameExW(hProcess, hModuleArray.GetAt(i), const_cast<wchar_t *>(sFileName.data()), MAX_PATH);
-                if (sFileName.rfind(module_name_sv, std::wstring::npos) != std::wstring::npos)
+                ::GetModuleFileNameExW(hProcess, hModuleArray.GetAt(i), buf, MAX_PATH);
+                sFileName.SetText(buf);
+                if (sFileName.EndOf(module_name_sv, FALSE) != -1)
                     return hModuleArray.GetAt(i);
             }
         }
@@ -260,7 +263,7 @@ public:
     }
 
     // 取模块基址
-    void *get_module_base(HMODULE hMoudle)
+    void *get_module_base(const HMODULE &hMoudle)
     {
         if (hProcess != NULL)
         {
@@ -274,7 +277,7 @@ public:
     }
 
     // 枚举模块句柄
-    int32_t enum_modules(CMArray<INT_P> &module_array, DWORD filter_flag)
+    int32_t enum_modules(CMArray<INT_P> &module_array, const DWORD &filter_flag)
     {
         module_array.RemoveAll();
         if (hProcess != NULL)
@@ -296,7 +299,7 @@ public:
     }
 
     // 枚举模块名称
-    int32_t enum_modules(CMArray<INT_P> &module_array, CMStringArray &name_array, BOOL is_fullpath, DWORD filter_flag)
+    int32_t enum_modules(CMArray<INT_P> &module_array, CMStringArray &name_array, const BOOL &is_fullpath, const DWORD &filter_flag)
     {
         module_array.RemoveAll();
         name_array.RemoveAll();
@@ -325,7 +328,7 @@ public:
     }
 
     // 取模块信息
-    BOOL get_module_info(HMODULE hModule, MODULEINFO *pModuleInfo)
+    BOOL get_module_info(const HMODULE &hModule, MODULEINFO *pModuleInfo)
     {
         if (hProcess != NULL)
         {
@@ -335,7 +338,7 @@ public:
     }
 
     // 取模块名称
-    CVolString get_module_name(HMODULE hModule)
+    CVolString get_module_name(const HMODULE &hModule)
     {
         if (hProcess != NULL)
         {
@@ -350,7 +353,7 @@ public:
     }
 
     // 取模块文件名
-    CVolString get_module_filename(HMODULE hModule)
+    CVolString get_module_filename(const HMODULE &hModule)
     {
         if (hProcess != NULL)
         {
@@ -365,7 +368,7 @@ public:
     }
 
     // 取模块路径
-    CVolString get_module_path(HMODULE hModule)
+    CVolString get_module_path(const HMODULE &hModule)
     {
         if (hProcess != NULL)
         {
@@ -414,7 +417,7 @@ public:
     }
 
     // 创建远程线程
-    BOOL create_remote_thread(void *func_ptr, void *parm_ptr, BOOL is_wait)
+    BOOL create_remote_thread(void *func_ptr, void *parm_ptr, const BOOL &is_wait)
     {
         BOOL result = false;
         if (hProcess != NULL)
@@ -445,18 +448,18 @@ public:
     }
 
     // 分配虚拟内存
-    void *virtual_alloc(void *address, size_t men_size, DWORD allocation_type, DWORD protect)
+    void *virtual_alloc(void *address, const size_t &men_size, const DWORD &allocation_type, const DWORD &protect)
     {
         return ::VirtualAllocEx(hProcess, address, men_size, allocation_type, protect);
     }
 
     // 释放虚拟内存
-    BOOL virtual_free(void *address, size_t men_size, DWORD free_type)
+    BOOL virtual_free(void *address, const size_t &men_size, const DWORD &free_type)
     {
         return ::VirtualFreeEx(hProcess, address, men_size, free_type);
     }
     // 修改内存保护
-    int32_t modify_memory_protect(void *address, size_t mem_size, DWORD new_protect)
+    int32_t modify_memory_protect(void *address, const size_t &mem_size, const DWORD &new_protect)
     {
         if (hProcess != NULL)
         {
@@ -470,7 +473,7 @@ public:
     }
 
     // 寻找所有内存特征码
-    int32_t find_signatures(const wchar_t *signatures, CMArray<INT_P> &address_array, const void *start_ptr, const void *end_ptr, ptrdiff_t max_count = PTRDIFF_MAX)
+    int32_t find_signatures(const wchar_t *signatures, CMArray<INT_P> &address_array, const void *start_ptr, const void *end_ptr, const DWORD &protect = 0, const DWORD &mem_type = 0, const ptrdiff_t &max_count = PTRDIFF_MAX)
     {
         address_array.RemoveAll();
         if (hProcess == NULL)
@@ -486,11 +489,12 @@ public:
         // 特征码转字节数组
         CVolMem sign_buf;
         GetMbsText(signatures, sign_buf, NULL);
+        sign_buf.ReplaceBin(CVolMem(static_cast<S_BYTE>(' ')), CVolMem(), 0, 0);
         char *Tzm = reinterpret_cast<char *>(sign_buf.GetPtr());
-        size_t TzmLength = strlen(Tzm) / 3 + 1;
+        size_t TzmLength = strlen(Tzm) / 2 + 1;
         WORD *TzmArray = new WORD[TzmLength];
         // 将十六进制特征码转为十进制
-        for (size_t i = 0, n = 0; i < strlen(Tzm); i++, n++)
+        for (size_t i = 0, n = 0; i < strlen(Tzm); n++)
         {
             char num[2]{Tzm[i++], Tzm[i++]};
             if (num[0] != '?' && num[1] != '?')
@@ -534,6 +538,8 @@ public:
         BYTE *MemoryData = new BYTE[BLOCKMAXSIZE];
         while (::VirtualQueryEx(hProcess, StartAddress, &mbi, sizeof(mbi)) != 0)
         {
+            if ((protect != 0 && protect != mbi.Protect) || (mem_type != 0 && mem_type != mbi.Type))
+                goto Next_Region;
             uint32_t i = 0;
             uint32_t BlockSize = static_cast<uint32_t>(mbi.RegionSize);
             while (BlockSize >= BLOCKMAXSIZE)
@@ -594,6 +600,7 @@ public:
                         m += (TzmLength - num);
                 }
             }
+        Next_Region:
             StartAddress += mbi.RegionSize;
             if (StartAddress >= EndAddress)
             {
@@ -606,12 +613,12 @@ public:
     }
 
     // 寻找内存特征码
-    ptrdiff_t find_signatures(const wchar_t *signatures, const void *start_ptr, const void *end_ptr)
+    ptrdiff_t find_signatures(const wchar_t *signatures, const void *start_ptr, const void *end_ptr, const DWORD &protect = 0, const DWORD &mem_type = 0)
     {
         if (hProcess != NULL)
         {
             CMArray<INT_P> address_array;
-            if (find_signatures(signatures, address_array, start_ptr, end_ptr, 1) > 0)
+            if (find_signatures(signatures, address_array, start_ptr, end_ptr, protect, mem_type, 1) > 0)
             {
                 return address_array.GetAt(0);
             }
@@ -620,7 +627,7 @@ public:
     }
 
     // 寻找所有内存字节集
-    int32_t find_memory(const CVolMem &mem_data, CMArray<INT_P> &address_array, const void *start_ptr, const void *end_ptr, ptrdiff_t max_count = PTRDIFF_MAX)
+    int32_t find_memory(const CVolMem &mem_data, CMArray<INT_P> &address_array, const void *start_ptr, const void *end_ptr, const DWORD &protect = 0, const DWORD &mem_type = 0, const ptrdiff_t &max_count = PTRDIFF_MAX)
     {
         address_array.RemoveAll();
         if (hProcess == NULL)
@@ -639,6 +646,8 @@ public:
         MemoryData.Alloc(BLOCKMAXSIZE, TRUE);
         while (::VirtualQueryEx(hProcess, StartAddress, &mbi, sizeof(mbi)) != 0)
         {
+            if ((protect != 0 && protect != mbi.Protect) || (mem_type != 0 && mem_type != mbi.Type))
+                goto Next_Region;
             uint32_t i = 0;
             uint32_t BlockSize = static_cast<uint32_t>(mbi.RegionSize);
             while (BlockSize >= BLOCKMAXSIZE)
@@ -669,6 +678,7 @@ public:
                     }
                 }
             }
+        Next_Region:
             StartAddress += mbi.RegionSize;
             if (StartAddress >= EndAddress)
             {
@@ -679,12 +689,12 @@ public:
     }
 
     // 寻找内存字节集
-    ptrdiff_t find_memory(const CVolMem &mem_data, const void *start_ptr, const void *end_ptr)
+    ptrdiff_t find_memory(const CVolMem &mem_data, const void *start_ptr, const void *end_ptr, const DWORD &protect = 0, const DWORD &mem_type = 0)
     {
         if (hProcess != NULL)
         {
             CMArray<INT_P> address_array;
-            if (find_memory(mem_data, address_array, start_ptr, end_ptr, 1) > 0)
+            if (find_memory(mem_data, address_array, start_ptr, end_ptr, protect, mem_type, 1) > 0)
             {
                 return address_array.GetAt(0);
             }
@@ -693,7 +703,7 @@ public:
     }
 
     // 读内存数据
-    BOOL read_memory(void *write_address, const void *read_address, size_t read_size)
+    BOOL read_memory(void *write_address, const void *read_address, const size_t &read_size)
     {
         if (hProcess != NULL)
         {
@@ -703,7 +713,7 @@ public:
     }
 
     // 读内存字节集
-    CVolMem read_memory(const void *read_address, size_t read_size)
+    CVolMem read_memory(const void *read_address, const size_t &read_size)
     {
         if (hProcess != NULL)
         {
@@ -731,7 +741,7 @@ public:
     }
 
     // 写内存数据
-    BOOL write_memory(void *write_address, const void *data_address, size_t data_size)
+    BOOL write_memory(void *write_address, const void *data_address, const size_t &data_size)
     {
         BOOL result = FALSE;
         if (hProcess != NULL)
@@ -782,7 +792,7 @@ public:
     }
 
     // 寻找模块特征码
-    ptrdiff_t find_module_signatures(HMODULE hModule, const wchar_t *signatures, size_t start_off, size_t end_off)
+    ptrdiff_t find_module_signatures(const HMODULE &hModule, const wchar_t *signatures, const size_t &start_off, const size_t &end_off, const DWORD &protect = 0, const DWORD &mem_type = 0)
     {
         ptrdiff_t result = 0;
         if (hProcess != NULL)
@@ -792,14 +802,14 @@ public:
             {
                 const BYTE *module_base = static_cast<const BYTE *>(ModuleInfo.lpBaseOfDll);
                 result = find_signatures(signatures, module_base + start_off,
-                                         module_base + (end_off ? end_off : ModuleInfo.SizeOfImage));
+                                         module_base + (end_off ? end_off : ModuleInfo.SizeOfImage), protect, mem_type);
             }
         }
         return result;
     }
 
     // 寻找所有模块特征码
-    int32_t find_module_signatures(HMODULE hModule, const wchar_t *signatures, CMArray<INT_P> &address_array, size_t start_off, size_t end_off)
+    int32_t find_module_signatures(const HMODULE &hModule, const wchar_t *signatures, CMArray<INT_P> &address_array, const size_t &start_off, const size_t &end_off, const DWORD &protect = 0, const DWORD &mem_type = 0)
     {
         int32_t result = 0;
         if (hProcess != NULL)
@@ -808,14 +818,14 @@ public:
             if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && start_off <= ModuleInfo.SizeOfImage && end_off <= ModuleInfo.SizeOfImage)
             {
                 const BYTE *module_base = static_cast<const BYTE *>(ModuleInfo.lpBaseOfDll);
-                result = find_signatures(signatures, address_array, module_base + start_off, module_base + (end_off ? end_off : ModuleInfo.SizeOfImage));
+                result = find_signatures(signatures, address_array, module_base + start_off, module_base + (end_off ? end_off : ModuleInfo.SizeOfImage), protect, mem_type);
             }
         }
         return result;
     }
 
     // 寻找模块字节集
-    ptrdiff_t find_module_memory(HMODULE hModule, const CVolMem &mem_data, size_t start_off, size_t end_off)
+    ptrdiff_t find_module_memory(const HMODULE &hModule, const CVolMem &mem_data, const size_t &start_off, const size_t &end_off, const DWORD &protect = 0, const DWORD &mem_type = 0)
     {
         ptrdiff_t result = 0;
         if (hProcess != NULL)
@@ -824,14 +834,14 @@ public:
             if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && start_off < ModuleInfo.SizeOfImage && end_off < ModuleInfo.SizeOfImage)
             {
                 const BYTE *module_base = static_cast<const BYTE *>(ModuleInfo.lpBaseOfDll);
-                result = find_memory(mem_data, module_base + start_off, module_base + (end_off ? end_off : ModuleInfo.SizeOfImage));
+                result = find_memory(mem_data, module_base + start_off, module_base + (end_off ? end_off : ModuleInfo.SizeOfImage), protect, mem_type);
             }
         }
         return result;
     }
 
     // 寻找所有模块字节集
-    int32_t find_module_memory(HMODULE hModule, const CVolMem &mem_data, CMArray<INT_P> &address_array, size_t start_off, size_t end_off)
+    int32_t find_module_memory(const HMODULE &hModule, const CVolMem &mem_data, CMArray<INT_P> &address_array, const size_t &start_off, const size_t &end_off, const DWORD &protect = 0, const DWORD &mem_type = 0)
     {
         int32_t result = 0;
         if (hProcess != NULL)
@@ -840,14 +850,14 @@ public:
             if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && start_off < ModuleInfo.SizeOfImage && end_off < ModuleInfo.SizeOfImage)
             {
                 const BYTE *module_base = static_cast<const BYTE *>(ModuleInfo.lpBaseOfDll);
-                result = find_memory(mem_data, address_array, module_base + start_off, module_base + (end_off ? end_off : ModuleInfo.SizeOfImage));
+                result = find_memory(mem_data, address_array, module_base + start_off, module_base + (end_off ? end_off : ModuleInfo.SizeOfImage), protect, mem_type);
             }
         }
         return result;
     }
 
     // 读内存数据
-    BOOL read_module_memory(HMODULE hModule, void *write_address, size_t read_off, size_t read_size)
+    BOOL read_module_memory(const HMODULE &hModule, void *write_address, const size_t &read_off, const size_t &read_size)
     {
         if (hProcess != NULL)
         {
@@ -862,7 +872,7 @@ public:
     }
 
     // 读内存字节集
-    CVolMem read_module_memory(HMODULE hModule, size_t read_off, size_t read_size)
+    CVolMem read_module_memory(const HMODULE &hModule, const size_t &read_off, const size_t &read_size)
     {
         if (hProcess != NULL)
         {
@@ -883,7 +893,7 @@ public:
 
     // 读模块内存值
     template <typename R>
-    R read_module_value(HMODULE hModule, size_t read_off)
+    R read_module_value(const HMODULE &hModule, const size_t &read_off)
     {
         R value;
         if (hProcess != NULL)
@@ -901,7 +911,7 @@ public:
         return value;
     }
     // 写模块数据
-    BOOL write_module_memory(HMODULE hModule, size_t write_off, const void *data_address, size_t data_size)
+    BOOL write_module_memory(const HMODULE &hModule, const size_t &write_off, const void *data_address, const size_t &data_size)
     {
         BOOL result = false;
         if (hProcess != NULL)
@@ -922,7 +932,7 @@ public:
     }
 
     // 写模块字节集
-    BOOL write_module_memory(HMODULE hModule, size_t write_off, const CVolMem &data)
+    BOOL write_module_memory(const HMODULE &hModule, const size_t &write_off, const CVolMem &data)
     {
         BOOL result = false;
         if (hProcess != NULL)
@@ -944,7 +954,7 @@ public:
 
     // 写模块值
     template <typename T>
-    BOOL write_module_value(HMODULE hModule, size_t write_off, const T &value)
+    BOOL write_module_value(const HMODULE &hModule, const size_t &write_off, const T &value)
     {
         BOOL result = false;
         if (hProcess != NULL)

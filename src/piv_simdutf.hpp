@@ -743,19 +743,19 @@ namespace piv
         // 验证UTF16LE文本
         static const BOOL validate_utf16le(const CVolMem &input)
         {
-            return simdutf::validate_utf16le(reinterpret_cast<const char16_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
+            return simdutf::validate_utf16le(reinterpret_cast<const char16_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 2);
         }
 
         // 验证UTF16BE文本
         static const BOOL validate_utf16be(const CVolMem &input)
         {
-            return simdutf::validate_utf16be(reinterpret_cast<const char16_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
+            return simdutf::validate_utf16be(reinterpret_cast<const char16_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 2);
         }
 
         // 验证UTF32文本
         static const BOOL validate_utf32(const CVolMem &input)
         {
-            return simdutf::validate_utf32(reinterpret_cast<const char32_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
+            return simdutf::validate_utf32(reinterpret_cast<const char32_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 4);
         }
 
         // 取UTF8文本长度

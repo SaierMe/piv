@@ -171,7 +171,7 @@ namespace piv
                 return false;
             auto p1 = lhs.data();
             auto p2 = rhs.data();
-            String_l::value_type a, b;
+            typename String_l::value_type a, b;
             while (n--)
             {
                 a = *p1++;
@@ -1446,11 +1446,11 @@ public:
      */
     inline bool IIsEqual(const PivStringView &other) const
     {
-        return piv::edit::iequals(sv, other.sv)
+        return piv::edit::iequals(sv, other.sv);
     }
     inline bool IIsEqual(const value_type &other) const
     {
-        return piv::edit::iequals(sv, other)
+        return piv::edit::iequals(sv, other);
     }
     inline bool IIsEqual(const string_type &other) const
     {
@@ -2108,9 +2108,9 @@ public:
         if (textlen != nullptr)
             *textlen = text.size();
         if (!case_insensitive)
-            return str.find(text, pos);
+            return sv.find(text, pos);
         else
-            return piv::edit::ifind(value_type{str}, value_type{text}, pos);
+            return piv::edit::ifind(value_type{sv}, value_type{text}, pos);
     }
     inline size_t SearchText(const CharT *text, const size_t &pos = 0, const bool &case_insensitive = false, const size_t &count = (size_t)-1, size_t *textlen = nullptr) const
     {
@@ -2643,7 +2643,7 @@ public:
      */
     inline string_type UrlEncode(const bool &utf8 = true, const bool &ReservedWord = false) const
     {
-        return piv::encoding::UrlStrEncode(str, utf8, ReservedWord);
+        return piv::encoding::UrlStrEncode(sv, utf8, ReservedWord);
     }
 
     /**
@@ -2653,7 +2653,7 @@ public:
      */
     inline string_type UrlDecode(const bool &utf8 = true) const
     {
-        return piv::encoding::UrlStrDecode(str, utf8);
+        return piv::encoding::UrlStrDecode(sv, utf8);
     }
 
     /**
@@ -5033,7 +5033,7 @@ public:
     {
         ASSERT(pos >= 0 && pos <= str.length());
         bool replaced = false;
-        for (const size_t &i = pos; i < str.size(); i++)
+        for (size_t i = pos; i < str.size(); i++)
         {
             if (str[i] == findCh)
             {
@@ -5419,7 +5419,7 @@ public:
     }
     inline size_t SplitStrings(const CVolMem &delimit, std::vector<value_type> &strArray, const bool &trimAll = true, const bool &ignoreEmptyStr = true, const size_t &max_count = (size_t)-1) const
     {
-        return SplitStrings(view_type{reinterpret_cast<const CharT *>(delimit.GetPtr()), static_cast<size_t>(delimit.GetSize() / sizeof(CharT))}, svArray, trimAll, ignoreEmptyStr, max_count);
+        return SplitStrings(view_type{reinterpret_cast<const CharT *>(delimit.GetPtr()), static_cast<size_t>(delimit.GetSize() / sizeof(CharT))}, strArray, trimAll, ignoreEmptyStr, max_count);
     }
     inline size_t SplitStrings(const CVolString &delimit, std::vector<value_type> &strArray, const bool &trimAll = true, const bool &ignoreEmptyStr = true, const size_t &max_count = (size_t)-1) const
     {

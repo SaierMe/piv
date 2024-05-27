@@ -10,7 +10,9 @@
 
 #include "detail/piv_base.hpp"
 
+#include <winioctl.h>
 #include <functional>
+#include <mutex>
 #include <thread>
 #include <map>
 #include <set>
@@ -31,19 +33,19 @@ private:
     USN_JOURNAL_DATA m_ujd{0};                                     // USN日志数据
     CVolString m_root;                                             // 根路径
 
-    std::function<int32_t(void)> func_Inited;                                                     // 初始化完毕
-    std::function<int32_t(CVolString &, CVolString &, FILETIME &)> func_Created;                  // 文件被创建
-    std::function<int32_t(CVolString &, CVolString &, FILETIME &)> func_Deleted;                  // 文件被删除
-    std::function<int32_t(CVolString &, CVolString &, int32_t, FILETIME &)> func_DataChanged;     // 文件内容改变
-    std::function<int32_t(CVolString &, CVolString &, CVolString &, FILETIME &)> func_Renamed;    // 文件被重命名
-    std::function<int32_t(CVolString &, CVolString &, int32_t, FILETIME &)> func_AttributeChange; // 文件属性改变
-    std::function<int32_t(CVolString &, CVolString &, int32_t, FILETIME &)> func_OtherChange;     // 其他状态改变
+    std::function<int32_t(void)> func_Inited;                                                              // 初始化完毕
+    std::function<int32_t(CVolString &, CVolString &, FILETIME &, int32_t)> func_Created;                  // 文件被创建
+    std::function<int32_t(CVolString &, CVolString &, FILETIME &, int32_t)> func_Deleted;                  // 文件被删除
+    std::function<int32_t(CVolString &, CVolString &, int32_t, FILETIME &, int32_t)> func_DataChanged;     // 文件内容改变
+    std::function<int32_t(CVolString &, CVolString &, CVolString &, FILETIME &, int32_t)> func_Renamed;    // 文件被重命名
+    std::function<int32_t(CVolString &, CVolString &, int32_t, FILETIME &, int32_t)> func_AttributeChange; // 文件属性改变
+    std::function<int32_t(CVolString &, CVolString &, int32_t, FILETIME &, int32_t)> func_OtherChange;     // 其他状态改变
 
     typedef struct _IO_STATUS_BLOCK
     {
         union
         {
-            NTSTATUS Status;
+            LONG Status;
             PVOID Pointer;
         };
         ULONG_PTR Information;
@@ -67,7 +69,7 @@ private:
 
     typedef ULONG(__stdcall *PNtCreateFile)(PHANDLE FileHandle, ULONG DesiredAccess, PVOID ObjectAttributes, PIO_STATUS_BLOCK IoStatusBlock,
                                             PLARGE_INTEGER AllocationSize, ULONG FileAttributes, ULONG ShareAccess, ULONG CreateDisposition, ULONG CreateOptions, PVOID EaBuffer, ULONG EaLength);
-    typedef NTSTATUS(__stdcall *PNtQueryInformationFile)(HANDLE FileHandle, PIO_STATUS_BLOCK IoStatusBlock, PVOID FileInformation, DWORD Length, DWORD FileInformationClass);
+    typedef LONG(__stdcall *PNtQueryInformationFile)(HANDLE FileHandle, PIO_STATUS_BLOCK IoStatusBlock, PVOID FileInformation, DWORD Length, DWORD FileInformationClass);
 
     PNtQueryInformationFile fNtQueryInformationFile = (PNtQueryInformationFile)GetProcAddress(::GetModuleHandleW(L"ntdll.dll"), "NtQueryInformationFile");
     PNtCreateFile fNtCreatefile = (PNtCreateFile)GetProcAddress(::GetModuleHandleW(L"ntdll.dll"), "NtCreateFile");
@@ -79,46 +81,44 @@ private:
      */
     void PathFromFRN(const DWORDLONG &frn, CVolString &path)
     {
-        auto it = m_FRNtoPATH->find(frn);
-        if (it != m_FRNtoPATH->end())
+        if (!m_hasPathMap)
         {
-            path.InsertChar(0, '\\');
-            path.InsertText(0, it->second);
-            auto it2 = m_FRNtoParent->find(it->first);
-            if (it2 != m_FRNtoParent->end())
-                PathFromFRN(it2->second, path);
+            if (!fNtCreatefile || !fNtQueryInformationFile)
+                return;
+            UNICODE_STRING fidstr = {8, 8, (PWSTR)&frn};
+            // OBJ_CASE_INSENSITIVE = 0x00000040UL;
+            OBJECT_ATTRIBUTES oa = {sizeof(OBJECT_ATTRIBUTES), m_hVol, &fidstr, 0x00000040UL, 0, 0};
+            HANDLE hFile;
+            IO_STATUS_BLOCK IoStatus;
+            // FILE_OPEN = 0x00000001UL;
+            // FILE_OPEN_BY_FILE_ID = 0x00002000UL;
+            if (fNtCreatefile(&hFile, GENERIC_READ, &oa, &IoStatus, NULL, FILE_ATTRIBUTE_NORMAL, FILE_SHARE_READ | FILE_SHARE_WRITE, 0x00000001UL, 0x00002000UL, NULL, 0) == 0)
+            {
+                PivBuffer<WCHAR, DWORD> buf{MAX_PATH * 4};
+                if (fNtQueryInformationFile(hFile, &IoStatus, buf.GetPtr(), buf.GetSize(), 9) == 0)
+                {
+                    path.SetText(m_root);
+                    path.AddText(buf.GetPtr() + 3, *buf.Get<DWORD>() / 2 - 1);
+                    path.CheckAddPathChar();
+                }
+                ::CloseHandle(hFile);
+            }
         }
         else
         {
-            path.InsertText(0, m_root);
-        }
-    }
-
-    /**
-     * @brief 文件引用编号到路径
-     * @param frn 文件引用编号
-     * @param path 返回路径
-     */
-    void FRNtoPath(const DWORDLONG &frn, CVolString &path)
-    {
-        if (!fNtCreatefile || !fNtQueryInformationFile)
-            return;
-        UNICODE_STRING fidstr = {8, 8, (PWSTR)&frn};
-        OBJECT_ATTRIBUTES oa = {sizeof(OBJECT_ATTRIBUTES), m_hVol, &fidstr, 0x00000040UL, 0, 0}; // OBJ_CASE_INSENSITIVE = 0x00000040UL;
-        HANDLE hFile;
-        IO_STATUS_BLOCK IoStatus;
-        // FILE_OPEN = 0x00000001UL;
-        // FILE_OPEN_BY_FILE_ID = 0x00002000UL;
-        if (fNtCreatefile(&hFile, GENERIC_READ, &oa, &IoStatus, NULL, FILE_ATTRIBUTE_NORMAL, FILE_SHARE_READ | FILE_SHARE_WRITE, 0x00000001UL, 0x00002000UL, NULL, 0) == 0)
-        {
-            PivBuffer<WCHAR, DWORD> buf{MAX_PATH * 4};
-            if (fNtQueryInformationFile(hFile, &IoStatus, buf.GetPtr(), buf.GetSize(), 9) == 0)
+            auto it = m_FRNtoPATH->find(frn);
+            if (it != m_FRNtoPATH->end())
             {
-                path.SetText(m_root);
-                path.AddText(buf.GetPtr() + 3, *buf.Get<DWORD>() / 2 - 1);
-                path.CheckAddPathChar();
+                path.InsertChar(0, '\\');
+                path.InsertText(0, it->second);
+                auto it2 = m_FRNtoParent->find(it->first);
+                if (it2 != m_FRNtoParent->end())
+                    PathFromFRN(it2->second, path);
             }
-            ::CloseHandle(hFile);
+            else
+            {
+                path.InsertText(0, m_root);
+            }
         }
     }
 
@@ -142,18 +142,203 @@ private:
     }
 
     /**
-     * @brief 判断指定的文件引用编号是否在监视的目录内
+     * @brief 判断指定的文件引用编号需要监视
      * @param frn 文件引用编号
      * @return
      */
-    bool IsPertain(const DWORDLONG &frn)
+    bool IsMonitored(const DWORDLONG &frn)
     {
+        if (!m_MonitorDir)
+            return true;
         if (m_MonitorDir->find(frn) != m_MonitorDir->end())
             return true;
         auto it = m_FRNtoParent->find(frn);
         if (it != m_FRNtoParent->end())
-            return IsPertain(it->second);
+            return IsMonitored(it->second);
         return false;
+    }
+
+    /**
+     * @brief 初始化USN日志
+     * @return
+     */
+    bool InitUsn()
+    {
+        if (m_hVol == INVALID_HANDLE_VALUE)
+            return false;
+        CREATE_USN_JOURNAL_DATA cujd{0, 0};
+        // 初始化USN日志文件
+        if (::DeviceIoControl(m_hVol, FSCTL_CREATE_USN_JOURNAL, &cujd, sizeof(cujd), NULL, 0, NULL, NULL) == FALSE)
+            return false;
+        // 获取USN日志基本信息
+        if (::DeviceIoControl(m_hVol, FSCTL_QUERY_USN_JOURNAL, NULL, 0, &m_ujd, sizeof(m_ujd), NULL, NULL) == FALSE)
+            return false;
+        m_StartTime = (LONGLONG)(time(nullptr) + 11644473600) * 10000000;
+        return true;
+    }
+
+    /**
+     * @brief 删除USN日志(删除后会影响其他使用USN日志的软件)
+     * @return
+     */
+    bool DeleteUsn()
+    {
+        if (m_hVol == INVALID_HANDLE_VALUE)
+            return false;
+        DELETE_USN_JOURNAL_DATA dujd{m_ujd.UsnJournalID, USN_DELETE_FLAG_DELETE};
+        DWORD br;
+        return ::DeviceIoControl(m_hVol, FSCTL_DELETE_USN_JOURNAL, &dujd, sizeof(dujd), NULL, 0, &br, NULL);
+    }
+
+    /**
+     * @brief 索引路径名称
+     */
+    void IndexPath()
+    {
+        if (m_hVol == INVALID_HANDLE_VALUE)
+            return;
+        if (m_hasPathMap)
+            m_FRNtoPATH.reset(new std::map<DWORDLONG, CVolString>);
+        m_FRNtoParent.reset(new std::map<DWORDLONG, DWORDLONG>);
+        MFT_ENUM_DATA med{0};
+        med.StartFileReferenceNumber = 0;
+        med.LowUsn = 0;            // m_ujd.FirstUsn
+        med.HighUsn = MAXLONGLONG; // m_ujd.NextUsn
+        PivBuffer<CHAR, DWORD> buffer{10240, true};
+        DWORD dwBytes = 0;
+        PUSN_RECORD UsnRecord;
+        while (::DeviceIoControl(m_hVol, FSCTL_ENUM_USN_DATA, &med, sizeof(med), buffer.GetPtr(), buffer.GetSize(), &dwBytes, NULL))
+        {
+            DWORD dwRetBytes = dwBytes - sizeof(USN);
+            UsnRecord = (PUSN_RECORD)(buffer.GetPtr() + sizeof(USN));
+            while (dwRetBytes > 0)
+            {
+                if (UsnRecord->FileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+                {
+                    m_FRNtoParent->emplace(UsnRecord->FileReferenceNumber, UsnRecord->ParentFileReferenceNumber);
+                    if (m_hasPathMap)
+                        m_FRNtoPATH->emplace(std::piecewise_construct, std::forward_as_tuple(UsnRecord->FileReferenceNumber),
+                                             std::forward_as_tuple((const WCHAR *)((PBYTE)UsnRecord + UsnRecord->FileNameOffset), UsnRecord->FileNameLength / 2));
+                }
+                // 获取下一个记录
+                dwRetBytes -= UsnRecord->RecordLength;
+                UsnRecord = (PUSN_RECORD)(((CHAR *)UsnRecord) + UsnRecord->RecordLength);
+            }
+            med.StartFileReferenceNumber = *buffer.Get<USN>();
+        }
+        MonitorUsn();
+    }
+
+    /**
+     * @brief 监视USN日志
+     */
+    void MonitorUsn()
+    {
+        if (m_hVol == INVALID_HANDLE_VALUE)
+            return;
+        if (func_Inited)
+            func_Inited();
+    ReadRecord:
+        READ_USN_JOURNAL_DATA ReadData = {0, 0xFFFFFFFF, 0, 0, 0};
+        ReadData.UsnJournalID = m_ujd.UsnJournalID;
+        PivBuffer<CHAR, DWORD> buffer{4096, true};
+        DWORD dwBytes = 0, dwRetBytes = 0;
+        PUSN_RECORD UsnRecord;
+        CVolString OldName;
+        while (::DeviceIoControl(m_hVol, FSCTL_READ_USN_JOURNAL, &ReadData, sizeof(ReadData), buffer.GetPtr(), buffer.GetSize(), &dwBytes, NULL))
+        {
+            CVolString filename;
+            CVolString path;
+            dwRetBytes = dwBytes - sizeof(USN);
+            // 找到第一个 USN 记录
+            UsnRecord = (PUSN_RECORD)(buffer.GetPtr() + sizeof(USN));
+            if (::WaitForSingleObject(m_Event, dwRetBytes ? 0 : m_delay) == WAIT_OBJECT_0)
+                return;
+            while (dwRetBytes > 0)
+            {
+                // 跳过开始监视之前的日志
+                if (UsnRecord->TimeStamp.QuadPart < m_StartTime)
+                    goto NextRecord;
+                // 文件或目录更改后都会关闭句柄,以此判断更改是否已完成
+                if (UsnRecord->Reason & USN_REASON_CLOSE)
+                {
+                    // 检查是否限定了监视目录
+                    if (!IsMonitored(UsnRecord->ParentFileReferenceNumber))
+                        goto NextRecord;
+                    bool isDir = ((m_hasParentMap || m_hasPathMap) && (UsnRecord->FileAttributes & FILE_ATTRIBUTE_DIRECTORY));
+                    // 获取路径
+                    path.Empty();
+                    if (m_IndexPath)
+                        PathFromFRN(UsnRecord->ParentFileReferenceNumber, path);
+                    // 获取文件或目录名称
+                    filename.SetText((const WCHAR *)((PBYTE)UsnRecord + UsnRecord->FileNameOffset), UsnRecord->FileNameLength / 2);
+                    // 以下为文件或更改事件
+                    if (UsnRecord->Reason & USN_REASON_FILE_CREATE)
+                    {
+                        if (isDir)
+                        {
+                            m_FRNtoParent->emplace(UsnRecord->FileReferenceNumber, UsnRecord->ParentFileReferenceNumber);
+                            if (m_FRNtoPATH)
+                                (*m_FRNtoPATH)[UsnRecord->FileReferenceNumber] = filename;
+                        }
+                        if (func_Created)
+                            func_Created(filename, path, FILETIME{UsnRecord->TimeStamp.LowPart, (DWORD)UsnRecord->TimeStamp.HighPart}, static_cast<int32_t>(UsnRecord->FileAttributes));
+                    }
+                    else if (UsnRecord->Reason & USN_REASON_FILE_DELETE)
+                    {
+                        if (isDir)
+                        {
+                            m_FRNtoParent->erase(UsnRecord->FileReferenceNumber);
+                            if (m_FRNtoPATH)
+                                m_FRNtoPATH->erase(UsnRecord->FileReferenceNumber);
+                        }
+                        if (func_Deleted)
+                            func_Deleted(filename, path, FILETIME{UsnRecord->TimeStamp.LowPart, (DWORD)UsnRecord->TimeStamp.HighPart}, static_cast<int32_t>(UsnRecord->FileAttributes));
+                    }
+                    else if (UsnRecord->Reason & USN_REASON_DATA_EXTEND || UsnRecord->Reason & USN_REASON_DATA_OVERWRITE || UsnRecord->Reason & USN_REASON_DATA_TRUNCATION ||
+                             UsnRecord->Reason & USN_REASON_NAMED_DATA_EXTEND || UsnRecord->Reason & USN_REASON_NAMED_DATA_OVERWRITE || UsnRecord->Reason & USN_REASON_NAMED_DATA_TRUNCATION)
+                    {
+                        if (func_DataChanged)
+                            func_DataChanged(filename, path, static_cast<int32_t>(UsnRecord->Reason), FILETIME{UsnRecord->TimeStamp.LowPart, (DWORD)UsnRecord->TimeStamp.HighPart}, static_cast<int32_t>(UsnRecord->FileAttributes));
+                    }
+                    else if (UsnRecord->Reason & USN_REASON_RENAME_NEW_NAME)
+                    {
+                        if (isDir && m_FRNtoPATH)
+                        {
+                            (*m_FRNtoPATH)[UsnRecord->FileReferenceNumber] = filename;
+                        }
+                        if (func_Renamed)
+                            func_Renamed(OldName, filename, path, FILETIME{UsnRecord->TimeStamp.LowPart, (DWORD)UsnRecord->TimeStamp.HighPart}, static_cast<int32_t>(UsnRecord->FileAttributes));
+                    }
+                    else if (UsnRecord->Reason & USN_REASON_BASIC_INFO_CHANGE || UsnRecord->Reason & USN_REASON_EA_CHANGE || UsnRecord->Reason & USN_REASON_INDEXABLE_CHANGE ||
+                             UsnRecord->Reason & USN_REASON_SECURITY_CHANGE || UsnRecord->Reason & USN_REASON_REPARSE_POINT_CHANGE || UsnRecord->Reason & 0x00800000)
+                    {
+                        if (func_AttributeChange)
+                            func_AttributeChange(filename, path, static_cast<int32_t>(UsnRecord->Reason), FILETIME{UsnRecord->TimeStamp.LowPart, (DWORD)UsnRecord->TimeStamp.HighPart}, static_cast<int32_t>(UsnRecord->FileAttributes));
+                    }
+                    else
+                    {
+                        if (func_OtherChange)
+                            func_OtherChange(filename, path, static_cast<int32_t>(UsnRecord->Reason), FILETIME{UsnRecord->TimeStamp.LowPart, (DWORD)UsnRecord->TimeStamp.HighPart}, static_cast<int32_t>(UsnRecord->FileAttributes));
+                    }
+                }
+                else if (UsnRecord->Reason & USN_REASON_RENAME_OLD_NAME) // 记住重命名前的旧名称
+                {
+                    // 检查是否限定了监视目录
+                    if (!IsMonitored(UsnRecord->ParentFileReferenceNumber))
+                        goto NextRecord;
+                    OldName.SetText((const WCHAR *)((PBYTE)UsnRecord + UsnRecord->FileNameOffset), UsnRecord->FileNameLength / 2);
+                }
+            // 获取下一个记录
+            NextRecord:
+                dwRetBytes -= UsnRecord->RecordLength;
+                UsnRecord = (PUSN_RECORD)(((PCHAR)UsnRecord) + UsnRecord->RecordLength);
+            }
+            ReadData.StartUsn = *buffer.Get<USN>();
+        }
+        // 可能是其他程序关闭了USN日志,尝试重新创建USN日志
+        if (InitUsn())
+            goto ReadRecord;
     }
 
 public:
@@ -252,7 +437,6 @@ public:
                 m_MonitorDir.reset(nullptr);
         }
         // 初始化成功
-        m_StartTime = (LONGLONG)(time(nullptr) + 11644473600) * 10000000;
         ::ResetEvent(m_Event);
         if (m_hasParentMap || m_hasPathMap)
             std::thread(&PivUsnMonitor::IndexPath, this).detach();
@@ -290,199 +474,6 @@ public:
         func_Renamed = nullptr;
         func_AttributeChange = nullptr;
         func_OtherChange = nullptr;
-    }
-
-    /**
-     * @brief 初始化USN日志
-     * @return
-     */
-    bool InitUsn()
-    {
-        if (m_hVol == INVALID_HANDLE_VALUE)
-            return false;
-        CREATE_USN_JOURNAL_DATA cujd{0, 0};
-        // 初始化USN日志文件
-        if (::DeviceIoControl(m_hVol, FSCTL_CREATE_USN_JOURNAL, &cujd, sizeof(cujd), NULL, 0, NULL, NULL) == FALSE)
-            return false;
-        // 获取USN日志基本信息
-        if (::DeviceIoControl(m_hVol, FSCTL_QUERY_USN_JOURNAL, NULL, 0, &m_ujd, sizeof(m_ujd), NULL, NULL) == FALSE)
-            return false;
-        return true;
-    }
-
-    /**
-     * @brief 删除USN日志(删除后会影响其他使用USN日志的软件)
-     * @return
-     */
-    bool DeleteUsn()
-    {
-        if (m_hVol == INVALID_HANDLE_VALUE)
-            return false;
-        DELETE_USN_JOURNAL_DATA dujd{m_ujd.UsnJournalID, USN_DELETE_FLAG_DELETE};
-        DWORD br;
-        return ::DeviceIoControl(m_hVol, FSCTL_DELETE_USN_JOURNAL, &dujd, sizeof(dujd), NULL, 0, &br, NULL);
-    }
-
-    /**
-     * @brief 索引路径名称
-     */
-    void IndexPath()
-    {
-        if (m_hVol == INVALID_HANDLE_VALUE)
-            return;
-        {
-            if (m_hasPathMap)
-                m_FRNtoPATH.reset(new std::map<DWORDLONG, CVolString>);
-            m_FRNtoParent.reset(new std::map<DWORDLONG, DWORDLONG>);
-            MFT_ENUM_DATA med{0};
-            med.StartFileReferenceNumber = 0;
-            med.LowUsn = m_ujd.FirstUsn;
-            med.HighUsn = m_ujd.NextUsn;
-            PivBuffer<CHAR, DWORD> buffer{10240, true};
-            DWORD dwBytes = 0;
-            PUSN_RECORD UsnRecord;
-            while (::DeviceIoControl(m_hVol, FSCTL_ENUM_USN_DATA, &med, sizeof(med), buffer.GetPtr(), buffer.GetSize(), &dwBytes, NULL))
-            {
-                DWORD dwRetBytes = dwBytes - sizeof(USN);
-                UsnRecord = (PUSN_RECORD)(buffer.GetPtr() + sizeof(USN));
-                while (dwRetBytes > 0)
-                {
-                    if (UsnRecord->FileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-                    {
-                        m_FRNtoParent->emplace(UsnRecord->FileReferenceNumber, UsnRecord->ParentFileReferenceNumber);
-                        if (m_hasPathMap)
-                            m_FRNtoPATH->emplace(std::piecewise_construct, std::forward_as_tuple(UsnRecord->FileReferenceNumber),
-                                                 std::forward_as_tuple((const WCHAR *)((PBYTE)UsnRecord + UsnRecord->FileNameOffset), UsnRecord->FileNameLength / 2));
-                    }
-                    // 获取下一个记录
-                    dwRetBytes -= UsnRecord->RecordLength;
-                    UsnRecord = (PUSN_RECORD)(((CHAR *)UsnRecord) + UsnRecord->RecordLength);
-                }
-                med.StartFileReferenceNumber = *buffer.Get<USN>();
-            }
-        }
-        MonitorUsn();
-    }
-
-    /**
-     * @brief 监视USN日志
-     */
-    void MonitorUsn()
-    {
-        if (m_hVol == INVALID_HANDLE_VALUE)
-            return;
-        if (func_Inited)
-            func_Inited();
-    ReadRecord:
-        READ_USN_JOURNAL_DATA ReadData = {0, 0xFFFFFFFF, 0, 0, 0};
-        ReadData.UsnJournalID = m_ujd.UsnJournalID;
-        PivBuffer<CHAR, DWORD> buffer{4096, true};
-        DWORD dwBytes = 0, dwRetBytes = 0;
-        PUSN_RECORD UsnRecord;
-        CVolString OldName;
-        while (::DeviceIoControl(m_hVol, FSCTL_READ_USN_JOURNAL, &ReadData, sizeof(ReadData), buffer.GetPtr(), buffer.GetSize(), &dwBytes, NULL))
-        {
-            CVolString filename;
-            CVolString path;
-            LARGE_INTEGER time{0};
-            dwRetBytes = dwBytes - sizeof(USN);
-            // 找到第一个 USN 记录
-            UsnRecord = (PUSN_RECORD)(buffer.GetPtr() + sizeof(USN));
-            if (::WaitForSingleObject(m_Event, dwRetBytes ? 0 : m_delay) == WAIT_OBJECT_0)
-                return;
-            while (dwRetBytes > 0)
-            {
-                // 跳过开始监视之前的日志
-                if (UsnRecord->TimeStamp.QuadPart < m_StartTime)
-                    goto NextRecord;
-                // 检查是否限定了监视目录
-                if (m_MonitorDir && !IsPertain(UsnRecord->ParentFileReferenceNumber))
-                    goto NextRecord;
-                bool isDir = ((m_hasParentMap || m_hasPathMap) && (UsnRecord->FileAttributes & FILE_ATTRIBUTE_DIRECTORY));
-                if (time.QuadPart != UsnRecord->TimeStamp.QuadPart || filename.IsEmpty())
-                {
-                    filename.Empty();
-                    path.Empty();
-                    // 获取路径
-                    if (m_IndexPath)
-                    {
-                        if (m_hasPathMap)
-                            PathFromFRN(UsnRecord->ParentFileReferenceNumber, path);
-                        else
-                            FRNtoPath(UsnRecord->ParentFileReferenceNumber, path);
-                    }
-                    // 加入文件或目录名称
-                    filename.SetText((const WCHAR *)((PBYTE)UsnRecord + UsnRecord->FileNameOffset), UsnRecord->FileNameLength / 2);
-                    time = UsnRecord->TimeStamp;
-                }
-                // 记住重命名前的旧名称
-                if (UsnRecord->Reason & USN_REASON_RENAME_OLD_NAME)
-                {
-                    OldName = filename;
-                    filename.Empty();
-                }
-                // 文件或目录更改后都会关闭句柄,以此判断更改是否已完成
-                if (UsnRecord->Reason & USN_REASON_CLOSE)
-                {
-                    if (UsnRecord->Reason & USN_REASON_FILE_CREATE)
-                    {
-                        if (isDir)
-                        {
-                            m_FRNtoParent->emplace(UsnRecord->FileReferenceNumber, UsnRecord->ParentFileReferenceNumber);
-                            if (m_FRNtoPATH)
-                                (*m_FRNtoPATH)[UsnRecord->FileReferenceNumber] = filename;
-                        }
-                        if (func_Created)
-                            func_Created(filename, path, FILETIME{UsnRecord->TimeStamp.LowPart, (DWORD)UsnRecord->TimeStamp.HighPart});
-                    }
-                    else if (UsnRecord->Reason & USN_REASON_FILE_DELETE)
-                    {
-                        if (isDir)
-                        {
-                            m_FRNtoParent->erase(UsnRecord->FileReferenceNumber);
-                            if (m_FRNtoPATH)
-                                m_FRNtoPATH->erase(UsnRecord->FileReferenceNumber);
-                        }
-                        if (func_Deleted)
-                            func_Deleted(filename, path, FILETIME{UsnRecord->TimeStamp.LowPart, (DWORD)UsnRecord->TimeStamp.HighPart});
-                    }
-                    else if (UsnRecord->Reason & USN_REASON_DATA_EXTEND || UsnRecord->Reason & USN_REASON_DATA_OVERWRITE || UsnRecord->Reason & USN_REASON_DATA_TRUNCATION ||
-                             UsnRecord->Reason & USN_REASON_NAMED_DATA_EXTEND || UsnRecord->Reason & USN_REASON_NAMED_DATA_OVERWRITE || UsnRecord->Reason & USN_REASON_NAMED_DATA_TRUNCATION)
-                    {
-                        if (func_DataChanged)
-                            func_DataChanged(filename, path, static_cast<int32_t>(UsnRecord->Reason), FILETIME{UsnRecord->TimeStamp.LowPart, (DWORD)UsnRecord->TimeStamp.HighPart});
-                    }
-                    else if (UsnRecord->Reason & USN_REASON_RENAME_NEW_NAME)
-                    {
-                        if (isDir && m_FRNtoPATH)
-                        {
-                            (*m_FRNtoPATH)[UsnRecord->FileReferenceNumber] = filename;
-                        }
-                        if (func_Renamed)
-                            func_Renamed(OldName, filename, path, FILETIME{UsnRecord->TimeStamp.LowPart, (DWORD)UsnRecord->TimeStamp.HighPart});
-                    }
-                    else if (UsnRecord->Reason & USN_REASON_BASIC_INFO_CHANGE || UsnRecord->Reason & USN_REASON_EA_CHANGE || UsnRecord->Reason & USN_REASON_INDEXABLE_CHANGE ||
-                             UsnRecord->Reason & USN_REASON_SECURITY_CHANGE || UsnRecord->Reason & USN_REASON_REPARSE_POINT_CHANGE || UsnRecord->Reason & 0x00800000)
-                    {
-                        if (func_AttributeChange)
-                            func_AttributeChange(filename, path, static_cast<int32_t>(UsnRecord->Reason), FILETIME{UsnRecord->TimeStamp.LowPart, (DWORD)UsnRecord->TimeStamp.HighPart});
-                    }
-                    else
-                    {
-                        if (func_OtherChange)
-                            func_OtherChange(filename, path, static_cast<int32_t>(UsnRecord->Reason), FILETIME{UsnRecord->TimeStamp.LowPart, (DWORD)UsnRecord->TimeStamp.HighPart});
-                    }
-                }
-            // 获取下一个记录
-            NextRecord:
-                dwRetBytes -= UsnRecord->RecordLength;
-                UsnRecord = (PUSN_RECORD)(((PCHAR)UsnRecord) + UsnRecord->RecordLength);
-            }
-            ReadData.StartUsn = *buffer.Get<USN>();
-        }
-        // 可能是其他程序关闭了USN日志,尝试重新创建USN日志
-        if (InitUsn())
-            goto ReadRecord;
     }
 
     /**

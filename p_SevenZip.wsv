@@ -4,8 +4,8 @@
         注释 = "  本类库需要依赖bit7z的lib静态库和\"7z.dll\"文件,其中dll文件是" 注释 = "从7-zip官网下载,使用VS 2017编译器和32位时支持XP."
         注释 = "  bit7z的很多方法都会抛出异常,封装时已经在内部俘获了大部分异" 注释 = "常,其他少量异常请自行俘获或者严格做好判断吧.">
 
-# 7-zip: 23.01        2023-06-20  开源协议: GNU LGPL
-# bit7z: v4.0.5       2023-12-23  开源协议: MPL-2.0
+# 7-zip: 24.05        2024-05-14  开源协议: GNU LGPL
+# bit7z: v4.0.7       2024-05-18  开源协议: MPL-2.0
 
 类 存档读写类 <公开 基础类 = PIV对象类 注释 = "提供简单易用的压缩和解压命令,只需要调用一个方法即可完成压缩或解压."
         注释 = "功能没有\"存档解压类\"和\"存档压缩类\"全面,也没有进度反馈,但胜在简单." 折叠 @文档 = "category = \"文件压缩\"" @禁止创建对象 = 真
@@ -548,7 +548,7 @@
         @ @dt<存档属性变体型>(@sn<this>.ItemProperty(@<项目索引>, @<属性名>))
     }
 
-    方法 取项目数 <公开 类型 = 整数 注释 = "获取压缩包的内容项目数量,1个项目表示1个文件或文件夹." 返回值注释 = "未打开压缩包时返回-1" 折叠 @嵌入式方法 = "">
+    方法 取项目数 <公开 类型 = 整数 注释 = "获取压缩包的内容项目数量,1个项目表示1个文件或文件夹." 折叠 @嵌入式方法 = "">
     {
         @ @sn<this>.ItemsCount()
     }
@@ -644,7 +644,9 @@
     参数 项目路径 <类型 = 文本型 注释 = "所欲查找的项目相对路径,如\"path\\file.txt\";" 注释 = "若没有子目录则填文件名即可.">
     {
         @ try {
-        @     auto _bit7z_itr = @sn<this>.arc().find(@<项目路径>.GetText());
+        @     bit7z::BitArchiveReader* ArchiveReader = @sn<this>.pdata();
+        @     if (!ArchiveReader) return;
+        @     auto _bit7z_itr = ArchiveReader->find(@<项目路径>.GetText());
     }
 
     方法 枚举循环 <公开 注释 = " 1. 启动一个正向循环来枚举所打开压缩文件中的每一个项目,调用\"取枚举索引\"" 注释 = "可以获取当前所枚举到项目的索引位置;"
@@ -752,8 +754,8 @@
     # ----
     # @begin
     # <> <include>
-    # int32_t ExtractProgress(const wchar_t *progressFile, int32_t progress, int64_t totalSize, int64_t progress_size, int32_t ratio) override {
-    #     return this->@<解压进度改变>(@an<CVolString>(progressFile), progress, totalSize, progress_size, ratio);
+    # void @an<_OnInitExtra>() {
+    #     this->SetEvent(&@sn<current_class>::@<解压进度改变>, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
     # }
     # <> </include>
     # @end
@@ -839,6 +841,15 @@
     参数 数据名称 <类型 = 文本型 注释 = "数据在压缩包中的文件名称和相对路径">
     {
         @ @sn<this>.AddFile(@<数据地址>, @<数据长度>, @<数据名称>)
+    }
+
+    方法 添加资源 <公开 类型 = 逻辑型 注释 = "将内存数据添加到压缩队列中;" 注释 = "所提供的内存数据会被缓存到本对象中,直到\"关闭\"压缩包才会释放;"
+            注释 = "建议添加后释放原来的内存数据,以减少内存的占用." 返回值注释 = "返回是否成功,失败时可调用\"取最后错误\"获取错误信息." 折叠
+            @嵌入式方法 = "req_str_param_text_pointer = true">
+    参数 文件资源 <类型 = 视窗文件资源 注释 = "所欲添加到压缩包的视窗文件资源">
+    参数 数据名称 <类型 = 文本型 注释 = "数据在压缩包中的文件名称和相对路径">
+    {
+        @ @sn<this>.AddFile(@<文件资源>, @<数据名称>)
     }
 
     方法 添加文件数组 <公开 类型 = 逻辑型 注释 = "添加多个文件到压缩队列中,数组中含有目录将被忽略." 返回值注释 = "返回是否成功,失败时可调用\"取最后错误\"获取错误信息." 折叠
@@ -1027,8 +1038,8 @@
     # ----
     # @begin
     # <> <include>
-    # int32_t WriterProgress(const wchar_t *progressFile, int32_t progress, int64_t totalSize, int64_t progress_size, int32_t ratio) override {
-    #     return this->@<压缩进度改变>(@an<CVolString>(progressFile), progress, totalSize, progress_size, ratio);
+    # void @an<_OnInitExtra>() {
+    #     this->SetEvent(&@sn<current_class>::@<压缩进度改变>, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
     # }
     # <> </include>
     # @end
@@ -1072,6 +1083,18 @@
     参数 压缩密码 <类型 = 文本型 注释 = "设置压缩密码;" 注释 = "只有SevenZip和ZIP支持密码,其他格式设置无效." @默认值 = "">
     {
         @ @sn<this>.CreateArchive(@<压缩包数据>, @<是否启用进度反馈>, piv::Archive::GetOutFormat(@<压缩格式>), @<压缩密码>)
+    }
+
+    方法 创建自文件资源 <公开 类型 = 逻辑型 注释 = "通过文件资源创建或更新压缩包,必须成功创建压缩包才能执行本类的其他方法."
+            返回值注释 = "返回是否成功,失败时可调用\"取最后错误\"获取错误信息." 折叠
+            @嵌入式方法 = "req_str_param_text_pointer = true\r\nreq_cpp_bool = true">
+    参数 文件资源 <类型 = 视窗文件资源 注释 = "提供视窗文件资源">
+    参数 是否启用进度反馈 <类型 = 逻辑型 注释 = "是否启用压缩过程中的回调函数,启用后可能会降低压缩速度." @默认值 = 假>
+    参数 压缩格式 <类型 = 存档输出格式 注释 = "设置压缩格式;" 注释 = "注意BZip2、GZip、Xz格式只能压缩单个文件,提供了多个文件路径或目录就会失败."
+            @默认值 = 存档输出格式.SevenZip>
+    参数 压缩密码 <类型 = 文本型 注释 = "设置压缩密码;" 注释 = "只有SevenZip和ZIP支持密码,其他格式设置无效." @默认值 = "">
+    {
+        @ @sn<this>.CreateArchive(@<文件资源>, @<是否启用进度反馈>, piv::Archive::GetOutFormat(@<压缩格式>), @<压缩密码>)
     }
 
     # 压缩 ---
@@ -1171,15 +1194,17 @@
 
     方法 删除索引项目 <公开 类型 = 逻辑型 注释 = "请求删除指定索引的项目" 返回值注释 = "返回是否成功,失败时可调用\"取最后错误\"获取错误信息." 折叠 @嵌入式方法 = "">
     参数 项目索引 <类型 = 整数 注释 = "所欲删除的项目索引">
+    参数 递归删除目录 <类型 = 逻辑型 注释 = "如果指定的项目为文件夹,默认将只删除文件夹,而不删除其中的文件;" 注释 = "将本参数设置为真将递归删除文件夹里的所有文件." @默认值 = 假>
     {
-        @ @sn<this>.DeleteItem(@<项目索引>)
+        @ @sn<this>.DeleteItem(@<项目索引>, @<递归删除目录>)
     }
 
-    方法 删除路径项目 <公开 类型 = 逻辑型 注释 = "请求删除指定路径的项目" 返回值注释 = "返回是否成功,失败时可调用\"取最后错误\"获取错误信息." 折叠
+    方法 删除路径项目 <公开 类型 = 逻辑型 注释 = "请求删除指定路径的一或多个项目" 返回值注释 = "返回是否成功,失败时可调用\"取最后错误\"获取错误信息." 折叠
             @嵌入式方法 = "req_str_param_text_pointer = true">
     参数 项目路径 <类型 = 文本型 注释 = "所欲删除的项目路径">
+    参数 递归删除目录 <类型 = 逻辑型 注释 = "如果指定的项目为文件夹,默认将只删除文件夹,而不删除其中的文件;" 注释 = "将本参数设置为真将递归删除文件夹里的所有文件." @默认值 = 假>
     {
-        @ @sn<this>.DeleteItem(@<项目路径>)
+        @ @sn<this>.DeleteItem(@<项目路径>, @<递归删除目录>)
     }
 }
 

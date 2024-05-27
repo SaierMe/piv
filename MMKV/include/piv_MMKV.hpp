@@ -122,6 +122,18 @@ namespace piv
         }
 
         /**
+         * @brief 删除表文件
+         * @param mmapID 表名称
+         * @param relatePath 相对路径
+         * @return
+         */
+        static bool RemoveStorage(const wchar_t *mmapID, const wchar_t *relatePath)
+        {
+            std::wstring _relatePath{relatePath};
+            return MMKV::removeStorage(PivW2U{mmapID}, _relatePath.empty() ? nullptr : &_relatePath);
+        }
+
+        /**
          * @brief 置日志级别
          * @param level 日志级别
          */

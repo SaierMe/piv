@@ -6,7 +6,6 @@
 \*********************************************/
 
 #ifndef _PIV_BIT7Z_HPP
-#define _PIV_BIT7Z_HPP
 
 #ifndef __VOL_BASE_H__
 #include <sys/base/libs/win_base/vol_base.h>
@@ -29,7 +28,6 @@
 #endif
 
 #include "bit7z.hpp"
-#include "bitarchiveeditor.hpp"
 
 #include <mutex>
 #include <memory>
@@ -208,7 +206,7 @@ private:
     Piv7zLib &operator=(Piv7zLib &&) = delete;
 
     std::atomic<bit7z::Bit7zLibrary *> m_7zLib = nullptr;
-    std::string m_error{"OK"};
+    std::string m_error{u8"OK"};
     std::mutex m_mutex;
 
 public:
@@ -313,6 +311,9 @@ public:
 
 }; // Piv7zLib
 
+/**
+ * @brief 存档读写类
+ */
 class PivArchiveOperate
 {
 public:
@@ -367,7 +368,7 @@ public:
     {
         if (paths.IsEmpty())
         {
-            SetError("未提供所欲压缩的文件或目录.");
+            SetError(u8"未提供所欲压缩的文件或目录.");
             return false;
         }
         try
@@ -375,14 +376,14 @@ public:
             std::vector<bit7z::tstring> in_paths;
             for (INT_P i = 0; i < paths.GetCount(); i++)
             {
-                in_paths.push_back(bit7z::tstring{paths.GetAt(i)});
+                in_paths.emplace_back(paths.GetAt(i));
             }
             bit7z::BitFileCompressor Compressor{Piv7zLib::data().Get(), format};
             Compressor.setPassword(password);
             Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
             Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
             Compressor.compress(in_paths, out_file);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -406,7 +407,7 @@ public:
     {
         if (in_paths.empty())
         {
-            SetError("未提供所欲压缩的文件或目录.");
+            SetError(u8"未提供所欲压缩的文件或目录.");
             return false;
         }
         try
@@ -416,7 +417,7 @@ public:
             Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
             Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
             Compressor.compress(in_paths, out_file);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -429,13 +430,13 @@ public:
     {
         if (path_pair.empty())
         {
-            SetError("未提供所欲压缩的文件或目录.");
+            SetError(u8"未提供所欲压缩的文件或目录.");
             return false;
         }
         std::map<bit7z::tstring, bit7z::tstring> in_paths;
-        for (auto iter = path_pair.begin(); iter != path_pair.end(); iter++)
+        for (auto &pair : path_pair)
         {
-            in_paths[bit7z::tstring{iter->first.GetText()}] = bit7z::tstring{iter->second.GetText()};
+            in_paths.emplace(std::piecewise_construct, std::forward_as_tuple(pair.first.GetText()), std::forward_as_tuple(pair.second.GetText()));
         }
         return CompressPaths(in_paths, out_file, password, format, level, update_mode);
     }
@@ -454,7 +455,7 @@ public:
     {
         if (in_paths.empty())
         {
-            SetError("未提供所欲压缩的文件.");
+            SetError(u8"未提供所欲压缩的文件.");
             return false;
         }
         try
@@ -464,7 +465,7 @@ public:
             Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
             Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
             Compressor.compress(in_paths, out_file);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -477,13 +478,13 @@ public:
     {
         if (paths.IsEmpty())
         {
-            SetError("未提供所欲压缩的文件.");
+            SetError(u8"未提供所欲压缩的文件.");
             return false;
         }
         std::vector<bit7z::tstring> in_paths;
         for (INT_P i = 0; i < paths.GetCount(); i++)
         {
-            in_paths.push_back(bit7z::tstring{paths.GetAt(i)});
+            in_paths.emplace_back(paths.GetAt(i));
         }
         return CompressFiles(in_paths, out_file, password, format, level, update_mode);
     }
@@ -509,7 +510,7 @@ public:
             Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
             Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
             Compressor.compressFiles(in_dir, out_file, recursive, filter);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -538,7 +539,7 @@ public:
             Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
             Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
             Compressor.compressDirectory(in_dir, out_file);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -564,7 +565,7 @@ public:
             bit7z::BitFileExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             extractor.extract(in_file, out_dir);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -584,7 +585,7 @@ public:
             bit7z::BitMemExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             extractor.extract(buffer, out_dir);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -611,18 +612,16 @@ public:
             bit7z::BitFileExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             bit7z::BitInputArchive in_archive{extractor, in_file};
-            for (auto itr = in_archive.begin(); itr != in_archive.end(); itr++)
+            for (const auto &item : in_archive)
             {
-                if (!itr->isDir())
+                if (item.isDir())
                 {
-                    CVolString strPath;
-                    strPath.SetText(itr->path().c_str());
-                    out_buffer[strPath] = CVolMem();
-                    out_buffer[strPath].Alloc(static_cast<INT_P>(itr->size()), true);
-                    in_archive.extractTo(reinterpret_cast<bit7z::byte_t *>(out_buffer[strPath].GetPtr()), static_cast<std::size_t>(itr->size()), itr->index());
+                    auto &it = out_buffer.emplace(std::piecewise_construct, std::forward_as_tuple(item.path().c_str()), std::forward_as_tuple()).first;
+                    it->second.Alloc(static_cast<ptrdiff_t>(item.size()), TRUE);
+                    in_archive.extractTo(reinterpret_cast<bit7z::byte_t *>(it->second.GetPtr()), static_cast<std::size_t>(item.size()), item.index());
                 }
             }
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -644,18 +643,16 @@ public:
             bit7z::BitMemExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             bit7z::BitInputArchive in_archive{extractor, buffer};
-            for (auto itr = in_archive.begin(); itr != in_archive.end(); itr++)
+            for (const auto &item : in_archive)
             {
-                if (!itr->isDir())
+                if (item.isDir())
                 {
-                    CVolString strPath;
-                    strPath.SetText(itr->path().c_str());
-                    out_buffer[strPath] = CVolMem();
-                    out_buffer[strPath].Alloc(static_cast<INT_P>(itr->size()), true);
-                    in_archive.extractTo(reinterpret_cast<bit7z::byte_t *>(out_buffer[strPath].GetPtr()), static_cast<std::size_t>(itr->size()), itr->index());
+                    auto &it = out_buffer.emplace(std::piecewise_construct, std::forward_as_tuple(item.path().c_str()), std::forward_as_tuple()).first;
+                    it->second.Alloc(static_cast<ptrdiff_t>(item.size()), TRUE);
+                    in_archive.extractTo(reinterpret_cast<bit7z::byte_t *>(it->second.GetPtr()), static_cast<std::size_t>(item.size()), item.index());
                 }
             }
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -684,7 +681,7 @@ public:
             bit7z::BitFileExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             extractor.extractMatching(in_file, filter, out_dir, isExclude ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -704,7 +701,7 @@ public:
             bit7z::BitMemExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             extractor.extractMatching(buffer, filter, out_dir, isExclude ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -732,7 +729,7 @@ public:
         try
         {
             if (filter.empty())
-                throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
+                throw bit7z::BitException(u8"Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
             bit7z::BitFileExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             bit7z::BitInputArchive in_archive(extractor, in_file);
@@ -741,14 +738,14 @@ public:
                 bool item_matches = bit7z::filesystem::fsutil::wildcard_match(filter, item.path());
                 if (item_matches != isExclude)
                 {
-                    out_buffer.Alloc(static_cast<INT_P>(item.size()), true);
+                    out_buffer.Alloc(static_cast<ptrdiff_t>(item.size()), true);
                     in_archive.extractTo(reinterpret_cast<bit7z::byte_t *>(out_buffer.GetPtr()), static_cast<std::size_t>(out_buffer.GetSize()), item.index());
                     out_file.SetText(item.path().c_str());
-                    SetError("OK");
+                    SetError(u8"OK");
                     return true;
                 }
             }
-            throw bit7z::BitException("Failed to extract items", bit7z::make_error_code(bit7z::BitError::NoMatchingItems));
+            throw bit7z::BitException(u8"Failed to extract items", bit7z::make_error_code(bit7z::BitError::NoMatchingItems));
         }
         catch (const bit7z::BitException &ex)
         {
@@ -766,7 +763,7 @@ public:
         try
         {
             if (filter.empty())
-                throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
+                throw bit7z::BitException(u8"Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
             bit7z::BitMemExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             bit7z::BitInputArchive in_archive(extractor, buffer);
@@ -775,14 +772,14 @@ public:
                 bool item_matches = bit7z::filesystem::fsutil::wildcard_match(filter, item.path());
                 if (item_matches != isExclude)
                 {
-                    out_buffer.Alloc(static_cast<INT_P>(item.size()), true);
+                    out_buffer.Alloc(static_cast<ptrdiff_t>(item.size()), true);
                     in_archive.extractTo(reinterpret_cast<bit7z::byte_t *>(out_buffer.GetPtr()), static_cast<std::size_t>(out_buffer.GetSize()), item.index());
                     out_file.SetText(item.path().c_str());
-                    SetError("OK");
+                    SetError(u8"OK");
                     return true;
                 }
             }
-            throw bit7z::BitException("Failed to extract items", bit7z::make_error_code(bit7z::BitError::NoMatchingItems));
+            throw bit7z::BitException(u8"Failed to extract items", bit7z::make_error_code(bit7z::BitError::NoMatchingItems));
         }
         catch (const bit7z::BitException &ex)
         {
@@ -809,7 +806,7 @@ public:
             bit7z::BitFileExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             extractor.extractMatchingRegex(in_file, regex, out_dir, isExclude ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -834,7 +831,7 @@ public:
             bit7z::BitMemExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             extractor.extractMatchingRegex(buffer, regex, out_dir, isExclude ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -867,7 +864,7 @@ public:
         try
         {
             if (regex.empty())
-                throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
+                throw bit7z::BitException(u8"Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
             bit7z::BitFileExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             bit7z::BitInputArchive in_archive(extractor, in_file);
@@ -877,14 +874,14 @@ public:
                 bool item_matches = std::regex_match(item.path(), regex_filter);
                 if (item_matches != isExclude)
                 {
-                    out_buffer.Alloc(static_cast<INT_P>(item.size()), true);
+                    out_buffer.Alloc(static_cast<ptrdiff_t>(item.size()), true);
                     in_archive.extractTo(reinterpret_cast<bit7z::byte_t *>(out_buffer.GetPtr()), static_cast<std::size_t>(out_buffer.GetSize()), item.index());
                     out_file.SetText(item.path().c_str());
-                    SetError("OK");
+                    SetError(u8"OK");
                     return true;
                 }
             }
-            throw bit7z::BitException("Failed to extract items", bit7z::make_error_code(bit7z::BitError::NoMatchingItems));
+            throw bit7z::BitException(u8"Failed to extract items", bit7z::make_error_code(bit7z::BitError::NoMatchingItems));
         }
         catch (const bit7z::BitException &ex)
         {
@@ -909,7 +906,7 @@ public:
         try
         {
             if (regex.empty())
-                throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
+                throw bit7z::BitException(u8"Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
             bit7z::BitMemExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             bit7z::BitInputArchive in_archive(extractor, buffer);
@@ -919,14 +916,14 @@ public:
                 bool item_matches = std::regex_match(item.path(), regex_filter);
                 if (item_matches != isExclude)
                 {
-                    out_buffer.Alloc(static_cast<INT_P>(item.size()), true);
+                    out_buffer.Alloc(static_cast<ptrdiff_t>(item.size()), true);
                     in_archive.extractTo(reinterpret_cast<bit7z::byte_t *>(out_buffer.GetPtr()), static_cast<std::size_t>(out_buffer.GetSize()), item.index());
                     out_file.SetText(item.path().c_str());
-                    SetError("OK");
+                    SetError(u8"OK");
                     return true;
                 }
             }
-            throw bit7z::BitException("Failed to extract items", bit7z::make_error_code(bit7z::BitError::NoMatchingItems));
+            throw bit7z::BitException(u8"Failed to extract items", bit7z::make_error_code(bit7z::BitError::NoMatchingItems));
         }
         catch (const bit7z::BitException &ex)
         {
@@ -956,7 +953,7 @@ public:
             bit7z::BitFileExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
             extractor.test(in_file);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -968,23 +965,26 @@ public:
 }; // PivArchiveOperate
 
 /**
- * @brief 存档解压类
+ * @brief 存档处理模板类
+ * @tparam archive_t bit7z类
  */
-class PivArchiveReader
+template <class archive_t>
+class PivArchiveHandler
 {
-private:
-    std::unique_ptr<bit7z::BitArchiveReader> m_archive{nullptr};
+protected:
+    std::unique_ptr<archive_t> m_archive{nullptr};
     std::unique_ptr<std::vector<bit7z::byte_t>> m_buffer{nullptr};
     std::string m_error;
     uint64_t m_total_size = 0;
     int32_t m_ratio = 0;
     std::wstring m_progress_file;
+    std::function<int32_t(CVolString &, int32_t, int64_t, int64_t, int32_t)> m_progress;
 
     /**
      * @brief 置最后错误
      * @param Error 错误信息
      */
-    inline void SetError(const CHAR *Error)
+    inline void SetError(const char *Error)
     {
         m_error = Error;
     }
@@ -1004,8 +1004,10 @@ private:
     {
         if (progress_size == 0 || m_total_size == 0)
             return true;
-        return !this->ExtractProgress(m_progress_file.c_str(), static_cast<int32_t>(100 * progress_size / m_total_size),
-                                      static_cast<int64_t>(m_total_size), static_cast<int64_t>(progress_size), m_ratio);
+        if (m_progress)
+            return !m_progress(CVolString{m_progress_file.c_str()}, static_cast<int32_t>(100 * progress_size / m_total_size),
+                               static_cast<int64_t>(m_total_size), static_cast<int64_t>(progress_size), m_ratio);
+        return true;
     }
 
     void FileNameCB(bit7z::tstring fileName)
@@ -1014,15 +1016,30 @@ private:
     }
 
 public:
-    PivArchiveReader() {}
-    ~PivArchiveReader() {}
+    PivArchiveHandler() {}
+    ~PivArchiveHandler() {}
 
-    inline bit7z::BitArchiveReader &data()
+    template <typename Fun, typename... Args>
+    inline void SetEvent(Fun &&fun, Args &&...args)
+    {
+        m_progress = std::bind(std::forward<Fun>(fun), std::forward<Args>(args)...);
+    }
+
+    /**
+     * @brief 取最后错误
+     * @return
+     */
+    inline CVolString GetError() const
+    {
+        return CVolString{m_error.c_str()};
+    }
+
+    inline archive_t &data()
     {
         return *m_archive;
     }
 
-    inline bit7z::BitArchiveReader *pdata()
+    inline archive_t *pdata()
     {
         return m_archive.get();
     }
@@ -1031,39 +1048,19 @@ public:
      * @brief 是否为空
      * @return
      */
-    inline bool IsNull()
+    inline bool IsNull() const
     {
         return m_archive == nullptr;
     }
 
     /**
-     * @brief 取最后错误
-     * @return
-     */
-    inline CVolString GetError()
-    {
-        return CVolString(GetWideText(m_error.c_str(), CVolMem(), NULL));
-    }
-
-    /**
      * @brief 关闭
      */
-    inline void CloseArchive()
+    virtual inline void CloseArchive()
     {
         m_buffer.reset();
         m_archive.reset();
     }
-
-    /**
-     * @brief 解压进度改变(虚拟方法)
-     * @param progressFile 文件路径
-     * @param progress 解压进度
-     * @param totalSize 总解压大小
-     * @param progress_size 已解压大小
-     * @param ratio 整体压缩比
-     * @return
-     */
-    virtual int32_t ExtractProgress(const wchar_t *progressFile, int32_t progress, int64_t totalSize, int64_t progress_size, int32_t ratio) { return 0; }
 
     /**
      * @brief 启用进度反馈
@@ -1074,10 +1071,10 @@ public:
             return;
         if (enable)
         {
-            m_archive->setTotalCallback(std::bind(&PivArchiveReader::TotalSizeCB, this, std::placeholders::_1));
-            m_archive->setRatioCallback(std::bind(&PivArchiveReader::RatioCB, this, std::placeholders::_1, std::placeholders::_2));
-            m_archive->setProgressCallback(std::bind(&PivArchiveReader::ProgressCB, this, std::placeholders::_1));
-            m_archive->setFileCallback(std::bind(&PivArchiveReader::FileNameCB, this, std::placeholders::_1));
+            m_archive->setTotalCallback(std::bind(&PivArchiveHandler::TotalSizeCB, this, std::placeholders::_1));
+            m_archive->setProgressCallback(std::bind(&PivArchiveHandler::ProgressCB, this, std::placeholders::_1));
+            m_archive->setRatioCallback(std::bind(&PivArchiveHandler::RatioCB, this, std::placeholders::_1, std::placeholders::_2));
+            m_archive->setFileCallback(std::bind(&PivArchiveHandler::FileNameCB, this, std::placeholders::_1));
         }
         else
         {
@@ -1089,15 +1086,614 @@ public:
     }
 
     /**
-     * @brief 是否启动进度反馈
+     * @brief 是否启用进度反馈
      */
-    bool HasFeeback()
+    bool HasFeeback() const
+    {
+        return m_archive ? !!m_archive->progressCallback() : false;
+    }
+
+    /**
+     * @brief 设置压缩密码
+     * @param password 密码
+     */
+    inline void SetPassword(const bit7z::tstring &password)
     {
         if (m_archive)
+            m_archive->setPassword(password);
+    }
+
+    /**
+     * @brief 获取压缩密码
+     * @return
+     */
+    inline CVolString Password() const
+    {
+        return m_archive ? CVolString(m_archive->password().c_str()) : _CT("");
+    }
+
+    /**
+     * @brief 清除密码
+     */
+    inline void ClearPassword()
+    {
+        if (m_archive)
+            m_archive->clearPassword();
+    }
+
+    /**
+     * @brief 是否有密码
+     * @return
+     */
+    inline bool IsPasswordDefined() const
+    {
+        return m_archive ? m_archive->isPasswordDefined() : false;
+    }
+
+    /**
+     * @brief 设置保留目录结构
+     * @param retain 是否保留目录结构
+     */
+    inline void SetRetainDirectories(bool retain)
+    {
+        if (m_archive)
+            m_archive->setRetainDirectories(retain);
+    }
+
+    /**
+     * @brief 是否保留目录结构
+     * @return
+     */
+    inline bool RetainDirectories() const
+    {
+        return m_archive ? m_archive->retainDirectories() : false;
+    }
+
+    /**
+     * @brief 取项目数
+     * @return
+     */
+    inline int32_t ItemsCount() const
+    {
+        return m_archive ? static_cast<int32_t>(m_archive->itemsCount()) : -1;
+    }
+
+}; // PivArchiveHandler
+
+/**
+ * @brief 存档创建模板类
+ * @tparam archive_t bit7z类
+ */
+template <class archive_t>
+class PivArchiveCreator : public PivArchiveHandler<archive_t>
+{
+protected:
+    std::vector<std::vector<bit7z::byte_t>> m_buffer_array;
+
+public:
+    PivArchiveCreator() {}
+    ~PivArchiveCreator() {}
+
+    /**
+     * @brief 关闭
+     */
+    inline void CloseArchive() override
+    {
+        m_buffer_array.swap(std::vector<std::vector<bit7z::byte_t>>{});
+        m_buffer.reset();
+        m_archive.reset();
+    }
+
+    /**
+     * @brief 添加项目
+     * @param path_array 路径数组
+     * @return
+     */
+    bool AddItems(std::vector<bit7z::tstring> &path_array)
+    {
+        if (!m_archive)
         {
-            return !!m_archive->progressCallback();
+            SetError(u8"未打开或创建压缩包!");
+            return false;
         }
-        return false;
+        try
+        {
+            m_archive->addItems(path_array);
+            SetError(u8"OK");
+            return true;
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            SetError(ex.what());
+            return false;
+        }
+    }
+    bool AddItems(CMStringArray &path_array)
+    {
+        std::vector<bit7z::tstring> in_paths;
+        for (INT_P i = 0; i < path_array.GetCount(); i++)
+        {
+            in_paths.emplace_back(path_array.GetAt(i));
+        }
+        return AddItems(in_paths);
+    }
+
+    /**
+     * @brief 添加别名项目
+     * @param path_map 路径键值对
+     * @return
+     */
+    bool AddItems(std::map<bit7z::tstring, bit7z::tstring> &path_map)
+    {
+        if (!m_archive)
+        {
+            SetError(u8"未打开或创建压缩包!");
+            return false;
+        }
+        try
+        {
+            m_archive->addItems(path_map);
+            SetError(u8"OK");
+            return true;
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            SetError(ex.what());
+            return false;
+        }
+    }
+    bool AddItems(std::map<CVolString, CVolString> &path_map)
+    {
+        std::map<bit7z::tstring, bit7z::tstring> in_paths;
+        for (const auto &pair : path_map)
+        {
+            in_paths.emplace(std::piecewise_construct, std::forward_as_tuple(pair.first.GetText()), std::forward_as_tuple(pair.second.GetText()));
+        }
+        return AddItems(in_paths);
+    }
+
+    /**
+     * @brief 添加文件
+     * @param in_path 文件路径
+     * @param alias 别名
+     * @return
+     */
+    bool AddFile(const bit7z::tstring &in_path, const bit7z::tstring &alias)
+    {
+        if (!m_archive)
+        {
+            SetError(u8"未打开或创建压缩包!");
+            return false;
+        }
+        try
+        {
+            m_archive->addFile(in_path, alias);
+            SetError(u8"OK");
+            return true;
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            SetError(ex.what());
+            return false;
+        }
+    }
+
+    /**
+     * @brief 添加内存流
+     * @param in_stream 内存流
+     * @param path 路径
+     * @return
+     */
+    bool AddFile(std::istream &in_stream, const bit7z::tstring &path)
+    {
+        if (!m_archive)
+        {
+            SetError(u8"未打开或创建压缩包!");
+            return false;
+        }
+        try
+        {
+            m_archive->addFile(in_stream, path);
+            SetError(u8"OK");
+            return true;
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            SetError(ex.what());
+            return false;
+        }
+    }
+
+    /**
+     * @brief 添加字节集
+     * @param in_buffer 缓存数据
+     * @param path 数据名称
+     * @return
+     */
+    bool AddFile(CVolMem &in_buffer, const bit7z::tstring &path /* , bool copy_data*/)
+    {
+        if (!m_archive)
+        {
+            SetError(u8"未打开或创建压缩包!");
+            return false;
+        }
+        try
+        {
+            m_buffer_array.emplace_back(reinterpret_cast<const bit7z::byte_t *>(in_buffer.GetPtr()), reinterpret_cast<const bit7z::byte_t *>(in_buffer.GetEndPtr()));
+            m_archive->addFile(m_buffer_array.back(), path);
+            SetError(u8"OK");
+            return true;
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            SetError(ex.what());
+            return false;
+        }
+    }
+
+    /**
+     * @brief 添加内存
+     * @param in_buffer 数据地址
+     * @param buffer_len 数据长度
+     * @param path 数据名称
+     * @return
+     */
+    bool AddFile(const ptrdiff_t &in_buffer, const ptrdiff_t &buffer_len, const bit7z::tstring &path /*, bool copy_data*/)
+    {
+        if (!m_archive)
+        {
+            SetError(u8"未打开或创建压缩包!");
+            return false;
+        }
+        try
+        {
+            m_buffer_array.emplace_back(reinterpret_cast<const bit7z::byte_t *>(in_buffer), reinterpret_cast<const bit7z::byte_t *>(in_buffer) + buffer_len);
+            m_archive->addFile(m_buffer_array.back(), path);
+            SetError(u8"OK");
+            return true;
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            SetError(ex.what());
+            return false;
+        }
+    }
+
+    /**
+     * @brief 添加文件资源内存
+     * @param resid
+     * @param buffer_len
+     * @param path
+     * @return
+     */
+    bool AddFile(int32_t resid, const bit7z::tstring &path)
+    {
+        if (!m_archive)
+        {
+            SetError(u8"未打开或创建压缩包!");
+            return false;
+        }
+        try
+        {
+            m_buffer_array.emplace_back();
+            PivArchiveOperate::LoadResIdData(resid, m_buffer_array.back());
+            m_archive->addFile(m_buffer_array.back(), path);
+            SetError(u8"OK");
+            return true;
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            SetError(ex.what());
+            return false;
+        }
+    }
+
+    /**
+     * @brief 添加文件数组
+     * @param in_files 文件数组
+     * @return
+     */
+    bool AddFiles(std::vector<bit7z::tstring> &in_files)
+    {
+        if (!m_archive)
+        {
+            SetError(u8"未打开或创建压缩包!");
+            return false;
+        }
+        try
+        {
+            m_archive->addFiles(in_files);
+            SetError(u8"OK");
+            return true;
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            SetError(ex.what());
+            return false;
+        }
+    }
+    bool AddFiles(CMStringArray &in_files)
+    {
+        std::vector<bit7z::tstring> in_paths;
+        for (INT_P i = 0; i < in_files.GetCount(); i++)
+        {
+            in_paths.emplace_back(in_files.GetAt(i));
+        }
+        return AddFiles(in_paths);
+    }
+
+    /**
+     * @brief 添加匹配文件
+     * @param in_dir 输入目录
+     * @param filter 筛选器
+     * @param isExclude 是否排除匹配项
+     * @param recursion 递归子目录
+     * @return
+     */
+    bool AddFiles(const bit7z::tstring &in_dir, const bit7z::tstring &filter, bool isExclude, bool recursion)
+    {
+        if (!m_archive)
+        {
+            SetError(u8"未打开或创建压缩包!");
+            return false;
+        }
+        try
+        {
+            m_archive->addFiles(in_dir, filter, isExclude ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include, recursion);
+            SetError(u8"OK");
+            return true;
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            SetError(ex.what());
+            return false;
+        }
+    }
+
+    /**
+     * @brief 添加目录
+     * @param in_dir 目录路径
+     * @return
+     */
+    bool AddDirectory(const bit7z::tstring &in_dir)
+    {
+        if (!m_archive)
+        {
+            SetError(u8"未打开或创建压缩包!");
+            return false;
+        }
+        try
+        {
+            m_archive->addDirectory(in_dir);
+            SetError(u8"OK");
+            return true;
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            SetError(ex.what());
+            return false;
+        }
+    }
+
+    /**
+     * @brief 压缩到文件
+     * @param out_file 压缩包路径
+     * @return
+     */
+    bool CompressTo(const bit7z::tstring &out_file)
+    {
+        if (!m_archive)
+        {
+            SetError(u8"未打开或创建压缩包!");
+            return false;
+        }
+        try
+        {
+            m_archive->compressTo(out_file);
+            SetError(u8"OK");
+            return true;
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            SetError(ex.what());
+            return false;
+        }
+    }
+
+    /**
+     * @brief 压缩到字节集
+     * @param out_buffer 输出字节集
+     * @return
+     */
+    bool CompressTo(CVolMem &out_buffer)
+    {
+        out_buffer.Empty();
+        if (!m_archive)
+        {
+            SetError(u8"未打开或创建压缩包!");
+            return false;
+        }
+        try
+        {
+            std::vector<bit7z::byte_t> buffer;
+            m_archive->compressTo(buffer);
+            out_buffer.Append(buffer.data(), buffer.size());
+            SetError(u8"OK");
+            return true;
+        }
+        catch (const bit7z::BitException &ex)
+        {
+            SetError(ex.what());
+            return false;
+        }
+    }
+
+    /**
+     * @brief 取压缩格式
+     * @return
+     */
+    inline int8_t CompressionFormat() const
+    {
+        return m_archive ? static_cast<int8_t>(m_archive->compressionFormat().value()) : 0;
+    }
+
+    /**
+     * @brief (设置/获取)压缩等级
+     * @param level 新等级
+     */
+    inline void SetCompressionLevel(int32_t level)
+    {
+        if (m_archive)
+            m_archive->setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
+    }
+    inline int32_t CompressionLevel() const
+    {
+        return m_archive ? static_cast<int32_t>(m_archive->compressionLevel()) : 0;
+    }
+
+    /**
+     * @brief (设置/获取)压缩方法
+     * @param method 新方法
+     */
+    inline void SetCompressionMethod(bit7z::BitCompressionMethod method)
+    {
+        if (m_archive)
+            m_archive->setCompressionMethod(method);
+    }
+    inline int32_t CompressionMethod() const
+    {
+        return m_archive ? static_cast<int32_t>(m_archive->compressionMethod()) : 0;
+    }
+
+    /**
+     * @brief (设置/获取)字典大小
+     * @param dictionary_size 新字典大小
+     */
+    inline void SetDictionarySize(int32_t dictionary_size)
+    {
+        if (m_archive)
+            m_archive->setDictionarySize(static_cast<uint32_t>(dictionary_size));
+    }
+    inline int32_t DictionarySize() const
+    {
+        return m_archive ? static_cast<int32_t>(m_archive->dictionarySize()) : 0;
+    }
+
+    /**
+     * @brief (设置/获取)单词大小
+     * @param word_size 新单词大小
+     */
+    inline void SetWordSize(int32_t word_size)
+    {
+        if (m_archive)
+            m_archive->setWordSize(static_cast<uint32_t>(word_size));
+    }
+    inline int32_t WordSize() const
+    {
+        return m_archive ? static_cast<int32_t>(m_archive->wordSize()) : 0;
+    }
+
+    /**
+     * @brief (设置/获取)固实压缩
+     * @param solid_mode 是否启用
+     */
+    inline void SetSolidMode(bool solid_mode)
+    {
+        if (m_archive)
+            m_archive->setSolidMode(solid_mode);
+    }
+    inline bool SolidMode() const
+    {
+        return m_archive ? m_archive->solidMode() : false;
+    }
+
+    /**
+     * @brief (设置/获取)更新方式
+     * @param mode 新更新方式
+     */
+    inline void SetUpdateMode(int32_t mode)
+    {
+        if (m_archive)
+            m_archive->setUpdateMode(static_cast<bit7z::UpdateMode>(mode));
+    }
+    inline int32_t UpdateMode() const
+    {
+        return m_archive ? static_cast<int32_t>(m_archive->updateMode()) : 0;
+    }
+
+    /**
+     * @brief (设置/获取)分卷大小
+     * @param volume_size 新分卷大小
+     */
+    inline void SetVolumeSize(int32_t volume_size)
+    {
+        if (m_archive)
+            m_archive->setVolumeSize(static_cast<uint32_t>(volume_size));
+    }
+    inline int32_t VolumeSize() const
+    {
+        return m_archive ? static_cast<int32_t>(m_archive->volumeSize()) : 0;
+    }
+
+    /**
+     * @brief (设置/获取)线程数
+     * @param threads_count 新线程数
+     */
+    inline void SetThreadsCount(int32_t threads_count)
+    {
+        if (m_archive)
+            m_archive->setThreadsCount(static_cast<uint32_t>(threads_count));
+    }
+    inline int32_t ThreadsCount() const
+    {
+        return m_archive ? static_cast<int32_t>(m_archive->threadsCount()) : 0;
+    }
+
+    /**
+     * @brief (设置/获取)存储符号链接
+     * @param store_symlinks 是否存储符号链接
+     */
+    inline void SetStoreSymbolicLinks(bool store_symlinks)
+    {
+        if (m_archive)
+            m_archive->setStoreSymbolicLinks(store_symlinks);
+    }
+    inline bool StoreSymbolicLinks() const
+    {
+        return m_archive ? m_archive->storeSymbolicLinks() : false;
+    }
+
+    /**
+     * @brief 设置密码
+     * @param password 新密码
+     * @param crypt_headers 加密文件头
+     */
+    inline void SetPassword(const bit7z::tstring &password, bool crypt_headers)
+    {
+        if (m_archive)
+            m_archive->setPassword(password, crypt_headers);
+    }
+
+    /**
+     * @brief 是否加密文件头
+     * @return
+     */
+    inline bool CryptHeaders() const
+    {
+        return m_archive ? m_archive->cryptHeaders() : false;
+    }
+}; // PivArchiveCreator
+
+/**
+ * @brief 存档解压类
+ */
+class PivArchiveReader : public PivArchiveHandler<bit7z::BitArchiveReader>
+{
+public:
+    PivArchiveReader() {}
+    ~PivArchiveReader()
+    {
+        CloseArchive();
     }
 
     /**
@@ -1115,7 +1711,7 @@ public:
         {
             m_archive.reset(new bit7z::BitArchiveReader{Piv7zLib::data().Get(), in_file, format, password});
             EnableFeeback(feedback);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -1141,7 +1737,7 @@ public:
         {
             m_archive.reset(new bit7z::BitArchiveReader{Piv7zLib::data().Get(), in_stream, format, password});
             EnableFeeback(feedback);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -1167,7 +1763,7 @@ public:
         {
             m_archive.reset(new bit7z::BitArchiveReader{Piv7zLib::data().Get(), in_buffer, format, password});
             EnableFeeback(feedback);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -1195,7 +1791,7 @@ public:
         {
             m_archive.reset(new bit7z::BitArchiveReader{Piv7zLib::data().Get(), *m_buffer, format, password});
             EnableFeeback(feedback);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -1224,7 +1820,7 @@ public:
         {
             m_archive.reset(new bit7z::BitArchiveReader{Piv7zLib::data().Get(), *m_buffer, format, password});
             EnableFeeback(feedback);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -1248,20 +1844,13 @@ public:
         CloseArchive();
         if (resId == 0)
             return false;
-        HMODULE hModule = g_objVolApp.GetInstanceHandle();
-        HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE(static_cast<WORD>(resId)), RT_RCDATA);
-        if (hSrc == NULL)
-            return false;
-        HGLOBAL resdata = ::LoadResource(hModule, hSrc);
-        if (resdata == NULL)
-            return false;
-        bit7z::byte_t *data = reinterpret_cast<bit7z::byte_t *>(::LockResource(resdata));
-        m_buffer.reset(new std::vector<bit7z::byte_t>{data, data + ::SizeofResource(hModule, hSrc)});
         try
         {
+            m_buffer.reset(new std::vector<bit7z::byte_t>{});
+            PivArchiveOperate::LoadResIdData(resId, *m_buffer);
             m_archive.reset(new bit7z::BitArchiveReader{Piv7zLib::data().Get(), *m_buffer, format, password});
             EnableFeeback(feedback);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -1281,13 +1870,13 @@ public:
     {
         if (!m_archive)
         {
-            SetError("未打开压缩文件.");
+            SetError(u8"未打开压缩文件.");
             return false;
         }
         try
         {
             m_archive->extractTo(out_dir);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -1307,23 +1896,21 @@ public:
         out_buffer.clear();
         if (!m_archive)
         {
-            SetError("未打开压缩文件.");
+            SetError(u8"未打开压缩文件.");
             return false;
         }
         try
         {
             std::map<bit7z::tstring, std::vector<bit7z::byte_t>> out_map;
             m_archive->extractTo(out_map);
-            for (auto itr = out_map.begin(); itr != out_map.end(); itr++)
+            for (auto &pair : out_map)
             {
-                CVolString Key;
-                Key.SetText(itr->first.c_str());
-                out_buffer[Key] = CVolMem();
-                out_buffer[Key].SetMemAlignSize(static_cast<ptrdiff_t>(itr->second.size()));
-                out_buffer[Key].Append(itr->second.data(), itr->second.size());
-                itr->second.clear();
+                auto &it = out_buffer.emplace(std::piecewise_construct, std::forward_as_tuple(pair.first.c_str()), std::forward_as_tuple()).first;
+                it->second.SetMemAlignSize(static_cast<ptrdiff_t>(pair.second.size()));
+                it->second.Append(pair.second.data(), pair.second.size());
+                pair.second.swap(std::vector<bit7z::byte_t>{});
             }
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -1344,23 +1931,21 @@ public:
         out_buffer.clear();
         if (!m_archive)
         {
-            SetError("未打开压缩文件.");
+            SetError(u8"未打开压缩文件.");
             return false;
         }
         try
         {
-            for (auto itr = m_archive->begin(); itr != m_archive->end(); itr++)
+            for (auto &item : *m_archive)
             {
-                if (!itr->isDir())
+                if (item.isDir())
                 {
-                    CVolString path;
-                    path.SetText(itr->path().c_str());
-                    out_buffer[path] = CVolMem();
-                    out_buffer[path].Alloc((INT_P)itr->size(), true);
-                    m_archive->extractTo(reinterpret_cast<bit7z::byte_t *>(out_buffer[path].GetPtr()), static_cast<std::size_t>(itr->size()), itr->index());
+                    auto &it = out_buffer.emplace(std::piecewise_construct, std::forward_as_tuple(item.path().c_str()), std::forward_as_tuple()).first;
+                    it->second.Alloc(static_cast<ptrdiff_t>(item.size()), TRUE);
+                    m_archive->extractTo(reinterpret_cast<bit7z::byte_t *>(it->second.GetPtr()), static_cast<std::size_t>(item.size()), item.index());
                 }
             }
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -1383,19 +1968,19 @@ public:
         out_path.Empty();
         if (!m_archive)
         {
-            SetError("未打开压缩文件.");
+            SetError(u8"未打开压缩文件.");
             return false;
         }
         try
         {
             if (idx < 0 || static_cast<uint32_t>(idx) > m_archive->itemsCount() - 1)
             {
-                throw bit7z::BitException("Cannot extract item at the index " + std::to_string(idx), bit7z::make_error_code(bit7z::BitError::InvalidIndex));
+                throw bit7z::BitException(u8"Cannot extract item at the index " + std::to_string(idx), bit7z::make_error_code(bit7z::BitError::InvalidIndex));
             }
             out_buffer.Alloc(static_cast<ptrdiff_t>(m_archive->itemProperty(static_cast<uint32_t>(idx), bit7z::BitProperty::Size).getUInt64()), true);
             m_archive->extractTo(reinterpret_cast<bit7z::byte_t *>(out_buffer.GetPtr()), static_cast<std::size_t>(out_buffer.GetSize()), static_cast<uint32_t>(idx));
             out_path.SetText(m_archive->itemProperty(static_cast<uint32_t>(idx), bit7z::BitProperty::Path).getString().c_str());
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -1416,14 +2001,14 @@ public:
     {
         if (!m_archive)
         {
-            SetError("未打开压缩文件.");
+            SetError(u8"未打开压缩文件.");
             return false;
         }
         try
         {
             if (idx_array.IsEmpty())
             {
-                throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::IndicesNotSpecified));
+                throw bit7z::BitException(u8"Cannot extract items", bit7z::make_error_code(bit7z::BitError::IndicesNotSpecified));
             }
             std::vector<uint32_t> indices(reinterpret_cast<uint32_t *>(idx_array.GetData()),
                                           reinterpret_cast<uint32_t *>(idx_array.GetData()) + idx_array.GetCount());
@@ -1435,7 +2020,7 @@ public:
             {
             }
             m_archive->extractTo(out_dir, indices);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -1456,13 +2041,13 @@ public:
     {
         if (!m_archive)
         {
-            SetError("未打开压缩文件.");
+            SetError(u8"未打开压缩文件.");
             return false;
         }
         try
         {
             if (filter.empty())
-                throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
+                throw bit7z::BitException(u8"Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
             std::vector<uint32_t> matched_indices;
             for (const auto &item : *m_archive)
             {
@@ -1471,9 +2056,9 @@ public:
                     matched_indices.push_back(item.index());
             }
             if (matched_indices.empty())
-                throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::NoMatchingItems));
+                throw bit7z::BitException(u8"Cannot extract items", bit7z::make_error_code(bit7z::BitError::NoMatchingItems));
             m_archive->extractTo(out_dir, matched_indices);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -1496,13 +2081,13 @@ public:
         out_path.Empty();
         if (!m_archive)
         {
-            SetError("未打开压缩文件.");
+            SetError(u8"未打开压缩文件.");
             return false;
         }
         try
         {
             if (filter.empty())
-                throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
+                throw bit7z::BitException(u8"Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
             for (const auto &item : *m_archive)
             {
                 bool item_matches = bit7z::filesystem::fsutil::wildcard_match(filter, item.path());
@@ -1511,7 +2096,7 @@ public:
                     out_buffer.Alloc(static_cast<ptrdiff_t>(item.size()), true);
                     m_archive->extractTo(reinterpret_cast<bit7z::byte_t *>(out_buffer.GetPtr()), static_cast<std::size_t>(out_buffer.GetSize()), item.index());
                     out_path.SetText(item.path().c_str());
-                    SetError("OK");
+                    SetError(u8"OK");
                     return true;
                 }
             }
@@ -1535,13 +2120,13 @@ public:
     {
         if (!m_archive)
         {
-            SetError("未打开压缩文件.");
+            SetError(u8"未打开压缩文件.");
             return false;
         }
         try
         {
             if (regex.empty())
-                throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
+                throw bit7z::BitException(u8"Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
             std::vector<uint32_t> matched_indices;
             const bit7z::tregex regex_filter(regex, bit7z::tregex::ECMAScript | bit7z::tregex::optimize);
             for (const auto &item : *m_archive)
@@ -1551,9 +2136,9 @@ public:
                     matched_indices.push_back(item.index());
             }
             if (matched_indices.empty())
-                throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::NoMatchingItems));
+                throw bit7z::BitException(u8"Cannot extract items", bit7z::make_error_code(bit7z::BitError::NoMatchingItems));
             m_archive->extractTo(out_dir, matched_indices);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -1581,13 +2166,13 @@ public:
         out_path.Empty();
         if (!m_archive)
         {
-            SetError("未打开压缩文件.");
+            SetError(u8"未打开压缩文件.");
             return false;
         }
         try
         {
             if (regex.empty())
-                throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
+                throw bit7z::BitException(u8"Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
             std::vector<uint32_t> matched_indices;
             const bit7z::tregex regex_filter(regex, bit7z::tregex::ECMAScript | bit7z::tregex::optimize);
             for (const auto &item : *m_archive)
@@ -1598,7 +2183,7 @@ public:
                     out_buffer.Alloc(static_cast<ptrdiff_t>(item.size()), true);
                     m_archive->extractTo(reinterpret_cast<bit7z::byte_t *>(out_buffer.GetPtr()), static_cast<std::size_t>(out_buffer.GetSize()), item.index());
                     out_path.SetText(item.path().c_str());
-                    SetError("OK");
+                    SetError(u8"OK");
                     return true;
                 }
             }
@@ -1625,13 +2210,13 @@ public:
     {
         if (!m_archive)
         {
-            SetError("未打开压缩文件.");
+            SetError(u8"未打开压缩文件.");
             return false;
         }
         try
         {
             m_archive->test();
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -1650,13 +2235,13 @@ public:
     {
         if (!m_archive)
         {
-            SetError("未打开压缩文件.");
+            SetError(u8"未打开压缩文件.");
             return false;
         }
         try
         {
             m_archive->testItem(static_cast<uint32_t>(index));
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -1667,67 +2252,21 @@ public:
     }
 
     /**
-     * @brief 压缩密码
-     * @param password 密码
-     */
-    inline void SetPassword(const bit7z::tstring &password)
-    {
-        if (m_archive)
-            m_archive->setPassword(password);
-    }
-    inline CVolString Password()
-    {
-        return m_archive == nullptr ? _CT("") : CVolString(m_archive->password().c_str());
-    }
-
-    /**
-     * @brief 清除密码
-     */
-    inline void ClearPassword()
-    {
-        if (m_archive)
-            m_archive->clearPassword();
-    }
-
-    /**
-     * @brief 是否有密码
-     * @return
-     */
-    inline bool IsPasswordDefined()
-    {
-        return m_archive == nullptr ? false : m_archive->isPasswordDefined();
-    }
-
-    /**
-     * @brief 保留目录结构
-     * @param retain 是否保留
-     */
-    inline void SetRetainDirectories(bool retain)
-    {
-        if (m_archive)
-            m_archive->setRetainDirectories(retain);
-    }
-    inline bool RetainDirectories()
-    {
-        return m_archive == nullptr ? false : m_archive->retainDirectories();
-    }
-
-    /**
      * @brief 取压缩格式
      * @return
      */
-    inline int8_t DetectedFormat()
+    inline int8_t DetectedFormat() const
     {
-        return m_archive == nullptr ? 0 : static_cast<int8_t>(m_archive->detectedFormat().value());
+        return m_archive ? static_cast<int8_t>(m_archive->detectedFormat().value()) : 0;
     }
 
     /**
      * @brief 取压缩包属性表
      * @return
      */
-    inline std::map<bit7z::BitProperty, bit7z::BitPropVariant> &ArchiveProperties()
+    inline std::map<bit7z::BitProperty, bit7z::BitPropVariant> &ArchiveProperties() const
     {
-        return m_archive == nullptr ? std::map<bit7z::BitProperty, bit7z::BitPropVariant>() : m_archive->archiveProperties();
+        return m_archive ? m_archive->archiveProperties() : std::map<bit7z::BitProperty, bit7z::BitPropVariant>{};
     }
 
     /**
@@ -1735,9 +2274,9 @@ public:
      * @param property
      * @return
      */
-    inline bit7z::BitPropVariant &ArchiveProperty(int32_t property)
+    inline bit7z::BitPropVariant &ArchiveProperty(int32_t property) const
     {
-        return m_archive == nullptr ? bit7z::BitPropVariant() : m_archive->archiveProperty(static_cast<bit7z::BitProperty>(property));
+        return m_archive ? m_archive->archiveProperty(static_cast<bit7z::BitProperty>(property)) : bit7z::BitPropVariant{};
     }
 
     /**
@@ -1746,7 +2285,7 @@ public:
      */
     inline std::vector<bit7z::BitArchiveItemInfo> &Items()
     {
-        return m_archive == nullptr ? std::vector<bit7z::BitArchiveItemInfo>() : m_archive->items();
+        return m_archive ? m_archive->items() : std::vector<bit7z::BitArchiveItemInfo>{};
     }
 
     /**
@@ -1755,18 +2294,9 @@ public:
      * @param property 属性名
      * @return
      */
-    inline bit7z::BitPropVariant &ItemProperty(int32_t idx, int32_t property)
+    inline bit7z::BitPropVariant &ItemProperty(int32_t idx, int32_t property) const
     {
-        return m_archive == nullptr ? bit7z::BitPropVariant() : m_archive->itemProperty(static_cast<uint32_t>(idx), static_cast<bit7z::BitProperty>(property));
-    }
-
-    /**
-     * @brief 取项目数
-     * @return
-     */
-    inline int32_t ItemsCount()
-    {
-        return m_archive == nullptr ? -1 : static_cast<int32_t>(m_archive->itemsCount());
+        return m_archive ? m_archive->itemProperty(static_cast<uint32_t>(idx), static_cast<bit7z::BitProperty>(property)) : bit7z::BitPropVariant{};
     }
 
     /**
@@ -1774,9 +2304,9 @@ public:
      * @param idx 项目索引
      * @return
      */
-    inline bool IsItemFolder(int32_t idx)
+    inline bool IsItemFolder(int32_t idx) const
     {
-        return m_archive == nullptr ? false : m_archive->isItemFolder(static_cast<uint32_t>(idx));
+        return m_archive ? m_archive->isItemFolder(static_cast<uint32_t>(idx)) : false;
     }
 
     /**
@@ -1784,108 +2314,108 @@ public:
      * @param idx 项目索引
      * @return
      */
-    inline bool IsItemEncrypted(int32_t idx)
+    inline bool IsItemEncrypted(int32_t idx) const
     {
-        return m_archive == nullptr ? false : m_archive->isItemEncrypted(static_cast<uint32_t>(idx));
+        return m_archive ? m_archive->isItemEncrypted(static_cast<uint32_t>(idx)) : false;
     }
 
     /**
      * @brief 取压缩文件路径
      * @return
      */
-    inline CVolString ArchivePath()
+    inline CVolString ArchivePath() const
     {
-        return m_archive == nullptr ? _CT("") : CVolString(m_archive->archivePath().c_str());
+        return m_archive ? CVolString(m_archive->archivePath().c_str()) : _CT("");
     }
 
     /**
      * @brief 取文件夹数量
      * @return
      */
-    inline int32_t foldersCount()
+    inline int32_t foldersCount() const
     {
-        return m_archive == nullptr ? -1 : static_cast<int32_t>(m_archive->foldersCount());
+        return m_archive ? static_cast<int32_t>(m_archive->foldersCount()) : -1;
     }
 
     /**
      * @brief 取文件数量
      * @return
      */
-    inline int32_t FilesCount()
+    inline int32_t FilesCount() const
     {
-        return m_archive == nullptr ? -1 : static_cast<int32_t>(m_archive->filesCount());
+        return m_archive ? static_cast<int32_t>(m_archive->filesCount()) : -1;
     }
 
     /**
      * @brief 取总长度
      * @return
      */
-    inline int64_t Size()
+    inline int64_t Size() const
     {
-        return m_archive == nullptr ? -1 : static_cast<int64_t>(m_archive->size());
+        return m_archive ? static_cast<int64_t>(m_archive->size()) : -1;
     }
 
     /**
      * @brief 取打包长度
      * @return
      */
-    inline int64_t PackSize()
+    inline int64_t PackSize() const
     {
-        return m_archive == nullptr ? -1 : static_cast<int64_t>(m_archive->packSize());
+        return m_archive ? static_cast<int64_t>(m_archive->packSize()) : -1;
     }
 
     /**
      * @brief 是否有加密项目
      * @return
      */
-    inline bool HasEncryptedItems()
+    inline bool HasEncryptedItems() const
     {
-        return m_archive == nullptr ? false : m_archive->hasEncryptedItems();
+        return m_archive ? m_archive->hasEncryptedItems() : false;
     }
 
     /**
      * @brief 是否已加密
      * @return
      */
-    inline bool IsEncrypted()
+    inline bool IsEncrypted() const
     {
-        return m_archive == nullptr ? false : m_archive->isEncrypted();
+        return m_archive ? m_archive->isEncrypted() : false;
     }
 
     /**
      * @brief 取分卷数量
      * @return
      */
-    inline int32_t VolumesCount()
+    inline int32_t VolumesCount() const
     {
-        return m_archive == nullptr ? -1 : static_cast<int32_t>(m_archive->volumesCount());
+        return m_archive ? static_cast<int32_t>(m_archive->volumesCount()) : -1;
     }
 
     /**
      * @brief 是否为分卷
      * @return
      */
-    inline bool IsMultiVolume()
+    inline bool IsMultiVolume() const
     {
-        return m_archive == nullptr ? false : m_archive->isMultiVolume();
+        return m_archive ? m_archive->isMultiVolume() : false;
     }
 
     /**
      * @brief 是否为固实
      * @return
      */
-    inline bool IsSolid()
+    inline bool IsSolid() const
     {
-        return m_archive == nullptr ? false : m_archive->isSolid();
+        return m_archive ? m_archive->isSolid() : false;
     }
 
     /**
      * @brief 取尾项目索引
      * @return
      */
-    inline int32_t EndIndex()
+    inline int32_t EndIndex() const
     {
-        return m_archive == nullptr ? -1 : static_cast<int32_t>(m_archive->end()->index() - 1);
+        return m_archive ? static_cast<int32_t>(m_archive->end()->index() - 1) : -1;
     }
 
     /**
@@ -1893,7 +2423,7 @@ public:
      * @param item_path 项目路径
      * @return
      */
-    inline int32_t FindIndex(const bit7z::tstring &item_path)
+    inline int32_t FindIndex(const bit7z::tstring &item_path) const
     {
         if (!m_archive)
             return -1;
@@ -1906,145 +2436,22 @@ public:
      * @param item_path 项目路径
      * @return
      */
-    inline bool IsContain(const bit7z::tstring &item_path)
+    inline bool IsContain(const bit7z::tstring &item_path) const
     {
-        return m_archive == nullptr ? false : m_archive->contains(item_path);
+        return m_archive ? m_archive->contains(item_path) : false;
     }
 }; // PivArchiveReader
 
 /**
  * @brief 存档压缩类
  */
-class PivArchiveWirter
+class PivArchiveWirter : public PivArchiveCreator<bit7z::BitArchiveWriter>
 {
-protected:
-    std::unique_ptr<bit7z::BitArchiveWriter> m_archive{nullptr};
-    std::unique_ptr<std::vector<bit7z::byte_t>> m_buffer{nullptr};
-    std::vector<std::vector<bit7z::byte_t>> m_buffer_array;
-    std::string m_error;
-    uint64_t m_total_size = 0;
-    int32_t m_ratio = 0;
-    std::wstring m_progress_file;
-
-    /**
-     * @brief 置最后错误
-     * @param Error 错误信息
-     */
-    inline void SetError(const CHAR *Error)
-    {
-        m_error = Error;
-    }
-
-    void TotalSizeCB(uint64_t total_size)
-    {
-        m_total_size = total_size;
-    }
-
-    void RatioCB(uint64_t input, uint64_t output)
-    {
-        if (input != 0)
-            m_ratio = static_cast<int32_t>(100 * output / input);
-    }
-
-    bool ProgressCB(uint64_t progress_size)
-    {
-        if (progress_size == 0 || m_total_size == 0)
-            return true;
-        return !this->WriterProgress(m_progress_file.c_str(), static_cast<int32_t>(100 * progress_size / m_total_size),
-                                     static_cast<int64_t>(m_total_size), static_cast<int64_t>(progress_size), m_ratio);
-    }
-
-    void FileNameCB(bit7z::tstring fileName)
-    {
-        m_progress_file = fileName;
-    }
-
 public:
     PivArchiveWirter() {}
-    ~PivArchiveWirter() {}
-
-    inline bit7z::BitArchiveWriter &data()
+    ~PivArchiveWirter()
     {
-        return *m_archive;
-    }
-
-    inline bit7z::BitArchiveWriter *pdata()
-    {
-        return m_archive.get();
-    }
-
-    /**
-     * @brief 关闭
-     */
-    inline void CloseArchive()
-    {
-        m_buffer_array.clear();
-        m_buffer.reset();
-        m_archive.reset();
-    }
-
-    /**
-     * @brief 是否为空
-     * @return
-     */
-    inline bool IsNull()
-    {
-        return m_archive == nullptr;
-    }
-
-    /**
-     * @brief 取最后错误
-     * @return
-     */
-    inline CVolString GetError()
-    {
-        return CVolString(GetWideText(m_error.c_str(), CVolMem(), NULL));
-    }
-
-    /**
-     * @brief 压缩进度改变(虚拟方法)
-     * @param progressFile 文件路径
-     * @param progress 压缩进度
-     * @param totalSize 总压缩大小
-     * @param progress_size 已压缩大小
-     * @param ratio 整体压缩比
-     * @return
-     */
-    virtual int32_t WriterProgress(const wchar_t *progressFile, int32_t progress, int64_t totalSize, int64_t progress_size, int32_t ratio) { return 0; }
-
-    /**
-     * @brief 启用进度反馈
-     */
-    void EnableFeeback(bool enable)
-    {
-        if (!m_archive)
-            return;
-        if (enable)
-        {
-            m_archive->setTotalCallback(std::bind(&PivArchiveWirter::TotalSizeCB, this, std::placeholders::_1));
-            m_archive->setProgressCallback(std::bind(&PivArchiveWirter::ProgressCB, this, std::placeholders::_1));
-            m_archive->setRatioCallback(std::bind(&PivArchiveWirter::RatioCB, this, std::placeholders::_1, std::placeholders::_2));
-            m_archive->setFileCallback(std::bind(&PivArchiveWirter::FileNameCB, this, std::placeholders::_1));
-        }
-        else
-        {
-            m_archive->setTotalCallback(nullptr);
-            m_archive->setProgressCallback(nullptr);
-            m_archive->setRatioCallback(nullptr);
-            m_archive->setFileCallback(nullptr);
-        }
-    }
-
-    /**
-     * @brief 是否启用进度反馈
-     */
-    bool HasFeeback()
-    {
-        if (m_archive)
-        {
-            return !!m_archive->progressCallback();
-        }
-        return false;
+        CloseArchive();
     }
 
     /**
@@ -2060,7 +2467,7 @@ public:
         {
             m_archive.reset(new bit7z::BitArchiveWriter{Piv7zLib::data().Get(), format});
             EnableFeeback(feedback);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -2086,7 +2493,7 @@ public:
         {
             m_archive.reset(new bit7z::BitArchiveWriter{Piv7zLib::data().Get(), in_file, format, password});
             EnableFeeback(feedback);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -2112,7 +2519,7 @@ public:
         {
             m_archive.reset(new bit7z::BitArchiveWriter{Piv7zLib::data().Get(), in_buffer, format, password});
             EnableFeeback(feedback);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -2138,7 +2545,7 @@ public:
         {
             m_archive.reset(new bit7z::BitArchiveWriter{Piv7zLib::data().Get(), in_stream, format, password});
             EnableFeeback(feedback);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -2166,7 +2573,7 @@ public:
         {
             m_archive.reset(new bit7z::BitArchiveWriter{Piv7zLib::data().Get(), *m_buffer, format, password});
             EnableFeeback(feedback);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -2178,16 +2585,16 @@ public:
     }
 
     // 创建自文件资源
-    /*
-    bool CreateArchive(size_t resid, bool feedback, const bit7z::BitInOutFormat &format, const bit7z::tstring &password)
+    bool CreateArchive(int32_t resid, bool feedback, const bit7z::BitInOutFormat &format, const bit7z::tstring &password)
     {
         CloseArchive();
+        m_buffer.reset(new std::vector<bit7z::byte_t>{});
+        PivArchiveOperate::LoadResIdData(resid, *m_buffer);
         try
         {
-            m_in_stream.OpenStream(resid);
-            m_archive = new bit7z::BitArchiveWriter{Piv7zLib::data().Get(), m_in_stream.is(), format, password};
+            m_archive.reset(new bit7z::BitArchiveWriter{Piv7zLib::data().Get(), *m_buffer, format, password});
             EnableFeeback(feedback);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -2197,625 +2604,18 @@ public:
             return false;
         }
     }
-    */
-
-    // 通用
-
-    /**
-     * @brief 添加项目
-     * @param path_array 路径数组
-     * @return
-     */
-    bool AddItems(std::vector<bit7z::tstring> &path_array)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            m_archive->addItems(path_array);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-    bool AddItems(CMStringArray &path_array)
-    {
-        std::vector<bit7z::tstring> in_paths;
-        for (INT_P i = 0; i < path_array.GetCount(); i++)
-        {
-            in_paths.push_back(bit7z::tstring{path_array.GetAt(i)});
-        }
-        return AddItems(in_paths);
-    }
-
-    /**
-     * @brief 添加别名项目
-     * @param path_map 路径键值对
-     * @return
-     */
-    bool AddItems(std::map<bit7z::tstring, bit7z::tstring> &path_map)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            m_archive->addItems(path_map);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-    bool AddItems(std::map<CVolString, CVolString> &path_map)
-    {
-        std::map<bit7z::tstring, bit7z::tstring> in_paths;
-        for (auto iter = path_map.begin(); iter != path_map.end(); iter++)
-        {
-            in_paths[bit7z::tstring{iter->first.GetText()}] = bit7z::tstring{iter->second.GetText()};
-        }
-        return AddItems(in_paths);
-    }
-
-    /**
-     * @brief 添加文件
-     * @param in_path 文件路径
-     * @param alias 别名
-     * @return
-     */
-    bool AddFile(const bit7z::tstring &in_path, const bit7z::tstring &alias)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            m_archive->addFile(in_path, alias);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-
-    /* 添加内存流
-    bool AddFile(std::istream &in_stream, const bit7z::tstring &path)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            m_archive->addFile(in_stream, path);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-    */
-
-    /**
-     * @brief 添加字节集
-     * @param in_buffer 缓存数据
-     * @param path 数据名称
-     * @return
-     */
-    bool AddFile(CVolMem &in_buffer, const bit7z::tstring &path /* , bool copy_data*/)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            m_buffer_array.push_back(bit7z::buffer_t{reinterpret_cast<const bit7z::byte_t *>(in_buffer.GetPtr()), reinterpret_cast<const bit7z::byte_t *>(in_buffer.GetEndPtr())});
-            m_archive->addFile(m_buffer_array.back(), path);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-
-    /**
-     * @brief 添加内存
-     * @param in_buffer 数据地址
-     * @param buffer_len 数据长度
-     * @param path 数据名称
-     * @return
-     */
-    bool AddFile(const ptrdiff_t &in_buffer, const ptrdiff_t &buffer_len, const bit7z::tstring &path /*, bool copy_data*/)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            m_buffer_array.push_back(bit7z::buffer_t{reinterpret_cast<const bit7z::byte_t *>(in_buffer), reinterpret_cast<const bit7z::byte_t *>(in_buffer) + buffer_len});
-            m_archive->addFile(m_buffer_array.back(), path);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-
-    /* 添加文件资源内存
-    bool AddFile(size_t resid, const ptrdiff_t &buffer_len, const bit7z::tstring &path)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            PivMemoryInStream<char> in_stream;
-            in_stream.OpenStream(resid);
-            m_archive->addFile(in_stream.is(), path);
-            m_istream_array.push_back(in_stream);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-    */
-
-    /**
-     * @brief 添加文件数组
-     * @param in_files 文件数组
-     * @return
-     */
-    bool AddFiles(std::vector<bit7z::tstring> &in_files)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            m_archive->addFiles(in_files);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-    bool AddFiles(CMStringArray &in_files)
-    {
-        std::vector<bit7z::tstring> in_paths;
-        for (INT_P i = 0; i < in_files.GetCount(); i++)
-        {
-            in_paths.push_back(bit7z::tstring{in_files.GetAt(i)});
-        }
-        return AddFiles(in_paths);
-    }
-
-    /**
-     * @brief 添加匹配文件
-     * @param in_dir 输入目录
-     * @param filter 筛选器
-     * @param isExclude 是否排除匹配项
-     * @param recursion 递归子目录
-     * @return
-     */
-    bool AddFiles(const bit7z::tstring &in_dir, const bit7z::tstring &filter, bool isExclude, bool recursion)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            m_archive->addFiles(in_dir, filter, isExclude ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include, recursion);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-
-    /**
-     * @brief 添加目录
-     * @param in_dir 目录路径
-     * @return
-     */
-    bool AddDirectory(const bit7z::tstring &in_dir)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            m_archive->addDirectory(in_dir);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-
-    /**
-     * @brief 压缩到文件
-     * @param out_file 压缩包路径
-     * @return
-     */
-    bool CompressTo(const bit7z::tstring &out_file)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            m_archive->compressTo(out_file);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-
-    /**
-     * @brief 压缩到字节集
-     * @param out_buffer 输出字节集
-     * @return
-     */
-    bool CompressTo(CVolMem &out_buffer)
-    {
-        out_buffer.Empty();
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            std::vector<bit7z::byte_t> buffer;
-            m_archive->compressTo(buffer);
-            out_buffer.Append(buffer.data(), buffer.size());
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-
-    /**
-     * @brief 取压缩格式
-     * @return
-     */
-    inline int8_t CompressionFormat()
-    {
-        return m_archive == nullptr ? 0 : static_cast<int8_t>(m_archive->compressionFormat().value());
-    }
-
-    /**
-     * @brief 取项目数量
-     * @return
-     */
-    inline int32_t ItemsCount()
-    {
-        return m_archive == nullptr ? 0 : static_cast<int32_t>(m_archive->itemsCount());
-    }
-
-    /**
-     * @brief (设置/获取)压缩密码
-     * @param password 新密码
-     */
-    inline void SetPassword(const bit7z::tstring &password)
-    {
-        if (m_archive)
-            m_archive->setPassword(password);
-    }
-    inline CVolString Password()
-    {
-        return m_archive == nullptr ? _CT("") : CVolString(m_archive->password().c_str());
-    }
-
-    /**
-     * @brief (设置/获取)压缩等级
-     * @param level 新等级
-     */
-    inline void SetCompressionLevel(int32_t level)
-    {
-        if (m_archive)
-            m_archive->setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
-    }
-    inline int32_t CompressionLevel()
-    {
-        return m_archive == nullptr ? 0 : static_cast<int32_t>(m_archive->compressionLevel());
-    }
-
-    /**
-     * @brief (设置/获取)压缩方法
-     * @param method 新方法
-     */
-    inline void SetCompressionMethod(bit7z::BitCompressionMethod method)
-    {
-        if (m_archive)
-            m_archive->setCompressionMethod(method);
-    }
-    inline int32_t CompressionMethod()
-    {
-        return m_archive == nullptr ? 0 : static_cast<int32_t>(m_archive->compressionMethod());
-    }
-
-    /**
-     * @brief (设置/获取)字典大小
-     * @param dictionary_size 新字典大小
-     */
-    inline void SetDictionarySize(int32_t dictionary_size)
-    {
-        if (m_archive)
-            m_archive->setDictionarySize(static_cast<uint32_t>(dictionary_size));
-    }
-    inline int32_t DictionarySize()
-    {
-        return m_archive == nullptr ? 0 : static_cast<int32_t>(m_archive->dictionarySize());
-    }
-
-    /**
-     * @brief (设置/获取)单词大小
-     * @param word_size 新单词大小
-     */
-    inline void SetWordSize(int32_t word_size)
-    {
-        if (m_archive)
-            m_archive->setWordSize(static_cast<uint32_t>(word_size));
-    }
-    inline int32_t WordSize()
-    {
-        return m_archive == nullptr ? 0 : static_cast<int32_t>(m_archive->wordSize());
-    }
-
-    /**
-     * @brief (设置/获取)固实压缩
-     * @param solid_mode 是否启用
-     */
-    inline void SetSolidMode(bool solid_mode)
-    {
-        if (m_archive)
-            m_archive->setSolidMode(solid_mode);
-    }
-    inline bool SolidMode()
-    {
-        return m_archive == nullptr ? false : m_archive->solidMode();
-    }
-
-    /**
-     * @brief (设置/获取)更新方式
-     * @param mode 新更新方式
-     */
-    inline void SetUpdateMode(int32_t mode)
-    {
-        if (m_archive)
-            m_archive->setUpdateMode(static_cast<bit7z::UpdateMode>(mode));
-    }
-    inline int32_t UpdateMode()
-    {
-        return m_archive == nullptr ? 0 : static_cast<int32_t>(m_archive->updateMode());
-    }
-
-    /**
-     * @brief (设置/获取)分卷大小
-     * @param volume_size 新分卷大小
-     */
-    inline void SetVolumeSize(int32_t volume_size)
-    {
-        if (m_archive)
-            m_archive->setVolumeSize(static_cast<uint32_t>(volume_size));
-    }
-    inline int32_t VolumeSize()
-    {
-        return m_archive == nullptr ? 0 : static_cast<int32_t>(m_archive->volumeSize());
-    }
-
-    /**
-     * @brief (设置/获取)线程数
-     * @param threads_count 新线程数
-     */
-    inline void SetThreadsCount(int32_t threads_count)
-    {
-        if (m_archive)
-            m_archive->setThreadsCount(static_cast<uint32_t>(threads_count));
-    }
-    inline int32_t ThreadsCount()
-    {
-        return m_archive == nullptr ? 0 : static_cast<int32_t>(m_archive->threadsCount());
-    }
-
-    /**
-     * @brief (设置/获取)存储符号链接
-     * @param store_symlinks 是否存储符号链接
-     */
-    inline void SetStoreSymbolicLinks(bool store_symlinks)
-    {
-        if (m_archive)
-            m_archive->setStoreSymbolicLinks(store_symlinks);
-    }
-    inline bool StoreSymbolicLinks()
-    {
-        return m_archive == nullptr ? false : m_archive->storeSymbolicLinks();
-    }
-
-    /**
-     * @brief (设置/获取)保留目录结构
-     * @param retain 是否保留目录结构
-     */
-    inline void SetRetainDirectories(bool retain)
-    {
-        if (m_archive)
-            m_archive->setRetainDirectories(retain);
-    }
-    inline bool RetainDirectories()
-    {
-        return m_archive == nullptr ? false : m_archive->retainDirectories();
-    }
-
-    /**
-     * @brief 设置密码
-     * @param password 新密码
-     * @param crypt_headers 加密文件头
-     */
-    inline void SetPassword(const bit7z::tstring &password, bool crypt_headers)
-    {
-        if (m_archive)
-            m_archive->setPassword(password, crypt_headers);
-    }
-
-    /**
-     * @brief 清除密码
-     */
-    inline void ClearPassword()
-    {
-        if (m_archive)
-            m_archive->clearPassword();
-    }
-
-    /**
-     * @brief 是否有密码
-     * @return
-     */
-    inline bool IsPasswordDefined()
-    {
-        return m_archive == nullptr ? false : m_archive->isPasswordDefined();
-    }
-
-    /**
-     * @brief 是否加密文件头
-     * @return
-     */
-    inline bool CryptHeaders()
-    {
-        return m_archive == nullptr ? false : m_archive->cryptHeaders();
-    }
 }; // PivArchiveWirter
 
 /**
  * @brief 存档编辑类
  */
-class PivArchiveEditor
+class PivArchiveEditor : public PivArchiveCreator<bit7z::BitArchiveEditor>
 {
-protected:
-    std::unique_ptr<bit7z::BitArchiveEditor> m_archive{nullptr};
-    std::unique_ptr<std::vector<bit7z::byte_t>> m_buffer{nullptr};
-    std::vector<std::vector<bit7z::byte_t>> m_buffer_array;
-    std::string m_error;
-    uint64_t m_total_size = 0;
-    int32_t m_ratio = 0;
-    std::wstring m_progress_file;
-
-    /**
-     * @brief 置最后错误
-     * @param Error 错误信息
-     */
-    inline void SetError(const CHAR *Error)
-    {
-        m_error = Error;
-    }
-
-    void RatioCB(uint64_t input, uint64_t output)
-    {
-        if (input != 0)
-            m_ratio = static_cast<int32_t>(100 * output / input);
-    }
-
-    bool ProgressCB(uint64_t progress_size)
-    {
-        if (progress_size == 0 || m_total_size == 0)
-            return true;
-        return !this->WriterProgress(m_progress_file.c_str(), static_cast<int32_t>(100 * progress_size / m_total_size),
-                                     static_cast<int64_t>(m_total_size), static_cast<int64_t>(progress_size), m_ratio);
-    }
-
-    void TotalSizeCB(uint64_t total_size)
-    {
-        m_total_size = total_size;
-    }
-
-    void FileNameCB(bit7z::tstring fileName)
-    {
-        m_progress_file = fileName;
-    }
-
 public:
     PivArchiveEditor() {}
-    ~PivArchiveEditor() {}
-
-    inline bit7z::BitArchiveEditor &data()
+    ~PivArchiveEditor()
     {
-        return *m_archive;
-    }
-
-    inline bit7z::BitArchiveEditor *pdata()
-    {
-        return m_archive.get();
-    }
-
-    /**
-     * @brief 关闭
-     */
-    inline void CloseArchive()
-    {
-        m_buffer_array.clear();
-        m_archive.reset();
+        CloseArchive();
     }
 
     /**
@@ -2835,7 +2635,7 @@ public:
             m_archive.reset(new bit7z::BitArchiveEditor{Piv7zLib::data().Get(), in_file, format, password});
             m_archive->setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
             EnableFeeback(feedback);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -2854,14 +2654,14 @@ public:
     {
         if (!m_archive)
         {
-            SetError("未打开压缩文件!");
+            SetError(u8"未打开压缩文件!");
             return false;
         }
         try
         {
             m_archive->applyChanges();
-            m_buffer_array.clear();
-            SetError("OK");
+            m_buffer_array.swap(std::vector<std::vector<bit7z::byte_t>>{});
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -2881,13 +2681,13 @@ public:
     {
         if (!m_archive)
         {
-            SetError("未打开压缩文件!");
+            SetError(u8"未打开压缩文件!");
             return false;
         }
         try
         {
             m_archive->renameItem(static_cast<uint32_t>(index), new_path);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -2907,13 +2707,13 @@ public:
     {
         if (!m_archive)
         {
-            SetError("未打开压缩文件!");
+            SetError(u8"未打开压缩文件!");
             return false;
         }
         try
         {
             m_archive->renameItem(old_path, new_path);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -2933,13 +2733,13 @@ public:
     {
         if (!m_archive)
         {
-            SetError("未打开压缩文件!");
+            SetError(u8"未打开压缩文件!");
             return false;
         }
         try
         {
             m_archive->updateItem(static_cast<uint32_t>(index), in_file);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -2959,14 +2759,14 @@ public:
     {
         if (!m_archive)
         {
-            SetError("未打开压缩文件!");
+            SetError(u8"未打开压缩文件!");
             return false;
         }
         try
         {
-            m_buffer_array.push_back(bit7z::buffer_t{reinterpret_cast<const bit7z::byte_t *>(in_buffer.GetPtr()), reinterpret_cast<const bit7z::byte_t *>(in_buffer.GetEndPtr())});
+            m_buffer_array.emplace_back(reinterpret_cast<const bit7z::byte_t *>(in_buffer.GetPtr()), reinterpret_cast<const bit7z::byte_t *>(in_buffer.GetEndPtr()));
             m_archive->updateItem(static_cast<uint32_t>(index), m_buffer_array.back());
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -2976,18 +2776,23 @@ public:
         }
     }
 
-    /* 更新索引项目自内存流
+    /**
+     * @brief 更新索引项目自内存流
+     * @param index 项目索引
+     * @param in_stream 内存流
+     * @return
+     */
     bool UpdateItem(int32_t index, std::istream &in_stream)
     {
         if (!m_archive)
         {
-            SetError("未打开压缩文件!");
+            SetError(u8"未打开压缩文件!");
             return false;
         }
         try
         {
             m_archive->updateItem(static_cast<uint32_t>(index), in_stream);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -2996,7 +2801,6 @@ public:
             return false;
         }
     }
-    */
 
     /**
      * @brief 更新路径项目自文件
@@ -3008,13 +2812,13 @@ public:
     {
         if (!m_archive)
         {
-            SetError("未打开压缩文件!");
+            SetError(u8"未打开压缩文件!");
             return false;
         }
         try
         {
             m_archive->updateItem(item_path, in_file);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -3034,14 +2838,14 @@ public:
     {
         if (!m_archive)
         {
-            SetError("未打开压缩文件!");
+            SetError(u8"未打开压缩文件!");
             return false;
         }
         try
         {
-            m_buffer_array.push_back(bit7z::buffer_t{reinterpret_cast<const bit7z::byte_t *>(in_buffer.GetPtr()), reinterpret_cast<const bit7z::byte_t *>(in_buffer.GetEndPtr())});
+            m_buffer_array.emplace_back(reinterpret_cast<const bit7z::byte_t *>(in_buffer.GetPtr()), reinterpret_cast<const bit7z::byte_t *>(in_buffer.GetEndPtr()));
             m_archive->updateItem(item_path, m_buffer_array.back());
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -3061,13 +2865,13 @@ public:
     {
         if (!m_archive)
         {
-            SetError("未打开压缩文件!");
+            SetError(u8"未打开压缩文件!");
             return false;
         }
         try
         {
             m_archive->updateItem(item_path, in_stream);
-            SetError("OK");
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -3080,19 +2884,20 @@ public:
     /**
      * @brief 删除索引项目
      * @param index 项目索引
+     * @param recurse_dirs 递归删除目录
      * @return
      */
-    bool DeleteItem(int32_t index)
+    bool DeleteItem(int32_t index, bool recurse_dirs = false)
     {
         if (!m_archive)
         {
-            SetError("未打开压缩文件!");
+            SetError(u8"未打开压缩文件!");
             return false;
         }
         try
         {
-            m_archive->deleteItem(static_cast<uint32_t>(index));
-            SetError("OK");
+            m_archive->deleteItem(static_cast<uint32_t>(index), recurse_dirs ? bit7z::DeletePolicy::RecurseDirs : bit7z::DeletePolicy::ItemOnly);
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -3105,19 +2910,20 @@ public:
     /**
      * @brief 删除路径项目
      * @param item_path 项目路径
+     * @param recurse_dirs 递归删除目录
      * @return
      */
-    bool DeleteItem(const bit7z::tstring &item_path)
+    bool DeleteItem(const bit7z::tstring &item_path, bool recurse_dirs = false)
     {
         if (!m_archive)
         {
-            SetError("未打开压缩文件!");
+            SetError(u8"未打开压缩文件!");
             return false;
         }
         try
         {
-            m_archive->deleteItem(item_path);
-            SetError("OK");
+            m_archive->deleteItem(item_path, recurse_dirs ? bit7z::DeletePolicy::RecurseDirs : bit7z::DeletePolicy::ItemOnly);
+            SetError(u8"OK");
             return true;
         }
         catch (const bit7z::BitException &ex)
@@ -3125,615 +2931,6 @@ public:
             SetError(ex.what());
             return false;
         }
-    }
-
-    /**
-     * @brief 是否为空
-     * @return
-     */
-    inline bool IsNull()
-    {
-        return m_archive == nullptr;
-    }
-
-    /**
-     * @brief 取最后错误
-     * @return
-     */
-    inline CVolString GetError()
-    {
-        return CVolString(GetWideText(m_error.c_str(), CVolMem(), NULL));
-    }
-
-    /**
-     * @brief 压缩进度改变(虚拟方法)
-     * @param progressFile 文件路径
-     * @param progress 压缩进度
-     * @param totalSize 总压缩大小
-     * @param progress_size 已压缩大小
-     * @param ratio 整体压缩比
-     * @return
-     */
-    virtual int32_t WriterProgress(const wchar_t *progressFile, int32_t progress, int64_t totalSize, int64_t progress_size, int32_t ratio) { return 0; }
-
-    /**
-     * @brief 启用进度反馈
-     */
-    void EnableFeeback(bool enable)
-    {
-        if (!m_archive)
-            return;
-        if (enable)
-        {
-            m_archive->setTotalCallback(std::bind(&PivArchiveEditor::TotalSizeCB, this, std::placeholders::_1));
-            m_archive->setProgressCallback(std::bind(&PivArchiveEditor::ProgressCB, this, std::placeholders::_1));
-            m_archive->setRatioCallback(std::bind(&PivArchiveEditor::RatioCB, this, std::placeholders::_1, std::placeholders::_2));
-            m_archive->setFileCallback(std::bind(&PivArchiveEditor::FileNameCB, this, std::placeholders::_1));
-        }
-        else
-        {
-            m_archive->setTotalCallback(nullptr);
-            m_archive->setProgressCallback(nullptr);
-            m_archive->setRatioCallback(nullptr);
-            m_archive->setFileCallback(nullptr);
-        }
-    }
-
-    /**
-     * @brief 是否启动进度反馈
-     */
-    bool HasFeeback()
-    {
-        if (m_archive)
-        {
-            return !!m_archive->progressCallback();
-        }
-        return false;
-    }
-    /**
-     * @brief 添加项目
-     * @param path_array 路径数组
-     * @return
-     */
-    bool AddItems(std::vector<bit7z::tstring> &path_array)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            m_archive->addItems(path_array);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-    bool AddItems(CMStringArray &path_array)
-    {
-        std::vector<bit7z::tstring> in_paths;
-        for (INT_P i = 0; i < path_array.GetCount(); i++)
-        {
-            in_paths.push_back(bit7z::tstring{path_array.GetAt(i)});
-        }
-        return AddItems(in_paths);
-    }
-
-    /**
-     * @brief 添加别名项目
-     * @param path_map 路径键值对
-     * @return
-     */
-    bool AddItems(std::map<bit7z::tstring, bit7z::tstring> &path_map)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            m_archive->addItems(path_map);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-    bool AddItems(std::map<CVolString, CVolString> &path_map)
-    {
-        std::map<bit7z::tstring, bit7z::tstring> in_paths;
-        for (auto iter = path_map.begin(); iter != path_map.end(); iter++)
-        {
-            in_paths[bit7z::tstring{iter->first.GetText()}] = bit7z::tstring{iter->second.GetText()};
-        }
-        return AddItems(in_paths);
-    }
-
-    /**
-     * @brief 添加文件
-     * @param in_path 文件路径
-     * @param alias 别名
-     * @return
-     */
-    bool AddFile(const bit7z::tstring &in_path, const bit7z::tstring &alias)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            m_archive->addFile(in_path, alias);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-
-    /* 添加内存流
-    bool AddFile(std::istream &in_stream, const bit7z::tstring &path)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            m_archive->addFile(in_stream, path);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-    */
-
-    /**
-     * @brief 添加字节集
-     * @param in_buffer 缓存数据
-     * @param path 数据名称
-     * @return
-     */
-    bool AddFile(CVolMem &in_buffer, const bit7z::tstring &path /* , bool copy_data*/)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            m_buffer_array.push_back(bit7z::buffer_t{reinterpret_cast<const bit7z::byte_t *>(in_buffer.GetPtr()), reinterpret_cast<const bit7z::byte_t *>(in_buffer.GetEndPtr())});
-            m_archive->addFile(m_buffer_array.back(), path);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-
-    /**
-     * @brief 添加内存
-     * @param in_buffer 数据地址
-     * @param buffer_len 数据长度
-     * @param path 数据名称
-     * @return
-     */
-    bool AddFile(const ptrdiff_t &in_buffer, const ptrdiff_t &buffer_len, const bit7z::tstring &path /*, bool copy_data*/)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            m_buffer_array.push_back(bit7z::buffer_t{reinterpret_cast<const bit7z::byte_t *>(in_buffer), reinterpret_cast<const bit7z::byte_t *>(in_buffer) + buffer_len});
-            m_archive->addFile(m_buffer_array.back(), path);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-
-    /* 添加文件资源内存
-    bool AddFile(size_t resid, const ptrdiff_t &buffer_len, const bit7z::tstring &path)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            PivMemoryInStream<char> in_stream;
-            in_stream.OpenStream(resid);
-            m_archive->addFile(in_stream.is(), path);
-            m_istream_array.push_back(in_stream);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-    */
-
-    /**
-     * @brief 添加文件数组
-     * @param in_files 文件数组
-     * @return
-     */
-    bool AddFiles(std::vector<bit7z::tstring> &in_files)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            m_archive->addFiles(in_files);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-    bool AddFiles(CMStringArray &in_files)
-    {
-        std::vector<bit7z::tstring> in_paths;
-        for (INT_P i = 0; i < in_files.GetCount(); i++)
-        {
-            in_paths.push_back(bit7z::tstring{in_files.GetAt(i)});
-        }
-        return AddFiles(in_paths);
-    }
-
-    /**
-     * @brief 添加匹配文件
-     * @param in_dir 输入目录
-     * @param filter 筛选器
-     * @param isExclude 是否排除匹配项
-     * @param recursion 递归子目录
-     * @return
-     */
-    bool AddFiles(const bit7z::tstring &in_dir, const bit7z::tstring &filter, bool isExclude, bool recursion)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            m_archive->addFiles(in_dir, filter, isExclude ? bit7z::FilterPolicy::Exclude : bit7z::FilterPolicy::Include, recursion);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-
-    /**
-     * @brief 添加目录
-     * @param in_dir 目录路径
-     * @return
-     */
-    bool AddDirectory(const bit7z::tstring &in_dir)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            m_archive->addDirectory(in_dir);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-
-    /**
-     * @brief 压缩到文件
-     * @param out_file 压缩包路径
-     * @return
-     */
-    bool CompressTo(const bit7z::tstring &out_file)
-    {
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            m_archive->compressTo(out_file);
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-
-    /**
-     * @brief 压缩到字节集
-     * @param out_buffer 输出字节集
-     * @return
-     */
-    bool CompressTo(CVolMem &out_buffer)
-    {
-        out_buffer.Empty();
-        if (!m_archive)
-        {
-            SetError("未打开或创建压缩包!");
-            return false;
-        }
-        try
-        {
-            std::vector<bit7z::byte_t> buffer;
-            m_archive->compressTo(buffer);
-            out_buffer.Append(buffer.data(), buffer.size());
-            SetError("OK");
-            return true;
-        }
-        catch (const bit7z::BitException &ex)
-        {
-            SetError(ex.what());
-            return false;
-        }
-    }
-
-    /**
-     * @brief 取压缩格式
-     * @return
-     */
-    inline int8_t CompressionFormat()
-    {
-        return m_archive == nullptr ? 0 : static_cast<int8_t>(m_archive->compressionFormat().value());
-    }
-
-    /**
-     * @brief 取项目数量
-     * @return
-     */
-    inline int32_t ItemsCount()
-    {
-        return m_archive == nullptr ? 0 : static_cast<int32_t>(m_archive->itemsCount());
-    }
-
-    /**
-     * @brief (设置/获取)压缩密码
-     * @param password 新密码
-     */
-    inline void SetPassword(const bit7z::tstring &password)
-    {
-        if (m_archive)
-            m_archive->setPassword(password);
-    }
-    inline CVolString Password()
-    {
-        return m_archive == nullptr ? _CT("") : CVolString(m_archive->password().c_str());
-    }
-
-    /**
-     * @brief (设置/获取)压缩等级
-     * @param level 新等级
-     */
-    inline void SetCompressionLevel(int32_t level)
-    {
-        if (m_archive)
-            m_archive->setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
-    }
-    inline int32_t CompressionLevel()
-    {
-        return m_archive == nullptr ? 0 : static_cast<int32_t>(m_archive->compressionLevel());
-    }
-
-    /**
-     * @brief (设置/获取)压缩方法
-     * @param method 新方法
-     */
-    inline void SetCompressionMethod(bit7z::BitCompressionMethod method)
-    {
-        if (m_archive)
-            m_archive->setCompressionMethod(method);
-    }
-    inline int32_t CompressionMethod()
-    {
-        return m_archive == nullptr ? 0 : static_cast<int32_t>(m_archive->compressionMethod());
-    }
-
-    /**
-     * @brief (设置/获取)字典大小
-     * @param dictionary_size 新字典大小
-     */
-    inline void SetDictionarySize(int32_t dictionary_size)
-    {
-        if (m_archive)
-            m_archive->setDictionarySize(static_cast<uint32_t>(dictionary_size));
-    }
-    inline int32_t DictionarySize()
-    {
-        return m_archive == nullptr ? 0 : static_cast<int32_t>(m_archive->dictionarySize());
-    }
-
-    /**
-     * @brief (设置/获取)单词大小
-     * @param word_size 新单词大小
-     */
-    inline void SetWordSize(int32_t word_size)
-    {
-        if (m_archive)
-            m_archive->setWordSize(static_cast<uint32_t>(word_size));
-    }
-    inline int32_t WordSize()
-    {
-        return m_archive == nullptr ? 0 : static_cast<int32_t>(m_archive->wordSize());
-    }
-
-    /**
-     * @brief (设置/获取)固实压缩
-     * @param solid_mode 是否启用
-     */
-    inline void SetSolidMode(bool solid_mode)
-    {
-        if (m_archive)
-            m_archive->setSolidMode(solid_mode);
-    }
-    inline bool SolidMode()
-    {
-        return m_archive == nullptr ? false : m_archive->solidMode();
-    }
-
-    /**
-     * @brief (设置/获取)更新方式
-     * @param mode 新更新方式
-     */
-    inline void SetUpdateMode(int32_t mode)
-    {
-        if (m_archive)
-            m_archive->setUpdateMode(static_cast<bit7z::UpdateMode>(mode));
-    }
-    inline int32_t UpdateMode()
-    {
-        return m_archive == nullptr ? 0 : static_cast<int32_t>(m_archive->updateMode());
-    }
-
-    /**
-     * @brief (设置/获取)分卷大小
-     * @param volume_size 新分卷大小
-     */
-    inline void SetVolumeSize(int32_t volume_size)
-    {
-        if (m_archive)
-            m_archive->setVolumeSize(static_cast<uint32_t>(volume_size));
-    }
-    inline int32_t VolumeSize()
-    {
-        return m_archive == nullptr ? 0 : static_cast<int32_t>(m_archive->volumeSize());
-    }
-
-    /**
-     * @brief (设置/获取)线程数
-     * @param threads_count 新线程数
-     */
-    inline void SetThreadsCount(int32_t threads_count)
-    {
-        if (m_archive)
-            m_archive->setThreadsCount(static_cast<uint32_t>(threads_count));
-    }
-    inline int32_t ThreadsCount()
-    {
-        return m_archive == nullptr ? 0 : static_cast<int32_t>(m_archive->threadsCount());
-    }
-
-    /**
-     * @brief (设置/获取)存储符号链接
-     * @param store_symlinks 是否存储符号链接
-     */
-    inline void SetStoreSymbolicLinks(bool store_symlinks)
-    {
-        if (m_archive)
-            m_archive->setStoreSymbolicLinks(store_symlinks);
-    }
-    inline bool StoreSymbolicLinks()
-    {
-        return m_archive == nullptr ? false : m_archive->storeSymbolicLinks();
-    }
-
-    /**
-     * @brief (设置/获取)保留目录结构
-     * @param retain 是否保留目录结构
-     */
-    inline void SetRetainDirectories(bool retain)
-    {
-        if (m_archive)
-            m_archive->setRetainDirectories(retain);
-    }
-    inline bool RetainDirectories()
-    {
-        return m_archive == nullptr ? false : m_archive->retainDirectories();
-    }
-
-    /**
-     * @brief 设置密码
-     * @param password 新密码
-     * @param crypt_headers 加密文件头
-     */
-    inline void SetPassword(const bit7z::tstring &password, bool crypt_headers)
-    {
-        if (m_archive)
-            m_archive->setPassword(password, crypt_headers);
-    }
-
-    /**
-     * @brief 清除密码
-     */
-    inline void ClearPassword()
-    {
-        if (m_archive)
-            m_archive->clearPassword();
-    }
-
-    /**
-     * @brief 是否有密码
-     * @return
-     */
-    inline bool IsPasswordDefined()
-    {
-        return m_archive == nullptr ? false : m_archive->isPasswordDefined();
-    }
-
-    /**
-     * @brief 是否加密文件头
-     * @return
-     */
-    inline bool CryptHeaders()
-    {
-        return m_archive == nullptr ? false : m_archive->cryptHeaders();
     }
 }; // PivArchiveEditor
 

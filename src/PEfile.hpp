@@ -9,107 +9,8 @@
 #define PIV_PEFILE_HPP
 
 #include "piv_NtProcess.hpp"
+#include "piv_file.hpp"
 #include <vector>
-
-class PivFileMapping
-{
-public:
-    PivFileMapping() {}
-    ~PivFileMapping()
-    {
-        Close();
-    }
-
-private:
-    PVOID m_pvFile = INVALID_HANDLE_VALUE;
-    HANDLE hFile = NULL;
-    HANDLE hFileMap = NULL;
-
-public:
-    BOOL Create(LPCTSTR lpFileName, DWORD dwCreationDisposition, INT64 n64Size, LPCWSTR lpName)
-    {
-        Close();
-
-        if (dwCreationDisposition != -1)
-        {
-            hFile = CreateFile(
-                lpFileName,
-                GENERIC_READ | GENERIC_WRITE, // 读写
-                0,
-                NULL,
-                dwCreationDisposition,
-                FILE_ATTRIBUTE_NORMAL,
-                NULL);
-            if (hFile == INVALID_HANDLE_VALUE)
-                return FALSE;
-        }
-
-        hFileMap = CreateFileMapping(hFile, NULL, PAGE_READWRITE, (DWORD)(n64Size >> 32), (DWORD)n64Size, lpName);
-        return (hFileMap != NULL);
-    }
-
-    BOOL Open(LPCTSTR lpName)
-    {
-        Close();
-        hFileMap = OpenFileMapping(FILE_MAP_WRITE, FALSE, lpName);
-        return (hFileMap != NULL);
-    }
-
-    PVOID Read()
-    {
-        return m_pvFile;
-    }
-
-    BOOL Write(DWORD dwFileOffset, PVOID pvData, SIZE_T stSize)
-    {
-        if (m_pvFile == NULL)
-            return FALSE;
-        memcpy((BYTE *)m_pvFile + dwFileOffset, pvData, stSize);
-        return TRUE;
-    }
-
-    BOOL Save(SIZE_T stSize)
-    {
-        if (m_pvFile == NULL)
-            return FALSE;
-        return FlushViewOfFile(m_pvFile, stSize);
-    }
-
-    BOOL MapToMemory(INT64 n64FileOffset, SIZE_T stSize)
-    {
-        if (hFileMap == NULL)
-            return FALSE;
-        if (NULL != m_pvFile)
-            UnmapViewOfFile(m_pvFile); // 取消映射
-        m_pvFile = MapViewOfFile(hFileMap, (FILE_MAP_WRITE | FILE_MAP_READ), (DWORD)(n64FileOffset >> 32), (DWORD)n64FileOffset, stSize);
-        return (m_pvFile != NULL);
-    }
-
-    BOOL UnMapToMemory()
-    {
-        return (m_pvFile == NULL ? FALSE : UnmapViewOfFile(m_pvFile));
-    }
-
-    VOID Close()
-    {
-        if (NULL != m_pvFile)
-        {
-            UnmapViewOfFile(m_pvFile); // 取消映射
-            m_pvFile = NULL;
-        }
-        if (NULL != hFileMap)
-        {
-            CloseHandle(hFileMap); // 关闭文件映射
-            hFileMap = NULL;
-        }
-        if (NULL != hFile && INVALID_HANDLE_VALUE != hFile) // 关闭文件
-        {
-            CloseHandle(hFile);
-            hFile = INVALID_HANDLE_VALUE;
-        }
-    }
-
-}; // PivFileMapping
 
 /**
  * @brief 自写的PE文件操作类
@@ -119,35 +20,27 @@ class PivPeFile
 protected:
     struct PEFILE_INFO
     {
+        bool bIs64Pe = false;                // 是否64位PE
+        bool bIsMemAlign = false;            // 是否内存对齐
+        bool bIsLoaded = false;              // 是否已加载运行
+        bool bIsWriteable = false;           // PE是否可写
         void *pPeBase = nullptr;             // PE数据的基址
-        HANDLE hFile = INVALID_HANDLE_VALUE; // 文件句柄
-        HANDLE hFileMap = nullptr;           // 内存映射文件句柄
+        DWORD dwSectionCount = 0;            // 节区数量
+        size_t cbPeSize = 0;                 // PE数据的当前尺寸
         PIMAGE_DOS_HEADER pDosHeader = nullptr;
         PIMAGE_NT_HEADERS32 pNtHeader = nullptr;
         PIMAGE_SECTION_HEADER pSection = nullptr;
         PIMAGE_EXPORT_DIRECTORY pExport = nullptr;
         PIMAGE_IMPORT_DESCRIPTOR pImport = nullptr;
-        size_t cbPeSize = 0;       // PE数据的当前尺寸
-        DWORD dwSectionCount = 0;  // 节区数量
-        bool bIs64Pe = false;      // 是否64位PE
-        bool bIsMemAlign = false;  // 是否内存对齐
-        bool bIsLoaded = false;    // 是否已加载运行
-        bool bIsWriteable = false; // PE是否可写
+        PivFileMapping FileMap; //内存映射文件
 
         PEFILE_INFO() {}
         ~PEFILE_INFO()
         {
-            if (pPeBase)
+            if (pPeBase != nullptr && bIsLoaded == false && bIsWriteable == true)
             {
-                if (bIsWriteable)
-                    PivNT::data().NtFreeVirtualMemory(NULL, &pPeBase, NULL, MEM_RELEASE);
-                else
-                    ::UnmapViewOfFile(pPeBase);
+                PivNT::data().NtFreeVirtualMemory(NULL, &pPeBase, NULL, MEM_RELEASE);
             }
-            if (hFileMap)
-                ::CloseHandle(hFileMap);
-            if (hFile != INVALID_HANDLE_VALUE)
-                ::CloseHandle(hFile);
         }
     };
     const WCHAR *szErrorsMessage[31]{
@@ -188,10 +81,10 @@ protected:
     std::unique_ptr<PEFILE_INFO> m_PE;
     std::vector<HMODULE> m_vecHmodule;
     INT m_Error = 0;
-    PivNT& Nt = PivNT::data();
+    PivNT &Nt = PivNT::data();
 
 public:
-    PivPeFile(){}
+    PivPeFile() {}
     ~PivPeFile() {}
 
     // 以下函数任何时候皆可调用
@@ -222,27 +115,18 @@ public:
     BOOL OpenPeFile(const WCHAR *szFileName)
     {
         m_PE.reset(new PEFILE_INFO);
-        m_PE->hFile = ::CreateFileW((LPCWSTR)szFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-        if (m_PE->hFile == INVALID_HANDLE_VALUE)
+        if (FALSE == m_PE->FileMap.Create(szFileName,GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, 0, PAGE_READONLY, nullptr))
         {
             m_Error = 1;
             goto _PIVPE_FAIL_;
         }
-        LARGE_INTEGER li;
-        if (::GetFileSizeEx(m_PE->hFile, &li))
-            m_PE->cbPeSize = static_cast<size_t>(li.QuadPart);
-        m_PE->hFileMap = ::CreateFileMappingW(m_PE->hFile, NULL, PAGE_READONLY, 0, 0, NULL);
-        if (m_PE->hFileMap == nullptr)
-        {
-            m_Error = 2;
-            goto _PIVPE_FAIL_;
-        }
-        m_PE->pPeBase = ::MapViewOfFile(m_PE->hFileMap, FILE_MAP_READ, 0, 0, 0);
-        if (m_PE->pPeBase == nullptr)
+        if (FALSE == m_PE->FileMap.MapToMemory(0, 0, FILE_MAP_READ))
         {
             m_Error = 3;
             goto _PIVPE_FAIL_;
         }
+        m_PE->pPeBase = m_PE->FileMap.GetPtr<void>(0);
+        m_PE->cbPeSize = m_PE->FileMap.GetViewSize();
         m_PE->bIsMemAlign = false;
         if (CheckHeaders())
         {
@@ -1050,7 +934,7 @@ protected:
     BOOL RebuildRelocation()
     {
         PIMAGE_BASE_RELOCATION pRelocation = PIV_PTR_FORWARD(PIMAGE_BASE_RELOCATION,
-                                                            m_PE->pPeBase, GetDataDirectoryRva(IMAGE_DIRECTORY_ENTRY_BASERELOC));
+                                                             m_PE->pPeBase, GetDataDirectoryRva(IMAGE_DIRECTORY_ENTRY_BASERELOC));
         while ((pRelocation->VirtualAddress + pRelocation->SizeOfBlock) != 0)
         {
             WORD *pLocData = PIV_PTR_FORWARD(WORD *, pRelocation, sizeof(IMAGE_BASE_RELOCATION));
@@ -1147,7 +1031,7 @@ protected:
                 else
                 {
                     PIMAGE_IMPORT_BY_NAME pByName = PIV_PTR_FORWARD(PIMAGE_IMPORT_BY_NAME,
-                                                                   m_PE->pPeBase, pRealIAT->u1.AddressOfData);
+                                                                    m_PE->pPeBase, pRealIAT->u1.AddressOfData);
                     Nt.RtlInitAnsiString(&FunctionName, pByName->Name);
                     Nt.LdrGetProcedureAddress(hModule, &FunctionName, pByName->Hint, &lpFunction);
                 }
@@ -1263,7 +1147,7 @@ protected:
     BOOL RepairRelocation(void *pMemAddress)
     {
         PIMAGE_BASE_RELOCATION pRelocation = PIV_PTR_FORWARD(PIMAGE_BASE_RELOCATION,
-                                                            m_PE->pPeBase, GetDataDirectoryRva(IMAGE_DIRECTORY_ENTRY_BASERELOC));
+                                                             m_PE->pPeBase, GetDataDirectoryRva(IMAGE_DIRECTORY_ENTRY_BASERELOC));
 
         PIMAGE_DOS_HEADER pDosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(pMemAddress);
         if (pDosHeader->e_magic != IMAGE_DOS_SIGNATURE)
@@ -1388,9 +1272,9 @@ protected:
         m_PE->dwSectionCount = m_PE->pNtHeader->FileHeader.NumberOfSections;
         m_PE->pSection = IMAGE_FIRST_SECTION(m_PE->pNtHeader);
         m_PE->pImport = PIV_PTR_FORWARD(PIMAGE_IMPORT_DESCRIPTOR, m_PE->pPeBase,
-                                       GetRealAddress(GetDataDirectoryRva(IMAGE_DIRECTORY_ENTRY_IMPORT)));
+                                        GetRealAddress(GetDataDirectoryRva(IMAGE_DIRECTORY_ENTRY_IMPORT)));
         m_PE->pExport = PIV_PTR_FORWARD(PIMAGE_EXPORT_DIRECTORY, m_PE->pPeBase,
-                                       GetRealAddress(GetDataDirectoryRva(IMAGE_DIRECTORY_ENTRY_EXPORT)));
+                                        GetRealAddress(GetDataDirectoryRva(IMAGE_DIRECTORY_ENTRY_EXPORT)));
         m_Error = 0;
         return TRUE;
     }

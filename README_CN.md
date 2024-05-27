@@ -112,6 +112,15 @@
 
 ※我经常修改现有的代码，比如修正bug、优化效率、规范格式、修订备注等……如果功能和用法没有改变，一般不会写在更新日志里，所以每次更新改动的地方其实还是有不少的。
 
+### 📅 2024/05/27
+
+1. 新增「文件操作类EX」和「内存映射文件类EX」；
+2. 优化「磁盘监视类」，事件增加了文件属性参数，可用于判断更改的是文件还是目录；
+3. 升级了 7-zip、bit7z 和 MMKV，请更新静态库文件；
+4. 优化了扩展类的「高并发网络访问类」；
+5. 模块中的大部分本地类型增加了「取展示内容」方法，用于输出信息；
+6. 其他多处优化与修正；
+
 ### 📅 2024/04/01
 
 1. 新增「磁盘监视类」，通过 NTFS 的 USN 日志来监控文件和目录的更改,实现原理跟 Everything 相同；
@@ -557,14 +566,14 @@
 - **[{fmt}](https://github.com/fmtlib/fmt)**  `10.1.1`  `MIT license` 格式化文本库，等同 C++20 std::format 的实现 
 - **[md4c](https://github.com/mity/md4c)** `0.4.8`  `MIT license` CommonMark 0.30 规范 + GFM 的 Markdown 解析库
 - **[simpleini](https://github.com/brofield/simpleini)** `4.20` `MIT license` 简易的 INI 配置文件读写库
-- **[simdutf](https://github.com/simdutf/simdutf)** `5.0.0` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
+- **[simdutf](https://github.com/simdutf/simdutf)** `5.2.8` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
 - **[OpenCC](https://github.com/BYVoid/OpenCC)** `1.1.6` `Apache-2.0 license` 中文简繁转换开源项目，支持词汇级别的转换、异体字转换和地区习惯用词转换
-- **[7-zip](https://www.7-zip.org/)** `23.01` `GNU LGPL license` 免费的开源压缩软件（采用GNU LGPL协议，只使用它的 dll 文件不会传染）
-- **[bit7z](https://github.com/rikyoz/bit7z)** `4.0.5` `Mozilla Public License v2.0` 7-zip 的封装类
+- **[7-zip](https://www.7-zip.org/)** `24.05` `GNU LGPL license` 免费的高压缩率开源压缩软件（采用GNU LGPL协议，只使用它的 dll 文件不会传染）
+- **[bit7z](https://github.com/rikyoz/bit7z)** `4.0.7` `Mozilla Public License v2.0` 7-zip 的封装类
 - **[MinHook](https://github.com/TsudaKageyu/minhook)** `1.3.3` `BSD-2-Clause License` 极简的 x86/x64 API Hook 库
-- **[MMKV](https://github.com/Tencent/MMKV)** `1.3.2` `BSD-3-Clause License` 腾讯的高性能键值表
+- **[MMKV](https://github.com/Tencent/MMKV)** `1.3.5` `BSD-3-Clause License` 腾讯开源的高效键值对存储框架
 - **[xxHash](https://github.com/Cyan4973/xxHash)** `8.0.2` `BSD-2-Clause License` 速度接近 RAM 限制的高速散列算法
-- **[Dear ImGui](https://github.com/ocornut/imgui)** `1.90.4` `MIT license` 轻量级的即时渲染界面开发框架
+- **[Dear ImGui](https://github.com/ocornut/imgui)** `1.90.6` `MIT license` 轻量级的即时渲染界面开发框架
 - **[GLFW](https://www.glfw.org)** `3.3.8` `zlib/libpng license` 跨平台的 OpenGL/Vulkan 桌面应用框架
 - **[glad](https://github.com/Dav1dde/glad)** `2023-04-04` `MIT License` 多语言的Vulkan/GL/GLES/EGL/GLX/WGL加载程序生成器
 - **[SDL](https://github.com/libsdl-org/SDL)** `2.26.5` `Zlib license` Simple DirectMedia Layer 是一个跨平台的多媒体开发库

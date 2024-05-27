@@ -106,7 +106,7 @@ namespace piv
         template <typename J>
         inline bool Accept(const wchar_t *input, bool ignore_comments, int32_t encoding = 1)
         {
-            return Accept(wstring_view{input}, ignore_comments, encoding);
+            return Accept<J>(wstring_view{input}, ignore_comments, encoding);
         }
 
         template <typename J>
@@ -656,49 +656,49 @@ namespace piv
         template <typename J>
         auto to_pointer(const wchar_t *path)
         {
-            return J::json_pointer{*PivW2U{path}};
+            return typename J::json_pointer{*PivW2U{path}};
         }
 
         template <typename J>
         auto to_pointer(const char *path)
         {
-            return J::json_pointer{path};
+            return typename J::json_pointer{path};
         }
 
         template <typename J>
         auto to_pointer(const CVolString &path)
         {
-            return J::json_pointer{*PivW2U{path}};
+            return typename J::json_pointer{*PivW2U{path}};
         }
 
         template <typename J>
         auto to_pointer(const std::string &path)
         {
-            return J::json_pointer{path};
+            return typename J::json_pointer{path};
         }
 
         template <typename J>
         auto &to_pointer(const string_view &path)
         {
-            return J::json_pointer{path};
+            return typename J::json_pointer{path};
         }
 
         template <typename J>
         auto to_pointer(const std::wstring &path)
         {
-            return J::json_pointer{*PivW2U{path}};
+            return typename J::json_pointer{*PivW2U{path}};
         }
 
         template <typename J>
         auto to_pointer(const wstring_view &path)
         {
-            return J::json_pointer{*PivW2U{path.data(), path.size()}};
+            return typename J::json_pointer{*PivW2U{path.data(), path.size()}};
         }
 
         template <typename J>
         auto to_pointer(const CVolMem &path)
         {
-            return J::json_pointer{string_view{reinterpret_cast<const char *>(path.GetPtr()), static_cast<size_t>(path.GetSize())}};
+            return typename J::json_pointer{string_view{reinterpret_cast<const char *>(path.GetPtr()), static_cast<size_t>(path.GetSize())}};
         }
 
         /**
@@ -1117,7 +1117,7 @@ namespace piv
                 if (ret.is_object())
                     return ret;
             }
-            catch (J::exception &e)
+            catch (typename J::exception &e)
             {
                 (void)e;
             }
@@ -1254,7 +1254,7 @@ namespace piv
         inline bool EmplaceAt(J &json, const wchar_t *path, const V &val, bool replace = false)
         {
             if (path[0] == '/')
-                return EmplaceAtPath(json, J::json_pointer{*PivW2U{path}}, to_value(val));
+                return EmplaceAtPath(json, typename J::json_pointer{*PivW2U{path}}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
@@ -1263,7 +1263,7 @@ namespace piv
         inline bool EmplaceAt(J &json, const char *path, const V &val, bool replace = false)
         {
             if (path[0] == '/')
-                return EmplaceAtPath(json, J::json_pointer{path}, to_value(val));
+                return EmplaceAtPath(json, typename J::json_pointer{path}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
@@ -1274,7 +1274,7 @@ namespace piv
             if (path.IsEmpty())
                 return false;
             if (path.GetCharAt(0) == '/')
-                return EmplaceAtPath(json, J::json_pointer{*PivW2U{path}}, to_value(val));
+                return EmplaceAtPath(json, typename J::json_pointer{*PivW2U{path}}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
@@ -1285,7 +1285,7 @@ namespace piv
             if (path.empty())
                 return false;
             if (path.front() == '/')
-                return EmplaceAtPath(json, J::json_pointer{path}, to_value(val));
+                return EmplaceAtPath(json, typename J::json_pointer{path}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
@@ -1296,7 +1296,7 @@ namespace piv
             if (path.empty())
                 return false;
             if (path.front() == '/')
-                return EmplaceAtPath(json, J::json_pointer{*PivW2U{path}}, to_value(val));
+                return EmplaceAtPath(json, typename J::json_pointer{*PivW2U{path}}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
@@ -1307,7 +1307,7 @@ namespace piv
             if (path.empty())
                 return false;
             if (path.front() == '/')
-                return EmplaceAtPath(json, J::json_pointer{path.data()}, to_value(val));
+                return EmplaceAtPath(json, typename J::json_pointer{path.data()}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
@@ -1318,7 +1318,7 @@ namespace piv
             if (path.empty())
                 return false;
             if (path.front() == '/')
-                return EmplaceAtPath(json, J::json_pointer{*PivW2U{path}}, to_value(val));
+                return EmplaceAtPath(json, typename J::json_pointer{*PivW2U{path}}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
@@ -1329,7 +1329,7 @@ namespace piv
             if (path.IsEmpty())
                 return false;
             if (path.Get_S_BYTE(0) == '/')
-                return EmplaceAtPath(json, J::json_pointer{*PivW2U{path}}, to_value(val));
+                return EmplaceAtPath(json, typename J::json_pointer{*PivW2U{path}}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
@@ -1350,7 +1350,7 @@ namespace piv
         inline bool EmplaceAt(J &json, const wchar_t *path, const J &val, bool replace = false)
         {
             if (path[0] == '/')
-                return EmplaceAtPath(json, J::json_pointer{*PivW2U{path}}, val);
+                return EmplaceAtPath(json, typename J::json_pointer{*PivW2U{path}}, val);
             else
                 return EmplaceAtKey(json, to_key(path), val, replace);
         }
@@ -1359,7 +1359,7 @@ namespace piv
         inline bool EmplaceAt(J &json, const char *path, const J &val, bool replace = false)
         {
             if (path[0] == '/')
-                return EmplaceAtPath(json, J::json_pointer{path}, val);
+                return EmplaceAtPath(json, typename J::json_pointer{path}, val);
             else
                 return EmplaceAtKey(json, to_key(path), val, replace);
         }
@@ -1370,7 +1370,7 @@ namespace piv
             if (path.IsEmpty())
                 return false;
             if (path.GetCharAt(0) == '/')
-                return EmplaceAtPath(json, J::json_pointer{*PivW2U{path}}, val);
+                return EmplaceAtPath(json, typename J::json_pointer{*PivW2U{path}}, val);
             else
                 return EmplaceAtKey(json, to_key(path), val, replace);
         }
@@ -1381,7 +1381,7 @@ namespace piv
             if (path.empty())
                 return false;
             if (path.front() == '/')
-                return EmplaceAtPath(json, J::json_pointer{path}, val);
+                return EmplaceAtPath(json, typename J::json_pointer{path}, val);
             else
                 return EmplaceAtKey(json, to_key(path), val, replace);
         }
@@ -1392,7 +1392,7 @@ namespace piv
             if (path.empty())
                 return false;
             if (path.front() == '/')
-                return EmplaceAtPath(json, J::json_pointer{*PivW2U{path}}, val);
+                return EmplaceAtPath(json, typename J::json_pointer{*PivW2U{path}}, val);
             else
                 return EmplaceAtKey(json, to_key(path), val, replace);
         }
@@ -1403,7 +1403,7 @@ namespace piv
             if (path.empty())
                 return false;
             if (path.front() == '/')
-                return EmplaceAtPath(json, J::json_pointer{path}, val);
+                return EmplaceAtPath(json, typename J::json_pointer{path}, val);
             else
                 return EmplaceAtKey(json, to_key(path), val, replace);
         }
@@ -1414,7 +1414,7 @@ namespace piv
             if (path.empty())
                 return false;
             if (path.front() == '/')
-                return EmplaceAtPath(json, J::json_pointer{*PivW2U{path}}, val);
+                return EmplaceAtPath(json, typename J::json_pointer{*PivW2U{path}}, val);
             else
                 return EmplaceAtKey(json, to_key(path), val, replace);
         }
@@ -1425,7 +1425,7 @@ namespace piv
             if (path.IsEmpty())
                 return false;
             if (path.Get_S_BYTE(0) == '/')
-                return EmplaceAtPath(json, J::json_pointer{*PivW2U{path}}, val);
+                return EmplaceAtPath(json, typename J::json_pointer{*PivW2U{path}}, val);
             else
                 return EmplaceAtKey(json, to_key(path), val, replace);
         }
@@ -1447,7 +1447,7 @@ namespace piv
                     keyArray.Add(PivU2W{el.key()}.GetText());
                 }
             }
-            return static_cast<int32_t>(keyArray.size());
+            return static_cast<int32_t>(keyArray.GetCount());
         }
 
         template <typename J>

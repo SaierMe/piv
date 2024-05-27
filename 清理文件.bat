@@ -49,6 +49,7 @@ IF EXIST "%PATH%MMKV\release" DEL /F /S /Q "%PATH%MMKV\release"
 IF EXIST "%PATH%MMKV\debug" RD /S /Q "%PATH%MMKV\debug"
 IF EXIST "%PATH%MMKV\release" RD /S /Q "%PATH%MMKV\release"
 IF EXIST "%PATH%MMKV\piv_MMKV.hpp" DEL /F /Q "%PATH%MMKV\piv_MMKV.hpp"
+IF EXIST "%PATH%MMKV\include\PBUtility.h" DEL /F /Q "%PATH%MMKV\include\PBUtility.h"
 
 IF EXIST "%PATH%bit7z\lib\win32\15" DEL /F /S /Q "%PATH%bit7z\lib\win32\15"
 IF EXIST "%PATH%bit7z\lib\win32\16" DEL /F /S /Q "%PATH%bit7z\lib\win32\16"
@@ -66,5 +67,5 @@ IF EXIST "%PATH%bit7z\lib\x64\17" RD /S /Q "%PATH%bit7z\lib\x64\17"
 
 IF EXIST "%PATH%minhook\src" RD /S /Q "%PATH%minhook\src"
 
-ECHO 已删除 2023-11-30 版之前的PIV模块残留文件。
+ECHO 已删除 2024-05-27 版之前的PIV模块残留文件.
 PAUSE

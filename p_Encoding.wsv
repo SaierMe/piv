@@ -434,6 +434,17 @@
         返回 (展示字节数据 (欲展示字节集.取字节集指针 (), 欲展示字节集.取字节集长度 (), 最大展示数据尺寸))
     }
 
+    方法 验证文本编码 <公开 静态 类型 = 逻辑型 注释 = "验证提供的Unicode文本是否符合指定代码页的文本编码,能判断转换到目标编码后是否会出现乱码."
+            注释 = "返回真表示能完整转换到目标编码." 折叠 @禁止流程检查 = 真>
+    参数 欲验证的文本 <类型 = 文本型 注释 = "提供所欲验证的UTF-16LE编码文本">
+    参数 代码页 <类型 = 整数 注释 = "0表示使用本地编码,常用代码页:" 注释 = "  932 日文(Shift-JIS)" 注释 = "  936 中文简体(GB2312)"
+            注释 = "  949 韩文" 注释 = "  950 中文繁体(Big5)" @默认值 = 0>
+    {
+        @ BOOL UsedDefaultChar = FALSE;
+        @ ::WideCharToMultiByte((UINT)@<代码页>, 0, @<欲验证的文本>.GetText(), -1, NULL, 0, NULL, &UsedDefaultChar);
+        @ return !UsedDefaultChar;
+    }
+
     # @begin
     # <> <include>
     # template <typename T>
@@ -450,408 +461,685 @@
 
 类 simdUTF <公开 注释 = "  使用SIMD指令集(SSE2, AVX2, NEON, AVX-512)加速," 注释 = "每秒数十亿字符的Unicode编码验证和转换库."
         注释 = "  源码: https://github.com/simdutf/simdutf" 折叠 @文档 = "category = \"编码处理\"" @禁止创建对象 = 真
-        @视窗.外部头文件 = "src\\piv_simdutf.hpp" @视窗.外部源文件 = "src\\simdutf.cpp">
+        @视窗.外部头文件 = "src\\simdutf.h" @视窗.外部源文件 = "src\\simdutf.cpp">
 {
 
     # 常用编码转换 ---
 
-    方法 UTF8到文本 <公开 静态 类型 = 文本型 注释 = "将所指定UTF-8格式的文本数据转换到UTF-16LE文本后返回." 折叠 @嵌入式方法 = "">
+    方法 UTF8到文本 <公开 静态 类型 = 文本型 注释 = "将所指定UTF-8格式的文本数据转换到UTF-16LE文本后返回." 折叠>
     参数 UTF8文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-8字符集文本数据">
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
             注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
     {
-        @ piv::utf::utf8_to_utf16le (@<UTF8文本>, @<是否校验文本>)
+        变量 结果 <类型 = 文本型>
+        UTF8到文本_Ex (UTF8文本, 结果, 是否校验文本)
+        返回 (结果)
     }
 
-    方法 文本到UTF8 <公开 静态 类型 = 字节集类 注释 = "将UTF-16LE文本转换到UTF-8字节集后返回." 折叠 @嵌入式方法 = "">
+    方法 文本到UTF8 <公开 静态 类型 = 字节集类 注释 = "将UTF-16LE文本转换到UTF-8字节集后返回." 折叠>
     参数 UTF16文本 <类型 = 文本型 注释 = "提供所欲转换的UTF-16LE文本">
     参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
             注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
     {
-        @ piv::utf::utf16le_to_utf8 (@<UTF16文本>, @<是否包括结束零字符>, @<是否校验文本>)
+        变量 结果 <类型 = 字节集类>
+        文本到UTF8_Ex (UTF16文本, 结果, 是否包括结束零字符, 是否校验文本)
+        返回 (结果)
     }
 
-    方法 多字节到UTF8 <公开 静态 类型 = 字节集类 注释 = "将所指定ANSI多字节数据转换到UTF-8字节集后返回." 折叠 @嵌入式方法 = "">
+    方法 多字节到UTF8 <公开 静态 类型 = 字节集类 注释 = "将所指定ANSI多字节数据转换到UTF-8字节集后返回." 折叠>
     参数 多字节文本 <类型 = 字节集类 注释 = "提供所欲转换的ANSI多字节编码文本数据">
     参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
             注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
     {
-        @ piv::utf::ansi_to_utf8 (@<多字节文本>, @<是否包括结束零字符>, @<是否校验文本>)
+        变量 结果 <类型 = 字节集类>
+        多字节到UTF8_Ex (多字节文本, 结果, 是否包括结束零字符, 是否校验文本)
+        返回 (结果)
     }
 
-    方法 UTF8到多字节 <公开 静态 类型 = 字节集类 注释 = "将所指定UTF-8格式数据转换到ANSI多字节后返回." 折叠 @嵌入式方法 = "">
+    方法 UTF8到多字节 <公开 静态 类型 = 字节集类 注释 = "将所指定UTF-8格式数据转换到ANSI多字节后返回." 折叠>
     参数 UTF8文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-8字符集文本数据">
     参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
             注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
     {
-        @ piv::utf::utf8_to_ansi (@<UTF8文本>, @<是否包括结束零字符>, @<是否校验文本>)
+        变量 结果 <类型 = 字节集类>
+        UTF8到多字节_Ex (UTF8文本, 结果, 是否包括结束零字符, 是否校验文本)
+        返回 (结果)
     }
 
     方法 UTF8到文本_Ex <公开 静态 类型 = 整数 注释 = "将所指定UTF-8格式的文本数据转换到UTF-16LE文本." 注释 = "跟\"UTF8到文本\"的区别是在参数中返回转换后的数据."
-            返回值注释 = "返回UTF-16LE文本的字符数(2字节),失败返回0." 折叠 @嵌入式方法 = "">
-    参数 UTF8文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-8字符集文本数据">
-    参数 UTF16文本 <类型 = 文本型 注释 = "转换后的UTF-16LE文本将保存在此参数中">
+            返回值注释 = "返回UTF-16LE文本的字符数(2字节),失败返回0." 折叠 @禁止流程检查 = 真>
+    参数 UTF8文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-8字符集文本数据" @输出名 = "input">
+    参数 UTF16文本 <类型 = 文本型 注释 = "转换后的UTF-16LE文本将保存在此参数中" @输出名 = "output">
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
-            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
+            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假 @输出名 = "validate">
     {
-        @ static_cast<INT>(piv::utf::utf8_to_utf16le (@<UTF8文本>, @<UTF16文本>, @<是否校验文本>))
+        @ size_t outlen = simdutf::utf16_length_from_utf8(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
+        @ if (!outlen) {
+        @     output.Empty();
+        @     return 0;
+        @ }
+        @ output.SetLength(outlen);
+        @ outlen = validate ? simdutf::convert_utf8_to_utf16le(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()),
+        @                                                      reinterpret_cast<char16_t *>(const_cast<WCHAR *>(output.GetText())))
+        @                   : simdutf::convert_valid_utf8_to_utf16le(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()),
+        @                                                            reinterpret_cast<char16_t *>(const_cast<WCHAR *>(output.GetText())));
+        @ output.SetLength(outlen);
+        @ return static_cast<INT>(outlen);
     }
 
     方法 文本到UTF8_Ex <公开 静态 类型 = 整数 注释 = "将UTF-16LE文本转换到UTF-8字节集." 注释 = "跟\"文本到UTF8\"的区别是在参数中返回转换后的数据."
-            返回值注释 = "返回UTF-8文本的字节数,失败返回0." 折叠 @嵌入式方法 = "">
-    参数 UTF16文本 <类型 = 文本型 注释 = "提供所欲转换的UTF-16LE文本">
-    参数 UTF8文本 <类型 = 字节集类 注释 = "转换后的UTF-8文本将保存在此参数中">
-    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
+            返回值注释 = "返回UTF-8文本的字节数,失败返回0." 折叠 @禁止流程检查 = 真>
+    参数 UTF16文本 <类型 = 文本型 注释 = "提供所欲转换的UTF-16LE文本" @输出名 = "input">
+    参数 UTF8文本 <类型 = 字节集类 注释 = "转换后的UTF-8文本将保存在此参数中" @输出名 = "output">
+    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假 @输出名 = "null_terminated">
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
-            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
+            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假 @输出名 = "validate">
     {
-        @ static_cast<INT>(piv::utf::utf16le_to_utf8 (@<UTF16文本>, @<UTF8文本>, @<是否包括结束零字符>, @<是否校验文本>))
+        @ size_t outlen = simdutf::utf8_length_from_utf16le(reinterpret_cast<const char16_t *>(input.GetText()), static_cast<size_t>(input.GetLength()));
+        @ if (!outlen) {
+        @     output.Empty();
+        @     return 0;
+        @ }
+        @ output.Alloc(outlen + 1, TRUE);
+        @ outlen = validate ? simdutf::convert_utf16le_to_utf8(reinterpret_cast<const char16_t *>(input.GetText()), static_cast<size_t>(input.GetLength()),
+        @                                                      reinterpret_cast<char *>(output.GetPtr()))
+        @                   : simdutf::convert_valid_utf16le_to_utf8(reinterpret_cast<const char16_t *>(input.GetText()), static_cast<size_t>(input.GetLength()),
+        @                                                            reinterpret_cast<char *>(output.GetPtr()));
+        @ output.Realloc(outlen ? (outlen + (null_terminated ? 1 : 0)) : 0);
+        @ return static_cast<INT>(outlen);
     }
 
     方法 多字节到UTF8_Ex <公开 静态 类型 = 整数 注释 = "将所指定ANSI多字节数据转换到UTF-8字节集." 注释 = "跟\"多字节到UTF8\"的区别是在参数中返回转换后的数据."
-            返回值注释 = "返回UTF-8文本的字节数,失败返回0." 折叠 @嵌入式方法 = "">
-    参数 多字节文本 <类型 = 字节集类 注释 = "提供所欲转换的ANSI多字节编码文本数据">
-    参数 UTF8文本 <类型 = 字节集类 注释 = "转换后的UTF-8文本将保存在此参数中">
-    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
+            返回值注释 = "返回UTF-8文本的字节数,失败返回0." 折叠 @禁止流程检查 = 真>
+    参数 多字节文本 <类型 = 字节集类 注释 = "提供所欲转换的ANSI多字节编码文本数据" @输出名 = "input">
+    参数 UTF8文本 <类型 = 字节集类 注释 = "转换后的UTF-8文本将保存在此参数中" @输出名 = "output">
+    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假 @输出名 = "null_terminated">
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
-            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
+            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假 @输出名 = "validate">
     {
-        @ static_cast<INT>(piv::utf::ansi_to_utf8 (@<多字节文本>, @<UTF8文本>, @<是否包括结束零字符>, @<是否校验文本>))
+        @ int utf16len = ::MultiByteToWideChar(CP_ACP, 0, reinterpret_cast<const char *>(input.GetPtr()), static_cast<int>(input.GetSize()), NULL, 0);
+        @ if (!utf16len) {
+        @     output.Empty();
+        @     return 0;
+        @ }
+        @ PivBuffer<wchar_t, int> buf{utf16len + 1, true};
+        @ ::MultiByteToWideChar(CP_ACP, 0, reinterpret_cast<const char *>(input.GetPtr()), static_cast<int>(input.GetSize()), buf.GetPtr(), utf16len);
+        @ size_t outlen = simdutf::utf8_length_from_utf16le(reinterpret_cast<const char16_t *>(buf.GetPtr()), utf16len);
+        @ if (!outlen) {
+        @     output.Empty();
+        @     return 0;
+        @ }
+        @ output.Alloc(outlen + 1, TRUE);
+        @ outlen = validate ? simdutf::convert_utf16le_to_utf8(reinterpret_cast<const char16_t *>(buf.GetPtr()), utf16len, reinterpret_cast<char *>(output.GetPtr()))
+        @                   : simdutf::convert_valid_utf16le_to_utf8(reinterpret_cast<const char16_t *>(buf.GetPtr()), utf16len, reinterpret_cast<char *>(output.GetPtr()));
+        @ output.Realloc(outlen ? (outlen + (null_terminated ? 1 : 0)) : 0);
+        @ return static_cast<INT>(outlen);
     }
 
     方法 UTF8到多字节_Ex <公开 静态 类型 = 整数 注释 = "将所指定UTF-8格式数据转换到ANSI多字节." 注释 = "跟\"UTF8到多字节\"的区别是在参数中返回转换后的数据."
-            返回值注释 = "返回多字节文本的字节数,失败返回0." 折叠 @嵌入式方法 = "">
-    参数 UTF8文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-8字符集文本数据">
-    参数 多字节文本 <类型 = 字节集类 注释 = "转换后的ANSI多字节文本将保存在此参数中">
-    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
+            返回值注释 = "返回多字节文本的字节数,失败返回0." 折叠 @禁止流程检查 = 真>
+    参数 UTF8文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-8字符集文本数据" @输出名 = "input">
+    参数 多字节文本 <类型 = 字节集类 注释 = "转换后的ANSI多字节文本将保存在此参数中" @输出名 = "output">
+    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假 @输出名 = "null_terminated">
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
-            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
+            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假 @输出名 = "validate">
     {
-        @ static_cast<INT>(piv::utf::utf8_to_ansi (@<UTF8文本>, @<多字节文本>, @<是否包括结束零字符>, @<是否校验文本>))
+        @ size_t outlen = simdutf::utf16_length_from_utf8(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
+        @ if (!outlen) {
+        @     output.Empty();
+        @     return 0;
+        @ }
+        @ PivBuffer<char16_t, size_t> buf{outlen + 1, true};
+        @ outlen = validate ? simdutf::convert_utf8_to_utf16le(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()), buf.GetPtr())
+        @                   : simdutf::convert_valid_utf8_to_utf16le(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()), buf.GetPtr());
+        @ if (!outlen) {
+        @     output.Empty();
+        @     return 0;
+        @ }
+        @ int mbslen = ::WideCharToMultiByte(CP_ACP, 0, reinterpret_cast<const wchar_t *>(buf.GetPtr()), static_cast<int>(outlen), NULL, 0, NULL, NULL);
+        @ if (!mbslen) {
+        @     output.Empty();
+        @     return 0;
+        @ }
+        @ output.Alloc(mbslen + 1, TRUE);
+        @ mbslen = ::WideCharToMultiByte(CP_ACP, 0, reinterpret_cast<const wchar_t *>(buf.GetPtr()), static_cast<int>(outlen), reinterpret_cast<char *>(output.GetPtr()), mbslen, NULL, NULL);
+        @ output.Realloc(mbslen + (null_terminated ? 1 : 0));
+        @ return mbslen;
     }
 
     方法 反转文本字节序 <公开 静态 类型 = 字节集类 注释 = "  将提供的数据反转字节序,比如将输入的UTF-16LE转换为"
-            注释 = "UTF-16BE,或者将UTF-16BE转换为UTF-16LE." 返回值注释 = "返回反转后的UTF-16编码数据" 折叠 @嵌入式方法 = "">
-    参数 UTF16数据 <类型 = 字节集类 注释 = "所欲反转字节序的UTF-16编码数据">
+            注释 = "UTF-16BE,或者将UTF-16BE转换为UTF-16LE." 返回值注释 = "返回反转后的UTF-16编码数据" 折叠 @禁止流程检查 = 真>
+    参数 UTF16数据 <类型 = 字节集类 注释 = "所欲反转字节序的UTF-16编码数据" @输出名 = "input">
     {
-        @ piv::utf::change_endianness_utf16 (@<UTF16数据>)
+        @ @an<CVolMem> output;
+        @ output.Alloc(input.GetSize(), TRUE);
+        @ simdutf::change_endianness_utf16(reinterpret_cast<const char16_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()),
+        @                                  reinterpret_cast<char16_t *>(output.GetPtr()));
+        @ return output;
     }
 
     # 编码检测 ---
 
-    方法 自动检测编码 <公开 静态 类型 = 整数 注释 = "  自动检测文本数据的Unicode编码类型,本方法只返回一个结果." 注释 = "  本方法不支持检测ANSI的编码,统一返回0(未知)."
-            返回值注释 = "请参考\"SIMD编码类型\"的常量,本方法只返回其中一个值." 折叠 @嵌入式方法 = "">
-    参数 文本数据 <类型 = 字节集类 注释 = "所欲检测Unicode编码的文本数据.">
+    方法 自动检测编码 <公开 静态 类型 = 整数 注释 = "自动检测文本数据的Unicode编码类型,本方法只返回一个结果." 注释 = "本方法不支持检测ANSI的编码,统一返回0(未知)."
+            返回值注释 = "请参考\"SIMD编码类型\"的常量,本方法只返回其中一个值." 折叠 @禁止流程检查 = 真>
+    参数 文本数据 <类型 = 字节集类 注释 = "所欲检测Unicode编码的文本数据." @输出名 = "input">
     {
-        @ piv::utf::autodetect_encoding (@<文本数据>)
+        @ return simdutf::autodetect_encoding(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
     }
 
     方法 检测编码 <公开 静态 类型 = 整数 注释 = "  检测文本数据的Unicode编码类型,如果检测的结果可能是UTF8或UTF-16LE,"
             注释 = "它将返回\"SIMD编码类型.UTF8 | SIMD编码类型.UTF-16LE\"的位或值." 注释 = "  本方法不支持检测ANSI的编码,统一返回0(未知)."
-            返回值注释 = "返回的结果可能是\"SIMD编码类型\"常量的位或值,请通过\"位与\"判断类型." 折叠 @嵌入式方法 = "">
-    参数 文本数据 <类型 = 字节集类>
+            返回值注释 = "返回的结果可能是\"SIMD编码类型\"常量的位或值,请通过\"位与\"判断类型." 折叠 @禁止流程检查 = 真>
+    参数 文本数据 <类型 = 字节集类 @输出名 = "input">
     {
-        @ piv::utf::detect_encodings (@<文本数据>)
+        @ return simdutf::detect_encodings(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
+
     }
 
     # UTF-8转换到其他 ---
 
-    方法 UTF8到UTF16LE <公开 静态 类型 = 字节集类 注释 = "将所指定UTF-8格式的文本数据转换到UTF-16LE字节集后返回." 折叠 @嵌入式方法 = "">
+    方法 UTF8到UTF16LE <公开 静态 类型 = 字节集类 注释 = "将所指定UTF-8格式的文本数据转换到UTF-16LE字节集后返回." 折叠>
     参数 UTF8文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-8字符集文本数据">
     参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
             注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
     {
-        @ piv::utf::utf8_to_utf16le (@<UTF8文本>, @<是否包括结束零字符>, @<是否校验文本>)
+        变量 结果 <类型 = 字节集类>
+        UTF8到UTF16LE_Ex (UTF8文本, 结果, 是否包括结束零字符, 是否校验文本)
+        返回 (结果)
     }
 
-    方法 UTF8到UTF16BE <公开 静态 类型 = 字节集类 注释 = "将所指定UTF-8格式的文本数据转换到UTF-16BE字节集后返回." 折叠 @嵌入式方法 = "">
+    方法 UTF8到UTF16BE <公开 静态 类型 = 字节集类 注释 = "将所指定UTF-8格式的文本数据转换到UTF-16BE字节集后返回." 折叠>
     参数 UTF8文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-8字符集文本数据">
     参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
             注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
     {
-        @ piv::utf::utf8_to_utf16Be (@<UTF8文本>, @<是否包括结束零字符>, @<是否校验文本>)
+        变量 结果 <类型 = 字节集类>
+        UTF8到UTF16BE_Ex (UTF8文本, 结果, 是否包括结束零字符, 是否校验文本)
+        返回 (结果)
     }
 
-    方法 UTF8到UTF32 <公开 静态 类型 = 字节集类 注释 = "将所指定UTF-8格式的文本数据转换到UTF-32文本数据后返回." 折叠 @嵌入式方法 = "">
+    方法 UTF8到UTF32 <公开 静态 类型 = 字节集类 注释 = "将所指定UTF-8格式的文本数据转换到UTF-32文本数据后返回." 折叠>
     参数 UTF8文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-8字符集文本数据">
     参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
             注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
     {
-        @ piv::utf::utf8_to_utf32 (@<UTF8文本>, @<是否包括结束零字符>, @<是否校验文本>)
+        变量 结果 <类型 = 字节集类>
+        UTF8到UTF32_Ex (UTF8文本, 结果, 是否包括结束零字符, 是否校验文本)
+        返回 (结果)
     }
 
     方法 UTF8到UTF16LE_Ex <公开 静态 类型 = 整数 注释 = "将所指定UTF-8格式的文本数据转换到UTF-16LE字节集."
-            注释 = "跟\"UTF8到UTF16LE\"的区别是在参数中返回转换后的数据." 返回值注释 = "返回UTF-16LE文本的字符数(2字节),失败返回0." 折叠 @嵌入式方法 = "">
-    参数 UTF8文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-8字符集文本数据">
-    参数 UTF16文本 <类型 = 字节集类 注释 = "转换后的UTF-16LE文本将保存在此参数中">
-    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
+            注释 = "跟\"UTF8到UTF16LE\"的区别是在参数中返回转换后的数据." 返回值注释 = "返回UTF-16LE文本的字符数(2字节),失败返回0." 折叠 @禁止流程检查 = 真>
+    参数 UTF8文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-8字符集文本数据" @输出名 = "input">
+    参数 UTF16文本 <类型 = 字节集类 注释 = "转换后的UTF-16LE文本将保存在此参数中" @输出名 = "output">
+    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假 @输出名 = "null_terminated">
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
-            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
+            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假 @输出名 = "validate">
     {
-        @ static_cast<INT>(piv::utf::utf8_to_utf16le (@<UTF8文本>, @<UTF16文本>, @<是否包括结束零字符>, @<是否校验文本>))
+        @ size_t outlen = simdutf::utf16_length_from_utf8(reinterpret_cast<const char *>(input.GetPtr()), len);
+        @ if (!outlen) {
+        @     output.Empty();
+        @     return 0;
+        @ }
+        @ output.Alloc((outlen + 1) * 2, TRUE);
+        @ outlen = validate ? simdutf::convert_utf8_to_utf16le(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()),
+        @                                                      reinterpret_cast<char16_t *>(output.GetPtr()))
+        @                   : simdutf::convert_valid_utf8_to_utf16le(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()),
+        @                                                            reinterpret_cast<char16_t *>(output.GetPtr()));
+        @ output.Realloc(outlen ? ((outlen + (null_terminated ? 1 : 0)) * 2) : 0);
+        @ return static_cast<INT>(outlen);
     }
 
     方法 UTF8到UTF16BE_Ex <公开 静态 类型 = 整数 注释 = "将所指定UTF-8格式的文本数据转换到UTF-16BE字节集."
-            注释 = "跟\"UTF8到UTF16BE\"的区别是在参数中返回转换后的数据." 返回值注释 = "返回UTF-16BE文本的字符数(2字节),失败返回0." 折叠 @嵌入式方法 = "">
-    参数 UTF8文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-8字符集文本数据">
-    参数 UTF16文本 <类型 = 字节集类 注释 = "转换后的UTF-16BE文本将保存在此参数中">
-    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
+            注释 = "跟\"UTF8到UTF16BE\"的区别是在参数中返回转换后的数据." 返回值注释 = "返回UTF-16BE文本的字符数(2字节),失败返回0." 折叠 @禁止流程检查 = 真>
+    参数 UTF8文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-8字符集文本数据" @输出名 = "input">
+    参数 UTF16文本 <类型 = 字节集类 注释 = "转换后的UTF-16BE文本将保存在此参数中" @输出名 = "output">
+    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假 @输出名 = "null_terminated">
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
-            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
+            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假 @输出名 = "validate">
     {
-        @ static_cast<INT>(piv::utf::utf8_to_utf16Be (@<UTF8文本>, @<UTF16文本>, @<是否包括结束零字符>, @<是否校验文本>))
+        @ size_t outlen = simdutf::utf16_length_from_utf8(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
+        @ if (!outlen) {
+        @     output.Empty();
+        @     return 0;
+        @ }
+        @ output.Alloc((outlen + 1) * 2, TRUE);
+        @ outlen = validate ? simdutf::convert_utf8_to_utf16be(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()),
+        @                                                      reinterpret_cast<char16_t *>(output.GetPtr()))
+        @                   : simdutf::convert_valid_utf8_to_utf16be(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()),
+        @                                                            reinterpret_cast<char16_t *>(output.GetPtr()));
+        @ output.Realloc(outlen ? ((outlen + (null_terminated ? 1 : 0)) * 2) : 0);
+        @ return static_cast<INT>(outlen);
     }
 
     方法 UTF8到UTF32_Ex <公开 静态 类型 = 整数 注释 = "将所指定UTF-8格式的文本数据转换到UTF-32文本数据."
-            注释 = "跟\"UTF8到UTF32\"的区别是在参数中返回转换后的数据." 返回值注释 = "返回UTF-32文本的字符数(4字节),失败返回0." 折叠 @嵌入式方法 = "">
-    参数 UTF8文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-8字符集文本数据">
-    参数 UTF32文本 <类型 = 字节集类 注释 = "转换后的UTF-32文本将保存在此参数中">
-    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
+            注释 = "跟\"UTF8到UTF32\"的区别是在参数中返回转换后的数据." 返回值注释 = "返回UTF-32文本的字符数(4字节),失败返回0." 折叠 @禁止流程检查 = 真>
+    参数 UTF8文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-8字符集文本数据" @输出名 = "input">
+    参数 UTF32文本 <类型 = 字节集类 注释 = "转换后的UTF-32文本将保存在此参数中" @输出名 = "output">
+    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假 @输出名 = "null_terminated">
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
-            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
+            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假 @输出名 = "validate">
     {
-        @ static_cast<INT>(piv::utf::utf8_to_utf32 (@<UTF8文本>, @<UTF32文本>, @<是否包括结束零字符>, @<是否校验文本>))
+        @ size_t outlen = simdutf::utf32_length_from_utf8(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
+        @ if (!outlen) {
+        @     output.Empty();
+        @     return 0;
+        @ }
+        @ output.Alloc((outlen + 1) * 4, TRUE);
+        @ outlen = validate ? simdutf::convert_utf8_to_utf32(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()),
+        @                                                    reinterpret_cast<char32_t *>(output.GetPtr()))
+        @                   : simdutf::convert_valid_utf8_to_utf32(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()),
+        @                                                          reinterpret_cast<char32_t *>(output.GetPtr()));
+        @ output.Realloc(outlen ? ((outlen + (null_terminated ? 1 : 0)) * 4) : 0);
+        @ return static_cast<INT>(outlen);
     }
 
     # UTF-16转换到其他 ---
 
-    方法 文本到UTF32 <公开 静态 类型 = 字节集类 注释 = "将UTF-16LE文本转换到UTF-32字节集后返回." 折叠 @嵌入式方法 = "">
+    方法 文本到UTF32 <公开 静态 类型 = 字节集类 注释 = "将UTF-16LE文本转换到UTF-32字节集后返回." 折叠>
     参数 UTF16文本 <类型 = 文本型 注释 = "提供所欲转换的UTF-16LE文本">
     参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
             注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
     {
-        @ piv::utf::utf16le_to_utf32 (@<UTF16文本>, @<是否包括结束零字符>, @<是否校验文本>)
+        变量 结果 <类型 = 字节集类>
+        文本到UTF32_Ex (UTF16文本, 结果, 是否包括结束零字符, 是否校验文本)
+        返回 (结果)
     }
 
-    方法 UTF16LE到UTF8 <公开 静态 类型 = 字节集类 注释 = "将UTF-16LE文本数据转换到UTF-8字节集后返回." 折叠 @嵌入式方法 = "">
+    方法 UTF16LE到UTF8 <公开 静态 类型 = 字节集类 注释 = "将UTF-16LE文本数据转换到UTF-8字节集后返回." 折叠>
     参数 UTF16文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-16LE文本">
     参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
             注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
     {
-        @ piv::utf::utf16le_to_utf8 (@<UTF16文本>, @<是否包括结束零字符>, @<是否校验文本>)
+        变量 结果 <类型 = 字节集类>
+        UTF16LE到UTF8_Ex (UTF16文本, 结果, 是否包括结束零字符, 是否校验文本)
+        返回 (结果)
     }
 
-    方法 UTF16LE到UTF32 <公开 静态 类型 = 字节集类 注释 = "将UTF-16LE文本转换到UTF-32字节集后返回." 折叠 @嵌入式方法 = "">
+    方法 UTF16LE到UTF32 <公开 静态 类型 = 字节集类 注释 = "将UTF-16LE文本转换到UTF-32字节集后返回." 折叠>
     参数 UTF16文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-16LE文本">
     参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
             注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
     {
-        @ piv::utf::utf16le_to_utf32 (@<UTF16文本>, @<是否包括结束零字符>, @<是否校验文本>)
+        变量 结果 <类型 = 字节集类>
+        UTF16LE到UTF32_Ex (UTF16文本, 结果, 是否包括结束零字符, 是否校验文本)
+        返回 (结果)
     }
 
-    方法 UTF16BE到UTF8 <公开 静态 类型 = 字节集类 注释 = "将UTF-16BE文本数据转换到UTF-8字节集后返回." 折叠 @嵌入式方法 = "">
+    方法 UTF16BE到UTF8 <公开 静态 类型 = 字节集类 注释 = "将UTF-16BE文本数据转换到UTF-8字节集后返回." 折叠>
     参数 UTF16文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-16BE文本">
     参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
             注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
     {
-        @ piv::utf::utf16be_to_utf8 (@<UTF16文本>, @<是否包括结束零字符>, @<是否校验文本>)
+        变量 结果 <类型 = 字节集类>
+        UTF16BE到UTF8_Ex (UTF16文本, 结果, 是否包括结束零字符, 是否校验文本)
+        返回 (结果)
     }
 
-    方法 UTF16BE到UTF32 <公开 静态 类型 = 字节集类 注释 = "将UTF-16BE文本数据转换到UTF-32字节集后返回." 折叠 @嵌入式方法 = "">
+    方法 UTF16BE到UTF32 <公开 静态 类型 = 字节集类 注释 = "将UTF-16BE文本数据转换到UTF-32字节集后返回." 折叠>
     参数 UTF16文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-16BE文本">
     参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
             注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
     {
-        @ piv::utf::utf16be_to_utf32 (@<UTF16文本>, @<是否包括结束零字符>, @<是否校验文本>)
+        变量 结果 <类型 = 字节集类>
+        UTF16BE到UTF32_Ex (UTF16文本, 结果, 是否包括结束零字符, 是否校验文本)
+        返回 (结果)
     }
 
     方法 文本到UTF32_Ex <公开 静态 类型 = 整数 注释 = "将UTF-16LE文本转换到UTF-32字节集后返回." 注释 = "跟\"文本到UTF32\"的区别是在参数中返回转换后的数据."
-            返回值注释 = "返回UTF-32文本的字符数(4字节),失败返回0." 折叠 @嵌入式方法 = "">
-    参数 UTF16文本 <类型 = 文本型 注释 = "提供所欲转换的UTF-16LE文本">
-    参数 UTF32文本 <类型 = 字节集类 注释 = "转换后的UTF-32文本将保存在此参数中">
-    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
+            返回值注释 = "返回UTF-32文本的字符数(4字节),失败返回0." 折叠 @禁止流程检查 = 真>
+    参数 UTF16文本 <类型 = 文本型 注释 = "提供所欲转换的UTF-16LE文本" @输出名 = "input">
+    参数 UTF32文本 <类型 = 字节集类 注释 = "转换后的UTF-32文本将保存在此参数中" @输出名 = "output">
+    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假 @输出名 = "null_terminated">
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
-            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
+            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假 @输出名 = "validate">
     {
-        @ static_cast<INT>(piv::utf::utf16le_to_utf32 (@<UTF16文本>, @<UTF32文本>, @<是否包括结束零字符>, @<是否校验文本>)
+        @ size_t outlen = simdutf::utf32_length_from_utf16le(reinterpret_cast<const char16_t *>(input.GetText()), static_cast<size_t>(input.GetLength()));
+        @ if (!outlen) {
+        @     output.Empty();
+        @     return 0;
+        @ }
+        @ output.Alloc((outlen + 1) * 4, TRUE);
+        @ outlen = validate ? simdutf::convert_utf16le_to_utf32(reinterpret_cast<const char16_t *>(input.GetText()), static_cast<size_t>(input.GetLength()),
+        @                                                       reinterpret_cast<char32_t *>(output.GetPtr()))
+        @                   : simdutf::convert_valid_utf16le_to_utf32(reinterpret_cast<const char16_t *>(input.GetText()), static_cast<size_t>(input.GetLength()),
+        @                                                             reinterpret_cast<char32_t *>(output.GetPtr()));
+        @ output.Realloc(outlen ? ((outlen + (null_terminated ? 1 : 0)) * 4) : 0);
+        @ return static_cast<INT>(outlen);
     }
 
     方法 UTF16LE到UTF8_Ex <公开 静态 类型 = 整数 注释 = "将UTF-16LE文本数据转换到UTF-8字节集."
-            注释 = "跟\"UTF16LE到UTF8\"的区别是在参数中返回转换后的数据." 返回值注释 = "返回UTF-8文本的字节数,失败返回0." 折叠 @嵌入式方法 = "">
-    参数 UTF16文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-16LE文本">
-    参数 UTF8文本 <类型 = 字节集类 注释 = "转换后的UTF-8文本将保存在此参数中">
-    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
+            注释 = "跟\"UTF16LE到UTF8\"的区别是在参数中返回转换后的数据." 返回值注释 = "返回UTF-8文本的字节数,失败返回0." 折叠 @禁止流程检查 = 真>
+    参数 UTF16文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-16LE文本" @输出名 = "input">
+    参数 UTF8文本 <类型 = 字节集类 注释 = "转换后的UTF-8文本将保存在此参数中" @输出名 = "output">
+    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假 @输出名 = "null_terminated">
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
-            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
+            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假 @输出名 = "validate">
     {
-        @ static_cast<INT>(piv::utf::utf16le_to_utf8 (@<UTF16文本>, @<UTF8文本>, @<是否包括结束零字符>, @<是否校验文本>))
+        @ size_t outlen = simdutf::utf8_length_from_utf16le(reinterpret_cast<const char16_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 2);
+        @ if (!outlen) {
+        @     output.Empty();
+        @     return 0;
+        @ }
+        @ output.Alloc(outlen + 1, TRUE);
+        @ outlen = validate ? simdutf::convert_utf16le_to_utf8(reinterpret_cast<const char16_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 2,
+        @                                                      reinterpret_cast<char *>(output.GetPtr()))
+        @                   : simdutf::convert_valid_utf16le_to_utf8(reinterpret_cast<const char16_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 2,
+        @                                                            reinterpret_cast<char *>(output.GetPtr()));
+        @ output.Realloc(outlen ? (outlen + (null_terminated ? 1 : 0)) : 0);
+        @ return static_cast<INT>(outlen);
     }
 
     方法 UTF16LE到UTF32_Ex <公开 静态 类型 = 整数 注释 = "将UTF-16LE文本转换到UTF-32字节集."
-            注释 = "跟\"UTF16LE到UTF32\"的区别是在参数中返回转换后的数据." 返回值注释 = "返回UTF-32文本的字符数(4字节),失败返回0." 折叠 @嵌入式方法 = "">
-    参数 UTF16文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-16LE文本">
-    参数 UTF32文本 <类型 = 字节集类 注释 = "转换后的UTF-32文本将保存在此参数中">
-    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
+            注释 = "跟\"UTF16LE到UTF32\"的区别是在参数中返回转换后的数据." 返回值注释 = "返回UTF-32文本的字符数(4字节),失败返回0." 折叠 @禁止流程检查 = 真>
+    参数 UTF16文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-16LE文本" @输出名 = "input">
+    参数 UTF32文本 <类型 = 字节集类 注释 = "转换后的UTF-32文本将保存在此参数中" @输出名 = "output">
+    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假 @输出名 = "null_terminated">
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
-            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
+            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假 @输出名 = "validate">
     {
-        @ static_cast<INT>(piv::utf::utf16le_to_utf32 (@<UTF16文本>, @<UTF32文本>, @<是否包括结束零字符>, @<是否校验文本>))
+        @ size_t outlen = simdutf::utf32_length_from_utf16le(reinterpret_cast<const char16_t *>(input.GetPtr()), static_cast<size_t>(input.GetLength()));
+        @ if (!outlen) {
+        @     output.Empty();
+        @     return 0;
+        @ }
+        @ output.Alloc((outlen + 1) * 4, TRUE);
+        @ outlen = validate ? simdutf::convert_utf16le_to_utf32(reinterpret_cast<const char16_t *>(input.GetText()), static_cast<size_t>(input.GetLength()),
+        @                                                       reinterpret_cast<char32_t *>(output.GetPtr()))
+        @                   : simdutf::convert_valid_utf16le_to_utf32(reinterpret_cast<const char16_t *>(input.GetText()), static_cast<size_t>(input.GetLength()),
+        @                                                             reinterpret_cast<char32_t *>(output.GetPtr()));
+        @ output.Realloc(outlen ? ((outlen + (null_terminated ? 1 : 0)) * 4) : 0);
+        @ return static_cast<INT>(outlen);
     }
 
     方法 UTF16BE到UTF8_Ex <公开 静态 类型 = 整数 注释 = "将UTF-16BE文本数据转换到UTF-8字节集."
-            注释 = "跟\"UTF16BE到UTF8\"的区别是在参数中返回转换后的数据." 返回值注释 = "返回UTF-8文本的字节数,失败返回0." 折叠 @嵌入式方法 = "">
-    参数 UTF16文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-16BE文本">
-    参数 UTF8文本 <类型 = 字节集类 注释 = "转换后的UTF-8文本将保存在此参数中">
-    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
+            注释 = "跟\"UTF16BE到UTF8\"的区别是在参数中返回转换后的数据." 返回值注释 = "返回UTF-8文本的字节数,失败返回0." 折叠 @禁止流程检查 = 真>
+    参数 UTF16文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-16BE文本" @输出名 = "input">
+    参数 UTF8文本 <类型 = 字节集类 注释 = "转换后的UTF-8文本将保存在此参数中" @输出名 = "output">
+    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假 @输出名 = "null_terminated">
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
-            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
+            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假 @输出名 = "validate">
     {
-        @ static_cast<INT>(piv::utf::utf16be_to_utf8 (@<UTF16文本>, @<UTF8文本>, @<是否包括结束零字符>, @<是否校验文本>))
+        @ size_t outlen = simdutf::utf8_length_from_utf16be(reinterpret_cast<const char16_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 2);
+        @ if (!outlen) {
+        @     output.Empty();
+        @     return 0;
+        @ }
+        @ output.Alloc(outlen + 1, TRUE);
+        @ outlen = validate ? simdutf::convert_utf16be_to_utf8(reinterpret_cast<const char16_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 2,
+        @                                                      reinterpret_cast<char *>(output.GetPtr()))
+        @                   : simdutf::convert_valid_utf16be_to_utf8(reinterpret_cast<const char16_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 2,
+        @                                                            reinterpret_cast<char *>(output.GetPtr()));
+        @ output.Realloc(outlen ? (outlen + (null_terminated ? 1 : 0)) : 0);
+        @ return static_cast<INT>(outlen);
     }
 
     方法 UTF16BE到UTF32_Ex <公开 静态 类型 = 整数 注释 = "将UTF-16BE文本数据转换到UTF-32字节集."
-            注释 = "跟\"UTF16BE到UTF32\"的区别是在参数中返回转换后的数据." 返回值注释 = "返回UTF-32文本的字符数(4字节),失败返回0." 折叠 @嵌入式方法 = "">
-    参数 UTF16文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-16BE文本">
-    参数 UTF32文本 <类型 = 字节集类 注释 = "转换后的UTF-32文本将保存在此参数中">
-    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
+            注释 = "跟\"UTF16BE到UTF32\"的区别是在参数中返回转换后的数据." 返回值注释 = "返回UTF-32文本的字符数(4字节),失败返回0." 折叠 @禁止流程检查 = 真>
+    参数 UTF16文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-16BE文本" @输出名 = "input">
+    参数 UTF32文本 <类型 = 字节集类 注释 = "转换后的UTF-32文本将保存在此参数中" @输出名 = "output">
+    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假 @输出名 = "null_terminated">
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
-            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
+            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假 @输出名 = "validate">
     {
-        @ static_cast<INT>(piv::utf::utf16be_to_utf32 (@<UTF16文本>, @<UTF32文本>, @<是否包括结束零字符>, @<是否校验文本>))
+        @ size_t outlen = simdutf::utf32_length_from_utf16be(reinterpret_cast<const char16_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 2);
+        @ if (!outlen) {
+        @     output.Empty();
+        @     return 0;
+        @ }
+        @ output.Alloc((outlen + 1) * 4, TRUE);
+        @ outlen = validate ? simdutf::convert_utf16be_to_utf32(reinterpret_cast<const char16_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 2,
+        @                                                       reinterpret_cast<char32_t *>(output.GetPtr()))
+        @                   : simdutf::convert_valid_utf16be_to_utf32(reinterpret_cast<const char16_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 2,
+        @                                                             reinterpret_cast<char32_t *>(output.GetPtr()));
+        @ output.Realloc(outlen ? ((outlen + (null_terminated ? 1 : 0)) * 4) : 0);
+        @ return static_cast<INT>(outlen);
     }
 
     # UTF-32转换到其他 ---
 
-    方法 UTF32到UTF8 <公开 静态 类型 = 字节集类 注释 = "将UTF-32文本数据转换到UTF-8字节集后返回." 折叠 @嵌入式方法 = "">
+    方法 UTF32到UTF8 <公开 静态 类型 = 字节集类 注释 = "将UTF-32文本数据转换到UTF-8字节集后返回." 折叠>
     参数 UTF32文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-32字符集文本数据">
     参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
             注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
     {
-        @ piv::utf::utf32_to_utf8 (@<UTF32文本>, @<是否包括结束零字符>, @<是否校验文本>)
+        变量 结果 <类型 = 字节集类>
+        UTF32到UTF8_Ex (UTF32文本, 结果, 是否包括结束零字符, 是否校验文本)
+        返回 (结果)
     }
 
-    方法 UTF32到文本 <公开 静态 类型 = 文本型 注释 = "将UTF-32文本数据转换到UTF-16LE文本后返回." 折叠 @嵌入式方法 = "">
+    方法 UTF32到文本 <公开 静态 类型 = 文本型 注释 = "将UTF-32文本数据转换到UTF-16LE文本后返回." 折叠>
     参数 UTF32文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-32字符集文本数据">
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
             注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
     {
-        @ piv::utf::utf32_to_utf16le (@<UTF32文本>, @<是否校验文本>)
+        变量 结果 <类型 = 文本型>
+        UTF32到文本_Ex (UTF32文本, 结果, 是否校验文本)
+        返回 (结果)
     }
 
-    方法 UTF32到UTF16LE <公开 静态 类型 = 文本型 注释 = "将UTF-32文本数据转换到UTF-16LE字节集后返回." 折叠 @嵌入式方法 = "">
-    参数 UTF32文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-32字符集文本数据">
-    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
-    参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
-            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
-    {
-        @ piv::utf::utf32_to_utf16le (@<UTF32文本>, @<是否包括结束零字符>, @<是否校验文本>)
-    }
-
-    方法 UTF32到UTF16BE <公开 静态 类型 = 字节集类 注释 = "将UTF-32文本数据转换到UTF-16BE字节集后返回." 折叠 @嵌入式方法 = "">
+    方法 UTF32到UTF16LE <公开 静态 类型 = 字节集类 注释 = "将UTF-32文本数据转换到UTF-16LE字节集后返回." 折叠>
     参数 UTF32文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-32字符集文本数据">
     参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
             注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
     {
-        @ piv::utf::utf32_to_utf16be (@<UTF32文本>, @<是否包括结束零字符>, @<是否校验文本>)
+        变量 结果 <类型 = 字节集类>
+        UTF32到UTF16LE_Ex (UTF32文本, 结果, 是否包括结束零字符, 是否校验文本)
+        返回 (结果)
+    }
+
+    方法 UTF32到UTF16BE <公开 静态 类型 = 字节集类 注释 = "将UTF-32文本数据转换到UTF-16BE字节集后返回." 折叠>
+    参数 UTF32文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-32字符集文本数据">
+    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
+    参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
+            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
+    {
+        变量 结果 <类型 = 字节集类>
+        UTF32到UTF16BE_Ex (UTF32文本, 结果, 是否包括结束零字符, 是否校验文本)
+        返回 (结果)
     }
 
     方法 UTF32到UTF8_Ex <公开 静态 类型 = 整数 注释 = "将UTF-32文本数据转换到UTF-8字节集." 注释 = "跟\"UTF32到UTF8\"的区别是在参数中返回转换后的数据."
-            返回值注释 = "返回UTF-8文本的字节数,失败返回0." 折叠 @嵌入式方法 = "">
-    参数 UTF32文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-32LE字符集文本数据">
-    参数 UTF8文本 <类型 = 字节集类 注释 = "转换后的UTF-8文本将保存在此参数中">
-    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
+            返回值注释 = "返回UTF-8文本的字节数,失败返回0." 折叠 @禁止流程检查 = 真>
+    参数 UTF32文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-32LE字符集文本数据" @输出名 = "input">
+    参数 UTF8文本 <类型 = 字节集类 注释 = "转换后的UTF-8文本将保存在此参数中" @输出名 = "output">
+    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假 @输出名 = "null_terminated">
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
-            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
+            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假 @输出名 = "validate">
     {
-        @ static_cast<INT>(piv::utf::utf32_to_utf8 (@<UTF32文本>, @<UTF8文本>, @<是否包括结束零字符>, @<是否校验文本>))
+        @ size_t outlen = simdutf::utf8_length_from_utf32(reinterpret_cast<const char32_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 4);
+        @ if (!outlen) {
+        @     output.Empty();
+        @     return 0;
+        @ }
+        @ output.Alloc(outlen + 1, TRUE);
+        @ outlen = validate ? simdutf::convert_utf32_to_utf8(reinterpret_cast<const char32_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 4,
+        @                                                       reinterpret_cast<char *>(output.GetPtr()))
+        @                   : simdutf::convert_valid_utf32_to_utf8(reinterpret_cast<const char32_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 4,
+        @                                                             reinterpret_cast<char *>(output.GetPtr()));
+        @ output.Realloc(outlen ? (outlen + (null_terminated ? 1 : 0)) : 0);
+        @ return static_cast<INT>(outlen);
     }
 
     方法 UTF32到文本_Ex <公开 静态 类型 = 整数 注释 = "将UTF-32文本数据转换到UTF-16LE文本." 注释 = "跟\"UTF32到文本\"的区别是在参数中返回转换后的数据."
-            返回值注释 = "返回UTF-16LE文本的字符数(2字节),失败返回0." 折叠 @嵌入式方法 = "">
-    参数 UTF32文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-32字符集文本数据">
-    参数 UTF16文本 <类型 = 文本型 注释 = "转换后的UTF-16LE文本将保存在此参数中">
+            返回值注释 = "返回UTF-16LE文本的字符数(2字节),失败返回0." 折叠 @禁止流程检查 = 真>
+    参数 UTF32文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-32字符集文本数据" @输出名 = "input">
+    参数 UTF16文本 <类型 = 文本型 注释 = "转换后的UTF-16LE文本将保存在此参数中" @输出名 = "output">
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
-            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
+            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假 @输出名 = "validate">
     {
-        @ static_cast<INT>(piv::utf::utf32_to_utf16le (@<UTF32文本>, @<UTF16文本>, @<是否校验文本>))
+        @ size_t outlen = simdutf::utf16_length_from_utf32(reinterpret_cast<const char32_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 4);
+        @ if (!outlen) {
+        @     output.Empty();
+        @     return 0;
+        @ }
+        @ output.SetLength(outlen);
+        @ outlen = validate ? simdutf::convert_utf32_to_utf16le(reinterpret_cast<const char32_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 4,
+        @                                                       reinterpret_cast<char16_t *>(const_cast<WCHAR *>(output.GetText())))
+        @                   : simdutf::convert_valid_utf32_to_utf16le(reinterpret_cast<const char32_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 4,
+        @                                                             reinterpret_cast<char16_t *>(const_cast<WCHAR *>(output.GetText())));
+        @ output.SetLength(outlen);
+        @ return static_cast<INT>(outlen);
     }
 
     方法 UTF32到UTF16LE_Ex <公开 静态 类型 = 整数 注释 = "将UTF-32文本数据转换到UTF-16LE字节集."
-            注释 = "跟\"UTF32到UTF16LE\"的区别是在参数中返回转换后的数据." 返回值注释 = "返回UTF-16LE文本的字符数(2字节),失败返回0." 折叠 @嵌入式方法 = "">
+            注释 = "跟\"UTF32到UTF16LE\"的区别是在参数中返回转换后的数据." 返回值注释 = "返回UTF-16LE文本的字符数(2字节),失败返回0." 折叠 @禁止流程检查 = 真>
     参数 UTF32文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-32字符集文本数据">
     参数 UTF16文本 <类型 = 字节集类 注释 = "转换后的UTF-16LE文本将保存在此参数中">
     参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
             注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
     {
-        @ static_cast<INT>(piv::utf::utf32_to_utf16le (@<UTF32文本>, @<UTF16文本>, @<是否包括结束零字符>, @<是否校验文本>))
+        @ size_t outlen = simdutf::utf16_length_from_utf32(reinterpret_cast<const char32_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 4);
+        @ if (!outlen) {
+        @     output.Empty();
+        @     return 0;
+        @ }
+        @ output.Alloc((outlen + 1) * 2, TRUE);
+        @ outlen = validate ? simdutf::convert_utf32_to_utf16le(reinterpret_cast<const char32_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 4,
+        @                                                       reinterpret_cast<char16_t *>(output.GetPtr()))
+        @                   : simdutf::convert_valid_utf32_to_utf16le(reinterpret_cast<const char32_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 4,
+        @                                                             reinterpret_cast<char16_t *>(output.GetPtr()));
+        @ output.Realloc(outlen ? ((outlen + (null_terminated ? 1 : 0)) * 2) : 0);
+        @ return static_cast<INT>(outlen);
     }
 
     方法 UTF32到UTF16BE_Ex <公开 静态 类型 = 整数 注释 = "将UTF-32文本数据转换到UTF-16BE字节集."
-            注释 = "跟\"UTF32到UTF16BE\"的区别是在参数中返回转换后的数据." 返回值注释 = "返回UTF-16BE文本的字符数(2字节),失败返回0." 折叠 @嵌入式方法 = "">
+            注释 = "跟\"UTF32到UTF16BE\"的区别是在参数中返回转换后的数据." 返回值注释 = "返回UTF-16BE文本的字符数(2字节),失败返回0." 折叠 @禁止流程检查 = 真>
     参数 UTF32文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-32字符集文本数据">
     参数 UTF16文本 <类型 = 字节集类 注释 = "转换后的UTF-16BE文本将保存在此参数中">
     参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
             注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
     {
-        @ static_cast<INT>(piv::utf::utf32_to_utf16be (@<UTF32文本>, @<UTF16文本>, @<是否包括结束零字符>, @<是否校验文本>))
+        @ size_t outlen = simdutf::utf16_length_from_utf32(reinterpret_cast<const char32_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 4);
+        @ if (!outlen) {
+        @     output.Empty();
+        @     return 0;
+        @ }
+        @ output.Alloc((outlen + 1) * 2, TRUE);
+        @ outlen = validate ? simdutf::convert_utf32_to_utf16be(reinterpret_cast<const char32_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 4,
+        @                                                       reinterpret_cast<char16_t *>(output.GetPtr()))
+        @                   : simdutf::convert_valid_utf32_to_utf16be(reinterpret_cast<const char32_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 4,
+        @                                                             reinterpret_cast<char16_t *>(output.GetPtr()));
+        @ output.Realloc(outlen ? ((outlen + (null_terminated ? 1 : 0)) * 2) : 0);
+        @ return static_cast<INT>(outlen);
     }
 
     # 验证文本 ---
 
-    方法 验证UTF8 <公开 静态 类型 = 逻辑型 注释 = "验证指定的字节集是否为有效的UTF-8文本数据." 折叠 @嵌入式方法 = "">
-    参数 文本数据 <类型 = 字节集类 注释 = "提供所欲验证的UTF8编码文本数据">
+    方法 验证UTF8 <公开 静态 类型 = 逻辑型 注释 = "验证指定的字节集是否为有效的UTF-8文本数据." 折叠 @禁止流程检查 = 真>
+    参数 文本数据 <类型 = 字节集类 注释 = "提供所欲验证的UTF8编码文本数据" @输出名 = "input">
     {
-        @ piv::utf::validate_utf8 (@<文本数据>)
+        @ return simdutf::validate_utf8(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
     }
 
     方法 验证ASCII <公开 静态 类型 = 逻辑型 注释 = "验证指定的字节集是否为有效的ASCII文本数据." 注释 = "只能验证可打印的ASCII字符,数据中含中文等字符会返回假." 折叠
-            @嵌入式方法 = "">
-    参数 文本数据 <类型 = 字节集类 注释 = "提供所欲验证的ASCII编码文本数据">
+            @禁止流程检查 = 真>
+    参数 文本数据 <类型 = 字节集类 注释 = "提供所欲验证的ASCII编码文本数据" @输出名 = "input">
     {
-        @ piv::utf::validate_ascii (@<文本数据>)
+        @ return simdutf::validate_ascii(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
     }
 
-    方法 验证UTF16LE <公开 静态 类型 = 逻辑型 注释 = "验证指定的字节集是否为有效的UTF-16LE文本数据." 折叠 @嵌入式方法 = "">
-    参数 文本数据 <类型 = 字节集类 注释 = "提供所欲验证的UTF-16LE编码文本数据">
+    方法 验证UTF16LE <公开 静态 类型 = 逻辑型 注释 = "验证指定的字节集是否为有效的UTF-16LE文本数据." 折叠 @禁止流程检查 = 真>
+    参数 文本数据 <类型 = 字节集类 注释 = "提供所欲验证的UTF-16LE编码文本数据" @输出名 = "input">
     {
-        @ piv::utf::validate_utf16le (@<文本数据>)
+        @ return simdutf::validate_utf16le(reinterpret_cast<const char16_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 2);
     }
 
-    方法 验证UTF16BE <公开 静态 类型 = 逻辑型 注释 = "验证指定的字节集是否为有效的UTF-16BE文本数据." 折叠 @嵌入式方法 = "">
-    参数 文本数据 <类型 = 字节集类 注释 = "提供所欲验证的UTF-16BE编码文本数据">
+    方法 验证UTF16BE <公开 静态 类型 = 逻辑型 注释 = "验证指定的字节集是否为有效的UTF-16BE文本数据." 折叠 @禁止流程检查 = 真>
+    参数 文本数据 <类型 = 字节集类 注释 = "提供所欲验证的UTF-16BE编码文本数据" @输出名 = "input">
     {
-        @ piv::utf::validate_utf16be (@<文本数据>)
+        @ return simdutf::validate_utf16be(reinterpret_cast<const char16_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 2);
     }
 
-    方法 验证UTF32 <公开 静态 类型 = 逻辑型 注释 = "验证指定的字节集是否为有效的UTF-32文本数据." 折叠 @嵌入式方法 = "">
-    参数 文本数据 <类型 = 字节集类 注释 = "提供所欲验证的UTF-32编码文本数据">
+    方法 验证UTF32 <公开 静态 类型 = 逻辑型 注释 = "验证指定的字节集是否为有效的UTF-32文本数据." 折叠 @禁止流程检查 = 真>
+    参数 文本数据 <类型 = 字节集类 注释 = "提供所欲验证的UTF-32编码文本数据" @输出名 = "input">
     {
-        @ piv::utf::validate_utf32 (@<文本数据>)
+        @ return simdutf::validate_utf32(reinterpret_cast<const char32_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 4);
     }
 
     # 获取文本长度 ---
 
-    方法 取UTF8长度 <公开 静态 类型 = 整数 注释 = "获取UTF-8文本数据的有效字符长度(1个字符可能占1到4字节)." 折叠 @嵌入式方法 = "">
-    参数 UTF8文本数据 <类型 = 字节集类 注释 = "提供所欲取字符数量的UTF-8字符集文本数据">
+    方法 取UTF8长度 <公开 静态 类型 = 整数 注释 = "获取UTF-8文本数据的有效字符长度(1个字符可能占1到4字节)." 折叠 @禁止流程检查 = 真>
+    参数 UTF8文本数据 <类型 = 字节集类 注释 = "提供所欲取字符数量的UTF-8字符集文本数据" @输出名 = "input">
     {
-        @ piv::utf::count_utf8 (@<UTF8文本数据>)
+        @ return (INT)simdutf::count_utf8(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
     }
 
-    方法 取UTF16LE长度 <公开 静态 类型 = 整数 注释 = "获取UTF-16LE文本数据的有效字符长度(1个字符占2字节)." 折叠 @嵌入式方法 = "">
-    参数 UTF16文本数据 <类型 = 字节集类 注释 = "提供所欲取字符数量的UTF-16LE字符集文本数据">
+    方法 取UTF16LE长度 <公开 静态 类型 = 整数 注释 = "获取UTF-16LE文本数据的有效字符长度(1个字符占2字节)." 折叠 @禁止流程检查 = 真>
+    参数 UTF16文本数据 <类型 = 字节集类 注释 = "提供所欲取字符数量的UTF-16LE字符集文本数据" @输出名 = "input">
     {
-        @ piv::utf::count_utf16le (@<UTF16文本数据>)
+        @ return (INT)simdutf::count_utf16le(reinterpret_cast<const char16_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 2);
     }
 
-    方法 取UTF16BE长度 <公开 静态 类型 = 整数 注释 = "获取UTF-16BE文本数据的有效字符长度(1个字符占2字节)." 折叠 @嵌入式方法 = "">
-    参数 UTF16文本数据 <类型 = 字节集类 注释 = "提供所欲取字符数量的UTF-16BE字符集文本数据">
+    方法 取UTF16BE长度 <公开 静态 类型 = 整数 注释 = "获取UTF-16BE文本数据的有效字符长度(1个字符占2字节)." 折叠 @禁止流程检查 = 真>
+    参数 UTF16文本数据 <类型 = 字节集类 注释 = "提供所欲取字符数量的UTF-16BE字符集文本数据" @输出名 = "input">
     {
-        @ piv::utf::count_utf16be (@<UTF16文本数据>)
+        @ return (INT)simdutf::count_utf16be(reinterpret_cast<const char16_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 2);
+    }
+
+    # BASE64 ---
+
+    方法 字节集到BASE64文本 <公开 静态 类型 = 文本型 注释 = "返回本字节集数据所对应的BASE64编码格式文本内容" 折叠 @禁止流程检查 = 真>
+    参数 字节数据 <类型 = 字节集类 注释 = "所欲编码的字节集数据" @输出名 = "input">
+    参数 URL专用 <类型 = 逻辑型 注释 = "选择BASE64的编码格式:" 注释 = " 真=URL专用" 注释 = " 假=标准BASE64" @默认值 = 假 @输出名 = "options">
+    {
+        @ PivBuffer<char, size_t> buf;
+        @ buf.Alloc(simdutf::base64_length_from_binary(static_cast<size_t>(input.GetSize()),
+        @                                              static_cast<simdutf::base64_options>(options)), true);
+        @ size_t wb = simdutf::binary_to_base64(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()),
+        @                                       buf.GetPtr(), static_cast<simdutf::base64_options>(options));
+        @ return @an<CVolString>(buf.GetPtr(), wb);
+    }
+
+    方法 BASE64文本到字节集 <公开 静态 类型 = 字节集类 注释 = "将所指定的BASE64编码格式文本解码为对应的字节集后返回" 折叠 @禁止流程检查 = 真>
+    参数 BASE64编码文本 <类型 = 文本型 注释 = "提供所欲解码的BASE64编码文本" @输出名 = "input">
+    参数 URL专用 <类型 = 逻辑型 注释 = "选择BASE64的编码格式:" 注释 = " 真=URL专用" 注释 = " 假=标准BASE64" @默认值 = 假 @输出名 = "options">
+    {
+        @ simdutf::result ret;
+        @ PivBuffer<char, size_t> buf;
+        @ buf.Alloc(simdutf::maximal_binary_length_from_base64(reinterpret_cast<const char16_t *>(input.GetText()),
+        @                                                      static_cast<size_t>(input.GetLength())), true);
+        @ ret = simdutf::base64_to_binary(reinterpret_cast<const char16_t*>(input.GetText()), static_cast<size_t>(input.GetLength()),
+        @                                    buf.GetPtr(), static_cast<simdutf::base64_options>(options));
+        @ if (ret.error == simdutf::SUCCESS)
+        @     return @an<CVolMem>(buf.GetPtr(), ret.count);
+        @ return @an<CVolMem>();
+    }
+
+    # 其他 ---
+
+    方法 匹配系统 <公开 静态 类型 = 逻辑型 注释 = "检查系统是否匹配指定的内存字节序" 折叠 @嵌入式方法 = "">
+    参数 是否大端 <类型 = 逻辑型>
+    {
+        @ simdutf::match_system(static_cast<simdutf::endianness>(@<是否大端>))
+    }
+
+    方法 检测BOM签名 <公开 静态 类型 = 整数 注释 = "检查提供的文本数据是否有BOM签名,如果无签名返回0(SIMD编码类型.未知)." 返回值注释 = "请参考\"SIMD编码类型\"的常量"
+            折叠 @禁止流程检查 = 真>
+    参数 文本数据 <类型 = 字节集类 @输出名 = "data">
+    {
+        @ return (INT)simdutf::BOM::check_bom(reinterpret_cast<(const char*>(data.GetPtr()), static_cast<size_t>(data.GetSize()));
+    }
+
+    方法 取BOM大小 <公开 静态 类型 = 整数 注释 = "获取指定文本编码的BOM签名大小,以字节为单位." 折叠 @嵌入式方法 = "">
+    参数 编码类型 <类型 = 整数 注释 = "请参考\"SIMD编码类型\"的常量" @输出名 = "bom">
+    {
+        @ simdutf::BOM::bom_byte_size(static_cast<simdutf::encoding_type>(bom))
     }
 }
 
@@ -864,6 +1152,12 @@
     常量 UTF32_LE <公开 类型 = 整数 值 = 8>
     常量 UTF32_BE <公开 类型 = 整数 值 = 16>
     常量 Latin1 <公开 类型 = 整数 值 = 32>
+
+    方法 到文本 <公开 静态 类型 = 标准文本类 折叠 @嵌入式方法 = "">
+    参数 编码类型 <类型 = 整数>
+    {
+        @ simdutf::to_string(static_cast<simdutf::encoding_type>(@<编码类型>))
+    }
 }
 
 # ===

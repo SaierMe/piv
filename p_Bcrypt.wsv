@@ -6,7 +6,7 @@
         注释 = "  - 桌面系统需要Windows Vista及更高版本." 注释 = "  - 服务器系统需要Windows Server 2008及更高版本."
         注释 = "  - 部分加密算法有更高的系统版本要求." @视窗.外部头文件 = "bcrypt.h" @视窗.外部库 = "Bcrypt.lib">
 
-类 CNG加解密 <公开 注释 = "提供密码学的加解密支持" @文档 = "category = \"CNG加解密\"" @禁止创建对象 = 真>
+类 CNG加解密 <公开 注释 = "提供密码学的加解密支持" 折叠 @文档 = "category = \"加解密\"" @禁止创建对象 = 真>
 {
 
     # 对称加解密算法
@@ -632,7 +632,7 @@
     方法 加密_字节集_3DES_ECB <公开 静态 类型 = 字节集类 注释 = "将指定数据进行3DES(ECB模式)加密,3DES即将DES算法进行三次(加密-解密-加密)计算."
             返回值注释 = "返回数据加密后的结果,加密失败将返回空字节集." 折叠>
     参数 数据 <类型 = 字节集类 注释 = "提供所欲加密的数据">
-    参数 密码 <类型 = 字节集类 注释 = "提供加密所使用的密码,固定长度8字节.">
+    参数 密码 <类型 = 字节集类 注释 = "提供加密所使用的密码,固定长度24字节.">
     参数 高强度 <类型 = 逻辑型 注释 = "是否采用高强度方式加密,为真时加密过程中会采用三个不同密钥,为假时仅使用两个相同密钥." @默认值 = 真>
     参数 填充方式 <类型 = CNG_填充方式 注释 = "在提供的数据未对齐的情况下,所欲使用的填充方式." @默认值 = CNG_填充方式.对称_零填充>
     {
@@ -2539,7 +2539,7 @@
     }
 }
 
-类 CNG_算法类型 <公开 注释 = "CNG的算法类型" 折叠 @文档 = "category = \"CNG加解密.辅助类\"" @常量类 = 文本型>
+类 CNG_算法类型 <公开 注释 = "CNG的算法类型" 折叠 @文档 = "category = \"加解密.辅助类\"" @常量类 = 文本型>
 {
     常量 对称加密_3DES <公开 值 = @BCRYPT_3DES_ALGORITHM
             注释 = "The triple data encryption standard symmetric encryption algorithm."
@@ -2649,7 +2649,7 @@
     #
 }
 
-类 CNG_链接模式 <公开 注释 = "CNG加密算法的加密分组链接模式" 折叠 @文档 = "category = \"CNG加解密.辅助类\"" @常量类 = 文本型>
+类 CNG_链接模式 <公开 注释 = "CNG加密算法的加密分组链接模式" 折叠 @文档 = "category = \"加解密.辅助类\"" @常量类 = 文本型>
 {
     常量 无 <公开 值 = @BCRYPT_CHAIN_MODE_NA 注释 = "此算法不支持链接模式">
     常量 CBC <公开 值 = @BCRYPT_CHAIN_MODE_CBC 注释 = "将算法的链接模式设置为加密块链接">
@@ -2661,7 +2661,7 @@
             注释 = "注: Windows Vista SP1之后才支持本模式.">
 }
 
-类 CNG_填充方式 <公开 注释 = "CNG的数据填充方式,部分加解密算法需要填充数据来对齐块大小" 折叠 @文档 = "category = \"CNG加解密.辅助类\"" @常量类 = 整数>
+类 CNG_填充方式 <公开 注释 = "CNG的数据填充方式,部分加解密算法需要填充数据来对齐块大小" 折叠 @文档 = "category = \"加解密.辅助类\"" @常量类 = 整数>
 {
     常量 对称_无填充 <公开 值 = 0x00000110 注释 = "不进行任何填充,如果数据本身没有对齐,加密/解密会失败.">
     常量 对称_零填充 <公开 值 = -1 注释 = "即ZeroPadding,在数据对齐时使用0补位." 注释 = "用这种填充方式加密的数据在解密后,尾部会有冗余数据.">
@@ -2685,7 +2685,7 @@
             注释 = "BCryptVerifySignature">
 }
 
-类 CNG_密钥类型 <公开 注释 = "CNG的密钥类型" @文档 = "category = \"CNG加解密.辅助类\"" @常量类 = 文本型>
+类 CNG_密钥类型 <公开 注释 = "CNG的密钥类型" 折叠 @文档 = "category = \"加解密.辅助类\"" @常量类 = 文本型>
 {
     常量 AES_WRAP_KEY <公开 值 = "Rfc3565KeyWrapBlob" 注释 = "Export an AES key wrapped key."
             注释 = "The hExportKey parameter must reference a valid BCRYPT_KEY_HANDLE pointer to the key encryption key,"
@@ -2745,7 +2745,7 @@
             注释 = "Export an RSA public key in a form that can be imported by using CryptoAPI.">
 }
 
-类 CNG_RSA填充 <公开 注释 = "RSA加解密专用的填充方式" 折叠 @文档 = "category = \"CNG加解密.辅助类\"" @常量类 = 整数>
+类 CNG_RSA填充 <公开 注释 = "RSA加解密专用的填充方式" 折叠 @文档 = "category = \"加解密.辅助类\"" @常量类 = 整数>
 {
     常量 ROUTER <公开 值 = @BCRYPT_SUPPORTED_PAD_ROUTER 注释 = "让提供程序支持通过路由器添加填充">
     常量 PKCS1 <公开 值 = @BCRYPT_SUPPORTED_PAD_PKCS1_ENC 注释 = "让提供程序支持PKCS1加密填充方案">

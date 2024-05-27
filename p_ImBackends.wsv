@@ -212,9 +212,9 @@
     }
 
     方法 渲染数据 <公开 折叠 @嵌入式方法 = "">
-    参数 绘制数据 <类型 = 变整数 注释 = "由\"ImGui.取渲染数据()\"返回">
+    参数 绘制数据 <类型 = IM绘制数据指针 注释 = "由\"ImGui.取渲染数据()\"返回">
     {
-        @ ImGui_ImplDX9_RenderDrawData(reinterpret_cast<ImDrawData*>(@<绘制数据>))
+        @ ImGui_ImplDX9_RenderDrawData(@<绘制数据>)
     }
 
     方法 创建设备对象 <公开 注释 = "用于在不丢失ImGui状态的情况下重置渲染设备" 折叠 @嵌入式方法 = "">
@@ -230,54 +230,58 @@
     # 纹理图片 ---
 
     方法 加载图片文件 <公开 类型 = 逻辑型 注释 = "从指定的图片文件加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 折叠2 @禁止流程检查 = 真
-            @视窗.外部头文件 = "<D3dx9tex.h>" @视窗.外部库 = "D3dx9.lib"
-            @视窗.需求系统头文件 = "<D3dx9tex.h>|需要安装 DirectX SDK 9 https://www.microsoft.com/zh-CN/download/details.aspx?id=6812">
+            @视窗.外部头文件 = "FrameWork\\d3dx9\\include\\d3dx9tex.h"
+            @视窗.外部库.debug = "FrameWork\\d3dx9\\Lib\\$(p)\\d3dx9d.lib"
+            @视窗.外部库.release = "FrameWork\\d3dx9\\Lib\\$(p)\\d3dx9.lib"
+            "//@视窗.需求系统头文件" = "D3dx9tex.h|需要安装 DirectX SDK 9 https://www.microsoft.com/zh-CN/download/details.aspx?id=6812 并在安装后添加头文件搜寻目录和库文件搜寻目录">
     参数 文件名 <类型 = 文本型 注释 = "支持格式: .bmp、.dds、.dib、.hdr、.jpg、.pfm、.png、.ppm 和 .tga">
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
         @ PDIRECT3DTEXTURE9 texture;
         @ HRESULT hr = D3DXCreateTextureFromFileW(m_pd3dDevice, @<文件名>.GetText(), &texture);
-        @ if (hr != S_OK) return false;
+        @ if (hr != S_OK) return FALSE;
         @ D3DSURFACE_DESC my_image_desc;
         @ texture->GetLevelDesc(0, &my_image_desc);
         @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(texture);
         @ @<图片信息.宽度> = static_cast<int>(my_image_desc.Width);
         @ @<图片信息.高度> = static_cast<int>(my_image_desc.Height);
-        @ return true;
+        @ return TRUE;
     }
 
     方法 加载图片资源 <公开 类型 = 逻辑型 注释 = "将程序文件中的图片资源加载到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 折叠2
-            @禁止流程检查 = 真 @视窗.外部头文件 = "<D3dx9tex.h>" @视窗.外部库 = "D3dx9.lib"
-            @视窗.需求系统头文件 = "<D3dx9tex.h>|需要安装 DirectX SDK 9 https://www.microsoft.com/zh-CN/download/details.aspx?id=6812">
+            @禁止流程检查 = 真 @视窗.外部头文件 = "FrameWork\\d3dx9\\include\\d3dx9tex.h"
+            @视窗.外部库.debug = "FrameWork\\d3dx9\\Lib\\$(p)\\d3dx9d.lib"
+            @视窗.外部库.release = "FrameWork\\d3dx9\\Lib\\$(p)\\d3dx9.lib">
     参数 图片资源 <类型 = 视窗文件资源 注释 = "支持格式: 支持格式: .bmp、.dds、.dib、.hdr、.jpg、.pfm、.png、.ppm 和 .tga">
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
         @ PDIRECT3DTEXTURE9 texture;
         @ HRESULT hr = D3DXCreateTextureFromResourceW(m_pd3dDevice, g_objVolApp.GetInstanceHandle(), MAKEINTRESOURCE(@<图片资源>), &texture);
-        @ if (hr != S_OK) return false;
+        @ if (hr != S_OK) return FALSE;
         @ D3DSURFACE_DESC my_image_desc;
         @ texture->GetLevelDesc(0, &my_image_desc);
         @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(texture);
         @ @<图片信息.宽度> = static_cast<int>(my_image_desc.Width);
         @ @<图片信息.高度> = static_cast<int>(my_image_desc.Height);
-        @ return true;
+        @ return TRUE;
     }
 
     方法 加载图片字节集 <公开 类型 = 逻辑型 注释 = "从指定的图片字节集加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 折叠2
-            @禁止流程检查 = 真 @视窗.外部头文件 = "<D3dx9tex.h>" @视窗.外部库 = "D3dx9.lib"
-            @视窗.需求系统头文件 = "<D3dx9tex.h>|需要安装 DirectX SDK 9 https://www.microsoft.com/zh-CN/download/details.aspx?id=6812">
+            @禁止流程检查 = 真 @视窗.外部头文件 = "FrameWork\\d3dx9\\include\\d3dx9tex.h"
+            @视窗.外部库.debug = "FrameWork\\d3dx9\\Lib\\$(p)\\d3dx9d.lib"
+            @视窗.外部库.release = "FrameWork\\d3dx9\\Lib\\$(p)\\d3dx9.lib">
     参数 图片数据 <类型 = 字节集类 注释 = "支持格式: 支持格式: .bmp、.dds、.dib、.hdr、.jpg、.pfm、.png、.ppm 和 .tga">
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
         @ PDIRECT3DTEXTURE9 texture;
         @ HRESULT hr = D3DXCreateTextureFromFileInMemory(m_pd3dDevice, @<图片数据>.GetPtr(), static_cast<UINT>(@<图片数据>.GetSize()), &texture);
-        @ if (hr != S_OK) return false;
+        @ if (hr != S_OK) return FALSE;
         @ D3DSURFACE_DESC my_image_desc;
         @ texture->GetLevelDesc(0, &my_image_desc);
         @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(texture);
         @ @<图片信息.宽度> = static_cast<int>(my_image_desc.Width);
         @ @<图片信息.高度> = static_cast<int>(my_image_desc.Height);
-        @ return true;
+        @ return TRUE;
     }
 
     方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠>
@@ -365,30 +369,29 @@
 
     # SDL ---
 
-    变量 局_窗口句柄 <类型 = 变整数>
-
     方法 加载_SDL <公开 类型 = 逻辑型 折叠 @视窗.外部头文件 = "SDL_syswm.h">
     参数 窗口句柄 <类型 = 变整数 @默认值 = 0>
     {
+        变量 原生窗口句柄 <类型 = 变整数>
         @ SDL_SysWMinfo wmInfo;
         @ SDL_VERSION(&wmInfo.version);
         @ SDL_GetWindowWMInfo(reinterpret_cast<SDL_Window*>(@<窗口句柄>), &wmInfo);
-        @ @<局_窗口句柄> = reinterpret_cast<INT_P>(wmInfo.info.win.window);
-        返回 (创建设备 (局_窗口句柄))
+        @ @<原生窗口句柄> = reinterpret_cast<INT_P>(wmInfo.info.win.window);
+        返回 (创建设备 (原生窗口句柄))
     }
 
-    方法 渲染_SDL <公开 折叠 @嵌入式方法 = "">
+    方法 渲染_SDL <公开 折叠>
     参数 窗口句柄 <类型 = 变整数>
     参数 背景颜色 <类型 = ImVec4>
     {
-        @ @sn<this>.@<渲染>(@<背景颜色>)
+        渲染 (背景颜色)
     }
 
     方法 加载字体纹理 <公开>
 
     方法 清理 <公开 折叠>
     {
-        释放设备 (局_窗口句柄)
+        释放设备 (0)
     }
 }
 
@@ -427,9 +430,9 @@
     }
 
     方法 渲染数据 <公开 折叠 @嵌入式方法 = "">
-    参数 绘制数据 <类型 = 变整数 注释 = "由\"ImGui.取渲染数据()\"返回">
+    参数 绘制数据 <类型 = IM绘制数据指针 注释 = "由\"ImGui.取渲染数据()\"返回">
     {
-        @ ImGui_ImplDX10_RenderDrawData(reinterpret_cast<ImDrawData*>(@<绘制数据>))
+        @ ImGui_ImplDX10_RenderDrawData(@<绘制数据>)
     }
 
     方法 创建设备对象 <公开 注释 = "用于在不丢失ImGui状态的情况下重置渲染设备" 折叠 @嵌入式方法 = "">
@@ -448,13 +451,13 @@
     参数 文件名 <类型 = 文本型 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
-        @ if (!m_pd3dDevice) return false;
+        @ if (!m_pd3dDevice) return FALSE;
         @ FILE* file = _wfopen(@<文件名>.GetText(), L"rb");
-        @ if (!file) return false;
+        @ if (!file) return FALSE;
         @ int image_width = 0, image_height = 0;
         @ unsigned char* image_data = stbi_load_from_file(file, &image_width, &image_height, nullptr, 4);
         @ fclose(file);
-        @ if (!image_data) return false;
+        @ if (!image_data) return FALSE;
         // Create texture
         @ D3D10_TEXTURE2D_DESC desc;
         @ ZeroMemory(&desc, sizeof(desc));
@@ -484,7 +487,7 @@
         @ @<图片信息.高度> = image_height;
         @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(out_srv);
         @ stbi_image_free(image_data);
-        @ return true;
+        @ return TRUE;
     }
 
     方法 加载图片资源 <公开 类型 = 逻辑型 注释 = "将程序文件中的图片资源加载到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
@@ -493,13 +496,13 @@
     {
         @ HMODULE hModule = g_objVolApp.GetInstanceHandle();
         @ HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE((WORD)@<图片资源>), RT_RCDATA);
-        @ if (!hSrc) return false;
+        @ if (!hSrc) return FALSE;
         @ HGLOBAL resdata = ::LoadResource(hModule, hSrc);
-        @ if (!resdata) return false;
+        @ if (!resdata) return FALSE;
         @ int image_width = 0, image_height = 0;
         @ unsigned char* image_data = stbi_load_from_memory((unsigned char*)::LockResource(resdata), static_cast<int>(::SizeofResource(hModule, hSrc)),
         @                                                   &image_width, &image_height, nullptr, 4);
-        @ if (!image_data) return false;
+        @ if (!image_data) return FALSE;
         // Create texture
         @ D3D10_TEXTURE2D_DESC desc;
         @ ZeroMemory(&desc, sizeof(desc));
@@ -529,7 +532,7 @@
         @ @<图片信息.高度> = image_height;
         @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(out_srv);
         @ stbi_image_free(image_data);
-        @ return true;
+        @ return TRUE;
     }
 
     方法 加载图片字节集 <公开 类型 = 逻辑型 注释 = "从指定的图片字节集加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
@@ -538,7 +541,7 @@
     {
         @ int image_width = 0, image_height = 0;
         @ unsigned char* image_data = stbi_load_from_memory(@<图片数据>.GetPtr(), static_cast<int>(@<图片数据>.GetSize()), &image_width, &image_height, nullptr, 4);
-        @ if (!image_data) return false;
+        @ if (!image_data) return FALSE;
         // Create texture
         @ D3D10_TEXTURE2D_DESC desc;
         @ ZeroMemory(&desc, sizeof(desc));
@@ -568,7 +571,7 @@
         @ @<图片信息.高度> = image_height;
         @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(out_srv);
         @ stbi_image_free(image_data);
-        @ return true;
+        @ return TRUE;
     }
 
     方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠>
@@ -661,16 +664,15 @@
 
     # SDL ---
 
-    变量 局_窗口句柄 <类型 = 变整数>
-
-    方法 加载_SDL <公开 类型 = 逻辑型 @视窗.外部头文件 = "<SDL_syswm.h>">
+    方法 加载_SDL <公开 类型 = 逻辑型 折叠 @视窗.外部头文件 = "<SDL_syswm.h>">
     参数 窗口句柄 <类型 = 变整数 @默认值 = 0>
     {
+        变量 原生窗口句柄 <类型 = 变整数>
         @ SDL_SysWMinfo wmInfo;
         @ SDL_VERSION(&wmInfo.version);
         @ SDL_GetWindowWMInfo(reinterpret_cast<SDL_Window*>(@<窗口句柄>), &wmInfo);
-        @ @<局_窗口句柄> = reinterpret_cast<INT_P>(wmInfo.info.win.window);
-        返回 (创建设备 (局_窗口句柄))
+        @ @<原生窗口句柄> = reinterpret_cast<INT_P>(wmInfo.info.win.window);
+        返回 (创建设备 (原生窗口句柄))
     }
 
     方法 渲染_SDL <公开 折叠 @嵌入式方法 = "">
@@ -684,7 +686,7 @@
 
     方法 清理 <公开 折叠>
     {
-        释放设备 (局_窗口句柄)
+        释放设备 (0)
     }
 }
 
@@ -724,9 +726,9 @@
     }
 
     方法 渲染数据 <公开 折叠 @嵌入式方法 = "">
-    参数 绘制数据 <类型 = 变整数 注释 = "由\"ImGui.取渲染数据()\"返回">
+    参数 绘制数据 <类型 = IM绘制数据指针 注释 = "由\"ImGui.取渲染数据()\"返回">
     {
-        @ ImGui_ImplDX11_RenderDrawData(reinterpret_cast<ImDrawData*>(@<绘制数据>))
+        @ ImGui_ImplDX11_RenderDrawData(@<绘制数据>)
     }
 
     方法 创建设备对象 <公开 注释 = "用于在不丢失ImGui状态的情况下重置渲染设备" 折叠 @嵌入式方法 = "">
@@ -745,13 +747,13 @@
     参数 文件名 <类型 = 文本型 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
-        @ if (!m_pd3dDevice) return false;
+        @ if (!m_pd3dDevice) return FALSE;
         @ FILE* file = _wfopen(@<文件名>.GetText(), L"rb");
-        @ if (!file) return false;
+        @ if (!file) return FALSE;
         @ int image_width = 0, image_height = 0;
         @ unsigned char* image_data = stbi_load_from_file(file, &image_width, &image_height, nullptr, 4);
         @ fclose(file);
-        @ if (!image_data) return false;
+        @ if (!image_data) return FALSE;
         // Create texture
         @ D3D11_TEXTURE2D_DESC desc;
         @ ZeroMemory(&desc, sizeof(desc));
@@ -781,7 +783,7 @@
         @ @<图片信息.高度> = image_height;
         @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(out_srv);
         @ stbi_image_free(image_data);
-        @ return true;
+        @ return TRUE;
     }
 
     方法 加载图片资源 <公开 类型 = 逻辑型 注释 = "将程序文件中的图片资源加载到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
@@ -790,13 +792,13 @@
     {
         @ HMODULE hModule = g_objVolApp.GetInstanceHandle();
         @ HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE((WORD)@<图片资源>), RT_RCDATA);
-        @ if (!hSrc) return false;
+        @ if (!hSrc) return FALSE;
         @ HGLOBAL resdata = ::LoadResource(hModule, hSrc);
-        @ if (!resdata) return false;
+        @ if (!resdata) return FALSE;
         @ int image_width = 0, image_height = 0;
         @ unsigned char* image_data = stbi_load_from_memory(reinterpret_cast<unsigned char*>(::LockResource(resdata)), static_cast<int>(::SizeofResource(hModule, hSrc)),
         @                                                   &image_width, &image_height, nullptr, 4);
-        @ if (!image_data) return false;
+        @ if (!image_data) return FALSE;
         // Create texture
         @ D3D11_TEXTURE2D_DESC desc;
         @ ZeroMemory(&desc, sizeof(desc));
@@ -826,7 +828,7 @@
         @ @<图片信息.高度> = image_height;
         @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(out_srv);
         @ stbi_image_free(image_data);
-        @ return true;
+        @ return TRUE;
     }
 
     方法 加载图片字节集 <公开 类型 = 逻辑型 注释 = "从指定的图片字节集加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
@@ -835,7 +837,7 @@
     {
         @ int image_width = 0, image_height = 0;
         @ unsigned char* image_data = stbi_load_from_memory(@<图片数据>.GetPtr(), static_cast<int>(@<图片数据>.GetSize()), &image_width, &image_height, nullptr, 4);
-        @ if (!image_data) return false;
+        @ if (!image_data) return FALSE;
         // Create texture
         @ D3D11_TEXTURE2D_DESC desc;
         @ ZeroMemory(&desc, sizeof(desc));
@@ -865,7 +867,7 @@
         @ @<图片信息.高度> = image_height;
         @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(out_srv);
         @ stbi_image_free(image_data);
-        @ return true;
+        @ return TRUE;
     }
 
     方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠>
@@ -962,16 +964,15 @@
 
     # SDL ---
 
-    变量 局_窗口句柄 <类型 = 变整数>
-
     方法 加载_SDL <公开 类型 = 逻辑型 折叠 @视窗.外部头文件 = "<SDL_syswm.h>">
     参数 窗口句柄 <类型 = 变整数 @默认值 = 0>
     {
+        变量 原生窗口句柄 <类型 = 变整数>
         @ SDL_SysWMinfo wmInfo;
         @ SDL_VERSION(&wmInfo.version);
         @ SDL_GetWindowWMInfo(reinterpret_cast<SDL_Window*>(@<窗口句柄>), &wmInfo);
-        @ @<局_窗口句柄> = reinterpret_cast<INT_P>(wmInfo.info.win.window);
-        返回 (创建设备 (局_窗口句柄))
+        @ @<原生窗口句柄> = reinterpret_cast<INT_P>(wmInfo.info.win.window);
+        返回 (创建设备 (原生窗口句柄))
     }
 
     方法 渲染_SDL <公开 折叠 @嵌入式方法 = "">
@@ -985,7 +986,7 @@
 
     方法 清理 <公开 折叠>
     {
-        释放设备 (局_窗口句柄)
+        释放设备 (0)
     }
 }
 
@@ -1045,9 +1046,9 @@
     }
 
     方法 渲染数据 <公开 折叠 @嵌入式方法 = "">
-    参数 绘制数据 <类型 = 变整数 注释 = "由\"ImGui.取渲染数据()\"返回">
+    参数 绘制数据 <类型 = IM绘制数据指针 注释 = "由\"ImGui.取渲染数据()\"返回">
     {
-        @ ImGui_ImplDX12_RenderDrawData(reinterpret_cast<ImDrawData*>(@<绘制数据>), @sn<this>.m_pd3dCommandList)
+        @ ImGui_ImplDX12_RenderDrawData(@<绘制数据>, @sn<this>.m_pd3dCommandList)
     }
 
     方法 创建设备对象 <公开 注释 = "用于在不丢失ImGui状态的情况下重置渲染设备" 折叠 @嵌入式方法 = "">
@@ -1067,12 +1068,12 @@
     参数 文件名 <类型 = 文本型 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
-        @ if (!m_pd3dDevice) return false;
+        @ if (!m_pd3dDevice) return FALSE;
         @ FILE* file = _wfopen(@<文件名>.GetText(), L"rb");
-        @ if (!file) return false;
+        @ if (!file) return FALSE;
         @ unsigned char* image_data = stbi_load_from_file(file, &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
         @ fclose(file);
-        @ if (!image_data) return false;
+        @ if (!image_data) return FALSE;
         @ ID3D12Resource* my_texture = NULL;
         @ UINT handle_increment = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
         @ descriptor_index++;
@@ -1083,7 +1084,7 @@
         @ this->@<_加载图片>(image_data, my_texture_srv_cpu_handle, &my_texture, @<图片信息.宽度>, @<图片信息.高度>);
         @ @<图片信息.纹理ID> = static_cast<INT64>(my_texture_srv_gpu_handle.ptr);
         @ @<图片信息._内部数据> = reinterpret_cast<INT_P>(my_texture);
-        @ return true;
+        @ return TRUE;
     }
 
     方法 加载图片资源 <公开 类型 = 逻辑型 注释 = "将程序文件中的图片资源加载到渲染器中,不再使用时请调用\"释放纹理\"."
@@ -1091,16 +1092,16 @@
     参数 图片资源 <类型 = 视窗文件资源 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
-        @ if (!m_pd3dDevice) return false;
+        @ if (!m_pd3dDevice) return FALSE;
         @ HMODULE hModule = g_objVolApp.GetInstanceHandle();
         @ HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE((WORD)@<图片资源>), RT_RCDATA);
-        @ if (!hSrc) return false;
+        @ if (!hSrc) return FALSE;
         @ HGLOBAL resdata = ::LoadResource(hModule, hSrc);
-        @ if (!resdata) return false;
+        @ if (!resdata) return FALSE;
         @ unsigned char* data = reinterpret_cast<unsigned char*>(::LockResource(resdata));
         @ int len = static_cast<int>(::SizeofResource(hModule, hSrc));
         @ unsigned char* image_data = stbi_load_from_memory(data, len, &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
-        @ if (!image_data) return false;
+        @ if (!image_data) return FALSE;
         @ ID3D12Resource* my_texture = NULL;
         @ UINT handle_increment = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
         @ descriptor_index++;
@@ -1111,7 +1112,7 @@
         @ this->@<_加载图片>(image_data, my_texture_srv_cpu_handle, &my_texture, @<图片信息.宽度>, @<图片信息.高度>);
         @ @<图片信息.纹理ID> = static_cast<INT64>(my_texture_srv_gpu_handle.ptr);
         @ @<图片信息._内部数据> = reinterpret_cast<INT_P>(my_texture);
-        @ return true;
+        @ return TRUE;
     }
 
     方法 加载图片字节集 <公开 类型 = 逻辑型 注释 = "从指定的图片字节集加载纹理到渲染器中,不再使用时请调用\"释放纹理\"."
@@ -1119,9 +1120,9 @@
     参数 图片数据 <类型 = 字节集类 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
-        @ if (!m_pd3dDevice) return false;
+        @ if (!m_pd3dDevice) return FALSE;
         @ unsigned char* image_data = stbi_load_from_memory(@<图片数据>.GetPtr(), static_cast<int>(@<图片数据>.GetSize()), &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
-        @ if (!image_data) return false;
+        @ if (!image_data) return FALSE;
         @ ID3D12Resource* my_texture = NULL;
         @ UINT handle_increment = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
         @ descriptor_index++;
@@ -1132,7 +1133,7 @@
         @ this->@<_加载图片>(image_data, my_texture_srv_cpu_handle, &my_texture, @<图片信息.宽度>, @<图片信息.高度>);
         @ @<图片信息.纹理ID> = static_cast<INT64>(my_texture_srv_gpu_handle.ptr);
         @ @<图片信息._内部数据> = reinterpret_cast<INT_P>(my_texture);
-        @ return true;
+        @ return TRUE;
     }
 
     方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠>
@@ -1502,16 +1503,15 @@
 
     # SDL ---
 
-    变量 局_窗口句柄 <类型 = 变整数>
-
     方法 加载_SDL <公开 类型 = 逻辑型 折叠 @视窗.外部头文件 = "<SDL_syswm.h>">
     参数 窗口句柄 <类型 = 变整数 @默认值 = 0>
     {
+        变量 原生窗口句柄 <类型 = 变整数>
         @ SDL_SysWMinfo wmInfo;
         @ SDL_VERSION(&wmInfo.version);
         @ SDL_GetWindowWMInfo(reinterpret_cast<SDL_Window*>(@<窗口句柄>), &wmInfo);
-        @ @<局_窗口句柄> = reinterpret_cast<INT_P>(wmInfo.info.win.window);
-        返回 (创建设备 (局_窗口句柄))
+        @ @<原生窗口句柄> = reinterpret_cast<INT_P>(wmInfo.info.win.window);
+        返回 (创建设备 (原生窗口句柄))
     }
 
     方法 渲染_SDL <公开 折叠 @嵌入式方法 = "">
@@ -1525,7 +1525,7 @@
 
     方法 清理 <公开 折叠>
     {
-        释放设备 (局_窗口句柄)
+        释放设备 (0)
     }
 }
 
@@ -1606,9 +1606,9 @@
     }
 
     方法 渲染数据 <公开 折叠 @嵌入式方法 = "">
-    参数 绘制数据 <类型 = 变整数 注释 = "由\"ImGui.取渲染数据()\"返回">
+    参数 绘制数据 <类型 = IM绘制数据指针 注释 = "由\"ImGui.取渲染数据()\"返回">
     {
-        @ ImGui_ImplOpenGL3_RenderDrawData(reinterpret_cast<ImDrawData*>(@<绘制数据>))
+        @ ImGui_ImplOpenGL3_RenderDrawData(@<绘制数据>)
     }
 
     方法 加载字体纹理 <公开 注释 = "(可选项)已在\"初始化/关闭/新建帧\"时自动调用" 折叠 @嵌入式方法 = "">
@@ -1638,11 +1638,11 @@
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
         @ FILE* file = _wfopen(@<文件名>.GetText(), L"rb");
-        @ if (!file) return false;
+        @ if (!file) return FALSE;
         @ int image_width = 0, image_height = 0;
         @ unsigned char* image_data = stbi_load_from_file(file, &image_width, &image_height, nullptr, 4);
         @ fclose(file);
-        @ if (!image_data) return false;
+        @ if (!image_data) return FALSE;
         @ GLuint image_texture;
         @ glGenTextures(1, &image_texture);
         @ glBindTexture(GL_TEXTURE_2D, image_texture);
@@ -1660,7 +1660,7 @@
         @ @<图片信息.纹理ID> = static_cast<INT64>(image_texture);
         @ @<图片信息.宽度> = image_width;
         @ @<图片信息.高度> = image_height;
-        @ return true;
+        @ return TRUE;
     }
 
     方法 加载图片资源 <公开 类型 = 逻辑型 注释 = "将程序文件中的图片资源加载到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
@@ -1669,14 +1669,14 @@
     {
         @ HMODULE hModule = g_objVolApp.GetInstanceHandle();
         @ HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE((WORD)@<图片资源>), RT_RCDATA);
-        @ if (!hSrc) return false;
+        @ if (!hSrc) return FALSE;
         @ HGLOBAL resdata = ::LoadResource(hModule, hSrc);
-        @ if (!resdata) return false;
+        @ if (!resdata) return FALSE;
         @ unsigned char* data = reinterpret_cast<unsigned char*>(::LockResource(resdata));
         @ int len = static_cast<int>(::SizeofResource(hModule, hSrc));
         @ int image_width = 0, image_height = 0;
         @ unsigned char* image_data = stbi_load_from_memory(data, len, &image_width, &image_height, nullptr, 4);
-        @ if (!image_data) return false;
+        @ if (!image_data) return FALSE;
         @ GLuint image_texture;
         @ glGenTextures(1, &image_texture);
         @ glBindTexture(GL_TEXTURE_2D, image_texture);
@@ -1694,7 +1694,7 @@
         @ @<图片信息.纹理ID> = static_cast<INT64>(image_texture);
         @ @<图片信息.宽度> = image_width;
         @ @<图片信息.高度> = image_height;
-        @ return true;
+        @ return TRUE;
     }
 
     方法 加载图片字节集 <公开 类型 = 逻辑型 注释 = "从指定的图片字节集加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 @禁止流程检查 = 真>
@@ -1703,7 +1703,7 @@
     {
         @ int image_width = 0, image_height = 0;
         @ unsigned char* image_data = stbi_load_from_memory(@<图片数据>.GetPtr(), static_cast<int>(@<图片数据>.GetSize()), &image_width, &image_height, nullptr, 4);
-        @ if (!image_data) return false;
+        @ if (!image_data) return FALSE;
         @ GLuint image_texture;
         @ glGenTextures(1, &image_texture);
         @ glBindTexture(GL_TEXTURE_2D, image_texture);
@@ -1721,7 +1721,7 @@
         @ @<图片信息.纹理ID> = static_cast<INT64>(image_texture);
         @ @<图片信息.宽度> = image_width;
         @ @<图片信息.高度> = image_height;
-        @ return true;
+        @ return TRUE;
     }
 
     方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠>
@@ -2050,15 +2050,16 @@
         @ init_info.Device = g_Device;
         @ init_info.QueueFamily = g_QueueFamily;
         @ init_info.Queue = g_Queue;
-        @ init_info.PipelineCache = g_PipelineCache;
         @ init_info.DescriptorPool = g_DescriptorPool;
-        @ init_info.Subpass = 0;
+        @ init_info.RenderPass = m_MainWindowData.RenderPass;
         @ init_info.MinImageCount = g_MinImageCount;
         @ init_info.ImageCount = m_MainWindowData.ImageCount;
         @ init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+        @ init_info.PipelineCache = g_PipelineCache;
+        @ init_info.Subpass = 0;
         @ init_info.Allocator = g_Allocator;
         @ init_info.CheckVkResultFn = @sn<current_class>::check_vk_result;
-        @ return ImGui_ImplVulkan_Init(&init_info, m_MainWindowData.RenderPass);
+        @ return ImGui_ImplVulkan_Init(&init_info);
     }
 
     方法 新建帧 <公开 折叠 @嵌入式方法 = "">
@@ -2074,9 +2075,9 @@
     }
 
     方法 渲染数据 <公开 折叠 @嵌入式方法 = "">
-    参数 绘制数据 <类型 = 变整数 注释 = "由\"ImGui.取渲染数据()\"返回">
+    参数 绘制数据 <类型 = IM绘制数据指针 注释 = "由\"ImGui.取渲染数据()\"返回">
     {
-        @ ImGui_ImplVulkan_RenderDrawData(reinterpret_cast<ImDrawData*>(@<绘制数据>))
+        @ ImGui_ImplVulkan_RenderDrawData(@<绘制数据>)
     }
 
     方法 渲染_GLFW <公开 折叠>
@@ -2126,7 +2127,7 @@
     参数 高度 <类型 = 整数>
 
     方法 _FrameRender <注释 = "仅限内部嵌入式使用" 折叠>
-    参数 draw_data <类型 = 变整数 @视窗.前缀文本 = "/*" @视窗.后缀文本 = "*/ImDrawData*" @输出名 = "draw_data">
+    参数 draw_data <类型 = IM绘制数据指针 @输出名 = "draw_data">
     {
         @ VkResult err;
         @ VkSemaphore image_acquired_semaphore  = m_MainWindowData.FrameSemaphores[m_MainWindowData.SemaphoreIndex].ImageAcquiredSemaphore;
@@ -2213,12 +2214,12 @@
     参数 文件名 <类型 = 文本型 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
-        @ if (g_Device == VK_NULL_HANDLE) return false;
+        @ if (g_Device == VK_NULL_HANDLE) return FALSE;
         @ FILE* file = _wfopen(@<文件名>.GetText(), L"rb");
-        @ if (!file) return false;
+        @ if (!file) return FALSE;
         @ unsigned char* image_data = stbi_load_from_file(file, &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
         @ fclose(file);
-        @ if (!image_data) return false;
+        @ if (!image_data) return FALSE;
         @ MyTextureData* tex_data = new MyTextureData{};
         @ @<图片信息._内部数据> = reinterpret_cast<INT_P>(tex_data);
         @ tex_data->Width = @<图片信息.宽度>;
@@ -2226,7 +2227,7 @@
         @ tex_data->Channels = 4;
         @ @<_加载图片>(image_data, tex_data);
         @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(tex_data->DS);
-        @ return true;
+        @ return TRUE;
     }
 
     方法 加载图片资源 <公开 类型 = 逻辑型 注释 = "将程序文件中的图片资源加载到渲染器中,不再使用时请调用\"释放纹理\"."
@@ -2234,16 +2235,16 @@
     参数 图片资源 <类型 = 视窗文件资源 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
-        @ if (g_Device == VK_NULL_HANDLE) return false;
+        @ if (g_Device == VK_NULL_HANDLE) return FALSE;
         @ HMODULE hModule = g_objVolApp.GetInstanceHandle();
         @ HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE((WORD)@<图片资源>), RT_RCDATA);
-        @ if (!hSrc) return false;
+        @ if (!hSrc) return FALSE;
         @ HGLOBAL resdata = ::LoadResource(hModule, hSrc);
-        @ if (!resdata) return false;
+        @ if (!resdata) return FALSE;
         @ unsigned char* data = reinterpret_cast<unsigned char*>(::LockResource(resdata));
         @ int len = static_cast<int>(::SizeofResource(hModule, hSrc));
         @ unsigned char* image_data = stbi_load_from_memory(data, len, &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
-        @ if (!image_data) return false;
+        @ if (!image_data) return FALSE;
         @ MyTextureData* tex_data = new MyTextureData{};
         @ tex_data->Width = @<图片信息.宽度>;
         @ tex_data->Height = @<图片信息.高度>;
@@ -2251,7 +2252,7 @@
         @ @<图片信息._内部数据> = reinterpret_cast<INT_P>(tex_data);
         @ @<_加载图片>(image_data, tex_data);
         @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(tex_data->DS);
-        @ return true;
+        @ return TRUE;
     }
 
     方法 加载图片字节集 <公开 类型 = 逻辑型 注释 = "从指定的图片字节集加载纹理到渲染器中,不再使用时请调用\"释放纹理\"."
@@ -2259,9 +2260,9 @@
     参数 图片数据 <类型 = 字节集类 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
-        @ if (g_Device == VK_NULL_HANDLE) return false;
+        @ if (g_Device == VK_NULL_HANDLE) return FALSE;
         @ unsigned char* image_data = stbi_load_from_memory(@<图片数据>.GetPtr(), static_cast<int>(@<图片数据>.GetSize()), &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
-        @ if (!image_data) return false;
+        @ if (!image_data) return FALSE;
         @ MyTextureData* tex_data = new MyTextureData{};
         @ @<图片信息._内部数据> = reinterpret_cast<INT_P>(tex_data);
         @ tex_data->Width = @<图片信息.宽度>;
@@ -2269,7 +2270,7 @@
         @ tex_data->Channels = 4;
         @ @<_加载图片>(image_data, tex_data);
         @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(tex_data->DS);
-        @ return true;
+        @ return TRUE;
     }
 
     方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠>

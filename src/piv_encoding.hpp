@@ -131,7 +131,7 @@ namespace piv
             }
             else
             {
-                mbstr = "";
+                mbstr.clear();
             }
         }
 
@@ -148,7 +148,7 @@ namespace piv
             size_t utf8words = simdutf::utf8_length_from_utf16le(reinterpret_cast<const char16_t *>(utf16str), utf16words);
             if (utf8words == 0)
             {
-                utf8str = "";
+                utf8str.clear();
             }
             else
             {
@@ -166,7 +166,7 @@ namespace piv
             }
             else
             {
-                utf8str = "";
+                utf8str.clear();
             }
 #endif
         }
@@ -184,7 +184,7 @@ namespace piv
             size_t utf16words = simdutf::utf16_length_from_utf8(utf8str, utf8words);
             if (utf16words == 0)
             {
-                utf16str = L"";
+                utf16str.clear();
             }
             else
             {
@@ -202,7 +202,7 @@ namespace piv
             }
             else
             {
-                utf16str = L"";
+                utf16str.clear();
             }
 #endif
         }
@@ -395,7 +395,10 @@ namespace piv
         static int32_t UrlEncode(const unsigned char *lpszSrc, const size_t &SrcLen, unsigned char *lpszDest, size_t &DestLen, const bool &ReservedWord = false) noexcept
         {
             if (lpszDest == nullptr || DestLen == 0)
-                goto ERROR_DEST_LEN;
+            {
+                DestLen = GuessUrlEncodeBound(lpszSrc, SrcLen);
+                return -5;
+            }
             unsigned char c, n;
             size_t j = 0;
             for (size_t i = 0; i < SrcLen; i++)
@@ -439,7 +442,10 @@ namespace piv
         static int32_t UrlDecode(const unsigned char *lpszSrc, const size_t &SrcLen, unsigned char *lpszDest, size_t &DestLen) noexcept
         {
             if (lpszDest == nullptr || DestLen == 0)
-                goto ERROR_DEST_LEN;
+            {
+                DestLen = GuessUrlDecodeBound(lpszSrc, SrcLen);
+                return -5;
+            }
             unsigned char c, n;
             size_t j = 0;
             for (size_t i = 0; i < SrcLen; i++)
@@ -525,7 +531,7 @@ namespace piv
         }
 
         template <typename CharT, typename String_t>
-        CVolString &str_to_hex(const String_t &str, const bool &separator = false, CVolString &hexstr = CVolString{})
+        CVolString &str_to_hex(const String_t &str, const bool &separator /* = false*/, CVolString &hexstr)
         {
             hexstr.Empty();
             if (str.empty())
@@ -554,11 +560,11 @@ namespace piv
         T &hex_to_str(const String_t &hexstr, T &str = T{})
         {
             str.clear();
-            if (hexstr.size() < 2 * sizeof(String_t::value_type))
+            if (hexstr.size() < 2 * sizeof(typename String_t::value_type))
                 return str;
-            str.resize(hexstr.size() / (2 * sizeof(String_t::value_type)));
+            str.resize(hexstr.size() / (2 * sizeof(typename String_t::value_type)));
             unsigned char *pStr = const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(str.data()));
-            String_t::value_type ch1, ch2;
+            typename String_t::value_type ch1, ch2;
             size_t count = hexstr.size(), n = 0;
             for (size_t i = 0; i < count; i++)
             {
@@ -570,7 +576,7 @@ namespace piv
                     n++;
                 }
             }
-            str.resize(n / sizeof(String_t::value_type));
+            str.resize(n / sizeof(typename String_t::value_type));
             return str;
         }
 
@@ -606,7 +612,7 @@ namespace piv
         }
 
         template <typename String_t>
-        static CVolString &to_usc2str(const String_t &str, const bool &en_ascii = false, CVolString &usc2 = CVolString{})
+        static CVolString &to_usc2str(const String_t &str, const bool &en_ascii /* = false*/, CVolString &usc2)
         {
             usc2.Empty();
             usc2.SetNumAlignChars(str.size() * 6);
@@ -641,7 +647,7 @@ namespace piv
             ret.clear();
             size_t len = usc2.size();
             ret.reserve(len);
-            String_t::value_type ch;
+            typename String_t::value_type ch;
             unsigned char hex[4];
             for (size_t i = 0; i < len; i++)
             {
@@ -919,7 +925,7 @@ public:
      * @brief 生成一个火山的文本型,其中包含了转换后的文本数据
      * @return 返回所转换的文本型
      */
-    inline CVolString &GetStr(CVolString &str = CVolString{}) const
+    inline CVolString &GetStr(CVolString &str) const
     {
         str.SetText(utf16str.c_str());
         return str;
@@ -930,7 +936,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline CVolMem &GetMem(CVolMem &mem = CVolMem{}, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem, const bool &null_char = false) const
     {
         mem.Empty();
         mem.Append(utf16str.c_str(), (utf16str.size() + (null_char ? 1 : 0)) * 2);
@@ -1133,7 +1139,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline CVolMem &GetMem(CVolMem &mem = CVolMem{}, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem, const bool &null_char = false) const
     {
         mem.Empty();
         mem.Append(mbstr.c_str(), mbstr.size() + (null_char ? 1 : 0));
@@ -1336,7 +1342,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline CVolMem &GetMem(CVolMem &mem = CVolMem{}, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem, const bool &null_char = false) const
     {
         mem.Empty();
         mem.Append(utf8str.c_str(), utf8str.size() + (null_char ? 1 : 0));
@@ -1534,7 +1540,7 @@ public:
      * @brief 生成一个火山的文本型,其中包含了转换后的文本数据
      * @return 返回所转换的文本型
      */
-    inline CVolString &GetStr(CVolString &str = CVolString{}) const
+    inline CVolString &GetStr(CVolString &str) const
     {
         str.SetText(utf16str.c_str());
         return str;
@@ -1545,7 +1551,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline CVolMem &GetMem(CVolMem &mem = CVolMem{}, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem, const bool &null_char = false) const
     {
         mem.Empty();
         mem.Append(utf16str.c_str(), (utf16str.size() + (null_char ? 1 : 0)) * 2);
@@ -1732,7 +1738,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline CVolMem &GetMem(CVolMem &mem = CVolMem{}, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem, const bool &null_char = false) const
     {
         mem.Empty();
         mem.Append(mbstr.c_str(), mbstr.size() + (null_char ? 1 : 0));
@@ -1923,7 +1929,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline CVolMem &GetMem(CVolMem &mem = CVolMem{}, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem, const bool &null_char = false) const
     {
         mem.Empty();
         mem.Append(utf8str.c_str(), utf8str.size() + (null_char ? 1 : 0));
@@ -2122,7 +2128,7 @@ public:
      * @brief 生成一个火山的文本型,其中包含了转换后的文本数据
      * @return 返回所转换的文本型
      */
-    inline CVolString &GetStr(CVolString &str = CVolString{}) const
+    inline CVolString &GetStr(CVolString &str) const
     {
         str.SetText(utf16str.GetText());
         return str;
@@ -2133,7 +2139,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline CVolMem &GetMem(CVolMem &mem = CVolMem{}, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem, const bool &null_char = false) const
     {
         mem.Empty();
         mem.Append(utf16str.GetText(), (utf16str.GetLength() + (null_char ? 1 : 0)) * 2);
@@ -2332,7 +2338,7 @@ public:
      * @brief 生成一个火山的文本型,其中包含了转换后的文本数据
      * @return 返回所转换的文本型
      */
-    inline CVolString &GetStr(CVolString &str = CVolString{}) const
+    inline CVolString &GetStr(CVolString &str) const
     {
         str.SetText(utf16str.GetText());
         return str;
@@ -2343,7 +2349,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline CVolMem &GetMem(CVolMem &mem = CVolMem{}, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem, const bool &null_char = false) const
     {
         mem.Empty();
         mem.Append(utf16str.GetText(), (utf16str.GetLength() + (null_char ? 1 : 0)) * 2);
@@ -2476,7 +2482,7 @@ namespace piv
         }
 
         template <typename CharT>
-        CVolMem &UrlStrDecode(const basic_string_view<CharT> &str, CVolMem &decoded = CVolMem{}, const bool &utf8 = true)
+        CVolMem &UrlStrDecode(const basic_string_view<CharT> &str, CVolMem &decoded, const bool &utf8 = true)
         {
             decoded.Empty();
             if (str.size() == 0)
@@ -2516,17 +2522,17 @@ namespace piv
             return decoded;
         }
         template <typename CharT>
-        CVolMem &UrlStrDecode(const std::basic_string<CharT> &str, CVolMem &decoded = CVolMem{}, const bool &utf8 = true)
+        CVolMem &UrlStrDecode(const std::basic_string<CharT> &str, CVolMem &decoded, const bool &utf8 = true)
         {
             return piv::encoding::UrlStrDecode(basic_string_view<CharT>{str.c_str()}, decoded, utf8);
         }
         template <typename = void>
-        CVolMem &UrlStrDecode(const CVolMem &str, const bool &utf8 = true, CVolMem &decoded = CVolMem{})
+        CVolMem &UrlStrDecode(const CVolMem &str, const bool &utf8 /* = true*/, CVolMem &decoded)
         {
             return piv::encoding::UrlStrDecode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), decoded, utf8);
         }
         template <typename = void>
-        CVolString &UrlStrDecode(const CVolMem &str, const bool &utf8 = true, CVolString &decoded = CVolString{})
+        CVolString &UrlStrDecode(const CVolMem &str, const bool &utf8 /*  = true*/, CVolString &decoded)
         {
             if (piv::encoding::UrlDecodeNeed(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())))
             {
@@ -2546,7 +2552,7 @@ namespace piv
             }
         }
         template <typename CharT>
-        CVolString &UrlStrDecode(const basic_string_view<CharT> &str, CVolString &decoded = CVolString{}, const bool &utf8 = true)
+        CVolString &UrlStrDecode(const basic_string_view<CharT> &str, CVolString &decoded, const bool &utf8 = true)
         {
             decoded.Empty();
             if (str.size() == 0)
@@ -2652,7 +2658,7 @@ namespace piv
         }
 
         template <typename CharT>
-        CVolMem &UrlDataEncode(const basic_string_view<CharT> &str, const bool &utf8 = true, const bool &ReservedWord = false, CVolMem &encoded = CVolMem{})
+        CVolMem &UrlDataEncode(const basic_string_view<CharT> &str, const bool &utf8 /* = true*/, const bool &ReservedWord /* = false*/, CVolMem &encoded)
         {
             encoded.Empty();
             size_t buffer_len;
@@ -2691,18 +2697,18 @@ namespace piv
             return encoded;
         }
         template <typename CharT>
-        CVolMem &UrlDataEncode(const std::basic_string<CharT> &str, const bool &utf8 = true, const bool &ReservedWord = false, CVolMem &encoded = CVolMem{})
+        CVolMem &UrlDataEncode(const std::basic_string<CharT> &str, const bool &utf8 /* = true*/, const bool &ReservedWord /* = false*/, CVolMem &encoded)
         {
             return piv::encoding::UrlDataEncode(std::basic_string<CharT>{str.c_str()}, utf8, ReservedWord, encoded);
         }
 
         template <typename = void>
-        CVolMem &UrlDataEncode(const CVolString &str, const bool &utf8 = true, const bool &ReservedWord = false, CVolMem &encoded = CVolMem{})
+        CVolMem &UrlDataEncode(const CVolString &str, const bool &utf8 /* = true*/, const bool &ReservedWord /* = false*/, CVolMem &encoded)
         {
             return piv::encoding::UrlDataEncode(wstring_view(str.GetText()), utf8, ReservedWord, encoded);
         }
         template <typename = void>
-        CVolMem &UrlDataEncode(const CVolMem &str, const bool &utf8 = true, const bool &ReservedWord = false, CVolMem &encoded = CVolMem{})
+        CVolMem &UrlDataEncode(const CVolMem &str, const bool &utf8 /* = true*/, const bool &ReservedWord /* = false*/, CVolMem &encoded)
         {
             return piv::encoding::UrlDataEncode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), utf8, ReservedWord, encoded);
         }
@@ -2785,7 +2791,7 @@ namespace piv
          * @return 返回编码后的BASE64文本
          */
         template <typename T>
-        inline T encode(const unsigned char *input, size_t len, const int &line_len = 0)
+        inline T encode(const unsigned char *input, size_t len, int line_len = 0)
         {
             T ret;
             int i = 0;
@@ -2839,19 +2845,32 @@ namespace piv
             }
             return ret;
         }
-        inline std::basic_string<CharT> encode(const basic_string_view<CharT> &input, const int &line_len = 0)
+        inline std::basic_string<CharT> encode(const basic_string_view<CharT> &input, int line_len = 0)
         {
             return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), line_len);
         }
-        inline std::basic_string<CharT> encode(const std::basic_string<CharT> &input, const int &line_len = 0)
+        inline std::basic_string<CharT> encode(const std::basic_string<CharT> &input, int line_len = 0)
         {
             return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), line_len);
         }
-        inline std::basic_string<CharT> encode(const CVolMem &input, const int &line_len = 0)
+        inline std::basic_string<CharT> encode(const CVolMem &input, int line_len = 0)
         {
             return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()), line_len);
         }
-        inline CVolString Encode(const CVolMem &input, const int &line_len = 0)
+
+        inline CVolString Encode(const unsigned char *input, size_t len, int line_len = 0)
+        {
+            return encode<CVolString>(input, len, line_len);
+        }
+        inline CVolString Encode(const basic_string_view<CharT> &input, int line_len = 0)
+        {
+            return encode<CVolString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), line_len);
+        }
+        inline CVolString Encode(const std::basic_string<CharT> &input, int line_len = 0)
+        {
+            return encode<CVolString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), line_len);
+        }
+        inline CVolString Encode(const CVolMem &input, int line_len = 0)
         {
             return encode<CVolString>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()), line_len);
         }
@@ -2861,16 +2880,24 @@ namespace piv
          * @param input 所欲转换的BASE64编码
          * @return 返回解码后的数据
          */
-        inline void decode(const basic_string_view<CharT> &input, CVolMem &output)
+        template <typename T>
+        inline void decode(const T *input, CVolMem &output, size_t len = -1)
         {
-            size_t in_len = input.size();
+            if (len == -1)
+                len = sizeof(T) == 1 ? strlen(reinterpret_cast<const char *>(input)) : wcslen(reinterpret_cast<const wchar_t *>(input));
+            /*
+            #ifdef SIMDUTF_H
+                        output.Alloc(simdutf::maximal_binary_length_from_base64(input, len), TRUE);
+                        simdutf::base64_to_binary(input, len, output.GetPtr(), simdutf::base64_default);
+            #else
+            */
             int i = 0;
             int j = 0;
             int in_ = 0;
             unsigned char char_array_4[4], char_array_3[3];
             output.Empty();
 
-            while (in_len-- && (input[in_] != '=') && is_base64(static_cast<unsigned char>(input[in_])))
+            while (len-- && (input[in_] != '=') && is_base64(static_cast<unsigned char>(input[in_])))
             {
                 if (input[in_] == '\r' || input[in_] == '\n')
                 {
@@ -2915,23 +2942,26 @@ namespace piv
                     output.AddByte(char_array_3[j]);
                 }
             }
+            // #endif
+        }
+
+        inline void decode(const basic_string_view<CharT> &input, CVolMem &output)
+        {
+            decode(input.data(), output, input.size());
         }
         inline void decode(const std::basic_string<CharT> &input, CVolMem &output)
         {
-            decode(basic_string_view<CharT>{input}, output);
-        }
-        inline void decode(const CharT *input, CVolMem &output, const size_t &count = static_cast<size_t>(-1))
-        {
-            decode((count == static_cast<size_t>(-1)) ? basic_string_view<CharT>{input} : basic_string_view<CharT>{input, count}, output);
+            decode(input.c_str(), output, input.size());
         }
         inline void decode(const CVolMem &input, CVolMem &output)
         {
-            decode(basic_string_view<CharT>{reinterpret_cast<const CharT *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / sizoef(CharT)}, output);
+            decode(reinterpret_cast<const CharT *>(input.GetPtr()), output, static_cast<size_t>(input.GetSize()) / sizoef(CharT));
         }
         inline void decode(const CVolString &input, CVolMem &output)
         {
-            decode(basic_string_view<CharT>{reinterpret_cast<const CharT *>(input.GetText())}, output);
+            decode(input.GetText(), output, static_cast<size_t>(input.GetLength()));
         }
+
         template <typename T>
         inline std::basic_string<CharT> decode(const T &input)
         {
@@ -2940,10 +2970,10 @@ namespace piv
             return std::basic_string<CharT>{reinterpret_cast<const CharT *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize()) / sizeof(CharT)};
         }
         template <typename T>
-        inline CVolMem Decode(const CVolString &input)
+        inline CVolMem Decode(const T &input)
         {
             CVolMem output;
-            decode(basic_string_view<CharT>{reinterpret_cast<const CharT *>(input.GetText())}, output);
+            decode(input, output);
             return output;
         }
 
@@ -3002,7 +3032,8 @@ namespace piv
             }
             return true;
         }
-        inline std::basic_string<CharT> encode(const basic_string_view<CharT> &input, const bool &padding = false)
+
+        inline std::basic_string<CharT> encode(const basic_string_view<CharT> &input, bool padding = false)
         {
             std::basic_string<CharT> output;
             size_t remainder = input.size() * sizeof(CharT) % 4;
@@ -3021,15 +3052,16 @@ namespace piv
             }
             return output;
         }
-        inline std::basic_string<CharT> encode(const std::basic_string<CharT> &input, const bool &padding = false)
+        inline std::basic_string<CharT> encode(const std::basic_string<CharT> &input, bool padding = false)
         {
             return encode(basic_string_view<CharT>{input}, padding);
         }
-        inline std::basic_string<CharT> encode(const CVolMem &input, const bool &padding = false)
+        inline std::basic_string<CharT> encode(const CVolMem &input, bool padding = false)
         {
             return encode(basic_string_view<CharT>{reinterpret_cast<const CharT *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / sizeof(CharT)}, padding);
         }
-        inline CVolString Encode(const CVolMem &input, const bool &padding = false)
+
+        inline CVolString Encode(const CVolMem &input, bool padding = false)
         {
             CVolString output;
             if (input.GetSize() % 4 == 0)
@@ -3047,15 +3079,26 @@ namespace piv
             }
             return output;
         }
+        inline CVolString Encode(const std::basic_string<CharT> &input, bool padding = false)
+        {
+            return Encode(CVolMem(input.c_str(), input.size() * sizeof(CharT)), padding);
+        }
+        inline CVolString Encode(const basic_string_view<CharT> &input, bool padding = false)
+        {
+            return Encode(CVolMem(input.data(), input.size() * sizeof(CharT)), padding);
+        }
 
         /**
          * @brief 将提供的BASE85编码文本解码
          * @param input 所欲转换的BASE85编码
          * @return 返回解码后的数据
          */
-        inline bool decode(const basic_string_view<CharT> &input, CVolMem &output)
+        template <typename T>
+        inline bool decode(const T *input, CVolMem &output, size_t len = static_cast<size_t>(-1))
         {
-            if (input.size() % 5)
+            if (len == -1)
+                len = sizeof(T) == 1 ? strlen(reinterpret_cast<const char *>(input)) : wcslen(reinterpret_cast<const wchar_t *>(input));
+            if (len % 5)
                 return false; // error: z85 string size must be multiple of 5
             // decode
             const unsigned char decoder[128] = {
@@ -3068,12 +3111,11 @@ namespace piv
                 0, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,  // 0x60..0x6F
                 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 79, 0, 80, 0, 0,    // 0x70..0x7F
             };
-            const CharT *z85 = input.data();
-            output.SetMemAlignSize(input.size() * 4 / 5);
-            for (size_t o = 0; o < input.size() * 4 / 5; z85 += 5, o += 4)
+            output.SetMemAlignSize(len * 4 / 5);
+            for (size_t o = 0; o < len * 4 / 5; input += 5, o += 4)
             {
-                uint32_t value = decoder[z85[0]] * 0x31C84B1 + decoder[z85[1]] * 0x95EED +
-                                 decoder[z85[2]] * 0x1C39 + decoder[z85[3]] * 0x55 + decoder[z85[4]];
+                uint32_t value = decoder[input[0]] * 0x31C84B1 + decoder[input[1]] * 0x95EED +
+                                 decoder[input[2]] * 0x1C39 + decoder[input[3]] * 0x55 + decoder[input[4]];
                 output.AddU8Char(U8CHAR((value >> 24) & 0xFF));
                 output.AddU8Char(U8CHAR((value >> 16) & 0xFF));
                 output.AddU8Char(U8CHAR((value >> 8) & 0xFF));
@@ -3081,21 +3123,21 @@ namespace piv
             }
             return true;
         }
+        inline bool decode(const basic_string_view<CharT> &input, CVolMem &output)
+        {
+            return decode(input.data(), output, input.size());
+        }
         inline bool decode(const std::basic_string<CharT> &input, CVolMem &output)
         {
-            return decode(basic_string_view<CharT>{input}, output);
-        }
-        inline bool decode(const CharT *input, CVolMem &output, const size_t &count = static_cast<size_t>(-1))
-        {
-            return decode((count == static_cast<size_t>(-1)) ? basic_string_view<CharT>{input} : basic_string_view<CharT>{input, count}, output);
+            return decode(input.c_str(), output, input.size());
         }
         inline bool decode(const CVolMem &input, CVolMem &output)
         {
-            return decode(basic_string_view<CharT>{reinterpret_cast<const CharT *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / sizoef(CharT)}, output);
+            return decode(reinterpret_cast<const CharT *>(input.GetPtr()), output, static_cast<size_t>(input.GetSize()) / sizoef(CharT));
         }
         inline bool decode(const CVolString &input, CVolMem &output)
         {
-            return decode(basic_string_view<CharT>{reinterpret_cast<const CharT *>(input.GetText())}, output);
+            return decode(input.GetText(), output, static_cast<size_t>(input.GetLength()));
         }
         template <typename T>
         inline std::basic_string<CharT> decode(const T &input)
@@ -3104,11 +3146,11 @@ namespace piv
             decode(input, buffer);
             return std::basic_string<CharT>{reinterpret_cast<const CharT *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize()) / sizeof(CharT)};
         }
-
-        inline CVolMem Decode(const CVolString &input)
+        template <typename T>
+        inline CVolMem Decode(const T &input)
         {
             CVolMem buffer;
-            decode(wstring_view{input.GetText()}, buffer);
+            decode(input, buffer);
             return buffer;
         }
 
@@ -3176,6 +3218,7 @@ namespace piv
             }
             return ret;
         }
+
         inline std::basic_string<CharT> encode(const basic_string_view<CharT> &input)
         {
             return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
@@ -3188,6 +3231,15 @@ namespace piv
         {
             return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
         }
+
+        inline CVolString Encode(const basic_string_view<CharT> &input)
+        {
+            return encode<CVolString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
+        }
+        inline CVolString Encode(const std::basic_string<CharT> &input)
+        {
+            return encode<CVolString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
+        }
         inline CVolString Encode(const CVolMem &input)
         {
             return encode<CVolString>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
@@ -3198,8 +3250,11 @@ namespace piv
          * @param input 所欲转换的BASE91编码
          * @return 返回解码后的数据
          */
-        inline void decode(const basic_string_view<CharT> &input, CVolMem &output)
+        template <typename T>
+        inline void decode(const T *input, CVolMem &output, size_t len = -1)
         {
+            if (len == -1)
+                len = sizeof(T) == 1 ? strlen(reinterpret_cast<const char *>(input)) : wcslen(reinterpret_cast<const wchar_t *>(input));
             const unsigned char dectab[256] = {
                 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 000..015
                 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 016..031
@@ -3218,14 +3273,14 @@ namespace piv
                 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 224..239
                 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91  // 240..255
             };
-            output.SetMemAlignSize(input.size() * sizeof(CharT) * 6 / 4);
-            const unsigned char *ib = reinterpret_cast<const unsigned char *>(input.data());
+            output.SetMemAlignSize(len * sizeof(T) * 6 / 4);
+            const unsigned char *ib = reinterpret_cast<const unsigned char *>(input);
 
             unsigned long queue = 0;
             unsigned int nbits = 0;
             int val = -1;
 
-            for (size_t len = input.size() * sizeof(CharT); len--;)
+            for (size_t i = len * sizeof(T); i--;)
             {
                 unsigned int d = dectab[*ib++];
                 if (d == 91)
@@ -3250,21 +3305,21 @@ namespace piv
             if (val != -1)
                 output.AddU8Char((U8CHAR)(queue | val << nbits));
         }
+        inline void decode(const basic_string_view<CharT> &input, CVolMem &output)
+        {
+            decode(input.data(), output, input.size());
+        }
         inline void decode(const std::basic_string<CharT> &input, CVolMem &output)
         {
-            decode(basic_string_view<CharT>{input}, output);
-        }
-        inline void decode(const CharT *input, CVolMem &output, const size_t &count = static_cast<size_t>(-1))
-        {
-            decode((count == static_cast<size_t>(-1)) ? basic_string_view<CharT>{input} : basic_string_view<CharT>{input, count}, output);
+            decode(input.c_str(), output, input.size());
         }
         inline void decode(const CVolMem &input, CVolMem &output)
         {
-            decode(basic_string_view<CharT>{reinterpret_cast<const CharT *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / sizoef(CharT)}, output);
+            decode(reinterpret_cast<const CharT *>(input.GetPtr()), output, static_cast<size_t>(input.GetSize()) / sizoef(CharT));
         }
         inline void decode(const CVolString &input, CVolMem &output)
         {
-            decode(basic_string_view<CharT>{reinterpret_cast<const CharT *>(input.GetText())}, output);
+            decode(input.GetText(), output, static_cast<size_t>(input.GetLength()));
         }
         template <typename T>
         inline std::basic_string<CharT> decode(const T &input)
@@ -3273,10 +3328,11 @@ namespace piv
             decode(input, buffer);
             return std::basic_string<CharT>{reinterpret_cast<const CharT *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize()) / sizeof(CharT)};
         }
-        inline CVolMem Decode(const CVolString &input)
+        template <typename T>
+        inline CVolMem Decode(const T &input)
         {
             CVolMem buffer;
-            decode(wstring_view{input.GetText()}, buffer);
+            decode(input, buffer);
             return buffer;
         }
     }; // base91

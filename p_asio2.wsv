@@ -1,9 +1,10 @@
 <火山程序 类型 = "通常" 版本 = 1 />
 
-包 火山.Asio2网络 <注释 = "https://github.com/SaierMe/piv" 注释 = "" @视窗.头文件搜寻目录 = "asio2\r\nasio2\\3rd"
-        "@视窗.外部头文件.全局-100" = "<malloc.h>\r\n<chrono>" "@视窗.外部头文件.全局-111" = "src\\piv_string.hpp"
-        "//@视窗.外部头文件" = "asio2\\piv_asio2.hpp" @视窗.外部头文件 = "<asio2/asio2.hpp>"
-        @视窗.附加编译参数 = "cpp: /std:c++17 /bigobj" @视窗.预定义宏 = "ASIO2_ENABLE_SSL" @视窗.头文件搜寻目录 = "OpenSSL\\include"
+包 火山.Asio2网络 <注释 = "https://github.com/SaierMe/piv" 注释 = "openssl: 3.0.13"
+        @视窗.头文件搜寻目录 = "asio2\r\nasio2\\3rd" "@视窗.外部头文件.全局-100" = "<malloc.h>\r\n<chrono>"
+        "@视窗.外部头文件.全局-111" = "src\\piv_string.hpp" "//@视窗.外部头文件" = "asio2\\piv_asio2.hpp"
+        @视窗.外部头文件 = "<asio2/asio2.hpp>" @视窗.附加编译参数 = "cpp: /std:c++17 /bigobj" @视窗.预定义宏 = "ASIO2_ENABLE_SSL"
+        @视窗.头文件搜寻目录 = "OpenSSL\\include"
         @视窗.外部库 = "OpenSSL\\lib\\$(p)\\libcrypto.lib\r\nOpenSSL\\lib\\$(p)\\libssl.lib\r\nCrypt32.lib"
         @视窗.附属文件.win32 = "OpenSSL\\lib\\win32\\libcrypto-3.dll\nOpenSSL\\lib\\win32\\libssl-3.dll"
         @视窗.附属文件.x64 = "OpenSSL\\lib\\x64\\libcrypto-3-x64.dll\nOpenSSL\\lib\\x64\\libssl-3-x64.dll">

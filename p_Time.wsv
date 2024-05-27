@@ -678,20 +678,12 @@
         @ return -tz.Bias;
     }
 
-    方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠>
+    方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用." 折叠>
     参数 欲操作本对象 <类型 = 系统时间结构类>
     {
-        变量 展示内容 <类型 = 文本型>
-        展示内容 = "<SYSTEMTIME> 总共 8 个成员:\r\n"
-        加入格式文本 (展示内容, "1.wYear(1601-30827): %u\r\n", 欲操作本对象.年)
-        加入格式文本 (展示内容, "2.wMonth(1-12): %u\r\n", 欲操作本对象.月)
-        加入格式文本 (展示内容, "3.wDayOfWeek(0-6): %u\r\n", 欲操作本对象.周)
-        加入格式文本 (展示内容, "4.wDay(1-31): %u\r\n", 欲操作本对象.日)
-        加入格式文本 (展示内容, "5.wHour(0-59): %u\r\n", 欲操作本对象.时)
-        加入格式文本 (展示内容, "6.wMinute(0-59): %u\r\n", 欲操作本对象.分)
-        加入格式文本 (展示内容, "7.wSecond(0-59): %u\r\n", 欲操作本对象.秒)
-        加入格式文本 (展示内容, "8.wMilliseconds(0-999): %u\r\n", 欲操作本对象.毫秒)
-        返回 (展示内容)
+        变量 格式文本 <类型 = 文本型
+                值 = "<SYSTEMTIME> 总共 8 个成员:\r\n1.wYear(1601-30827): %u\r\n2.wMonth(1-12): %u\r\n3.wDayOfWeek(0-6): %u\r\n4.wDay(1-31): %u\r\n5.wHour(0-59): %u\r\n6.wMinute(0-59): %u\r\n7.wSecond(0-59): %u\r\n8.wMilliseconds(0-999): %u">
+        返回 (取格式文本 (格式文本, 欲操作本对象.年, 欲操作本对象.月, 欲操作本对象.周, 欲操作本对象.日, 欲操作本对象.时, 欲操作本对象.分, 欲操作本对象.秒, 欲操作本对象.毫秒))
     }
 }
 
@@ -821,7 +813,7 @@
         注释 = "时间不稳定; 系统限制了最多只能设置16个多媒体时钟." 注释 = "  时钟队列的回调函数在非I/O的线程池中执行,不会阻塞其他的时钟; \"周期事件\""
         注释 = "之间的时间间隔固定不变; 可以在同一个\"时钟队列类\"中添加多个不同周期时间的" 注释 = "时钟.而且可添加的时钟数量几乎没有上限,我测试添加了上万个也没有问题,开销"
         注释 = "也很低." 注释 = "  注意: 时钟的计时精度较差,最大有15毫秒的误差" 折叠 @文档 = "category = \"时间操作.周期时钟\""
-        @视窗.外部头文件 = "<threadpoollegacyapiset.h>\r\n<map>">
+        @视窗.外部头文件 = "<threadpoollegacyapiset.h>\r\n<map>\r\n<memory>">
 {
     方法 类_初始化 <折叠>
     {
@@ -848,12 +840,9 @@
             注释 = "如果提供事件句柄(同步事件类),将立即返回并在删除时钟队列和\"周期事件\"完成后发出信号;" @默认值 = 0 @输出名 = "hCompletionEvent">
     {
         @ if (m_hTimerQueue == NULL) return FALSE;
+        @ CMutexLocker locker(m_locker);
         @ BOOL bRes = ::DeleteTimerQueueEx(m_hTimerQueue, (HANDLE)hCompletionEvent);
         @ m_hTimerQueue = NULL;
-        @ CMutexLocker locker(m_locker);
-        @ for (auto it = m_hTimerMap.begin(); it != m_hTimerMap.end(); it++) {
-        @     delete it->second;
-        @ }
         @ m_hTimerMap.clear();
         @ return bRes;
     }
@@ -873,13 +862,12 @@
         @ if (m_hTimerQueue == NULL) return FALSE;
         @ CMutexLocker locker(m_locker);
         @ if (m_hTimerMap.find(szTimerID) != m_hTimerMap.end()) return FALSE;
-        @ TIMERCALLBACKPARAMETER* pTimerParam = new TIMERCALLBACKPARAMETER{this, NULL, szTimerID, lpUserData};
+        @ TIMERCALLBACKPARAMETER* pTimerParam = m_hTimerMap.emplace(szTimerID, new TIMERCALLBACKPARAMETER{this, NULL, szTimerID, lpUserData}).first->second.get();
         @ if (::CreateTimerQueueTimer(&pTimerParam->hTimer, m_hTimerQueue, (WAITORTIMERCALLBACK)onTimerFunc,
         @         pTimerParam, (DWORD)dwDueTime, (DWORD)dwPeriod, bInThreadPool ? WT_EXECUTEDEFAULT : WT_EXECUTEINTIMERTHREAD)) {
-        @     m_hTimerMap[szTimerID] = pTimerParam;
         @     return TRUE;
         @ }
-        @ delete pTimerParam;
+        @ m_hTimerMap.erase(szTimerID);
         @ return FALSE;
     }
 
@@ -908,7 +896,6 @@
         @ auto it = m_hTimerMap.find(szTimerID);
         @ if (it != m_hTimerMap.end()) {
         @     bRes = ::DeleteTimerQueueTimer(m_hTimerQueue, it->second->hTimer, (HANDLE)hCompletionEvent);
-        @     delete it->second;
         @     m_hTimerMap.erase(it);
         @ }
         @ return bRes;
@@ -925,8 +912,9 @@
         @ if (m_hTimerQueue == NULL) return FALSE;
         @ BOOL bRes = FALSE;
         @ CMutexLocker locker(m_locker);
-        @ if (m_hTimerMap.find(szTimerID) != m_hTimerMap.end()) {
-        @     bRes = ::ChangeTimerQueueTimer(m_hTimerQueue, m_hTimerMap[szTimerID].hTimer, (DWORD)dwDueTime, (DWORD)dwPeriod);
+        @ auto it = m_hTimerMap.find(szTimerID);
+        @ if (it != m_hTimerMap.end()) {
+        @     bRes = ::ChangeTimerQueueTimer(m_hTimerQueue, it->second->hTimer, (DWORD)dwDueTime, (DWORD)dwPeriod);
         @ }
         @ return bRes;
     }
@@ -934,11 +922,11 @@
     方法 取时钟句柄 <公开 类型 = 变整数 注释 = "根据用户自定义的标记获取时钟的句柄" 返回值注释 = "成功返回句柄,失败返回0." 折叠 @禁止流程检查 = 真>
     参数 时钟标记 <类型 = 文本型 注释 = "提供用户自定义的时钟标记" @输出名 = "szTimerID">
     {
-        @ INT_P npTimer = 0;
         @ CMutexLocker locker(m_locker);
-        @ if (m_hTimerMap.find(szTimerID) != m_hTimerMap.end())
-        @     npTimer = (INT_P)m_hTimerMap[szTimerID].hTimer;
-        @ return npTimer;
+        @ auto it = m_hTimerMap.find(szTimerID);
+        @ if (it != m_hTimerMap.end())
+        @     return (INT_P)it->second->hTimer;
+        @ return 0;
     }
 
     方法 取所有时钟标记 <公开 类型 = 整数 注释 = "获取所有正在运行的时钟标记" 返回值注释 = "成功返回时钟序号的数量" 折叠 @禁止流程检查 = 真>
@@ -969,7 +957,7 @@
     参数 用户数据 <类型 = 变整数 注释 = "为\"添加时钟2\"时所提供的用户数据值">
     参数 等待超时 <类型 = 字节 注释 = "时钟回调中此参数始终为1,无用处.">
 
-    方法 周期事件 <公开 定义事件 类型 = 整数 注释 = "每当经过了指定的时钟周期,将发送本事件." 返回值注释 = "此返回值无意义" 折叠>
+    方法 周期事件 <公开 定义事件 类型 = 整数 注释 = "每当经过了指定的时钟周期,将发送本事件." 返回值注释 = "此返回值无意义">
     参数 时钟标记 <类型 = 文本型 注释 = "用户在\"添加时钟\"时自定义的时钟标记">
     参数 用户数据 <类型 = 变整数 注释 = "用户在\"添加时钟\"时传入的参数.可用于传递数据.">
 
@@ -983,12 +971,11 @@
     #         CVolString szTimerID;
     #         INT_P lpUserData;
     #     };
-    #     std::map<CVolString, TIMERCALLBACKPARAMETER*> m_hTimerMap; // 时钟标记到时钟参数哈希表
+    #     std::map<CVolString, std::unique_ptr<TIMERCALLBACKPARAMETER>> m_hTimerMap; // 时钟标记到时钟参数哈希表
     #     CMMutex m_locker; // 互斥锁,临界区
     #     static VOID CALLBACK onTimerFunc(PVOID lpParameter, BOOLEAN TimerOrWaitFired) {
     #         TIMERCALLBACKPARAMETER* pTimerParam = (TIMERCALLBACKPARAMETER*)lpParameter;
-    #         //CVolString szTimerID{pTimerParam->szTimerID};
-    #         pTimerParam->pThis->@<周期事件>(pTimerParam->szTimerID, pTimerParam->lpUserData);
+    #         pTimerParam->pThis->@<周期事件>(CVolString{pTimerParam->szTimerID}, pTimerParam->lpUserData);
     #     }
     # public:
     #     HANDLE m_hTimerQueue = NULL; // 时钟队列句柄
@@ -996,13 +983,12 @@
     #         if (m_hTimerQueue == NULL) return FALSE;
     #         CMutexLocker locker(m_locker);
     #         if (m_hTimerMap.find(szTimerID) != m_hTimerMap.end()) return FALSE;
-    #         TIMERCALLBACKPARAMETER* pTimerParam = new TIMERCALLBACKPARAMETER{nullptr, NULL, szTimerID, (INT_P)lpUserData};
+    #         TIMERCALLBACKPARAMETER* pTimerParam = m_hTimerMap.emplace(szTimerID, new TIMERCALLBACKPARAMETER{nullptr, NULL, szTimerID, (INT_P)lpUserData}).first->second.get();
     #         if (::CreateTimerQueueTimer(&pTimerParam->hTimer, m_hTimerQueue, lpTimerCallBack,
     #                 lpUserData, dwDueTime, dwPeriod, bInThreadPool ? WT_EXECUTEDEFAULT : WT_EXECUTEINTIMERTHREAD)) {
-    #             m_hTimerMap[szTimerID] = pTimerParam;
     #             return TRUE;
     #         }
-    #         delete pTimerParam;
+    #         m_hTimerMap.erase(szTimerID);
     #         return FALSE;
     #     }
     # <> </include>
@@ -1011,7 +997,7 @@
 }
 
 类 时钟队列类2 <公开 注释 = "跟\"时钟队列类\"的不同之处是,使用自增的时钟序号代替自定义的时钟标记." 注释 = "注意: 时钟的计时精度较差,最大有15毫秒的误差" 折叠
-        @文档 = "category = \"时间操作.周期时钟\"" @视窗.外部头文件 = "<threadpoollegacyapiset.h>\r\n<map>">
+        @文档 = "category = \"时间操作.周期时钟\"" @视窗.外部头文件 = "<threadpoollegacyapiset.h>\r\n<map>\r\n<memory>">
 {
     方法 类_初始化 <折叠>
     {
@@ -1042,9 +1028,6 @@
         @ BOOL bRes = ::DeleteTimerQueueEx(m_hTimerQueue, (HANDLE)hCompletionEvent);
         @ m_hTimerQueue = NULL;
         @ CMutexLocker locker(m_locker);
-        @ for (auto it = m_hTimerMap.begin(); it != m_hTimerMap.end(); it++) {
-        @     delete it->second;
-        @ }
         @ m_hTimerMap.clear();
         @ m_TimerIndex = 0;
         @ return bRes;
@@ -1063,13 +1046,12 @@
     {
         @ if (m_hTimerQueue == NULL) return -1;
         @ CMutexLocker locker(m_locker);
-        @ TIMERCALLBACKPARAMETER* pTimerParam = new TIMERCALLBACKPARAMETER{this, NULL, m_TimerIndex, lpUserData};
+        @ TIMERCALLBACKPARAMETER* pTimerParam = m_hTimerMap.emplace(m_TimerIndex, new TIMERCALLBACKPARAMETER{this, NULL, m_TimerIndex, lpUserData}).first->second.get();
         @ if (::CreateTimerQueueTimer(&pTimerParam->hTimer, m_hTimerQueue, (WAITORTIMERCALLBACK)onTimerFunc,
         @         pTimerParam, (DWORD)dwDueTime, (DWORD)dwPeriod, bInThreadPool ? WT_EXECUTEDEFAULT : WT_EXECUTEINTIMERTHREAD) ) {
-        @     m_hTimerMap[m_TimerIndex] = pTimerParam;
         @     return m_TimerIndex++;
         @ }
-        @ delete pTimerParam;
+        @ m_hTimerMap.erase(m_TimerIndex);
         @ return -1;
     }
 
@@ -1097,7 +1079,6 @@
         @ auto it = m_hTimerMap.find(nIndex);
         @ if (it != m_hTimerMap.end()) {
         @     bRes = ::DeleteTimerQueueTimer(m_hTimerQueue, it->second->hTimer, (HANDLE)hCompletionEvent);
-        @     delete it->second;
         @     m_hTimerMap.erase(it);
         @ }
         @ return bRes;
@@ -1114,8 +1095,9 @@
         @ if (m_hTimerQueue == NULL) return FALSE;
         @ BOOL bRes = FALSE;
         @ CMutexLocker locker(m_locker);
-        @ if (m_hTimerMap.find(nIndex) != m_hTimerMap.end()) {
-        @     bRes = ::ChangeTimerQueueTimer(m_hTimerQueue, m_hTimerMap[nIndex].hTimer, (DWORD)dwDueTime, (DWORD)dwPeriod);
+        @ auto it = m_hTimerMap.find(nIndex);
+        @ if (it != m_hTimerMap.end()) {
+        @     bRes = ::ChangeTimerQueueTimer(m_hTimerQueue, it->second->hTimer, (DWORD)dwDueTime, (DWORD)dwPeriod);
         @ }
         @ return bRes;
     }
@@ -1123,11 +1105,11 @@
     方法 取时钟句柄 <公开 类型 = 变整数 注释 = "根据序号获取时钟的句柄" 返回值注释 = "成功返回句柄,失败返回0." 折叠 @禁止流程检查 = 真>
     参数 时钟序号 <类型 = 整数 注释 = "提供由\"添加时钟\"返回的序号(从0开始)." @输出名 = "nIndex">
     {
-        @ INT_P npTimer = 0;
         @ CMutexLocker locker(m_locker);
-        @ if (m_hTimerMap.find(nIndex) != m_hTimerMap.end())
-        @     npTimer = (INT_P)m_hTimerMap[nIndex].hTimer;
-        @ return npTimer;
+        @ auto it = m_hTimerMap.find(nIndex);
+        @ if (it != m_hTimerMap.end())
+        @     return (INT_P)it->second->hTimer;
+        @ return 0;
     }
 
     方法 取所有时钟序号 <公开 类型 = 整数 注释 = "获取所有正在运行的时钟序号" 返回值注释 = "成功返回时钟序号的数量" 折叠 @禁止流程检查 = 真>
@@ -1176,25 +1158,24 @@
     #         INT nTimerIndex;
     #         INT_P lpUserData;
     #     };
-    #     std::map<INT, TIMERCALLBACKPARAMETER*> m_hTimerMap;
+    #     std::map<INT, std::unique_ptr<TIMERCALLBACKPARAMETER>> m_hTimerMap;
     #     INT m_TimerIndex = 0; // 原子操作记录添加的时钟数量
     #     CMMutex m_locker; // 互斥锁,临界区
     #     static VOID CALLBACK onTimerFunc(PVOID lpParameter, BOOLEAN TimerOrWaitFired) {
     #         TIMERCALLBACKPARAMETER* pTimerParam = (TIMERCALLBACKPARAMETER*)lpParameter;
-    #         pTimerParam->pThis->@<周期事件> ((INT)pTimerParam->nTimerIndex, pTimerParam->lpUserData);
+    #         pTimerParam->pThis->@<周期事件> (pTimerParam->nTimerIndex, pTimerParam->lpUserData);
     #     }
     # public:
     #     HANDLE m_hTimerQueue = NULL; // 时钟队列句柄
     #     INT AddTimerQueue(WAITORTIMERCALLBACK lpTimerCallBack, PVOID lpUserData, DWORD dwDueTime, DWORD dwPeriod, BOOL bInThreadPool) {
     #         if (m_hTimerQueue == NULL) return -1;
     #         CMutexLocker locker(m_locker);
-    #         TIMERCALLBACKPARAMETER* pTimerParam = new TIMERCALLBACKPARAMETER{nullptr, NULL, m_TimerIndex, (INT_P)lpUserData};
+    #         TIMERCALLBACKPARAMETER* pTimerParam = m_hTimerMap.emplace(m_TimerIndex, new TIMERCALLBACKPARAMETER{nullptr, NULL, m_TimerIndex, (INT_P)lpUserData}).first->second.get();
     #         if (::CreateTimerQueueTimer(&pTimerParam->hTimer, m_hTimerQueue, lpTimerCallBack,
     #                 lpUserData, dwDueTime, dwPeriod, bInThreadPool ? WT_EXECUTEDEFAULT : WT_EXECUTEINTIMERTHREAD) ) {
-    #             m_hTimerMap[m_TimerIndex] = pTimerParam;
     #             return m_TimerIndex++;
     #         }
-    #         delete pTimerParam;
+    #         m_hTimerMap.erase(m_TimerIndex);
     #         return -1;
     #     }
     # <> </include>

@@ -14,11 +14,12 @@
         @ @sn<this>.open_process(static_cast<DWORD>(@<进程ID>), static_cast<DWORD>(@<进程访问权限>))
     }
 
-    方法 打开句柄 <公开 类型 = 逻辑型 注释 = "将一个外部的进程句柄置入到本类中." 注释 = "注: 调用本方法前将关闭之前打开的句柄." 返回值注释 = "返回是否成功" 折叠
+    方法 打开句柄 <公开 类型 = 逻辑型 注释 = "将一个外部的进程句柄置入到本类中进行操作." 注释 = "注: 调用本方法前将关闭之前打开的句柄." 返回值注释 = "返回是否成功" 折叠
             @嵌入式方法 = "">
-    参数 外部句柄 <类型 = 变整数>
+    参数 外部句柄 <类型 = 变整数 注释 = "外部的进程句柄">
+    参数 自动关闭句柄 <类型 = 逻辑型 注释 = "是否在类析构时自动关闭外部句柄" @默认值 = 假>
     {
-        @ @sn<this>.open_handle((HANDLE)@<外部句柄>)
+        @ @sn<this>.open_handle(reinterpret_cast<HANDLE>(@<外部句柄>), @<自动关闭句柄>)
     }
 
     方法 关闭进程 <公开 注释 = "关闭进程的句柄." 注释 = "对象实例离开作用域时会自动关闭,除非有必要提前释放进程句柄,一般不需要手动调用." 折叠 @嵌入式方法 = "">
@@ -95,12 +96,11 @@
         @ @sn<this>.get_commandline()
     }
 
-    方法 取模块句柄 <公开 类型 = 变整数 注释 = "通过模块名称获取模块的句柄" 返回值注释 = "成功返回模块句柄,失败返回0." 折叠
-            @嵌入式方法 = "req_str_param_text_pointer = true">
-    参数 模块名称 <类型 = 文本型 注释 = "所欲取句柄的模块文件名称(区分大小写);" 注释 = "如省略扩展名则默认为\".dll\". 结尾为\".\"则表示模块名称没有扩展名;"
+    方法 取模块句柄 <公开 类型 = 变整数 注释 = "通过模块名称获取模块的句柄" 返回值注释 = "成功返回模块句柄,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 模块名称 <类型 = 文本型 注释 = "所欲取句柄的模块文件名称(不区分大小写);" 注释 = "如省略扩展名则默认为\".dll\". 结尾为\".\"则表示模块名称没有扩展名;"
             注释 = "该名称可以不包含路径,如果指定路径,必须用反斜杠\"\\\\\";" 注释 = "留空为打开进程的exe文件." @默认值 = 空对象>
     {
-        @ reinterpret_cast<INT_P>(@sn<this>.get_module_handle (@<模块名称>))
+        @ reinterpret_cast<INT_P>(@sn<this>.get_module_handle(@<模块名称>.GetText()))
     }
 
     方法 取模块基址 <公开 类型 = 变整数 注释 = "获取已打开进程中模块文件(.exe或.dll)的基址" 返回值注释 = "成功返回模块基址,失败返回0." 折叠 @嵌入式方法 = "">
@@ -211,11 +211,13 @@
 
     方法 寻找内存特征码 <公开 类型 = 变整数 注释 = "Sunday算法实现内存快速搜索特征码(支持通配符模糊搜索)." 注释 = "本方法只返回找到的一个地址."
             返回值注释 = "返回找到的虚拟内存地址,未找到则返回0." 折叠 @嵌入式方法 = "req_str_param_text_pointer = true">
-    参数 特征码 <类型 = 文本型 注释 = "十六进制文本,首尾无空格,中间空格不可省略,支持通配符?" 注释 = "例如\"BA ?? 00 B4 09 ?? 21\"">
+    参数 特征码 <类型 = 文本型 注释 = "十六进制文本,中间的空格可以省略,支持通配符?" 注释 = "例如\"BA ?? 00 B4 09 ?? 21\"">
     参数 起始地址 <类型 = 变整数 注释 = "搜索的起始位置" @默认值 = 0>
     参数 结束地址 <类型 = 变整数 注释 = "搜索的结束位置,默认搜索整个虚拟内存;" 注释 = "0则为进程所有模块的地址尾部,可能会找不到部分数据." @默认值 = -1>
+    参数 指定保护属性 <类型 = 整数 注释 = "是否仅寻找指定保护属性的内存地址,0为寻找全部保护属性;" 注释 = "请参考\"内存页面保护属性\"的常量." @默认值 = 0>
+    参数 指定页面类型 <类型 = 整数 注释 = "是否仅寻找指定页面类型的内存地址,0为寻找全部类型;" 注释 = "请参考\"内存页面类型\"的常量." @默认值 = 0>
     {
-        @ @sn<this>.find_signatures(@<特征码>, reinterpret_cast<const void*>(@<起始地址>), reinterpret_cast<const void*>(@<结束地址>))
+        @ @sn<this>.find_signatures(@<特征码>, reinterpret_cast<const void*>(@<起始地址>), reinterpret_cast<const void*>(@<结束地址>), static_cast<DWORD>(@<指定保护属性>), static_cast<DWORD>(@<指定页面类型>))
     }
 
     方法 寻找内存字节集 <公开 类型 = 变整数 注释 = "在进程的虚拟内存中寻找指定的字节集数据,本方法只返回找到的一个地址." 返回值注释 = "返回找到的虚拟内存地址,未找到则返回0." 折叠
@@ -223,18 +225,22 @@
     参数 所欲寻找的字节集 <类型 = 字节集类 注释 = "所欲寻找的字节集">
     参数 起始地址 <类型 = 变整数 注释 = "搜索的起始位置" @默认值 = 0>
     参数 结束地址 <类型 = 变整数 注释 = "搜索的结束位置,默认搜索整个虚拟内存;" 注释 = "0则为进程所有模块的地址尾部,可能会找不到部分数据." @默认值 = -1>
+    参数 指定保护属性 <类型 = 整数 注释 = "是否仅寻找指定保护属性的内存地址,0为寻找全部保护属性;" 注释 = "请参考\"内存页面保护属性\"的常量." @默认值 = 0>
+    参数 指定页面类型 <类型 = 整数 注释 = "是否仅寻找指定页面类型的内存地址,0为寻找全部类型;" 注释 = "请参考\"内存页面类型\"的常量." @默认值 = 0>
     {
-        @ @sn<this>.find_memory(@<所欲寻找的字节集>, reinterpret_cast<const void*>(@<起始地址>), reinterpret_cast<const void*>(@<结束地址>))
+        @ @sn<this>.find_memory(@<所欲寻找的字节集>, reinterpret_cast<const void*>(@<起始地址>), reinterpret_cast<const void*>(@<结束地址>), static_cast<DWORD>(@<指定保护属性>), static_cast<DWORD>(@<指定页面类型>))
     }
 
     方法 寻找所有内存特征码 <公开 类型 = 整数 注释 = "Sunday算法实现内存快速搜索特征码(支持通配符模糊搜索)." 返回值注释 = "返回找到的虚拟内存地址数量,未找到则返回0." 折叠
             @嵌入式方法 = "req_str_param_text_pointer = true">
-    参数 特征码 <类型 = 文本型 注释 = "十六进制文本,首尾无空格,中间空格不可省略,支持通配符?" 注释 = "例如\"BA ?? 00 B4 09 ?? 21\"">
+    参数 特征码 <类型 = 文本型 注释 = "十六进制文本,中间的空格可以省略,支持通配符?" 注释 = "例如\"BA ?? 00 B4 09 ?? 21\"">
     参数 结果地址数组 <类型 = 变整数数组类 注释 = "在此返回所有找到的虚拟内存地址">
     参数 起始地址 <类型 = 变整数 注释 = "搜索的起始位置" @默认值 = 0>
     参数 结束地址 <类型 = 变整数 注释 = "搜索的结束位置,搜索的结束位置,默认搜索整个虚拟内存;" 注释 = "0则为进程所有模块的地址尾部,可能会找不到部分数据." @默认值 = -1>
+    参数 指定保护属性 <类型 = 整数 注释 = "是否仅寻找指定保护属性的内存地址,0为寻找全部保护属性;" 注释 = "请参考\"内存页面保护属性\"的常量." @默认值 = 0>
+    参数 指定页面类型 <类型 = 整数 注释 = "是否仅寻找指定页面类型的内存地址,0为寻找全部类型;" 注释 = "请参考\"内存页面类型\"的常量." @默认值 = 0>
     {
-        @ @sn<this>.find_signatures(@<特征码>, @<结果地址数组>.data(), reinterpret_cast<const void*>(@<起始地址>), reinterpret_cast<const void*>(@<结束地址>))
+        @ @sn<this>.find_signatures(@<特征码>, @<结果地址数组>.data(), reinterpret_cast<const void*>(@<起始地址>), reinterpret_cast<const void*>(@<结束地址>), static_cast<DWORD>(@<指定保护属性>), static_cast<DWORD>(@<指定页面类型>))
     }
 
     方法 寻找所有内存字节集 <公开 类型 = 整数 注释 = "在进程的虚拟内存中寻找指定的字节集数据" 返回值注释 = "返回找到的虚拟内存地址数量,未找到则返回0." 折叠 @嵌入式方法 = "">
@@ -242,8 +248,10 @@
     参数 结果地址数组 <类型 = 变整数数组类 注释 = "在此返回所有找到的虚拟内存地址">
     参数 起始地址 <类型 = 变整数 注释 = "搜索的起始位置" @默认值 = 0>
     参数 结束地址 <类型 = 变整数 注释 = "搜索的结束位置,默认搜索整个虚拟内存;" 注释 = "0则为进程所有模块的地址尾部,可能会找不到部分数据." @默认值 = -1>
+    参数 指定保护属性 <类型 = 整数 注释 = "是否仅寻找指定保护属性的内存地址,0为寻找全部保护属性;" 注释 = "请参考\"内存页面保护属性\"的常量." @默认值 = 0>
+    参数 指定页面类型 <类型 = 整数 注释 = "是否仅寻找指定页面类型的内存地址,0为寻找全部类型;" 注释 = "请参考\"内存页面类型\"的常量." @默认值 = 0>
     {
-        @ @sn<this>.find_memory(@<所欲寻找的字节集>, @<结果地址数组>.data(), reinterpret_cast<const void*>(@<起始地址>), reinterpret_cast<const void*>(@<结束地址>))
+        @ @sn<this>.find_memory(@<所欲寻找的字节集>, @<结果地址数组>.data(), reinterpret_cast<const void*>(@<起始地址>), reinterpret_cast<const void*>(@<结束地址>), static_cast<DWORD>(@<指定保护属性>), static_cast<DWORD>(@<指定页面类型>))
     }
 
     方法 读内存数据 <公开 类型 = 逻辑型 注释 = "读取进程中指定虚拟地址的内存数据,并保存到指定的地址中." 返回值注释 = "返回是否读取成功" 折叠 @嵌入式方法 = "">
@@ -372,13 +380,15 @@
     方法 寻找模块特征码 <公开 类型 = 变整数 注释 = "Sunday算法实现内存快速搜索特征码(支持通配符模糊搜索)." 返回值注释 = "返回找到的虚拟内存地址,未找到则返回0." 折叠
             @嵌入式方法 = "req_str_param_text_pointer = true">
     参数 模块句柄 <类型 = 变整数 注释 = "所欲操作的模块句柄,可以用\"取模块句柄\"、\"枚举模块句柄\"、\"枚举模块名称\"获取." @默认值 = 0>
-    参数 特征码 <类型 = 文本型 注释 = "十六进制文本,首尾无空格,中间空格不可省略,支持通配符?" 注释 = "例如\"BA ?? 00 B4 09 ?? 21\"">
+    参数 特征码 <类型 = 文本型 注释 = "十六进制文本,中间的空格可以省略,支持通配符?" 注释 = "例如\"BA ?? 00 B4 09 ?? 21\"">
     参数 起始偏移地址 <类型 = 变整数 注释 = "搜索的起始偏移位置,0为模块的基地址,实际地址为模块的虚拟内存基址+偏移地址;" 注释 = "如果提供的偏移地址大于模块尺寸,将返回失败."
             @默认值 = 0>
     参数 结束偏移地址 <类型 = 变整数 注释 = "搜索的结束偏移位置,默认值0表示搜索到模块文件的结尾,实际地址为模块的虚拟" 注释 = "内存基址+偏移地址;"
             注释 = "如果提供的偏移地址大于模块尺寸,将返回失败." @默认值 = 0>
+    参数 指定保护属性 <类型 = 整数 注释 = "是否仅寻找指定保护属性的内存地址,0为寻找全部保护属性;" 注释 = "请参考\"内存页面保护属性\"的常量." @默认值 = 0>
+    参数 指定页面类型 <类型 = 整数 注释 = "是否仅寻找指定页面类型的内存地址,0为寻找全部类型;" 注释 = "请参考\"内存页面类型\"的常量." @默认值 = 0>
     {
-        @ @sn<this>.find_module_signatures(reinterpret_cast<HMODULE>(@<模块句柄>), @<特征码>, static_cast<size_t>(@<起始偏移地址>), static_cast<size_t>(@<结束偏移地址>))
+        @ @sn<this>.find_module_signatures(reinterpret_cast<HMODULE>(@<模块句柄>), @<特征码>, static_cast<size_t>(@<起始偏移地址>), static_cast<size_t>(@<结束偏移地址>), static_cast<DWORD>(@<指定保护属性>), static_cast<DWORD>(@<指定页面类型>))
     }
 
     方法 寻找模块字节集 <公开 类型 = 变整数 注释 = "在模块的虚拟内存中寻找指定的字节集数据" 返回值注释 = "返回找到的虚拟内存地址,未找到则返回0." 折叠 @嵌入式方法 = "">
@@ -388,21 +398,26 @@
             @默认值 = 0>
     参数 结束偏移地址 <类型 = 变整数 注释 = "搜索的结束偏移位置,默认值0表示搜索到模块文件的结尾,实际地址为模块的虚拟" 注释 = "内存基址+偏移地址;"
             注释 = "如果提供的偏移地址大于模块尺寸,将返回失败." @默认值 = 0>
+    参数 指定保护属性 <类型 = 整数 注释 = "是否仅寻找指定保护属性的内存地址,0为寻找全部保护属性;" 注释 = "请参考\"内存页面保护属性\"的常量." @默认值 = 0>
+    参数 指定页面类型 <类型 = 整数 注释 = "是否仅寻找指定页面类型的内存地址,0为寻找全部类型;" 注释 = "请参考\"内存页面类型\"的常量." @默认值 = 0>
     {
-        @ @sn<this>.find_module_memory(reinterpret_cast<HMODULE>(@<模块句柄>), @<所欲寻找的字节集>, static_cast<size_t>(@<起始偏移地址>), static_cast<size_t>(@<结束偏移地址>))
+        @ @sn<this>.find_module_memory(reinterpret_cast<HMODULE>(@<模块句柄>), @<所欲寻找的字节集>, static_cast<size_t>(@<起始偏移地址>), static_cast<size_t>(@<结束偏移地址>), static_cast<DWORD>(@<指定保护属性>), static_cast<DWORD>(@<指定页面类型>))
     }
 
     方法 寻找所有模块特征码 <公开 类型 = 整数 注释 = "Sunday算法实现内存快速搜索特征码(支持通配符模糊搜索)." 返回值注释 = "返回找到的虚拟内存地址数量,未找到则返回0." 折叠
             @嵌入式方法 = "req_str_param_text_pointer = true">
     参数 模块句柄 <类型 = 变整数 注释 = "所欲操作的模块句柄,可以用\"取模块句柄\"、\"枚举模块句柄\"、\"枚举模块名称\"获取." @默认值 = 0>
-    参数 特征码 <类型 = 文本型 注释 = "十六进制文本,首尾无空格,中间空格不可省略,支持通配符?" 注释 = "例如\"BA ?? 00 B4 09 ?? 21\"">
+    参数 特征码 <类型 = 文本型 注释 = "十六进制文本,中间的空格可以省略,支持通配符?" 注释 = "例如\"BA ?? 00 B4 09 ?? 21\"">
     参数 结果地址数组 <类型 = 变整数数组类 注释 = "在此返回所有找到的虚拟内存地址.">
     参数 起始偏移地址 <类型 = 变整数 注释 = "搜索的起始偏移位置,0为模块的基地址,实际地址为模块的虚拟内存基址+偏移地址;" 注释 = "如果提供的偏移地址大于模块尺寸,将返回失败."
             @默认值 = 0>
     参数 结束偏移地址 <类型 = 变整数 注释 = "搜索的结束偏移位置,默认值0表示搜索到模块文件的结尾,实际地址为模块的虚拟" 注释 = "内存基址+偏移地址;"
             注释 = "如果提供的偏移地址大于模块尺寸,将返回失败." @默认值 = 0>
+    参数 指定保护属性 <类型 = 整数 注释 = "是否仅寻找指定保护属性的内存地址,0为寻找全部保护属性;" 注释 = "请参考\"内存页面保护属性\"的常量." @默认值 = 0>
+    参数 指定页面类型 <类型 = 整数 注释 = "是否仅寻找指定页面类型的内存地址,0为寻找全部类型;" 注释 = "请参考\"内存页面类型\"的常量." @默认值 = 0>
     {
-        @ @sn<this>.find_module_signatures(reinterpret_cast<HMODULE>(@<模块句柄>), @<特征码>, @<结果地址数组>.data (), static_cast<size_t>(@<起始偏移地址>), static_cast<size_t>(@<结束偏移地址>))
+        @ @sn<this>.find_module_signatures(reinterpret_cast<HMODULE>(@<模块句柄>), @<特征码>, @<结果地址数组>.data (), static_cast<size_t>(@<起始偏移地址>),
+        @     static_cast<size_t>(@<结束偏移地址>), static_cast<DWORD>(@<指定保护属性>), static_cast<DWORD>(@<指定页面类型>))
     }
 
     方法 寻找所有模块字节集 <公开 类型 = 整数 注释 = "在模块的虚拟内存中寻找指定的字节集数据" 返回值注释 = "返回找到的虚拟内存地址数量,未找到则返回0." 折叠 @嵌入式方法 = "">
@@ -413,8 +428,11 @@
             @默认值 = 0>
     参数 结束偏移地址 <类型 = 变整数 注释 = "搜索的结束偏移位置,默认值0表示搜索到模块文件的结尾,实际地址为模块的虚拟" 注释 = "内存基址+偏移地址;"
             注释 = "如果提供的偏移地址大于模块尺寸,将返回失败." @默认值 = 0>
+    参数 指定保护属性 <类型 = 整数 注释 = "是否仅寻找指定保护属性的内存地址,0为寻找全部保护属性;" 注释 = "请参考\"内存页面保护属性\"的常量." @默认值 = 0>
+    参数 指定页面类型 <类型 = 整数 注释 = "是否仅寻找指定页面类型的内存地址,0为寻找全部类型;" 注释 = "请参考\"内存页面类型\"的常量." @默认值 = 0>
     {
-        @ @sn<this>.find_module_memory(reinterpret_cast<HMODULE>(@<模块句柄>), @<所欲寻找的字节集>, @<结果地址数组>.data (), static_cast<size_t>(@<起始偏移地址>), static_cast<size_t>(@<结束偏移地址>))
+        @ @sn<this>.find_module_memory(reinterpret_cast<HMODULE>(@<模块句柄>), @<所欲寻找的字节集>, @<结果地址数组>.data (), static_cast<size_t>(@<起始偏移地址>),
+        @     static_cast<size_t>(@<结束偏移地址>), static_cast<DWORD>(@<指定保护属性>), static_cast<DWORD>(@<指定页面类型>))
     }
 
     方法 读模块数据 <公开 类型 = 逻辑型 注释 = "读取模块中指定虚拟地址的内存数据,并保存到指定的地址中." 返回值注释 = "返回是否读取成功." 折叠 @嵌入式方法 = "">
@@ -674,12 +692,12 @@
     方法 枚举模块信息 <公开 类型 = 整数 注释 = "枚举进程中的所有模块的详细信息" 返回值注释 = "成功返回模块句柄的数量,未打开进程始终返回0." 折叠 @禁止流程检查 = 真>
     参数 模块信息数组 <类型 = NT模块信息数组类 注释 = "成功返回模块信息数组">
     {
-        @ @<模块信息数组>.data().clear();
+        @ @<模块信息数组>.clear();
         @ if (enum_modules() == 0) { return 0; }
         @ for (auto& it = modules_map().begin(); it != modules_map().end(); it++) {
-        @     @<模块信息数组>.data().emplace_back(it->second);
+        @     @<模块信息数组>.emplace_back(it->second);
         @ }
-        @ return static_cast<INT>(@<模块信息数组>.data().size());
+        @ return static_cast<INT>(@<模块信息数组>.size());
     }
 
     方法 枚举模块句柄 <公开 类型 = 整数 注释 = "枚举进程中的所有模块句柄." 注释 = "注意: 建议改用\"枚举模块信息\"!" 返回值注释 = "成功返回模块句柄的数量,未打开进程始终返回0."
@@ -788,11 +806,13 @@
 
     方法 寻找内存特征码 <公开 类型 = 长整数 注释 = "Sunday算法实现内存快速搜索特征码(支持通配符模糊搜索)." 注释 = "本方法只返回找到的一个地址."
             返回值注释 = "返回找到的虚拟内存地址,未找到则返回0." 折叠 @嵌入式方法 = "req_str_param_text_pointer = true">
-    参数 特征码 <类型 = 文本型 注释 = "十六进制文本,首尾无空格,中间空格不可省略,支持通配符?" 注释 = "例如\"BA ?? 00 B4 09 ?? 21\"">
+    参数 特征码 <类型 = 文本型 注释 = "十六进制文本,中间的空格可以省略,支持通配符?" 注释 = "例如\"BA ?? 00 B4 09 ?? 21\"">
     参数 起始地址 <类型 = 长整数 注释 = "搜索的起始位置" @默认值 = 0>
     参数 结束地址 <类型 = 长整数 注释 = "搜索的结束位置,默认搜索整个虚拟内存;" 注释 = "0则为进程所有模块的地址尾部,可能会找不到部分数据." @默认值 = -1>
+    参数 指定保护属性 <类型 = 整数 注释 = "是否仅寻找指定保护属性的内存地址,0为寻找全部保护属性;" 注释 = "请参考\"内存页面保护属性\"的常量." @默认值 = 0>
+    参数 指定页面类型 <类型 = 整数 注释 = "是否仅寻找指定页面类型的内存地址,0为寻找全部类型;" 注释 = "请参考\"内存页面类型\"的常量." @默认值 = 0>
     {
-        @ @sn<this>.find_signatures(@<特征码>, reinterpret_cast<PVOID64>(@<起始地址>), reinterpret_cast<PVOID64>(@<结束地址>))
+        @ @sn<this>.find_signatures(@<特征码>, reinterpret_cast<PVOID64>(@<起始地址>), reinterpret_cast<PVOID64>(@<结束地址>), static_cast<DWORD>(@<指定保护属性>), static_cast<DWORD>(@<指定页面类型>))
     }
 
     方法 寻找内存字节集 <公开 类型 = 长整数 注释 = "在进程的虚拟内存中寻找指定的字节集数据,本方法只返回找到的一个地址." 返回值注释 = "返回找到的虚拟内存地址,未找到则返回0." 折叠
@@ -800,18 +820,22 @@
     参数 所欲寻找的字节集 <类型 = 字节集类 注释 = "所欲寻找的字节集">
     参数 起始地址 <类型 = 长整数 注释 = "搜索的起始位置" @默认值 = 0>
     参数 结束地址 <类型 = 长整数 注释 = "搜索的结束位置,默认搜索整个虚拟内存;" 注释 = "0则为进程所有模块的地址尾部,可能会找不到部分数据." @默认值 = -1>
+    参数 指定保护属性 <类型 = 整数 注释 = "是否仅寻找指定保护属性的内存地址,0为寻找全部保护属性;" 注释 = "请参考\"内存页面保护属性\"的常量." @默认值 = 0>
+    参数 指定页面类型 <类型 = 整数 注释 = "是否仅寻找指定页面类型的内存地址,0为寻找全部类型;" 注释 = "请参考\"内存页面类型\"的常量." @默认值 = 0>
     {
-        @ @sn<this>.find_memory(@<所欲寻找的字节集>, reinterpret_cast<PVOID64>(@<起始地址>), reinterpret_cast<PVOID64>(@<结束地址>))
+        @ @sn<this>.find_memory(@<所欲寻找的字节集>, reinterpret_cast<PVOID64>(@<起始地址>), reinterpret_cast<PVOID64>(@<结束地址>), static_cast<DWORD>(@<指定保护属性>), static_cast<DWORD>(@<指定页面类型>))
     }
 
     方法 寻找所有内存特征码 <公开 类型 = 整数 注释 = "Sunday算法实现内存快速搜索特征码(支持通配符模糊搜索)." 返回值注释 = "返回找到的虚拟内存地址数量,未找到则返回0." 折叠
             @嵌入式方法 = "req_str_param_text_pointer = true">
-    参数 特征码 <类型 = 文本型 注释 = "十六进制文本,首尾无空格,中间空格不可省略,支持通配符?" 注释 = "例如\"BA ?? 00 B4 09 ?? 21\"">
+    参数 特征码 <类型 = 文本型 注释 = "十六进制文本,中间的空格可以省略,支持通配符?" 注释 = "例如\"BA ?? 00 B4 09 ?? 21\"">
     参数 结果地址数组 <类型 = 长整数数组类 注释 = "在此返回所有找到的虚拟内存地址">
     参数 起始地址 <类型 = 长整数 注释 = "搜索的起始位置" @默认值 = 0>
     参数 结束地址 <类型 = 长整数 注释 = "搜索的结束位置,搜索的结束位置,默认搜索整个虚拟内存;" 注释 = "0则为进程所有模块的地址尾部,可能会找不到部分数据." @默认值 = -1>
+    参数 指定保护属性 <类型 = 整数 注释 = "是否仅寻找指定保护属性的内存地址,0为寻找全部保护属性;" 注释 = "请参考\"内存页面保护属性\"的常量." @默认值 = 0>
+    参数 指定页面类型 <类型 = 整数 注释 = "是否仅寻找指定页面类型的内存地址,0为寻找全部类型;" 注释 = "请参考\"内存页面类型\"的常量." @默认值 = 0>
     {
-        @ @sn<this>.find_signatures(@<特征码>, @<结果地址数组>.data(), reinterpret_cast<PVOID64>(@<起始地址>), reinterpret_cast<PVOID64>(@<结束地址>))
+        @ @sn<this>.find_signatures(@<特征码>, @<结果地址数组>.data(), reinterpret_cast<PVOID64>(@<起始地址>), reinterpret_cast<PVOID64>(@<结束地址>), static_cast<DWORD>(@<指定保护属性>), static_cast<DWORD>(@<指定页面类型>))
     }
 
     方法 寻找所有内存字节集 <公开 类型 = 整数 注释 = "在进程的虚拟内存中寻找指定的字节集数据" 返回值注释 = "返回找到的虚拟内存地址数量,未找到则返回0." 折叠 @嵌入式方法 = "">
@@ -819,8 +843,10 @@
     参数 结果地址数组 <类型 = 长整数数组类 注释 = "在此返回所有找到的虚拟内存地址">
     参数 起始地址 <类型 = 长整数 注释 = "搜索的起始位置" @默认值 = 0>
     参数 结束地址 <类型 = 长整数 注释 = "搜索的结束位置,默认搜索整个虚拟内存;" 注释 = "0则为进程所有模块的地址尾部,可能会找不到部分数据." @默认值 = -1>
+    参数 指定保护属性 <类型 = 整数 注释 = "是否仅寻找指定保护属性的内存地址,0为寻找全部保护属性;" 注释 = "请参考\"内存页面保护属性\"的常量." @默认值 = 0>
+    参数 指定页面类型 <类型 = 整数 注释 = "是否仅寻找指定页面类型的内存地址,0为寻找全部类型;" 注释 = "请参考\"内存页面类型\"的常量." @默认值 = 0>
     {
-        @ @sn<this>.find_memory(@<所欲寻找的字节集>, @<结果地址数组>.data(), reinterpret_cast<PVOID64>(@<起始地址>), reinterpret_cast<PVOID64>(@<结束地址>))
+        @ @sn<this>.find_memory(@<所欲寻找的字节集>, @<结果地址数组>.data(), reinterpret_cast<PVOID64>(@<起始地址>), reinterpret_cast<PVOID64>(@<结束地址>), static_cast<DWORD>(@<指定保护属性>), static_cast<DWORD>(@<指定页面类型>))
     }
 
     方法 读内存数据 <公开 类型 = 逻辑型 注释 = "读取进程中指定虚拟地址的内存数据,并保存到指定的地址中." 返回值注释 = "返回是否读取成功" 折叠 @嵌入式方法 = "">
@@ -949,13 +975,15 @@
     方法 寻找模块特征码 <公开 类型 = 长整数 注释 = "Sunday算法实现内存快速搜索特征码(支持通配符模糊搜索)." 返回值注释 = "返回找到的虚拟内存地址,未找到则返回0." 折叠
             @嵌入式方法 = "req_str_param_text_pointer = true">
     参数 模块句柄 <类型 = 长整数 注释 = "所欲操作的模块句柄,可以用\"取模块句柄\"、\"枚举模块句柄\"、\"枚举模块名称\"获取." @默认值 = 0>
-    参数 特征码 <类型 = 文本型 注释 = "十六进制文本,首尾无空格,中间空格不可省略,支持通配符?" 注释 = "例如\"BA ?? 00 B4 09 ?? 21\"">
+    参数 特征码 <类型 = 文本型 注释 = "十六进制文本,中间的空格可以省略,支持通配符?" 注释 = "例如\"BA ?? 00 B4 09 ?? 21\"">
     参数 起始偏移地址 <类型 = 变整数 注释 = "搜索的起始偏移位置,0为模块的基地址,实际地址为模块的虚拟内存基址+偏移地址;" 注释 = "如果提供的偏移地址大于模块尺寸,将返回失败."
             @默认值 = 0>
     参数 结束偏移地址 <类型 = 变整数 注释 = "搜索的结束偏移位置,默认值0表示搜索到模块文件的结尾,实际地址为模块的虚拟" 注释 = "内存基址+偏移地址;"
             注释 = "如果提供的偏移地址大于模块尺寸,将返回失败." @默认值 = 0>
+    参数 指定保护属性 <类型 = 整数 注释 = "是否仅寻找指定保护属性的内存地址,0为寻找全部保护属性;" 注释 = "请参考\"内存页面保护属性\"的常量." @默认值 = 0>
+    参数 指定页面类型 <类型 = 整数 注释 = "是否仅寻找指定页面类型的内存地址,0为寻找全部类型;" 注释 = "请参考\"内存页面类型\"的常量." @默认值 = 0>
     {
-        @ @sn<this>.find_module_signatures(static_cast<ULONG64>(@<模块句柄>), @<特征码>, static_cast<size_t>(@<起始偏移地址>), static_cast<size_t>(@<结束偏移地址>))
+        @ @sn<this>.find_module_signatures(static_cast<ULONG64>(@<模块句柄>), @<特征码>, static_cast<size_t>(@<起始偏移地址>), static_cast<size_t>(@<结束偏移地址>), static_cast<DWORD>(@<指定保护属性>), static_cast<DWORD>(@<指定页面类型>))
     }
 
     方法 寻找模块字节集 <公开 类型 = 长整数 注释 = "在模块的虚拟内存中寻找指定的字节集数据" 返回值注释 = "返回找到的虚拟内存地址,未找到则返回0." 折叠 @嵌入式方法 = "">
@@ -965,21 +993,26 @@
             @默认值 = 0>
     参数 结束偏移地址 <类型 = 变整数 注释 = "搜索的结束偏移位置,默认值0表示搜索到模块文件的结尾,实际地址为模块的虚拟" 注释 = "内存基址+偏移地址;"
             注释 = "如果提供的偏移地址大于模块尺寸,将返回失败." @默认值 = 0>
+    参数 指定保护属性 <类型 = 整数 注释 = "是否仅寻找指定保护属性的内存地址,0为寻找全部保护属性;" 注释 = "请参考\"内存页面保护属性\"的常量." @默认值 = 0>
+    参数 指定页面类型 <类型 = 整数 注释 = "是否仅寻找指定页面类型的内存地址,0为寻找全部类型;" 注释 = "请参考\"内存页面类型\"的常量." @默认值 = 0>
     {
-        @ @sn<this>.find_module_memory(static_cast<ULONG64>(@<模块句柄>), @<所欲寻找的字节集>, static_cast<size_t>(@<起始偏移地址>), static_cast<size_t>(@<结束偏移地址>))
+        @ @sn<this>.find_module_memory(static_cast<ULONG64>(@<模块句柄>), @<所欲寻找的字节集>, static_cast<size_t>(@<起始偏移地址>), static_cast<size_t>(@<结束偏移地址>), static_cast<DWORD>(@<指定保护属性>), static_cast<DWORD>(@<指定页面类型>))
     }
 
     方法 寻找所有模块特征码 <公开 类型 = 整数 注释 = "Sunday算法实现内存快速搜索特征码(支持通配符模糊搜索)." 返回值注释 = "返回找到的虚拟内存地址数量,未找到则返回0." 折叠
             @嵌入式方法 = "req_str_param_text_pointer = true">
     参数 模块句柄 <类型 = 长整数 注释 = "所欲操作的模块句柄,可以用\"取模块句柄\"、\"枚举模块句柄\"、\"枚举模块名称\"获取." @默认值 = 0>
-    参数 特征码 <类型 = 文本型 注释 = "十六进制文本,首尾无空格,中间空格不可省略,支持通配符?" 注释 = "例如\"BA ?? 00 B4 09 ?? 21\"">
+    参数 特征码 <类型 = 文本型 注释 = "十六进制文本,中间的空格可以省略,支持通配符?" 注释 = "例如\"BA ?? 00 B4 09 ?? 21\"">
     参数 结果地址数组 <类型 = 长整数数组类 注释 = "在此返回所有找到的虚拟内存地址.">
     参数 起始偏移地址 <类型 = 变整数 注释 = "搜索的起始偏移位置,0为模块的基地址,实际地址为模块的虚拟内存基址+偏移地址;" 注释 = "如果提供的偏移地址大于模块尺寸,将返回失败."
             @默认值 = 0>
     参数 结束偏移地址 <类型 = 变整数 注释 = "搜索的结束偏移位置,默认值0表示搜索到模块文件的结尾,实际地址为模块的虚拟" 注释 = "内存基址+偏移地址;"
             注释 = "如果提供的偏移地址大于模块尺寸,将返回失败." @默认值 = 0>
+    参数 指定保护属性 <类型 = 整数 注释 = "是否仅寻找指定保护属性的内存地址,0为寻找全部保护属性;" 注释 = "请参考\"内存页面保护属性\"的常量." @默认值 = 0>
+    参数 指定页面类型 <类型 = 整数 注释 = "是否仅寻找指定页面类型的内存地址,0为寻找全部类型;" 注释 = "请参考\"内存页面类型\"的常量." @默认值 = 0>
     {
-        @ @sn<this>.find_module_signatures (static_cast<ULONG64>(@<模块句柄>), @<特征码>, @<结果地址数组>.data(), static_cast<size_t>(@<起始偏移地址>), static_cast<size_t>(@<结束偏移地址>))
+        @ @sn<this>.find_module_signatures (static_cast<ULONG64>(@<模块句柄>), @<特征码>, @<结果地址数组>.data(), static_cast<size_t>(@<起始偏移地址>),
+        @     static_cast<size_t>(@<结束偏移地址>), static_cast<DWORD>(@<指定保护属性>), static_cast<DWORD>(@<指定页面类型>))
     }
 
     方法 寻找所有模块字节集 <公开 类型 = 整数 注释 = "在模块的虚拟内存中寻找指定的字节集数据" 返回值注释 = "返回找到的虚拟内存地址数量,未找到则返回0." 折叠 @嵌入式方法 = "">
@@ -990,8 +1023,11 @@
             @默认值 = 0>
     参数 结束偏移地址 <类型 = 变整数 注释 = "搜索的结束偏移位置,默认值0表示搜索到模块文件的结尾,实际地址为模块的虚拟" 注释 = "内存基址+偏移地址;"
             注释 = "如果提供的偏移地址大于模块尺寸,将返回失败." @默认值 = 0>
+    参数 指定保护属性 <类型 = 整数 注释 = "是否仅寻找指定保护属性的内存地址,0为寻找全部保护属性;" 注释 = "请参考\"内存页面保护属性\"的常量." @默认值 = 0>
+    参数 指定页面类型 <类型 = 整数 注释 = "是否仅寻找指定页面类型的内存地址,0为寻找全部类型;" 注释 = "请参考\"内存页面类型\"的常量." @默认值 = 0>
     {
-        @ @sn<this>.find_module_memory(static_cast<ULONG64>(@<模块句柄>), @<所欲寻找的字节集>, @<结果地址数组>.data (), static_cast<size_t>(@<起始偏移地址>), static_cast<size_t>(@<结束偏移地址>))
+        @ @sn<this>.find_module_memory(static_cast<ULONG64>(@<模块句柄>), @<所欲寻找的字节集>, @<结果地址数组>.data (), static_cast<size_t>(@<起始偏移地址>),
+        @     static_cast<size_t>(@<结束偏移地址>), static_cast<DWORD>(@<指定保护属性>), static_cast<DWORD>(@<指定页面类型>))
     }
 
     方法 读模块数据 <公开 类型 = 逻辑型 注释 = "读取模块中指定虚拟地址的内存数据,并保存到指定的地址中." 返回值注释 = "返回是否读取成功" 折叠 @嵌入式方法 = "">
@@ -1360,7 +1396,8 @@
         @ return (BOOL)::ShellExecuteExW (&ExecInfo);
     }
 
-    方法 枚举进程ID <公开 静态 类型 = 整数 注释 = "获取系统当前所有进程的ID" 返回值注释 = "成功返回进程ID数量,失败返回0." 折叠 @禁止流程检查 = 真>
+    方法 枚举进程ID <公开 静态 类型 = 整数 注释 = "获取系统当前所有进程的ID" 返回值注释 = "成功返回进程ID数量,失败返回0." 折叠 @禁止流程检查 = 真
+            @强制依赖 = "进程操作类">
     参数 进程ID数组 <类型 = 整数数组类 注释 = "获取的进程ID数组" @输出名 = "aProcessID">
     参数 预估进程数量 <类型 = 整数 注释 = "必须大于系统当前运行的进程数量,默认2048个进程,一般足够了;" 注释 = "如果你电脑运行的程序过多,请自行适当调整该参数." @默认值 = 2048
             @输出名 = "nSize">
@@ -1512,16 +1549,16 @@
     方法 枚举进程信息 <公开 静态 类型 = 整数 注释 = "通过系统快照获取当前所有进程的基本信息(ID、名称等)." 返回值注释 = "成功返回进程数量,失败返回0." 折叠 @禁止流程检查 = 真>
     参数 进程信息数组 <类型 = 进程快照数组类 注释 = "获取的进程信息保存在此数组中">
     {
-        @ @<进程信息数组>.RemoveAll ();
-        @ HANDLE hProcessSnap = ::CreateToolhelp32Snapshot (TH32CS_SNAPPROCESS, 0);
+        @ @<进程信息数组>.clear();
+        @ HANDLE hProcessSnap = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
         @ if (hProcessSnap == INVALID_HANDLE_VALUE) return 0;
-        @ PROCESSENTRY32W pe32 { sizeof (PROCESSENTRY32W) };
-        @ if (::Process32FirstW (hProcessSnap, &pe32) == FALSE) return 0;
+        @ PROCESSENTRY32W pe32{sizeof(PROCESSENTRY32W)};
+        @ if (::Process32FirstW(hProcessSnap, &pe32) == FALSE) return 0;
         @ do {
-        @     @<进程信息数组>.Add (@dt<进程快照类> (&pe32), NULL);
-        @ } while (::Process32NextW (hProcessSnap, &pe32));
-        @ ::CloseHandle (hProcessSnap);
-        @ return (INT)@<进程信息数组>.GetCount ();
+        @     @<进程信息数组>.push_back(pe32);
+        @ } while (::Process32NextW(hProcessSnap, &pe32));
+        @ ::CloseHandle(hProcessSnap);
+        @ return (INT)@<进程信息数组>.size();
     }
 
     方法 枚举子进程信息 <公开 静态 类型 = 整数 注释 = "通过系统快照获取指定进程的子进程基本信息(ID、名称等)." 注释 = "子进程指的是由另一进程(对应称之为父进程)所创建的进程,"
@@ -1529,50 +1566,50 @@
     参数 父进程ID <类型 = 整数 注释 = "所欲取子进程信息的父进程ID,0为当前进程." @输出名 = "nPID">
     参数 子进程信息数组 <类型 = 进程快照数组类 注释 = "获取的子进程信息保存在此数组中">
     {
-        @ @<子进程信息数组>.RemoveAll ();
-        @ HANDLE hProcessSnap = ::CreateToolhelp32Snapshot (TH32CS_SNAPPROCESS, 0);
-        @ DWORD dwParentPID = nPID == 0 ? ::GetCurrentProcessId () : (DWORD)nPID;
+        @ @<子进程信息数组>.clear();
+        @ HANDLE hProcessSnap = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+        @ DWORD dwParentPID = nPID == 0 ? ::GetCurrentProcessId() : (DWORD)nPID;
         @ if (hProcessSnap == INVALID_HANDLE_VALUE) return 0;
-        @ PROCESSENTRY32W pe32 { sizeof (PROCESSENTRY32W) };
-        @ if (::Process32FirstW (hProcessSnap, &pe32) == FALSE) return 0;
+        @ PROCESSENTRY32W pe32{sizeof(PROCESSENTRY32W)};
+        @ if (::Process32FirstW(hProcessSnap, &pe32) == FALSE) return 0;
         @ do {
         @     if (pe32.th32ParentProcessID == dwParentPID)
-        @         @<子进程信息数组>.Add (@dt<进程快照类> (&pe32), NULL);
-        @ } while (::Process32NextW (hProcessSnap, &pe32));
-        @ ::CloseHandle (hProcessSnap);
-        @ return (INT)@<子进程信息数组>.GetCount ();
+        @         @<子进程信息数组>.push_back(pe32);
+        @ } while (::Process32NextW(hProcessSnap, &pe32));
+        @ ::CloseHandle(hProcessSnap);
+        @ return (INT)@<子进程信息数组>.size();
     }
 
     方法 枚举模块信息 <公开 静态 类型 = 整数 注释 = "通过系统快照获取某个进程所有模块的基本信息" 返回值注释 = "成功返回进程的模块数量,失败返回0." 折叠 @禁止流程检查 = 真>
     参数 进程ID <类型 = 整数 注释 = "所欲取模块信息的进程ID,0为当前进程." @输出名 = "nPID">
     参数 模块信息数组 <类型 = 模块快照数组类 注释 = "获取的模块信息保存在此数组中">
     {
-        @ @<模块信息数组>.RemoveAll ();
-        @ HANDLE hModuleSnap = ::CreateToolhelp32Snapshot (TH32CS_SNAPMODULE, (DWORD)nPID);
+        @ @<模块信息数组>.clear();
+        @ HANDLE hModuleSnap = ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, (DWORD)nPID);
         @ if (hModuleSnap == INVALID_HANDLE_VALUE) return 0;
-        @ MODULEENTRY32W me32 { sizeof (MODULEENTRY32W) };
-        @ if (::Module32FirstW (hModuleSnap, &me32) == FALSE) return 0;
+        @ MODULEENTRY32W me32{sizeof(MODULEENTRY32W)};
+        @ if (::Module32FirstW(hModuleSnap, &me32) == FALSE) return 0;
         @ do {
-        @     @<模块信息数组>.Add (@dt<模块快照类> (&me32), NULL);
-        @ } while (::Module32NextW (hModuleSnap, &me32));
-        @ ::CloseHandle (hModuleSnap);
-        @ return (INT)@<模块信息数组>.GetCount ();
+        @     @<模块信息数组>.push_back(me32);
+        @ } while (::Module32NextW(hModuleSnap, &me32));
+        @ ::CloseHandle(hModuleSnap);
+        @ return (INT)@<模块信息数组>.size();
     }
 
     方法 枚举线程信息 <公开 静态 类型 = 整数 注释 = "通过系统快照获取系统所有线程的基本信息." 注释 = "本方法会一次性获取所有的线程信息,请用\"线程快照类.进程ID\"来特定进程."
             返回值注释 = "成功返回线程数量,失败返回0." 折叠 @禁止流程检查 = 真>
     参数 线程信息数组 <类型 = 线程快照数组类 注释 = "获取的线程信息保存在此数组中">
     {
-        @ @<线程信息数组>.RemoveAll ();
-        @ HANDLE hThreadSnap = ::CreateToolhelp32Snapshot (TH32CS_SNAPTHREAD, 0);
+        @ @<线程信息数组>.clear();
+        @ HANDLE hThreadSnap = ::CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
         @ if (hThreadSnap == INVALID_HANDLE_VALUE) return 0;
-        @ THREADENTRY32 te32 { sizeof (THREADENTRY32) };
-        @ if (::Thread32First (hThreadSnap, &te32) == FALSE) return 0;
+        @ THREADENTRY32 te32{sizeof(THREADENTRY32)};
+        @ if (::Thread32First(hThreadSnap, &te32) == FALSE) return 0;
         @ do {
-        @     @<线程信息数组>.Add (@dt<线程快照类>(&te32), NULL);
-        @ } while (::Thread32Next (hThreadSnap, &te32));
-        @ ::CloseHandle (hThreadSnap);
-        @ return (INT)@<线程信息数组>.GetCount ();
+        @     @<线程信息数组>.push_back(te32);
+        @ } while (::Thread32Next(hThreadSnap, &te32));
+        @ ::CloseHandle(hThreadSnap);
+        @ return (INT)@<线程信息数组>.size();
     }
 
     方法 枚举堆列表 <公开 静态 类型 = 整数 注释 = "通过系统快照获取线程的堆内存列表ID数组." 注释 = "后续可以用\"枚举堆内存\"历遍所有堆块的信息."
@@ -1599,32 +1636,29 @@
     参数 堆列表ID <类型 = 变整数 注释 = "所欲取堆块信息的堆列表ID" @输出名 = "pHeapID">
     参数 堆块结构数组 <类型 = 堆块结构数组类 注释 = "获取的堆块信息保存在此数组中">
     {
-        @ @<堆块结构数组>.RemoveAll ();
-        @ HEAPENTRY32 he32 { 0 };
-        @ he32.dwSize = sizeof (HEAPENTRY32);
-        @ if (::Heap32First (&he32, (DWORD)nPID, (ULONG_PTR)pHeapID) == FALSE) return 0;
+        @ @<堆块结构数组>.clear ();
+        @ HEAPENTRY32 he32{sizeof(HEAPENTRY32)};
+        @ if (::Heap32First(&he32, (DWORD)nPID, (ULONG_PTR)pHeapID) == FALSE) return 0;
         @ do {
-        @     @dt<堆块结构类> he;
-        @     he.SetStruct ((@dt<堆块结构类>::S*)&he32);
-        @     @<堆块结构数组>.Add (he, NULL);
+        @     @<堆块结构数组>.push_back(he32);
         @ } while (::Heap32Next(&he32));
-        @ return (INT)@<堆块结构数组>.GetCount ();
+        @ return (INT)@<堆块结构数组>.size();
     }
 
     方法 进程ID取进程名 <公开 静态 类型 = 文本型 注释 = "通过系统快照,根据进程ID获取进程名称." 返回值注释 = "成功返回进程名称,失败返回空文本." 折叠 @禁止流程检查 = 真>
     参数 进程ID <类型 = 整数 注释 = "所欲取进程名称的进程ID" @输出名 = "nProcessID">
     {
-        @ HANDLE hProcessSnap = ::CreateToolhelp32Snapshot (TH32CS_SNAPPROCESS, 0);
+        @ HANDLE hProcessSnap = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
         @ if (hProcessSnap == INVALID_HANDLE_VALUE) return 0;
-        @ PROCESSENTRY32W pe32 { sizeof (PROCESSENTRY32W) };
-        @ if (::Process32FirstW (hProcessSnap, &pe32) == FALSE) return 0;
+        @ PROCESSENTRY32W pe32{sizeof(PROCESSENTRY32W)};
+        @ if (::Process32FirstW(hProcessSnap, &pe32) == FALSE) return 0;
         @ do {
         @     if (pe32.th32ProcessID == nProcessID) {
-        @         ::CloseHandle (hProcessSnap);
-        @         return @an<CVolString> (pe32.szExeFile);
+        @         ::CloseHandle(hProcessSnap);
+        @         return @an<CVolString>(pe32.szExeFile);
         @     }
-        @ } while (::Process32NextW (hProcessSnap, &pe32));
-        @ ::CloseHandle (hProcessSnap);
+        @ } while (::Process32NextW(hProcessSnap, &pe32));
+        @ ::CloseHandle(hProcessSnap);
         @ return _CT ("");
     }
 
@@ -1634,52 +1668,52 @@
     参数 进程ID数组 <类型 = 整数数组类 注释 = "获取的进程ID保存在此数组中" @输出名 = "aProcessID">
     参数 是否区分大小写 <类型 = 逻辑型 注释 = "指定进程名称是否区分英文字母的大小写" @默认值 = 真 @输出名 = "bCaseMatch">
     {
-        @ aProcessID.data ().RemoveAll ();
-        @ HANDLE hProcessSnap = ::CreateToolhelp32Snapshot (TH32CS_SNAPPROCESS, 0);
+        @ aProcessID.data().RemoveAll();
+        @ HANDLE hProcessSnap = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
         @ if (hProcessSnap == INVALID_HANDLE_VALUE) return 0;
-        @ PROCESSENTRY32W pe32 { sizeof (PROCESSENTRY32W) };
-        @ if (::Process32FirstW (hProcessSnap, &pe32) == FALSE) return 0;
+        @ PROCESSENTRY32W pe32{sizeof(PROCESSENTRY32W)};
+        @ if (::Process32FirstW(hProcessSnap, &pe32) == FALSE) return 0;
         @ do {
-        @     if ((INT)ProcessName.compare (@an<CVolString> (pe32.szExeFile), bCaseMatch) == 0) {
-        @         aProcessID.data ().Add2 ((INT)pe32.th32ProcessID);
+        @     if ((bCaseMatch ? ProcessName.compare(pe32.szExeFile) : ProcessName.icompare(pe32.szExeFile)) == 0) {
+        @         aProcessID.data().Add2((INT)pe32.th32ProcessID);
         @     }
-        @ } while (::Process32NextW (hProcessSnap, &pe32));
-        @ ::CloseHandle (hProcessSnap);
-        @ return (INT)aProcessID.data ().GetCount ();
+        @ } while (::Process32NextW(hProcessSnap, &pe32));
+        @ ::CloseHandle(hProcessSnap);
+        @ return (INT)aProcessID.data().GetCount();
     }
 
     方法 取进程线程信息 <公开 静态 类型 = 整数 注释 = "通过系统快照获取指定进程的所有线程的基本信息" 返回值注释 = "成功返回线程数量,失败返回0." 折叠 @禁止流程检查 = 真>
     参数 进程ID <类型 = 整数 注释 = "所欲取子进程信息的父进程ID,0为当前进程." @默认值 = 0>
     参数 线程信息数组 <类型 = 线程快照数组类 注释 = "获取的线程信息保存在此数组中">
     {
-        @ @<线程信息数组>.RemoveAll ();
-        @ DWORD dwPID = (@<进程ID> == 0) ? ::GetCurrentProcessId () : (DWORD)@<进程ID>;
-        @ HANDLE hThreadSnap = ::CreateToolhelp32Snapshot (TH32CS_SNAPTHREAD, 0);
+        @ @<线程信息数组>.clear();
+        @ DWORD dwPID = (@<进程ID> == 0) ? ::GetCurrentProcessId() : (DWORD)@<进程ID>;
+        @ HANDLE hThreadSnap = ::CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
         @ if (hThreadSnap == INVALID_HANDLE_VALUE) return 0;
-        @ THREADENTRY32 te32 { sizeof (THREADENTRY32) };
-        @ if (::Thread32First (hThreadSnap, &te32) == FALSE) return 0;
+        @ THREADENTRY32 te32{sizeof(THREADENTRY32)};
+        @ if (::Thread32First(hThreadSnap, &te32) == FALSE) return 0;
         @ do {
         @     if (dwPID == te32.th32OwnerProcessID)
-        @         @<线程信息数组>.Add (@dt<线程快照类>(&te32), NULL);
-        @ } while (::Thread32Next (hThreadSnap, &te32));
-        @ ::CloseHandle (hThreadSnap);
-        @ return (INT)@<线程信息数组>.GetCount ();
+        @         @<线程信息数组>.push_back(te32);
+        @ } while (::Thread32Next(hThreadSnap, &te32));
+        @ ::CloseHandle(hThreadSnap);
+        @ return (INT)@<线程信息数组>.size();
     }
 
     方法 取进程线程数 <公开 静态 类型 = 整数 注释 = "通过系统快照获取某个进程的线程数量" 返回值注释 = "成功返回进程的线程数量" 折叠 @禁止流程检查 = 真>
     参数 进程ID <类型 = 整数 注释 = "所欲取线程数量的进程ID" @输出名 = "nProcessID">
     {
-        @ HANDLE hProcessSnap = ::CreateToolhelp32Snapshot (TH32CS_SNAPPROCESS, 0);
+        @ HANDLE hProcessSnap = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
         @ if (hProcessSnap == INVALID_HANDLE_VALUE) return 0;
-        @ PROCESSENTRY32W pe32 { sizeof (PROCESSENTRY32W) };
-        @ if (::Process32FirstW (hProcessSnap, &pe32) == FALSE) return 0;
+        @ PROCESSENTRY32W pe32{ sizeof(PROCESSENTRY32W)};
+        @ if (::Process32FirstW(hProcessSnap, &pe32) == FALSE) return 0;
         @ do {
         @     if (pe32.th32ProcessID == nProcessID) {
-        @         ::CloseHandle (hProcessSnap);
+        @         ::CloseHandle(hProcessSnap);
         @         return (INT)pe32.cntThreads;
         @     }
-        @ } while (::Process32NextW (hProcessSnap, &pe32));
-        @ ::CloseHandle (hProcessSnap);
+        @ } while (::Process32NextW(hProcessSnap, &pe32));
+        @ ::CloseHandle(hProcessSnap);
         @ return 0;
     }
 }
@@ -1735,9 +1769,9 @@
     {
         @ if (m_module) return FALSE;
         @ HMODULE hModule = g_objVolApp.GetInstanceHandle();
-        @ HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE(@<模块资源>, RT_RCDATA));
+        @ HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCEW(@<模块资源>), RT_RCDATA);
         @ if (hSrc == NULL) return FALSE;
-        @ HGLOBAL resdata = ::LoadResource(hModule, ::FindResourceW(hModule, MAKEINTRESOURCE(@<模块资源>, RT_RCDATA));
+        @ HGLOBAL resdata = ::LoadResource(hModule, ::FindResourceW(hModule, MAKEINTRESOURCEW(@<模块资源>), RT_RCDATA));
         @ if (resdata == NULL) return FALSE;
         @ m_module = MemoryLoadLibrary(::LockResource(resdata), ::SizeofResource(hModule, hSrc));
         @ return (m_module != nullptr);
@@ -2127,6 +2161,13 @@
     常量 "//" <公开 类型 = 整数 值 = @PAGE_ENCLAVE_UNVALIDATED>
 }
 
+类 内存页面类型 <公开 折叠 @文档 = "category = \"进程操作.辅助类\"">
+{
+    常量 私有 <公开 类型 = 整数 值 = @MEM_PRIVATE 注释 = "表示区域内的内存页是私有的(即不与其他进程共享)">
+    常量 映射 <公开 类型 = 整数 值 = @MEM_MAPPED 注释 = "表示区域内的内存页已映射到区段的视图中">
+    常量 映像 <公开 类型 = 整数 值 = @MEM_IMAGE 注释 = "表示区域内的内存页已映射到映像区段的视图中">
+}
+
 类 用户权限常量 <公开 注释 = "用于\"进程辅助类.提升进程权限\""
         注释 = "https://docs.microsoft.com/en-us/windows/win32/secauthz/privilege-constants" 折叠
         @文档 = "category = \"进程操作.辅助类\"" @常量类 = 文本型>
@@ -2291,10 +2332,10 @@
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
     {
-        展示内容 = "<MODULEINFO> 总共 3 个成员:\n"
-        加入文本 (展示内容, "1. lpBaseOfDll: " + 取调试文本2 (最大展示数据尺寸, lpBaseOfDll) + "\n")
-        加入文本 (展示内容, "2. SizeOfImage: " + 取调试文本2 (最大展示数据尺寸, SizeOfImage) + "\n")
-        加入文本 (展示内容, "3. EntryPoint: " + 取调试文本2 (最大展示数据尺寸, EntryPoint) + "\n")
+        展示内容 = "<MODULEINFO> 总共 3 个成员:\r\n"
+        加入文本 (展示内容, "1. lpBaseOfDll: " + 取调试文本2 (最大展示数据尺寸, lpBaseOfDll) + "\r\n")
+        加入文本 (展示内容, "2. SizeOfImage: " + 取调试文本2 (最大展示数据尺寸, SizeOfImage) + "\r\n")
+        加入文本 (展示内容, "3. EntryPoint: " + 取调试文本2 (最大展示数据尺寸, EntryPoint))
     }
 }
 
@@ -2310,12 +2351,12 @@
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
     {
-        展示内容 = "<模块信息> 总共 5 个成员:\n"
-        加入文本 (展示内容, "[1] lpBaseOfDll: " + 取调试文本2 (最大展示数据尺寸, lpBaseOfDll) + "\n")
-        加入文本 (展示内容, "[2] SizeOfImage: " + 取调试文本2 (最大展示数据尺寸, SizeOfImage) + "\n")
-        加入文本 (展示内容, "[3] EntryPoint: " + 取调试文本2 (最大展示数据尺寸, EntryPoint) + "\n")
-        加入文本 (展示内容, "[4] FullDllName: " + 取调试文本2 (最大展示数据尺寸, FullDllName) + "\n")
-        加入文本 (展示内容, "[5] BaseDllName: " + 取调试文本2 (最大展示数据尺寸, BaseDllName) + "\n")
+        展示内容 = "<模块信息> 总共 5 个成员:\r\n"
+        加入文本 (展示内容, "[1] lpBaseOfDll: " + 取调试文本2 (最大展示数据尺寸, lpBaseOfDll) + "\r\n")
+        加入文本 (展示内容, "[2] SizeOfImage: " + 取调试文本2 (最大展示数据尺寸, SizeOfImage) + "\r\n")
+        加入文本 (展示内容, "[3] EntryPoint: " + 取调试文本2 (最大展示数据尺寸, EntryPoint) + "\r\n")
+        加入文本 (展示内容, "[4] FullDllName: " + 取调试文本2 (最大展示数据尺寸, FullDllName) + "\r\n")
+        加入文本 (展示内容, "[5] BaseDllName: " + 取调试文本2 (最大展示数据尺寸, BaseDllName))
     }
 
     # @begin
@@ -2332,7 +2373,7 @@
     # @end
 }
 
-类 NT模块信息数组类 <公开 基础类 = 对象容器模板类 @文档 = "category = \"进程操作.辅助类\"" @模板实现类 = "NT模块信息类">
+类 NT模块信息数组类 <公开 基础类 = PIV数组模板 @文档 = "category = \"进程操作.辅助类\"" @模板实现类 = "NT模块信息类">
 
 类 进程内存使用情况类 <公开 基础类 = 扩展对象类 注释 = "PROCESS_MEMORY_COUNTERS" 折叠 @视窗.结构类 = 0
         @文档 = "category = \"进程操作.辅助类\"">
@@ -2352,159 +2393,168 @@
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
     {
-        展示内容 = "<PROCESS_MEMORY_COUNTERS> 总共 10 个成员:\n"
-        加入文本 (展示内容, "1. 结构体尺寸: " + 取调试文本2 (最大展示数据尺寸, 结构体尺寸) + "\n")
-        加入文本 (展示内容, "2. 页面错误数: " + 取调试文本2 (最大展示数据尺寸, 页面错误数) + "\n")
-        加入文本 (展示内容, "3. 峰值工作集大小: " + 取调试文本2 (最大展示数据尺寸, 峰值工作集大小) + "\n")
-        加入文本 (展示内容, "4. 工作集大小: " + 取调试文本2 (最大展示数据尺寸, 工作集大小) + "\n")
-        加入文本 (展示内容, "5. 分页缓冲池用量配额峰值: " + 取调试文本2 (最大展示数据尺寸, 分页缓冲池用量配额峰值) + "\n")
-        加入文本 (展示内容, "6. 分页缓冲池用量配额: " + 取调试文本2 (最大展示数据尺寸, 分页缓冲池用量配额) + "\n")
-        加入文本 (展示内容, "7. 非分页缓冲池用量配额峰值: " + 取调试文本2 (最大展示数据尺寸, 非分页缓冲池用量配额峰值) + "\n")
-        加入文本 (展示内容, "8. 非分页缓冲池用量配额: " + 取调试文本2 (最大展示数据尺寸, 非分页缓冲池用量配额) + "\n")
-        加入文本 (展示内容, "9. 页面文件用量: " + 取调试文本2 (最大展示数据尺寸, 页面文件用量) + "\n")
-        加入文本 (展示内容, "10. 页面文件用量峰值: " + 取调试文本2 (最大展示数据尺寸, 页面文件用量峰值) + "\n")
+        展示内容 = "<PROCESS_MEMORY_COUNTERS> 总共 10 个成员:\r\n"
+        加入文本 (展示内容, "1. 结构体尺寸: " + 取调试文本2 (最大展示数据尺寸, 结构体尺寸) + "\r\n")
+        加入文本 (展示内容, "2. 页面错误数: " + 取调试文本2 (最大展示数据尺寸, 页面错误数) + "\r\n")
+        加入文本 (展示内容, "3. 峰值工作集大小: " + 取调试文本2 (最大展示数据尺寸, 峰值工作集大小) + "\r\n")
+        加入文本 (展示内容, "4. 工作集大小: " + 取调试文本2 (最大展示数据尺寸, 工作集大小) + "\r\n")
+        加入文本 (展示内容, "5. 分页缓冲池用量配额峰值: " + 取调试文本2 (最大展示数据尺寸, 分页缓冲池用量配额峰值) + "\r\n")
+        加入文本 (展示内容, "6. 分页缓冲池用量配额: " + 取调试文本2 (最大展示数据尺寸, 分页缓冲池用量配额) + "\r\n")
+        加入文本 (展示内容, "7. 非分页缓冲池用量配额峰值: " + 取调试文本2 (最大展示数据尺寸, 非分页缓冲池用量配额峰值) + "\r\n")
+        加入文本 (展示内容, "8. 非分页缓冲池用量配额: " + 取调试文本2 (最大展示数据尺寸, 非分页缓冲池用量配额) + "\r\n")
+        加入文本 (展示内容, "9. 页面文件用量: " + 取调试文本2 (最大展示数据尺寸, 页面文件用量) + "\r\n")
+        加入文本 (展示内容, "10. 页面文件用量峰值: " + 取调试文本2 (最大展示数据尺寸, 页面文件用量峰值))
     }
 }
 
-类 进程快照类 <公开 基础类 = 扩展对象类 注释 = "系统快照中的有效进程信息." 折叠 @文档 = "category = \"进程操作.辅助类\"">
+类 进程快照类 <公开 基础类 = PIV结构模板 注释 = "系统快照中的有效进程信息" 折叠 @文档 = "category = \"进程操作.辅助类\""
+        @别名 = "PROCESSENTRY32W" @模板实现类 = "进程快照类" @强制依赖 = "快照辅助类">
 {
+    变量 dwSize <公开 类型 = 整数 @输出名 = "dwSize">
     变量 进程ID <公开 类型 = 整数 注释 = "此进程的ID" @输出名 = "th32ProcessID">
     变量 线程数量 <公开 类型 = 整数 注释 = "此进程已启动的线程数量" @输出名 = "cntThreads">
     变量 父进程ID <公开 类型 = 整数 注释 = "创建此子进程的父进程ID" @输出名 = "th32ParentProcessID">
     变量 线程优先级 <公开 类型 = 整数 注释 = "此进程创建线程的基础优先级" @输出名 = "pcPriClassBase">
-    变量 进程名称 <公开 类型 = 文本型 注释 = "此进程的可执行文件名" @输出名 = "szExeFile">
+    变量 "//进程名称" <公开 类型 = 文本型 注释 = "此进程的可执行文件名" @输出名 = "szExeFile">
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖>
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    方法 进程名称 <公开 静态 属性读 类型 = 文本型 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = 进程快照类>
     {
-        展示内容 = "<进程快照类> 总共 5 个成员:\n"
-        加入文本 (展示内容, "1. 进程ID: " + 取调试文本2 (最大展示数据尺寸, 进程ID) + "\n")
-        加入文本 (展示内容, "2. 线程数量: " + 取调试文本2 (最大展示数据尺寸, 线程数量) + "\n")
-        加入文本 (展示内容, "3. 父进程ID: " + 取调试文本2 (最大展示数据尺寸, 父进程ID) + "\n")
-        加入文本 (展示内容, "4. 线程优先级: " + 取调试文本2 (最大展示数据尺寸, 线程优先级) + "\n")
-        加入文本 (展示内容, "5. 进程名称: " + 取调试文本2 (最大展示数据尺寸, 进程名称) + "\n")
+        @ @an<CVolString>(@<欲操作本对象>.szExeFile)
     }
 
-    # @begin
-    # <> <include>
-    # inline void SetInfo (PROCESSENTRY32W* stInfo) {
-    #     this->ResetObject ();
-    #     th32ProcessID = (INT)stInfo->th32ProcessID;
-    #     cntThreads = (INT)stInfo->cntThreads;
-    #     th32ParentProcessID = (INT)stInfo->th32ParentProcessID;
-    #     pcPriClassBase = (INT)stInfo->pcPriClassBase;
-    #     if (stInfo->szExeFile) szExeFile.SetText (stInfo->szExeFile);
-    # }
-    # inline @sn<current_class> (PROCESSENTRY32W* stInfo) : @sn<current_class>()  { this->SetInfo(stInfo); }
-    # <> </include>
-    # @end
+    方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用." 折叠>
+    参数 欲操作本对象 <类型 = 进程快照类 注释 = "用作填入本对象中所有数据的展示文本">
+    {
+        变量 格式文本 <类型 = 文本型
+                值 = "<进程快照类 PROCESSENTRY32> 总共 6/10 个成员:\"\r\n1. dwSize: %u\r\n2. 进程ID(th32ProcessID): %u\r\n3. 线程数量(cntThreads): %u\r\n4. 父进程ID(th32ParentProcessID): %u\r\n5. 线程优先级(pcPriClassBase): %u\r\n6. 进程名称(szExeFile): %s">
+        返回 (取格式文本 (格式文本, 欲操作本对象.dwSize, 欲操作本对象.进程ID, 欲操作本对象.线程数量, 欲操作本对象.父进程ID, 欲操作本对象.线程优先级, 欲操作本对象.进程名称))
+    }
 }
 
-类 进程快照数组类 <公开 基础类 = 对象数组模板类 @文档 = "category = \"进程操作.辅助类\"" @模板实现类 = "进程快照类">
+类 进程快照数组类 <公开 基础类 = PIV数组模板 注释 = "std::vector<PROCESSENTRY32W>" @文档 = "category = \"进程操作.辅助类\""
+        @模板实现类 = "进程快照类">
 
-类 模块快照类 <公开 基础类 = 扩展对象类 注释 = "系统快照中的有效模块信息." 折叠 @文档 = "category = \"进程操作.辅助类\"">
+类 模块快照类 <公开 基础类 = PIV结构模板 注释 = "系统快照中的有效模块信息" 注释 = "MODULEENTRY32W" 折叠 @文档 = "category = \"进程操作.辅助类\""
+        @别名 = "MODULEENTRY32W" @模板实现类 = "模块快照类" @强制依赖 = "快照辅助类">
 {
+    变量 dwSize <公开 类型 = 整数 @输出名 = "dwSize">
+    变量 "// 模块ID" <类型 = 整数 注释 = "当前模块的ID(无用)" @输出名 = "th32ModuleID">
     变量 进程ID <公开 类型 = 整数 注释 = "模块所属进程的ID" @输出名 = "th32ProcessID">
-    变量 模块基址 <公开 类型 = 变整数 注释 = "模块在所属进程上下文中的基址" @输出名 = "modBaseAddr">
+    变量 "//模块基址" <公开 类型 = 变整数 注释 = "模块在所属进程上下文中的基址" @输出名 = "modBaseAddr">
     变量 模块大小 <公开 类型 = 整数 注释 = "模块的大小(字节)" @输出名 = "modBaseSize">
-    变量 模块句柄 <公开 类型 = 变整数 注释 = "模块在所属进程上下文中的句柄" @输出名 = "hModule">
-    变量 模块名称 <公开 类型 = 文本型 注释 = "模块文件的名称" @输出名 = "szModule">
-    变量 模块路径 <公开 类型 = 文本型 注释 = "模块的路径" @输出名 = "szExePath">
+    变量 "// 模块句柄" <公开 类型 = 变整数 注释 = "模块在所属进程上下文中的句柄" @输出名 = "hModule">
+    变量 "// 模块名称" <公开 类型 = 文本型 注释 = "模块文件的名称" @输出名 = "szModule">
+    变量 "// 模块路径" <公开 类型 = 文本型 注释 = "模块的路径" @输出名 = "szExePath">
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖>
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    方法 模块基址 <公开 静态 属性读 类型 = 变整数 注释 = "模块在所属进程上下文中的基址" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = 模块快照类>
     {
-        展示内容 = "<模块快照类> 总共 6 个成员:\n"
-        加入文本 (展示内容, "1. 进程ID: " + 取调试文本2 (最大展示数据尺寸, 进程ID) + "\n")
-        加入文本 (展示内容, "2. 模块基址: " + 取调试文本2 (最大展示数据尺寸, 模块基址) + "\n")
-        加入文本 (展示内容, "3. 模块大小: " + 取调试文本2 (最大展示数据尺寸, 模块大小) + "\n")
-        加入文本 (展示内容, "4. 模块句柄: " + 取调试文本2 (最大展示数据尺寸, 模块句柄) + "\n")
-        加入文本 (展示内容, "5. 模块名称: " + 取调试文本2 (最大展示数据尺寸, 模块名称) + "\n")
-        加入文本 (展示内容, "6. 模块路径: " + 取调试文本2 (最大展示数据尺寸, 模块路径) + "\n")
+        @ (INT_P)@<欲操作本对象>.modBaseAddr
     }
 
-    # @begin
-    # <> <include>
-    # inline void SetInfo (MODULEENTRY32W* stInfo) {
-    #     this->ResetObject ();
-    #     th32ProcessID = (INT)stInfo->th32ProcessID;
-    #     modBaseAddr = (INT_P)stInfo->modBaseAddr;
-    #     modBaseSize = (INT)stInfo->modBaseSize;
-    #     hModule = (INT_P)stInfo->hModule;
-    #     if (stInfo->szModule) szModule.SetText (stInfo->szModule);
-    #     if (stInfo->szExePath) szExePath.SetText (stInfo->szExePath);
-    # }
-    # inline @sn<current_class> (MODULEENTRY32W* stInfo) : @sn<current_class>()  { this->SetInfo(stInfo); }
-    # <> </include>
-    # @end
+    方法 模块基址 <公开 静态 属性写 注释 = "模块在所属进程上下文中的基址" 折叠>
+    参数 欲操作本对象 <类型 = 模块快照类>
+    参数 基址 <类型 = 变整数>
+    {
+        @ @<欲操作本对象>.modBaseAddr = (BYTE*)@<基址>;
+    }
+
+    方法 模块句柄 <公开 静态 属性读 类型 = 变整数 注释 = "模块在所属进程上下文中的句柄" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = 模块快照类>
+    {
+        @ (INT_P)@<欲操作本对象>.hModule
+    }
+
+    方法 模块句柄 <公开 静态 属性写 注释 = "模块在所属进程上下文中的句柄" 折叠>
+    参数 欲操作本对象 <类型 = 模块快照类>
+    参数 句柄 <类型 = 变整数>
+    {
+        @ @<欲操作本对象>.hModule = (HMODULE)@<句柄>;
+    }
+
+    方法 模块名称 <公开 静态 属性读 类型 = 文本型 注释 = "模块文件的名称" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = 模块快照类>
+    {
+        @ @an<CVolString>(@<欲操作本对象>.szModule)
+    }
+
+    方法 模块路径 <公开 静态 属性读 类型 = 文本型 注释 = "模块的路径" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = 模块快照类>
+    {
+        @ @an<CVolString>(@<欲操作本对象>.szExePath)
+    }
+
+    方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用." 折叠>
+    参数 欲操作本对象 <类型 = 模块快照类 注释 = "用作填入本对象中所有数据的展示文本">
+    {
+        变量 格式文本 <类型 = 文本型
+                值 = "<模块快照类 MODULEENTRY32> 总共 7/10 个成员:\"\r\n1. dwSize: %u\r\n2. 进程ID(th32ProcessID): %u\r\n3. 模块基址(modBaseAddr): %u\r\n4. 模块大小(modBaseSize): %u\r\n5. 模块句柄(hModule): %I64u\r\n6. 模块名称(szModule): %s\r\n7. 模块路径(szExePath): %s">
+        返回 (取格式文本 (格式文本, 欲操作本对象.dwSize, 欲操作本对象.进程ID, 欲操作本对象.模块基址, 欲操作本对象.模块大小, 欲操作本对象.模块句柄, 欲操作本对象.模块名称, 欲操作本对象.模块路径))
+    }
 }
 
-类 模块快照数组类 <公开 基础类 = 对象数组模板类 @文档 = "category = \"进程操作.辅助类\"" @模板实现类 = "模块快照类">
+类 模块快照数组类 <公开 基础类 = PIV数组模板 注释 = "std::vector<MODULEENTRY32W>" @文档 = "category = \"进程操作.辅助类\""
+        @模板实现类 = "模块快照类">
 
-类 线程快照类 <公开 基础类 = 扩展对象类 注释 = "系统快照中的线程信息." 折叠 @文档 = "category = \"进程操作.辅助类\"">
+类 线程快照类 <公开 基础类 = PIV结构模板 注释 = "系统快照中的线程信息" 注释 = "THREADENTRY32" 折叠 @文档 = "category = \"进程操作.辅助类\""
+        @别名 = "THREADENTRY32" @模板实现类 = "线程快照类" @强制依赖 = "快照辅助类">
 {
+    变量 dwSize <公开 类型 = 整数 @输出名 = "dwSize">
     变量 线程ID <公开 类型 = 整数 注释 = "线程的ID" @输出名 = "th32ThreadID">
     变量 进程ID <公开 类型 = 整数 注释 = "线程所属进程的ID" @输出名 = "th32OwnerProcessID">
     变量 基本优先级 <公开 类型 = 整数 注释 = "分配给线程的内核基本优先级.优先级为0到31的数字,0是最低优先级." @输出名 = "tpBasePri">
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖>
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用." 折叠>
+    参数 欲操作本对象 <类型 = 线程快照类 注释 = "用作填入本对象中所有数据的展示文本">
     {
-        展示内容 = "<线程快照类> 总共 3 个成员:\n"
-        加入文本 (展示内容, "1. 线程ID: " + 取调试文本2 (最大展示数据尺寸, 线程ID) + "\n")
-        加入文本 (展示内容, "2. 进程ID: " + 取调试文本2 (最大展示数据尺寸, 进程ID) + "\n")
-        加入文本 (展示内容, "3. 基本优先级: " + 取调试文本2 (最大展示数据尺寸, 基本优先级) + "\n")
+        变量 格式文本 <类型 = 文本型
+                值 = "<线程快照类 THREADENTRY32> 总共 4/7 个成员:\"\r\n1. dwSize: %u\r\n2. 线程ID(th32ThreadID): %u\r\n3. 进程ID:(th32OwnerProcessID): %u\r\n4. 基本优先级(tpBasePri): %d">
+        返回 (取格式文本 (格式文本, 欲操作本对象.dwSize, 欲操作本对象.线程ID, 欲操作本对象.进程ID, 欲操作本对象.基本优先级))
     }
-
-    # @begin
-    # <> <include>
-    # inline void SetInfo (THREADENTRY32* stInfo) {
-    #     th32ThreadID = (INT)stInfo->th32ThreadID;
-    #     th32OwnerProcessID = (INT_P)stInfo->th32OwnerProcessID;
-    #     tpBasePri = (INT)stInfo->tpBasePri;
-    # }
-    # inline @sn<current_class> (THREADENTRY32* stInfo) : @sn<current_class>()  { this->SetInfo(stInfo); }
-    # <> </include>
-    # @end
 }
 
-类 线程快照数组类 <公开 基础类 = 对象数组模板类 @文档 = "category = \"进程操作.辅助类\"" @模板实现类 = "线程快照类">
+类 线程快照数组类 <公开 基础类 = PIV数组模板 注释 = "std::vector<THREADENTRY32>" @文档 = "category = \"进程操作.辅助类\""
+        @模板实现类 = "线程快照类">
 
-类 堆块结构类 <公开 基础类 = 扩展对象类 注释 = "HEAPENTRY32" 折叠 @文档 = "category = \"进程操作.辅助类\"" @视窗.结构类 = 0
-        @强制依赖 = "快照辅助类">
+类 堆块结构类 <公开 基础类 = PIV结构模板 注释 = "HEAPENTRY32" 折叠 @文档 = "category = \"进程操作.辅助类\"" @别名 = "HEAPENTRY32"
+        @模板实现类 = "堆块结构类" @强制依赖 = "快照辅助类">
 {
-    变量 dwSize <公开 类型 = 变整数 注释 = "HEAPENTRY32的结构体尺寸">
-    变量 hHandle <公开 类型 = 变整数 注释 = "堆块的句柄">
-    变量 dwAddress <公开 类型 = 变整数 注释 = "块开头的线性地址">
-    变量 dwBlockSize <公开 类型 = 变整数 注释 = "堆的块大小">
+    变量 dwSize <公开 类型 = 变整数 注释 = "HEAPENTRY32的结构体尺寸" @输出名 = "dwSize">
+    变量 "// hHandle" <公开 类型 = 变整数 注释 = "堆块的句柄" @输出名 = "hHandle">
+    变量 dwAddress <公开 类型 = 变整数 注释 = "块开头的线性地址" @输出名 = "dwAddress">
+    变量 dwBlockSize <公开 类型 = 变整数 注释 = "堆的块大小" @输出名 = "dwBlockSize">
     变量 dwFlags <公开 类型 = 整数 注释 = "为以下三个值之一:" 注释 = " 1(LF32_FIXED): 此内存块有一个固定位置;"
-            注释 = " 2(LF32_FREE): 此内存块未使用;" 注释 = " 4(LF32_MOVEABLE): 此内存块的位置可以移动;">
-    变量 dwLockCount <公开 类型 = 整数 注释 = "本成员不再使用,始终为0">
-    变量 dwResvd <公开 类型 = 整数 注释 = "保留成员,不要使用或改动.">
-    变量 th32ProcessID <公开 类型 = 整数 注释 = "此堆所属进程的ID">
-    变量 th32HeapID <公开 类型 = 变整数 注释 = "堆ID">
+            注释 = " 2(LF32_FREE): 此内存块未使用;" 注释 = " 4(LF32_MOVEABLE): 此内存块的位置可以移动;" @输出名 = "dwFlags">
+    变量 dwLockCount <公开 类型 = 整数 注释 = "本成员不再使用,始终为0" @输出名 = "dwLockCount">
+    变量 dwResvd <公开 类型 = 整数 注释 = "保留成员,不要使用或改动." @输出名 = "dwResvd">
+    变量 th32ProcessID <公开 类型 = 整数 注释 = "此堆所属进程的ID" @输出名 = "th32ProcessID">
+    变量 th32HeapID <公开 类型 = 变整数 注释 = "堆ID" @输出名 = "th32HeapID">
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖>
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
+    方法 hHandle <公开 静态 属性读 类型 = 变整数 注释 = "模块在所属进程上下文中的句柄" 折叠 @嵌入式方法 = "">
+    参数 欲操作本对象 <类型 = 堆块结构类>
     {
-        展示内容 = "<HEAPENTRY32> 总共 9 个成员:\n"
-        加入文本 (展示内容, "1. dwSize: " + 取调试文本2 (最大展示数据尺寸, dwSize) + "\n")
-        加入文本 (展示内容, "2. hHandle: " + 取调试文本2 (最大展示数据尺寸, hHandle) + "\n")
-        加入文本 (展示内容, "3. dwAddress: " + 取调试文本2 (最大展示数据尺寸, dwAddress) + "\n")
-        加入文本 (展示内容, "4. dwBlockSize: " + 取调试文本2 (最大展示数据尺寸, dwBlockSize) + "\n")
-        加入文本 (展示内容, "5. dwFlags: " + 取调试文本2 (最大展示数据尺寸, dwFlags) + "\n")
-        加入文本 (展示内容, "6. dwLockCount: " + 取调试文本2 (最大展示数据尺寸, dwLockCount) + "\n")
-        加入文本 (展示内容, "7. dwResvd: " + 取调试文本2 (最大展示数据尺寸, dwResvd) + "\n")
-        加入文本 (展示内容, "8. th32ProcessID: " + 取调试文本2 (最大展示数据尺寸, th32ProcessID) + "\n")
-        加入文本 (展示内容, "9. th32HeapID: " + 取调试文本2 (最大展示数据尺寸, th32HeapID) + "\n")
+        @ (INT_P)@<欲操作本对象>.hHandle
+    }
+
+    方法 hHandle <公开 静态 属性写 注释 = "模块在所属进程上下文中的句柄" 折叠>
+    参数 欲操作本对象 <类型 = 堆块结构类>
+    参数 句柄 <类型 = 变整数>
+    {
+        @ @<欲操作本对象>.hHandle = (HANDLE)@<句柄>;
+    }
+
+    方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用." 折叠>
+    参数 欲操作本对象 <类型 = 堆块结构类 注释 = "用作填入本对象中所有数据的展示文本">
+    {
+        变量 格式文本 <类型 = 文本型
+                值 = "<堆块结构类 HEAPENTRY3> 总共 9 个成员:\"\r\n1. dwSize: %u\r\n2. hHandle: %u\r\n3. dwAddress: %I64u\r\n4. dwBlockSize: %I64u\r\n5. dwFlags: %u\r\n6. dwLockCount: %u\r\n7. dwResvd: %u\r\n8. th32ProcessID: %u\r\n9. th32HeapID: %I64u">
+        返回 (取格式文本 (格式文本, 欲操作本对象.dwSize, 欲操作本对象.hHandle, 欲操作本对象.dwAddress, 欲操作本对象.dwBlockSize, 欲操作本对象.dwFlags, 欲操作本对象.dwLockCount, 欲操作本对象.dwResvd, 欲操作本对象.th32ProcessID, 欲操作本对象.th32HeapID))
     }
 }
 
-类 堆块结构数组类 <公开 基础类 = 对象数组模板类 @文档 = "category = \"进程操作.辅助类\"" @模板实现类 = "堆块结构类">
+类 堆块结构数组类 <公开 基础类 = PIV数组模板 注释 = "std::vector<HEAPENTRY32>" @文档 = "category = \"进程操作.辅助类\""
+        @模板实现类 = "堆块结构类">
 
 类 内存状态信息类EX <公开 基础类 = 扩展对象类 折叠 @文档 = "category = \"进程操作.辅助类\"">
 {
@@ -2520,14 +2570,14 @@
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
     {
-        展示内容 = "<内存状态信息类EX> 总共 7 个成员:\n"
-        加入文本 (展示内容, "1. 内存使用率: " + 取调试文本2 (最大展示数据尺寸, 内存使用率) + "\n")
-        加入文本 (展示内容, "2. 物理内存大小: " + 取调试文本2 (最大展示数据尺寸, 物理内存大小) + "\n")
-        加入文本 (展示内容, "3. 可用物理内存: " + 取调试文本2 (最大展示数据尺寸, 可用物理内存) + "\n")
-        加入文本 (展示内容, "4. 页面文件总量: " + 取调试文本2 (最大展示数据尺寸, 页面文件总量) + "\n")
-        加入文本 (展示内容, "5. 可用页面文件: " + 取调试文本2 (最大展示数据尺寸, 可用页面文件) + "\n")
-        加入文本 (展示内容, "6. 虚拟内存总量: " + 取调试文本2 (最大展示数据尺寸, 虚拟内存总量) + "\n")
-        加入文本 (展示内容, "7. 可用虚拟内存: " + 取调试文本2 (最大展示数据尺寸, 可用虚拟内存) + "\n")
+        展示内容 = "<内存状态信息类EX> 总共 7 个成员:\r\n"
+        加入文本 (展示内容, "1. 内存使用率: " + 取调试文本2 (最大展示数据尺寸, 内存使用率) + "\r\n")
+        加入文本 (展示内容, "2. 物理内存大小: " + 取调试文本2 (最大展示数据尺寸, 物理内存大小) + "\r\n")
+        加入文本 (展示内容, "3. 可用物理内存: " + 取调试文本2 (最大展示数据尺寸, 可用物理内存) + "\r\n")
+        加入文本 (展示内容, "4. 页面文件总量: " + 取调试文本2 (最大展示数据尺寸, 页面文件总量) + "\r\n")
+        加入文本 (展示内容, "5. 可用页面文件: " + 取调试文本2 (最大展示数据尺寸, 可用页面文件) + "\r\n")
+        加入文本 (展示内容, "6. 虚拟内存总量: " + 取调试文本2 (最大展示数据尺寸, 虚拟内存总量) + "\r\n")
+        加入文本 (展示内容, "7. 可用虚拟内存: " + 取调试文本2 (最大展示数据尺寸, 可用虚拟内存))
     }
 
     #

@@ -1,9 +1,9 @@
-﻿/*
- * 火山视窗 - 数组辅助增强
- * 作者: Xelloss
- * 网站: https://piv.ink
- * 邮箱: xelloss@vip.qq.com
- */
+﻿/*********************************************\
+ * 火山视窗PIV模块 - 数组辅助增强            *
+ * 作者: Xelloss                             *
+ * 网站: https://piv.ink                     *
+ * 邮箱: xelloss@vip.qq.com                  *
+\*********************************************/
 
 #ifndef _PIV_ARRAY_HPP
 #define _PIV_ARRAY_HPP
@@ -13,6 +13,7 @@
 #endif
 
 #include "detail/piv_base.hpp"
+#include <random>
 
 namespace piv
 {
@@ -315,6 +316,30 @@ namespace piv
                 return TRUE;
             }
             return FALSE;
+        }
+
+        // 打乱数组
+        template <typename T>
+        void Shuffle(T &array)
+        {
+            if constexpr (std::is_same_v<T, CVolObjectArray>)
+            {
+                INT_P count = array.GetCount();
+                if (count < 2)
+                    return;
+                std::mt19937 gen{std::random_device{}()};
+                std::uniform_int_distribution<INT_P> dist(0, count - 1);
+                for (INT_P i = 0; i < count; i++)
+                {
+                    array.XchgElement(i, dist(gen));
+                }
+            }
+            else
+            {
+                auto begin = array.data().GetData();
+                auto end = begin + array.data().GetCount();
+                std::shuffle(begin, end, std::mt19937{std::random_device{}()});
+            }
         }
 
     } // namespace arr

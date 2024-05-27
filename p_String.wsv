@@ -416,7 +416,7 @@
     参数 代码页 <类型 = 整数 注释 = "默认值0表示使用本地编码,常用代码页:" 注释 = "  932 日文(Shift-JIS)" 注释 = "  936 中文简体(GB2312)"
             注释 = "  949 韩文" 注释 = "  950 中文繁体(Big5)" @默认值 = 0>
     {
-        @ *PivA2Ws {reinterpret_cast<const char *>(@<多字节数组>), -1, static_cast<uint32_t>(@<代码页>)}
+        @ *PivA2Ws {reinterpret_cast<const char *>(@<多字节数组>), static_cast<size_t>(-1), static_cast<uint32_t>(@<代码页>)}
         // @ @an<CVolString> (GetWideText ((const CHAR*)@<多字节数组>, CVolMem (), NULL))
     }
 
@@ -1065,8 +1065,8 @@
 
 # 标准文本(std::basic_string) ====
 
-类 标准文本模板类 <公开 注释 = "标准文本类(std::basic_string)的模板基础类." 注释 = "\"模板类型1\"为字符类型." 折叠
-        @文档 = "category = \"文本操作\"" "@视窗.外部头文件.全局-111" = "src\\piv_string.hpp" @模板基础类 = 真 @别名类型 = 火山类>
+类 标准文本模板类 <公开 注释 = "标准文本类(std::basic_string)的模板基础类." 注释 = "\"模板类型1\"为字符类型." @文档 = "category = \"文本操作\""
+        "@视窗.外部头文件.全局-111" = "src\\piv_string.hpp" @模板基础类 = 真 @别名类型 = 火山类>
 {
 
     # 属性 ---
