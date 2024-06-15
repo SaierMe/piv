@@ -255,7 +255,7 @@ public:
             {
                 ::GetModuleFileNameExW(hProcess, hModuleArray.GetAt(i), buf, MAX_PATH);
                 sFileName.SetText(buf);
-                if (sFileName.EndOf(module_name_sv, FALSE) != -1)
+                if (sFileName.EndOf(module_name_sv.GetText(), FALSE) == TRUE)
                     return hModuleArray.GetAt(i);
             }
         }

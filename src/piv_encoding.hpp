@@ -54,18 +54,78 @@ namespace piv
         unsigned char bom[4] = {0x00, 0x00, 0xFE, 0xFF};
     };
 
+    /**
+     * @brief 创建文本视图
+     * @tparam CharT 字符类型
+     * @param rhs 指向的文本数据
+     * @param count 文本长度
+     * @return 所创建的文本视图
+     */
+    template <typename CharT, typename T>
+    ::piv::basic_string_view<CharT> make_sv(const T *rhs, size_t count = -1)
+    {
+        if (!std::is_same<CharT, T>::value)
+            return ::piv::basic_string_view<CharT>{};
+        if (count == -1)
+            return ::piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(rhs)};
+        else
+            return ::piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(rhs), count};
+    }
+
+    template <typename CharT, typename T>
+    ::piv::basic_string_view<CharT> make_sv(const std::basic_string<T> &rhs, size_t count = -1)
+    {
+        if (!std::is_same<CharT, T>::value)
+            return ::piv::basic_string_view<CharT>{};
+        if (count == -1)
+            return ::piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(rhs.c_str())};
+        else
+            return ::piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(rhs.c_str()), count};
+    }
+
+    template <typename CharT, typename T>
+    ::piv::basic_string_view<CharT> make_sv(const ::piv::basic_string_view<T> &rhs, size_t count = -1)
+    {
+        if (!std::is_same<CharT, T>::value)
+            return ::piv::basic_string_view<CharT>{};
+        if (count == -1)
+            return ::piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(rhs.data())};
+        else
+            return ::piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(rhs.data()), count};
+    }
+
+    template <typename CharT>
+    ::piv::basic_string_view<CharT> make_sv(const CWString &rhs, size_t count = -1)
+    {
+        if (!std::is_same<CharT, wchar_t>::value)
+            return ::piv::basic_string_view<CharT>{};
+        if (count == -1)
+            return ::piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(rhs.GetText())};
+        else
+            return ::piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(rhs.GetText()), count};
+    }
+
+    template <typename CharT>
+    ::piv::basic_string_view<CharT> make_sv(const CVolMem &rhs, size_t count = -1)
+    {
+        if (count == -1)
+            return ::piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(rhs.GetPtr()), static_cast<size_t>(rhs.GetSize()) / sizeof(CharT)};
+        else
+            return ::piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(rhs.GetText()), count};
+    }
+
     namespace detail
     {
-        static string_view const base64_chars =
+        static ::piv::string_view const base64_chars =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             "abcdefghijklmnopqrstuvwxyz"
             "0123456789+/";
-        static string_view const base85_chars =
+        static ::piv::string_view const base85_chars =
             "0123456789"
             "abcdefghijklmnopqrstuvwxyz"
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             ".-:+=^!/*?&<>()[]{}@%$#";
-        static string_view const base91_chars =
+        static ::piv::string_view const base91_chars =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             "abcdefghijklmnopqrstuvwxyz"
             "0123456789!#$%&()*+,./:;-="
@@ -81,30 +141,30 @@ namespace piv
          * @param mbslen 转换前的字符串字符长度,-1为自动获取
          * @param code_page 编码页
          */
-        static void A2Wex(std::wstring &utf16str, const char *mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+        static void A2Wex(std::wstring &utf16str, const char *mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
         {
-            int utf16len = ::MultiByteToWideChar(code_page, 0, mbstr, (mbslen == static_cast<size_t>(-1)) ? -1 : static_cast<int>(mbslen), NULL, 0);
+            int utf16len = ::MultiByteToWideChar(code_page, 0, mbstr, (mbslen == -1) ? -1 : static_cast<int>(mbslen), NULL, 0);
             if (utf16len > 0)
             {
-                if (mbslen == static_cast<size_t>(-1))
+                if (mbslen == -1)
                     utf16len -= 1;
                 utf16str.resize(utf16len, '\0');
-                ::MultiByteToWideChar(code_page, 0, mbstr, (mbslen == static_cast<size_t>(-1)) ? -1 : static_cast<int>(mbslen), const_cast<wchar_t *>(utf16str.data()), utf16len);
+                ::MultiByteToWideChar(code_page, 0, mbstr, (mbslen == -1) ? -1 : static_cast<int>(mbslen), const_cast<wchar_t *>(utf16str.data()), utf16len);
             }
             else
             {
                 utf16str.clear();
             }
         }
-        static void A2Wex(CVolString &utf16str, const char *mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+        static void A2Wex(CWString &utf16str, const char *mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
         {
-            int utf16len = ::MultiByteToWideChar(code_page, 0, mbstr, (mbslen == static_cast<size_t>(-1)) ? -1 : static_cast<int>(mbslen), NULL, 0);
+            int utf16len = ::MultiByteToWideChar(code_page, 0, mbstr, (mbslen == -1) ? -1 : static_cast<int>(mbslen), NULL, 0);
             if (utf16len > 0)
             {
-                if (mbslen == static_cast<size_t>(-1))
+                if (mbslen == -1)
                     utf16len -= 1;
                 utf16str.m_mem.Alloc((utf16len + 1) * 2, TRUE);
-                ::MultiByteToWideChar(code_page, 0, mbstr, (mbslen == static_cast<size_t>(-1)) ? -1 : static_cast<int>(mbslen), const_cast<wchar_t *>(utf16str.GetText()), utf16len);
+                ::MultiByteToWideChar(code_page, 0, mbstr, (mbslen == -1) ? -1 : static_cast<int>(mbslen), const_cast<wchar_t *>(utf16str.GetText()), utf16len);
             }
             else
             {
@@ -119,15 +179,15 @@ namespace piv
          * @param utf16len 转换前的字符串字符长度,-1为自动获取
          * @param code_page 编码页
          */
-        static void W2Aex(std::string &mbstr, const wchar_t *utf16str, const size_t &utf16len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+        static void W2Aex(std::string &mbstr, const wchar_t *utf16str, size_t utf16len = -1, uint32_t code_page = CP_ACP)
         {
-            int mbslen = ::WideCharToMultiByte(code_page, 0, utf16str, (utf16len == static_cast<size_t>(-1)) ? -1 : static_cast<int>(utf16len), NULL, 0, NULL, NULL);
+            int mbslen = ::WideCharToMultiByte(code_page, 0, utf16str, (utf16len == -1) ? -1 : static_cast<int>(utf16len), NULL, 0, NULL, NULL);
             if (mbslen > 0)
             {
-                if (utf16len == static_cast<size_t>(-1))
+                if (utf16len == -1)
                     mbslen -= 1;
                 mbstr.resize(mbslen, '\0');
-                ::WideCharToMultiByte(code_page, 0, utf16str, (utf16len == static_cast<size_t>(-1)) ? -1 : static_cast<int>(utf16len), const_cast<char *>(mbstr.data()), mbslen, NULL, NULL);
+                ::WideCharToMultiByte(code_page, 0, utf16str, (utf16len == -1) ? -1 : static_cast<int>(utf16len), const_cast<char *>(mbstr.data()), mbslen, NULL, NULL);
             }
             else
             {
@@ -141,10 +201,10 @@ namespace piv
          * @param utf16str 转换前的字符串
          * @param utf16len 转换前的字符串字符长度,-1为自动获取
          */
-        static void W2Uex(std::string &utf8str, const wchar_t *utf16str, const size_t &utf16len = static_cast<size_t>(-1))
+        static void W2Uex(std::string &utf8str, const wchar_t *utf16str, size_t utf16len = -1)
         {
 #ifdef SIMDUTF_H
-            size_t utf16words = (utf16len == static_cast<size_t>(-1)) ? wcslen(utf16str) : utf16len;
+            size_t utf16words = (utf16len == -1) ? wcslen(utf16str) : utf16len;
             size_t utf8words = simdutf::utf8_length_from_utf16le(reinterpret_cast<const char16_t *>(utf16str), utf16words);
             if (utf8words == 0)
             {
@@ -156,13 +216,13 @@ namespace piv
                 simdutf::convert_valid_utf16le_to_utf8(reinterpret_cast<const char16_t *>(utf16str), utf16words, const_cast<char *>(reinterpret_cast<const char *>(utf8str.data())));
             }
 #else
-            int utf8len = ::WideCharToMultiByte(CP_UTF8, 0, utf16str, (utf16len == static_cast<size_t>(-1)) ? -1 : static_cast<int>(utf16len), NULL, 0, NULL, NULL);
+            int utf8len = ::WideCharToMultiByte(CP_UTF8, 0, utf16str, (utf16len == -1) ? -1 : static_cast<int>(utf16len), NULL, 0, NULL, NULL);
             if (utf8len > 0)
             {
-                if (utf16len == static_cast<size_t>(-1))
+                if (utf16len == -1)
                     utf8len -= 1;
                 utf8str.resize(utf8len, '\0');
-                ::WideCharToMultiByte(CP_UTF8, 0, utf16str, (utf16len == static_cast<size_t>(-1)) ? -1 : static_cast<int>(utf16len), const_cast<char *>(utf8str.data()), utf8len, NULL, NULL);
+                ::WideCharToMultiByte(CP_UTF8, 0, utf16str, (utf16len == -1) ? -1 : static_cast<int>(utf16len), const_cast<char *>(utf8str.data()), utf8len, NULL, NULL);
             }
             else
             {
@@ -177,10 +237,10 @@ namespace piv
          * @param utf8str 转换前的字符串
          * @param utf8len 转换前的字符串字符长度,-1为自动获取
          */
-        static void U2Wex(std::wstring &utf16str, const char *utf8str, const size_t &utf8len = static_cast<size_t>(-1))
+        static void U2Wex(std::wstring &utf16str, const char *utf8str, size_t utf8len = -1)
         {
 #ifdef SIMDUTF_H
-            size_t utf8words = (utf8len == static_cast<size_t>(-1)) ? strlen(utf8str) : utf8len;
+            size_t utf8words = (utf8len == -1) ? strlen(utf8str) : utf8len;
             size_t utf16words = simdutf::utf16_length_from_utf8(utf8str, utf8words);
             if (utf16words == 0)
             {
@@ -192,13 +252,13 @@ namespace piv
                 utf16words = simdutf::convert_valid_utf8_to_utf16le(utf8str, utf8words, reinterpret_cast<char16_t *>(const_cast<wchar_t *>(utf16str.data())));
             }
 #else
-            int utf16len = ::MultiByteToWideChar(CP_UTF8, 0, utf8str, (utf8len == static_cast<size_t>(-1)) ? -1 : static_cast<int>(utf8len), NULL, 0);
+            int utf16len = ::MultiByteToWideChar(CP_UTF8, 0, utf8str, (utf8len == -1) ? -1 : static_cast<int>(utf8len), NULL, 0);
             if (utf16len > 0)
             {
-                if (utf8len == static_cast<size_t>(-1))
+                if (utf8len == -1)
                     utf16len -= 1;
                 utf16str.resize(utf16len, '\0');
-                ::MultiByteToWideChar(CP_UTF8, 0, utf8str, (utf8len == static_cast<size_t>(-1)) ? -1 : static_cast<int>(utf8len), const_cast<wchar_t *>(utf16str.data()), utf16len);
+                ::MultiByteToWideChar(CP_UTF8, 0, utf8str, (utf8len == -1) ? -1 : static_cast<int>(utf8len), const_cast<wchar_t *>(utf16str.data()), utf16len);
             }
             else
             {
@@ -206,10 +266,10 @@ namespace piv
             }
 #endif
         }
-        static void U2Wex(CVolString &utf16str, const char *utf8str, const size_t &utf8len = static_cast<size_t>(-1))
+        static void U2Wex(CWString &utf16str, const char *utf8str, size_t utf8len = -1)
         {
 #ifdef SIMDUTF_H
-            size_t utf8words = (utf8len == static_cast<size_t>(-1)) ? strlen(utf8str) : utf8len;
+            size_t utf8words = (utf8len == -1) ? strlen(utf8str) : utf8len;
             size_t utf16words = simdutf::utf16_length_from_utf8(utf8str, utf8words);
             if (utf16words == 0)
             {
@@ -221,13 +281,13 @@ namespace piv
                 utf16words = simdutf::convert_valid_utf8_to_utf16le(utf8str, utf8words, reinterpret_cast<char16_t *>(const_cast<wchar_t *>(utf16str.GetText())));
             }
 #else
-            int utf16len = ::MultiByteToWideChar(CP_UTF8, 0, utf8str, (utf8len == static_cast<size_t>(-1)) ? -1 : static_cast<int>(utf8len), NULL, 0);
+            int utf16len = ::MultiByteToWideChar(CP_UTF8, 0, utf8str, (utf8len == -1) ? -1 : static_cast<int>(utf8len), NULL, 0);
             if (utf16len > 0)
             {
-                if (utf8len == static_cast<size_t>(-1))
+                if (utf8len == -1)
                     utf16len -= 1;
                 utf16str.m_mem.Alloc((utf16len + 1) * 2, TRUE);
-                ::MultiByteToWideChar(CP_UTF8, 0, utf8str, (utf8len == static_cast<size_t>(-1)) ? -1 : static_cast<int>(utf8len), const_cast<wchar_t *>(utf16str.GetText()), utf16len);
+                ::MultiByteToWideChar(CP_UTF8, 0, utf8str, (utf8len == -1) ? -1 : static_cast<int>(utf8len), const_cast<wchar_t *>(utf16str.GetText()), utf16len);
             }
             else
             {
@@ -242,7 +302,7 @@ namespace piv
          * @param utf8str 转换前的字符串
          * @param utf8len 转换前的字符串字符长度,-1为自动获取
          */
-        static void U2Aex(std::string &mbstr, const char *utf8str, const size_t &utf8len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+        static void U2Aex(std::string &mbstr, const char *utf8str, size_t utf8len = -1, uint32_t code_page = CP_ACP)
         {
             std::wstring utf16str;
             piv::encoding::U2Wex(utf16str, utf8str, utf8len);
@@ -255,7 +315,7 @@ namespace piv
          * @param mbstr 转换前的字符串
          * @param mbslen 转换前的字符串字符长度,-1为自动获取
          */
-        static void A2Uex(std::string &utf8str, const char *mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+        static void A2Uex(std::string &utf8str, const char *mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
         {
             std::wstring utf16str;
             piv::encoding::A2Wex(utf16str, mbstr, mbslen, code_page);
@@ -268,7 +328,7 @@ namespace piv
          * @param Reserved 是否允许有特殊意义的保留字符
          * @return 返回字符是否为有效的URL编码字符
          */
-        static bool IsUrlValidWord(const int &c, const bool &Reserved = false) noexcept
+        static bool IsUrlValidWord(const int &c, bool Reserved = false) noexcept
         {
             if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '.' || c == '~') // 安全字符
                 return true;
@@ -293,7 +353,7 @@ namespace piv
          * @param ReservedWord 是否不编码保留字符
          * @return
          */
-        static bool UrlEncodeNeed(const wchar_t *lpszSrc, const size_t &SrcLen, const bool &ReservedWord = false) noexcept
+        static bool UrlEncodeNeed(const wchar_t *lpszSrc, size_t SrcLen, bool ReservedWord = false) noexcept
         {
             for (size_t i = 0; i < SrcLen; i++)
             {
@@ -305,7 +365,7 @@ namespace piv
             }
             return false;
         }
-        static bool UrlEncodeNeed(const char *lpszSrc, const size_t &SrcLen, const bool &ReservedWord = false) noexcept
+        static bool UrlEncodeNeed(const char *lpszSrc, size_t SrcLen, bool ReservedWord = false) noexcept
         {
             for (size_t i = 0; i < SrcLen; i++)
             {
@@ -325,7 +385,7 @@ namespace piv
          * @param ReservedWord 是否不编码保留字符
          * @return
          */
-        static bool UrlDecodeNeed(const wchar_t *lpszSrc, const size_t &SrcLen) noexcept
+        static bool UrlDecodeNeed(const wchar_t *lpszSrc, size_t SrcLen) noexcept
         {
             for (size_t i = 0; i < SrcLen; i++)
             {
@@ -334,7 +394,7 @@ namespace piv
             }
             return false;
         }
-        static bool UrlDecodeNeed(const char *lpszSrc, const size_t &SrcLen) noexcept
+        static bool UrlDecodeNeed(const char *lpszSrc, size_t SrcLen) noexcept
         {
             for (size_t i = 0; i < SrcLen; i++)
             {
@@ -351,7 +411,7 @@ namespace piv
          * @param ReservedWord 是否不编码保留字符
          * @return
          */
-        static size_t GuessUrlEncodeBound(const unsigned char *lpszSrc, const size_t &SrcLen, const bool &ReservedWord = false) noexcept
+        static size_t GuessUrlEncodeBound(const unsigned char *lpszSrc, size_t SrcLen, bool ReservedWord = false) noexcept
         {
             size_t Add = 0;
             for (size_t i = 0; i < SrcLen; i++)
@@ -369,7 +429,7 @@ namespace piv
          * @param SrcLen 所欲解码的数据长度
          * @return
          */
-        static size_t GuessUrlDecodeBound(const unsigned char *lpszSrc, const size_t &SrcLen) noexcept
+        static size_t GuessUrlDecodeBound(const unsigned char *lpszSrc, size_t SrcLen) noexcept
         {
             size_t Percent = 0;
             for (size_t i = 0; i < SrcLen; i++)
@@ -392,7 +452,7 @@ namespace piv
          * @param ReservedWord 是否不编码保留字符
          * @return
          */
-        static int32_t UrlEncode(const unsigned char *lpszSrc, const size_t &SrcLen, unsigned char *lpszDest, size_t &DestLen, const bool &ReservedWord = false) noexcept
+        static int32_t UrlEncode(const unsigned char *lpszSrc, size_t SrcLen, unsigned char *lpszDest, size_t &DestLen, bool ReservedWord = false) noexcept
         {
             if (lpszDest == nullptr || DestLen == 0)
             {
@@ -439,7 +499,7 @@ namespace piv
          * @param DestLen 解码后数据的长度
          * @return
          */
-        static int32_t UrlDecode(const unsigned char *lpszSrc, const size_t &SrcLen, unsigned char *lpszDest, size_t &DestLen) noexcept
+        static int32_t UrlDecode(const unsigned char *lpszSrc, size_t SrcLen, unsigned char *lpszDest, size_t &DestLen) noexcept
         {
             if (lpszDest == nullptr || DestLen == 0)
             {
@@ -509,15 +569,15 @@ namespace piv
          * @param hexstr 返回的十六进制文本
          * @return
          */
-        template <typename CharT, typename String_t>
-        std::basic_string<CharT> &str_to_hex(const String_t &str, const bool &separator = false, std::basic_string<CharT> &hexstr = std::basic_string<CharT>{})
+        template <typename StringT, typename CharT>
+        std::basic_string<CharT> &str_to_hex(const StringT &str, bool separator = false, std::basic_string<CharT> &hexstr = std::basic_string<CharT>{})
         {
             hexstr.clear();
             if (str.empty())
                 return hexstr;
             hexstr.reserve(str.size() * (separator ? 3 : 2));
             const unsigned char *pStr = reinterpret_cast<const unsigned char *>(str.data());
-            size_t count = str.size() * sizeof(CharT);
+            size_t count = str.size() * sizeof(typename StringT::value_type);
             for (size_t i = 0; i < count; ++i)
             {
                 hexstr.push_back(hexUpCh[static_cast<unsigned char>(pStr[i]) >> 4]);
@@ -530,15 +590,15 @@ namespace piv
             return hexstr;
         }
 
-        template <typename CharT, typename String_t>
-        CVolString &str_to_hex(const String_t &str, const bool &separator /* = false*/, CVolString &hexstr)
+        template <typename StringT>
+        CWString &str_to_hex(const StringT &str, bool separator = false, CWString &hexstr = CWString{})
         {
             hexstr.Empty();
             if (str.empty())
                 return hexstr;
             hexstr.SetNumAlignChars(str.size() * (separator ? 3 : 2));
             const unsigned char *pStr = reinterpret_cast<const unsigned char *>(str.data());
-            size_t count = str.size() * sizeof(CharT);
+            size_t count = str.size() * sizeof(typename StringT::value_type);
             for (size_t i = 0; i < count; ++i)
             {
                 hexstr.AddChar(hexUpCh[static_cast<unsigned char>(pStr[i]) >> 4]);
@@ -556,15 +616,15 @@ namespace piv
          * @param str 返回还原后的文本
          * @return
          */
-        template <typename T, typename String_t>
-        T &hex_to_str(const String_t &hexstr, T &str = T{})
+        template <typename T, typename StringT>
+        T &hex_to_str(const StringT &hexstr, T &str = T{})
         {
             str.clear();
-            if (hexstr.size() < 2 * sizeof(typename String_t::value_type))
+            if (hexstr.size() < 2 * sizeof(typename StringT::value_type))
                 return str;
-            str.resize(hexstr.size() / (2 * sizeof(typename String_t::value_type)));
+            str.resize(hexstr.size() / (2 * sizeof(typename StringT::value_type)));
             unsigned char *pStr = const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(str.data()));
-            typename String_t::value_type ch1, ch2;
+            typename StringT::value_type ch1, ch2;
             size_t count = hexstr.size(), n = 0;
             for (size_t i = 0; i < count; i++)
             {
@@ -576,7 +636,7 @@ namespace piv
                     n++;
                 }
             }
-            str.resize(n / sizeof(typename String_t::value_type));
+            str.resize(n / sizeof(typename StringT::value_type));
             return str;
         }
 
@@ -587,8 +647,8 @@ namespace piv
          * @param usc2 返回的USC2文本
          * @return
          */
-        template <typename CharT, typename String_t>
-        std::basic_string<CharT> &to_usc2(const String_t &str, const bool &en_ascii = false, std::basic_string<CharT> &usc2 = std::basic_string<CharT>{})
+        template <typename CharT, typename StringT>
+        std::basic_string<CharT> &to_usc2(const StringT &str, bool en_ascii = false, std::basic_string<CharT> &usc2 = std::basic_string<CharT>{})
         {
             usc2.clear();
             usc2.reserve(str.size() * 6);
@@ -611,8 +671,8 @@ namespace piv
             return usc2;
         }
 
-        template <typename String_t>
-        static CVolString &to_usc2str(const String_t &str, const bool &en_ascii /* = false*/, CVolString &usc2)
+        template <typename StringT>
+        static CWString &to_usc2str(const StringT &str, bool en_ascii, CWString &usc2 = CWString{})
         {
             usc2.Empty();
             usc2.SetNumAlignChars(str.size() * 6);
@@ -641,13 +701,13 @@ namespace piv
          * @param ret 返回文本
          * @return
          */
-        template <typename String_t>
-        std::wstring &usc2_to_str(const String_t &usc2, std::wstring &ret = std::wstring{})
+        template <typename StringT>
+        std::wstring &usc2_to_str(const StringT &usc2, std::wstring &ret = std::wstring{})
         {
             ret.clear();
             size_t len = usc2.size();
             ret.reserve(len);
-            typename String_t::value_type ch;
+            typename StringT::value_type ch;
             unsigned char hex[4];
             for (size_t i = 0; i < len; i++)
             {
@@ -687,7 +747,7 @@ namespace piv
             return hex;
         }
         template <typename T>
-        CVolString &value_to_hex(const T &v, CVolString &hex, const bool &upper = true)
+        CWString &value_to_hex(const T &v, CWString &hex, bool upper = true)
         {
             const unsigned char *pValue = reinterpret_cast<const unsigned char *>(&v);
             wchar_t *pStr = const_cast<wchar_t *>(reinterpret_cast<const wchar_t *>(hex.m_mem.Alloc(((sizeof(T) * 2) + 1) * 2, TRUE)));
@@ -710,7 +770,7 @@ namespace piv
             return hex;
         }
         template <typename T, typename CharT>
-        std::basic_string<CharT> &value_to_hex(const T &v, std::basic_string<CharT> &hex, const bool &upper = true)
+        std::basic_string<CharT> &value_to_hex(const T &v, std::basic_string<CharT> &hex, bool upper = true)
         {
             const unsigned char *pValue = reinterpret_cast<const unsigned char *>(&v);
             if (upper)
@@ -768,19 +828,19 @@ public:
      * @param mbstr 所欲转换的文本
      * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    PivA2W(const char *mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivA2W(const char *mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
         Convert(mbstr, mbslen, code_page);
     }
-    PivA2W(const std::string &mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivA2W(const std::string &mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
         Convert(mbstr, mbslen, code_page);
     }
-    PivA2W(const piv::string_view &mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivA2W(const piv::string_view &mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
         Convert(mbstr, mbslen, code_page);
     }
-    PivA2W(const CVolMem &mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivA2W(const CVolMem &mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
         Convert(mbstr, mbslen, code_page);
     }
@@ -797,9 +857,9 @@ public:
     {
         return utf16str;
     }
-    operator CVolString() const
+    operator CWString() const
     {
-        return CVolString(utf16str.c_str());
+        return CWString{utf16str.c_str()};
     }
     operator CVolMem() const
     {
@@ -846,21 +906,21 @@ public:
      * @param mbstr 所欲转换的ANSI文本
      * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    inline void Convert(const char *mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const char *mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
         piv::encoding::A2Wex(utf16str, mbstr, mbslen, code_page);
     }
-    inline void Convert(const std::string &mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const std::string &mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
-        Convert(mbstr.c_str(), (mbslen == static_cast<size_t>(-1)) ? mbstr.size() : mbslen, code_page);
+        Convert(mbstr.c_str(), (mbslen == -1) ? mbstr.size() : mbslen, code_page);
     }
-    inline void Convert(const piv::string_view &mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const piv::string_view &mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
-        Convert(mbstr.data(), (mbslen == static_cast<size_t>(-1)) ? mbstr.size() : mbslen, code_page);
+        Convert(mbstr.data(), (mbslen == -1) ? mbstr.size() : mbslen, code_page);
     }
-    inline void Convert(const CVolMem &mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const CVolMem &mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
-        Convert(reinterpret_cast<const char *>(mbstr.GetPtr()), (mbslen == static_cast<size_t>(-1)) ? static_cast<size_t>(mbstr.GetSize()) : mbslen, code_page);
+        Convert(reinterpret_cast<const char *>(mbstr.GetPtr()), (mbslen == -1) ? static_cast<size_t>(mbstr.GetSize()) : mbslen, code_page);
     }
 
     /**
@@ -894,9 +954,9 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline wchar_t *GetPtr() const noexcept
+    inline const wchar_t *GetPtr() const noexcept
     {
-        return const_cast<wchar_t *>(utf16str.data());
+        return utf16str.empty() ? nullptr : utf16str.data();
     }
 
     /**
@@ -925,7 +985,7 @@ public:
      * @brief 生成一个火山的文本型,其中包含了转换后的文本数据
      * @return 返回所转换的文本型
      */
-    inline CVolString &GetStr(CVolString &str) const
+    inline CWString &GetStr(CWString &str) const
     {
         str.SetText(utf16str.c_str());
         return str;
@@ -936,7 +996,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline CVolMem &GetMem(CVolMem &mem, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem, bool null_char = false) const
     {
         mem.Empty();
         mem.Append(utf16str.c_str(), (utf16str.size() + (null_char ? 1 : 0)) * 2);
@@ -977,23 +1037,23 @@ public:
      * @param utf16str 所欲转换的UTF-16LE文本
      * @param utf16len 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    PivW2A(const wchar_t *utf16str, const size_t &utf16len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivW2A(const wchar_t *utf16str, size_t utf16len = -1, uint32_t code_page = CP_ACP)
     {
         Convert(utf16str, utf16len, code_page);
     }
-    PivW2A(const std::wstring &utf16str, const size_t &utf16len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivW2A(const std::wstring &utf16str, size_t utf16len = -1, uint32_t code_page = CP_ACP)
     {
         Convert(utf16str, utf16len, code_page);
     }
-    PivW2A(const CVolString &utf16str, const size_t &utf16len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivW2A(const CWString &utf16str, size_t utf16len = -1, uint32_t code_page = CP_ACP)
     {
         Convert(utf16str, utf16len, code_page);
     }
-    PivW2A(const piv::wstring_view &utf16str, const size_t &utf16len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivW2A(const piv::wstring_view &utf16str, size_t utf16len = -1, uint32_t code_page = CP_ACP)
     {
         Convert(utf16str, utf16len, code_page);
     }
-    PivW2A(const CVolMem &utf16str, const size_t &utf16len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivW2A(const CVolMem &utf16str, size_t utf16len = -1, uint32_t code_page = CP_ACP)
     {
         Convert(utf16str, utf16len, code_page);
     }
@@ -1055,25 +1115,25 @@ public:
      * @param mbstr 所欲转换的文本
      * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    inline void Convert(const wchar_t *utf16str, const size_t &utf16len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const wchar_t *utf16str, size_t utf16len = -1, uint32_t code_page = CP_ACP)
     {
         piv::encoding::W2Aex(mbstr, utf16str, utf16len, code_page);
     }
-    inline void Convert(const std::wstring &utf16str, const size_t &utf16len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const std::wstring &utf16str, size_t utf16len = -1, uint32_t code_page = CP_ACP)
     {
-        Convert(utf16str.c_str(), (utf16len == static_cast<size_t>(-1)) ? utf16str.size() : utf16len, code_page);
+        Convert(utf16str.c_str(), (utf16len == -1) ? utf16str.size() : utf16len, code_page);
     }
-    inline void Convert(const CVolString &utf16str, const size_t &utf16len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const CWString &utf16str, size_t utf16len = -1, uint32_t code_page = CP_ACP)
     {
-        Convert(utf16str.GetText(), (utf16len == static_cast<size_t>(-1)) ? static_cast<size_t>(utf16str.GetLength()) : utf16len, code_page);
+        Convert(utf16str.GetText(), (utf16len == -1) ? static_cast<size_t>(utf16str.GetLength()) : utf16len, code_page);
     }
-    inline void Convert(const piv::wstring_view &utf16str, const size_t &utf16len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const piv::wstring_view &utf16str, size_t utf16len = -1, uint32_t code_page = CP_ACP)
     {
-        Convert(utf16str.data(), (utf16len == static_cast<size_t>(-1)) ? utf16str.size() : utf16len, code_page);
+        Convert(utf16str.data(), (utf16len == -1) ? utf16str.size() : utf16len, code_page);
     }
-    inline void Convert(const CVolMem &utf16str, const size_t &utf16len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const CVolMem &utf16str, size_t utf16len = -1, uint32_t code_page = CP_ACP)
     {
-        Convert(reinterpret_cast<const wchar_t *>(utf16str.GetPtr()), (utf16len == static_cast<size_t>(-1)) ? static_cast<size_t>(utf16str.GetSize() / 2) : utf16len, code_page);
+        Convert(reinterpret_cast<const wchar_t *>(utf16str.GetPtr()), (utf16len == -1) ? static_cast<size_t>(utf16str.GetSize() / 2) : utf16len, code_page);
     }
 
     /**
@@ -1107,9 +1167,9 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline char *GetPtr() noexcept
+    inline const char *GetPtr() const noexcept
     {
-        return const_cast<char *>(mbstr.data());
+        return mbstr.empty() ? nullptr : mbstr.data();
     }
 
     /**
@@ -1139,7 +1199,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline CVolMem &GetMem(CVolMem &mem, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem, bool null_char = false) const
     {
         mem.Empty();
         mem.Append(mbstr.c_str(), mbstr.size() + (null_char ? 1 : 0));
@@ -1180,23 +1240,23 @@ public:
      * @param utf16str 所欲转换的UTF-16LE文本
      * @param utf16len 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    PivW2U(const wchar_t *utf16str, const size_t &utf16len = static_cast<size_t>(-1))
+    PivW2U(const wchar_t *utf16str, size_t utf16len = -1)
     {
         Convert(utf16str, utf16len);
     }
-    PivW2U(const std::wstring &utf16str, const size_t &utf16len = static_cast<size_t>(-1))
+    PivW2U(const std::wstring &utf16str, size_t utf16len = -1)
     {
         Convert(utf16str, utf16len);
     }
-    PivW2U(const CVolString &utf16str, const size_t &utf16len = static_cast<size_t>(-1))
+    PivW2U(const CWString &utf16str, size_t utf16len = -1)
     {
         Convert(utf16str, utf16len);
     }
-    PivW2U(const piv::wstring_view &utf16str, const size_t &utf16len = static_cast<size_t>(-1))
+    PivW2U(const piv::wstring_view &utf16str, size_t utf16len = -1)
     {
         Convert(utf16str, utf16len);
     }
-    PivW2U(const CVolMem &utf16str, const size_t &utf16len = static_cast<size_t>(-1))
+    PivW2U(const CVolMem &utf16str, size_t utf16len = -1)
     {
         Convert(utf16str, utf16len);
     }
@@ -1258,25 +1318,25 @@ public:
      * @param mbstr 所欲转换的文本
      * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    inline void Convert(const wchar_t *utf16str, const size_t &utf16len = static_cast<size_t>(-1))
+    inline void Convert(const wchar_t *utf16str, size_t utf16len = -1)
     {
         piv::encoding::W2Uex(utf8str, utf16str, utf16len);
     }
-    inline void Convert(const std::wstring &utf16str, const size_t &utf16len = static_cast<size_t>(-1))
+    inline void Convert(const std::wstring &utf16str, size_t utf16len = -1)
     {
-        Convert(utf16str.c_str(), (utf16len == static_cast<size_t>(-1)) ? utf16str.size() : utf16len);
+        Convert(utf16str.c_str(), (utf16len == -1) ? utf16str.size() : utf16len);
     }
-    inline void Convert(const CVolString &utf16str, const size_t &utf16len = static_cast<size_t>(-1))
+    inline void Convert(const CWString &utf16str, size_t utf16len = -1)
     {
-        Convert(utf16str.GetText(), (utf16len == static_cast<size_t>(-1)) ? static_cast<size_t>(utf16str.GetLength()) : utf16len);
+        Convert(utf16str.GetText(), (utf16len == -1) ? static_cast<size_t>(utf16str.GetLength()) : utf16len);
     }
-    inline void Convert(const piv::wstring_view &utf16str, const size_t &utf16len = static_cast<size_t>(-1))
+    inline void Convert(const piv::wstring_view &utf16str, size_t utf16len = -1)
     {
-        Convert(utf16str.data(), (utf16len == static_cast<size_t>(-1)) ? utf16str.size() : utf16len);
+        Convert(utf16str.data(), (utf16len == -1) ? utf16str.size() : utf16len);
     }
-    inline void Convert(const CVolMem &utf16str, const size_t &utf16len = static_cast<size_t>(-1))
+    inline void Convert(const CVolMem &utf16str, size_t utf16len = -1)
     {
-        Convert(reinterpret_cast<const wchar_t *>(utf16str.GetPtr()), (utf16len == static_cast<size_t>(-1)) ? static_cast<size_t>(utf16str.GetSize() / 2) : utf16len);
+        Convert(reinterpret_cast<const wchar_t *>(utf16str.GetPtr()), (utf16len == -1) ? static_cast<size_t>(utf16str.GetSize() / 2) : utf16len);
     }
 
     /**
@@ -1310,9 +1370,9 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline char *GetPtr() noexcept
+    inline const char *GetPtr() const noexcept
     {
-        return const_cast<char *>(utf8str.data());
+        return utf8str.empty() ? nullptr : utf8str.data();
     }
 
     /**
@@ -1342,7 +1402,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline CVolMem &GetMem(CVolMem &mem, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem, bool null_char = false) const
     {
         mem.Empty();
         mem.Append(utf8str.c_str(), utf8str.size() + (null_char ? 1 : 0));
@@ -1383,19 +1443,19 @@ public:
      * @param utf8str 所欲转换的UTF-8文本
      * @param utf8len 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    PivU2W(const char *utf8str, const size_t &utf8len = static_cast<size_t>(-1))
+    PivU2W(const char *utf8str, size_t utf8len = -1)
     {
         Convert(utf8str, utf8len);
     }
-    PivU2W(const std::string &utf8str, const size_t &utf8len = static_cast<size_t>(-1))
+    PivU2W(const std::string &utf8str, size_t utf8len = -1)
     {
         Convert(utf8str, utf8len);
     }
-    PivU2W(const piv::string_view &utf8str, const size_t &utf8len = static_cast<size_t>(-1))
+    PivU2W(const piv::string_view &utf8str, size_t utf8len = -1)
     {
         Convert(utf8str, utf8len);
     }
-    PivU2W(const CVolMem &utf8str, const size_t &utf8len = static_cast<size_t>(-1))
+    PivU2W(const CVolMem &utf8str, size_t utf8len = -1)
     {
         Convert(utf8str, utf8len);
     }
@@ -1412,9 +1472,9 @@ public:
     {
         return utf16str;
     }
-    operator CVolString() const
+    operator CWString() const
     {
-        return CVolString(utf16str.c_str());
+        return CWString{utf16str.c_str()};
     }
     operator CVolMem() const
     {
@@ -1461,21 +1521,21 @@ public:
      * @param mbstr 所欲转换的文本
      * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    inline void Convert(const char *utf8str, const size_t &utf8len = static_cast<size_t>(-1))
+    inline void Convert(const char *utf8str, size_t utf8len = -1)
     {
         piv::encoding::U2Wex(utf16str, utf8str, utf8len);
     }
-    inline void Convert(const std::string &utf8str, const size_t &utf8len = static_cast<size_t>(-1))
+    inline void Convert(const std::string &utf8str, size_t utf8len = -1)
     {
-        Convert(utf8str.c_str(), (utf8len == static_cast<size_t>(-1)) ? utf8str.size() : utf8len);
+        Convert(utf8str.c_str(), (utf8len == -1) ? utf8str.size() : utf8len);
     }
-    inline void Convert(const piv::string_view &utf8str, const size_t &utf8len = static_cast<size_t>(-1))
+    inline void Convert(const piv::string_view &utf8str, size_t utf8len = -1)
     {
-        Convert(utf8str.data(), (utf8len == static_cast<size_t>(-1)) ? utf8str.size() : utf8len);
+        Convert(utf8str.data(), (utf8len == -1) ? utf8str.size() : utf8len);
     }
-    inline void Convert(const CVolMem &utf8str, const size_t &utf8len = static_cast<size_t>(-1))
+    inline void Convert(const CVolMem &utf8str, size_t utf8len = -1)
     {
-        Convert(reinterpret_cast<const char *>(utf8str.GetPtr()), (utf8len == static_cast<size_t>(-1)) ? static_cast<size_t>(utf8str.GetSize()) : utf8len);
+        Convert(reinterpret_cast<const char *>(utf8str.GetPtr()), (utf8len == -1) ? static_cast<size_t>(utf8str.GetSize()) : utf8len);
     }
 
     /**
@@ -1509,9 +1569,9 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline wchar_t *GetPtr() noexcept
+    inline const wchar_t *GetPtr() noexcept
     {
-        return const_cast<wchar_t *>(utf16str.data());
+        return utf16str.empty() ? nullptr : utf16str.data();
     }
 
     /**
@@ -1540,7 +1600,7 @@ public:
      * @brief 生成一个火山的文本型,其中包含了转换后的文本数据
      * @return 返回所转换的文本型
      */
-    inline CVolString &GetStr(CVolString &str) const
+    inline CWString &GetStr(CWString &str) const
     {
         str.SetText(utf16str.c_str());
         return str;
@@ -1551,7 +1611,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline CVolMem &GetMem(CVolMem &mem, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem, bool null_char = false) const
     {
         mem.Empty();
         mem.Append(utf16str.c_str(), (utf16str.size() + (null_char ? 1 : 0)) * 2);
@@ -1592,19 +1652,19 @@ public:
      * @param utf8str 所欲转换的UTF-8文本
      * @param utf8len 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    PivU2A(const char *utf8str, const size_t &utf8len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivU2A(const char *utf8str, size_t utf8len = -1, uint32_t code_page = CP_ACP)
     {
         Convert(utf8str, utf8len, code_page);
     }
-    PivU2A(const std::string &utf8str, const size_t &utf8len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivU2A(const std::string &utf8str, size_t utf8len = -1, uint32_t code_page = CP_ACP)
     {
         Convert(utf8str, utf8len, code_page);
     }
-    PivU2A(const piv::string_view &utf8str, const size_t &utf8len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivU2A(const piv::string_view &utf8str, size_t utf8len = -1, uint32_t code_page = CP_ACP)
     {
         Convert(utf8str, utf8len, code_page);
     }
-    PivU2A(const CVolMem &utf8str, const size_t &utf8len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivU2A(const CVolMem &utf8str, size_t utf8len = -1, uint32_t code_page = CP_ACP)
     {
         Convert(utf8str, utf8len, code_page);
     }
@@ -1662,21 +1722,21 @@ public:
      * @param mbstr 所欲转换的文本
      * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    inline void Convert(const char *utf8str, const size_t &utf8len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const char *utf8str, size_t utf8len = -1, uint32_t code_page = CP_ACP)
     {
         piv::encoding::U2Aex(mbstr, utf8str, utf8len, code_page);
     }
-    inline void Convert(const std::string &utf8str, const size_t &utf8len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const std::string &utf8str, size_t utf8len = -1, uint32_t code_page = CP_ACP)
     {
-        Convert(utf8str.c_str(), (utf8len == static_cast<size_t>(-1)) ? utf8str.size() : utf8len, code_page);
+        Convert(utf8str.c_str(), (utf8len == -1) ? utf8str.size() : utf8len, code_page);
     }
-    inline void Convert(const piv::string_view &utf8str, const size_t &utf8len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const piv::string_view &utf8str, size_t utf8len = -1, uint32_t code_page = CP_ACP)
     {
-        Convert(utf8str.data(), (utf8len == static_cast<size_t>(-1)) ? utf8str.size() : utf8len, code_page);
+        Convert(utf8str.data(), (utf8len == -1) ? utf8str.size() : utf8len, code_page);
     }
-    inline void Convert(const CVolMem &utf8str, const size_t &utf8len = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const CVolMem &utf8str, size_t utf8len = -1, uint32_t code_page = CP_ACP)
     {
-        Convert(reinterpret_cast<const char *>(utf8str.GetPtr()), (utf8len == static_cast<size_t>(-1)) ? static_cast<size_t>(utf8str.GetSize()) : utf8len, code_page);
+        Convert(reinterpret_cast<const char *>(utf8str.GetPtr()), (utf8len == -1) ? static_cast<size_t>(utf8str.GetSize()) : utf8len, code_page);
     }
 
     /**
@@ -1710,9 +1770,9 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline char *GetPtr() noexcept
+    inline const char *GetPtr() noexcept
     {
-        return const_cast<char *>(mbstr.data());
+        return mbstr.empty() ? nullptr : mbstr.data();
     }
 
     /**
@@ -1738,7 +1798,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline CVolMem &GetMem(CVolMem &mem, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem, bool null_char = false) const
     {
         mem.Empty();
         mem.Append(mbstr.c_str(), mbstr.size() + (null_char ? 1 : 0));
@@ -1779,19 +1839,19 @@ public:
      * @param mbstr 所欲转换的ANSI文本
      * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    PivA2U(const char *mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivA2U(const char *mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
         Convert(mbstr, mbslen, code_page);
     }
-    PivA2U(const std::string &mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivA2U(const std::string &mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
         Convert(mbstr, mbslen, code_page);
     }
-    PivA2U(const piv::string_view &mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivA2U(const piv::string_view &mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
         Convert(mbstr, mbslen, code_page);
     }
-    PivA2U(const CVolMem &mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivA2U(const CVolMem &mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
         Convert(mbstr, mbslen, code_page);
     }
@@ -1849,21 +1909,21 @@ public:
      * @param mbstr 所欲转换的文本
      * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    inline void Convert(const char *mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const char *mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
         piv::encoding::A2Uex(utf8str, mbstr, mbslen, code_page);
     }
-    inline void Convert(const std::string &mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const std::string &mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
-        Convert(mbstr.c_str(), (mbslen == static_cast<size_t>(-1)) ? mbstr.size() : mbslen, code_page);
+        Convert(mbstr.c_str(), (mbslen == -1) ? mbstr.size() : mbslen, code_page);
     }
-    inline void Convert(const piv::string_view &mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const piv::string_view &mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
-        Convert(mbstr.data(), (mbslen == static_cast<size_t>(-1)) ? mbstr.size() : mbslen, code_page);
+        Convert(mbstr.data(), (mbslen == -1) ? mbstr.size() : mbslen, code_page);
     }
-    inline void Convert(const CVolMem &mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const CVolMem &mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
-        Convert(reinterpret_cast<const char *>(mbstr.GetPtr()), (mbslen == static_cast<size_t>(-1)) ? static_cast<size_t>(mbstr.GetSize()) : mbslen, code_page);
+        Convert(reinterpret_cast<const char *>(mbstr.GetPtr()), (mbslen == -1) ? static_cast<size_t>(mbstr.GetSize()) : mbslen, code_page);
     }
 
     /**
@@ -1897,9 +1957,9 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline char *GetPtr() noexcept
+    inline const char *GetPtr() const noexcept
     {
-        return const_cast<char *>(utf8str.data());
+        return utf8str.empty() ? nullptr : utf8str.data();
     }
 
     /**
@@ -1929,7 +1989,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline CVolMem &GetMem(CVolMem &mem, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem, bool null_char = false) const
     {
         mem.Empty();
         mem.Append(utf8str.c_str(), utf8str.size() + (null_char ? 1 : 0));
@@ -1943,7 +2003,7 @@ public:
 class PivA2Ws
 {
 private:
-    CVolString utf16str;
+    CWString utf16str;
 
 public:
     /**
@@ -1970,19 +2030,19 @@ public:
      * @param mbstr 所欲转换的文本
      * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    PivA2Ws(const char *mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivA2Ws(const char *mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
         Convert(mbstr, mbslen, code_page);
     }
-    PivA2Ws(const std::string &mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivA2Ws(const std::string &mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
         Convert(mbstr, mbslen, code_page);
     }
-    PivA2Ws(const piv::string_view &mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivA2Ws(const piv::string_view &mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
         Convert(mbstr, mbslen, code_page);
     }
-    PivA2Ws(const CVolMem &mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    PivA2Ws(const CVolMem &mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
         Convert(mbstr, mbslen, code_page);
     }
@@ -1991,11 +2051,11 @@ public:
     {
         return utf16str.GetText();
     }
-    operator CVolString const &() const noexcept
+    operator CWString const &() const noexcept
     {
         return utf16str;
     }
-    operator CVolString &() noexcept
+    operator CWString &() noexcept
     {
         return utf16str;
     }
@@ -2022,19 +2082,19 @@ public:
     {
         return utf16str == _PivA2W.utf16str;
     }
-    CVolString *operator->() noexcept
+    CWString *operator->() noexcept
     {
         return &utf16str;
     }
-    const CVolString *operator->() const noexcept
+    const CWString *operator->() const noexcept
     {
         return &utf16str;
     }
-    CVolString &operator*() noexcept
+    CWString &operator*() noexcept
     {
         return utf16str;
     }
-    const CVolString &operator*() const noexcept
+    const CWString &operator*() const noexcept
     {
         return utf16str;
     }
@@ -2044,21 +2104,21 @@ public:
      * @param mbstr 所欲转换的ANSI文本
      * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    inline void Convert(const char *mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const char *mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
         piv::encoding::A2Wex(utf16str, mbstr, mbslen, code_page);
     }
-    inline void Convert(const std::string &mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const std::string &mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
-        Convert(mbstr.c_str(), (mbslen == static_cast<size_t>(-1)) ? mbstr.size() : mbslen, code_page);
+        Convert(mbstr.c_str(), (mbslen == -1) ? mbstr.size() : mbslen, code_page);
     }
-    inline void Convert(const piv::string_view &mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const piv::string_view &mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
-        Convert(mbstr.data(), (mbslen == static_cast<size_t>(-1)) ? mbstr.size() : mbslen, code_page);
+        Convert(mbstr.data(), (mbslen == -1) ? mbstr.size() : mbslen, code_page);
     }
-    inline void Convert(const CVolMem &mbstr, const size_t &mbslen = static_cast<size_t>(-1), const uint32_t &code_page = CP_ACP)
+    inline void Convert(const CVolMem &mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
     {
-        Convert(reinterpret_cast<const char *>(mbstr.GetPtr()), (mbslen == static_cast<size_t>(-1)) ? static_cast<size_t>(mbstr.GetSize()) : mbslen, code_page);
+        Convert(reinterpret_cast<const char *>(mbstr.GetPtr()), (mbslen == -1) ? static_cast<size_t>(mbstr.GetSize()) : mbslen, code_page);
     }
 
     /**
@@ -2092,9 +2152,9 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline wchar_t *GetPtr() const noexcept
+    inline const wchar_t *GetPtr() const noexcept
     {
-        return const_cast<wchar_t *>(utf16str.GetText());
+        return utf16str.IsEmpty() ? nullptr : utf16str.GetText();
     }
 
     /**
@@ -2119,7 +2179,7 @@ public:
      * @brief 生成一个火山的文本型,其中包含了转换后的文本数据
      * @return 返回所转换的文本型
      */
-    inline CVolString &ToStr()
+    inline CWString &ToStr()
     {
         return utf16str;
     }
@@ -2128,7 +2188,7 @@ public:
      * @brief 生成一个火山的文本型,其中包含了转换后的文本数据
      * @return 返回所转换的文本型
      */
-    inline CVolString &GetStr(CVolString &str) const
+    inline CWString &GetStr(CWString &str) const
     {
         str.SetText(utf16str.GetText());
         return str;
@@ -2139,7 +2199,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline CVolMem &GetMem(CVolMem &mem, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem, bool null_char = false) const
     {
         mem.Empty();
         mem.Append(utf16str.GetText(), (utf16str.GetLength() + (null_char ? 1 : 0)) * 2);
@@ -2153,7 +2213,7 @@ public:
 class PivU2Ws
 {
 private:
-    CVolString utf16str;
+    CWString utf16str;
 
 public:
     /**
@@ -2180,19 +2240,19 @@ public:
      * @param utf8str 所欲转换的UTF-8文本
      * @param utf8len 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    PivU2Ws(const char *utf8str, const size_t &utf8len = static_cast<size_t>(-1))
+    PivU2Ws(const char *utf8str, size_t utf8len = -1)
     {
         Convert(utf8str, utf8len);
     }
-    PivU2Ws(const std::string &utf8str, const size_t &utf8len = static_cast<size_t>(-1))
+    PivU2Ws(const std::string &utf8str, size_t utf8len = -1)
     {
         Convert(utf8str, utf8len);
     }
-    PivU2Ws(const piv::string_view &utf8str, const size_t &utf8len = static_cast<size_t>(-1))
+    PivU2Ws(const piv::string_view &utf8str, size_t utf8len = -1)
     {
         Convert(utf8str, utf8len);
     }
-    PivU2Ws(const CVolMem &utf8str, const size_t &utf8len = static_cast<size_t>(-1))
+    PivU2Ws(const CVolMem &utf8str, size_t utf8len = -1)
     {
         Convert(utf8str, utf8len);
     }
@@ -2201,11 +2261,11 @@ public:
     {
         return utf16str.GetText();
     }
-    operator CVolString const &() const noexcept
+    operator CWString const &() const noexcept
     {
         return utf16str;
     }
-    operator CVolString &() noexcept
+    operator CWString &() noexcept
     {
         return utf16str;
     }
@@ -2232,19 +2292,19 @@ public:
     {
         return utf16str == _PivU2W.utf16str;
     }
-    CVolString *operator->() noexcept
+    CWString *operator->() noexcept
     {
         return &utf16str;
     }
-    const CVolString *operator->() const noexcept
+    const CWString *operator->() const noexcept
     {
         return &utf16str;
     }
-    CVolString &operator*() noexcept
+    CWString &operator*() noexcept
     {
         return utf16str;
     }
-    const CVolString &operator*() const noexcept
+    const CWString &operator*() const noexcept
     {
         return utf16str;
     }
@@ -2254,21 +2314,21 @@ public:
      * @param mbstr 所欲转换的文本
      * @param mbslen 文本的字符长度,为-1时文本必须带结尾0字符
      */
-    inline void Convert(const char *utf8str, const size_t &utf8len = static_cast<size_t>(-1))
+    inline void Convert(const char *utf8str, size_t utf8len = -1)
     {
         piv::encoding::U2Wex(utf16str, utf8str, utf8len);
     }
-    inline void Convert(const std::string &utf8str, const size_t &utf8len = static_cast<size_t>(-1))
+    inline void Convert(const std::string &utf8str, size_t utf8len = -1)
     {
-        Convert(utf8str.c_str(), (utf8len == static_cast<size_t>(-1)) ? utf8str.size() : utf8len);
+        Convert(utf8str.c_str(), (utf8len == -1) ? utf8str.size() : utf8len);
     }
-    inline void Convert(const piv::string_view &utf8str, const size_t &utf8len = static_cast<size_t>(-1))
+    inline void Convert(const piv::string_view &utf8str, size_t utf8len = -1)
     {
-        Convert(utf8str.data(), (utf8len == static_cast<size_t>(-1)) ? utf8str.size() : utf8len);
+        Convert(utf8str.data(), (utf8len == -1) ? utf8str.size() : utf8len);
     }
-    inline void Convert(const CVolMem &utf8str, const size_t &utf8len = static_cast<size_t>(-1))
+    inline void Convert(const CVolMem &utf8str, size_t utf8len = -1)
     {
-        Convert(reinterpret_cast<const char *>(utf8str.GetPtr()), (utf8len == static_cast<size_t>(-1)) ? static_cast<size_t>(utf8str.GetSize()) : utf8len);
+        Convert(reinterpret_cast<const char *>(utf8str.GetPtr()), (utf8len == -1) ? static_cast<size_t>(utf8str.GetSize()) : utf8len);
     }
 
     /**
@@ -2302,9 +2362,9 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline wchar_t *GetPtr() noexcept
+    inline const wchar_t *GetPtr() const noexcept
     {
-        return const_cast<wchar_t *>(utf16str.GetText());
+        return utf16str.IsEmpty() ? nullptr : utf16str.GetText();
     }
 
     /**
@@ -2329,7 +2389,7 @@ public:
      * @brief 生成一个火山的文本型,其中包含了转换后的文本数据
      * @return 返回所转换的文本型
      */
-    inline CVolString &ToStr()
+    inline CWString &ToStr()
     {
         return utf16str;
     }
@@ -2338,7 +2398,7 @@ public:
      * @brief 生成一个火山的文本型,其中包含了转换后的文本数据
      * @return 返回所转换的文本型
      */
-    inline CVolString &GetStr(CVolString &str) const
+    inline CWString &GetStr(CWString &str) const
     {
         str.SetText(utf16str.GetText());
         return str;
@@ -2349,7 +2409,7 @@ public:
      * @param mem 文本数据将复制到此字节集中
      * @param null_char 字节集是否带结尾0字符
      */
-    inline CVolMem &GetMem(CVolMem &mem, const bool &null_char = false) const
+    inline CVolMem &GetMem(CVolMem &mem, bool null_char = false) const
     {
         mem.Empty();
         mem.Append(utf16str.GetText(), (utf16str.GetLength() + (null_char ? 1 : 0)) * 2);
@@ -2358,7 +2418,7 @@ public:
 }; // PivU2Ws
 
 /**
- * @brief 取指定编码的文本指针,只有CVolString可能会产生编码转换,其他取指针输出.
+ * @brief 取指定编码的文本指针,只有CWString可能会产生编码转换,其他取指针输出.
  */
 template <typename CharT>
 class PivFromAny
@@ -2371,7 +2431,7 @@ public:
     PivFromAny() = delete;
     ~PivFromAny() {}
 
-    PivFromAny(const CVolString &s)
+    PivFromAny(const CWString &s)
     {
         PIV_IF(sizeof(CharT) == 2)
         {
@@ -2423,6 +2483,783 @@ public:
     }
 }; // PivFromAny
 
+/**
+ * @brief 任意编码转UTF-8的封装类(输出文本指针)
+ */
+class PivAny2U
+{
+private:
+    std::unique_ptr<std::string> pStr{nullptr};
+    std::unique_ptr<piv::string_view> pSv{nullptr};
+
+public:
+    PivAny2U() = delete;
+    ~PivAny2U() {}
+
+    /**
+     * @brief 构造的同时将提供的文本转换
+     * @param s 所欲转换的任意编码文本
+     */
+    PivAny2U(const char *s, size_t count = -1)
+    {
+        if (s == nullptr || count == 0)
+            return;
+        if (count == -1)
+            pSv.reset(new piv::string_view{s});
+        else
+            pSv.reset(new piv::string_view{s, count});
+    }
+
+    PivAny2U(const wchar_t *s, size_t count = -1)
+    {
+        if (s == nullptr || count == 0)
+            return;
+        pStr.reset(new std::string{});
+        piv::encoding::W2Uex(*pStr, s, count);
+    }
+
+    PivAny2U(const CWString &s)
+    {
+        if (s.IsEmpty())
+            return;
+        pStr.reset(new std::string{});
+        piv::encoding::W2Uex(*pStr, s.GetText(), static_cast<size_t>(s.GetLength()));
+    }
+
+    PivAny2U(const CVolMem &s)
+    {
+        if (s.IsEmpty())
+            return;
+#ifdef SIMDUTF_H
+        int encodings = simdutf::detect_encodings(reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
+        if ((encodings & 2) == 2) // UTF-16LE
+        {
+            pStr.reset(new std::string{});
+            piv::encoding::W2Uex(*pStr, s.GetTextPtr(), static_cast<size_t>(s.GetSize()) / 2);
+        }
+        else if ((encodings & 1) == 1) // UTF-8
+        {
+            pSv.reset(new piv::string_view{reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize())});
+        }
+        else // ANSI
+        {
+            pStr.reset(new std::string{});
+            piv::encoding::A2Uex(*pStr, reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
+        }
+#else
+        pSv.reset(new piv::string_view{reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize())});
+#endif
+    }
+
+    PivAny2U(const std::string &s)
+    {
+        if (s.empty())
+            return;
+        pSv.reset(new piv::string_view{s});
+    }
+
+    PivAny2U(const std::wstring &s)
+    {
+        if (s.empty())
+            return;
+        pStr.reset(new std::string{});
+        piv::encoding::W2Uex(*pStr, s.c_str(), s.size());
+    }
+
+    PivAny2U(const piv::string_view &s)
+    {
+        if (s.empty())
+            return;
+        pSv.reset(new piv::string_view{s});
+    }
+
+    PivAny2U(const piv::wstring_view &s)
+    {
+        if (s.empty())
+            return;
+        pStr.reset(new std::string{});
+        piv::encoding::W2Uex(*pStr, s.data(), s.size());
+    }
+
+    PivAny2U(int32_t v)
+    {
+        if (v == 0)
+            return;
+        char buf[16] = {'\0'};
+        _ltoa(v, buf, 10);
+        pStr.reset(new std::string{buf});
+    }
+
+    PivAny2U(int64_t v)
+    {
+        if (v == 0)
+            return;
+        char buf[32] = {'\0'};
+        _i64toa(v, buf, 10);
+        pStr.reset(new std::string{buf});
+    }
+
+    /**
+     * @brief 获取转换后的文本指针(至少返回空字符串)
+     * @return 字符串指针
+     */
+    inline const char *GetText() const noexcept
+    {
+        if (pStr)
+            return pStr->c_str();
+        if (pSv)
+            return pSv->data();
+        return "";
+    }
+
+    /**
+     * @brief 获取转换后的文本指针(可能会返回空指针)
+     * @return 字符串指针
+     */
+    inline const char *GetPtr() const noexcept
+    {
+        if (pStr)
+            return pStr->data();
+        if (pSv)
+            return pSv->data();
+        return nullptr;
+    }
+
+    /**
+     * @brief 获取转换后的尾字符指针(可能会返回空指针)
+     * @return 尾字符指针
+     */
+    inline const char *GetEndPtr() const noexcept
+    {
+        if (pStr)
+            return pStr->data() + pStr->size();
+        if (pSv)
+            return pSv->data() + pSv->size();
+        return nullptr;
+    }
+
+    /**
+     * @brief 获取转换后的文本长度
+     * @return 文本的字符长度
+     */
+    inline size_t GetLength() const noexcept
+    {
+        if (pStr)
+            return pStr->size();
+        if (pSv)
+            return pSv->size();
+        return 0;
+    }
+
+    operator const char *() const noexcept
+    {
+        return this->GetText();
+    }
+
+    const char *operator*() const noexcept
+    {
+        return this->GetText();
+    }
+}; // PivAny2U
+
+/**
+ * @brief 任意编码转UTF-8 std::string的封装类(输出std::string)
+ */
+class PivAny2Us
+{
+private:
+    std::string u8str;
+
+public:
+    PivAny2Us() = delete;
+    ~PivAny2Us() {}
+
+    /**
+     * @brief 构造的同时将提供的文本转换
+     * @param s 所欲转换的任意编码文本
+     */
+    PivAny2Us(const char *s, size_t count = -1)
+    {
+        if (s == nullptr || count == 0)
+            return;
+        if (count == -1)
+            u8str.assign(s);
+        else
+            u8str.assign(s, count);
+    }
+
+    PivAny2Us(const wchar_t *s, size_t count = -1)
+    {
+        if (s == nullptr || count == 0)
+            return;
+        piv::encoding::W2Uex(u8str, s, count);
+    }
+
+    PivAny2Us(const CWString &s)
+    {
+        if (s.IsEmpty())
+            return;
+        piv::encoding::W2Uex(u8str, s.GetText(), static_cast<size_t>(s.GetLength()));
+    }
+
+    PivAny2Us(const CVolMem &s)
+    {
+        if (s.IsEmpty())
+            return;
+#ifdef SIMDUTF_H
+        int encodings = simdutf::detect_encodings(reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
+        if ((encodings & 2) == 2) // UTF-16LE
+        {
+            piv::encoding::W2Uex(u8str, s.GetTextPtr(), static_cast<size_t>(s.GetSize()) / 2);
+        }
+        else if ((encodings & 1) == 1) // UTF-8
+        {
+            u8str.assign(reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
+        }
+        else // ANSI
+        {
+            piv::encoding::A2Uex(u8str, reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
+        }
+#else
+        u8str.assign(reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
+#endif
+    }
+
+    PivAny2Us(const std::string &s)
+    {
+        if (s.empty())
+            return;
+        u8str.assign(s);
+    }
+
+    PivAny2Us(std::string &&s)
+    {
+        u8str = std::move(s);
+    }
+
+    PivAny2Us(const std::wstring &s)
+    {
+        if (s.empty())
+            return;
+        piv::encoding::W2Uex(u8str, s.c_str(), s.size());
+    }
+
+    PivAny2Us(const piv::string_view &s)
+    {
+        if (s.empty())
+            return;
+        u8str.assign(s.data(), s.size());
+    }
+
+    PivAny2Us(const piv::wstring_view &s)
+    {
+        if (s.empty())
+            return;
+        piv::encoding::W2Uex(u8str, s.data(), s.size());
+    }
+
+    PivAny2Us(int32_t v)
+    {
+        if (v == 0)
+            return;
+        char buf[16] = {'\0'};
+        _ltoa(v, buf, 10);
+        u8str.assign(buf);
+    }
+
+    PivAny2Us(int64_t v)
+    {
+        if (v == 0)
+            return;
+        char buf[32] = {'\0'};
+        _i64toa(v, buf, 10);
+        u8str.assign(buf);
+    }
+
+    /**
+     * @brief 判断转换后的文本是否为空
+     * @return 为空时返回真,未执行转换前始终为真
+     */
+    inline bool IsEmpty() const noexcept
+    {
+        return u8str.empty();
+    }
+
+    /**
+     * @brief 获取转换后的文本指针(至少返回空字符串)
+     * @return 字符串指针
+     */
+    inline const char *GetText() const noexcept
+    {
+        return u8str.c_str();
+    }
+
+    /**
+     * @brief 获取转换后的尾字符指针
+     * @return 尾字符指针
+     */
+    inline const char *GetEndPtr() const noexcept
+    {
+        return u8str.data() + u8str.size();
+    }
+
+    /**
+     * @brief 获取转换后的文本长度
+     * @return 文本的字符长度
+     */
+    inline size_t GetLength() const noexcept
+    {
+        return u8str.size();
+    }
+
+    operator const std::string &() const noexcept
+    {
+        return u8str;
+    }
+
+    const std::string &operator*() const noexcept
+    {
+        return u8str;
+    }
+
+    /**
+     * @brief 返回内部文本(转换后)的参考
+     * @return 转换后的std::basic_string参考
+     */
+    inline std::string &String() noexcept
+    {
+        return u8str;
+    }
+    inline const std::string &String() const noexcept
+    {
+        return u8str;
+    }
+}; // PivAny2Us
+
+/**
+ * @brief 任意编码转UTF-8编码的std::string_view
+ */
+class PivS2V
+{
+private:
+    piv::string_view _sv;
+    std::unique_ptr<std::string> _buffer{nullptr};
+
+public:
+    PivS2V() = delete;
+    ~PivS2V() {}
+
+    /**
+     * @brief 构造的同时将提供的文本转换
+     * @param s 所欲转换的任意编码文本
+     */
+    PivS2V(const char *s, size_t count = -1)
+    {
+        _sv = (count == -1) ? piv::string_view{s} : piv::string_view{s, count};
+    }
+
+    PivS2V(const wchar_t *s, size_t count = -1)
+    {
+        _buffer.reset(new std::string{});
+        piv::encoding::W2Uex(*_buffer, s, count);
+        _sv = *_buffer;
+    }
+
+    PivS2V(const CWString &s)
+    {
+        _buffer.reset(new std::string{});
+        piv::encoding::W2Uex(*_buffer, s.GetText(), static_cast<size_t>(s.GetLength()));
+        _sv = *_buffer;
+    }
+
+    PivS2V(const CVolMem &s)
+    {
+#ifdef SIMDUTF_H
+        int encodings = simdutf::detect_encodings(reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
+        if ((encodings & 2) == 2) // UTF-16LE
+        {
+            _buffer.reset(new std::string{});
+            piv::encoding::W2Uex(*_buffer, s.GetTextPtr(), static_cast<size_t>(s.GetSize()) / 2);
+            _sv = *_buffer;
+        }
+        else if ((encodings & 1) == 1) // UTF-8
+        {
+            _sv = piv::string_view{reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize())};
+        }
+        else // ANSI
+        {
+            _buffer.reset(new std::string{});
+            piv::encoding::A2Uex(*_buffer, reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
+            _sv = *_buffer;
+        }
+#else
+        _sv = piv::string_view{reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize())};
+#endif
+    }
+
+    PivS2V(const std::string &s)
+    {
+        _sv = s;
+    }
+
+    PivS2V(const std::wstring &s)
+    {
+        _buffer.reset(new std::string{});
+        piv::encoding::W2Uex(*_buffer, s.c_str(), s.size());
+        _sv = *_buffer;
+    }
+
+    PivS2V(const piv::string_view &s)
+    {
+        _sv = s;
+    }
+
+    PivS2V(const piv::wstring_view &s)
+    {
+        _buffer.reset(new std::string{});
+        piv::encoding::W2Uex(*_buffer, s.data(), s.size());
+        _sv = *_buffer;
+    }
+
+    /**
+     * @brief 获取转换后的文本指针
+     * @return 字符串指针
+     */
+    inline const char *GetText() const noexcept
+    {
+        return _sv.data();
+    }
+
+    /**
+     * @brief 获取转换后的文本指针
+     * @return 字符串指针
+     */
+    inline const char *GetPtr() const noexcept
+    {
+        return _sv.empty() ? nullptr : _sv.data();
+    }
+
+    /**
+     * @brief 获取转换后的尾字符指针
+     * @return 尾字符指针
+     */
+    inline const char *GetEndPtr() const noexcept
+    {
+        return _sv.data() + _sv.size();
+    }
+
+    /**
+     * @brief 获取转换后的文本长度
+     * @return 文本的字符长度
+     */
+    inline size_t GetLength() const noexcept
+    {
+        return _sv.size();
+    }
+
+    operator const piv::string_view &() const noexcept
+    {
+        return _sv;
+    }
+
+    operator piv::string_view &() noexcept
+    {
+        return _sv;
+    }
+
+    const piv::string_view &operator*() const noexcept
+    {
+        return _sv;
+    }
+
+    piv::string_view &operator*() noexcept
+    {
+        return _sv;
+    }
+}; // PivS2V
+
+/**
+ * @brief 任意编码转ANSI编码的std::wstring_view
+ */
+class PivS2AV
+{
+private:
+    piv::string_view _sv;
+    std::unique_ptr<std::string> _buffer{nullptr};
+
+public:
+    PivS2AV() = delete;
+    ~PivS2AV() {}
+
+    /**
+     * @brief 构造的同时将提供的文本转换
+     * @param s 所欲转换的任意编码文本
+     */
+    PivS2AV(const char *s, size_t count = -1)
+    {
+        _sv = (count == -1) ? piv::string_view{s} : piv::string_view{s, count};
+    }
+
+    PivS2AV(const wchar_t *s, size_t count = -1)
+    {
+        _buffer.reset(new std::string{});
+        piv::encoding::W2Aex(*_buffer, s, count);
+        _sv = *_buffer;
+    }
+
+    PivS2AV(const CWString &s)
+    {
+        _buffer.reset(new std::string{});
+        piv::encoding::W2Aex(*_buffer, s.GetText(), static_cast<size_t>(s.GetLength()));
+        _sv = *_buffer;
+    }
+
+    PivS2AV(const CVolMem &s)
+    {
+#ifdef SIMDUTF_H
+        int encodings = simdutf::detect_encodings(reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
+        if ((encodings & 2) == 2) // UTF-16LE
+        {
+            _buffer.reset(new std::string{});
+            piv::encoding::W2Uex(*_buffer, s.GetTextPtr(), static_cast<size_t>(s.GetSize()) / 2);
+            _sv = *_buffer;
+        }
+        else if ((encodings & 1) == 1) // UTF-8
+        {
+            _sv = piv::string_view{reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize())};
+        }
+        else // ANSI
+        {
+            _buffer.reset(new std::string{});
+            piv::encoding::A2Uex(*_buffer, reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
+            _sv = *_buffer;
+        }
+#else
+        _sv = piv::string_view{reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize())};
+#endif
+    }
+
+    PivS2AV(const std::string &s)
+    {
+        _sv = s;
+    }
+
+    PivS2AV(const std::wstring &s)
+    {
+        _buffer.reset(new std::string{});
+        piv::encoding::W2Aex(*_buffer, s.c_str(), s.size());
+        _sv = *_buffer;
+    }
+
+    PivS2AV(const piv::string_view &s)
+    {
+        _sv = s;
+    }
+
+    PivS2AV(const piv::wstring_view &s)
+    {
+        _buffer.reset(new std::string{});
+        piv::encoding::W2Aex(*_buffer, s.data(), s.size());
+        _sv = *_buffer;
+    }
+
+    /**
+     * @brief 获取转换后的文本指针
+     * @return 字符串指针
+     */
+    inline const char *GetText() const noexcept
+    {
+        return _sv.data();
+    }
+
+    /**
+     * @brief 获取转换后的文本指针
+     * @return 字符串指针
+     */
+    inline const char *GetPtr() const noexcept
+    {
+        return _sv.empty() ? nullptr : _sv.data();
+    }
+
+    /**
+     * @brief 获取转换后的尾字符指针
+     * @return 尾字符指针
+     */
+    inline const char *GetEndPtr() const noexcept
+    {
+        return _sv.data() + _sv.size();
+    }
+
+    /**
+     * @brief 获取转换后的文本长度
+     * @return 文本的字符长度
+     */
+    inline size_t GetLength() const noexcept
+    {
+        return _sv.size();
+    }
+
+    operator const piv::string_view &() const noexcept
+    {
+        return _sv;
+    }
+
+    operator piv::string_view &() noexcept
+    {
+        return _sv;
+    }
+
+    const piv::string_view &operator*() const noexcept
+    {
+        return _sv;
+    }
+
+    piv::string_view &operator*() noexcept
+    {
+        return _sv;
+    }
+}; // PivS2AV
+
+/**
+ * @brief 任意编码转std::wstring_view
+ */
+class PivS2WV
+{
+private:
+    piv::wstring_view _sv;
+    std::unique_ptr<std::wstring> _buffer{nullptr};
+
+public:
+    PivS2WV() = delete;
+    ~PivS2WV() {}
+
+    /**
+     * @brief 构造的同时将提供的文本转换
+     * @param s 所欲转换的任意编码文本
+     */
+    PivS2WV(const wchar_t *s, size_t count = -1)
+    {
+        _sv = (count == -1) ? piv::wstring_view{s} : piv::wstring_view{s, count};
+    }
+
+    PivS2WV(const char *s, size_t count = -1)
+    {
+        _buffer.reset(new std::wstring{});
+        piv::encoding::U2Wex(*_buffer, s, count);
+        _sv = *_buffer;
+    }
+
+    PivS2WV(const CWString &s)
+    {
+        _sv = s.GetText();
+    }
+
+    PivS2WV(const CVolMem &s)
+    {
+#ifdef SIMDUTF_H
+        int encodings = simdutf::detect_encodings(reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
+        if ((encodings & 2) == 2) // UTF-16LE
+        {
+            _sv = piv::wstring_view{s.GetTextPtr(), static_cast<size_t>(s.GetSize()) / 2};
+        }
+        else if ((encodings & 1) == 1) // UTF-8
+        {
+            _buffer.reset(new std::wstring{});
+            piv::encoding::U2Wex(*_buffer, reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()) / 2);
+            _sv = *_buffer;
+        }
+        else // ANSI
+        {
+            _buffer.reset(new std::wstring{});
+            piv::encoding::A2Wex(*_buffer, reinterpret_cast<const char *>(s.GetPtr()), static_cast<size_t>(s.GetSize()));
+            _sv = *_buffer;
+        }
+#else
+        _sv = piv::wstring_view{s.GetTextPtr(), static_cast<size_t>(s.GetSize()) / 2};
+#endif
+    }
+
+    PivS2WV(const std::string &s)
+    {
+        _buffer.reset(new std::wstring{});
+        piv::encoding::U2Wex(*_buffer, s.c_str(), s.size());
+        _sv = *_buffer;
+    }
+
+    PivS2WV(const std::wstring &s)
+    {
+        _sv = s;
+    }
+
+    PivS2WV(const piv::string_view &s)
+    {
+        _buffer.reset(new std::wstring{});
+        piv::encoding::U2Wex(*_buffer, s.data(), s.size());
+        _sv = *_buffer;
+    }
+
+    PivS2WV(const piv::wstring_view &s)
+    {
+        _sv = s;
+    }
+
+    /**
+     * @brief 获取转换后的文本指针
+     * @return 字符串指针
+     */
+    inline const wchar_t *GetText() const noexcept
+    {
+        return _sv.data();
+    }
+
+    /**
+     * @brief 获取转换后的文本指针
+     * @return 字符串指针
+     */
+    inline const wchar_t *GetPtr() const noexcept
+    {
+        return _sv.empty() ? nullptr : _sv.data();
+    }
+
+    /**
+     * @brief 获取转换后的尾字符指针
+     * @return 尾字符指针
+     */
+    inline const wchar_t *GetEndPtr() const noexcept
+    {
+        return _sv.data() + _sv.size();
+    }
+
+    /**
+     * @brief 获取转换后的文本长度
+     * @return 文本的字符长度
+     */
+    inline size_t GetLength() const noexcept
+    {
+        return _sv.size();
+    }
+
+    operator const piv::wstring_view &() const noexcept
+    {
+        return _sv;
+    }
+
+    operator piv::wstring_view &() noexcept
+    {
+        return _sv;
+    }
+
+    const piv::wstring_view &operator*() const noexcept
+    {
+        return _sv;
+    }
+
+    piv::wstring_view &operator*() noexcept
+    {
+        return _sv;
+    }
+}; // PivS2WV
+
 namespace piv
 {
     namespace encoding
@@ -2434,7 +3271,7 @@ namespace piv
          * @param utf8 是否为UTF-8编码
          */
         template <typename CharT>
-        std::basic_string<CharT> &UrlStrDecode(const basic_string_view<CharT> &str, const bool &utf8 = true, std::basic_string<CharT> &decoded = std::basic_string<CharT>{})
+        std::basic_string<CharT> &UrlStrDecode(const ::piv::basic_string_view<CharT> &str, bool utf8 = true, std::basic_string<CharT> &decoded = std::basic_string<CharT>{})
         {
             decoded.clear();
             if (str.size() == 0)
@@ -2476,13 +3313,13 @@ namespace piv
             return decoded;
         }
         template <typename CharT>
-        std::basic_string<CharT> &UrlStrDecode(const std::basic_string<CharT> &str, const bool &utf8 = true, std::basic_string<CharT> &decoded = std::basic_string<CharT>{})
+        std::basic_string<CharT> &UrlStrDecode(const std::basic_string<CharT> &str, bool utf8 = true, std::basic_string<CharT> &decoded = std::basic_string<CharT>{})
         {
-            return piv::encoding::UrlStrDecode(basic_string_view<CharT>{str}, utf8, decoded);
+            return piv::encoding::UrlStrDecode(::piv::basic_string_view<CharT>{str}, utf8, decoded);
         }
 
         template <typename CharT>
-        CVolMem &UrlStrDecode(const basic_string_view<CharT> &str, CVolMem &decoded, const bool &utf8 = true)
+        CVolMem &UrlStrDecode(const ::piv::basic_string_view<CharT> &str, CVolMem &decoded, bool utf8 = true)
         {
             decoded.Empty();
             if (str.size() == 0)
@@ -2522,22 +3359,22 @@ namespace piv
             return decoded;
         }
         template <typename CharT>
-        CVolMem &UrlStrDecode(const std::basic_string<CharT> &str, CVolMem &decoded, const bool &utf8 = true)
+        CVolMem &UrlStrDecode(const std::basic_string<CharT> &str, CVolMem &decoded, bool utf8 = true)
         {
-            return piv::encoding::UrlStrDecode(basic_string_view<CharT>{str.c_str()}, decoded, utf8);
+            return piv::encoding::UrlStrDecode(::piv::basic_string_view<CharT>{str.c_str()}, decoded, utf8);
         }
         template <typename = void>
-        CVolMem &UrlStrDecode(const CVolMem &str, const bool &utf8 /* = true*/, CVolMem &decoded)
+        CVolMem &UrlStrDecode(const CVolMem &str, bool utf8 = true, CVolMem &decoded = CVolMem{})
         {
-            return piv::encoding::UrlStrDecode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), decoded, utf8);
+            return piv::encoding::UrlStrDecode(::piv::string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), decoded, utf8);
         }
         template <typename = void>
-        CVolString &UrlStrDecode(const CVolMem &str, const bool &utf8 /*  = true*/, CVolString &decoded)
+        CWString &UrlStrDecode(const CVolMem &str, bool utf8, CWString &decoded = CWString{})
         {
             if (piv::encoding::UrlDecodeNeed(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())))
             {
                 CVolMem buffer;
-                piv::encoding::UrlStrDecode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), buffer, utf8);
+                piv::encoding::UrlStrDecode(::piv::string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), buffer, utf8);
                 if (utf8)
                     return PivU2Ws{buffer}.GetStr(decoded);
                 else
@@ -2552,7 +3389,7 @@ namespace piv
             }
         }
         template <typename CharT>
-        CVolString &UrlStrDecode(const basic_string_view<CharT> &str, CVolString &decoded, const bool &utf8 = true)
+        CWString &UrlStrDecode(const ::piv::basic_string_view<CharT> &str, CWString &decoded, bool utf8 = true)
         {
             decoded.Empty();
             if (str.size() == 0)
@@ -2610,7 +3447,7 @@ namespace piv
          * @param ReservedWord 是否不编码保留字符
          */
         template <typename CharT>
-        std::basic_string<CharT> &UrlStrEncode(const basic_string_view<CharT> &str, const bool &utf8 = true, const bool &ReservedWord = false, std::basic_string<CharT> &encoded = std::basic_string<CharT>{})
+        std::basic_string<CharT> &UrlStrEncode(const ::piv::basic_string_view<CharT> &str, bool utf8 = true, bool ReservedWord = false, std::basic_string<CharT> &encoded = std::basic_string<CharT>{})
         {
             size_t buffer_len;
             if (piv::encoding::UrlEncodeNeed(str.data(), str.size(), ReservedWord))
@@ -2652,13 +3489,13 @@ namespace piv
             return encoded;
         }
         template <typename CharT>
-        std::basic_string<CharT> &UrlStrEncode(const std::basic_string<CharT> &str, const bool &utf8 = true, const bool &ReservedWord = false, std::basic_string<CharT> &encoded = std::basic_string<CharT>{})
+        std::basic_string<CharT> &UrlStrEncode(const std::basic_string<CharT> &str, bool utf8 = true, bool ReservedWord = false, std::basic_string<CharT> &encoded = std::basic_string<CharT>{})
         {
-            return piv::encoding::UrlStrEncode(basic_string_view<CharT>{str.c_str()}, utf8, ReservedWord, encoded);
+            return piv::encoding::UrlStrEncode(::piv::basic_string_view<CharT>{str.c_str()}, utf8, ReservedWord, encoded);
         }
 
         template <typename CharT>
-        CVolMem &UrlDataEncode(const basic_string_view<CharT> &str, const bool &utf8 /* = true*/, const bool &ReservedWord /* = false*/, CVolMem &encoded)
+        CVolMem &UrlDataEncode(const basic_string_view<CharT> &str, bool utf8 = true, bool ReservedWord = false, CVolMem &encoded = CVolMem{})
         {
             encoded.Empty();
             size_t buffer_len;
@@ -2697,28 +3534,28 @@ namespace piv
             return encoded;
         }
         template <typename CharT>
-        CVolMem &UrlDataEncode(const std::basic_string<CharT> &str, const bool &utf8 /* = true*/, const bool &ReservedWord /* = false*/, CVolMem &encoded)
+        CVolMem &UrlDataEncode(const std::basic_string<CharT> &str, bool utf8 = true, bool ReservedWord = false, CVolMem &encoded = CVolMem{})
         {
             return piv::encoding::UrlDataEncode(std::basic_string<CharT>{str.c_str()}, utf8, ReservedWord, encoded);
         }
 
         template <typename = void>
-        CVolMem &UrlDataEncode(const CVolString &str, const bool &utf8 /* = true*/, const bool &ReservedWord /* = false*/, CVolMem &encoded)
+        CVolMem &UrlDataEncode(const CWString &str, bool utf8 = true, bool ReservedWord = false, CVolMem &encoded = CVolMem{})
         {
-            return piv::encoding::UrlDataEncode(wstring_view(str.GetText()), utf8, ReservedWord, encoded);
+            return piv::encoding::UrlDataEncode(::piv::wstring_view(str.GetText()), utf8, ReservedWord, encoded);
         }
         template <typename = void>
-        CVolMem &UrlDataEncode(const CVolMem &str, const bool &utf8 /* = true*/, const bool &ReservedWord /* = false*/, CVolMem &encoded)
+        CVolMem &UrlDataEncode(const CVolMem &str, bool utf8 = true, bool ReservedWord = false, CVolMem &encoded = CVolMem{})
         {
-            return piv::encoding::UrlDataEncode(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), utf8, ReservedWord, encoded);
+            return piv::encoding::UrlDataEncode(::piv::string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), utf8, ReservedWord, encoded);
         }
         template <typename = void>
-        CVolString &UrlStrEncode(const CVolMem &str, CVolString &encoded, const bool &utf8 = true, const bool &ReservedWord = false)
+        CWString &UrlStrEncode(const CVolMem &str, CWString &encoded, bool utf8 = true, bool ReservedWord = false)
         {
             if (piv::encoding::UrlEncodeNeed(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize()), ReservedWord))
             {
                 CVolMem buffer;
-                piv::encoding::UrlDataEncode<char>(string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), utf8, ReservedWord, buffer);
+                piv::encoding::UrlDataEncode<char>(::piv::string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), utf8, ReservedWord, buffer);
                 if (utf8)
                     return PivU2Ws{buffer}.GetStr(encoded);
                 else
@@ -2753,7 +3590,7 @@ namespace piv
                     (c >= 97 && c <= 122) || // a-z
                     (c == 10) || (c == 13)); // \r\n
         }
-        inline void AddChar(std::basic_string<CharT> &s, const unsigned char &c, uint32_t &count, const uint32_t &max_line_len) noexcept
+        inline void AddChar(std::basic_string<CharT> &s, const unsigned char &c, uint32_t &count, uint32_t max_line_len) noexcept
         {
             if (count < max_line_len)
             {
@@ -2768,7 +3605,7 @@ namespace piv
                 count = 1;
             }
         }
-        inline void AddChar(CVolString &s, const unsigned char &c, uint32_t &count, const uint32_t &max_line_len) noexcept
+        inline void AddChar(CWString &s, const unsigned char &c, uint32_t &count, uint32_t max_line_len) noexcept
         {
             if (count < max_line_len)
             {
@@ -2858,21 +3695,21 @@ namespace piv
             return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()), line_len);
         }
 
-        inline CVolString Encode(const unsigned char *input, size_t len, int line_len = 0)
+        inline CWString Encode(const unsigned char *input, size_t len, int line_len = 0)
         {
-            return encode<CVolString>(input, len, line_len);
+            return encode<CWString>(input, len, line_len);
         }
-        inline CVolString Encode(const basic_string_view<CharT> &input, int line_len = 0)
+        inline CWString Encode(const ::piv::basic_string_view<CharT> &input, int line_len = 0)
         {
-            return encode<CVolString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), line_len);
+            return encode<CWString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), line_len);
         }
-        inline CVolString Encode(const std::basic_string<CharT> &input, int line_len = 0)
+        inline CWString Encode(const std::basic_string<CharT> &input, int line_len = 0)
         {
-            return encode<CVolString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), line_len);
+            return encode<CWString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), line_len);
         }
-        inline CVolString Encode(const CVolMem &input, int line_len = 0)
+        inline CWString Encode(const CVolMem &input, int line_len = 0)
         {
-            return encode<CVolString>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()), line_len);
+            return encode<CWString>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()), line_len);
         }
 
         /**
@@ -2945,7 +3782,7 @@ namespace piv
             // #endif
         }
 
-        inline void decode(const basic_string_view<CharT> &input, CVolMem &output)
+        inline void decode(const ::piv::basic_string_view<CharT> &input, CVolMem &output)
         {
             decode(input.data(), output, input.size());
         }
@@ -2957,7 +3794,7 @@ namespace piv
         {
             decode(reinterpret_cast<const CharT *>(input.GetPtr()), output, static_cast<size_t>(input.GetSize()) / sizoef(CharT));
         }
-        inline void decode(const CVolString &input, CVolMem &output)
+        inline void decode(const CWString &input, CVolMem &output)
         {
             decode(input.GetText(), output, static_cast<size_t>(input.GetLength()));
         }
@@ -2991,7 +3828,7 @@ namespace piv
         {
             s.push_back(c);
         }
-        inline void AddChar(CVolString &s, const unsigned char &c) noexcept
+        inline void AddChar(CWString &s, const unsigned char &c) noexcept
         {
             s.AddChar(c);
         }
@@ -2999,7 +3836,7 @@ namespace piv
         {
             s.clear();
         }
-        inline void ClearStr(CVolString &s) noexcept
+        inline void ClearStr(CWString &s) noexcept
         {
             s.Empty();
         }
@@ -3013,7 +3850,7 @@ namespace piv
          * @return 是否成功
          */
         template <typename T>
-        inline bool encode(const unsigned char *input, const size_t &len, T &output)
+        inline bool encode(const unsigned char *input, size_t len, T &output)
         {
             ClearStr(output);
             if (len % 4)
@@ -3033,7 +3870,7 @@ namespace piv
             return true;
         }
 
-        inline std::basic_string<CharT> encode(const basic_string_view<CharT> &input, bool padding = false)
+        inline std::basic_string<CharT> encode(const ::piv::basic_string_view<CharT> &input, bool padding = false)
         {
             std::basic_string<CharT> output;
             size_t remainder = input.size() * sizeof(CharT) % 4;
@@ -3054,19 +3891,19 @@ namespace piv
         }
         inline std::basic_string<CharT> encode(const std::basic_string<CharT> &input, bool padding = false)
         {
-            return encode(basic_string_view<CharT>{input}, padding);
+            return encode(::piv::basic_string_view<CharT>{input}, padding);
         }
         inline std::basic_string<CharT> encode(const CVolMem &input, bool padding = false)
         {
-            return encode(basic_string_view<CharT>{reinterpret_cast<const CharT *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / sizeof(CharT)}, padding);
+            return encode(::piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / sizeof(CharT)}, padding);
         }
 
-        inline CVolString Encode(const CVolMem &input, bool padding = false)
+        inline CWString Encode(const CVolMem &input, bool padding = false)
         {
-            CVolString output;
+            CWString output;
             if (input.GetSize() % 4 == 0)
             {
-                encode<CVolString>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()), output);
+                encode<CWString>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()), output);
             }
             else
             {
@@ -3074,16 +3911,16 @@ namespace piv
                 {
                     CVolMem pad = input;
                     pad.AddManyU8Chars('\0', input.GetSize() % 4);
-                    encode<CVolString>(reinterpret_cast<const unsigned char *>(pad.GetPtr()), static_cast<size_t>(pad.GetSize()), output);
+                    encode<CWString>(reinterpret_cast<const unsigned char *>(pad.GetPtr()), static_cast<size_t>(pad.GetSize()), output);
                 }
             }
             return output;
         }
-        inline CVolString Encode(const std::basic_string<CharT> &input, bool padding = false)
+        inline CWString Encode(const std::basic_string<CharT> &input, bool padding = false)
         {
             return Encode(CVolMem(input.c_str(), input.size() * sizeof(CharT)), padding);
         }
-        inline CVolString Encode(const basic_string_view<CharT> &input, bool padding = false)
+        inline CWString Encode(const ::piv::basic_string_view<CharT> &input, bool padding = false)
         {
             return Encode(CVolMem(input.data(), input.size() * sizeof(CharT)), padding);
         }
@@ -3094,7 +3931,7 @@ namespace piv
          * @return 返回解码后的数据
          */
         template <typename T>
-        inline bool decode(const T *input, CVolMem &output, size_t len = static_cast<size_t>(-1))
+        inline bool decode(const T *input, CVolMem &output, size_t len = -1)
         {
             if (len == -1)
                 len = sizeof(T) == 1 ? strlen(reinterpret_cast<const char *>(input)) : wcslen(reinterpret_cast<const wchar_t *>(input));
@@ -3123,7 +3960,7 @@ namespace piv
             }
             return true;
         }
-        inline bool decode(const basic_string_view<CharT> &input, CVolMem &output)
+        inline bool decode(const ::piv::basic_string_view<CharT> &input, CVolMem &output)
         {
             return decode(input.data(), output, input.size());
         }
@@ -3135,7 +3972,7 @@ namespace piv
         {
             return decode(reinterpret_cast<const CharT *>(input.GetPtr()), output, static_cast<size_t>(input.GetSize()) / sizoef(CharT));
         }
-        inline bool decode(const CVolString &input, CVolMem &output)
+        inline bool decode(const CWString &input, CVolMem &output)
         {
             return decode(input.GetText(), output, static_cast<size_t>(input.GetLength()));
         }
@@ -3168,7 +4005,7 @@ namespace piv
         {
             s.push_back(c);
         }
-        inline void AddChar(CVolString &s, unsigned char c) noexcept
+        inline void AddChar(CWString &s, unsigned char c) noexcept
         {
             s.AddChar(c);
         }
@@ -3181,7 +4018,7 @@ namespace piv
          * @return 返回编码后的BASE91文本
          */
         template <typename T>
-        inline T encode(const unsigned char *input, const size_t &len)
+        inline T encode(const unsigned char *input, size_t len)
         {
             T ret;
             unsigned long queue = 0;
@@ -3219,7 +4056,7 @@ namespace piv
             return ret;
         }
 
-        inline std::basic_string<CharT> encode(const basic_string_view<CharT> &input)
+        inline std::basic_string<CharT> encode(const ::piv::basic_string_view<CharT> &input)
         {
             return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
         }
@@ -3232,17 +4069,17 @@ namespace piv
             return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
         }
 
-        inline CVolString Encode(const basic_string_view<CharT> &input)
+        inline CWString Encode(const ::piv::basic_string_view<CharT> &input)
         {
-            return encode<CVolString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
+            return encode<CWString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
         }
-        inline CVolString Encode(const std::basic_string<CharT> &input)
+        inline CWString Encode(const std::basic_string<CharT> &input)
         {
-            return encode<CVolString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
+            return encode<CWString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
         }
-        inline CVolString Encode(const CVolMem &input)
+        inline CWString Encode(const CVolMem &input)
         {
-            return encode<CVolString>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
+            return encode<CWString>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
         }
 
         /**
@@ -3305,7 +4142,7 @@ namespace piv
             if (val != -1)
                 output.AddU8Char((U8CHAR)(queue | val << nbits));
         }
-        inline void decode(const basic_string_view<CharT> &input, CVolMem &output)
+        inline void decode(const ::piv::basic_string_view<CharT> &input, CVolMem &output)
         {
             decode(input.data(), output, input.size());
         }
@@ -3317,7 +4154,7 @@ namespace piv
         {
             decode(reinterpret_cast<const CharT *>(input.GetPtr()), output, static_cast<size_t>(input.GetSize()) / sizoef(CharT));
         }
-        inline void decode(const CVolString &input, CVolMem &output)
+        inline void decode(const CWString &input, CVolMem &output)
         {
             decode(input.GetText(), output, static_cast<size_t>(input.GetLength()));
         }

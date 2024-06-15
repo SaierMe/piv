@@ -61,7 +61,7 @@
         @ char data[27];
         @ data[26] = '\0';
         @ ulid::MarshalTo<char>(@<欲操作本对象>, data);
-        @ return @dt<标准文本类U>(data);
+        @ return std::string{data};
     }
 
     方法 取字节集 <公开 静态 类型 = 字节集类 注释 = "返回本对象中所保存ULID对应的字节集数据" 折叠 @嵌入式方法 = "">
@@ -98,10 +98,10 @@
     # <> <include>
     # std::random_device rd;
     # @m<engine> gen;
-    # inline void @an<_OnInitExtra> () { gen.seed (rd ()); }
-    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
-    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
-    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
+    # inline void @an<_OnInitExtra>() { gen.seed(rd()); }
+    # inline void @an<_CopySelfFromExtra>(const @sn<current_class>& objCopyFrom) { gen = objCopyFrom.gen; }
+    # inline @sn<current_class>& operator=(@sn<current_class>&& rhs) { gen = std::move(rhs.gen); return *this; }
+    # inline BOOL @an<_IsSelfEqualExtra>(const @sn<current_class>& objCompare) const { return (gen == objCompare.gen); }
     # template <typename T>
     # inline T GenRandInt(const T & min_value, const T & max_value) {
     #     std::uniform_int_distribution<T> dist(min_value, max_value);
@@ -114,10 +114,10 @@
     方法 重置种子 <公开 注释 = "  为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
             注释 = "  本方法在类初始化时会自动调用,因此仅在你想要一个新的" 注释 = "种子值时,才需要手动调用." 折叠>
     {
-        @ gen.seed (rd ());
+        @ gen.seed(rd());
     }
 
-    方法 取随机数 <公开 注释 = "产生在一个范围内均匀分布的伪随机数." 注释 = "本方法可以自定义返回的整数类型." 返回值注释 = "返回产生的随机数,类型与参数\"数值类型\"相同."
+    方法 取随机数 <公开 注释 = "产生在一个范围内均匀分布的伪随机数." 注释 = "本方法可以自定义返回的整数类型." 返回值注释 = "返回产生的随机数,类型与参数\"数值类型\"相同." 折叠
             @嵌入式方法 = "">
     参数 数值类型 <注释 = "请填写\"短整数\"、\"整数\"、\"长整数\"等基本整数型." @匹配类型 = 通用整数型 @需求类型 = 数据类型 @返回值类型 = 0>
     参数 最小值 <注释 = "指定取值范围的最小值,可使用\"数值范围\"中的常量." @匹配类型 = 匹配前参数值类型>
@@ -168,7 +168,7 @@
     }
 
     方法 取二项分布整数 <公开 类型 = 整数 注释 = "根据二项分布离散概率函数产生随机正整数值." 注释 = "若每次试验的成功率为p,返回t次试验中的成功次数."
-            返回值注释 = "返回随机的成功次数." @禁止流程检查 = 真>
+            返回值注释 = "返回随机的成功次数." 折叠 @禁止流程检查 = 真>
     参数 试验次数 <类型 = 整数 注释 = "定义为t,必须大于等于0,为试验次数">
     参数 成功概率 <类型 = 小数 注释 = "定义为p,取值范围为0 ≤ p ≤ 1,为每次试验产生\"真\"的概率." @默认值 = 0.50>
     {
@@ -285,14 +285,14 @@
     {
         @ TCHAR Buffer[96] { 0 };
         @ INT nFlags = @<字符类型>;
-        @ if ((nFlags & 1) == 1) wcscat (Buffer, L"0123456789");
-        @ if ((nFlags & 2) == 2) wcscat (Buffer, L"abcdefghijklmnopqrstuvwxyz");
-        @ if ((nFlags & 4) == 4) wcscat (Buffer, L"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-        @ if ((nFlags & 8) == 8) wcscat (Buffer, L" !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
-        @ size_t Offset = wcslen (Buffer) - 1;
+        @ if ((nFlags & 1) == 1) wcscat(Buffer, L"0123456789");
+        @ if ((nFlags & 2) == 2) wcscat(Buffer, L"abcdefghijklmnopqrstuvwxyz");
+        @ if ((nFlags & 4) == 4) wcscat(Buffer, L"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        @ if ((nFlags & 8) == 8) wcscat(Buffer, L" !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
+        @ size_t Offset = wcslen(Buffer) - 1;
         @ @an<CVolString> szStr;
         @ if (Offset <= 0) return szStr;
-        @ wchar_t* pStr = szStr.InitWithChars (@<欲取字符数>, ' ');
+        @ wchar_t* pStr = szStr.InitWithChars(@<欲取字符数>, ' ');
         @ std::uniform_int_distribution<INT> dist(0, Offset);
         @ for (INT i = 0; i < @<欲取字符数>; i++) {
         @     pStr[i] = Buffer[dist(gen)];
@@ -579,7 +579,7 @@
         @ m_szIniFile.Empty (); m_bAutoSave = false;
         @ data ().Reset ();
         @ INT nRet = 0;
-        @ FILE* fp = _wfopen (@<文件名>.GetText (), L"ab+");
+        @ FILE* fp = _wfopen (@<文件名>.GetText (), L"rb");
         @ if (!fp) return -3;
         @ fseek (fp, 0, SEEK_END);
         @ int nSize = ftell (fp);

@@ -56,9 +56,9 @@ namespace piv
          * @return 返回是否为json数据
          */
         template <typename J>
-        bool Accept(const string_view &input, bool ignore_comments, int32_t encoding = 1)
+        bool Accept(const ::piv::string_view &input, bool ignore_comments, int32_t encoding = 1)
         {
-            string_view test{input};
+            ::piv::string_view test{input};
             piv::edit::trim_left(test);
             piv::edit::trim_right(test);
             if (test.empty())
@@ -70,9 +70,9 @@ namespace piv
         }
 
         template <typename J>
-        bool Accept(const wstring_view &input, bool ignore_comments, int32_t encoding = 1)
+        bool Accept(const ::piv::wstring_view &input, bool ignore_comments, int32_t encoding = 1)
         {
-            wstring_view test{input};
+            ::piv::wstring_view test{input};
             piv::edit::trim_left(test);
             piv::edit::trim_right(test);
             if (test.empty())
@@ -86,13 +86,13 @@ namespace piv
         template <typename J>
         inline bool Accept(const std::string &input, bool ignore_comments, int32_t encoding = 1)
         {
-            return Accept<J>(string_view{input}, ignore_comments, encoding);
+            return Accept<J>(::piv::string_view{input}, ignore_comments, encoding);
         }
 
         template <typename J>
         bool Accept(const std::wstring &input, bool ignore_comments, int32_t encoding = 1)
         {
-            wstring_view test{input};
+            ::piv::wstring_view test{input};
             piv::edit::trim_left(test);
             piv::edit::trim_right(test);
             if (test.empty())
@@ -106,13 +106,13 @@ namespace piv
         template <typename J>
         inline bool Accept(const wchar_t *input, bool ignore_comments, int32_t encoding = 1)
         {
-            return Accept<J>(wstring_view{input}, ignore_comments, encoding);
+            return Accept<J>(::piv::wstring_view{input}, ignore_comments, encoding);
         }
 
         template <typename J>
-        bool Accept(const CVolString &input, bool ignore_comments, int32_t encoding = 1)
+        bool Accept(const CWString &input, bool ignore_comments, int32_t encoding = 1)
         {
-            wstring_view test{input.GetText()};
+            ::piv::wstring_view test{input.GetText()};
             piv::edit::trim_left(test);
             piv::edit::trim_right(test);
             if (test.empty())
@@ -144,16 +144,16 @@ namespace piv
             else if ((str_encoding & 2) == 2) // UTF-16LE
             {
                 if (static_cast<uint8_t>(input.Get_S_BYTE(0)) == 0xFF && len > 2 && static_cast<uint8_t>(input.Get_S_BYTE(1)) == 0xFE)
-                    return Accept<J>(wstring_view{reinterpret_cast<const wchar_t *>(input.GetPtr()) + 1, (len / 2) - 1}, ignore_comments);
+                    return Accept<J>(::piv::wstring_view{reinterpret_cast<const wchar_t *>(input.GetPtr()) + 1, (len / 2) - 1}, ignore_comments);
                 else
-                    return Accept<J>(wstring_view{reinterpret_cast<const wchar_t *>(input.GetPtr()), len / 2}, ignore_comments);
+                    return Accept<J>(::piv::wstring_view{reinterpret_cast<const wchar_t *>(input.GetPtr()), len / 2}, ignore_comments);
             }
             else if ((str_encoding & 1) == 1) // UTF-8
             {
                 if (static_cast<uint8_t>(input.Get_S_BYTE(0)) == 0xEF && len > 3 && static_cast<uint8_t>(input.Get_S_BYTE(1)) == 0xBB && static_cast<uint8_t>(input.Get_S_BYTE(2)) == 0xBF)
-                    return Accept<J>(string_view{reinterpret_cast<const char *>(input.GetPtr()) + 3, len - 3}, ignore_comments);
+                    return Accept<J>(::piv::string_view{reinterpret_cast<const char *>(input.GetPtr()) + 3, len - 3}, ignore_comments);
                 else
-                    return Accept<J>(string_view{reinterpret_cast<const char *>(input.GetPtr()), len}, ignore_comments);
+                    return Accept<J>(::piv::string_view{reinterpret_cast<const char *>(input.GetPtr()), len}, ignore_comments);
             }
             else if (str_encoding == 0) // ANSI
             {
@@ -207,9 +207,9 @@ namespace piv
          * @return 返回是否解析成功
          */
         template <typename J, typename F>
-        bool Parse(J &json, const string_view &input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
+        bool Parse(J &json, const ::piv::string_view &input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
         {
-            string_view test{input};
+            ::piv::string_view test{input};
             piv::edit::trim_left(test);
             piv::edit::trim_right(test);
             if (test.empty())
@@ -221,9 +221,9 @@ namespace piv
         }
 
         template <typename J, typename F>
-        bool Parse(J &json, const wstring_view &input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
+        bool Parse(J &json, const ::piv::wstring_view &input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
         {
-            wstring_view test{input};
+            ::piv::wstring_view test{input};
             piv::edit::trim_left(test);
             piv::edit::trim_right(test);
             if (test.empty())
@@ -237,13 +237,13 @@ namespace piv
         template <typename J, typename F>
         inline bool Parse(J &json, const std::string &input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
         {
-            return Parse(json, string_view{input}, cb, allow_exceptions, ignore_comments);
+            return Parse(json, ::piv::string_view{input}, cb, allow_exceptions, ignore_comments);
         }
 
         template <typename J, typename F>
         bool Parse(J &json, const std::wstring &input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
         {
-            wstring_view test{input};
+            ::piv::wstring_view test{input};
             piv::edit::trim_left(test);
             piv::edit::trim_right(test);
             if (test.empty())
@@ -255,9 +255,9 @@ namespace piv
         }
 
         template <typename J, typename F>
-        bool Parse(J &json, const CVolString &input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
+        bool Parse(J &json, const CWString &input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
         {
-            wstring_view test{input.GetText()};
+            ::piv::wstring_view test{input.GetText()};
             piv::edit::trim_left(test);
             piv::edit::trim_right(test);
             if (test.empty())
@@ -271,7 +271,7 @@ namespace piv
         template <typename J, typename F>
         inline bool Parse(J &json, const wchar_t *input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
         {
-            return Parse(json, wstring_view{input}, cb, allow_exceptions, ignore_comments, encoding);
+            return Parse(json, ::piv::wstring_view{input}, cb, allow_exceptions, ignore_comments, encoding);
         }
 
         template <typename J, typename F>
@@ -303,7 +303,7 @@ namespace piv
                     len -= 2;
                 }
                 if (reinterpret_cast<const wchar_t *>(data)[0] == '{' || reinterpret_cast<const wchar_t *>(data)[0] == '[')
-                    return ParseText(json, wstring_view{reinterpret_cast<const wchar_t *>(data), len}, cb, allow_exceptions, ignore_comments);
+                    return ParseText(json, ::piv::wstring_view{reinterpret_cast<const wchar_t *>(data), len}, cb, allow_exceptions, ignore_comments);
             }
             if ((encoding & 1) == 1) // UTF-8
             {
@@ -312,7 +312,7 @@ namespace piv
                     data += 3;
                     len -= 3;
                 }
-                return ParseText(json, string_view{reinterpret_cast<const char *>(data), len}, cb, allow_exceptions, ignore_comments);
+                return ParseText(json, ::piv::string_view{reinterpret_cast<const char *>(data), len}, cb, allow_exceptions, ignore_comments);
             }
             if (encoding == 0) // ANSI
             {
@@ -327,9 +327,9 @@ namespace piv
          * @return 返回输入类型
          */
         template <typename = void>
-        inline const string_view input_t(const CVolMem &input)
+        inline const ::piv::string_view input_t(const CVolMem &input)
         {
-            return string_view{reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize())};
+            return ::piv::string_view{reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize())};
         }
 
         inline const std::vector<uint8_t> &input_t(const std::vector<uint8_t> &input)
@@ -337,7 +337,7 @@ namespace piv
             return input;
         }
 
-        inline const string_view &input_t(const string_view &input)
+        inline const ::piv::string_view &input_t(const ::piv::string_view &input)
         {
             return input;
         }
@@ -535,19 +535,19 @@ namespace piv
         }
 
         template <typename = void>
-        const std::string to_value(const wchar_t *str)
+        std::string to_value(const wchar_t *str)
         {
             return PivW2U{str}.String();
         }
 
         template <typename = void>
-        const string_view &to_value(const char *str)
+        ::piv::string_view to_value(const char *str)
         {
-            return string_view{str};
+            return ::piv::string_view{str};
         }
 
         template <typename = void>
-        const std::string to_value(const CVolString &str)
+        std::string to_value(const CWString &str)
         {
             return PivW2U{str}.String();
         }
@@ -559,27 +559,27 @@ namespace piv
         }
 
         template <typename = void>
-        const string_view &to_value(const string_view &str)
+        const ::piv::string_view &to_value(const ::piv::string_view &str)
         {
             return str;
         }
 
         template <typename = void>
-        const std::string to_value(const std::wstring &str)
+        std::string to_value(const std::wstring &str)
         {
             return PivW2U{str}.String();
         }
 
         template <typename = void>
-        const std::string to_value(const wstring_view &str)
+        std::string to_value(const ::piv::wstring_view &str)
         {
             return PivW2U{str.data(), str.size()}.String();
         }
 
         template <typename = void>
-        const string_view to_value(const CVolMem &str)
+        const ::piv::string_view &to_value(const CVolMem &str)
         {
-            return string_view{reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())};
+            return ::piv::string_view{reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())};
         }
 
         /**
@@ -601,19 +601,19 @@ namespace piv
         }
 
         template <typename = void>
-        const std::string to_key(const wchar_t *key)
+        std::string to_key(const wchar_t *key)
         {
             return PivW2U{key}.String();
         }
 
         template <typename = void>
-        const string_view to_key(const char *key)
+        ::piv::string_view to_key(const char *key)
         {
-            return string_view{key};
+            return ::piv::string_view{key};
         }
 
         template <typename = void>
-        const std::string to_key(const CVolString &key)
+        std::string to_key(const CWString &key)
         {
             return PivW2U{key}.String();
         }
@@ -625,27 +625,27 @@ namespace piv
         }
 
         template <typename = void>
-        const string_view &to_key(const string_view &key)
+        const ::piv::string_view &to_key(const ::piv::string_view &key)
         {
             return key;
         }
 
         template <typename = void>
-        const std::string to_key(const std::wstring &key)
+        std::string to_key(const std::wstring &key)
         {
             return PivW2U{key}.String();
         }
 
         template <typename = void>
-        const std::string to_key(const wstring_view &key)
+        std::string to_key(const ::piv::wstring_view &key)
         {
             return PivW2U{key.data(), key.size()}.String();
         }
 
         template <typename = void>
-        const string_view to_key(const CVolMem &key)
+        ::piv::string_view to_key(const CVolMem &key)
         {
-            return string_view{reinterpret_cast<const char *>(key.GetPtr()), static_cast<size_t>(key.GetSize())};
+            return ::piv::string_view{reinterpret_cast<const char *>(key.GetPtr()), static_cast<size_t>(key.GetSize())};
         }
 
         /**
@@ -653,52 +653,10 @@ namespace piv
          * @param path 所欲转换的路径
          * @return 返回JSON Pointer
          */
-        template <typename J>
-        auto to_pointer(const wchar_t *path)
+        template <typename J, typename T>
+        auto to_pointer(T &&path)
         {
-            return typename J::json_pointer{*PivW2U{path}};
-        }
-
-        template <typename J>
-        auto to_pointer(const char *path)
-        {
-            return typename J::json_pointer{path};
-        }
-
-        template <typename J>
-        auto to_pointer(const CVolString &path)
-        {
-            return typename J::json_pointer{*PivW2U{path}};
-        }
-
-        template <typename J>
-        auto to_pointer(const std::string &path)
-        {
-            return typename J::json_pointer{path};
-        }
-
-        template <typename J>
-        auto &to_pointer(const string_view &path)
-        {
-            return typename J::json_pointer{path};
-        }
-
-        template <typename J>
-        auto to_pointer(const std::wstring &path)
-        {
-            return typename J::json_pointer{*PivW2U{path}};
-        }
-
-        template <typename J>
-        auto to_pointer(const wstring_view &path)
-        {
-            return typename J::json_pointer{*PivW2U{path.data(), path.size()}};
-        }
-
-        template <typename J>
-        auto to_pointer(const CVolMem &path)
-        {
-            return typename J::json_pointer{string_view{reinterpret_cast<const char *>(path.GetPtr()), static_cast<size_t>(path.GetSize())}};
+            return typename J::json_pointer{*PivAny2Us{path}};
         }
 
         /**
@@ -725,12 +683,12 @@ namespace piv
             return json[static_cast<uint64_t>(idx)];
         }
 
-        template <typename J, typename T>
-        inline J &At(J &json, const T &key, bool allow_exceptions = false)
+        template <typename J, typename K>
+        inline J &At(J &json, K &&key, bool allow_exceptions = false)
         {
             if (!allow_exceptions && !json.is_object())
                 json = J::object();
-            return json[to_key(key)];
+            return json[to_key(std::forward<K>(key))];
         }
 
         /**
@@ -744,18 +702,18 @@ namespace piv
         {
         }
 
-        template <typename J, typename T, typename... Args>
-        inline void PushBack(J &json, const T &val, Args&&... args)
+        template <typename J, typename V, typename... Args>
+        inline void PushBack(J &json, const V &val, Args &&...args)
         {
             json.push_back(to_value(val));
-            PushBack(json, args...);
+            PushBack(json, std::forward<Args>(args)...);
         }
 
         template <typename J, typename... Args>
-        inline void PushBack(J &json, const J &val, Args&&... args)
+        inline void PushBack(J &json, const J &val, Args &&...args)
         {
             json.push_back(val);
-            PushBack(json, args...);
+            PushBack(json, std::forward<Args>(args)...);
         }
 
         /**
@@ -775,23 +733,23 @@ namespace piv
         }
 
         template <typename J, typename K>
-        inline void Emplace(J &json, const K &key)
+        inline void Emplace(J &json, K &&key)
         {
-            json[to_key(key)] = nullptr;
+            json[to_key(std::forward<K>(key))] = nullptr;
         }
 
         template <typename J, typename K, typename V, typename... Args>
-        inline void Emplace(J &json, const K &key, const V &val, Args&&... args)
+        inline void Emplace(J &json, K &&key, const V &val, Args &&...args)
         {
-            json[to_key(key)] = to_value(val);
-            Emplace(json, args...);
+            json[to_key(std::forward<K>(key))] = to_value(val);
+            Emplace(json, std::forward<Args>(args)...);
         }
 
         template <typename J, typename K, typename... Args>
-        inline void Emplace(J &json, const K &key, const J &val, Args&&... args)
+        inline void Emplace(J &json, K &&key, const J &val, Args &&...args)
         {
-            json[to_key(key)] = val;
-            Emplace(json, args...);
+            json[to_key(std::forward<K>(key))] = val;
+            Emplace(json, std::forward<Args>(args)...);
         }
 
         /**
@@ -800,10 +758,10 @@ namespace piv
          * @return 返回创建的数组
          */
         template <typename J, typename... Args>
-        inline J CreateArray(Args&&... args)
+        inline J CreateArray(Args &&...args)
         {
             J array = J::array();
-            PushBack(array, args...);
+            PushBack(array, std::forward<Args>(args)...);
             return array;
         }
 
@@ -814,10 +772,10 @@ namespace piv
          * @return 返回自身
          */
         template <typename J, typename... Args>
-        inline J &SetArray(J &json, Args&&... args)
+        inline J &SetArray(J &json, Args &&...args)
         {
             json = J::array();
-            PushBack(json, args...);
+            PushBack(json, std::forward<Args>(args)...);
             return json;
         }
 
@@ -828,9 +786,9 @@ namespace piv
          * @return 返回自身
          */
         template <typename J, typename... Args>
-        inline J &PushBackArgs(J &json, Args&&... args)
+        inline J &PushBackArgs(J &json, Args &&...args)
         {
-            PushBack(json, args...);
+            PushBack(json, std::forward<Args>(args)...);
             return json;
         }
 
@@ -842,15 +800,16 @@ namespace piv
          * @param cnt 插入次数
          * @return 返回自身
          */
+
         template <typename J>
-        inline J &Insert(J &json, const ptrdiff_t &pos, const J &val, size_t cnt = 1)
+        inline J &Insert(J &json, ptrdiff_t pos, const J &val, size_t cnt = 1)
         {
             json.insert(json.begin() + pos, cnt, val);
             return json;
         }
 
-        template <typename J, typename T>
-        inline J &Insert(J &json, const ptrdiff_t &pos, const T &val, size_t cnt = 1)
+        template <typename J, typename V>
+        inline J &Insert(J &json, ptrdiff_t pos, const V &val, size_t cnt = 1)
         {
             json.insert(json.begin() + pos, cnt, to_value(val));
             return json;
@@ -862,10 +821,10 @@ namespace piv
          * @return 返回所创建的JSON对象
          */
         template <typename J, typename... Args>
-        inline J CreateObject(Args&&... args)
+        inline J CreateObject(Args &&...args)
         {
             J json = J::object();
-            Emplace(json, args...);
+            Emplace(json, std::forward<Args>(args)...);
             return json;
         }
 
@@ -876,10 +835,10 @@ namespace piv
          * @return 返回自身
          */
         template <typename J, typename... Args>
-        inline J &SetObject(J &json, Args&&... args)
+        inline J &SetObject(J &json, Args &&...args)
         {
             json = J::object();
-            Emplace(json, args...);
+            Emplace(json, std::forward<Args>(args)...);
             return json;
         }
 
@@ -946,11 +905,11 @@ namespace piv
          * @return 返回成员值
          */
         template <typename R, typename J, typename P>
-        R ValuePath(const J &json, const P &path, const R &default_value)
+        R ValuePath(const J &json, P &&path, const R &default_value)
         {
             try
             {
-                return json.at(to_pointer<J>(path)).get<R>();
+                return json.at(to_pointer<J>(std::forward<P>(path))).get<R>();
             }
             catch (const J::exception &e)
             {
@@ -966,12 +925,12 @@ namespace piv
          * @param default_value 默认值(失败时返回)
          * @return 返回成员值
          */
-        template <typename J, typename K>
-        CVolString ValuePathStr(const J &json, const K &path, const CVolString &default_value)
+        template <typename J, typename P>
+        CWString ValuePathStr(const J &json, P &&path, const CWString &default_value)
         {
             try
             {
-                return *PivU2Ws{json.at(to_pointer<J>(path)).get_ref<const std::string &>()};
+                return *PivU2Ws{json.at(to_pointer<J>(std::forward<P>(path))).get_ref<const std::string &>()};
             }
             catch (const J::exception &e)
             {
@@ -987,18 +946,18 @@ namespace piv
          * @param default_value 默认值(失败时返回)
          * @return 返回成员值
          */
-        template <typename J, typename K>
-        string_view ValuePathView(const J &json, const K &path, const std::string &default_value)
+        template <typename J, typename P>
+        ::piv::string_view ValuePathView(const J &json, P &&path, const std::string &default_value)
         {
             try
             {
-                return string_view{json.at(to_pointer<J>(path)).get_ref<const J::string_t &>()};
+                return ::piv::string_view{json.at(to_pointer<J>(std::forward<P>(path))).get_ref<const J::string_t &>()};
             }
             catch (const J::exception &e)
             {
                 (void)e;
             }
-            return string_view{default_value};
+            return ::piv::string_view{default_value};
         }
 
         /**
@@ -1008,11 +967,11 @@ namespace piv
          * @return 返回JSON对象
          */
         template <typename J, typename P>
-        J ValuePathObj(J &json, const P &path)
+        J ValuePathObj(J &json, P &&path)
         {
             try
             {
-                auto ret = json.at(to_pointer<J>(path));
+                auto ret = json.at(to_pointer<J>(std::forward<P>(path)));
                 if (ret.is_object())
                     return ret;
             }
@@ -1030,11 +989,11 @@ namespace piv
          * @return 返回JSON数组
          */
         template <typename J, typename P>
-        J ValuePathArray(J &json, const P &path)
+        J ValuePathArray(J &json, P &&path)
         {
             try
             {
-                auto ret = json.at(to_pointer<J>(path));
+                auto ret = json.at(to_pointer<J>(std::forward<P>(path)));
                 if (ret.is_array())
                     return ret;
             }
@@ -1054,11 +1013,11 @@ namespace piv
          * @return 返回成员值
          */
         template <typename R, typename J, typename K>
-        R Value(const J &json, const K &key, const R &default_value)
+        R Value(const J &json, K &&key, const R &default_value)
         {
             try
             {
-                return json.at(to_key(key)).get<R>();
+                return json.at(to_key(std::forward<K>(key))).get<R>();
             }
             catch (const J::exception &e)
             {
@@ -1075,11 +1034,11 @@ namespace piv
          * @return 返回成员值
          */
         template <typename J, typename K>
-        std::string ValueStr(const J &json, const K &key, const std::string &default_value)
+        std::string ValueStr(const J &json, K &&key, const std::string &default_value)
         {
             try
             {
-                return json.at(to_key(key)).get_ref<const std::string &>();
+                return json.at(to_key(std::forward<K>(key))).get_ref<const std::string &>();
             }
             catch (const J::exception &e)
             {
@@ -1089,11 +1048,11 @@ namespace piv
         }
 
         template <typename J, typename K>
-        CVolString ValueStr(const J &json, const K &key, const CVolString &default_value)
+        CWString ValueStr(const J &json, K &&key, const CWString &default_value)
         {
             try
             {
-                return *PivU2Ws{json.at(to_key(key)).get_ref<const std::string &>()};
+                return *PivU2Ws{json.at(to_key(std::forward<K>(key))).get_ref<const std::string &>()};
             }
             catch (const J::exception &e)
             {
@@ -1109,11 +1068,11 @@ namespace piv
          * @return 返回JSON对象
          */
         template <typename J, typename K>
-        J ValueObj(const J &json, const K &key)
+        J ValueObj(const J &json, K &&key)
         {
             try
             {
-                J ret = json.at(to_key(key));
+                J ret = json.at(to_key(std::forward<K>(key)));
                 if (ret.is_object())
                     return ret;
             }
@@ -1131,11 +1090,11 @@ namespace piv
          * @return 返回JSON数组
          */
         template <typename J, typename K>
-        J ValueArray(const J &json, const K &key)
+        J ValueArray(const J &json, K &&key)
         {
             try
             {
-                J ret = json.at(to_key(key));
+                J ret = json.at(to_key(std::forward<K>(key)));
                 if (ret.is_array())
                     return ret;
             }
@@ -1155,7 +1114,7 @@ namespace piv
          * @return 返回是否置入成功
          */
         template <typename J, typename I, typename V>
-        bool EmplaceAtIdx(J &json, const I &idx, const V &val, bool replace = false)
+        bool EmplaceAtIdx(J &json, const I &idx, V &&val, bool replace = false)
         {
             try
             {
@@ -1185,7 +1144,7 @@ namespace piv
          * @return 返回是否置入成功
          */
         template <typename J, typename K, typename V>
-        bool EmplaceAtKey(J &json, const K &key, const V &val, bool replace = false)
+        bool EmplaceAtKey(J &json, K &&key, V &&val, bool replace = false)
         {
             try
             {
@@ -1196,7 +1155,7 @@ namespace piv
                     else
                         return false;
                 }
-                json[key] = val;
+                json[std::forward<K>(key)] = val;
                 return true;
             }
             catch (const J::exception &e)
@@ -1214,11 +1173,11 @@ namespace piv
          * @return 返回是否置入成功
          */
         template <typename J, typename P, typename V>
-        bool EmplaceAtPath(J &json, const P &path, const V &val)
+        bool EmplaceAtPath(J &json, P &&path, V &&val)
         {
             try
             {
-                json[path] = val;
+                json[std::forward<P>(path)] = val;
                 return true;
             }
             catch (const J::exception &e)
@@ -1269,7 +1228,7 @@ namespace piv
         }
 
         template <typename J, typename V>
-        inline bool EmplaceAt(J &json, const CVolString &path, const V &val, bool replace = false)
+        inline bool EmplaceAt(J &json, const CWString &path, const V &val, bool replace = false)
         {
             if (path.IsEmpty())
                 return false;
@@ -1302,7 +1261,7 @@ namespace piv
         }
 
         template <typename J, typename V>
-        inline bool EmplaceAt(J &json, const string_view &path, const V &val, bool replace = false)
+        inline bool EmplaceAt(J &json, const ::piv::string_view &path, const V &val, bool replace = false)
         {
             if (path.empty())
                 return false;
@@ -1313,7 +1272,7 @@ namespace piv
         }
 
         template <typename J, typename V>
-        inline bool EmplaceAt(J &json, const wstring_view &path, const V &val, bool replace = false)
+        inline bool EmplaceAt(J &json, const ::piv::wstring_view &path, const V &val, bool replace = false)
         {
             if (path.empty())
                 return false;
@@ -1365,7 +1324,7 @@ namespace piv
         }
 
         template <typename J>
-        inline bool EmplaceAt(J &json, const CVolString &path, const J &val, bool replace = false)
+        inline bool EmplaceAt(J &json, const CWString &path, const J &val, bool replace = false)
         {
             if (path.IsEmpty())
                 return false;
@@ -1398,7 +1357,7 @@ namespace piv
         }
 
         template <typename J>
-        inline bool EmplaceAt(J &json, const string_view &path, const J &val, bool replace = false)
+        inline bool EmplaceAt(J &json, const ::piv::string_view &path, const J &val, bool replace = false)
         {
             if (path.empty())
                 return false;
@@ -1409,7 +1368,7 @@ namespace piv
         }
 
         template <typename J>
-        inline bool EmplaceAt(J &json, const wstring_view &path, const J &val, bool replace = false)
+        inline bool EmplaceAt(J &json, const ::piv::wstring_view &path, const J &val, bool replace = false)
         {
             if (path.empty())
                 return false;
@@ -1451,14 +1410,14 @@ namespace piv
         }
 
         template <typename J>
-        int32_t EnumKey(const J &json, std::vector<string_view> &keyArray)
+        int32_t EnumKey(const J &json, std::vector<::piv::string_view> &keyArray)
         {
             keyArray.clear();
             if (json.is_object())
             {
                 for (auto &el : json.items())
                 {
-                    keyArray.push_back(string_view{el.key()});
+                    keyArray.push_back(::piv::string_view{el.key()});
                 }
             }
             return static_cast<int32_t>(keyArray.size());

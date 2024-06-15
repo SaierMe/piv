@@ -293,10 +293,10 @@ public:
      * @brief 取最后错误
      * @return
      */
-    inline CVolString GetLastError()
+    inline CWString GetLastError()
     {
         std::lock_guard<std::mutex> guard(m_mutex);
-        return CVolString{m_error.c_str()};
+        return CWString{m_error.c_str()};
     }
 
     /**
@@ -340,7 +340,7 @@ public:
      * @brief 取最后错误
      * @return
      */
-    inline static CVolString GetLastError()
+    inline static CWString GetLastError()
     {
         return Piv7zLib::data().GetLastError();
     }
@@ -426,7 +426,7 @@ public:
             return false;
         }
     }
-    static bool CompressPaths(const std::map<CVolString, CVolString> &path_pair, const bit7z::tstring &out_file, const bit7z::tstring &password, const bit7z::BitInOutFormat &format, int32_t level, int32_t update_mode)
+    static bool CompressPaths(const std::map<CWString, CWString> &path_pair, const bit7z::tstring &out_file, const bit7z::tstring &password, const bit7z::BitInOutFormat &format, int32_t level, int32_t update_mode)
     {
         if (path_pair.empty())
         {
@@ -604,7 +604,7 @@ public:
      * @param format 解压格式
      * @return
      */
-    static bool Extract(const bit7z::tstring &in_file, std::map<CVolString, CVolMem> &out_buffer, const bit7z::tstring &password, const bit7z::BitInFormat &format)
+    static bool Extract(const bit7z::tstring &in_file, std::map<CWString, CVolMem> &out_buffer, const bit7z::tstring &password, const bit7z::BitInFormat &format)
     {
         out_buffer.clear();
         try
@@ -632,7 +632,7 @@ public:
         }
     }
 
-    static bool Extract(int32_t resId, std::map<CVolString, CVolMem> &out_buffer, const bit7z::tstring &password, const bit7z::BitInFormat &format)
+    static bool Extract(int32_t resId, std::map<CWString, CVolMem> &out_buffer, const bit7z::tstring &password, const bit7z::BitInFormat &format)
     {
         out_buffer.clear();
         std::vector<bit7z::byte_t> buffer;
@@ -723,7 +723,7 @@ public:
      * @param format 解压格式
      * @return
      */
-    static bool Extract(const bit7z::tstring &in_file, const bit7z::tstring &filter, CVolMem &out_buffer, const bit7z::tstring &password, CVolString &out_file, bool isExclude, const bit7z::BitInFormat &format)
+    static bool Extract(const bit7z::tstring &in_file, const bit7z::tstring &filter, CVolMem &out_buffer, const bit7z::tstring &password, CWString &out_file, bool isExclude, const bit7z::BitInFormat &format)
     {
         out_file.Empty();
         try
@@ -754,7 +754,7 @@ public:
         }
     }
 
-    static bool Extract(int32_t resId, const bit7z::tstring &filter, CVolMem &out_buffer, const bit7z::tstring &password, CVolString &out_file, bool isExclude, const bit7z::BitInFormat &format)
+    static bool Extract(int32_t resId, const bit7z::tstring &filter, CVolMem &out_buffer, const bit7z::tstring &password, CWString &out_file, bool isExclude, const bit7z::BitInFormat &format)
     {
         out_file.Empty();
         std::vector<bit7z::byte_t> buffer;
@@ -858,7 +858,7 @@ public:
      * @param format 解压格式
      * @return
      */
-    static bool ExtractRegex(const bit7z::tstring &in_file, const bit7z::tstring &regex, CVolMem &out_buffer, const bit7z::tstring &password, CVolString &out_file, bool isExclude, const bit7z::BitInFormat &format)
+    static bool ExtractRegex(const bit7z::tstring &in_file, const bit7z::tstring &regex, CVolMem &out_buffer, const bit7z::tstring &password, CWString &out_file, bool isExclude, const bit7z::BitInFormat &format)
     {
         out_file.Empty();
         try
@@ -897,7 +897,7 @@ public:
         }
     }
 
-    static bool ExtractRegex(int32_t resId, const bit7z::tstring &regex, CVolMem &out_buffer, const bit7z::tstring &password, CVolString &out_file, bool isExclude, const bit7z::BitInFormat &format)
+    static bool ExtractRegex(int32_t resId, const bit7z::tstring &regex, CVolMem &out_buffer, const bit7z::tstring &password, CWString &out_file, bool isExclude, const bit7z::BitInFormat &format)
     {
         out_file.Empty();
         std::vector<bit7z::byte_t> buffer;
@@ -978,7 +978,7 @@ protected:
     uint64_t m_total_size = 0;
     int32_t m_ratio = 0;
     std::wstring m_progress_file;
-    std::function<int32_t(CVolString &, int32_t, int64_t, int64_t, int32_t)> m_progress;
+    std::function<int32_t(CWString &, int32_t, int64_t, int64_t, int32_t)> m_progress;
 
     /**
      * @brief 置最后错误
@@ -1005,7 +1005,7 @@ protected:
         if (progress_size == 0 || m_total_size == 0)
             return true;
         if (m_progress)
-            return !m_progress(CVolString{m_progress_file.c_str()}, static_cast<int32_t>(100 * progress_size / m_total_size),
+            return !m_progress(CWString{m_progress_file.c_str()}, static_cast<int32_t>(100 * progress_size / m_total_size),
                                static_cast<int64_t>(m_total_size), static_cast<int64_t>(progress_size), m_ratio);
         return true;
     }
@@ -1029,9 +1029,9 @@ public:
      * @brief 取最后错误
      * @return
      */
-    inline CVolString GetError() const
+    inline CWString GetError() const
     {
-        return CVolString{m_error.c_str()};
+        return CWString{m_error.c_str()};
     }
 
     inline archive_t &data()
@@ -1107,9 +1107,9 @@ public:
      * @brief 获取压缩密码
      * @return
      */
-    inline CVolString Password() const
+    inline CWString Password() const
     {
-        return m_archive ? CVolString(m_archive->password().c_str()) : _CT("");
+        return m_archive ? CWString(m_archive->password().c_str()) : _CT("");
     }
 
     /**
@@ -1242,7 +1242,7 @@ public:
             return false;
         }
     }
-    bool AddItems(std::map<CVolString, CVolString> &path_map)
+    bool AddItems(std::map<CWString, CWString> &path_map)
     {
         std::map<bit7z::tstring, bit7z::tstring> in_paths;
         for (const auto &pair : path_map)
@@ -1891,7 +1891,7 @@ public:
      * @param out_buffer 解压结果
      * @return
      */
-    bool Extract(std::map<CVolString, CVolMem> &out_buffer)
+    bool Extract(std::map<CWString, CVolMem> &out_buffer)
     {
         out_buffer.clear();
         if (!m_archive)
@@ -1926,7 +1926,7 @@ public:
      * @param out_buffer 解压结果
      * @return
      */
-    bool ExtractEx(std::map<CVolString, CVolMem> &out_buffer)
+    bool ExtractEx(std::map<CWString, CVolMem> &out_buffer)
     {
         out_buffer.clear();
         if (!m_archive)
@@ -1963,7 +1963,7 @@ public:
      * @param out_path 输出文件名
      * @return
      */
-    bool Extract(int32_t idx, CVolMem &out_buffer, CVolString &out_path)
+    bool Extract(int32_t idx, CVolMem &out_buffer, CWString &out_path)
     {
         out_path.Empty();
         if (!m_archive)
@@ -2076,7 +2076,7 @@ public:
      * @param isExclude 是否排除匹配项
      * @return
      */
-    bool Extract(const bit7z::tstring &filter, CVolMem &out_buffer, CVolString &out_path, bool isExclude)
+    bool Extract(const bit7z::tstring &filter, CVolMem &out_buffer, CWString &out_path, bool isExclude)
     {
         out_path.Empty();
         if (!m_archive)
@@ -2161,7 +2161,7 @@ public:
      * @param isExclude 是否排除匹配项
      * @return
      */
-    bool ExtractRegex(const bit7z::tstring &regex, CVolMem &out_buffer, CVolString &out_path, bool isExclude)
+    bool ExtractRegex(const bit7z::tstring &regex, CVolMem &out_buffer, CWString &out_path, bool isExclude)
     {
         out_path.Empty();
         if (!m_archive)
@@ -2323,9 +2323,9 @@ public:
      * @brief 取压缩文件路径
      * @return
      */
-    inline CVolString ArchivePath() const
+    inline CWString ArchivePath() const
     {
-        return m_archive ? CVolString(m_archive->archivePath().c_str()) : _CT("");
+        return m_archive ? CWString{m_archive->archivePath().c_str()} : _CT("");
     }
 
     /**

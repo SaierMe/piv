@@ -12,7 +12,7 @@
 #define NONSTD_SV_LITE_H_INCLUDED
 
 #define string_view_lite_MAJOR  1
-#define string_view_lite_MINOR  7
+#define string_view_lite_MINOR  8
 #define string_view_lite_PATCH  0
 
 #define string_view_lite_VERSION  nssv_STRINGIFY(string_view_lite_MAJOR) "." nssv_STRINGIFY(string_view_lite_MINOR) "." nssv_STRINGIFY(string_view_lite_PATCH)
@@ -67,6 +67,10 @@
 
 #ifndef  nssv_CONFIG_NO_STREAM_INSERTION
 # define nssv_CONFIG_NO_STREAM_INSERTION  0
+#endif
+
+#ifndef  nssv_CONFIG_CONSTEXPR11_STD_SEARCH
+# define nssv_CONFIG_CONSTEXPR11_STD_SEARCH  1
 #endif
 
 // Control presence of exception handling (try and auto discover):
@@ -129,6 +133,8 @@
 // Extensions for std::string:
 
 #if nssv_CONFIG_CONVERSION_STD_STRING_FREE_FUNCTIONS
+
+#include <string>
 
 namespace nonstd {
 
@@ -267,7 +273,7 @@ using std::operator<<;
 # define nssv_HAS_CPP0X  0
 #endif
 
-// Unless defined otherwise below, consider VC14 as C++11 for variant-lite:
+// Unless defined otherwise below, consider VC14 as C++11 for string-view-lite:
 
 #if nssv_COMPILER_MSVC_VER >= 1900
 # undef  nssv_CPP11_OR_GREATER
@@ -567,11 +573,30 @@ constexpr const CharT* search( basic_string_view<CharT, Traits> haystack, basic_
 
 // non-recursive:
 
+#if nssv_CONFIG_CONSTEXPR11_STD_SEARCH
+
 template< class CharT, class Traits = std::char_traits<CharT> >
 constexpr const CharT* search( basic_string_view<CharT, Traits> haystack, basic_string_view<CharT, Traits> needle )
 {
     return std::search( haystack.begin(), haystack.end(), needle.begin(), needle.end() );
 }
+
+#else // nssv_CONFIG_CONSTEXPR11_STD_SEARCH
+
+template< class CharT, class Traits = std::char_traits<CharT> >
+nssv_constexpr14 const CharT* search( basic_string_view<CharT, Traits> haystack, basic_string_view<CharT, Traits> needle )
+{
+    while ( needle.size() <= haystack.size() )
+    {
+        if  ( haystack.starts_with(needle) )
+        {
+            return haystack.cbegin();
+        }
+        haystack = basic_string_view<CharT, Traits>{ haystack.begin() + 1, haystack.size() - 1U };
+    }
+    return haystack.cend();
+}
+#endif // nssv_CONFIG_CONSTEXPR11_STD_SEARCH
 
 #endif // OPTIMIZE
 #endif // nssv_CPP11_OR_GREATER && ! nssv_CPP17_OR_GREATER

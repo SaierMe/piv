@@ -415,7 +415,7 @@ public:
      * @param encode 文本编码
      * @return 读入的字节长度
      */
-    int64_t ReadTextWithEncode(CVolString &text, int64_t read_words = -1, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
+    int64_t ReadTextWithEncode(CWString &text, int64_t read_words = -1, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
     {
         text.Empty();
         if (INVALID_HANDLE_VALUE == hFile || read_words == 0)
@@ -461,12 +461,16 @@ public:
                 wchar_t bom = 0;
                 if (::ReadFile(hFile, &bom, 2, NULL, NULL) && bom == 0xFEFF)
                     CurrentPos = 2;
+                else
+                    return 0;
             }
             else
             {
                 char bom[3]{0};
                 if (::ReadFile(hFile, bom, 3, NULL, NULL) && bom[0] == (char)0xEF && bom[1] == (char)0xBB && bom[2] == (char)0xBF)
                     CurrentPos = 3;
+                else
+                    return 0;
             }
             this->SetCurrentPos(CurrentPos, FILE_BEGIN);
         }
@@ -481,6 +485,8 @@ public:
         {
             ReadSize = read_words * sizeof(CharT);
         }
+        if (ReadSize <= 0)
+            return 0;
 
         DWORD dwRead;
         PivBuffer<CharT, DWORD> buf{static_cast<DWORD>((ReadSize > 0x10000) ? 0x10000 : (ReadSize / sizeof(CharT))), true};
@@ -523,7 +529,7 @@ public:
         return static_cast<int64_t>(text.size() * sizeof(CharT));
     }
 
-    int64_t ReadText(CVolString &text, int64_t read_words = -1)
+    int64_t ReadText(CWString &text, int64_t read_words = -1)
     {
         text.Empty();
         if (INVALID_HANDLE_VALUE == hFile || read_words == 0)
@@ -535,6 +541,8 @@ public:
             wchar_t bom = 0;
             if (::ReadFile(hFile, &bom, 2, NULL, NULL) && bom == 0xFEFF)
                 CurrentPos = 2;
+            else
+                return 0;
             this->SetCurrentPos(CurrentPos, FILE_BEGIN);
         }
 
@@ -548,7 +556,8 @@ public:
         {
             ReadSize = read_words * 2;
         }
-
+        if (ReadSize <= 0)
+            return 0;
         DWORD dwRead;
         PivBuffer<wchar_t, DWORD> buf{static_cast<DWORD>((ReadSize > 0x10000) ? 0x10000 : (ReadSize / 2)), true};
         for (int32_t i = 0; i < ReadSize / 0x10000; i++)
@@ -596,7 +605,7 @@ public:
      * @param encode 文本编码
      * @return 读入的字节长度
      */
-    int64_t ReadLineWithEncode(CVolString &text, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
+    int64_t ReadLineWithEncode(CWString &text, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
     {
         int64_t ret = 0;
         text.Empty();
@@ -640,17 +649,22 @@ public:
                 wchar_t bom = 0;
                 if (::ReadFile(hFile, &bom, 2, NULL, NULL) && bom == 0xFEFF)
                     CurrentPos = 2;
+                else
+                    return 0;
             }
             else
             {
                 char bom[3]{0};
                 if (::ReadFile(hFile, bom, 3, NULL, NULL) && bom[0] == (char)0xEF && bom[1] == (char)0xBB && bom[2] == (char)0xBF)
                     CurrentPos = 3;
+                else
+                    return 0;
             }
         }
         int64_t ReadSize = this->MoveAndGetFilePos(FILE_END) - CurrentPos;
+        if (ReadSize <= 0)
+            return 0;
         this->SetCurrentPos(CurrentPos, FILE_BEGIN);
-
         int64_t TotalRead = 0;
         DWORD dwRead;
         PivBuffer<CharT, DWORD> buf{static_cast<DWORD>((ReadSize > 0x10000) ? 0x10000 : (ReadSize / 2)), true};
@@ -735,7 +749,7 @@ public:
         return TotalRead;
     }
 
-    int64_t ReadLine(CVolString &text)
+    int64_t ReadLine(CWString &text)
     {
         text.Empty();
         if (INVALID_HANDLE_VALUE == hFile)
@@ -747,8 +761,12 @@ public:
             wchar_t bom = 0;
             if (::ReadFile(hFile, &bom, 2, NULL, NULL) && bom == 0xFEFF)
                 CurrentPos = 2;
+            else
+                return 0;
         }
         int64_t ReadSize = this->MoveAndGetFilePos(FILE_END) - CurrentPos;
+        if (ReadSize <= 0)
+            return 0;
         this->SetCurrentPos(CurrentPos, FILE_BEGIN);
 
         int64_t TotalRead = 0;
@@ -1322,7 +1340,7 @@ public:
      * @param encode 文本编码
      * @return 读入的字节长度
      */
-    int64_t ReadTextWithEncode(CVolString &text, int64_t read_words = -1, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
+    int64_t ReadTextWithEncode(CWString &text, int64_t read_words = -1, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
     {
         int64_t ret = 0;
         text.Empty();
@@ -1351,7 +1369,7 @@ public:
         return ret;
     }
 
-    int64_t ReadText(CVolString &text, int64_t read_words = -1)
+    int64_t ReadText(CWString &text, int64_t read_words = -1)
     {
         text.Empty();
         if (!m_pvFile || m_offset >= m_ViewSize)
@@ -1406,7 +1424,7 @@ public:
      * @param encode 文本编码
      * @return 读入的字节长度
      */
-    int64_t ReadLineWithEncode(CVolString &text, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
+    int64_t ReadLineWithEncode(CWString &text, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
     {
         int64_t ret = 0;
         text.Empty();
@@ -1437,7 +1455,7 @@ public:
         return ret;
     }
 
-    int64_t ReadLine(CVolString &text)
+    int64_t ReadLine(CWString &text)
     {
         text.Empty();
         if (!m_pvFile || m_offset >= m_ViewSize)

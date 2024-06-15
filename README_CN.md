@@ -112,6 +112,20 @@
 
 ※我经常修改现有的代码，比如修正bug、优化效率、规范格式、修订备注等……如果功能和用法没有改变，一般不会写在更新日志里，所以每次更新改动的地方其实还是有不少的。
 
+### 📅 2024/06/15
+
+1. 使用本地类别名重写「标准文本类(W/U/A)」与「文本视图类(W/U/A)」；
+
+   用法跟以前基本一致，但相关数组类型有改名，以及增删了部分方法，请注意修改代码；
+
+2. 「磁盘监视类」增加「被删到回收站」和「文件被移动」事件；
+
+3. 其他优化与修正；
+
+### 📅 2024/05/30
+
+1. 修正「进程操作类」的取模块句柄（上一版的bug）；
+
 ### 📅 2024/05/27
 
 1. 新增「文件操作类EX」和「内存映射文件类EX」；
@@ -573,7 +587,7 @@
 - **[MinHook](https://github.com/TsudaKageyu/minhook)** `1.3.3` `BSD-2-Clause License` 极简的 x86/x64 API Hook 库
 - **[MMKV](https://github.com/Tencent/MMKV)** `1.3.5` `BSD-3-Clause License` 腾讯开源的高效键值对存储框架
 - **[xxHash](https://github.com/Cyan4973/xxHash)** `8.0.2` `BSD-2-Clause License` 速度接近 RAM 限制的高速散列算法
-- **[Dear ImGui](https://github.com/ocornut/imgui)** `1.90.6` `MIT license` 轻量级的即时渲染界面开发框架
+- **[Dear ImGui](https://github.com/ocornut/imgui)** `1.90.8` `MIT license` 轻量级的即时渲染界面开发框架
 - **[GLFW](https://www.glfw.org)** `3.3.8` `zlib/libpng license` 跨平台的 OpenGL/Vulkan 桌面应用框架
 - **[glad](https://github.com/Dav1dde/glad)** `2023-04-04` `MIT License` 多语言的Vulkan/GL/GLES/EGL/GLX/WGL加载程序生成器
 - **[SDL](https://github.com/libsdl-org/SDL)** `2.26.5` `Zlib license` Simple DirectMedia Layer 是一个跨平台的多媒体开发库

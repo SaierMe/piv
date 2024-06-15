@@ -11,6 +11,7 @@
 #include "detail/piv_base.hpp"
 
 #include <winioctl.h>
+#include <sddl.h>
 #include <functional>
 #include <mutex>
 #include <thread>
@@ -27,19 +28,22 @@ private:
     HANDLE m_hVol = INVALID_HANDLE_VALUE;                          // 卷句柄
     HANDLE m_Event = NULL;                                         // 同步事件(用于退出线程)
     LONGLONG m_StartTime = 0;                                      // 启动文件时间戳
-    std::unique_ptr<std::map<DWORDLONG, CVolString>> m_FRNtoPATH;  // 文件FRN到文本名称排序表
+    std::unique_ptr<std::map<DWORDLONG, CWString>> m_FRNtoPATH;    // 文件FRN到文本名称排序表
     std::unique_ptr<std::map<DWORDLONG, DWORDLONG>> m_FRNtoParent; // 文件FRN到父目录FRN排序表
     std::unique_ptr<std::set<DWORDLONG>> m_MonitorDir;             // 监视目录的FRN集合
     USN_JOURNAL_DATA m_ujd{0};                                     // USN日志数据
-    CVolString m_root;                                             // 根路径
+    CWString m_root;                                               // 根路径
+    CWString m_RecyclePath;                                        // 回收站路径
 
-    std::function<int32_t(void)> func_Inited;                                                              // 初始化完毕
-    std::function<int32_t(CVolString &, CVolString &, FILETIME &, int32_t)> func_Created;                  // 文件被创建
-    std::function<int32_t(CVolString &, CVolString &, FILETIME &, int32_t)> func_Deleted;                  // 文件被删除
-    std::function<int32_t(CVolString &, CVolString &, int32_t, FILETIME &, int32_t)> func_DataChanged;     // 文件内容改变
-    std::function<int32_t(CVolString &, CVolString &, CVolString &, FILETIME &, int32_t)> func_Renamed;    // 文件被重命名
-    std::function<int32_t(CVolString &, CVolString &, int32_t, FILETIME &, int32_t)> func_AttributeChange; // 文件属性改变
-    std::function<int32_t(CVolString &, CVolString &, int32_t, FILETIME &, int32_t)> func_OtherChange;     // 其他状态改变
+    std::function<int32_t(void)> func_Inited;                                                               // 初始化完毕
+    std::function<int32_t(CWString &, CWString &, FILETIME &, int32_t)> func_Created;                       // 文件被创建
+    std::function<int32_t(CWString &, CWString &, FILETIME &, int32_t)> func_Deleted;                       // 文件被删除
+    std::function<int32_t(CWString &, CWString &, int32_t, FILETIME &, int32_t)> func_DataChanged;          // 文件内容改变
+    std::function<int32_t(CWString &, CWString &, CWString &, FILETIME &, int32_t)> func_Renamed;           // 文件被重命名
+    std::function<int32_t(CWString &, CWString &, CWString &, FILETIME &, int32_t)> func_Recycle;           // 被删到回收站
+    std::function<int32_t(CWString &, CWString &, CWString &, CWString &, FILETIME &, int32_t)> func_Moved; // 文件被移动
+    std::function<int32_t(CWString &, CWString &, int32_t, FILETIME &, int32_t)> func_AttributeChange;      // 文件属性改变
+    std::function<int32_t(CWString &, CWString &, int32_t, FILETIME &, int32_t)> func_OtherChange;          // 其他状态改变
 
     typedef struct _IO_STATUS_BLOCK
     {
@@ -79,7 +83,7 @@ private:
      * @param frn 文件引用编号
      * @param path 返回路径
      */
-    void PathFromFRN(const DWORDLONG &frn, CVolString &path)
+    void PathFromFRN(DWORDLONG frn, CWString &path)
     {
         if (!m_hasPathMap)
         {
@@ -146,7 +150,7 @@ private:
      * @param frn 文件引用编号
      * @return
      */
-    bool IsMonitored(const DWORDLONG &frn)
+    bool IsMonitored(DWORDLONG frn)
     {
         if (!m_MonitorDir)
             return true;
@@ -156,6 +160,34 @@ private:
         if (it != m_FRNtoParent->end())
             return IsMonitored(it->second);
         return false;
+    }
+
+    /**
+     * @brief 取当前用户的SID(安全标识符)
+     * @param sidString 返回SID文本
+     * @return 返回SID文本
+     */
+    CWString &GetUserSidString(CWString &sidString = CWString{})
+    {
+        sidString.Empty();
+        HANDLE token = NULL;
+        if (::OpenProcessToken(::GetCurrentProcess(), TOKEN_QUERY, &token))
+        {
+            DWORD tokenInfoLength = 0;
+            ::GetTokenInformation(token, TokenUser, NULL, 0, &tokenInfoLength);
+            PivBuffer<BYTE, DWORD> tokenInfo(tokenInfoLength, true);
+            if (::GetTokenInformation(token, TokenUser, tokenInfo.GetPtr(), tokenInfoLength, &tokenInfoLength))
+            {
+                LPWSTR stringSid = nullptr;
+                if (::ConvertSidToStringSidW(tokenInfo.Get<TOKEN_USER>()->User.Sid, &stringSid))
+                {
+                    sidString.SetText(stringSid);
+                    ::LocalFree(stringSid);
+                }
+            }
+            ::CloseHandle(token);
+        }
+        return sidString;
     }
 
     /**
@@ -198,7 +230,7 @@ private:
         if (m_hVol == INVALID_HANDLE_VALUE)
             return;
         if (m_hasPathMap)
-            m_FRNtoPATH.reset(new std::map<DWORDLONG, CVolString>);
+            m_FRNtoPATH.reset(new std::map<DWORDLONG, CWString>);
         m_FRNtoParent.reset(new std::map<DWORDLONG, DWORDLONG>);
         MFT_ENUM_DATA med{0};
         med.StartFileReferenceNumber = 0;
@@ -244,11 +276,12 @@ private:
         PivBuffer<CHAR, DWORD> buffer{4096, true};
         DWORD dwBytes = 0, dwRetBytes = 0;
         PUSN_RECORD UsnRecord;
-        CVolString OldName;
+        CWString OldName;
+        DWORDLONG OldPathFRN = 0;
         while (::DeviceIoControl(m_hVol, FSCTL_READ_USN_JOURNAL, &ReadData, sizeof(ReadData), buffer.GetPtr(), buffer.GetSize(), &dwBytes, NULL))
         {
-            CVolString filename;
-            CVolString path;
+            CWString filename;
+            CWString path;
             dwRetBytes = dwBytes - sizeof(USN);
             // 找到第一个 USN 记录
             UsnRecord = (PUSN_RECORD)(buffer.GetPtr() + sizeof(USN));
@@ -263,7 +296,7 @@ private:
                 if (UsnRecord->Reason & USN_REASON_CLOSE)
                 {
                     // 检查是否限定了监视目录
-                    if (!IsMonitored(UsnRecord->ParentFileReferenceNumber))
+                    if (OldPathFRN == 0 && !IsMonitored(UsnRecord->ParentFileReferenceNumber))
                         goto NextRecord;
                     bool isDir = ((m_hasParentMap || m_hasPathMap) && (UsnRecord->FileAttributes & FILE_ATTRIBUTE_DIRECTORY));
                     // 获取路径
@@ -307,8 +340,30 @@ private:
                         {
                             (*m_FRNtoPATH)[UsnRecord->FileReferenceNumber] = filename;
                         }
-                        if (func_Renamed)
-                            func_Renamed(OldName, filename, path, FILETIME{UsnRecord->TimeStamp.LowPart, (DWORD)UsnRecord->TimeStamp.HighPart}, static_cast<int32_t>(UsnRecord->FileAttributes));
+                        if (OldPathFRN == UsnRecord->ParentFileReferenceNumber)
+                        {
+                            if (func_Renamed)
+                                func_Renamed(OldName, filename, path, FILETIME{UsnRecord->TimeStamp.LowPart, (DWORD)UsnRecord->TimeStamp.HighPart}, static_cast<int32_t>(UsnRecord->FileAttributes));
+                        }
+                        else
+                        {
+                            CWString oldPath;
+                            if (m_IndexPath)
+                                PathFromFRN(OldPathFRN, oldPath);
+                            if (path.LeadOf(m_RecyclePath, FALSE))
+                            {
+                                if (func_Recycle)
+                                {
+                                    filename.InsertText(0, path);
+                                    func_Recycle(OldName, oldPath, filename, FILETIME{UsnRecord->TimeStamp.LowPart, (DWORD)UsnRecord->TimeStamp.HighPart}, static_cast<int32_t>(UsnRecord->FileAttributes));
+                                }
+                            }
+                            else
+                            {
+                                if (func_Moved)
+                                    func_Moved(OldName, filename, oldPath, path, FILETIME{UsnRecord->TimeStamp.LowPart, (DWORD)UsnRecord->TimeStamp.HighPart}, static_cast<int32_t>(UsnRecord->FileAttributes));
+                            }
+                        }
                     }
                     else if (UsnRecord->Reason & USN_REASON_BASIC_INFO_CHANGE || UsnRecord->Reason & USN_REASON_EA_CHANGE || UsnRecord->Reason & USN_REASON_INDEXABLE_CHANGE ||
                              UsnRecord->Reason & USN_REASON_SECURITY_CHANGE || UsnRecord->Reason & USN_REASON_REPARSE_POINT_CHANGE || UsnRecord->Reason & 0x00800000)
@@ -321,6 +376,7 @@ private:
                         if (func_OtherChange)
                             func_OtherChange(filename, path, static_cast<int32_t>(UsnRecord->Reason), FILETIME{UsnRecord->TimeStamp.LowPart, (DWORD)UsnRecord->TimeStamp.HighPart}, static_cast<int32_t>(UsnRecord->FileAttributes));
                     }
+                    OldPathFRN = 0;
                 }
                 else if (UsnRecord->Reason & USN_REASON_RENAME_OLD_NAME) // 记住重命名前的旧名称
                 {
@@ -328,6 +384,7 @@ private:
                     if (!IsMonitored(UsnRecord->ParentFileReferenceNumber))
                         goto NextRecord;
                     OldName.SetText((const WCHAR *)((PBYTE)UsnRecord + UsnRecord->FileNameOffset), UsnRecord->FileNameLength / 2);
+                    OldPathFRN = UsnRecord->ParentFileReferenceNumber;
                 }
             // 获取下一个记录
             NextRecord:
@@ -360,7 +417,7 @@ public:
      * @param index_path 索引完整路径
      * @return 是否成功
      */
-    PivUsnMonitor(const wchar_t &drive_letter, CMStringArray &monitor_dirs, const int32_t &delay = 1000, const int32_t &index_path = true)
+    PivUsnMonitor(const wchar_t &drive_letter, CMStringArray &monitor_dirs, int32_t delay = 1000, int32_t index_path = true)
     {
         m_Event = ::CreateEvent(NULL, FALSE, FALSE, NULL);
         Start(drive_letter, monitor_dirs, delay, index_path);
@@ -383,7 +440,7 @@ public:
      * @param index_path 索引完整路径
      * @return 是否成功
      */
-    bool Start(const wchar_t &drive_letter, CMStringArray &monitor_dirs, const int32_t &delay = 1000, const int32_t &index_path = 1)
+    bool Start(const wchar_t &drive_letter, CMStringArray &monitor_dirs, int32_t delay = 1000, int32_t index_path = 1)
     {
         Stop();
         m_root.Empty();
@@ -400,7 +457,7 @@ public:
         if (::GetDriveTypeW(m_root.GetText()) != DRIVE_FIXED)
             return FALSE;
         // 打开设备句柄
-        m_hVol = ::CreateFileW(CVolString().Format(L"\\\\.\\%c:", drive_letter).GetText(), GENERIC_READ | GENERIC_WRITE,
+        m_hVol = ::CreateFileW(CWString().Format(L"\\\\.\\%c:", drive_letter).GetText(), GENERIC_READ | GENERIC_WRITE,
                                FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_READONLY, NULL);
         if (m_hVol == INVALID_HANDLE_VALUE)
         {
@@ -412,15 +469,21 @@ public:
         }
         m_delay = static_cast<DWORD>(delay);
         m_IndexPath = (index_path != 0);
+        // 获取回收站真实路径
+        m_RecyclePath = m_root;
+        m_RecyclePath.AddText(L"$RECYCLE.BIN\\");
+        m_RecyclePath.AddText(GetUserSidString(CWString{}));
+        m_RecyclePath.AddChar('\\');
         // 初始化USN日志
         if (!InitUsn())
             goto Init_Failed;
+
         // 初始化监视目录组
         m_hasPathMap = (index_path == 2);
         if (monitor_dirs.IsEmpty() == FALSE)
         {
             m_MonitorDir.reset(new std::set<DWORDLONG>);
-            CVolString dir;
+            CWString dir;
             for (INT_P i = 0; i < monitor_dirs.GetCount(); i++)
             {
                 dir.SetText(monitor_dirs.GetAt(i));
@@ -436,6 +499,7 @@ public:
             else
                 m_MonitorDir.reset(nullptr);
         }
+
         // 初始化成功
         ::ResetEvent(m_Event);
         if (m_hasParentMap || m_hasPathMap)
@@ -454,7 +518,7 @@ public:
      * @brief 停止监视
      * @param delete_usn 是否删除(禁用)USN日志
      */
-    void Stop(const bool &delete_usn = false)
+    void Stop(bool delete_usn = false)
     {
         ::SetEvent(m_Event);
         if (m_hVol != INVALID_HANDLE_VALUE)
@@ -472,6 +536,8 @@ public:
         func_Deleted = nullptr;
         func_DataChanged = nullptr;
         func_Renamed = nullptr;
+        func_Moved = nullptr;
+        func_Recycle = nullptr;
         func_AttributeChange = nullptr;
         func_OtherChange = nullptr;
     }
@@ -534,6 +600,30 @@ public:
     inline void BindRenamed(Fun &&fun, Args &&...args)
     {
         func_Renamed = std::bind(std::forward<Fun>(fun), std::forward<Args>(args)...);
+    }
+
+    /**
+     * @brief 绑定文件被移动事件
+     * @param fun 执行函数
+     * @param ...args 参数列表
+     * @return
+     */
+    template <typename Fun, typename... Args>
+    inline void BindMoved(Fun &&fun, Args &&...args)
+    {
+        func_Moved = std::bind(std::forward<Fun>(fun), std::forward<Args>(args)...);
+    }
+
+    /**
+     * @brief 绑定被删到回收站事件
+     * @param fun 执行函数
+     * @param ...args 参数列表
+     * @return
+     */
+    template <typename Fun, typename... Args>
+    inline void BindRecycle(Fun &&fun, Args &&...args)
+    {
+        func_Recycle = std::bind(std::forward<Fun>(fun), std::forward<Args>(args)...);
     }
 
     /**

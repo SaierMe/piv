@@ -5,9 +5,6 @@
  * 邮箱: xelloss@vip.qq.com                  *
 \*********************************************/
 
-#ifndef _PIV_BASE_HPP
-#define _PIV_BASE_HPP
-
 // 包含火山视窗基本类,它在火山里的包含顺序比较靠前(全局-110)
 #ifndef __VOL_BASE_H__
 #include <sys/base/libs/win_base/vol_base.h>
@@ -15,9 +12,14 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cwctype>
 #include <cstdlib>
+#include <type_traits>
 #include <algorithm>
 #include <memory>
+
+#ifndef _PIV_BASE_HPP
+#define _PIV_BASE_HPP
 
 #if defined(_MSVC_LANG) && (_MSVC_LANG >= 201703L)
 #define PIV_HAS_CPP17
@@ -43,6 +45,8 @@ namespace piv
     } // namespace detail
 
 } // namespace piv
+
+#endif // _PIV_BASE_HPP
 
 #ifndef _PIV_BUFFER_CLASS
 #define _PIV_BUFFER_CLASS
@@ -142,7 +146,36 @@ public:
 
     ELEMENT_T *operator*() { return p; }
     ELEMENT_T &operator[](MEM_SIZE pos) { return p[pos]; }
-};     // PivBuffer
+}; // PivBuffer
 #endif // _PIV_BUFFER_CLASS
 
-#endif // _PIV_BASE_HPP
+#ifndef _PIV_ASSERT_HPP
+#define _PIV_ASSERT_HPP
+#ifdef _DEBUG
+#define PIV_ASSERT(t, _ERROR, _SOURCE) PivMsgAssert((t), (_ERROR), (_SOURCE))
+static BOOL PivMsgAssert(const BOOL blpSucceed, const WCHAR *szErrorMessage, const char *szFileName)
+{
+    if (blpSucceed)
+        return blpSucceed;
+    CWString strOutput;
+    const BOOL blpDebuggerPresent = ::IsDebuggerPresent();
+    if (blpDebuggerPresent)
+        strOutput.AddText(L"* \a");
+    strOutput.AddFormatText(L"运行时校验失败(\"%s\"): %s", GetWideText(szFileName, CVolMem(), NULL), szErrorMessage);
+    if (blpDebuggerPresent)
+    {
+        ::OutputDebugStringW(strOutput.GetText());
+        __debugbreak();
+    }
+    else
+    {
+        ::MessageBox(NULL, strOutput.GetText(), L"运行时校验失败", (MB_ICONERROR | MB_OK));
+        assert(FALSE);
+    }
+    return blpSucceed;
+}
+#else
+#define PIV_ASSERT(t, _ERROR, _SOURCE)
+#endif
+#endif // _PIV_ASSERT_HPP
+

@@ -615,24 +615,25 @@ public:
 
 private:
     // 动态控制函数
-    static VOID ThreadPoolExtendProc(std::shared_ptr<THREADPOOL_INFO> pThreadPool)
+    static VOID ThreadPoolExtendProc(std::shared_ptr<THREADPOOL_INFO> *lpThreadPool)
     {
-        while (::WaitForSingleObject(pThreadPool->hEvent[3], pThreadPool->dwCycleMs) != WAIT_OBJECT_0)
+        std::shared_ptr<THREADPOOL_INFO> ThreadPool = *lpThreadPool;
+        while (::WaitForSingleObject(ThreadPool->hEvent[3], ThreadPool->dwCycleMs) != WAIT_OBJECT_0)
         {
-            if (pThreadPool->dwState == ThreadPoolState_Normal)
+            if (ThreadPool->dwState == ThreadPoolState_Normal)
             {
-                if (pThreadPool->dwWorkerTask >= pThreadPool->dwThreadsMin)
+                if (ThreadPool->dwWorkerTask >= ThreadPool->dwThreadsMin)
                 {
-                    DWORD dwIncrease = pThreadPool->dwCapacity - pThreadPool->dwThreadsCount;
+                    DWORD dwIncrease = ThreadPool->dwCapacity - ThreadPool->dwThreadsCount;
                     for (DWORD i = 0; i < dwIncrease; i++)
                     {
-                        HANDLE hThreadHandle = ::CreateThread(NULL, pThreadPool->tStackSize,
-                                                              reinterpret_cast<LPTHREAD_START_ROUTINE>(ThreadPoolWorkerThread), &pThreadPool, 0, NULL);
+                        HANDLE hThreadHandle = ::CreateThread(NULL, ThreadPool->tStackSize,
+                                                              reinterpret_cast<LPTHREAD_START_ROUTINE>(ThreadPoolWorkerThread), &ThreadPool, 0, NULL);
                         if (hThreadHandle)
                         {
                             // 设置线程优先级
-                            if (pThreadPool->nPriority != THREAD_PRIORITY_NORMAL)
-                                ::SetThreadPriority(hThreadHandle, pThreadPool->nPriority);
+                            if (ThreadPool->nPriority != THREAD_PRIORITY_NORMAL)
+                                ::SetThreadPriority(hThreadHandle, ThreadPool->nPriority);
                             // 因为之后不需要改变线程状态,所以立即销毁线程句柄
                             ::CloseHandle(hThreadHandle);
                         }
@@ -641,14 +642,14 @@ private:
             }
             else
             {
-                if (pThreadPool->dwThreadsCount > pThreadPool->dwThreadsMin)
+                if (ThreadPool->dwThreadsCount > ThreadPool->dwThreadsMin)
                 {
-                    ::InterlockedExchange(&pThreadPool->dwState, ThreadPoolState_Adjust);
-                    DWORD dwReduce = pThreadPool->dwThreadsCount - pThreadPool->dwThreadsMin;
+                    ::InterlockedExchange(&ThreadPool->dwState, ThreadPoolState_Adjust);
+                    DWORD dwReduce = ThreadPool->dwThreadsCount - ThreadPool->dwThreadsMin;
                     // 通知退出指定数量的线程,注意这要等之前投递的任务全部完成,才会执行
                     for (DWORD i = 0; i < dwReduce; i++)
                     {
-                        ::PostQueuedCompletionStatus(pThreadPool->hCompletionPort, ExitThread, 0, NULL);
+                        ::PostQueuedCompletionStatus(ThreadPool->hCompletionPort, ExitThread, 0, NULL);
                     }
                 }
             }

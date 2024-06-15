@@ -894,9 +894,10 @@
     参数 进度 <类型 = 单精度小数 注释 = "提供当前的进度位置,范围[0.0-1.0].">
     参数 尺寸 <类型 = ImVec2 注释 = "提供进度条的像素尺寸,小于0.0将使用全部可用宽度/高度," 注释 = "等于0.0为默认的项目宽度/高度,大于0.0则使用提供的宽度/高度."
             注释 = "推荐默认值: ImVec2(-FLT_MIN, 0)" @默认值 = ImVec2默认值.最小_零>
-    参数 覆盖文本 <类型 = 标准文本类U 注释 = "默认在进度条上显示如\"95%\"的当前进度文本,若提供了自定义的文本,将覆盖原来的进度文本." @默认值 = 空对象>
+    参数 覆盖文本 <注释 = "默认在进度条上显示如\"95%\"的当前进度文本,若提供了自定义的文本,将覆盖原来的进度文本." 注释 = "支持类型: 文本型、标准文本类U、字节集类(UTF-8)"
+            @默认值 = "" @匹配类型 = 通用型>
     {
-        @ ImGui::ProgressBar(@<进度>, @<尺寸>, @<覆盖文本>.GetTextMaybeNull())
+        @ ImGui::ProgressBar(@<进度>, @<尺寸>, PivAny2U{@<覆盖文本>}.GetPtr())
     }
 
     方法 项目符号 <公开 静态 注释 = "绘制一个小圆点并将光标保持在同一行." 折叠 @嵌入式方法 = "">
@@ -1547,8 +1548,10 @@
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
     参数 文本内容 <类型 = 标准文本类U 注释 = "必须提供一个\"标准文本类U\"变量,并确保其生命周期,输入的内容将保存在此变量中." @需求类型 = 可写入变量>
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
+    参数 回调函数 <类型 = IM输入框回调指针 注释 = "请使用\"IM输入框回调指针.创建 ()\"来取静态方法地址." @默认值 = 空对象>
+    参数 用户数据 <类型 = 变整数 注释 = "传递到回调函数的用户数据" @默认值 = 0>
     {
-        @ ImGui::InputText(*PivAny2U{@<标签文本>}, @<文本内容>.pdata(), static_cast<ImGuiInputTextFlags>(@<输入框标志>), nullptr, nullptr)
+        @ ImGui::InputText(*PivAny2U{@<标签文本>}, &@<文本内容>, static_cast<ImGuiInputTextFlags>(@<输入框标志>), @<回调函数>, (void*)@<用户数据>)
     }
 
     方法 多行文本输入框 <公开 静态 类型 = 逻辑型 注释 = "创建一个多行文本输入框,输入的UTF-8编码内容将保存在\"文本内容\"参数中."
@@ -1559,8 +1562,10 @@
     参数 文本内容 <类型 = 标准文本类U 注释 = "必须提供一个\"标准文本类U\"变量,并确保其生命周期,输入的内容将保存在此变量中." @需求类型 = 可写入变量>
     参数 尺寸 <类型 = ImVec2 注释 = "提供输入框的尺寸" @默认值 = ImVec2默认值.零值>
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
+    参数 回调函数 <类型 = IM输入框回调指针 注释 = "请使用\"IM输入框回调指针.创建 ()\"来取静态方法地址." @默认值 = 空对象>
+    参数 用户数据 <类型 = 变整数 注释 = "传递到回调函数的用户数据" @默认值 = 0>
     {
-        @ ImGui::InputTextMultiline(*PivAny2U{@<标签文本>}, @<文本内容>.pdata(), @<尺寸>, static_cast<ImGuiInputTextFlags>(@<输入框标志>), nullptr, nullptr)
+        @ ImGui::InputTextMultiline(*PivAny2U{@<标签文本>}, &@<文本内容>, @<尺寸>, static_cast<ImGuiInputTextFlags>(@<输入框标志>), @<回调函数>, (void*)@<用户数据>)
     }
 
     方法 提示输入框 <公开 静态 类型 = 逻辑型 注释 = "创建一个文本输入框,未输入内容时将以灰色显示提示文本,输入的UTF-8编码内容将保存在\"文本内容\"参数中."
@@ -1571,8 +1576,10 @@
     参数 提示文本 <注释 = "如果输入框未输入任何内容,则显示本提示内容;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型." @匹配类型 = 通用型>
     参数 文本内容 <类型 = 标准文本类U 注释 = "必须提供一个\"标准文本类U\"变量,并确保其生命周期,输入的内容将保存在此变量中." @需求类型 = 可写入变量>
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
+    参数 回调函数 <类型 = IM输入框回调指针 注释 = "请使用\"IM输入框回调指针.创建 ()\"来取静态方法地址." @默认值 = 空对象>
+    参数 用户数据 <类型 = 变整数 注释 = "传递到回调函数的用户数据" @默认值 = 0>
     {
-        @ ImGui::InputTextWithHint(*PivAny2U{@<标签文本>}, *PivAny2U{@<提示文本>}, @<文本内容>.pdata(), static_cast<ImGuiInputTextFlags>(@<输入框标志>), nullptr, nullptr)
+        @ ImGui::InputTextWithHint(*PivAny2U{@<标签文本>}, *PivAny2U{@<提示文本>}, &@<文本内容>, static_cast<ImGuiInputTextFlags>(@<输入框标志>), @<回调函数>, (void*)@<用户数据>)
     }
 
     方法 单浮点输入框 <公开 静态 类型 = 逻辑型 注释 = "创建一个输入框,用于输入单精度小数值,可选添加两个增加按钮." 返回值注释 = "值被改变时返回真" 折叠 @嵌入式方法 = "">
@@ -2109,20 +2116,21 @@
     方法 停靠空间 <公开 静态 类型 = 整数 注释 = "创建一个停靠空间"
             注释 = "create an explicit dock node _within_ an existing window. See Docking demo for details." 折叠
             @嵌入式方法 = "">
-    参数 ID <类型 = 整数>
+    参数 停靠空间ID <类型 = 整数>
     参数 尺寸 <类型 = ImVec2 @默认值 = ImVec2默认值.零值>
     参数 标志 <类型 = 整数 @默认值 = IM停靠节点标志.无>
     参数 窗口类指针 <类型 = IM窗口类指针 @默认值 = 空对象>
     {
-        @ static_cast<INT>(ImGui::DockSpace(static_cast<ImGuiID>(@<ID>), @<尺寸>, static_cast<ImGuiDockNodeFlags>(@<标志>), @<窗口类指针>))
+        @ static_cast<INT>(ImGui::DockSpace(static_cast<ImGuiID>(@<停靠空间ID>), @<尺寸>, static_cast<ImGuiDockNodeFlags>(@<标志>), @<窗口类指针>))
     }
 
     方法 覆盖式停靠空间 <公开 静态 类型 = 整数 注释 = "创建一个覆盖屏幕或特定视口的显式停靠节点." 折叠 @嵌入式方法 = "">
+    参数 停靠空间ID <类型 = 整数 @默认值 = 0>
     参数 视口 <类型 = IM视口指针 @默认值 = 空对象>
     参数 标志 <类型 = 整数 @默认值 = IM停靠节点标志.无>
     参数 窗口类指针 <类型 = IM窗口类指针 @默认值 = 空对象>
     {
-        @ static_cast<INT>(ImGui::DockSpaceOverViewport(@<视口>, static_cast<ImGuiDockNodeFlags>(@<标志>), @<窗口类指针>))
+        @ static_cast<INT>(ImGui::DockSpaceOverViewport(static_cast<ImGuiID>(@<停靠空间ID>), @<视口>, static_cast<ImGuiDockNodeFlags>(@<标志>), @<窗口类指针>))
     }
 
     方法 置下一窗口停靠ID <公开 静态 折叠 @嵌入式方法 = "">
@@ -2470,7 +2478,7 @@
         @ ImGui::IsKeyReleased(static_cast<ImGuiKey>(@<按键码>))
     }
 
-    方法 组合键被按下 <公开 静态 类型 = 逻辑型 注释 = "返回指定的组合键是否被按下" 折叠 @嵌入式方法 = "">
+    方法 组合键被按下 <公开 静态 类型 = 逻辑型 注释 = "返回指定的组合键是否被按下." 注释 = "注意: 本方法不检测路由与窗口焦点,请使用\"快捷键\"方法." 折叠 @嵌入式方法 = "">
     参数 组合键 <类型 = 整数 注释 = "为\"IM按键码\"中修饰键和按键的组合值,例:" 注释 = "位或 (IM按键码.Shift键, IM按键码.S键)">
     {
         @ ImGui::IsKeyChordPressed(static_cast<ImGuiKeyChord>(@<组合键>))
@@ -2487,13 +2495,27 @@
     方法 取键名称 <公开 静态 类型 = 标准文本类U 注释 = "返回指定按键码的英文名称" 折叠 @嵌入式方法 = "">
     参数 按键码 <类型 = 整数 注释 = "请使用\"IM按键码\"中的常量">
     {
-        @ @dt<标准文本类U>{ImGui::GetKeyName(static_cast<ImGuiKey>(@<按键码>))}
+        @ ImGui::GetKeyName(static_cast<ImGuiKey>(@<按键码>))
     }
 
     方法 置下一帧捕获键盘 <公开 静态 注释 = "强制下一帧捕获键盘" 折叠 @嵌入式方法 = "">
     参数 捕获键盘 <类型 = 逻辑型>
     {
         @ ImGui::SetNextFrameWantCaptureKeyboard(static_cast<bool>(@<捕获键盘>))
+    }
+
+    方法 快捷键 <公开 静态 类型 = 逻辑型 注释 = "返回指定的组合快捷键是否被触发" 折叠 @嵌入式方法 = "">
+    参数 组合键 <类型 = 整数 注释 = "为\"IM按键码\"中修饰键和按键的组合值,例:" 注释 = "位或 (IM按键码.Shift键, IM按键码.S键)">
+    参数 标志 <类型 = 整数 @默认值 = IM输入标志.无>
+    {
+        @ ImGui::Shortcut(static_cast<ImGuiKeyChord>(@<组合键>), static_cast<ImGuiInputFlags>(标志))
+    }
+
+    方法 置下一项目快捷键 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 组合键 <类型 = 整数 注释 = "为\"IM按键码\"中修饰键和按键的组合值,例:" 注释 = "位或 (IM按键码.Shift键, IM按键码.S键)">
+    参数 标志 <类型 = 整数 @默认值 = IM输入标志.无>
+    {
+        @ ImGui::SetNextItemShortcut(static_cast<ImGuiKeyChord>(@<组合键>), static_cast<ImGuiInputFlags>(标志))
     }
 
     # 输入实用工具: 鼠标 | Inputs Utilities: Mouse specific
@@ -2677,11 +2699,11 @@
     参数 标签文本 <注释 = "提供显示在表格第一行的列标签文本;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;"
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
-    参数 表格行标志 <类型 = 整数 注释 = "请参考\"IM表格行标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM表格行标志.无>
+    参数 表格列标志 <类型 = 整数 注释 = "请参考\"IM表格行标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM表格列标志.无>
     参数 初始宽度 <类型 = 单精度小数 注释 = "提供列的初始宽度,单位为像素或权重(依标志而定)" @默认值 = 0.0>
     参数 用户ID <类型 = 整数 注释 = "提供用户自定义的ID值" @默认值 = 0>
     {
-        @ ImGui::TableSetupColumn(*PivAny2U{@<标签文本>}, static_cast<ImGuiTableRowFlags>(@<表格行标志>), @<初始宽度>, static_cast<ImGuiID>(@<用户ID>))
+        @ ImGui::TableSetupColumn(*PivAny2U{@<标签文本>}, static_cast<ImGuiTableColumnFlags>(@<表格列标志>), @<初始宽度>, static_cast<ImGuiID>(@<用户ID>))
     }
 
     方法 冻结窗格 <公开 静态 注释 = "锁定指定数量的列和行,使它们在表格滚动时始终可见." 注释 = "注: 只能在\"置列属性\"和\"到下一行\"之间调用." 折叠 隐藏值属性 = "0"
@@ -2728,7 +2750,7 @@
     方法 取列标题 <公开 静态 类型 = 标准文本类U 注释 = "获取指定列的标题名称,如果未设置\"置列属性\"则返回空文本." 折叠 @嵌入式方法 = "">
     参数 列索引 <类型 = 整数 注释 = "-1表示当前列" @默认值 = -1>
     {
-        @ @dt<标准文本类U>{ImGui::TableGetColumnName(@<列索引>)}
+        @ ImGui::TableGetColumnName(@<列索引>)
     }
 
     方法 取列标志 <公开 静态 类型 = 整数 注释 = "获取指定列的标志,通过标志可以检测列的可用、可见、排序、悬停等状态." 折叠 @嵌入式方法 = "">
@@ -2737,15 +2759,14 @@
         @ static_cast<INT>(ImGui::TableGetColumnFlags(@<列索引>))
     }
 
-    方法 置列启用 <公开 静态 类型 = 标准文本类U 注释 = "设置指定列是否可以被用户访问,设置为假可隐藏列." 注释 = "用户也可以使用上下文菜单自行更改(在列标题中右键单击)." 折叠
-            @嵌入式方法 = "">
+    方法 置列启用 <公开 静态 注释 = "设置指定列是否可以被用户访问,设置为假可隐藏列." 注释 = "用户也可以使用上下文菜单自行更改(在列标题中右键单击)." 折叠 @嵌入式方法 = "">
     参数 列索引 <类型 = 整数 注释 = "-1表示当前列" @默认值 = -1>
     参数 是否启用 <类型 = 逻辑型 注释 = "是否启用指定的列,假时将隐藏列">
     {
         @ ImGui::TableSetColumnEnabled(@<列索引>, static_cast<bool>(@<是否启用>))
     }
 
-    方法 置背景颜色 <公开 静态 类型 = 标准文本类U 注释 = "设置指定单元格、行或列的背景颜色" 折叠 @嵌入式方法 = "">
+    方法 置背景颜色 <公开 静态 注释 = "设置指定单元格、行或列的背景颜色" 折叠 @嵌入式方法 = "">
     参数 设置目标 <类型 = IM表格背景目标 注释 = "-1表示当前列">
     参数 颜色值 <类型 = 整数 注释 = "32位颜色值">
     参数 列索引 <类型 = 整数 注释 = "-1表示当前列" @默认值 = -1>
@@ -3242,55 +3263,62 @@
     方法 枚举循环 <公开 注释 = "  启动一个循环来枚举数组的每一个成员,在循环中可以调用" 注释 = "\"取枚举值\"方法来获取当前所枚举到的成员值,调用\"取枚举索引\""
             注释 = "方法来获取当前所枚举到成员的索引位置." 折叠 @嵌入式方法 = "name = counter\r\nhas_loop_body = true">
     {
-        @ IM_VECTOR_FOR_FORWARD (@sn<this>)
+        @ for (size_t __im_vector_i = 0; __im_vector_i < @sn<this>.arr.size(); __im_vector_i++)
     }
 
     方法 逆向枚举循环 <公开 注释 = "  启动一个逆向循环来枚举数组的每一个成员,在循环中可以调" 注释 = "用\"取枚举值\"方法来获取当前所枚举到的成员值,调用\"取枚举索引\""
             注释 = "方法来获取当前所枚举到成员的索引位置." 折叠 @嵌入式方法 = "name = rcounter\r\nhas_loop_body = true">
     {
-        @ IM_VECTOR_FOR_REVERSE (@sn<this>)
+        @ for (size_t __im_vector_i = @sn<this>.arr.size() - 1; __im_vector_i >= 0; __im_vector_i--)
     }
 
     方法 取枚举索引 <公开 类型 = 变整数 注释 = "  只能在本类的\"枚举循环\"语句的子语句体中使用,用作取回当前枚举到成员的索引位置."
             注释 = "跟官方库的不一样,即使有多层本类或本类继承类的\"枚举循环\"嵌套,本方法仍能正确返回" 注释 = "枚举到成员的索引位置." 折叠
             @嵌入式方法 = "parent = \"counter, rcounter\"">
     {
-        @ static_cast<INT_P>(@sn<this>.m_index)
+        @ static_cast<INT>(__im_vector_i)
+    }
+
+    方法 取枚举值 <公开 类型 = 标准文本类U 注释 = "  只能在本类的\"枚举循环\"语句的子语句体中使用,用作取回当前枚举到的成员值."
+            注释 = "跟官方库的不一样,即使有多层本类或本类继承类的\"枚举循环\"嵌套,本方法仍能正确" 注释 = "返回枚举成员值." 折叠
+            @嵌入式方法 = "parent = \"counter, rcounter\"" @视窗.返回参考 = 真>
+    {
+        @ @sn<this>.arr[__im_vector_i]
     }
 
     方法 取枚举成员 <公开 类型 = 标准文本类U 注释 = "  只能在本类的\"枚举循环\"语句的子语句体中使用,用作取回当前枚举到的成员值."
             注释 = "跟官方库的不一样,即使有多层本类或本类继承类的\"枚举循环\"嵌套,本方法仍能正确" 注释 = "返回枚举成员值." 折叠
             @嵌入式方法 = "parent = \"counter, rcounter\"" @视窗.返回参考 = 真>
     {
-        @ IM_VECTOR_FOR_GET_VALUES (@sn<this>)
+        @ @sn<this>.arr[__im_vector_i]
     }
 
     方法 取枚举成员文本 <公开 类型 = 文本型 注释 = "跟\"取枚举成员\"不同,本方法返回的是火山的\"文本型\",会产生编码转换." 折叠
             @嵌入式方法 = "parent = \"counter, rcounter\"">
     {
-        @ IM_VECTOR_FOR_GET_VALUES (@sn<this>).ToVolString()
+        @ @an<CVolString>{@sn<this>.arr[__im_vector_i].c_str()}
     }
 
     方法 索引是否有效 <公开 类型 = 逻辑型 注释 = "返回所指定的索引值是否大于等于0且小于本数组的成员数." 折叠 @禁止流程检查 = 真>
     参数 所欲检查的索引值 <类型 = 变整数>
     {
-        @ return static_cast<size_t>(@<所欲检查的索引值>) >= 0 && static_cast<size_t>(@<所欲检查的索引值>) < data().size();
+        @ return static_cast<size_t>(@<所欲检查的索引值>) >= 0 && static_cast<size_t>(@<所欲检查的索引值>) < arr.size();
     }
 
     方法 重置数组 <公开 注释 = "重置数组中的成员数为所指定的数目,数组原有的数据将被覆盖." 折叠 @嵌入式方法 = "">
     参数 欲重置的成员数目 <类型 = 整数 注释 = "重置后的数组成员数">
     {
-        @ @sn<this>.data().assign(@<欲重置的成员数目>, PivStringU{})
+        @ @sn<this>.arr.assign(@<欲重置的成员数目>, std::string{})
     }
 
     方法 是否为空 <公开 类型 = 逻辑型 注释 = "返回本数组是否为空" 折叠 @嵌入式方法 = "">
     {
-        @ static_cast<BOOL>(@sn<this>.data().empty())
+        @ static_cast<BOOL>(@sn<this>.arr.empty())
     }
 
     方法 删除所有成员 <公开 注释 = "删除数组中的当前所有成员" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.data().clear()
+        @ @sn<this>.arr.clear()
     }
 
     方法 删除成员 <公开 注释 = "删除数组中所指定索引范围的单个或多个成员" 折叠>
@@ -3298,44 +3326,44 @@
     参数 结束索引位置 <类型 = 变整数 注释 = "默认为-1, 即只删除单个成员." 注释 = "提供所欲删除的尾成员的索引位置,必须大于\"所欲删除首位置\"且小于等于数组成员数目."
             @默认值 = -1>
     {
-        @ auto it = data().begin();
+        @ auto it = arr.begin();
         @ if (@<结束索引位置> != -1){
-        @     data().erase(it + static_cast<size_t>(@<删除索引位置>), it + static_cast<size_t>(@<结束索引位置>) + 1);
+        @     arr.erase(it + static_cast<size_t>(@<删除索引位置>), it + static_cast<size_t>(@<结束索引位置>) + 1);
         @ } else {
-        @     data().erase(it + static_cast<size_t>(@<删除索引位置>), it + static_cast<size_t>(@<删除索引位置>) + 1);
+        @     arr.erase(it + static_cast<size_t>(@<删除索引位置>), it + static_cast<size_t>(@<删除索引位置>) + 1);
         @ }
     }
 
     方法 取成员数 <公开 类型 = 变整数 注释 = "返回数组中的当前已有成员数目" 折叠 @嵌入式方法 = "">
     {
-        @ static_cast<INT_P>(@sn<this>.data().size())
+        @ static_cast<INT_P>(@sn<this>.arr.size())
     }
 
     方法 取成员 <公开 类型 = 标准文本类U 注释 = "返回所指定索引位置处的\"标准文本类U\"成员值." 注释 = "高效率,不检查边界,不抛出异常,索引无效直接崩溃." 折叠 @嵌入式方法 = ""
             @视窗.返回参考 = 真>
     参数 索引位置 <类型 = 变整数 注释 = "提供所欲操作成员的索引位置,必须大于等于0且小于数组成员数目.">
     {
-        @ @sn<this>.data()[static_cast<size_t>(@<索引位置>)]
+        @ @sn<this>.arr[static_cast<size_t>(@<索引位置>)]
     }
 
     方法 取成员文本 <公开 类型 = 文本型 注释 = "返回所指定索引位置处的\"文本型\"成员值,会产生编码转换." 注释 = "高效率,不检查边界,不抛出异常,索引无效直接崩溃." 折叠
             @嵌入式方法 = "">
     参数 索引位置 <类型 = 变整数 注释 = "提供所欲操作成员的索引位置,必须大于等于0且小于数组成员数目.">
     {
-        @ @sn<this>.data()[static_cast<size_t>(@<索引位置>)].ToVolString()
+        @ @an<CVolString>{@sn<this>.arr[static_cast<size_t>(@<索引位置>)].c_str()}
     }
 
     方法 置成员值 <公开 注释 = "设置数组中所指定索引位置处的成员文本值,本方法不执行索引检查,索引无效直接崩溃." 折叠 @嵌入式方法 = "">
     参数 索引位置 <类型 = 变整数 注释 = "提供所欲操作成员的索引位置,必须大于等于0且小于数组成员数目.">
     参数 所欲设置的文本 <注释 = "提供所欲设置的成员值,先前的值将被覆盖." 注释 = "支持类型(*表示会进行编码转换):" 注释 = "  标准文本类U、文本视图类U"
-            注释 = "  *文本型、*标准文本类、*文本视图类" @匹配类型 = 通用型>
+            注释 = "  *文本型、*标准文本类W、*文本视图类W" @匹配类型 = 通用型>
     {
-        @ @sn<this>.data()[static_cast<size_t>(@<索引位置>)] = @dt<标准文本类U>{@<所欲设置的文本>}
+        @ @sn<this>.arr[static_cast<size_t>(@<索引位置>)] = PivAny2Us{@<所欲设置的文本>}.String()
     }
 
     方法 加入成员 <公开 注释 = "将一个或多个文本值加入到数组尾部" 折叠 @嵌入式方法 = "">
     参数 所欲加入文本 <注释 = "所欲添加的文本值,支持类型(*表示会进行编码转换):" 注释 = "  标准文本类U、文本视图类U、字节集类(UTF-8)"
-            注释 = "  *文本型、*标准文本类、*文本视图类" @匹配类型 = 通用型 @可扩展 = "">
+            注释 = "  *文本型、*标准文本类W、*文本视图类W" @匹配类型 = 通用型 @可扩展 = "">
     {
         @ @sn<this>.push_backs(@<所欲加入文本>)
     }
@@ -3343,7 +3371,7 @@
     方法 加入成员2 <公开 注释 = "将一个文本值加入到数组尾部,本方法不会进行编码转换." 折叠 @嵌入式方法 = "">
     参数 所欲加入文本 <类型 = 文本型 注释 = "只支持填入用\"\"包围的字符串字面量或文本常量" @需求类型 = 立即数或常量>
     {
-        @ @sn<this>.data().push_back(@dt<标准文本类U>{u8@sn<quot>@pvpt<所欲加入文本>@sn<quot>})
+        @ @sn<this>.arr.emplace_back(u8@sn<quot>@pvpt<所欲加入文本>@sn<quot>)
     }
 
     方法 插入成员 <公开 注释 = "将所指定的文本值插入到所指定的索引位置" 折叠 @嵌入式方法 = "">
@@ -3351,7 +3379,7 @@
     参数 所欲插入的文本 <注释 = "所欲添加的文本值,支持类型(*表示会进行编码转换):" 注释 = "  标准文本类U、文本视图类U" 注释 = "  *文本型、*标准文本类、*文本视图类"
             @匹配类型 = 通用型>
     {
-        @ data().emplace (data().begin() + static_cast<size_t>(@<插入索引位置>), @dt<标准文本类U>{@<所欲插入的文本>});
+        @ arr.emplace(arr.begin() + static_cast<size_t>(@<插入索引位置>), PivAny2Us{@<所欲插入的文本>}.String());
     }
 
     方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖>
@@ -3368,42 +3396,39 @@
 
     # @begin
     # <> <include>
-    # #define IM_VECTOR_FOR_FORWARD(cThis) for (cThis.m_index = 0; cThis.m_index < cThis.data().size(); cThis.m_index++)
-    # #define IM_VECTOR_FOR_REVERSE(cThis) for (cThis.m_index = cThis.data().size() - 1; cThis.m_index >= 0; cThis.m_index--)
-    # #define IM_VECTOR_FOR_GET_VALUES(cThis) cThis.data()[cThis.m_index]
-    # size_t m_index;
-    # std::vector<PivStringU> m_vecData;
-    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { m_vecData = objCopyFrom.m_vecData; }
-    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { m_vecData = std::move(rhs.m_vecData); return *this; }
-    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (m_vecData == objCompare.m_vecData); }
-    # inline std::vector<PivStringU> &data () { return m_vecData; }
-    # inline std::vector<PivStringU> *pdata () { return &m_vecData; }
-    # inline void push_backs(const std::string &s) { m_vecData.push_back(PivStringU{s}); }
-    # inline void push_backs(const std::wstring &s) { m_vecData.push_back(PivStringU{s}); }
-    # inline void push_backs(const piv::string_view &s) { m_vecData.push_back(PivStringU{s}); }
-    # inline void push_backs(const piv::wstring_view &s) { m_vecData.push_back(PivStringU{s}); }
+    # std::vector<std::string> arr;
+    # inline void @an<_CopySelfFromExtra> (const @sn<current_class>& objCopyFrom) { arr = objCopyFrom.arr; }
+    # inline @sn<current_class>& operator= (@sn<current_class>&& rhs) { arr = std::move(rhs.arr); return *this; }
+    # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (arr == objCompare.arr); }
+    # inline std::vector<std::string> *pdata() { return &arr; }
+    # inline void push_back(const std::string &s) { arr.emplace_back(s); }
+    # inline void push_back(const std::wstring &s) { arr.emplace_back(*PivW2U{s}); }
+    # inline void push_back(const piv::string_view &s) { arr.emplace_back(s); }
+    # inline void push_back(const piv::wstring_view &s) { arr.emplace_back(*PivW2U{s}); }
+    # inline void push_back(const CVolString &s) { arr.emplace_back(*PivW2U{s}); }
+    # inline void push_back(const CVolMem &s) { arr.emplace_back((const char *)s.GetPtr(), (size_t)s.GetSize()); }
     # template <typename T>
-    # inline void push_backs(const T &s) { m_vecData.push_back(PivStringU{s}); }
+    # inline void push_backs(T &&s) { push_back(std::forward<T>(s)); }
     # template <typename T, typename... Args>
-    # inline void push_backs(const T &s, const Args... args) {
-    #     push_backs(s); push_backs(args...);
+    # inline void push_backs(T &&s, Args&&... args) {
+    #     push_back(std::forward<T>(s)); push_backs(std::forward<Args>(args)...);
     # }
     # static const char* ItemGetter(void* data, int idx) {
-    #     std::vector<PivStringU>* arr = reinterpret_cast<std::vector<PivStringU>*>(data);
-    #     return arr->at(idx).data().c_str();
+    #     std::vector<std::string>* arr = reinterpret_cast<std::vector<std::string>*>(data);
+    #     return arr->at(idx).c_str();
     # }
     # <> </include>
     # @end
 }
 
-类 IM字体指针 <公开 基础类 = PIV结构指针模板 注释 = "ImFont 本类使用指针封装,必须在创建或赋值后使用(用\"为空指针\"判断)." 折叠
+类 IM字体指针 <公开 基础类 = PIV指针模板 注释 = "ImFont 本类使用指针封装,必须在创建或赋值后使用(用\"为空指针\"判断)." 折叠
         @文档 = "category = \"辅助类\"" @别名 = "ImFont*" @模板实现类 = "IM字体指针">
 {
 
     #
 }
 
-类 IM字体图集类 <公开 基础类 = PIV结构指针模板 注释 = "ImFontAtlas 本类使用指针封装,必须在创建或赋值后使用(用\"为空指针\"判断)." 折叠
+类 IM字体图集类 <公开 基础类 = PIV指针模板 注释 = "ImFontAtlas 本类使用指针封装,必须在创建或赋值后使用(用\"为空指针\"判断)." 折叠
         @文档 = "category = \"辅助类\"" @别名 = "ImFontAtlas*" @模板实现类 = "IM字体图集类">
 {
     方法 添加默认字体 <公开 静态 类型 = IM字体指针 注释 = "添加ImGui的默认字体(ProggyClean.ttf)" 返回值注释 = "返回字体指针" @嵌入式方法 = "">
@@ -3900,7 +3925,7 @@
     变量 _内部数据 <公开 类型 = 变整数>
 }
 
-类 ImGuiIO类 <公开 基础类 = PIV结构指针模板 注释 = "必须接收\"ImGui.取IO()\"的返回结果后,才能使用本类." 折叠 @文档 = "category = \"辅助类\""
+类 ImGuiIO类 <公开 基础类 = PIV指针模板 注释 = "必须接收\"ImGui.取IO()\"的返回结果后,才能使用本类." 折叠 @文档 = "category = \"辅助类\""
         @别名 = "ImGuiIO*" @模板实现类 = "ImGuiIO类">
 {
     变量 配置标志 <公开 类型 = 整数 注释 = "IM配置标志,请参考\"IM配置标志\"的常量" @输出名 = "ConfigFlags">
@@ -4184,7 +4209,7 @@
     }
 }
 
-类 IM样式类 <公开 基础类 = PIV结构指针模板 注释 = "本类使用指针封装,必须在创建或赋值后使用(用\"为空指针\"判断)."
+类 IM样式类 <公开 基础类 = PIV指针模板 注释 = "本类使用指针封装,必须在创建或赋值后使用(用\"为空指针\"判断)."
         注释 = "这些样式可以在新建帧之前的\"帧被创建\"事件中更改,当然在当前帧更改也可以,但在下一帧生效." 注释 = "如果需要更改当前帧的样式,请用\"ImGui.压入样式变量\"" 折叠
         @文档 = "category = \"辅助类\"" @别名 = "ImGuiStyle*" @模板实现类 = "IM样式类">
 {
@@ -4379,7 +4404,7 @@
     }
 }
 
-类 IM视口指针 <公开 基础类 = PIV结构指针模板 注释 = "ImGuiViewport指针 用于接收\"ImGui.取主视口()\"的返回结果"
+类 IM视口指针 <公开 基础类 = PIV指针模板 注释 = "ImGuiViewport指针 用于接收\"ImGui.取主视口()\"的返回结果"
         注释 = "本类使用指针封装,必须在创建或赋值后使用(用\"为空指针\"判断)." 折叠 @文档 = "category = \"辅助类\"" @别名 = "ImGuiViewport*"
         @模板实现类 = "IM视口指针">
 {
@@ -4440,13 +4465,13 @@
     }
 }
 
-类 IM窗口类指针 <公开 基础类 = PIV结构指针模板 注释 = "未封装" @文档 = "category = \"辅助类\"" @别名 = "ImGuiWindowClass*"
+类 IM窗口类指针 <公开 基础类 = PIV指针模板 注释 = "未封装" @文档 = "category = \"辅助类\"" @别名 = "ImGuiWindowClass*"
         @模板实现类 = "IM窗口类指针">
 
-类 IM绘制数据指针 <公开 基础类 = PIV结构指针模板 注释 = "未封装" @文档 = "category = \"辅助类\"" @别名 = "ImDrawData*"
+类 IM绘制数据指针 <公开 基础类 = PIV指针模板 注释 = "未封装" @文档 = "category = \"辅助类\"" @别名 = "ImDrawData*"
         @模板实现类 = "IM绘制数据指针">
 
-类 IM平台IO类 <公开 基础类 = PIV结构指针模板 注释 = "本类使用指针封装,必须在创建或赋值后使用(用\"为空指针\"判断)." @文档 = "category = \"辅助类\""
+类 IM平台IO类 <公开 基础类 = PIV指针模板 注释 = "本类使用指针封装,必须在创建或赋值后使用(用\"为空指针\"判断)." @文档 = "category = \"辅助类\""
         @别名 = "ImGuiPlatformIO*" @模板实现类 = "IM平台IO类">
 
 类 IM字符 <公开 基础类 = PIV数值模板 注释 = "ImWchar" @文档 = "category = \"辅助类\"" @别名 = "ImWchar" @模板实现类 = "IM字符">
@@ -4483,7 +4508,7 @@
     }
 }
 
-# 标志常量
+# 标志常量 ---
 
 类 IM窗口标志 <公开 注释 = "ImGui.窗口开端()" 注释 = "ImGuiWindowFlags" 折叠 @文档 = "category = \"标志类\"">
 {
@@ -4547,33 +4572,73 @@
     常量 无 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_None>
     常量 十进制数字 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_CharsDecimal 注释 = "允许输入 0123456789.+-*/">
     常量 十六进制数字 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_CharsHexadecimal 注释 = "允许输入 0123456789ABCDEFabcdef">
+    常量 科学计数法 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_CharsScientific 注释 = "允许输入小数 0123456789.+-*/eE (科学计数法输入)">
     常量 转换到大写 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_CharsUppercase 注释 = "将小写字母a..z转换到大写A..Z">
     常量 禁止空白 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_CharsNoBlank 注释 = "过滤掉空格和制表符">
-    常量 自动全选 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_AutoSelectAll 注释 = "第一次获得鼠标焦点时选择整个文本">
+    常量 ""
+    常量 允许制表符 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_AllowTabInput 注释 = "按TAB键时输入一个\'\\t\'字符到文本区">
     常量 按回车返回真 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_EnterReturnsTrue
             注释 = "按回车键时返回\"true\",与每次修改值时相反.请查看IsItemDeactivatedAfterEdit()函数.">
+    常量 按ESC键清除 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_EscapeClearsAll
+            注释 = "如果内容不为空,按ESC键将清除内容,否则为停用(与ESC的默认行为正好相反)">
+    常量 按Ctrl加回车换行 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_CtrlEnterForNewLine
+            注释 = "在多行模式下,按回车失去焦点,按Ctrl+回车添加新行(与默认行为正好相反)">
+    常量 ""
+    常量 只读模式 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_ReadOnly 注释 = "只读模式">
+    常量 密码模式 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_Password 注释 = "密码模式,将所有字符显示为\'*\'">
+    常量 改写模式 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_AlwaysOverwrite 注释 = "改写模式">
+    常量 自动全选 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_AutoSelectAll 注释 = "第一次获得鼠标焦点时选择整个文本">
+    常量 按值解析空白 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_ParseEmptyRefVal 注释 = "仅限数值类型的输入框: 将输入框的空文本解释为0值.">
+    常量 按值显示空白 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_DisplayEmptyRefVal
+            注释 = "仅限数值类型的输入框: 如果值为0,不在输入框中显示,通常与\"按值解析空白\"一起使用.">
+    常量 禁止水平滚动 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_NoHorizontalScroll 注释 = "禁止水平跟随光标">
+    常量 禁止撤销重做 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_NoUndoRedo
+            注释 = "禁用撤消/重做.请注意输入框在活动时拥有文本数据,如果你想提供自己的撤销/重做堆栈,你需要调用ClearActiveID().">
+    常量 ""
     常量 完成回调 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_CallbackCompletion 注释 = "在输入TAB键时触发回调,用于处理结束文本编辑">
     常量 历史记录回调 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_CallbackHistory 注释 = "在输入向上/向下键时触发回调,用于处理历史记录">
     常量 始终回调 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_CallbackAlways 注释 = "每次迭代的回调.用户代码可以查询光标位置,修改文本缓冲区.">
     常量 字符过滤回调 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_CallbackCharFilter
             注释 = "在回调中替换或丢弃对输入的字符.修改\"EventChar\"以替换或丢弃，或在回调中返回1以丢弃。">
-    常量 允许制表符 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_AllowTabInput 注释 = "按TAB键时输入一个\'\\t\'字符到文本区">
-    常量 按Ctrl_回车换行 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_CtrlEnterForNewLine
-            注释 = "在多行模式下,按回车失去焦点,按Ctrl+回车添加新行(与默认行为正好相反)">
-    常量 禁止水平滚动 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_NoHorizontalScroll 注释 = "禁止水平跟随光标">
-    常量 改写模式 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_AlwaysOverwrite 注释 = "改写模式">
-    常量 只读模式 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_ReadOnly 注释 = "只读模式">
-    常量 密码模式 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_Password 注释 = "密码模式,将所有字符显示为\'*\'">
-    常量 禁止撤销重做 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_NoUndoRedo
-            注释 = "禁用撤消/重做.请注意输入框在活动时拥有文本数据,如果你想提供自己的撤销/重做堆栈,你需要调用ClearActiveID().">
-    常量 科学计数法 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_CharsScientific 注释 = "允许输入小数 0123456789.+-*/eE (科学计数法输入)">
     常量 重设大小回调 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_CallbackResize
             注释 = "缓冲区容量超过\"buf_size\"参数值时,请求更改的回调,以允许字符串增长." 注释 = "当字符串需要调整大小时通知(对于保存其大小的缓存的字符串类型)."
             注释 = "回调中会提供一个新的缓存大小,你需要遵守它.">
     常量 编辑回调 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_CallbackEdit
             注释 = "在进行任何编辑时触发回调.请注意\"输入框\"在编辑时已经返回true,这个回调主要用于在获得焦点时操作底层缓冲区.">
-    常量 按ESC键清除 <公开 类型 = 整数 值 = @ImGuiInputTextFlags_EscapeClearsAll
-            注释 = "如果内容不为空,按ESC键将清除内容,否则为停用(与ESC的默认行为正好相反)">
+}
+
+类 IM输入标志 <公开 注释 = "ImGuiInputFlags" 注释 = "Flags for Shortcut(), SetNextItemShortcut(),"
+        注释 = "(and for upcoming extended versions of IsKeyPressed(), IsMouseClicked(), Shortcut(), SetKeyOwner(), SetItemKeyOwner() that are still in imgui_internal.h)"
+        注释 = "Don\'t mistake with ImGuiInputTextFlags! (which is for ImGui::InputText() function)" 折叠
+        @文档 = "category = \"标志类\"">
+{
+    常量 无 <公开 类型 = 整数 值 = @ImGuiInputFlags_None>
+    常量 重复输入 <公开 类型 = 整数 值 = @ImGuiInputFlags_Repeat 注释 = "启用重复,在连续重复按键时返回真."
+            注释 = "Default for legacy IsKeyPressed(). NOT Default for legacy IsMouseClicked(). MUST BE == 1.">
+
+    # Flags for Shortcut(), SetNextItemShortcut()
+    # - Routing policies: RouteGlobal+OverActive >> RouteActive or RouteFocused (if owner is active item) >> RouteGlobal+OverFocused >> RouteFocused (if in focused window stack) >> RouteGlobal.
+    # - Default policy is RouteFocused. Can select only 1 policy among all available.
+
+    常量 路由到活动项 <公开 类型 = 整数 值 = @ImGuiInputFlags_RouteActive 注释 = "仅路由到活动项目">
+    常量 路由到焦点 <公开 类型 = 整数 值 = @ImGuiInputFlags_RouteFocused 注释 = "(默认值)路由到获得焦点的窗口."
+            注释 = "焦点深度最底的窗口将获得输入,而活动项目仅在位于焦点窗口时获得输入.">
+    常量 路由到全局 <公开 类型 = 整数 值 = @ImGuiInputFlags_RouteGlobal 注释 = "路由到全局,直到某个焦点窗口或活动项目注册了路由.">
+    常量 始终路由 <公开 类型 = 整数 值 = @ImGuiInputFlags_RouteAlways 注释 = "不注册路由表,直接轮询按键.">
+
+    # - Routing options
+
+    常量 路由_高于焦点 <公开 类型 = 整数 值 = @ImGuiInputFlags_RouteOverFocused 注释 = "选项[全局路由]: 优先于被焦点路由(除非活动项目位于焦点路由)">
+    常量 路由_高于活动项 <公开 类型 = 整数 值 = @ImGuiInputFlags_RouteOverActive 注释 = "选项[全局路由]: 优先于活动项目(除非活动项目位于焦点路由)"
+            注释 = "Option: global route: higher priority than active item. Unlikely you need to use that: will interfere with every active items,"
+            注释 = "e.g. CTRL+A registered by InputText will be overridden by this. May not be fully honored as user/internal code is likely to always assume they can access keys when active.">
+    常量 路由_除非背景被焦点 <公开 类型 = 整数 值 = @ImGuiInputFlags_RouteUnlessBgFocused
+            注释 = "选项[全局路由]: 如果基础背景被焦点(等于没有ImGui窗口被焦点),将不会应用路由.适用于覆盖应用程序.">
+    常量 路由_基于根窗口 <公开 类型 = 整数 值 = @ImGuiInputFlags_RouteFromRootWindow 注释 = "选项: 路由是从根窗口而不是当前窗口来评估">
+
+    # Flags for SetNextItemShortcut()
+
+    常量 工具提示 <公开 类型 = 整数 值 = @ImGuiInputFlags_Tooltip 注释 = "在项目上悬停时自动显示工具提示">
 }
 
 类 IM树节点标志 <公开 注释 = "ImGuiTreeNodeFlags"
@@ -4818,7 +4883,7 @@
             注释 = "ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_SizingFixedSame | ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_SizingStretchSame">
 }
 
-类 IM表格列标志 <公开 注释 = "ImGuiTableColumnFlags Flags for ImGui::TableSetupColumn()"
+类 IM表格列标志 <公开 注释 = "ImGuiTableColumnFlags Flags for ImGui::TableSetupColumn()" 折叠
         @文档 = "category = \"标志类\"">
 {
     常量 无 <公开 类型 = 整数 值 = @ImGuiTableColumnFlags_None>
@@ -5389,7 +5454,6 @@
     常量 Shift键 <公开 类型 = 整数 值 = @ImGuiMod_Shift 注释 = "Shift">
     常量 Alt键 <公开 类型 = 整数 值 = @ImGuiMod_Alt 注释 = "Option/Menu">
     常量 徽标键 <公开 类型 = 整数 值 = @ImGuiMod_Super 注释 = "Cmd/Super/Windows">
-    常量 "" <公开 类型 = 整数 值 = @ImGuiMod_Shortcut 注释 = "Alias for Ctrl (non-macOS) _or_ Super (macOS).">
     常量 "" <公开 类型 = 整数 值 = @ImGuiMod_Mask_ 注释 = "5-bits">
 }
 
@@ -5455,7 +5519,7 @@
 
 类 IM样式标识符 <公开
         注释 = "ImGuiStyleVar Enumeration for PushStyleVar() / PopStyleVar() to temporarily modify the ImGuiStyle structure."
-        @文档 = "category = \"常量类\"" @常量类 = 整数>
+        折叠 @文档 = "category = \"常量类\"" @常量类 = 整数>
 {
     常量 不透明度 <公开 值 = @ImGuiStyleVar_Alpha 注释 = "float">
     常量 禁用项不透明度 <公开 值 = @ImGuiStyleVar_DisabledAlpha 注释 = "float">
@@ -5563,6 +5627,122 @@
     常量 向右 <公开 值 = @ImGuiDir_Right>
     常量 向上 <公开 值 = @ImGuiDir_Up>
     常量 向下 <公开 值 = @ImGuiDir_Down>
+}
+
+# 回调数据指针 ---
+
+类 IM输入框回调数据指针 <公开 基础类 = PIV指针模板 注释 = "ImGuiInputTextCallbackData" 折叠
+        @别名 = "ImGuiInputTextCallbackData*" @模板实现类 = "IM输入框回调数据指针" @类用途 = 禁止创建对象>
+{
+    变量 上下文 <公开 类型 = IM上下文指针 注释 = "父窗口的上下文" @输出名 = "Ctx">
+    变量 事件标志 <公开 类型 = 整数 注释 = "(只读)为\"IM输入框标志\"中以\"回调\"结束的常量之一" @输出名 = "EventFlag">
+    变量 标志 <公开 类型 = 整数 注释 = "(只读)调用\"xx输入框\"时传递的标志,请参考\"IM输入框标志\"中的常量." @输出名 = "Flags">
+    变量 用户数据 <公开 类型 = 通用指针 注释 = "(只读)调用\"xx输入框\"时传递的用户数据" @输出名 = "UserData">
+    变量 事件字符 <公开 类型 = IM字符 注释 = "(读写)输入的字符" 注释 = "[字符过滤回调] 可以替换字符" @输出名 = "EventChar">
+    变量 事件按键 <公开 类型 = 整数 注释 = "(只读)请参考\"IM按键码\"的常量" 注释 = "[完成回调、历史记录回调]" @输出名 = "EventKey">
+    变量 缓冲区 <公开 类型 = 通用指针 注释 = "(读写)文本缓冲区(char*)" 注释 = "[重设大小回调] 可以替换文本指针(该指针等于你输入的文本)"
+            注释 = "[完成回调、历史记录回调、始终回调] 只能修改指针数据,不允许替换指针本身 (该指针指向内部数据)" @输出名 = "Buf">
+    变量 文本长度 <公开 类型 = 整数 注释 = "(读写)文本长度(以字节为单位)" 注释 = "[重设大小回调、完成回调、历史记录回调、始终回调] 不包含结尾零字符的文本长度"
+            @输出名 = "BufTextLen">
+    变量 缓冲区长度 <公开 类型 = 整数 注释 = "(读写)文本缓冲区的长度(以字节为单位)" 注释 = "[重设大小回调、完成回调、历史记录回调、始终回调] 包含结尾零字符的文本缓冲区长度"
+            @输出名 = "BufSize">
+    变量 更新缓冲区 <公开 类型 = 逻辑型 注释 = "(只写)如果你修改了缓冲区数据和缓冲区长度,必须将本成员设置为\"真\"" 注释 = "[完成回调、历史记录回调、始终回调]"
+            @输出名 = "BufDirty">
+    变量 光标位置 <公开 类型 = 整数 注释 = "(读写)[完成回调、历史记录回调、始终回调]" @输出名 = "CursorPos">
+    变量 选区起点 <公开 类型 = 整数 注释 = "(读写)等于\"选区终点\"表示无选区" 注释 = "[完成回调、历史记录回调、始终回调]" @输出名 = "SelectionStart">
+    变量 选区终点 <公开 类型 = 整数 注释 = "(读写)[完成回调、历史记录回调、始终回调]" @输出名 = "SelectionEnd">
+
+    方法 删除字符 <公开 静态 注释 = "删除文本缓冲区里的部分字符." 注释 = "如果需要修改文本缓冲区,请优先使用本方法." 折叠 @嵌入式方法 = "">
+    参数 本结构指针 <类型 = IM输入框回调数据指针>
+    参数 起始位置 <类型 = 整数 注释 = "所欲删除的起始索引位置">
+    参数 删除长度 <类型 = 整数 注释 = "所欲删除的字节数">
+    {
+        @ @<本结构指针>->DeleteChars(@<起始位置>, @<删除长度>)
+    }
+
+    方法 插入字符 <公开 静态 注释 = "在文本缓冲区中插入字符串." 注释 = "如果需要修改文本缓冲区,请优先使用本方法." 折叠>
+    参数 本结构指针 <类型 = IM输入框回调数据指针>
+    参数 插入位置 <类型 = 整数 注释 = "所欲插入的索引位置">
+    参数 文本指针 <类型 = 变整数 注释 = "所欲插入的UTF-8文本指针">
+    参数 插入长度 <类型 = 整数 注释 = "所欲插入的字节数">
+    {
+        @ @<本结构指针>->InsertChars(@<插入位置>, (const char*)@<文本指针>, (const char*)@<文本指针> + @<插入长度>);
+    }
+
+    方法 全选 <公开 静态 注释 = "全选输入框的文本" 折叠 @嵌入式方法 = "">
+    参数 本结构指针 <类型 = IM输入框回调数据指针>
+    {
+        @ @<本结构指针>->SelectAll()
+    }
+
+    方法 取消选择 <公开 静态 注释 = "取消选择输入框中的文本" 折叠 @嵌入式方法 = "">
+    参数 本结构指针 <类型 = IM输入框回调数据指针>
+    {
+        @ @<本结构指针>->ClearSelection()
+    }
+
+    方法 是否有选区 <公开 静态 类型 = 逻辑型 注释 = "返回是否有被选定的文本" 折叠 @嵌入式方法 = "">
+    参数 本结构指针 <类型 = IM输入框回调数据指针>
+    {
+        @ @<本结构指针>->HasSelection()
+    }
+}
+
+# 回调函数指针 ---
+
+类 IM输入框回调指针 <公开 折叠 @别名 = "ImGuiInputTextCallback" @别名类型 = 本地参考类型>
+{
+    方法 回调函数模板 <公开 静态 类型 = 整数 返回值注释 = "在\"字符过滤回调\"中,返回1表示丢弃当前输入." 折叠>
+    参数 数据 <类型 = IM输入框回调数据指针>
+    {
+        // int (*ImGuiInputTextCallback)(ImGuiInputTextCallbackData* data)
+        返回 (0)
+    }
+
+    方法 创建 <公开 静态 类型 = IM输入框回调指针 折叠 @嵌入式方法 = "">
+    参数 回调函数 <@匹配方法 = "回调函数模板">
+    {
+        @ (ImGuiInputTextCallback)&@<回调函数>
+    }
+
+    # ---
+
+    方法 取指针 <公开 静态 类型 = 通用指针 注释 = "取回本类指针对应的通用指针" 折叠 @嵌入式方法 = "">
+    参数 本结构指针 <类型 = IM输入框回调指针>
+    {
+        @ (void*)@<本结构指针>
+    }
+
+    方法 取变整数指针 <公开 静态 类型 = 变整数 注释 = "将本数据类型值转换到变整数后返回" 折叠 @嵌入式方法 = "">
+    参数 本结构指针 <类型 = IM输入框回调指针>
+    {
+        @ (INT_P)@<本结构指针>
+    }
+
+    方法 来自变整数 <公开 静态 类型 = IM输入框回调指针 注释 = "将指定整数值转换为本数据类型值后返回" 折叠 @嵌入式方法 = "">
+    参数 欲转换整数值 <@匹配类型 = 通用整数型>
+    {
+        @ (@dt<IM输入框回调指针>)@<欲转换整数值>
+    }
+
+    方法 空指针 <公开 静态 类型 = IM输入框回调指针 注释 = "将NULL指针值转换为本数据类型值后返回" 折叠 @嵌入式方法 = "">
+    {
+        @ NULL
+    }
+
+    方法 置空指针 <公开 静态 类型 = 逻辑型 注释 = "将指针值置空(null)." 注释 = "注意: 本方法不会销毁指针数据,请确保指针数据会被销毁." 折叠 @嵌入式方法 = "">
+    参数 本结构指针 <类型 = IM输入框回调指针>
+    {
+        @ @<本结构指针> = nullptr
+    }
+
+    方法 为空指针 <公开 静态 类型 = 逻辑型 注释 = "返回本指针是否为空" 折叠 @嵌入式方法 = "">
+    参数 本结构指针 <类型 = IM输入框回调指针>
+    {
+        @ @<本结构指针> == nullptr
+    }
+
+    #
 }
 
 #

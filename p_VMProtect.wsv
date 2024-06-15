@@ -547,10 +547,10 @@
 
 # ======
 
-类 VMP注册机类 <公开 注释 = "使用步骤:" 注释 = " 1. 导入密钥对/导入产品信息" 注释 = " 2. 生成序列号" 折叠
-        @文档 = "category = \"VMProtect注册机\"" @视窗.外部头文件 = "VMProtect\\include\\KeyGenAPI.h"
-        @视窗.外部库.x64 = "VMProtect\\lib\\KeyGen64.lib" @视窗.外部库.win32 = "VMProtect\\lib\\KeyGen32.lib"
-        @视窗.附属文件.x64 = "VMProtect\\lib\\KeyGen64.dll" @视窗.附属文件.win32 = "VMProtect\\lib\\KeyGen32.dll">
+类 VMP注册机类 <公开 注释 = "使用步骤:" 注释 = " 1. 导入密钥对/导入产品信息" 注释 = " 2. 生成序列号" @文档 = "category = \"VMProtect注册机\""
+        @视窗.外部头文件 = "VMProtect\\include\\KeyGenAPI.h" @视窗.外部库.x64 = "VMProtect\\lib\\KeyGen64.lib"
+        @视窗.外部库.win32 = "VMProtect\\lib\\KeyGen32.lib" @视窗.附属文件.x64 = "VMProtect\\lib\\KeyGen64.dll"
+        @视窗.附属文件.win32 = "VMProtect\\lib\\KeyGen32.dll">
 {
     变量 产品信息 <类型 = VMProtect产品信息>
     变量 ProductInfo <类型 = VMProtectProductInfo @输出名 = "ProductInfo">
@@ -754,13 +754,13 @@
         {
             序列号信息.标志 = 位或 (序列号信息.标志, VMProtectSerialNumberFlags.有机器码)
             硬件ID = 文本到多字节 (机器码, 真)
-            序列号信息.HWID = PIV.类型.多字节指针.来自 (硬件ID.取字节集指针 ())
+            序列号信息.HWID = 硬件ID.取字节集指针 ()
         }
         如果 (用户数据.字节集是否为空 () == 假 && 用户数据.取字节集长度 () <= 255)
         {
             序列号信息.标志 = 位或 (序列号信息.标志, VMProtectSerialNumberFlags.有用户数据)
             序列号信息.用户数据长度 = 用户数据.取字节集长度 ()
-            序列号信息.用户数据 = PIV.类型.无符号字节指针.来自 (用户数据.取字节集指针 ())
+            序列号信息.用户数据 = 用户数据.取字节集指针 ()
         }
         返回 (生成序列号2 (序列号, 序列号信息))
     }
@@ -934,7 +934,7 @@
     常量 有用户数据 <公开 类型 = 整数 值 = @HAS_USER_DATA 注释 = "将pUserData地址的自定义用户数据置入到序列号" 编辑时信息 = "33FFC, 0, 0, 0">
 }
 
-类 VMProtectProductInfo <公开 基础类 = PIV结构模板 折叠 @文档 = "category = \"VMProtect注册机.辅助类\""
+类 VMProtectProductInfo <公开 基础类 = PIV结构模板 折叠 @文档 = "category = \"VMProtect注册机.辅助类\"" @强制依赖 = "VMP注册机类"
         @别名 = "VMProtectProductInfo" @模板实现类 = "VMProtectProductInfo">
 {
     变量 algorithm <公开 类型 = 整数 注释 = "ALGORITHM_RSA = 0," 注释 = "ALGORITHM_PADDING = 0xFFFFFFFF"
@@ -949,7 +949,7 @@
 }
 
 类 VMProtectSerialNumberInfo <公开 基础类 = PIV结构模板 折叠 @文档 = "category = \"VMProtect注册机.辅助类\""
-        @别名 = "VMProtectSerialNumberInfo" @模板实现类 = "VMProtectSerialNumberInfo">
+        @强制依赖 = "VMP注册机类" @别名 = "VMProtectSerialNumberInfo" @模板实现类 = "VMProtectSerialNumberInfo">
 {
     变量 标志 <公开 类型 = 整数 注释 = "\"VMProtect序列号标志\"中常量的位或值" @输出名 = "flags">
     变量 用户名 <公开 类型 = 文本指针 注释 = "用户名称的Unicode文本指针" @输出名 = "pUserName">
@@ -958,7 +958,35 @@
     变量 更新期限 <公开 类型 = 无符号整数 注释 = "免费更新的期限,程序在此日期前编译的,可以免费使用." @输出名 = "dwMaxBuildDate">
     变量 运行时限 <公开 类型 = 无符号字节 注释 = "从程序运行时开始计算,超过此参数(以分钟为单位)的时间后,将不再允许使用程序;"
             注释 = "注意: VMProtect本身未实现到时限提示或退出程序的功能,需要你自己编程实现," 注释 = "这里只是在序列号里提供了这个状态." @输出名 = "nRunningTimeLimit">
-    变量 HWID <公开 类型 = PIV.类型.多字节指针 注释 = "硬件ID的ANSI文本指针" @输出名 = "pHardwareID">
+    变量 "//HWID" <公开 类型 = PIV.类型.多字节指针 注释 = "硬件ID的ANSI文本指针" @输出名 = "pHardwareID">
     变量 用户数据长度 <公开 类型 = 变整数 注释 = "用户数据已使用的字节数,最大255字节." @输出名 = "nUserDataLength">
-    变量 用户数据 <公开 类型 = PIV.类型.无符号字节指针 注释 = "用户数据的字节集指针,实际占用尺寸以\"用户数据长度\"为准." @输出名 = "pUserData">
+    变量 "//用户数据" <公开 类型 = PIV.类型.无符号字节指针 注释 = "用户数据的字节集指针,实际占用尺寸以\"用户数据长度\"为准." @输出名 = "pUserData">
+
+    方法 HWID <公开 静态 属性读 类型 = 变整数 注释 = "硬件ID的ANSI文本指针" 折叠 @嵌入式方法 = "">
+    参数 本结构 <类型 = VMProtectSerialNumberInfo>
+    {
+        @ (INT_P)@<本结构>.pHardwareID
+    }
+
+    方法 HWID <公开 静态 属性写 注释 = "硬件ID的ANSI文本指针" 折叠>
+    参数 本结构 <类型 = VMProtectSerialNumberInfo>
+    参数 文本指针 <类型 = 变整数>
+    {
+        @ @<本结构>.pHardwareID = (const char *)@<文本指针>;
+    }
+
+    方法 用户数据 <公开 静态 属性读 类型 = 变整数 注释 = "用户数据的字节集指针,实际占用尺寸以\"用户数据长度\"为准." @嵌入式方法 = "">
+    参数 本结构 <类型 = VMProtectSerialNumberInfo>
+    {
+        @ (INT_P)@<本结构>.pUserData
+    }
+
+    方法 用户数据 <公开 静态 属性写 注释 = "用户数据的字节集指针,实际占用尺寸以\"用户数据长度\"为准.">
+    参数 本结构 <类型 = VMProtectSerialNumberInfo>
+    参数 数据指针 <类型 = 变整数>
+    {
+        @ @<本结构>.pUserData = (const char *)@<数据指针>;
+    }
+
+    #
 }

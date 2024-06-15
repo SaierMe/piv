@@ -22,7 +22,7 @@ namespace piv
          * @param rootDir 根目录
          * @param MMKVLogInfo 日志级别
          */
-        static void InitializeMMKV(const wchar_t *rootDir = L"", const int32_t &MMKVLogInfo = 2)
+        static void InitializeMMKV(const wchar_t *rootDir = L"", int32_t MMKVLogInfo = 2)
         {
             std::wstring _rootDir(rootDir);
             if (_rootDir.empty())
@@ -53,9 +53,9 @@ namespace piv
          * @brief 取根目录
          * @return
          */
-        static CVolString GetRootDir()
+        static CWString GetRootDir()
         {
-            return CVolString(MMKV::getRootDir().c_str());
+            return CWString{MMKV::getRootDir().c_str()};
         }
 
         /**
@@ -137,7 +137,7 @@ namespace piv
          * @brief 置日志级别
          * @param level 日志级别
          */
-        static void SetLogLevel(const int32_t &level)
+        static void SetLogLevel(int32_t level)
         {
             MMKV::setLogLevel(static_cast<MMKVLogLevel>(level));
         }
@@ -241,7 +241,7 @@ public:
      * @brief 取表名称
      * @return
      */
-    inline CVolString GetMmapID()
+    inline CWString GetMmapID()
     {
         return m_MMKV ? *PivU2Ws{m_MMKV->mmapID()} : _CT("");
     }
@@ -259,7 +259,7 @@ public:
      * @brief 取密钥
      * @return
      */
-    inline CVolString GetCryptKey()
+    inline CWString GetCryptKey()
     {
         return m_MMKV ? *PivU2Ws{m_MMKV->cryptKey()} : _CT("");
     }
@@ -328,7 +328,7 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline bool SetCVolStr(CVolString &value, const KeyT &key, int32_t expireDuration = 0)
+    inline bool SetCVolStr(CWString &value, const KeyT &key, int32_t expireDuration = 0)
     {
         if (!m_MMKV)
             return false;
@@ -443,7 +443,7 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline bool GetString(const KeyT &key, CVolString &value)
+    inline bool GetString(const KeyT &key, CWString &value)
     {
         value.Empty();
         if (m_MMKV)
@@ -458,9 +458,9 @@ public:
         return false;
     }
     template <typename KeyT>
-    inline CVolString GetString(const KeyT &key)
+    inline CWString GetString(const KeyT &key)
     {
-        CVolString result;
+        CWString result;
         if (m_MMKV)
         {
             mmkv::MMBuffer buffer;

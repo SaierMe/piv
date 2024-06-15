@@ -114,6 +114,7 @@
         "vol_base.h": "c",
         "piv_bit7z copy.C": "cpp",
         "cerrno": "cpp",
-        "climits": "cpp"
+        "climits": "cpp",
+        "cwctype": "cpp"
     }
 }
