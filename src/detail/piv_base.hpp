@@ -25,6 +25,10 @@
 #define PIV_HAS_CPP17
 #endif
 
+#if defined(_MSVC_LANG) && (_MSVC_LANG >= 202002L)
+#define PIV_HAS_CPP20
+#endif
+
 #ifdef PIV_HAS_CPP17
 #define PIV_IF if constexpr
 #define PIV_ELSE_IF else if constexpr
@@ -161,7 +165,8 @@ static BOOL PivMsgAssert(const BOOL blpSucceed, const WCHAR *szErrorMessage, con
     const BOOL blpDebuggerPresent = ::IsDebuggerPresent();
     if (blpDebuggerPresent)
         strOutput.AddText(L"* \a");
-    strOutput.AddFormatText(L"运行时校验失败(\"%s\"): %s", GetWideText(szFileName, CVolMem(), NULL), szErrorMessage);
+    CVolMem buf;
+    strOutput.AddFormatText(L"运行时校验失败(\"%s\"): %s", GetWideText(szFileName, buf, NULL), szErrorMessage);
     if (blpDebuggerPresent)
     {
         ::OutputDebugStringW(strOutput.GetText());

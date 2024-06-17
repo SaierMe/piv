@@ -41,11 +41,15 @@ struct BooleanFakeLock
 struct LFLock
 {
     std::atomic_flag flag;
-
+#if defined(_MSVC_LANG) && (_MSVC_LANG >= 202002L)
+    LFLock() : flag{}
+    {
+    }
+#else
     LFLock() : flag{false}
     {
     }
-
+#endif
     LIBGO_INLINE void lock()
     {
         while (flag.test_and_set(std::memory_order_acquire)) ;

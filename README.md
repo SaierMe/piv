@@ -101,7 +101,7 @@
 
 - [nlohmann **JSON**](https://github.com/nlohmann/json) `3.11.3` `MIT license`  现代 C++ 的 JSON 库
 - **[fmtlog](https://github.com/MengRao/fmtlog)**  `2.2.1`  `MIT license` 纳秒级精度的高性能异步日志记录库
-- **[{fmt}](https://github.com/fmtlib/fmt)**  `10.1.1`  `MIT license` 格式化文本库，等同 C++20 std::format 的实现 
+- **[{fmt}](https://github.com/fmtlib/fmt)**  `10.2.0`  `MIT license` 格式化文本库，等同 C++20 std::format 的实现 
 - **[md4c](https://github.com/mity/md4c)** `0.4.8`  `MIT license` CommonMark 0.30 规范 + GFM 的 Markdown 解析库
 - **[simpleini](https://github.com/brofield/simpleini)** `4.20` `MIT license` 简易的 INI 配置文件读写库
 - **[simdutf](https://github.com/simdutf/simdutf)** `5.2.8` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库

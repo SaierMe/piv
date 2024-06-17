@@ -252,8 +252,8 @@ namespace piv
         template <typename StringT>
         int32_t compare(const StringT &lhs, const CVolMem &rhs, bool case_insensitive = true)
         {
-            return piv::edit::compare(lhs, reinterpret_cast<const typename StringT::value_type *>(s.GetPtr()),
-                                      case_insensitive, static_cast<size_t>(s.GetSize() / sizeof(typename StringT::value_type)));
+            return piv::edit::compare(lhs, reinterpret_cast<const typename StringT::value_type *>(rhs.GetPtr()),
+                                      case_insensitive, static_cast<size_t>(rhs.GetSize() / sizeof(typename StringT::value_type)));
         }
 
         template <typename StringT>
@@ -1162,13 +1162,13 @@ namespace piv
         template <typename CharT>
         std::basic_string<CharT> &assign(std::basic_string<CharT> &lhs, const CVolMem &rhs, size_t count = -1)
         {
-            return lhs.assign(reinterpret_cast<const CharT *>(rhs.GetPtr()), count == -1 ? static_cast<size_t>(rhs.GetSize() / sizeof(CharT)), count);
+            return lhs.assign(reinterpret_cast<const CharT *>(rhs.GetPtr()), count == -1 ? static_cast<size_t>(rhs.GetSize() / sizeof(CharT)) : count);
         }
 
         template <typename CharT>
         std::basic_string<CharT> &assign(std::basic_string<CharT> &lhs, const ::piv::basic_string_view<CharT> &rhs, size_t count = -1)
         {
-            return lhs.assign(rhs.data(), count == -1 ? rhs.size(), count);
+            return lhs.assign(rhs.data(), count == -1 ? rhs.size() : count);
         }
 
         static std::wstring &assign(std::wstring &lhs, const CWString &rhs, size_t count = -1)
@@ -1470,13 +1470,13 @@ namespace piv
         template <typename CharT>
         std::basic_string<CharT> &append(std::basic_string<CharT> &lhs, const CVolMem &rhs, size_t count = -1)
         {
-            return lhs.append(reinterpret_cast<const CharT *>(rhs.GetPtr()), count == -1 ? static_cast<size_t>(rhs.GetSize() / sizeof(CharT)), count);
+            return lhs.append(reinterpret_cast<const CharT *>(rhs.GetPtr()), count == -1 ? static_cast<size_t>(rhs.GetSize() / sizeof(CharT)) : count);
         }
 
         template <typename CharT>
         std::basic_string<CharT> &append(std::basic_string<CharT> &lhs, const ::piv::basic_string_view<CharT> &rhs, size_t count = -1)
         {
-            return lhs.append(rhs.data(), count == -1 ? rhs.size(), count);
+            return lhs.append(rhs.data(), count == -1 ? rhs.size() : count);
         }
 
         static std::wstring &append(std::wstring &lhs, const CWString &rhs, size_t count = -1)
@@ -1746,7 +1746,7 @@ namespace piv
         template <typename EncodeT, typename... Args>
         std::string &append_format(std::string &lhs, const wchar_t *format, Args &&...args)
         {
-            PIV_ELSE_IF(sizeof(EncodeT) == 3)
+            PIV_IF(sizeof(EncodeT) == 3)
             {
                 return lhs.append(piv::edit::format<char>(PivW2U{format}.GetText(), std::forward<Args>(args)...));
             }
@@ -2141,7 +2141,7 @@ namespace piv
         template <typename CharT>
         size_t copy(std::basic_string<CharT> &lhs, CharT *dest, size_t pos, size_t count)
         {
-            ASSERT(pos <= str.size()); // 判断索引位置是否有效
+            ASSERT(pos <= lhs.size()); // 判断索引位置是否有效
             return lhs.copy(dest, count, pos);
         }
 
@@ -2366,7 +2366,7 @@ namespace piv
         template <typename CharT>
         size_t copy(piv::basic_string_view<CharT> &lhs, CharT *dest, size_t pos, size_t count)
         {
-            ASSERT(pos <= str.size()); // 判断索引位置是否有效
+            ASSERT(pos <= lhs.size()); // 判断索引位置是否有效
             return lhs.copy(dest, count, pos);
         }
 

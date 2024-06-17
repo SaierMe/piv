@@ -111,7 +111,7 @@ namespace piv
         if (count == -1)
             return ::piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(rhs.GetPtr()), static_cast<size_t>(rhs.GetSize()) / sizeof(CharT)};
         else
-            return ::piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(rhs.GetText()), count};
+            return ::piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(rhs.GetTextPtr()), count};
     }
 
     namespace detail
@@ -954,7 +954,7 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline const wchar_t *GetPtr() const noexcept
+    inline wchar_t *GetPtr() noexcept
     {
         return utf16str.empty() ? nullptr : utf16str.data();
     }
@@ -1167,7 +1167,7 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline const char *GetPtr() const noexcept
+    inline char *GetPtr() noexcept
     {
         return mbstr.empty() ? nullptr : mbstr.data();
     }
@@ -1370,7 +1370,7 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline const char *GetPtr() const noexcept
+    inline char *GetPtr() noexcept
     {
         return utf8str.empty() ? nullptr : utf8str.data();
     }
@@ -1569,7 +1569,7 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline const wchar_t *GetPtr() noexcept
+    inline wchar_t *GetPtr() noexcept
     {
         return utf16str.empty() ? nullptr : utf16str.data();
     }
@@ -1770,7 +1770,7 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline const char *GetPtr() noexcept
+    inline char *GetPtr() noexcept
     {
         return mbstr.empty() ? nullptr : mbstr.data();
     }
@@ -1957,7 +1957,7 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline const char *GetPtr() const noexcept
+    inline char *GetPtr() noexcept
     {
         return utf8str.empty() ? nullptr : utf8str.data();
     }
@@ -2152,9 +2152,9 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline const wchar_t *GetPtr() const noexcept
+    inline wchar_t *GetPtr() noexcept
     {
-        return utf16str.IsEmpty() ? nullptr : utf16str.GetText();
+        return utf16str.IsEmpty() ? nullptr : utf16str.m_mem.GetTextPtr();
     }
 
     /**
@@ -2362,9 +2362,9 @@ public:
      * @brief 获取转换的文本首字符指针
      * @return 文本的首字符指针
      */
-    inline const wchar_t *GetPtr() const noexcept
+    inline wchar_t *GetPtr() noexcept
     {
-        return utf16str.IsEmpty() ? nullptr : utf16str.GetText();
+        return utf16str.IsEmpty() ? nullptr : utf16str.m_mem.GetTextPtr();
     }
 
     /**
@@ -2616,12 +2616,12 @@ public:
      * @brief 获取转换后的文本指针(可能会返回空指针)
      * @return 字符串指针
      */
-    inline const char *GetPtr() const noexcept
+    inline char *GetPtr() noexcept
     {
         if (pStr)
             return pStr->data();
         if (pSv)
-            return pSv->data();
+            return const_cast<char *>(pSv->data());
         return nullptr;
     }
 
@@ -2792,6 +2792,15 @@ public:
     inline const char *GetText() const noexcept
     {
         return u8str.c_str();
+    }
+
+    /**
+     * @brief 获取转换后的文本指针(可能会返回空指针)
+     * @return 字符串指针
+     */
+    inline char *GetPtr() noexcept
+    {
+        return u8str.empty() ? nullptr : u8str.data();
     }
 
     /**

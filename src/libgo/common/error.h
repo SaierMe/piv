@@ -90,7 +90,11 @@ static void ThrowError(eCoErrorCode code)
 {
     LIBGO_DebugPrint(dbg_exception, "throw exception %d:%s",
             (int)code, GetCoErrorCategory().message((int)code).c_str());
+#if defined(_MSVC_LANG) && (_MSVC_LANG >= 202002L)
+    if (std::uncaught_exceptions()) return ;
+#else
     if (std::uncaught_exception()) return ;
+#endif
     throw std::system_error(MakeCoErrorCode(code));
 }
 
@@ -113,7 +117,11 @@ private:
 static void ThrowException(std::string const& errMsg)
 {
     LIBGO_DebugPrint(dbg_exception, "throw co_exception %s", errMsg.c_str());
+#if defined(_MSVC_LANG) && (_MSVC_LANG >= 202002L)
+    if (std::uncaught_exceptions()) return ;
+#else
     if (std::uncaught_exception()) return ;
+#endif
     throw co_exception(errMsg);
 }
 
