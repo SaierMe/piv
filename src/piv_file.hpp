@@ -1282,7 +1282,7 @@ public:
         if (!m_pvFile)
             return 0;
         if (m_offset + stSize >= m_ViewSize)
-            stSize = m_ViewSize - m_offset;
+            stSize = static_cast<ptrdiff_t>(m_ViewSize - m_offset);
         cData.CopyFrom(m_pvFile + m_offset, stSize);
         m_offset += stSize;
         return stSize;
@@ -1587,7 +1587,7 @@ public:
         if (!m_pvFile || offset >= m_MapSize || length <= 0 || length > m_MapSize - offset)
             return FALSE;
         memmove(m_pvFile + offset, m_pvFile + offset + length, static_cast<size_t>(m_MapSize - offset - length));
-        memset(m_pvFile + (m_MapSize - length), 0, length);
+        memset(m_pvFile + (m_MapSize - length), 0, static_cast<size_t>(length));
         return TRUE;
     }
 

@@ -956,7 +956,7 @@ public:
      */
     inline wchar_t *GetPtr() noexcept
     {
-        return utf16str.empty() ? nullptr : utf16str.data();
+        return utf16str.empty() ? nullptr : const_cast<wchar_t *>(utf16str.data());
     }
 
     /**
@@ -1169,7 +1169,7 @@ public:
      */
     inline char *GetPtr() noexcept
     {
-        return mbstr.empty() ? nullptr : mbstr.data();
+        return mbstr.empty() ? nullptr : const_cast<char *>(mbstr.data());
     }
 
     /**
@@ -1372,7 +1372,7 @@ public:
      */
     inline char *GetPtr() noexcept
     {
-        return utf8str.empty() ? nullptr : utf8str.data();
+        return utf8str.empty() ? nullptr : const_cast<char *>(utf8str.data());
     }
 
     /**
@@ -1571,7 +1571,7 @@ public:
      */
     inline wchar_t *GetPtr() noexcept
     {
-        return utf16str.empty() ? nullptr : utf16str.data();
+        return utf16str.empty() ? nullptr : const_cast<wchar_t *>(utf16str.data());
     }
 
     /**
@@ -1772,7 +1772,7 @@ public:
      */
     inline char *GetPtr() noexcept
     {
-        return mbstr.empty() ? nullptr : mbstr.data();
+        return mbstr.empty() ? nullptr : const_cast<char *>(mbstr.data());
     }
 
     /**
@@ -1959,7 +1959,7 @@ public:
      */
     inline char *GetPtr() noexcept
     {
-        return utf8str.empty() ? nullptr : utf8str.data();
+        return utf8str.empty() ? nullptr : const_cast<char *>(utf8str.data());
     }
 
     /**
@@ -2154,7 +2154,7 @@ public:
      */
     inline wchar_t *GetPtr() noexcept
     {
-        return utf16str.IsEmpty() ? nullptr : utf16str.m_mem.GetTextPtr();
+        return utf16str.IsEmpty() ? nullptr : const_cast<wchar_t *>(utf16str.m_mem.GetTextPtr());
     }
 
     /**
@@ -2364,7 +2364,7 @@ public:
      */
     inline wchar_t *GetPtr() noexcept
     {
-        return utf16str.IsEmpty() ? nullptr : utf16str.m_mem.GetTextPtr();
+        return utf16str.IsEmpty() ? nullptr : const_cast<wchar_t *>(utf16str.m_mem.GetTextPtr());
     }
 
     /**
@@ -2619,7 +2619,7 @@ public:
     inline char *GetPtr() noexcept
     {
         if (pStr)
-            return pStr->data();
+            return const_cast<char *>(pStr->data());
         if (pSv)
             return const_cast<char *>(pSv->data());
         return nullptr;
@@ -2800,7 +2800,7 @@ public:
      */
     inline char *GetPtr() noexcept
     {
-        return u8str.empty() ? nullptr : u8str.data();
+        return u8str.empty() ? nullptr : const_cast<char *>(u8str.data());
     }
 
     /**
