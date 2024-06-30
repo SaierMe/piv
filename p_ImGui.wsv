@@ -897,7 +897,7 @@
     参数 覆盖文本 <注释 = "默认在进度条上显示如\"95%\"的当前进度文本,若提供了自定义的文本,将覆盖原来的进度文本." 注释 = "支持类型: 文本型、标准文本类U、字节集类(UTF-8)"
             @默认值 = "" @匹配类型 = 通用型>
     {
-        @ ImGui::ProgressBar(@<进度>, @<尺寸>, PivAny2U{@<覆盖文本>}.GetPtr())
+        @ ImGui::ProgressBar(@<进度>, @<尺寸>, PivAny2U{@<覆盖文本>}.data())
     }
 
     方法 项目符号 <公开 静态 注释 = "绘制一个小圆点并将光标保持在同一行." 折叠 @嵌入式方法 = "">
@@ -1948,7 +1948,7 @@
     参数 是否选中 <类型 = 逻辑型 注释 = "设置当前的菜单项是否为选中状态" @默认值 = 假>
     参数 是否启用 <类型 = 逻辑型 注释 = "设置当前的菜单项是否可用" @默认值 = 真>
     {
-        @ ImGui::MenuItem(*PivAny2U{@<标签文本>}, PivAny2U{@<快捷键>}.GetPtr(), static_cast<bool>(@<是否选中>), static_cast<bool>(@<是否启用>))
+        @ ImGui::MenuItem(*PivAny2U{@<标签文本>}, PivAny2U{@<快捷键>}.data(), static_cast<bool>(@<是否选中>), static_cast<bool>(@<是否启用>))
     }
 
     方法 菜单项Ex <公开 静态 类型 = 逻辑型 注释 = "在菜单中创建一个菜单项,参数中的快捷键仅用于显示,本方法不会实现对应的快捷键功能." 返回值注释 = "菜单项被单击时返回真" 折叠
@@ -1960,7 +1960,7 @@
     参数 是否选中 <类型 = 逻辑型 注释 = "必须提供一个变量,可以设置和返回当前的菜单项是否为选中状态." @需求类型 = 可写入变量>
     参数 是否启用 <类型 = 逻辑型 注释 = "设置当前的菜单项是否可用" @默认值 = 真>
     {
-        @ ImGui::MenuItem(*PivAny2U{@<标签文本>}, PivAny2U{@<快捷键>}.GetPtr(), reinterpret_cast<bool*>(&@<是否选中>), static_cast<bool>(@<是否启用>))
+        @ ImGui::MenuItem(*PivAny2U{@<标签文本>}, PivAny2U{@<快捷键>}.data(), reinterpret_cast<bool*>(&@<是否选中>), static_cast<bool>(@<是否启用>))
     }
 
     # 工具提示 | Tooltips
@@ -2048,7 +2048,7 @@
     参数 文本ID <注释 = "设置弹出项的唯一文本ID,本ID不会显示在弹出项中;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型 @默认值 = 0>
     参数 弹出标志 <类型 = 整数 注释 = "请参考\"IM弹出标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM弹出标志.鼠标右键>
     {
-        @ if (ImGui::BeginPopupContextItem(PivAny2U{@<文本ID>}.GetPtr(), static_cast<ImGuiPopupFlags>(@<弹出标志>)) == true)
+        @ if (ImGui::BeginPopupContextItem(PivAny2U{@<文本ID>}.data(), static_cast<ImGuiPopupFlags>(@<弹出标志>)) == true)
     }
 
     方法 单击窗口创建弹出菜单 <公开 静态 注释 = "(右键)单击当前窗口的任意位置时,弹出一个上下文菜单,可在子语句体中自定义菜单项." 折叠 隐藏值属性 = "0"
@@ -2056,7 +2056,7 @@
     参数 文本ID <注释 = "设置弹出项的唯一文本ID,本ID不会显示在弹出项中;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型 @默认值 = 0>
     参数 弹出标志 <类型 = 整数 注释 = "请参考\"IM弹出标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM弹出标志.鼠标右键>
     {
-        @ if (ImGui::BeginPopupContextWindow(PivAny2U{@<文本ID>}.GetPtr(), static_cast<ImGuiPopupFlags>(@<弹出标志>)) == true)
+        @ if (ImGui::BeginPopupContextWindow(PivAny2U{@<文本ID>}.data(), static_cast<ImGuiPopupFlags>(@<弹出标志>)) == true)
     }
 
     方法 单击背景创建弹出菜单 <公开 静态 注释 = "(右键)单击背景(没有窗口的区域)的任意位置时,弹出一个上下文菜单,可在子语句体中自定义菜单项." 折叠 隐藏值属性 = "0"
@@ -2064,7 +2064,7 @@
     参数 文本ID <注释 = "设置弹出项的唯一文本ID,本ID不会显示在弹出项中;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型 @默认值 = 0>
     参数 弹出标志 <类型 = 整数 注释 = "请参考\"IM弹出标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM弹出标志.鼠标右键>
     {
-        @ if (ImGui::BeginPopupContextVoid(PivAny2U{@<文本ID>}.GetPtr(), static_cast<ImGuiPopupFlags>(@<弹出标志>)) == true)
+        @ if (ImGui::BeginPopupContextVoid(PivAny2U{@<文本ID>}.data(), static_cast<ImGuiPopupFlags>(@<弹出标志>)) == true)
     }
 
     方法 是否已弹出 <公开 静态 类型 = 逻辑型 注释 = "返回指定的弹出项是否已经弹出显示,返回结果因标志而异." 折叠 @嵌入式方法 = "">
@@ -2102,7 +2102,7 @@
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
     参数 标志 <类型 = 整数 注释 = "请参考\"IM选项卡项标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM选项卡项标志.无>
     {
-        @ ImGui::TabItemButton(PivAny2U{@<标签文本>}.GetPtr(), static_cast<ImGuiTabItemFlags>(@<标志>))
+        @ ImGui::TabItemButton(PivAny2U{@<标签文本>}.data(), static_cast<ImGuiTabItemFlags>(@<标志>))
     }
 
     方法 置选项卡关闭 <公开 静态 注释 = "通知指定的选项卡已关闭" 折叠 @嵌入式方法 = "">
@@ -3358,7 +3358,7 @@
     参数 所欲设置的文本 <注释 = "提供所欲设置的成员值,先前的值将被覆盖." 注释 = "支持类型(*表示会进行编码转换):" 注释 = "  标准文本类U、文本视图类U"
             注释 = "  *文本型、*标准文本类W、*文本视图类W" @匹配类型 = 通用型>
     {
-        @ @sn<this>.arr[static_cast<size_t>(@<索引位置>)] = PivAny2Us{@<所欲设置的文本>}.String()
+        @ @sn<this>.arr[static_cast<size_t>(@<索引位置>)] = PivAny2Us{@<所欲设置的文本>}.ref()
     }
 
     方法 加入成员 <公开 注释 = "将一个或多个文本值加入到数组尾部" 折叠 @嵌入式方法 = "">
@@ -3379,7 +3379,7 @@
     参数 所欲插入的文本 <注释 = "所欲添加的文本值,支持类型(*表示会进行编码转换):" 注释 = "  标准文本类U、文本视图类U" 注释 = "  *文本型、*标准文本类、*文本视图类"
             @匹配类型 = 通用型>
     {
-        @ arr.emplace(arr.begin() + static_cast<size_t>(@<插入索引位置>), PivAny2Us{@<所欲插入的文本>}.String());
+        @ arr.emplace(arr.begin() + static_cast<size_t>(@<插入索引位置>), PivAny2Us{@<所欲插入的文本>}.ref());
     }
 
     方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖>
@@ -3947,8 +3947,8 @@
     参数 新文件名 <类型 = 文本型 注释 = "空文本可以关掉自动读写.ini文件功能">
     {
         @ static PivW2U u8str;
-        @ u8str.Convert(@<新文件名>);
-        @ @<欲操作本对象>->IniFilename = u8str.GetText();
+        @ u8str.convert(@<新文件名>);
+        @ @<欲操作本对象>->IniFilename = u8str.c_str();
     }
 
     方法 日志文件名 <公开 静态 属性读 类型 = 文本型 注释 = "返回日志文件的路径(默认为当前工作目录下的\"imgui_log.txt\")."
@@ -3963,8 +3963,8 @@
     参数 新文件名 <类型 = 文本型 注释 = "空文本可以关掉自动读写.ini文件功能">
     {
         @ static PivW2U u8str;
-        @ u8str.Convert(@<新文件名>);
-        @ @<欲操作本对象>->LogFilename = u8str.GetText();
+        @ u8str.convert(@<新文件名>);
+        @ @<欲操作本对象>->LogFilename = u8str.c_str();
     }
 
     变量 用户数据 <公开 类型 = 通用指针 注释 = "用户自定义的数据" @输出名 = "UserData">

@@ -76,63 +76,63 @@
     参数 欲操作本对象 <类型 = TOML节点模板>
     参数 路径 <@匹配类型 = 通用型>
     {
-        @ *PivU2Ws{@<欲操作本对象>.at_path(PivS2V{@<路径>}).value_or<std::string_view>(std::string_view{""})}
+        @ *PivU2Ws{@<欲操作本对象>.at_path(*PivS2V{@<路径>}).value_or<std::string_view>(std::string_view{""})}
     }
 
     方法 取路径文本值U <公开 静态 类型 = 标准文本类U 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = TOML节点模板>
     参数 路径 <@匹配类型 = 通用型>
     {
-        @ @<欲操作本对象>.at_path(PivS2V{@<路径>}).value_or<std::string_view>(std::string_view{""})
+        @ @<欲操作本对象>.at_path(*PivS2V{@<路径>}).value_or<std::string_view>(std::string_view{""})
     }
 
     方法 取路径整数值 <公开 静态 类型 = 整数 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = TOML节点模板>
     参数 路径 <@匹配类型 = 通用型>
     {
-        @ static_cast<INT>(@<欲操作本对象>.at_path(PivS2V{@<路径>}).value_or<int64_t>(0))
+        @ static_cast<INT>(@<欲操作本对象>.at_path(*PivS2V{@<路径>}).value_or<int64_t>(0))
     }
 
     方法 取路径长整数值 <公开 静态 类型 = 长整数 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = TOML节点模板>
     参数 路径 <@匹配类型 = 通用型>
     {
-        @ @<欲操作本对象>.at_path(PivS2V{@<路径>}).value_or<int64_t>(0)
+        @ @<欲操作本对象>.at_path(*PivS2V{@<路径>}).value_or<int64_t>(0)
     }
 
     方法 取路径小数值 <公开 静态 类型 = 小数 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = TOML节点模板>
     参数 路径 <@匹配类型 = 通用型>
     {
-        @ @<欲操作本对象>.at_path(PivS2V{@<路径>}).value_or<double>(0.0)
+        @ @<欲操作本对象>.at_path(*PivS2V{@<路径>}).value_or<double>(0.0)
     }
 
     方法 取路径逻辑值 <公开 静态 类型 = 逻辑型 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = TOML节点模板>
     参数 路径 <@匹配类型 = 通用型>
     {
-        @ @<欲操作本对象>.at_path(PivS2V{@<路径>}).value_or<bool>(false)
+        @ @<欲操作本对象>.at_path(*PivS2V{@<路径>}).value_or<bool>(false)
     }
 
     方法 取路径日期值 <公开 静态 类型 = TOML日期类 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = TOML节点模板>
     参数 路径 <@匹配类型 = 通用型>
     {
-        @ @<欲操作本对象>.at_path(PivS2V{@<路径>}).value_or<toml::date>(toml::date{})
+        @ @<欲操作本对象>.at_path(*PivS2V{@<路径>}).value_or<toml::date>(toml::date{})
     }
 
     方法 取路径时间值 <公开 静态 类型 = TOML时间类 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = TOML节点模板>
     参数 路径 <@匹配类型 = 通用型>
     {
-        @ @<欲操作本对象>.at_path(PivS2V{@<路径>}).value_or<toml::time>(toml::time{})
+        @ @<欲操作本对象>.at_path(*PivS2V{@<路径>}).value_or<toml::time>(toml::time{})
     }
 
     方法 取路径日期时间值 <公开 静态 类型 = TOML日期时间类 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = TOML节点模板>
     参数 路径 <@匹配类型 = 通用型>
     {
-        @ @<欲操作本对象>.at_path(PivS2V{@<路径>}).value_or<toml::date_time>(toml::date_time{})
+        @ @<欲操作本对象>.at_path(*PivS2V{@<路径>}).value_or<toml::date_time>(toml::date_time{})
     }
 
     # 类型转换
@@ -341,7 +341,7 @@
     参数 欲操作本对象 <类型 = TOML键值表>
     参数 键名 <@匹配类型 = 通用型>
     {
-        @ @<欲操作本对象>.contains(PivS2V{@<键名>})
+        @ @<欲操作本对象>.contains(*PivS2V{@<键名>})
     }
 
     # 删除
@@ -357,7 +357,7 @@
     参数 欲操作本对象 <类型 = TOML键值表>
     参数 键名 <@匹配类型 = 通用型>
     {
-        @ static_cast<int32_t>(@<欲操作本对象>.erase(PivS2V{@<键名>}))
+        @ static_cast<int32_t>(@<欲操作本对象>.erase(*PivS2V{@<键名>}))
     }
 
     方法 删除空成员 <公开 静态 注释 = "Removes empty child arrays and tables." 折叠 @嵌入式方法 = "">
@@ -467,7 +467,7 @@
     参数 键名 <@匹配类型 = 通用型>
     参数 键值表 <类型 = TOML键值表>
     {
-        @ @<欲操作本对象>.emplace<toml::table>(PivS2V{@<键名>}, @<键值表>).second
+        @ @<欲操作本对象>.emplace<toml::table>(*PivS2V{@<键名>}, @<键值表>).second
     }
 
     方法 置入数组值 <公开 静态 类型 = 逻辑型 折叠 @嵌入式方法 = "">
@@ -475,7 +475,7 @@
     参数 键名 <@匹配类型 = 通用型>
     参数 数组值 <类型 = TOML数组类>
     {
-        @ @<欲操作本对象>.emplace<toml::array>(PivS2V{@<键名>}, @<数组值>).second
+        @ @<欲操作本对象>.emplace<toml::array>(*PivS2V{@<键名>}, @<数组值>).second
     }
 
     方法 置入文本值 <公开 静态 类型 = 逻辑型 折叠 @嵌入式方法 = "">
@@ -483,7 +483,7 @@
     参数 键名 <@匹配类型 = 通用型>
     参数 文本值 <@匹配类型 = 通用型>
     {
-        @ @<欲操作本对象>.emplace<std::string>(PivS2V{@<键名>}, PivS2V{@<文本值>}).second
+        @ @<欲操作本对象>.emplace<std::string>(*PivS2V{@<键名>}, *PivS2V{@<文本值>}).second
     }
 
     方法 置入整数值 <公开 静态 类型 = 逻辑型 折叠 @嵌入式方法 = "">
@@ -491,7 +491,7 @@
     参数 键名 <@匹配类型 = 通用型>
     参数 整数值 <类型 = 长整数>
     {
-        @ @<欲操作本对象>.emplace<int64_t>(PivS2V{@<键名>}, @<整数值>).second
+        @ @<欲操作本对象>.emplace<int64_t>(*PivS2V{@<键名>}, @<整数值>).second
     }
 
     方法 置入小数值 <公开 静态 类型 = 逻辑型 折叠 @嵌入式方法 = "">
@@ -499,7 +499,7 @@
     参数 键名 <@匹配类型 = 通用型>
     参数 小数值 <类型 = 小数>
     {
-        @ @<欲操作本对象>.emplace<double>(PivS2V{@<键名>}, @<小数值>).second
+        @ @<欲操作本对象>.emplace<double>(*PivS2V{@<键名>}, @<小数值>).second
     }
 
     方法 置入逻辑值 <公开 静态 类型 = 逻辑型 折叠 @嵌入式方法 = "">
@@ -507,7 +507,7 @@
     参数 键名 <@匹配类型 = 通用型>
     参数 逻辑值 <类型 = 逻辑型>
     {
-        @ @<欲操作本对象>.emplace<bool>(PivS2V{@<键名>}, @<逻辑值>).second
+        @ @<欲操作本对象>.emplace<bool>(*PivS2V{@<键名>}, @<逻辑值>).second
     }
 
     方法 置入日期值 <公开 静态 类型 = 逻辑型 折叠 @嵌入式方法 = "">
@@ -515,7 +515,7 @@
     参数 键名 <@匹配类型 = 通用型>
     参数 日期值 <类型 = TOML日期类>
     {
-        @ @<欲操作本对象>.emplace<toml::date>(PivS2V{@<键名>}, @<日期值>).second
+        @ @<欲操作本对象>.emplace<toml::date>(*PivS2V{@<键名>}, @<日期值>).second
     }
 
     方法 置入时间值 <公开 静态 类型 = 逻辑型 折叠 @嵌入式方法 = "">
@@ -523,7 +523,7 @@
     参数 键名 <@匹配类型 = 通用型>
     参数 时间值 <类型 = TOML时间类>
     {
-        @ @<欲操作本对象>.emplace<toml::time>(PivS2V{@<键名>}, @<时间值>).second
+        @ @<欲操作本对象>.emplace<toml::time>(*PivS2V{@<键名>}, @<时间值>).second
     }
 
     方法 置入日期时间值 <公开 静态 类型 = 逻辑型 折叠 @嵌入式方法 = "">
@@ -531,7 +531,7 @@
     参数 键名 <@匹配类型 = 通用型>
     参数 日期时间值 <类型 = TOML日期时间类>
     {
-        @ @<欲操作本对象>.emplace<toml::date_time>(PivS2V{@<键名>}, @<日期时间值>).second
+        @ @<欲操作本对象>.emplace<toml::date_time>(*PivS2V{@<键名>}, @<日期时间值>).second
     }
 
     # 取值
@@ -540,7 +540,7 @@
     参数 欲操作本对象 <类型 = TOML键值表>
     参数 键名 <@匹配类型 = 通用型>
     {
-        @ @<欲操作本对象>.get(PivS2V{@<键名>})
+        @ @<欲操作本对象>.get(*PivS2V{@<键名>})
     }
 
     方法 取数组 <公开 静态 类型 = TOML数组类 @嵌入式方法 = "" "//@视窗.返回参考" = 真>

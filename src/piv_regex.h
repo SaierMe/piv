@@ -3346,7 +3346,7 @@ public:
 			m_out->append(m_off, m_rgx.begin());
 		m_off = m_rgx.end();
 		PivFromAny<CharT> _fmt{fmt};
-		const CharT* c = &_fmt.GetText()[0];
+		const CharT* c = &_fmt.c_str()[0];
 		while (*c != 0) {
 			if (*c == '\\') {
 				CharT n = *(++c);

@@ -775,7 +775,7 @@
         @ glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
         @ glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, @<透明帧缓冲区>);
         @ glfwWindowHint(GLFW_VISIBLE, m_Visible);
-        @ m_window = glfwCreateWindow(@<宽度>, @<高度>, PivW2U{@<标题>}.GetText(), @<全屏模式> ? m_monitor : nullptr, nullptr);
+        @ m_window = glfwCreateWindow(@<宽度>, @<高度>, PivW2U{@<标题>}.c_str(), @<全屏模式> ? m_monitor : nullptr, nullptr);
         @ if (!m_window) return FALSE;
         @ m_hwnd = glfwGetWin32Window(m_window);
         @ HICON hIcon = ::LoadIconW(::GetModuleHandle(NULL), MAKEINTRESOURCEW(_VOL_USER_APP_ICON_RES_ID));
@@ -1055,7 +1055,7 @@
     方法 标题 <公开 属性写 注释 = "设置本窗口的当前标题文本" 折叠>
     参数 所欲设置标题 <类型 = 文本型 注释 = "提供所欲设置的标题文本">
     {
-        @ glfwSetWindowTitle(m_window, PivW2U{@<所欲设置标题>}.GetText());
+        @ glfwSetWindowTitle(m_window, PivW2U{@<所欲设置标题>}.c_str());
     }
 
     方法 显示边框 <公开 属性读 类型 = 逻辑型 注释 = "返回窗口是否显示标题栏和边框" 折叠 @禁止流程检查 = 真>
@@ -1122,7 +1122,7 @@
     # int m_Visible = GLFW_TRUE;
     # // Callback
     # static void glfw_error_callback(int error, const char* description) {
-    #     PIVDEBUG("S", CVolString().Format(L"GLFW Error %d: %s\n", error, PivU2W(description).GetText()).GetText());
+    #     PIVDEBUG("S", CVolString().Format(L"GLFW Error %d: %s\n", error, PivU2W(description).GetText()).c_str());
     # }
     # static void glfw_pos_callback(GLFWwindow* window, int xpos, int ypos) {
     #     reinterpret_cast<@sn<current_class>*>(glfwGetWindowUserPointer(window))->@<位置被改变>(xpos, ypos);
@@ -1144,7 +1144,7 @@
     # void @sn<current_class>::glfw_drop_callback(GLFWwindow* window, int path_count, const char* paths[]) {
     #     @dt<文本数组类> aryFileNames;
     #     for (int i = 0; i < path_count; i++) {
-    #         aryFileNames.data().Add(PivU2W{paths[i]}.GetText());
+    #         aryFileNames.data().Add(PivU2W{paths[i]}.c_str());
     #     }
     #     reinterpret_cast<@sn<current_class>*>(glfwGetWindowUserPointer(window))->@<文件被拖放>(aryFileNames);
     # }
@@ -1188,7 +1188,7 @@
         关注屏幕DPI (真)
         宽度 = 乘于屏幕DPI (宽度)
         高度 = 乘于屏幕DPI (高度)
-        @ m_window = SDL_CreateWindow(PivW2U{@<标题>}.GetText(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, @<宽度>, @<高度>, window_flags);
+        @ m_window = SDL_CreateWindow(PivW2U{@<标题>}.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, @<宽度>, @<高度>, window_flags);
         @ if (!m_window) return FALSE;
         @ SDL_SysWMinfo info{0};
         @ if (SDL_GetWindowWMInfo(m_window, &info) == SDL_TRUE)
@@ -1470,7 +1470,7 @@
     方法 标题 <公开 属性写 注释 = "设置本窗口的当前标题文本" 折叠>
     参数 所欲设置的标题 <类型 = 文本型 注释 = "提供所欲设置的标题文本">
     {
-        @ SDL_SetWindowTitle(m_window, PivW2U{@<所欲设置的标题>}.GetText());
+        @ SDL_SetWindowTitle(m_window, PivW2U{@<所欲设置的标题>}.c_str());
     }
 
     方法 显示边框 <公开 属性读 类型 = 逻辑型 注释 = "返回窗口是否显示标题栏和边框" 折叠 @禁止流程检查 = 真>

@@ -682,7 +682,7 @@
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
             注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假 @输出名 = "validate">
     {
-        @ size_t outlen = simdutf::utf16_length_from_utf8(reinterpret_cast<const char *>(input.GetPtr()), len);
+        @ size_t outlen = simdutf::utf16_length_from_utf8(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
         @ if (!outlen) {
         @     output.Empty();
         @     return 0;

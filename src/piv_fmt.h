@@ -36,7 +36,7 @@ struct fmt::formatter<CWConstString, char>
 	template <typename FormatContext>
 	auto format(const CWConstString& s, FormatContext& ctx) -> decltype(ctx.out())
 	{
-		return format_to(ctx.out(), "{}", PivW2U{s}.GetText());
+		return format_to(ctx.out(), "{}", PivW2U{s}.c_str());
 	}
 };
 
@@ -82,7 +82,7 @@ struct fmt::formatter<CWString, char>
 	template <typename FormatContext>
 	auto format(const CWString& s, FormatContext& ctx) -> decltype(ctx.out())
 	{
-		return format_to(ctx.out(), "{}", PivW2U{s}.GetText());
+		return format_to(ctx.out(), "{}", PivW2U{s}.c_str());
 	}
 };
 

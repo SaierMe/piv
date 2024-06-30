@@ -214,10 +214,10 @@ public:
         PivW2U _mmapID{mmapID};
         PivW2U _cryptKey{cryptKey};
         std::wstring _rootPath{rootPath};
-        if (_mmapID.IsEmpty())
-            m_MMKV = MMKV::defaultMMKV(static_cast<MMKVMode>(mode), _cryptKey.IsEmpty() ? nullptr : &_cryptKey.String());
+        if (_mmapID.empty())
+            m_MMKV = MMKV::defaultMMKV(static_cast<MMKVMode>(mode), _cryptKey.empty() ? nullptr : &_cryptKey.ref());
         else
-            m_MMKV = MMKV::mmkvWithID(_mmapID, static_cast<MMKVMode>(mode), _cryptKey.IsEmpty() ? nullptr : &_cryptKey.String(),
+            m_MMKV = MMKV::mmkvWithID(_mmapID, static_cast<MMKVMode>(mode), _cryptKey.empty() ? nullptr : &_cryptKey.ref(),
                                       _rootPath.empty() ? nullptr : &_rootPath, expectedCapacity);
         if (m_MMKV != nullptr)
             return (m_MMKV->count(false) > 0) ? 1 : 0;
@@ -243,7 +243,7 @@ public:
      */
     inline CWString GetMmapID()
     {
-        return m_MMKV ? *PivU2Ws{m_MMKV->mmapID()} : _CT("");
+        return m_MMKV ? PivU2Ws{m_MMKV->mmapID()}.cref() : _CT("");
     }
 
     /**
@@ -261,7 +261,7 @@ public:
      */
     inline CWString GetCryptKey()
     {
-        return m_MMKV ? *PivU2Ws{m_MMKV->cryptKey()} : _CT("");
+        return m_MMKV ? PivU2Ws{m_MMKV->cryptKey()}.cref() : _CT("");
     }
 
     /**
@@ -271,7 +271,7 @@ public:
      */
     inline bool ReKey(const wchar_t *cryptKey)
     {
-        return m_MMKV ? m_MMKV->reKey(PivW2U{cryptKey}) : false;
+        return m_MMKV ? m_MMKV->reKey(PivW2U{cryptKey}.cref()) : false;
     }
 
     /**
@@ -283,7 +283,7 @@ public:
         if (m_MMKV)
         {
             PivW2U _cryptKey{cryptKey};
-            m_MMKV->checkReSetCryptKey(&_cryptKey.String());
+            m_MMKV->checkReSetCryptKey(&_cryptKey.cref());
         }
     }
 
@@ -317,7 +317,7 @@ public:
     {
         if (!m_MMKV)
             return false;
-        return expireDuration == -1 ? m_MMKV->set(value, PivAny2Us{key}) : m_MMKV->set(value, PivAny2Us{key}, static_cast<uint32_t>(expireDuration));
+        return expireDuration == -1 ? m_MMKV->set(value, *PivAny2Us{key}) : m_MMKV->set(value, *PivAny2Us{key}, static_cast<uint32_t>(expireDuration));
     }
 
     /**
@@ -333,7 +333,7 @@ public:
         if (!m_MMKV)
             return false;
         mmkv::MMBuffer buffer{const_cast<wchar_t *>(value.GetText()), static_cast<size_t>(value.GetLength() * 2), mmkv::MMBufferNoCopy};
-        return expireDuration == -1 ? m_MMKV->set(buffer, PivAny2Us{key}) : m_MMKV->set(buffer, PivAny2Us{key}, static_cast<uint32_t>(expireDuration));
+        return expireDuration == -1 ? m_MMKV->set(buffer, *PivAny2Us{key}) : m_MMKV->set(buffer, *PivAny2Us{key}, static_cast<uint32_t>(expireDuration));
     }
 
     /**
@@ -349,7 +349,7 @@ public:
         if (!m_MMKV)
             return false;
         mmkv::MMBuffer buffer{value.GetPtr(), static_cast<size_t>(value.GetSize()), mmkv::MMBufferNoCopy};
-        return expireDuration == -1 ? m_MMKV->set(buffer, PivAny2Us{key}) : m_MMKV->set(buffer, PivAny2Us{key}, static_cast<uint32_t>(expireDuration));
+        return expireDuration == -1 ? m_MMKV->set(buffer, *PivAny2Us{key}) : m_MMKV->set(buffer, *PivAny2Us{key}, static_cast<uint32_t>(expireDuration));
     }
 
     /**
@@ -368,7 +368,7 @@ public:
         object.VolSaveIntoStream(memStream);
         CVolMem bin = memStream.GetBin(CVolMem());
         mmkv::MMBuffer buffer{bin.GetPtr(), static_cast<size_t>(bin.GetSize()), mmkv::MMBufferNoCopy};
-        return expireDuration == -1 ? m_MMKV->set(buffer, PivAny2Us{key}) : m_MMKV->set(buffer, PivAny2Us{key}, static_cast<uint32_t>(expireDuration));
+        return expireDuration == -1 ? m_MMKV->set(buffer, *PivAny2Us{key}) : m_MMKV->set(buffer, *PivAny2Us{key}, static_cast<uint32_t>(expireDuration));
     }
 
     /**
@@ -381,7 +381,7 @@ public:
     template <typename KeyT>
     inline BOOL GetBool(const KeyT &key, const BOOL &defaultValue, bool *hasValue)
     {
-        return m_MMKV ? m_MMKV->getBool(PivAny2Us{key}, defaultValue ? true : false, hasValue) : defaultValue;
+        return m_MMKV ? m_MMKV->getBool(*PivAny2Us{key}, defaultValue ? true : false, hasValue) : defaultValue;
     }
 
     /**
@@ -394,7 +394,7 @@ public:
     template <typename KeyT>
     inline int32_t GetInt32(const KeyT &key, const int32_t &defaultValue, bool *hasValue)
     {
-        return m_MMKV ? m_MMKV->getInt32(PivAny2Us{key}, defaultValue, hasValue) : defaultValue;
+        return m_MMKV ? m_MMKV->getInt32(*PivAny2Us{key}, defaultValue, hasValue) : defaultValue;
     }
 
     /**
@@ -407,7 +407,7 @@ public:
     template <typename KeyT>
     inline int64_t GetInt64(const KeyT &key, const int64_t &defaultValue, bool *hasValue)
     {
-        return m_MMKV ? m_MMKV->getInt64(PivAny2Us{key}, defaultValue, hasValue) : defaultValue;
+        return m_MMKV ? m_MMKV->getInt64(*ivAny2Us{key}, defaultValue, hasValue) : defaultValue;
     }
 
     /**
@@ -420,7 +420,7 @@ public:
     template <typename KeyT>
     inline double GetDouble(const KeyT &key, const double &defaultValue, bool *hasValue)
     {
-        return m_MMKV ? m_MMKV->getDouble(PivAny2Us{key}, defaultValue, hasValue) : defaultValue;
+        return m_MMKV ? m_MMKV->getDouble(*PivAny2Us{key}, defaultValue, hasValue) : defaultValue;
     }
 
     /**
@@ -433,7 +433,7 @@ public:
     template <typename KeyT>
     inline float GetFloat(const KeyT &key, const float &defaultValue, bool *hasValue)
     {
-        return m_MMKV ? m_MMKV->getFloat(PivAny2Us{key}, defaultValue, hasValue) : defaultValue;
+        return m_MMKV ? m_MMKV->getFloat(*PivAny2Us{key}, defaultValue, hasValue) : defaultValue;
     }
 
     /**
@@ -449,7 +449,7 @@ public:
         if (m_MMKV)
         {
             mmkv::MMBuffer buffer;
-            if (m_MMKV->getBytes(PivAny2Us{key}, buffer))
+            if (m_MMKV->getBytes(*PivAny2Us{key}, buffer))
             {
                 value.SetText(reinterpret_cast<const wchar_t *>(buffer.getPtr()), buffer.length() / 2);
                 return true;
@@ -464,7 +464,7 @@ public:
         if (m_MMKV)
         {
             mmkv::MMBuffer buffer;
-            if (m_MMKV->getBytes(PivAny2Us{key}, buffer))
+            if (m_MMKV->getBytes(*PivAny2Us{key}, buffer))
             {
                 result.SetText(reinterpret_cast<const wchar_t *>(buffer.getPtr()), buffer.length() / 2);
             }
@@ -477,7 +477,7 @@ public:
         value.clear();
         if (m_MMKV)
         {
-            return m_MMKV->getString(PivAny2Us{key}, value);
+            return m_MMKV->getString(*PivAny2Us{key}, value);
         }
         return false;
     }
@@ -487,7 +487,7 @@ public:
         std::string value;
         if (m_MMKV)
         {
-            m_MMKV->getString(PivAny2Us{key}, value);
+            m_MMKV->getString(*PivAny2Us{key}, value);
         }
         return value;
     }
@@ -497,7 +497,7 @@ public:
     {
         if (m_MMKV)
         {
-            return m_MMKV->getVector(PivAny2Us{key}, result);
+            return m_MMKV->getVector(*PivAny2Us{key}, result);
         }
         return false;
     }
@@ -515,7 +515,7 @@ public:
         if (m_MMKV)
         {
             mmkv::MMBuffer buffer;
-            if (m_MMKV->getBytes(PivAny2Us{key}, buffer))
+            if (m_MMKV->getBytes(*PivAny2Us{key}, buffer))
             {
                 value.Append(buffer.getPtr(), buffer.length());
                 return true;
@@ -530,7 +530,7 @@ public:
         if (m_MMKV)
         {
             mmkv::MMBuffer buffer;
-            if (m_MMKV->getBytes(PivAny2Us{key}, buffer))
+            if (m_MMKV->getBytes(*PivAny2Us{key}, buffer))
             {
                 result.Append(buffer.getPtr(), buffer.length());
             }
@@ -551,7 +551,7 @@ public:
         if (m_MMKV)
         {
             mmkv::MMBuffer buffer;
-            if (m_MMKV->getBytes(PivAny2Us{key}, buffer))
+            if (m_MMKV->getBytes(*PivAny2Us{key}, buffer))
             {
                 CVolMemoryInputStream memStream;
                 memStream.ResetMemory(buffer.getPtr(), buffer.length());
@@ -571,7 +571,7 @@ public:
     template <typename KeyT>
     inline ptrdiff_t GetValueSize(const KeyT &key, const bool &actualSize)
     {
-        return m_MMKV ? static_cast<ptrdiff_t>(m_MMKV->getValueSize(PivAny2Us{key}, actualSize)) : 0;
+        return m_MMKV ? static_cast<ptrdiff_t>(m_MMKV->getValueSize(*PivAny2Us{key}, actualSize)) : 0;
     }
 
     /**
@@ -582,7 +582,7 @@ public:
     template <typename KeyT>
     inline bool IsContainsKey(const KeyT &key)
     {
-        return m_MMKV ? m_MMKV->containsKey(PivAny2Us{key}) : false;
+        return m_MMKV ? m_MMKV->containsKey(*PivAny2Us{key}) : false;
     }
 
     /**
@@ -609,7 +609,7 @@ public:
             std::vector<std::string> keys = m_MMKV->allKeys(filterExpire);
             for (auto iter = keys.cbegin(); iter != keys.cend(); ++iter)
             {
-                keysArray.Add(PivU2W(*iter).GetText());
+                keysArray.Add(PivU2W(*iter).c_str());
             }
             return keysArray.GetCount();
         }
@@ -650,7 +650,7 @@ public:
     {
         if (m_MMKV)
         {
-            m_MMKV->removeValueForKey(PivAny2Us{key});
+            m_MMKV->removeValueForKey(*PivAny2Us{key});
         }
     }
 

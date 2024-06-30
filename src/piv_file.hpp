@@ -869,13 +869,13 @@ public:
         case VSET_UTF_8:
         {
             PivW2U u8{str};
-            return this->WriteData(u8.GetText(), u8.GetSize() + null_terminated ? 1 : 0);
+            return this->WriteData(u8.c_str(), u8.size() + null_terminated ? 1 : 0);
             break;
         }
         case VSET_MBCS:
         {
             PivW2A mbcs{str};
-            return this->WriteData(mbcs.GetText(), mbcs.GetSize() + null_terminated ? 1 : 0);
+            return this->WriteData(mbcs.c_str(), mbcs.size() + null_terminated ? 1 : 0);
             break;
         }
         default:
@@ -1534,13 +1534,13 @@ public:
         case VSET_UTF_8:
         {
             PivW2U u8{str};
-            return this->WriteData(u8.GetText(), u8.GetSize() + null_terminated ? 1 : 0);
+            return this->WriteData(u8.c_str(), u8.size() + null_terminated ? 1 : 0);
             break;
         }
         case VSET_MBCS:
         {
             PivW2A mbcs{str};
-            return this->WriteData(mbcs.GetText(), mbcs.GetSize() + null_terminated ? 1 : 0);
+            return this->WriteData(mbcs.c_str(), mbcs.size() + null_terminated ? 1 : 0);
             break;
         }
         default:

@@ -10,12 +10,12 @@
     参数 欲编码数据 <类型 = 字节集类 注释 = "提供所欲进行编码的数据">
     参数 不编码保留字符 <类型 = 逻辑型 注释 = "是否不编码保留字符(;/?:@=&),保留字符在URL中有特殊含义" @默认值 = 假>
     {
-        @ size_t DestLen = piv::encoding::GuessUrlEncodeBound (@<欲编码数据>.GetPtr (),
-        @                                                      static_cast<size_t>(@<欲编码数据>.GetSize ()), @<不编码保留字符>);
-        @ if (DestLen > static_cast<size_t>(@<欲编码数据>.GetSize ())) {
+        @ size_t DestLen = piv::encoding::GuessUrlEncodeBound(@<欲编码数据>.GetPtr(),
+        @                                                     static_cast<size_t>(@<欲编码数据>.GetSize()), @<不编码保留字符>);
+        @ if (DestLen > static_cast<size_t>(@<欲编码数据>.GetSize())) {
         @     @an<CVolMem> encode;
-        @     piv::encoding::UrlEncode (@<欲编码数据>.GetPtr (), static_cast<size_t>(@<欲编码数据>.GetSize ()),
-        @                               encode.Alloc (static_cast<INT_P>(DestLen), TRUE), DestLen, @<不编码保留字符>);
+        @     piv::encoding::UrlEncode(@<欲编码数据>.GetPtr(), static_cast<size_t>(@<欲编码数据>.GetSize()),
+        @                               encode.Alloc(static_cast<INT_P>(DestLen), TRUE), DestLen, @<不编码保留字符>);
         @     return encode;
         @ }
         @ return @<欲编码数据>;
@@ -26,11 +26,11 @@
     参数 编码数据 <类型 = 字节集类 注释 = "返回编码后的数据">
     参数 不编码保留字符 <类型 = 逻辑型 注释 = "是否不编码保留字符(;/?:@=&),保留字符在URL中有特殊含义" @默认值 = 假>
     {
-        @ size_t DestLen = piv::encoding::GuessUrlEncodeBound (@<欲编码数据>.GetPtr (),
-        @                                                      static_cast<size_t>(@<欲编码数据>.GetSize ()), @<不编码保留字符>);
-        @ if (DestLen > static_cast<size_t>(@<欲编码数据>.GetSize ())) {
-        @     piv::encoding::UrlEncode (@<欲编码数据>.GetPtr (), static_cast<size_t>(@<欲编码数据>.GetSize ()),
-        @                               @<编码数据>.Alloc (static_cast<INT_P>(DestLen), TRUE), DestLen, @<不编码保留字符>);
+        @ size_t DestLen = piv::encoding::GuessUrlEncodeBound(@<欲编码数据>.GetPtr(),
+        @                                                     static_cast<size_t>(@<欲编码数据>.GetSize()), @<不编码保留字符>);
+        @ if (DestLen > static_cast<size_t>(@<欲编码数据>.GetSize())) {
+        @     piv::encoding::UrlEncode(@<欲编码数据>.GetPtr(), static_cast<size_t>(@<欲编码数据>.GetSize()),
+        @                              @<编码数据>.Alloc(static_cast<INT_P>(DestLen), TRUE), DestLen, @<不编码保留字符>);
         @ else
         @     @<编码数据> = @<欲编码数据>;
     }
@@ -40,25 +40,25 @@
     参数 是否UTF8 <类型 = 逻辑型 注释 = "将文本内容以UTF-8格式进行URL编码,否则为多字节." @默认值 = 真>
     参数 不编码保留字符 <类型 = 逻辑型 注释 = "是否不编码保留字符(;/?:@=&),保留字符在URL中有特殊含义" @默认值 = 假>
     {
-        @ if (!piv::encoding::UrlEncodeNeed(@<欲编码文本>.GetText (), static_cast<size_t>(@<欲编码文本>.GetLength ())))
+        @ if (!piv::encoding::UrlEncodeNeed(@<欲编码文本>.GetText(), static_cast<size_t>(@<欲编码文本>.GetLength())))
         @     return @<欲编码文本>;
         @ size_t DestLen;
         @ if (@<是否UTF8>) {
-        @     PivW2U urlstr{@<欲编码文本>.GetText ()};
-        @     DestLen = piv::encoding::GuessUrlEncodeBound (reinterpret_cast<BYTE *>(urlstr.GetPtr ()),
-        @                                                   urlstr.GetSize (), @<不编码保留字符>);
+        @     PivW2U urlstr{@<欲编码文本>.GetText()};
+        @     DestLen = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<BYTE *>(urlstr.data()),
+        @                                                  urlstr.size_bytes(), @<不编码保留字符>);
         @     @an<CVolMem> buffer;
-        @     piv::encoding::UrlEncode (reinterpret_cast<BYTE *>(urlstr.GetPtr ()), urlstr.GetSize (),
-        @                               buffer.Alloc (static_cast<INT_P>(DestLen), TRUE), DestLen, @<不编码保留字符>);
-        @     return *PivU2Ws{reinterpret_cast<const char *>(buffer.GetPtr ()), DestLen};
+        @     piv::encoding::UrlEncode(reinterpret_cast<BYTE *>(urlstr.data()), urlstr.size_bytes(),
+        @                              buffer.Alloc(static_cast<INT_P>(DestLen), TRUE), DestLen, @<不编码保留字符>);
+        @     return *PivU2Ws{reinterpret_cast<const char *>(buffer.GetPtr()), DestLen};
         @ } else {
-        @     PivW2A urlstr{@<欲编码文本>.GetText ()};
-        @     DestLen = piv::encoding::GuessUrlEncodeBound (reinterpret_cast<BYTE *>(urlstr.GetPtr ()),
-        @                                                   urlstr.GetSize (), @<不编码保留字符>);
+        @     PivW2A urlstr{@<欲编码文本>.GetText()};
+        @     DestLen = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<BYTE *>(urlstr.data()),
+        @                                                  urlstr.size_bytes(), @<不编码保留字符>);
         @     @an<CVolMem> buffer;
-        @     piv::encoding::UrlEncode (reinterpret_cast<BYTE *>(urlstr.GetPtr ()), urlstr.GetSize (),
-        @                               buffer.Alloc (static_cast<INT_P>(DestLen), TRUE), DestLen, @<不编码保留字符>);
-        @     return *PivA2Ws{reinterpret_cast<const char *>(buffer.GetPtr ()), DestLen};
+        @     piv::encoding::UrlEncode(reinterpret_cast<BYTE *>(urlstr.data()), urlstr.size_bytes(),
+        @                               buffer.Alloc(static_cast<INT_P>(DestLen), TRUE), DestLen, @<不编码保留字符>);
+        @     return *PivA2Ws{reinterpret_cast<const char *>(buffer.GetPtr()), DestLen};
         @ }
     }
 
@@ -67,7 +67,7 @@
     参数 是否UTF8 <类型 = 逻辑型 注释 = "将文本内容以UTF-8格式进行URL编码,否则为多字节." @默认值 = 真>
     参数 不编码保留字符 <类型 = 逻辑型 注释 = "是否不编码保留字符(;/?:@=&),保留字符在URL中有特殊含义" @默认值 = 假>
     {
-        @ piv::encoding::UrlStrEncode (@<欲编码数据>, @an<CVolString>{}, @<是否UTF8>, @<不编码保留字符>)
+        @ piv::encoding::UrlStrEncode(@<欲编码数据>, @an<CVolString>{}, @<是否UTF8>, @<不编码保留字符>)
     }
 
     # ---
@@ -75,12 +75,12 @@
     方法 解码 <公开 静态 类型 = 字节集类 注释 = "将指定数据进行URL解码,返回解码后的数据." 折叠 @禁止流程检查 = 真>
     参数 欲解码数据 <类型 = 字节集类 注释 = "提供所欲进行解码的数据">
     {
-        @ size_t DestLen = piv::encoding::GuessUrlDecodeBound (@<欲解码数据>.GetPtr (),
-        @                                                      static_cast<size_t>(@<欲解码数据>.GetSize ()));
-        @ if (DestLen < @<欲解码数据>.GetSize ()) {
+        @ size_t DestLen = piv::encoding::GuessUrlDecodeBound(@<欲解码数据>.GetPtr(),
+        @                                                     static_cast<size_t>(@<欲解码数据>.GetSize()));
+        @ if (DestLen < @<欲解码数据>.GetSize()) {
         @     @an<CVolMem> decode;
-        @     piv::encoding::UrlDecode (@<欲解码数据>.GetPtr (), static_cast<size_t>(@<欲解码数据>.GetSize ()),
-        @                               decode.Alloc (static_cast<INT_P>(DestLen), TRUE), DestLen);
+        @     piv::encoding::UrlDecode(@<欲解码数据>.GetPtr(), static_cast<size_t>(@<欲解码数据>.GetSize()),
+        @                              decode.Alloc(static_cast<INT_P>(DestLen), TRUE), DestLen);
         @     return decode;
         @ }
         @ return @<欲解码数据>;
@@ -90,11 +90,11 @@
     参数 欲解码数据 <类型 = 字节集类 注释 = "提供所欲进行解码的数据">
     参数 解码数据 <类型 = 字节集类 注释 = "返回解码后的数据">
     {
-        @ size_t DestLen = piv::encoding::GuessUrlDecodeBound (@<欲解码数据>.GetPtr (),
-        @                                                      static_cast<size_t>(@<欲解码数据>.GetSize ()));
-        @ if (DestLen > @<欲解码数据>.GetSize ())
-        @     piv::encoding::UrlDecode (@<欲解码数据>.GetPtr (), static_cast<size_t>(@<欲解码数据>.GetSize ()),
-        @                               @<解码数据>.Alloc (static_cast<INT_P>(DestLen), TRUE), DestLen);
+        @ size_t DestLen = piv::encoding::GuessUrlDecodeBound(@<欲解码数据>.GetPtr(),
+        @                                                     static_cast<size_t>(@<欲解码数据>.GetSize()));
+        @ if (DestLen > @<欲解码数据>.GetSize())
+        @     piv::encoding::UrlDecode(@<欲解码数据>.GetPtr(), static_cast<size_t>(@<欲解码数据>.GetSize()),
+        @                              @<解码数据>.Alloc(static_cast<INT_P>(DestLen), TRUE), DestLen);
         @ else
         @     @<解码数据> = @<欲解码数据>;
     }
@@ -105,22 +105,22 @@
     {
         @ size_t DestLen;
         @ if (@<是否UTF8>) {
-        @     PivW2U urlstr {@<欲解码文本>.GetText ()};
-        @     DestLen = piv::encoding::GuessUrlDecodeBound (reinterpret_cast<BYTE *>(urlstr.GetPtr ()), urlstr.GetSize ());
-        @     if (DestLen < static_cast<size_t>(urlstr.GetSize ())) {
+        @     PivW2U urlstr {@<欲解码文本>.GetText()};
+        @     DestLen = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<BYTE *>(urlstr.data()), urlstr.size_bytes());
+        @     if (DestLen < static_cast<size_t>(urlstr.size_bytes())) {
         @         @an<CVolMem> buffer;
-        @         piv::encoding::UrlDecode (reinterpret_cast<BYTE *>(urlstr.GetPtr ()), urlstr.GetSize (),
-        @                                   reinterpret_cast<BYTE *>(buffer.Alloc (static_cast<INT_P>(DestLen), TRUE)), DestLen);
-        @         return *PivU2Ws {reinterpret_cast<const char *>(buffer.GetPtr ()), DestLen};
+        @         piv::encoding::UrlDecode(reinterpret_cast<BYTE *>(urlstr.data()), urlstr.size_bytes(),
+        @                                  reinterpret_cast<BYTE *>(buffer.Alloc(static_cast<INT_P>(DestLen), TRUE)), DestLen);
+        @         return *PivU2Ws {reinterpret_cast<const char *>(buffer.GetPtr()), DestLen};
         @     }
         @ } else {
-        @     PivW2A urlstr {@<欲解码文本>.GetText ()};
-        @     DestLen = piv::encoding::GuessUrlDecodeBound (reinterpret_cast<BYTE *>(urlstr.GetPtr ()), urlstr.GetSize ());
-        @     if (DestLen < static_cast<size_t>(urlstr.GetSize ())) {
+        @     PivW2A urlstr {@<欲解码文本>.GetText()};
+        @     DestLen = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<BYTE *>(urlstr.data()), urlstr.size_bytes());
+        @     if (DestLen < static_cast<size_t>(urlstr.size_bytes())) {
         @         @an<CVolMem> buffer;
-        @         piv::encoding::UrlDecode (reinterpret_cast<BYTE *>(urlstr.GetPtr ()), urlstr.GetSize (),
-        @                                   reinterpret_cast<BYTE *>(buffer.Alloc (static_cast<INT_P>(DestLen), TRUE)), DestLen);
-        @         return *PivA2Ws {reinterpret_cast<const char *>(buffer.GetPtr ()), DestLen};
+        @         piv::encoding::UrlDecode(reinterpret_cast<BYTE *>(urlstr.data()), urlstr.size_bytes(),
+        @                                  reinterpret_cast<BYTE *>(buffer.Alloc(static_cast<INT_P>(DestLen), TRUE)), DestLen);
+        @         return *PivA2Ws {reinterpret_cast<const char *>(buffer.GetPtr()), DestLen};
         @     }
         @ }
         @ return @<欲解码文本>;
@@ -130,7 +130,7 @@
     参数 欲解码数据 <类型 = 字节集类 注释 = "提供所欲进行编码的数据">
     参数 是否UTF8 <类型 = 逻辑型 注释 = "URL编码文本是否为UTF-8格式,否则为多字节." @默认值 = 真>
     {
-        @ piv::encoding::UrlStrDecode (@<欲解码数据>, @<是否UTF8>, @an<CVolString>{})
+        @ piv::encoding::UrlStrDecode(@<欲解码数据>, @<是否UTF8>, @an<CVolString>{})
     }
 }
 

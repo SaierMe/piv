@@ -780,19 +780,19 @@
     # ---
     # @begin
     # <> <include>
-    # LONG_PTR m_OldWndProc = NULL;
     # HWND m_hWnd = NULL;
+    # LONG_PTR m_OldWndProc = 0;
     # typedef BOOL(WINAPI* pChangeWindowMessageFilterEx)(HWND, UINT, DWORD, PVOID);
     # pChangeWindowMessageFilterEx API_ChangeWindowMessageFilterEx =
     #     (pChangeWindowMessageFilterEx)::GetProcAddress(::GetModuleHandle(L"User32.dll"), "ChangeWindowMessageFilterEx");
     # static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
     # <> </include>
     # LRESULT CALLBACK @sn<current_class>::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    #     @sn<current_class>* pThis = reinterpret_cast<@sn<current_class>*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+    #     @sn<current_class>* pThis = reinterpret_cast<@sn<current_class>*>(::GetPropW(hwnd, L"_piv_DragUserData"));
     #     if (pThis != NULL) {
     #         if (uMsg == WM_DROPFILES) {
     #             @dt<文本数组类> saryFileNames;
-    #             WCHAR szFileName[MAX_PATH] = { _T ('\0') };
+    #             WCHAR szFileName[MAX_PATH] = {'\0'};
     #             UINT uFileNum = ::DragQueryFileW((HDROP)wParam, 0xFFFFFFFF, NULL, 0);
     #             for (UINT i = 0; i < uFileNum; ++i) {
     #                 ::DragQueryFileW((HDROP)wParam, i, szFileName, MAX_PATH);
@@ -818,7 +818,7 @@
 
     方法 是否启用 <公开 属性读 类型 = 逻辑型 注释 = "返回当前是否启用了文件拖放" 折叠 @禁止流程检查 = 真>
     {
-        @ return (m_hWnd != NULL && m_OldWndProc != NULL);
+        @ return (m_hWnd != NULL && m_OldWndProc != 0);
     }
 
     方法 启用拖放 <公开 注释 = "启用文件拖放,并选择需要绑定的窗口组件" 折叠>
@@ -827,6 +827,7 @@
         @ if (!m_hWnd) { @<禁用拖放>(); } // 如果之前有绑定过其他组件,先将它禁用
         @ m_hWnd = (HWND)@<绑定组件>;
         @ if (!m_OldWndProc) {
+        @     ::SetPropW(m_hWnd, L"_piv_DragUserData", (HANDLE)this);
         @     ::SetWindowLongPtrW(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
         @     m_OldWndProc = ::SetWindowLongPtrW(m_hWnd, GWLP_WNDPROC, (LONG_PTR)WindowProc);
         @ }
@@ -841,12 +842,13 @@
     {
         @ if (m_hWnd && m_OldWndProc) {
         @     ::DragAcceptFiles(m_hWnd, FALSE);
-        @     ::SetWindowLongPtrW(m_hWnd, GWLP_WNDPROC, (LONG_PTR)m_OldWndProc);
+        @     ::SetWindowLongPtrW(m_hWnd, GWLP_WNDPROC, m_OldWndProc);
         @     if (API_ChangeWindowMessageFilterEx) {
         @         API_ChangeWindowMessageFilterEx(m_hWnd, WM_DROPFILES, 0, NULL); // WM_DROPFILES, MSGFLT_RESET
         @         API_ChangeWindowMessageFilterEx(m_hWnd, 0x0049, 0, NULL); // 0x0049 == WM_COPYGLOBALDATA, MSGFLT_RESET
         @     }
-        @     m_hWnd = NULL; m_OldWndProc = NULL;
+        @     ::RemovePropW(m_hWnd, L"_piv_DragUserData");
+        @     m_hWnd = NULL; m_OldWndProc = 0;
         @ }
     }
 }
@@ -949,8 +951,7 @@
     常量 泰文 <公开 值 = @THAI_CHARSET 注释 = "泰国版Windows系统">
 }
 
-类 管道命令行类 <公开 注释 = "启动一个命令行提示符进程,通过匿名管道让当前进程和命令行之间交互传递输出输入信息." 折叠 @文档 = "category = \"系统操作\""
-        @视窗.外部头文件 = "namedpipeapi.h">
+类 管道命令行类 <公开 注释 = "启动一个命令行提示符进程,通过匿名管道让当前进程和命令行之间交互传递输出输入信息." 折叠 @文档 = "category = \"系统操作\"">
 {
     方法 类_初始化 <折叠>
     {
@@ -1019,6 +1020,7 @@
         @ m_hThread = ::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)&@<读屏显>, this, 0, NULL);
         @ if (m_hThread == NULL) { goto Fail; }
         @ m_ProcessId = pi.dwProcessId;
+        @ ::SetConsoleCtrlHandler(NULL, TRUE);
         @ return TRUE;
         @ Fail:
         @     if (m_hProcess) { ::CloseHandle(m_hProcess); m_hProcess = NULL; }
@@ -1089,7 +1091,7 @@
     {
         @ if (!m_ProcessId) return;
         @ ::AttachConsole(m_ProcessId);
-        @ ::GenerateConsoleCtrlEvent(CTRL_C_EVENT, m_ProcessId);
+        @ ::GenerateConsoleCtrlEvent(CTRL_C_EVENT, 0);
         @ ::FreeConsole();
     }
 
@@ -1112,6 +1114,7 @@
         @     ::CloseHandle(m_hProcess); m_hProcess = NULL;
         @ }
         @ m_bRunning = FALSE;
+        @ ::SetConsoleCtrlHandler(NULL, FALSE);
         @ // 关闭匿名管道的读写句柄
         @ if (m_hReadPipeHandle) { ::CloseHandle(m_hReadPipeHandle); m_hReadPipeHandle = NULL; }
         @ if (m_hWritePipeShell) { ::CloseHandle(m_hWritePipeShell); m_hWritePipeShell = NULL; }

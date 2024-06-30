@@ -53,7 +53,7 @@ namespace piv
         template <typename T>
         bool ParseFile(::toml::table &tbl, const T &file_path)
         {
-            ::toml::parse_result result = ::toml::parse_file(PivS2V{file_path});
+            ::toml::parse_result result = ::toml::parse_file(*PivS2V{file_path});
             if (result)
             {
                 tbl = std::move(result.table());
@@ -72,7 +72,7 @@ namespace piv
         template <typename D, typename S>
         bool Parse(::toml::table &tbl, const D &doc, const S &source_path)
         {
-            ::toml::parse_result result = ::toml::parse(PivS2V{doc}, PivS2V{source_path});
+            ::toml::parse_result result = ::toml::parse(*PivS2V{doc}, *PivS2V{source_path});
             if (result)
             {
                 tbl = std::move(result.table());
@@ -86,7 +86,7 @@ namespace piv
         template <typename R, typename K>
         R GetAs(::toml::table &tbl, const K &key)
         {
-            auto val = tbl.get_as<R>(PivS2V{key});
+            auto val = tbl.get_as<R>(*PivS2V{key});
             if (val)
                 return **val;
             return R{};
@@ -96,7 +96,7 @@ namespace piv
         template <typename K>
         ::toml::table &GetTable(::toml::table &tbl, const K &key, ::toml::table &def_val = ::toml::table{})
         {
-            auto val = tbl.get_as<::toml::table>(PivS2V{key});
+            auto val = tbl.get_as<::toml::table>(*PivS2V{key});
             if (val)
                 return *val;
             return def_val;
@@ -106,7 +106,7 @@ namespace piv
         template <typename K>
         ::toml::array &GetArr(::toml::table &tbl, const K &key, ::toml::array &def_val = ::toml::array{})
         {
-            auto val = tbl.get_as<::toml::array>(PivS2V{key});
+            auto val = tbl.get_as<::toml::array>(*PivS2V{key});
             if (val)
                 return *val;
             return def_val;

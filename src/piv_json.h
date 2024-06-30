@@ -66,7 +66,7 @@ namespace piv
             if (test.front() == '{' || test.front() == '[')
                 return AcceptText<J>(test, ignore_comments);
             else
-                return AcceptFile<J>(PivU2W{test.data(), test.size()}.GetText(), ignore_comments);
+                return AcceptFile<J>(PivU2W{test.data(), test.size()}.c_str(), ignore_comments);
         }
 
         template <typename J>
@@ -157,7 +157,7 @@ namespace piv
             }
             else if (str_encoding == 0) // ANSI
             {
-                return Accept<J>(PivA2U{reinterpret_cast<const char *>(input.GetPtr()), len}.String(), ignore_comments);
+                return Accept<J>(PivA2U{reinterpret_cast<const char *>(input.GetPtr()), len}.ref(), ignore_comments);
             }
             return false;
         }
@@ -217,7 +217,7 @@ namespace piv
             if (test.front() == '{' || test.front() == '[')
                 return ParseText(json, test, cb, allow_exceptions, ignore_comments);
             else
-                return ParseFile(json, PivU2W{test.data(), test.size()}.GetText(), cb, allow_exceptions, ignore_comments);
+                return ParseFile(json, PivU2W{test.data(), test.size()}.c_str(), cb, allow_exceptions, ignore_comments);
         }
 
         template <typename J, typename F>
@@ -316,7 +316,7 @@ namespace piv
             }
             if (encoding == 0) // ANSI
             {
-                return ParseText(json, PivA2U{reinterpret_cast<const char *>(data), len}.String(), cb, allow_exceptions, ignore_comments);
+                return ParseText(json, PivA2U{reinterpret_cast<const char *>(data), len}.ref(), cb, allow_exceptions, ignore_comments);
             }
             return false;
         }
@@ -537,7 +537,7 @@ namespace piv
         template <typename = void>
         std::string to_value(const wchar_t *str)
         {
-            return PivW2U{str}.String();
+            return *PivW2U{str};
         }
 
         template <typename = void>
@@ -549,7 +549,7 @@ namespace piv
         template <typename = void>
         std::string to_value(const CWString &str)
         {
-            return PivW2U{str}.String();
+            return *PivW2U{str};
         }
 
         template <typename = void>
@@ -567,13 +567,13 @@ namespace piv
         template <typename = void>
         std::string to_value(const std::wstring &str)
         {
-            return PivW2U{str}.String();
+            return *PivW2U{str};
         }
 
         template <typename = void>
         std::string to_value(const ::piv::wstring_view &str)
         {
-            return PivW2U{str.data(), str.size()}.String();
+            return *PivW2U{str.data(), str.size()};
         }
 
         template <typename = void>
@@ -603,7 +603,7 @@ namespace piv
         template <typename = void>
         std::string to_key(const wchar_t *key)
         {
-            return PivW2U{key}.String();
+            return *PivW2U{key};
         }
 
         template <typename = void>
@@ -615,7 +615,7 @@ namespace piv
         template <typename = void>
         std::string to_key(const CWString &key)
         {
-            return PivW2U{key}.String();
+            return *PivW2U{key};
         }
 
         template <typename = void>
@@ -633,13 +633,13 @@ namespace piv
         template <typename = void>
         std::string to_key(const std::wstring &key)
         {
-            return PivW2U{key}.String();
+            return *PivW2U{key};
         }
 
         template <typename = void>
         std::string to_key(const ::piv::wstring_view &key)
         {
-            return PivW2U{key.data(), key.size()}.String();
+            return *PivW2U{key.data(), key.size()};
         }
 
         template <typename = void>
@@ -1403,7 +1403,7 @@ namespace piv
             {
                 for (auto &el : json.items())
                 {
-                    keyArray.Add(PivU2W{el.key()}.GetText());
+                    keyArray.Add(PivU2W{el.key()}.c_str());
                 }
             }
             return static_cast<int32_t>(keyArray.GetCount());

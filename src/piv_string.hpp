@@ -20,7 +20,7 @@ namespace piv
          * @param c
          * @return
          */
-        static uint16_t tolower(const uint16_t &c) noexcept
+        static uint16_t tolower(uint16_t c) noexcept
         {
             return (c >= 'A' && c <= 'Z') ? (c + 32U) : c;
         }
@@ -30,7 +30,7 @@ namespace piv
          * @param c
          * @return
          */
-        static uint16_t toupper(const uint16_t &c) noexcept
+        static uint16_t toupper(uint16_t c) noexcept
         {
             return (c >= 'a' && c <= 'z') ? (c - 32U) : c;
         }
@@ -265,7 +265,7 @@ namespace piv
             }
             else
             {
-                return piv::edit::compare(lhs, reinterpret_cast<const typename StringT::value_type *>(PivW2U{rhs}.GetText()), case_insensitive);
+                return piv::edit::compare(lhs, reinterpret_cast<const typename StringT::value_type *>(PivW2U{rhs}.c_str()), case_insensitive);
             }
         }
 
@@ -1748,11 +1748,11 @@ namespace piv
         {
             PIV_IF(sizeof(EncodeT) == 3)
             {
-                return lhs.append(piv::edit::format<char>(PivW2U{format}.GetText(), std::forward<Args>(args)...));
+                return lhs.append(piv::edit::format<char>(PivW2U{format}.c_str(), std::forward<Args>(args)...));
             }
             else
             {
-                return lhs.append(piv::edit::format<char>(PivW2A{format}.GetText(), std::forward<Args>(args)...));
+                return lhs.append(piv::edit::format<char>(PivW2A{format}.c_str(), std::forward<Args>(args)...));
             }
         }
 
@@ -1955,12 +1955,12 @@ namespace piv
                     PIV_IF(sizeof(EncodeT) == 3)
                     {
                         PivW2U convert{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2};
-                        lhs.assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
+                        lhs.assign(reinterpret_cast<const CharT *>(convert.c_str()), convert.size());
                     }
                     else
                     {
                         PivW2A convert{reinterpret_cast<const wchar_t *>(data.get()), fileSize / 2, code_page};
-                        lhs.assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
+                        lhs.assign(reinterpret_cast<const CharT *>(convert.c_str()), convert.size());
                     }
                 }
             }
@@ -1978,12 +1978,12 @@ namespace piv
                     PIV_IF(sizeof(EncodeT) == 2)
                     {
                         PivU2W convert{reinterpret_cast<const char *>(data.get()), fileSize};
-                        lhs.assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
+                        lhs.assign(reinterpret_cast<const CharT *>(convert.c_str()), convert.size());
                     }
                     else
                     {
                         PivU2A convert{reinterpret_cast<const char *>(data.get()), fileSize, code_page};
-                        lhs.assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
+                        lhs.assign(reinterpret_cast<const CharT *>(convert.c_str()), convert.size());
                     }
                 }
             }
@@ -2001,12 +2001,12 @@ namespace piv
                     PIV_IF(sizeof(EncodeT) == 2)
                     {
                         PivA2W convert{reinterpret_cast<const char *>(data.get()), fileSize, code_page};
-                        lhs.assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
+                        lhs.assign(reinterpret_cast<const CharT *>(convert.c_str()), convert.size());
                     }
                     else
                     {
                         PivA2U convert{reinterpret_cast<const char *>(data.get()), fileSize, code_page};
-                        lhs.assign(reinterpret_cast<const CharT *>(convert.GetText()), convert.GetLength());
+                        lhs.assign(reinterpret_cast<const CharT *>(convert.c_str()), convert.size());
                     }
                 }
             }
@@ -2048,12 +2048,12 @@ namespace piv
                 PIV_ELSE_IF(sizeof(EncodeT) == 3)
                 {
                     PivU2W convert{reinterpret_cast<const char *>(lhs.c_str()), count};
-                    Succeeded = (fwrite(convert.GetText(), 2, convert.GetLength(), out) == convert.GetLength());
+                    Succeeded = (fwrite(convert.c_str(), 2, convert.size(), out) == convert.size());
                 }
                 else
                 {
                     PivA2W convert{reinterpret_cast<const char *>(lhs.c_str()), count, code_page};
-                    Succeeded = (fwrite(convert.GetText(), 2, convert.GetLength(), out) == convert.GetLength());
+                    Succeeded = (fwrite(convert.c_str(), 2, convert.size(), out) == convert.size());
                 }
             }
             else if (WriteEncode == VSET_UTF_8)
@@ -2066,7 +2066,7 @@ namespace piv
                 PIV_IF(sizeof(EncodeT) == 2)
                 {
                     PivW2U convert{reinterpret_cast<const wchar_t *>(lhs.c_str()), count};
-                    Succeeded = (fwrite(convert.GetText(), 1, convert.GetLength(), out) == convert.GetLength());
+                    Succeeded = (fwrite(convert.c_str(), 1, convert.size(), out) == convert.size());
                 }
                 PIV_ELSE_IF(sizeof(EncodeT) == 3)
                 {
@@ -2075,7 +2075,7 @@ namespace piv
                 else
                 {
                     PivA2U convert{reinterpret_cast<const char *>(lhs.c_str()), count, code_page};
-                    Succeeded = (fwrite(convert.GetText(), 1, convert.GetLength(), out) == convert.GetLength());
+                    Succeeded = (fwrite(convert.c_str(), 1, convert.size(), out) == convert.size());
                 }
             }
             else if (WriteEncode == VSET_MBCS)
@@ -2083,12 +2083,12 @@ namespace piv
                 PIV_IF(sizeof(EncodeT) == 2)
                 {
                     PivW2A convert{reinterpret_cast<const wchar_t *>(lhs.c_str()), count, code_page};
-                    Succeeded = (fwrite(convert.GetText(), 1, convert.GetLength(), out) == convert.GetLength());
+                    Succeeded = (fwrite(convert.c_str(), 1, convert.size(), out) == convert.size());
                 }
                 PIV_ELSE_IF(sizeof(EncodeT) == 3)
                 {
                     PivU2A convert{reinterpret_cast<const char *>(lhs.c_str()), count, code_page};
-                    Succeeded = (fwrite(convert.GetText(), 1, convert.GetLength(), out) == convert.GetLength());
+                    Succeeded = (fwrite(convert.c_str(), 1, convert.size(), out) == convert.size());
                 }
                 else
                 {
@@ -2414,4 +2414,4 @@ namespace piv
     } // namespace str
 } // namespace piv
 
-#endif
+#endif // _PIV_STD_STRING_HPP

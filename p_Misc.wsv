@@ -576,10 +576,14 @@
     参数 自动保存 <类型 = 逻辑型 注释 = "是否在对象被释放之前自动保存更改到文件中;" 注释 = "为假时必须手动调用\"保存\",否则可能丢失未保存的编辑内容;"
             注释 = "为真时,即使已经通过\"保存文件\"将配置数据保存到新文件中," 注释 = "仍会将更改保存到原文件." @默认值 = 真>
     {
-        @ m_szIniFile.Empty (); m_bAutoSave = false;
-        @ data ().Reset ();
+        @ m_szIniFile.Empty(); m_bAutoSave = false;
+        @ data().Reset();
         @ INT nRet = 0;
-        @ FILE* fp = _wfopen (@<文件名>.GetText (), L"rb");
+        @ FILE* fp = NULL
+        @ if (IsOSFileExist(@<文件名>.GetText())
+        @     fp = _wfopen(@<文件名>.GetText(), L"rb");
+        @ else
+        @     fp = _wfopen(@<文件名>.GetText(), L"ab+");
         @ if (!fp) return -3;
         @ fseek (fp, 0, SEEK_END);
         @ int nSize = ftell (fp);
@@ -657,7 +661,7 @@
         @         std::string szBuffer;
         @         data ().Save (szBuffer, false);
         @         PivA2U utf8str {szBuffer};
-        @         utf8str.GetMem (memUtf8, false);
+        @         utf8str.to_volmem (memUtf8, false);
         @         memUtf8.InsertValue_S_BYTE (0, (S_BYTE)0xBF); memUtf8.InsertValue_S_BYTE (0, (S_BYTE)0xBB); memUtf8.InsertValue_S_BYTE (0, (S_BYTE)0xEF);
         @         return memUtf8.WriteIntoFile (@<文件名>, -1) ? 0 : -3;
         @     }
@@ -666,10 +670,10 @@
         @     data ().Save (szBuffer, false);
         @     if (data ().IsUnicode ()) {
         @         PivU2W utf16str {szBuffer};
-        @         utf16str.GetMem (memWStr, false);
+        @         utf16str.to_volmem (memWStr, false);
         @     } else {
         @         PivA2W utf16str {szBuffer};
-        @         utf16str.GetMem (memWStr, false);
+        @         utf16str.to_volmem (memWStr, false);
         @     }
         @     memWStr.InsertValue_SHORT (0, (SHORT)0xFEFF);
         @     return memWStr.WriteIntoFile (@<文件名>, -1) ? 0 : -3;
@@ -679,7 +683,7 @@
         @         std::string szBuffer;
         @         data ().Save (szBuffer, false);
         @         PivU2A mbstr {szBuffer};
-        @         mbstr.GetMem (memMBS, false);
+        @         mbstr.to_volmem (memMBS, false);
         @         return memMBS.WriteIntoFile (@<文件名>, -1) ? 0 : -3;
         @     } else {
         @         return static_cast<INT>(data ().SaveFile (@<文件名>.GetText (), false));

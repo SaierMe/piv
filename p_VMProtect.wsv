@@ -547,10 +547,10 @@
 
 # ======
 
-类 VMP注册机类 <公开 注释 = "使用步骤:" 注释 = " 1. 导入密钥对/导入产品信息" 注释 = " 2. 生成序列号" @文档 = "category = \"VMProtect注册机\""
-        @视窗.外部头文件 = "VMProtect\\include\\KeyGenAPI.h" @视窗.外部库.x64 = "VMProtect\\lib\\KeyGen64.lib"
-        @视窗.外部库.win32 = "VMProtect\\lib\\KeyGen32.lib" @视窗.附属文件.x64 = "VMProtect\\lib\\KeyGen64.dll"
-        @视窗.附属文件.win32 = "VMProtect\\lib\\KeyGen32.dll">
+类 VMP注册机类 <公开 注释 = "使用步骤:" 注释 = " 1. 导入密钥对/导入产品信息" 注释 = " 2. 生成序列号" 折叠
+        @文档 = "category = \"VMProtect注册机\"" @视窗.外部头文件 = "VMProtect\\include\\KeyGenAPI.h"
+        @视窗.外部库.x64 = "VMProtect\\lib\\KeyGen64.lib" @视窗.外部库.win32 = "VMProtect\\lib\\KeyGen32.lib"
+        @视窗.附属文件.x64 = "VMProtect\\lib\\KeyGen64.dll" @视窗.附属文件.win32 = "VMProtect\\lib\\KeyGen32.dll">
 {
     变量 产品信息 <类型 = VMProtect产品信息>
     变量 ProductInfo <类型 = VMProtectProductInfo @输出名 = "ProductInfo">
@@ -972,20 +972,20 @@
     参数 本结构 <类型 = VMProtectSerialNumberInfo>
     参数 文本指针 <类型 = 变整数>
     {
-        @ @<本结构>.pHardwareID = (const char *)@<文本指针>;
+        @ @<本结构>.pHardwareID = (char *)@<文本指针>;
     }
 
-    方法 用户数据 <公开 静态 属性读 类型 = 变整数 注释 = "用户数据的字节集指针,实际占用尺寸以\"用户数据长度\"为准." @嵌入式方法 = "">
+    方法 用户数据 <公开 静态 属性读 类型 = 变整数 注释 = "用户数据的字节集指针,实际占用尺寸以\"用户数据长度\"为准." 折叠 @嵌入式方法 = "">
     参数 本结构 <类型 = VMProtectSerialNumberInfo>
     {
         @ (INT_P)@<本结构>.pUserData
     }
 
-    方法 用户数据 <公开 静态 属性写 注释 = "用户数据的字节集指针,实际占用尺寸以\"用户数据长度\"为准.">
+    方法 用户数据 <公开 静态 属性写 注释 = "用户数据的字节集指针,实际占用尺寸以\"用户数据长度\"为准." 折叠>
     参数 本结构 <类型 = VMProtectSerialNumberInfo>
     参数 数据指针 <类型 = 变整数>
     {
-        @ @<本结构>.pUserData = (const char *)@<数据指针>;
+        @ @<本结构>.pUserData = (BYTE *)@<数据指针>;
     }
 
     #
