@@ -460,35 +460,35 @@
 {
     方法 类_初始化 <折叠>
     {
-        @ data ().SetUnicode (true); // 默认使用UTF-8
+        @ data().SetUnicode(true); // 默认使用UTF-8
     }
 
     方法 类_清理 <折叠>
     {
-        @ if (m_szIniFile.IsEmpty () == FALSE && m_bAutoSave == true)
-        @     this->@<保存> ();
+        @ if (m_szIniFile.IsEmpty() == FALSE && m_bAutoSave == true)
+        @     this->@<保存>();
     }
 
     方法 清空 <公开 注释 = "释放本配置对象的所有内存数据" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.data ().Reset ()
+        @ @sn<this>.data().Reset()
     }
 
     方法 是否为空 <公开 类型 = 逻辑型 注释 = "检查本配置对象是否为空(未加载任何数据)" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.data ().IsEmpty ()
+        @ @sn<this>.data().IsEmpty()
     }
 
     方法 是否允许重复键名 <公开 属性写 注释 = "  设置是否允许存在重复的键名,即一个键名允许存在多个键值." 注释 = "  如果开启本属性,使用\"取XX键值\"时只获取到第一个键值,只有"
             注释 = "\"取所有键值\"能获取全部键值." 折叠>
     参数 是否允许 <类型 = 逻辑型 注释 = "默认为假">
     {
-        @ data ().SetMultiKey (@<是否允许>);
+        @ data().SetMultiKey(@<是否允许>);
     }
 
     方法 是否允许重复键名 <公开 属性读 类型 = 逻辑型 注释 = "返回是否允许重复键名" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.data ().IsMultiKey ()
+        @ @sn<this>.data().IsMultiKey()
     }
 
     方法 是否允许跨行键值 <公开 属性写 注释 = "  设置是否允许键值可以跨越多行,格式如下:" 注释 = "    key = <<<TAG"
@@ -497,46 +497,46 @@
             注释 = "  中间是跨行的键值,可以有很多行,其中换行符会被替换为\'\\\\n\'字符." 折叠>
     参数 是否允许 <类型 = 逻辑型 注释 = "默认为假">
     {
-        @ data ().SetMultiLine (@<是否允许>);
+        @ data().SetMultiLine(@<是否允许>);
     }
 
     方法 是否允许跨行键值 <公开 属性读 类型 = 逻辑型 注释 = "返回是否允许跨行键值" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.data ().IsMultiLine ()
+        @ @sn<this>.data().IsMultiLine()
     }
 
     方法 是否添加空格 <公开 属性写 注释 = "设置是否在键值对的等号两边添加空格." 注释 = " 真: \"key = value\";" 注释 = " 假: \"key=value\"." 折叠>
     参数 是否添加 <类型 = 逻辑型 注释 = "默认为假">
     {
-        @ data ().SetSpaces (@<是否添加>);
+        @ data().SetSpaces(@<是否添加>);
     }
 
     方法 是否添加空格 <公开 属性读 类型 = 逻辑型 注释 = "返回是否在等号两边添加空格" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.data ().UsingSpaces ()
+        @ @sn<this>.data().UsingSpaces()
     }
 
     方法 是否解析引号 <公开 属性写 注释 = "设置是否解析包围单行键值的双引号." 注释 = "为真时会将双引号当作语法解析,不会输出到键值中;" 注释 = "为假时会将双引号输出为字符." 折叠>
     参数 是否解析 <类型 = 逻辑型 注释 = "默认为假">
     {
-        @ data ().SetQuotes (@<是否解析>);
+        @ data().SetQuotes(@<是否解析>);
     }
 
     方法 是否解析引号 <公开 属性读 类型 = 逻辑型 注释 = "返回是否解析包围单行键值的引号" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.data ().UsingQuotes ()
+        @ @sn<this>.data().UsingQuotes()
     }
 
     方法 是否允许单键名 <公开 属性写 注释 = "设置是否允许存在没有等号和键值的单个键名." 注释 = "为假时必须有等号才会解析出键名和键值;" 注释 = "为真时将没有等号的单行文本识别为单个键名."
             折叠>
     参数 是否允许 <类型 = 逻辑型 注释 = "默认为假">
     {
-        @ data ().SetAllowKeyOnly (@<是否允许>);
+        @ data().SetAllowKeyOnly(@<是否允许>);
     }
 
     方法 是否允许单键名 <公开 属性读 类型 = 逻辑型 注释 = "返回是否允许存在没有等号和键值的单个键名" 折叠 @嵌入式方法 = "">
     {
-        @ @sn<this>.data ().UsingQuotes ()
+        @ @sn<this>.data().UsingQuotes()
     }
 
     # ---
@@ -545,9 +545,9 @@
             @禁止流程检查 = 真>
     参数 配置内容 <类型 = 文本型>
     {
-        @ data ().Reset ();
-        @ data ().SetUnicode (true);
-        @ return data ().LoadData (*PivW2U(@<配置内容>.GetText()));
+        @ data().Reset();
+        @ data().SetUnicode(true);
+        @ return data().LoadData(*PivW2U(@<配置内容>.GetText()));
     }
 
     方法 创建自字节集 <公开 类型 = 整数 注释 = "从字节集数据中读入ini配置数据,本方法会覆盖本类之前的数据." 返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠
@@ -555,16 +555,16 @@
     参数 配置内容 <类型 = 字节集类>
     参数 文本编码 <类型 = 文本编码类型 注释 = "指定字节集文本编码,文本编码必须对应,否则可能会乱码;" 注释 = "其中\"未知\"等同多字节." @默认值 = 文本编码类型.UTF8>
     {
-        @ data ().Reset ();
+        @ data().Reset();
         @ if (@<文本编码> == VSET_UTF_8) {
-        @     data ().SetUnicode (true);
-        @     return data ().LoadData (reinterpret_cast<const char*>(@<配置内容>.GetPtr()), @<配置内容>.GetSize());
+        @     data().SetUnicode(true);
+        @     return data().LoadData(reinterpret_cast<const char*>(@<配置内容>.GetPtr()), @<配置内容>.GetSize());
         @ } else if (@<文本编码> == VSET_UTF_16) {
-        @     data ().SetUnicode (true);
-        @     return data ().LoadData (*PivW2U (reinterpret_cast<const wchar_t*>(@<配置内容>.GetPtr()), @<配置内容>.GetSize() / 2));
+        @     data().SetUnicode(true);
+        @     return data().LoadData(*PivW2U(reinterpret_cast<const wchar_t*>(@<配置内容>.GetPtr()), @<配置内容>.GetSize() / 2));
         @ } else {
-        @     data ().SetUnicode (false);
-        @     return data ().LoadData (reinterpret_cast<const char*>(@<配置内容>.GetPtr()), @<配置内容>.GetSize());
+        @     data().SetUnicode(false);
+        @     return data().LoadData(reinterpret_cast<const char*>(@<配置内容>.GetPtr()), @<配置内容>.GetSize());
         @ }
     }
 
@@ -579,46 +579,46 @@
         @ m_szIniFile.Empty(); m_bAutoSave = false;
         @ data().Reset();
         @ INT nRet = 0;
-        @ FILE* fp = NULL
-        @ if (IsOSFileExist(@<文件名>.GetText())
+        @ FILE* fp = NULL;
+        @ if (IsOSFileExist(@<文件名>.GetText()))
         @     fp = _wfopen(@<文件名>.GetText(), L"rb");
         @ else
         @     fp = _wfopen(@<文件名>.GetText(), L"ab+");
         @ if (!fp) return -3;
-        @ fseek (fp, 0, SEEK_END);
-        @ int nSize = ftell (fp);
+        @ fseek(fp, 0, SEEK_END);
+        @ int nSize = ftell(fp);
         @ if (nSize == 0) {
-        @     fclose (fp); m_nType = @<文本编码>;
+        @     fclose(fp); m_nType = @<文本编码>;
         @     if (m_nType == VSET_UTF_8 || m_nType == VSET_UTF_16)
-        @         data ().SetUnicode (true);
+        @         data().SetUnicode(true);
         @     else
-        @         data ().SetUnicode (false);
+        @         data().SetUnicode(false);
         @     m_szIniFile = @<文件名>;
         @     m_bAutoSave = (bool)@<自动保存>;
         @     return 0;
         @ }
-        @ fseek (fp, 0, SEEK_SET);
+        @ fseek(fp, 0, SEEK_SET);
         @ char* szData = new char [nSize] { 0 };
-        @ if (!szData) { fclose (fp); return -2; }
-        @ fread (szData, sizeof(char), nSize, fp);
-        @ fclose (fp);
+        @ if (!szData) { fclose(fp); return -2; }
+        @ fread(szData, sizeof(char), nSize, fp);
+        @ fclose(fp);
         @ m_nType = VSET_UNKNOWN;
         @ bool hasBom = false;
-        @ if (memcmp (szData, SI_UTF16_SIGNATURE, 2) == 0) {
+        @ if (memcmp(szData, "\xFF\xFE", 2) == 0) {
         @     m_nType = VSET_UTF_16; hasBom = true;
-        @ } else if (memcmp (szData, SI_UTF8_SIGNATURE, 3) == 0) {
+        @ } else if (memcmp(szData, SI_UTF8_SIGNATURE, 3) == 0) {
         @     m_nType = VSET_UTF_8;
         @ }
         @ if (m_nType == VSET_UTF_16 || (m_nType == VSET_UNKNOWN && @<文本编码> == VSET_UTF_16)) {
-        @     data ().SetUnicode (true);
-        @     nRet = static_cast<INT>(data ().LoadData (*PivW2U (reinterpret_cast<const WCHAR*>(szData + (hasBom ? 2 : 0)), (hasBom ? (nSize - 2) : nSize) / 2)));
+        @     data().SetUnicode(true);
+        @     nRet = static_cast<INT>(data().LoadData(*PivW2U(reinterpret_cast<const WCHAR*>(szData + (hasBom ? 2 : 0)), (hasBom ? (nSize - 2) : nSize) / 2)));
         @ } else if (m_nType == VSET_UTF_8 || (m_nType == VSET_UNKNOWN && @<文本编码> == VSET_UTF_8)) {
-        @     data ().SetUnicode (true);
-        @     nRet = static_cast<INT>(data ().LoadData (reinterpret_cast<const char*>(szData), nSize));
+        @     data().SetUnicode(true);
+        @     nRet = static_cast<INT>(data().LoadData(reinterpret_cast<const char*>(szData), nSize));
         @ } else {
         @     m_nType = VSET_MBCS;
-        @     data ().SetUnicode (false);
-        @     nRet = static_cast<INT>(data ().LoadData (reinterpret_cast<const char*>(szData), nSize));
+        @     data().SetUnicode(false);
+        @     nRet = static_cast<INT>(data().LoadData(reinterpret_cast<const char*>(szData), nSize));
         @ }
         @ delete [] szData;
         @ if (nRet >= 0) {
@@ -643,10 +643,10 @@
     方法 保存 <公开 类型 = 整数 注释 = "覆盖保存所打开的ini文件." 注释 = "如果未执行过\"创建自文件/打开文件\",应当使用\"保存文件\"."
             返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @禁止流程检查 = 真>
     {
-        @ if (m_szIniFile.IsEmpty ())
+        @ if (m_szIniFile.IsEmpty())
         @     return -3;
         @ else
-        @     return this->@<保存文件> (m_szIniFile, m_nType);
+        @     return this->@<保存文件>(m_szIniFile, m_nType);
     }
 
     方法 保存文件 <公开 类型 = 整数 注释 = "将当前编辑的内容保存到指定的ini文件中" 返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @禁止流程检查 = 真>
@@ -654,39 +654,39 @@
     参数 文本编码 <类型 = 文本编码类型 注释 = "指定保存文件的文本编码,UTF8和UTF16会添加自动BOM签名,其中\"未知\"等同多字节." @默认值 = 文本编码类型.UTF8>
     {
         @ if (@<文本编码> == @<文本编码类型.UTF8>) {
-        @     if (data ().IsUnicode ()) {
-        @         return data ().SaveFile (@<文件名>.GetText (), true);
+        @     if (data().IsUnicode()) {
+        @         return data().SaveFile(@<文件名>.GetText(), true);
         @     } else {
         @         CVolMem memUtf8;
         @         std::string szBuffer;
-        @         data ().Save (szBuffer, false);
+        @         data().Save(szBuffer, false);
         @         PivA2U utf8str {szBuffer};
-        @         utf8str.to_volmem (memUtf8, false);
-        @         memUtf8.InsertValue_S_BYTE (0, (S_BYTE)0xBF); memUtf8.InsertValue_S_BYTE (0, (S_BYTE)0xBB); memUtf8.InsertValue_S_BYTE (0, (S_BYTE)0xEF);
-        @         return memUtf8.WriteIntoFile (@<文件名>, -1) ? 0 : -3;
+        @         utf8str.to_volmem(memUtf8, false);
+        @         memUtf8.InsertValue_S_BYTE(0, (S_BYTE)0xBF); memUtf8.InsertValue_S_BYTE(0, (S_BYTE)0xBB); memUtf8.InsertValue_S_BYTE(0, (S_BYTE)0xEF);
+        @         return memUtf8.WriteIntoFile(@<文件名>, -1) ? 0 : -3;
         @     }
         @ } else if (@<文本编码> == @<文本编码类型.UTF16>) {
         @     CVolMem memWStr; std::string szBuffer;
-        @     data ().Save (szBuffer, false);
-        @     if (data ().IsUnicode ()) {
+        @     data().Save(szBuffer, false);
+        @     if (data().IsUnicode()) {
         @         PivU2W utf16str {szBuffer};
-        @         utf16str.to_volmem (memWStr, false);
+        @         utf16str.to_volmem(memWStr, false);
         @     } else {
         @         PivA2W utf16str {szBuffer};
-        @         utf16str.to_volmem (memWStr, false);
+        @         utf16str.to_volmem(memWStr, false);
         @     }
-        @     memWStr.InsertValue_SHORT (0, (SHORT)0xFEFF);
-        @     return memWStr.WriteIntoFile (@<文件名>, -1) ? 0 : -3;
+        @     memWStr.InsertValue_SHORT(0, (SHORT)0xFEFF);
+        @     return memWStr.WriteIntoFile(@<文件名>, -1) ? 0 : -3;
         @ } else {
-        @     if (data ().IsUnicode ()) {
+        @     if (data().IsUnicode()) {
         @         CVolMem memMBS;
         @         std::string szBuffer;
-        @         data ().Save (szBuffer, false);
+        @         data().Save(szBuffer, false);
         @         PivU2A mbstr {szBuffer};
-        @         mbstr.to_volmem (memMBS, false);
-        @         return memMBS.WriteIntoFile (@<文件名>, -1) ? 0 : -3;
+        @         mbstr.to_volmem(memMBS, false);
+        @         return memMBS.WriteIntoFile(@<文件名>, -1) ? 0 : -3;
         @     } else {
-        @         return static_cast<INT>(data ().SaveFile (@<文件名>.GetText (), false));
+        @         return static_cast<INT>(data().SaveFile(@<文件名>.GetText(), false));
         @     }
         @ }
     }
@@ -700,11 +700,11 @@
     方法 到文本 <公开 类型 = 文本型 注释 = "将内存中的配置数据输出到文本" 折叠 @禁止流程检查 = 真>
     {
         @ std::string szBuffer;
-        @ data ().Save (szBuffer, false);
-        @ if (data ().IsUnicode ())
-        @     return *PivU2Ws {szBuffer};
+        @ data().Save(szBuffer, false);
+        @ if (data().IsUnicode())
+        @     return *PivU2Ws{szBuffer};
         @ else
-        @     return *PivA2Ws {szBuffer};
+        @     return *PivA2Ws{szBuffer};
     }
 
     方法 到字节集 <公开 类型 = 字节集类 注释 = "将内存中的配置数据输出到字节集类." 注释 = "本方法不做编码转换,直接返回类的内部数据,内部只使用多字节和UTF8两种编码." 折叠
@@ -713,19 +713,19 @@
     参数 是否UTF8编码 <类型 = 逻辑型类 注释 = "返回字节集的数据是否为UTF8编码,返回假则说明是多字节编码." @默认值 = 空对象>
     {
         @ std::string szBuffer;
-        @ data ().Save (szBuffer, @<添加签名>);
-        @ @<是否UTF8编码.值> = data ().IsUnicode ();
-        @ return @an<CVolMem> (szBuffer.c_str(), szBuffer.size());
+        @ data().Save(szBuffer, @<添加签名>);
+        @ @<是否UTF8编码.值> = data().IsUnicode();
+        @ return @an<CVolMem>(szBuffer.c_str(), szBuffer.size());
     }
 
     方法 取所有节名 <公开 注释 = "获取配置数据中所有节的名称" 折叠>
     参数 返回节名数组 <类型 = 文本数组类 注释 = "成功返回节名的数组">
     {
-        @ @<返回节名数组>.data ().RemoveAll ();
+        @ @<返回节名数组>.data().RemoveAll();
         @ CSimpleIniW::TNamesDepend sections;
-        @ data ().GetAllSections (sections);
+        @ data().GetAllSections(sections);
         @ for (auto it = sections.begin(); it != sections.end(); it++) {
-        @     @<返回节名数组>.data ().Add ((*it).pItem);
+        @     @<返回节名数组>.data().Add((*it).pItem);
         @ }
     }
 
@@ -733,12 +733,12 @@
     参数 节名 <类型 = 文本型 注释 = "所欲取所有键名的节">
     参数 返回键名数组 <类型 = 文本数组类 注释 = "成功返回键名的数组">
     {
-        @ @<返回键名数组>.data ().RemoveAll ();
+        @ @<返回键名数组>.data().RemoveAll();
         @ CSimpleIniW::TNamesDepend keys;
-        @ BOOL bRet = data ().GetAllKeys (@<节名>.GetText (), keys);
+        @ BOOL bRet = data().GetAllKeys(@<节名>.GetText(), keys);
         @ if (!bRet) return FALSE;
         @ for (auto it = keys.begin(); it != keys.end(); it++) {
-        @     @<返回键名数组>.data ().Add ((*it).pItem);
+        @     @<返回键名数组>.data().Add((*it).pItem);
         @ }
         @ return bRet;
     }
@@ -749,12 +749,12 @@
     参数 键名 <类型 = 文本型 注释 = "所欲取键值的键名">
     参数 返回值数组 <类型 = 文本数组类 注释 = "成功返回键值数组">
     {
-        @ @<返回值数组>.data ().RemoveAll ();
+        @ @<返回值数组>.data().RemoveAll();
         @ CSimpleIniW::TNamesDepend values;
-        @ BOOL bRet = data ().GetAllValues (@<节名>.GetText (), @<键名>.GetText (), values);
+        @ BOOL bRet = data().GetAllValues(@<节名>.GetText(), @<键名>.GetText(), values);
         @ if (!bRet) return FALSE;
         @ for (auto it = values.begin(); it != values.end(); it++) {
-        @     @<返回值数组>.data ().Add ((*it).pItem);
+        @     @<返回值数组>.data().Add((*it).pItem);
         @ }
         @ return bRet;
     }
@@ -762,15 +762,15 @@
     方法 取所有节名2 <公开 注释 = "获取配置数据中所有节的信息." 注释 = "本方法除了节名,还能返回注释和序号." 折叠>
     参数 返回配置项数组 <类型 = 配置项信息数组类 注释 = "成功返回节名的数组">
     {
-        @ @<返回配置项数组>.RemoveAll ();
+        @ @<返回配置项数组>.RemoveAll();
         @ CSimpleIniW::TNamesDepend sections;
-        @ data ().GetAllSections (sections);
+        @ data().GetAllSections(sections);
         @ for (auto it = sections.begin(); it != sections.end(); it++) {
         @     @dt<配置项信息类> iniInf;
-        @     if ((*it).pItem) iniInf.pItem = @an<CVolString> ((*it).pItem);
-        @     if ((*it).pComment) iniInf.pComment = @an<CVolString> ((*it).pComment);
+        @     if ((*it).pItem) { iniInf.pItem.SetText((*it).pItem); }
+        @     if ((*it).pComment) { iniInf.pComment.SetText((*it).pComment); };
         @     iniInf.nOrder = (*it).nOrder;
-        @     @<返回配置项数组>.Add (iniInf, NULL);
+        @     @<返回配置项数组>.Add(iniInf, NULL);
         @ }
     }
 
@@ -778,16 +778,16 @@
     参数 节名 <类型 = 文本型 注释 = "所欲取所有键名的节">
     参数 返回配置项数组 <类型 = 配置项信息数组类 注释 = "成功返回键名的数组">
     {
-        @ @<返回配置项数组>.RemoveAll ();
+        @ @<返回配置项数组>.RemoveAll();
         @ CSimpleIniW::TNamesDepend keys;
-        @ BOOL bRet = data ().GetAllKeys (@<节名>.GetText (), keys);
+        @ BOOL bRet = data().GetAllKeys(@<节名>.GetText(), keys);
         @ if (!bRet) return FALSE;
         @ for (auto it = keys.begin(); it != keys.end(); it++) {
         @     @dt<配置项信息类> iniInf;
-        @     if ((*it).pItem) iniInf.pItem = @an<CVolString> ((*it).pItem);
-        @     if ((*it).pComment) iniInf.pComment = @an<CVolString> ((*it).pComment);
+        @     if ((*it).pItem) { iniInf.pItem.SetText((*it).pItem); }
+        @     if ((*it).pComment) { iniInf.pComment.SetText((*it).pComment); }
         @     iniInf.nOrder = (*it).nOrder;
-        @     @<返回配置项数组>.Add (iniInf, NULL);
+        @     @<返回配置项数组>.Add(iniInf, NULL);
         @ }
         @ return bRet;
     }
@@ -798,16 +798,16 @@
     参数 键名 <类型 = 文本型 注释 = "所欲取键值的键名">
     参数 返回配置项数组 <类型 = 配置项信息数组类 注释 = "成功返回键值数组">
     {
-        @ @<返回配置项数组>.RemoveAll ();
+        @ @<返回配置项数组>.RemoveAll();
         @ CSimpleIniW::TNamesDepend values;
-        @ BOOL bRet = data ().GetAllValues (@<节名>.GetText (), @<键名>.GetText (), values);
+        @ BOOL bRet = data().GetAllValues(@<节名>.GetText(), @<键名>.GetText(), values);
         @ if (!bRet) return FALSE;
         @ for (auto it = values.begin(); it != values.end(); it++) {
         @     @dt<配置项信息类> iniInf;
-        @     if ((*it).pItem) iniInf.pItem = @an<CVolString> ((*it).pItem);
-        @     if ((*it).pComment) iniInf.pComment = @an<CVolString> ((*it).pComment);
+        @     if ((*it).pItem) { iniInf.pItem.SetText((*it).pItem); }
+        @     if ((*it).pComment) { iniInf.pComment.SetText((*it).pComment); }
         @     iniInf.nOrder = (*it).nOrder;
-        @     @<返回配置项数组>.Add (iniInf, NULL);
+        @     @<返回配置项数组>.Add(iniInf, NULL);
         @ }
         @ return bRet;
     }
@@ -815,16 +815,16 @@
     方法 取节成员数 <公开 类型 = 整数 注释 = "获取指定节的键数量" 折叠 @嵌入式方法 = "">
     参数 节名 <类型 = 文本型 注释 = "所欲取键数量的节名">
     {
-        @ @sn<this>.data ().GetSectionSize (@<节名>.GetText ())
+        @ @sn<this>.data().GetSectionSize(@<节名>.GetText())
     }
 
     方法 取节键值对 <公开 类型 = 文本到文本哈希表 注释 = "获取指定节名的所有键值对" 返回值注释 = "返回键值对哈希表" 折叠>
     参数 节名 <类型 = 文本型 注释 = "所欲取键值对的节名">
     {
         变量 结果 <类型 = 文本到文本哈希表>
-        @ const CSimpleIniW::TKeyVal* kv = data ().GetSection (@<节名>.GetText ());
-        @ for (auto it = kv->begin (); it != kv->end (); it++) {
-        @     @<结果>.m_map [@an<CVolString> (it->first.pItem)] = @an<CVolString> (it->second);
+        @ const CSimpleIniW::TKeyVal* kv = data().GetSection(@<节名>.GetText());
+        @ for (auto it = kv->begin(); it != kv->end(); it++) {
+        @     @<结果>.m_map.emplace(it->first.pItem, it->second);
         @ }
         返回 (结果)
     }
@@ -832,14 +832,14 @@
     方法 节名是否存在 <公开 类型 = 逻辑型 注释 = "检查指定的节是否存在" 折叠 @嵌入式方法 = "">
     参数 节名 <类型 = 文本型 注释 = "所欲检查的节名">
     {
-        @ @sn<this>.data ().SectionExists (@<节名>.GetText ())
+        @ @sn<this>.data().SectionExists(@<节名>.GetText())
     }
 
     方法 键名是否存在 <公开 类型 = 逻辑型 注释 = "检查指定的键名是否存在" 折叠 @嵌入式方法 = "">
     参数 节名 <类型 = 文本型 注释 = "所欲检查键名的节名">
     参数 键名 <类型 = 文本型 注释 = "所欲检查的键名">
     {
-        @ @sn<this>.data ().KeyExists (@<节名>.GetText (), @<键名>.GetText ())
+        @ @sn<this>.data().KeyExists(@<节名>.GetText(), @<键名>.GetText())
     }
 
     方法 取文本键值 <公开 类型 = 文本型 注释 = "获取指定键的文本型键值." 注释 = "即使\"是否允许重复键名\"为真,也只会返回找到的第一个值." 折叠 @嵌入式方法 = "">
@@ -848,7 +848,7 @@
     参数 默认值 <类型 = 文本型 注释 = "如果所指定键名不存在,将返回此默认值." @默认值 = "">
     参数 是否有多个值 <类型 = 逻辑型类 注释 = "返回当前键是否有多个值,为真时可以用\"取所有键值\"获取." @默认值 = 空对象>
     {
-        @ @an<CVolString> (@sn<this>.data ().GetValue (@<节名>.GetText (), @<键名>.GetText (), @<默认值>.GetText (), (bool*)&@<是否有多个值.值>))
+        @ @an<CVolString>(@sn<this>.data().GetValue(@<节名>.GetText(), @<键名>.GetText(), @<默认值>.GetText(), (bool*)&@<是否有多个值.值>))
     }
 
     方法 取整数键值 <公开 类型 = 整数 注释 = "获取指定键的整数型键值." 注释 = "即使\"是否允许重复键名\"为真,也只会返回找到的第一个值." 折叠 @嵌入式方法 = "">
@@ -857,7 +857,7 @@
     参数 默认值 <类型 = 整数 注释 = "如果所指定键名不存在,将返回此默认值." @默认值 = 0>
     参数 是否有多个值 <类型 = 逻辑型类 注释 = "返回当前键是否有多个值,为真时可以用\"取所有键值\"获取." @默认值 = 空对象>
     {
-        @ (INT)@sn<this>.data ().GetLongValue (@<节名>.GetText (), @<键名>.GetText (), (long)@<默认值>, (bool*)&@<是否有多个值.值>)
+        @ (INT)@sn<this>.data().GetLongValue(@<节名>.GetText(), @<键名>.GetText(), (long)@<默认值>, (bool*)&@<是否有多个值.值>)
     }
 
     方法 取小数键值 <公开 类型 = 小数 注释 = "获取指定键的小数型键值." 注释 = "即使\"是否允许重复键名\"为真,也只会返回找到的第一个值." 折叠 @嵌入式方法 = "">
@@ -866,7 +866,7 @@
     参数 默认值 <类型 = 小数 注释 = "如果所指定键名不存在,将返回此默认值." @默认值 = 0>
     参数 是否有多个值 <类型 = 逻辑型类 注释 = "返回当前键是否有多个值,为真时可以用\"取所有键值\"获取." @默认值 = 空对象>
     {
-        @ @sn<this>.data ().GetDoubleValue (@<节名>.GetText (), @<键名>.GetText (), @<默认值>, (bool*)&@<是否有多个值.值>)
+        @ @sn<this>.data().GetDoubleValue(@<节名>.GetText(), @<键名>.GetText(), @<默认值>, (bool*)&@<是否有多个值.值>)
     }
 
     方法 取逻辑键值 <公开 类型 = 逻辑型 注释 = "获取指定键的逻辑型键值." 注释 = "即使\"是否允许重复键名\"为真,也只会返回找到的第一个值." 折叠 @嵌入式方法 = "">
@@ -875,11 +875,11 @@
     参数 默认值 <类型 = 逻辑型 注释 = "如果所指定键名不存在,将返回此默认值." @默认值 = 假>
     参数 是否有多个值 <类型 = 逻辑型类 注释 = "返回当前键是否有多个值,为真时可以用\"取所有键值\"获取." @默认值 = 空对象>
     {
-        @ (BOOL)@sn<this>.data ().GetBoolValue (@<节名>.GetText (), @<键名>.GetText (), (bool)@<默认值>, (bool*)&@<是否有多个值.值>)
+        @ (BOOL)@sn<this>.data().GetBoolValue(@<节名>.GetText(), @<键名>.GetText(), (bool)@<默认值>, (bool*)&@<是否有多个值.值>)
     }
 
     方法 置文本键值 <公开 类型 = 整数 注释 = "添加或更新一个节或文本型键值." 注释 = "当\"是否允许重复键名\"为真时,始终为添加键值."
-            返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @禁止流程检查 = 真>
+            返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @嵌入式方法 = "">
     参数 节名 <类型 = 文本型 注释 = "所欲添加或更新的节">
     参数 键名 <类型 = 文本型 注释 = "所欲添加或更新的键,留空表示创建一个空节." @默认值 = 空对象>
     参数 键值 <类型 = 文本型 注释 = "所欲设置的键值,留空表示创建一个空节." @默认值 = 空对象>
@@ -887,12 +887,12 @@
             注释 = "仅在第一次创建新的节或键名时才会写入注释." @默认值 = 空对象>
     参数 强制替换 <类型 = 逻辑型 注释 = "\"是否允许重复键名\"为真时,是否强制将同一个键名的" 注释 = "所有键值都替换成新值." @默认值 = 假>
     {
-        @ return (INT)data ().SetValue (@<节名>.GetText (), @<键名>.IsEmpty () ? NULL : @<键名>.GetText (),
-        @     @<键值>.IsEmpty () ? NULL : @<键值>.GetText (), @<注释>.IsEmpty () ? NULL : @<注释>.GetText (), (bool)@<强制替换>);
+        @ (INT)@sn<this>.data().SetValue(@<节名>.GetText(), @<键名>.GetTextMaybeNull(), @<键值>.GetTextMaybeNull(),
+        @     @<注释>.GetTextMaybeNull(), (bool)@<强制替换>)
     }
 
     方法 置整数键值 <公开 类型 = 整数 注释 = "添加或更新一个整数型键值." 注释 = "当\"是否允许重复键名\"为真时,始终为添加键值."
-            返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @禁止流程检查 = 真>
+            返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @嵌入式方法 = "">
     参数 节名 <类型 = 文本型 注释 = "所欲添加或更新的节">
     参数 键名 <类型 = 文本型 注释 = "所欲添加或更新的键">
     参数 键值 <类型 = 整数 注释 = "所欲设置的键值">
@@ -901,12 +901,12 @@
     参数 使用十六进制 <类型 = 逻辑型 注释 = "是否以十六进制文本的格式来写入整数型键值" @默认值 = 假>
     参数 强制替换 <类型 = 逻辑型 注释 = "\"是否允许重复键名\"为真时,是否强制将同一个键名的" 注释 = "所有键值都替换成新值." @默认值 = 假>
     {
-        @ return (INT)data ().SetLongValue (@<节名>.GetText (), @<键名>.GetText (), (long)@<键值>,
-        @         @<注释>.IsEmpty () ? NULL : @<注释>.GetText (), @<使用十六进制>, (bool)@<强制替换>);
+        @ (INT)@sn<this>.data().SetLongValue(@<节名>.GetText(), @<键名>.GetText(), (long)@<键值>,
+        @     @<注释>.GetTextMaybeNull(), (bool)@<使用十六进制>, (bool)@<强制替换>)
     }
 
     方法 置小数键值 <公开 类型 = 整数 注释 = "添加或更新一个小数型键值." 注释 = "当\"是否允许重复键名\"为真时,始终为添加键值."
-            返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @禁止流程检查 = 真>
+            返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @嵌入式方法 = "">
     参数 节名 <类型 = 文本型 注释 = "所欲添加或更新的节">
     参数 键名 <类型 = 文本型 注释 = "所欲添加或更新的键">
     参数 键值 <类型 = 小数 注释 = "所欲设置的键值">
@@ -914,12 +914,12 @@
             注释 = "仅在第一次创建新的节或键名时才会写入注释." @默认值 = 空对象>
     参数 强制替换 <类型 = 逻辑型 注释 = "\"是否允许重复键名\"为真时,是否强制将同一个键名的" 注释 = "所有键值都替换成新值." @默认值 = 假>
     {
-        @ return (INT)data ().SetDoubleValue (@<节名>.GetText (), @<键名>.GetText (), @<键值>,
-        @         @<注释>.IsEmpty () ? NULL : @<注释>.GetText (), (bool)@<强制替换>);
+        @ (INT)@sn<this>.data().SetDoubleValue(@<节名>.GetText(), @<键名>.GetText(), @<键值>,
+        @     @<注释>.GetTextMaybeNull(), (bool)@<强制替换>)
     }
 
     方法 置逻辑键值 <公开 类型 = 整数 注释 = "添加或更新一个逻辑型键值." 注释 = "当\"是否允许重复键名\"为真时,始终为添加键值."
-            返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @禁止流程检查 = 真>
+            返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @嵌入式方法 = "">
     参数 节名 <类型 = 文本型 注释 = "所欲添加或更新的节">
     参数 键名 <类型 = 文本型 注释 = "所欲添加或更新的键">
     参数 键值 <类型 = 逻辑型 注释 = "所欲设置的键值">
@@ -927,34 +927,33 @@
             注释 = "仅在第一次创建新的节或键名时才会写入注释." @默认值 = 空对象>
     参数 强制替换 <类型 = 逻辑型 注释 = "\"是否允许重复键名\"为真时,是否强制将同一个键名的" 注释 = "所有键值都替换成新值." @默认值 = 假>
     {
-        @ return (INT)data ().SetBoolValue (@<节名>.GetText (), @<键名>.GetText (), (bool)@<键值>,
-        @         @<注释>.IsEmpty () ? NULL : @<注释>.GetText (), (bool)@<强制替换>);
+        @ (INT)@sn<this>.data().SetBoolValue(@<节名>.GetText(), @<键名>.GetText(), (bool)@<键值>,
+        @     @<注释>.GetTextMaybeNull(), (bool)@<强制替换>)
     }
 
     方法 删除配置 <公开 类型 = 逻辑型 注释 = "  删除整个节,或节中的某个键." 注释 = "  当\"是否允许重复键名\"为真时,将删除所有同名的键,"
-            注释 = "如果要单独删除某个键值对,请用\"删除键值\"." 返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @禁止流程检查 = 真>
-    参数 节名 <类型 = 文本型 注释 = "所欲删除配置的节,如果如果键名为空,则表示删除整个节.">
+            注释 = "如果要单独删除某个键值对,请用\"删除键值\"." 返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠 @嵌入式方法 = "">
+    参数 节名 <类型 = 文本型 注释 = "所欲删除配置的节,如果如果键名为空,则表示删除整个节." @默认值 = 空对象>
     参数 键名 <类型 = 文本型 注释 = "所欲删除的键,如果键名为空,则表示删除整个节." @默认值 = 空对象>
     参数 删除空节 <类型 = 逻辑型 注释 = "如果删除指定键后,节已经没有其他内容,是否把这个空节也删除掉?" @默认值 = 假>
     {
-        @ return data ().Delete (@<节名>.GetText (), @<键名>.IsEmpty () ? NULL : @<键名>.GetText (), (bool)@<删除空节>);
+        @ (BOOL)@sn<this>.data().Delete(@<节名>.GetTextMaybeNull(), @<键名>.GetTextMaybeNull(), (bool)@<删除空节>)
     }
 
     方法 删除键值 <公开 类型 = 逻辑型 注释 = "删除整个节,或节中的某个键.如果提供了键值,则只删除对应的键." 返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠
-            @禁止流程检查 = 真>
-    参数 节名 <类型 = 文本型 注释 = "所欲删除配置的节,如果如果键名为空,则表示删除整个节.">
+            @嵌入式方法 = "">
+    参数 节名 <类型 = 文本型 注释 = "所欲删除配置的节,如果如果键名为空,则表示删除整个节." @默认值 = 空对象>
     参数 键名 <类型 = 文本型 注释 = "所欲删除的键,如果键名为空,则表示删除整个节." @默认值 = 空对象>
     参数 键值 <类型 = 文本型 注释 = "所欲删除的指定键值,如果留空则表示删除所有同名的键." @默认值 = 空对象>
     参数 删除空节 <类型 = 逻辑型 注释 = "如果删除指定键后,节已经没有其他内存,是否把这个空节也删除掉." @默认值 = 假>
     {
-        @ return data ().DeleteValue (@<节名>.GetText (), @<键名>.IsEmpty () ? NULL : @<键名>.GetText (),
-        @        @<键值>.IsEmpty () ? NULL : @<键值>.GetText (), (bool)@<删除空节>);
+        @ (BOOL)@sn<this>.data().DeleteValue(@<节名>.GetTextMaybeNull(), @<键名>.GetTextMaybeNull(),
+        @     @<键值>.GetTextMaybeNull(), (bool)@<删除空节>)
     }
 
     # @begin
-    # @m<DECLARE_REF_OBJECT_CLASS_WITH_DATA> (CSimpleIniW)
+    # @m<DECLARE_REF_OBJECT_CLASS_WITH_DATA>(CSimpleIniW)
     # <> <include>
-    # #define SI_UTF16_SIGNATURE     "\xFF\xFE"
     # CVolString m_szIniFile;
     # bool m_bAutoSave;
     # INT m_nType = VSET_UNKNOWN;
