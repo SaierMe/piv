@@ -391,7 +391,7 @@ public:
             if (read_memory(const_cast<wchar_t *>(result.GetText()), reinterpret_cast<PVOID64>(ProInfo->CommandLine.Buffer), ProInfo->CommandLine.Length))
                 return result;
         }
-        return _CT("");
+        return CWString(L"");
     }
 
     /**
@@ -588,7 +588,7 @@ public:
             if (it != ProInfo->ModulesMap.end())
                 return it->second.FullDllName.Right(it->second.BaseDllNameLen);
         }
-        return _CT("");
+        return CWString(L"");
     }
 
     /**
@@ -605,7 +605,7 @@ public:
             if (it != ProInfo->ModulesMap.end())
                 return it->second.FullDllName;
         }
-        return _CT("");
+        return CWString(L"");
     }
 
     /**
@@ -622,7 +622,7 @@ public:
             if (it != ProInfo->ModulesMap.end())
                 return it->second.FullDllName.Left(it->second.FullDllName.GetLength() - it->second.BaseDllNameLen);
         }
-        return _CT("");
+        return CWString(L"");
     }
 
     /**
@@ -646,7 +646,7 @@ public:
                     return CVolString(mapFileName.Buffer);
             }
         }
-        return _CT("");
+        return CWString(L"");
     }
 
     /**
@@ -661,7 +661,7 @@ public:
             if (Nt.GetProcessImageFileNameW(ProInfo->hProcess, const_cast<wchar_t *>(ImageFilename.GetText()), 512) > 0)
                 return ImageFilename;
         }
-        return _CT("");
+        return CWString(L"");
     }
 
     /**
@@ -771,19 +771,18 @@ public:
         PVOID64 EndAddress = (end_ptr == 0) ? reinterpret_cast<PVOID64>(ProInfo->ModulesMap.rbegin()->first) : (std::max)(StartAddress, end_ptr);
         ULONGLONG RegionSize = 0;
         // 特征码转字节数组
-        CVolMem sign_buf;
-        GetMbsText(signatures, sign_buf, NULL);
-        sign_buf.ReplaceBin(CVolMem(static_cast<S_BYTE>(' ')), CVolMem(), 0, 0);
-        char *Tzm = reinterpret_cast<char *>(sign_buf.GetPtr());
-        size_t TzmLength = strlen(Tzm) / 2 + 1;
-        std::unique_ptr<WORD[]> TzmArray(new WORD[TzmLength]);
+        CWString SignatureStr{signatures};
+        SignatureStr.Replace(L" ", L"");
+        wchar_t *SignatureCode = const_cast<wchar_t *>(SignatureStr.GetText());
+        size_t SignatureLength = static_cast<size_t>(SignatureStr.GetLength()) / 2;
+        std::unique_ptr<WORD[]> BytesetSequence(new WORD[SignatureLength]);
         // 将十六进制特征码转为十进制
-        for (size_t i = 0, n = 0; i < strlen(Tzm); n++)
+        for (size_t i = 0, n = 0; i < static_cast<size_t>(SignatureStr.GetLength()); n++)
         {
-            char num[2]{Tzm[i++], Tzm[i++]};
+            wchar_t num[2]{SignatureCode[i++], SignatureCode[i++]};
             if (num[0] != '?' && num[1] != '?')
             {
-                char a[2];
+                WORD a[2];
                 for (size_t i = 0; i < 2; i++)
                 {
                     if (num[i] >= '0' && num[i] <= '9')
@@ -793,19 +792,19 @@ public:
                     else if (num[i] >= 'A' && num[i] <= 'Z')
                         a[i] = num[i] - 55;
                 }
-                TzmArray[n] = a[0] * 16 + a[1];
+                BytesetSequence[n] = a[0] * 16 + a[1];
             }
             else
             {
-                TzmArray[n] = 256;
+                BytesetSequence[n] = 256;
             }
         }
         // 获取Next数组
         short Next[260]; // 特征码的每个字节的范围在0-255(0-FF)之间,256用来表示问号,到260是为了防止越界
         for (short i = 0; i < 260; i++)
             Next[i] = -1;
-        for (short i = 0; i < static_cast<short>(TzmLength); i++)
-            Next[TzmArray[i]] = i;
+        for (short i = 0; i < static_cast<short>(SignatureLength); i++)
+            Next[BytesetSequence[i]] = i;
 
         std::unique_ptr<BYTE[]> MemoryData(new BYTE[BLOCKMAXSIZE]);
         bool check_mem;
@@ -823,20 +822,20 @@ public:
                     {
                         j = m;
                         k = 0;
-                        for (; k < TzmLength && j < BLOCKMAXSIZE && (TzmArray[k] == MemoryData[j] || TzmArray[k] == 256); k++, j++)
+                        for (; k < SignatureLength && j < BLOCKMAXSIZE && (BytesetSequence[k] == MemoryData[j] || BytesetSequence[k] == 256); k++, j++)
                             ;
-                        if (k == TzmLength)
+                        if (k == SignatureLength)
                         {
                             if (address_array.Add2(reinterpret_cast<INT64>(StartAddress) + (BLOCKMAXSIZE * i) + m) >= (max_count - 1))
                                 return static_cast<int32_t>(max_count); // 达到所欲获取的最大数组成员数后退出
                         }
-                        if ((m + TzmLength) >= BLOCKMAXSIZE)
+                        if ((m + SignatureLength) >= BLOCKMAXSIZE)
                             break;
-                        int32_t num = Next[MemoryData[m + TzmLength]];
+                        int32_t num = Next[MemoryData[m + SignatureLength]];
                         if (num == -1)
-                            m += (TzmLength - Next[256]);
+                            m += (SignatureLength - Next[256]);
                         else
-                            m += (TzmLength - num);
+                            m += (SignatureLength - num);
                     }
                 }
                 BlockSize -= BLOCKMAXSIZE;
@@ -848,21 +847,21 @@ public:
                 {
                     j = m;
                     k = 0;
-                    for (; k < TzmLength && j < BlockSize && (TzmArray[k] == MemoryData[j] || TzmArray[k] == 256); k++, j++)
+                    for (; k < SignatureLength && j < BlockSize && (BytesetSequence[k] == MemoryData[j] || BytesetSequence[k] == 256); k++, j++)
                         ;
-                    if (k == TzmLength)
+                    if (k == SignatureLength)
                     {
                         if (address_array.Add2(reinterpret_cast<INT64>(StartAddress) + (BLOCKMAXSIZE * i) + m) >= (max_count - 1))
                             return static_cast<int32_t>(max_count); // 达到所欲获取的最大数组成员数后退出
                         break;
                     }
-                    if ((m + TzmLength) >= BlockSize)
+                    if ((m + SignatureLength) >= BlockSize)
                         break;
-                    int32_t num = Next[MemoryData[m + TzmLength]];
+                    int32_t num = Next[MemoryData[m + SignatureLength]];
                     if (num == -1)
-                        m += (TzmLength - Next[256]);
+                        m += (SignatureLength - Next[256]);
                     else
-                        m += (TzmLength - num);
+                        m += (SignatureLength - num);
                 }
             }
         Next_Region:
@@ -1004,6 +1003,12 @@ public:
                 return MemoryData;
         }
         return CVolMem();
+    }
+
+    template <typename T>
+    inline BOOL read_memory_num(PVOID64 read_address, T &value) noexcept
+    {
+        return read_memory(&value, read_address, sizeof(T));
     }
 
     /**
@@ -1208,6 +1213,27 @@ public:
                 return read_memory(PIV_PTR_FORWARD(PVOID64, it->first, read_off), read_size);
         }
         return CVolMem();
+    }
+
+    /**
+     * @brief 读模块内存值
+     * @tparam R 值类型
+     * @param hModule 模块句柄
+     * @param read_off 所欲读取的偏移地址
+     * @return 返回读取的值
+     */
+    template <typename T>
+    inline bool read_module_num(ULONG64 hModule, T &value, size_t read_off) noexcept
+    {
+        if (ProInfo && enum_modules() > 0)
+        {
+            if (hModule == 0)
+                hModule = ImageBaseAddress;
+            auto &it = ProInfo->ModulesMap.find(hModule);
+            if (it != ProInfo->ModulesMap.end() && read_off < it->second.SizeOfImage)
+                return read_memory(&value, PIV_PTR_FORWARD(PVOID64, it->first, read_off), sizeof(T));
+        }
+        return false;
     }
 
     /**

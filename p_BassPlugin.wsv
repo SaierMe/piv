@@ -1337,7 +1337,7 @@
             注释 = "   \"%(\" - \"(\"" 注释 = "   \"%,\" - \",\"" 注释 = "   \"%)\" - \")\"" 编辑时信息 = "55F10, 0, 0, 0"
             @默认值 = "%IFV1(%TRCK,%TRCK. )%IFV2(%ARTI,%ARTI,无艺术家) - %IFV2(%TITL,%TITL -,无标题 -) %IFV1(%ALBM,%ALBM)">
     {
-        @ @an<CVolString>(Utf8ToWStr(BassTags::Fn().TAGS_Read(@<通道句柄>, @<格式文本>), -1, CVolMem(), NULL, NULL, TRUE))
+        @ @an<CVolString>{BassTags::Fn().TAGS_Read(@<通道句柄>, @<格式文本>)}
     }
 
     方法 取标签信息 <公开 静态 类型 = 逻辑型 注释 = "获取BASS通道句柄中的标签值,为\"取标签\"的二次封装" 返回值注释 = "返回是否成功" 折叠 @禁止流程检查 = 真>
@@ -1396,12 +1396,12 @@
             注释 = "https://docs.microsoft.com/zh-cn/windows/win32/intl/code-page-identifiers?redirectedfrom=MSDN"
             编辑时信息 = "53A7E, 0, 0, 0" @默认值 = 0>
     {
-        @ @an<CVolString>(Utf8ToWStr(BassTags::Fn().TAGS_ReadEx(static_cast<DWORD>(@<通道句柄>), @<格式文本>, static_cast<DWORD>(@<标签类型>), @<代码页>), -1, CVolMem(), NULL, NULL, TRUE))
+        @ @an<CVolString>{BassTags::Fn().TAGS_ReadEx(static_cast<DWORD>(@<通道句柄>), @<格式文本>, static_cast<DWORD>(@<标签类型>), @<代码页>)}
     }
 
     方法 取错误描述 <公开 静态 类型 = 文本型 注释 = "获取最近一次错误的描述" 返回值注释 = "返回错误的描述文本" 折叠 @嵌入式方法 = "">
     {
-        @ @an<CVolString>(Utf8ToWStr(BassTags::Fn().TAGS_GetLastErrorDesc(), -1, CVolMem(), NULL, NULL, TRUE))
+        @ @an<CVolString>{BassTags::Fn().TAGS_GetLastErrorDesc()}
     }
 }
 
@@ -1446,8 +1446,8 @@
 
 # BASS_WASAPI类.辅助类
 
-类 BASS_WASAPI_信息 <公开 基础类 = PIV结构模板 注释 = "\"BASS_WASAPI类::取信息/BASS_WASAPI_GetInfo\"返回的信息" 折叠
-        @文档 = "category = \"WASAPI支持.辅助类\"" @别名 = "BASS_WASAPI_INFO" @模板实现类 = "BASS_WASAPI_信息">
+类 BASS_WASAPI_信息 <公开 基础类 = PIV结构模板 注释 = "\"BASS_WASAPI类::取信息/BASS_WASAPI_GetInfo\"返回的信息" 折叠 折叠2
+        @文档 = "category = \"WASAPI支持.辅助类\"" @别名 = "BASS_WASAPI_INFO" @别名类型 = 本地结构 @模板实现类 = "BASS_WASAPI_信息">
 {
     变量 初始化标志 <公开 类型 = 整数 注释 = "设备初始化时设置的标志" @输出名 = "initflags">
     变量 采样率 <公开 类型 = 整数 注释 = "采样率" @输出名 = "freq">
@@ -1470,7 +1470,8 @@
 }
 
 类 BASS_WASAPI_设备信息 <公开 基础类 = PIV结构模板 注释 = "\"BASS_WASAPI类::取设备信息/BASS_WASAPI_GetDeviceInfo\"返回的信息" 折叠
-        折叠2 @文档 = "category = \"WASAPI支持.辅助类\"" @别名 = "BASS_WASAPI_DEVICEINFO" @模板实现类 = "BASS_WASAPI_设备信息">
+        折叠2 @文档 = "category = \"WASAPI支持.辅助类\"" @别名 = "BASS_WASAPI_DEVICEINFO" @别名类型 = 本地结构
+        @模板实现类 = "BASS_WASAPI_设备信息">
 {
     变量 "//名称" <公开 类型 = 文本型 注释 = "设备描述" @输出名 = "name">
     变量 "//驱动ID" <公开 类型 = 文本型 注释 = "驱动程序的识别ID" @输出名 = "id">
@@ -1579,8 +1580,8 @@
 
 # BASS_ASIO类.辅助类
 
-类 BASS_ASIO_信息 <公开 基础类 = PIV结构模板 注释 = "\"BASS_ASIO类::取信息/BASS_ASIO_GetInfo\"返回的信息" 折叠
-        @文档 = "category = \"WASAPI支持.辅助类\"" @别名 = "BASS_ASIO_INFO" @模板实现类 = "BASS_ASIO_信息">
+类 BASS_ASIO_信息 <公开 基础类 = PIV结构模板 注释 = "\"BASS_ASIO类::取信息/BASS_ASIO_GetInfo\"返回的信息" 折叠 折叠2
+        @文档 = "category = \"WASAPI支持.辅助类\"" @别名 = "BASS_ASIO_INFO" @别名类型 = 本地结构 @模板实现类 = "BASS_ASIO_信息">
 {
     方法 名称 <公开 静态 属性读 类型 = 文本型 注释 = "设备或驱动程序的名称" 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = BASS_ASIO_信息>
@@ -1606,8 +1607,8 @@
     }
 }
 
-类 BASS_ASIO_设备信息 <公开 基础类 = PIV结构模板 注释 = "\"BASS_ASIO类::取设备信息/BASS_ASIO_GetDeviceInfo\"返回的信息" 折叠
-        @文档 = "category = \"ASIO支持.辅助类\"" @别名 = "BASS_ASIO_DEVICEINFO" @模板实现类 = "BASS_ASIO_设备信息">
+类 BASS_ASIO_设备信息 <公开 基础类 = PIV结构模板 注释 = "\"BASS_ASIO类::取设备信息/BASS_ASIO_GetDeviceInfo\"返回的信息" 折叠 折叠2
+        @文档 = "category = \"ASIO支持.辅助类\"" @别名 = "BASS_ASIO_DEVICEINFO" @别名类型 = 本地结构 @模板实现类 = "BASS_ASIO_设备信息">
 {
     方法 名称 <公开 静态 属性读 类型 = 文本型 注释 = "设备描述" 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = BASS_ASIO_设备信息>
@@ -1632,8 +1633,9 @@
 类 BASS_ASIO_设备信息数组 <公开 基础类 = PIV数组模板 注释 = "\"BASS_ASIO类::取所有设备信息\"返回的信息数组"
         @文档 = "category = \"ASIO支持.辅助类\"" @模板实现类 = "BASS_ASIO_设备信息">
 
-类 BASS_ASIO_通道信息 <公开 基础类 = PIV结构模板 注释 = "\"BASS_ASIO类::取通道信息/BASS_ASIO_ChannelGetInfo\"返回的信息" 折叠
-        @文档 = "category = \"ASIO支持.辅助类\"" @别名 = "BASS_ASIO_CHANNELINFO" @模板实现类 = "BASS_ASIO_通道信息">
+类 BASS_ASIO_通道信息 <公开 基础类 = PIV结构模板 注释 = "\"BASS_ASIO类::取通道信息/BASS_ASIO_ChannelGetInfo\"返回的信息" 折叠 折叠2
+        @文档 = "category = \"ASIO支持.辅助类\"" @别名 = "BASS_ASIO_CHANNELINFO" @别名类型 = 本地结构
+        @模板实现类 = "BASS_ASIO_通道信息">
 {
     变量 群组 <公开 类型 = 整数 注释 = "通道的群组" @输出名 = "group">
     变量 采样格式 <公开 类型 = 整数 注释 = "通道的采样格式,为下列常量之一:" 注释 = "16 BASS_ASIO_FORMAT_16BIT 16位整数."
@@ -1712,8 +1714,8 @@
     常量 BASS_MIXER_NORAMPIN <公开 类型 = 整数 值 = @BASS_MIXER_NORAMPIN>
 }
 
-类 BASS_MIXER_节点 <公开 基础类 = PIV结构模板 注释 = "BASS混合器类::置通道包络线" 折叠 @文档 = "category = \"BASS混合器.辅助类\""
-        @别名 = "BASS_MIXER_NODE" @模板实现类 = "BASS_MIXER_节点">
+类 BASS_MIXER_节点 <公开 基础类 = PIV结构模板 注释 = "BASS混合器类::置通道包络线" 折叠 折叠2 @文档 = "category = \"BASS混合器.辅助类\""
+        @别名 = "BASS_MIXER_NODE" @别名类型 = 本地结构 @模板实现类 = "BASS_MIXER_节点">
 {
     变量 位置 <公开 类型 = 长整数 @输出名 = "pos">
     变量 值 <公开 类型 = 单精度小数 @输出名 = "val">

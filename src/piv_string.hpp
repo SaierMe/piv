@@ -106,67 +106,143 @@ namespace piv
          * @brief 删首空
          * @param 所欲操作的文本 str
          */
-        template <typename CharT>
-        std::basic_string<CharT> &trim_left(std::basic_string<CharT> &str)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        trim_left(T &&str)
         {
-            if (str.empty())
-                return str;
-            size_t count = 0;
-            for (auto it = str.begin(); it != str.end(); it++, count++)
+            if (!str.empty())
             {
-                if (static_cast<uint16_t>(*it) > ' ')
-                    break;
+                size_t count = 0;
+                for (auto it = str.begin(); it != str.end(); it++, count++)
+                {
+                    if (static_cast<uint16_t>(*it) > ' ')
+                        break;
+                }
+                str.erase(0, count);
             }
-            str.erase(0, count);
-            return str;
+            return std::forward<T>(str);
         }
 
-        template <typename CharT>
-        basic_string_view<CharT> &trim_left(basic_string_view<CharT> &str)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        trim_left(T &&str)
         {
-            if (str.empty())
-                return str;
-            size_t count = 0;
-            for (auto it = str.begin(); it != str.end(); it++, count++)
+            if (!str.empty())
             {
-                if (static_cast<uint16_t>(*it) > ' ')
-                    break;
+                size_t count = 0;
+                for (auto it = str.begin(); it != str.end(); it++, count++)
+                {
+                    if (static_cast<uint16_t>(*it) > ' ')
+                        break;
+                }
+                str.erase(0, count);
             }
-            str.remove_prefix(count);
-            return str;
+            return std::forward<T>(str);
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, ::piv::string_view>::value, T>::type
+        trim_left(T &&str)
+        {
+            if (!str.empty())
+            {
+                size_t count = 0;
+                for (auto it = str.begin(); it != str.end(); it++, count++)
+                {
+                    if (static_cast<uint16_t>(*it) > ' ')
+                        break;
+                }
+                str.remove_prefix(count);
+            }
+            return std::forward<T>(str);
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, ::piv::wstring_view>::value, T>::type
+        trim_left(T &&str)
+        {
+            if (!str.empty())
+            {
+                size_t count = 0;
+                for (auto it = str.begin(); it != str.end(); it++, count++)
+                {
+                    if (static_cast<uint16_t>(*it) > ' ')
+                        break;
+                }
+                str.remove_prefix(count);
+            }
+            return std::forward<T>(str);
         }
 
         /**
          * @brief 删尾空
          * @param 所欲操作的文本 str
          */
-        template <typename CharT>
-        std::basic_string<CharT> &trim_right(std::basic_string<CharT> &str)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        trim_right(T &&str)
         {
-            if (str.empty())
-                return str;
-            size_t count = 0;
-            for (auto it = str.rbegin(); it != str.rend(); it++, count++)
+            if (!str.empty())
             {
-                if (static_cast<uint16_t>(*it) > ' ')
-                    break;
+                size_t count = 0;
+                for (auto it = str.rbegin(); it != str.rend(); it++, count++)
+                {
+                    if (static_cast<uint16_t>(*it) > ' ')
+                        break;
+                }
+                str.erase(count);
             }
-            str.erase(count);
+            return std::forward<T>(str);
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        trim_right(T &&str)
+        {
+            if (!str.empty())
+            {
+                size_t count = 0;
+                for (auto it = str.rbegin(); it != str.rend(); it++, count++)
+                {
+                    if (static_cast<uint16_t>(*it) > ' ')
+                        break;
+                }
+                str.erase(count);
+            }
+            return std::forward<T>(str);
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, ::piv::string_view>::value, T>::type
+        trim_right(T &&str)
+        {
+            if (!str.empty())
+            {
+                size_t count = 0;
+                for (auto it = str.rbegin(); it != str.rend(); it++, count++)
+                {
+                    if (static_cast<uint16_t>(*it) > ' ')
+                        break;
+                }
+                str.remove_suffix(count);
+            }
             return str;
         }
 
-        template <typename CharT>
-        basic_string_view<CharT> &trim_right(basic_string_view<CharT> &str)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, ::piv::wstring_view>::value, T>::type
+        trim_right(T &&str)
         {
-            if (str.empty())
-                return str;
-            size_t count = 0;
-            for (auto it = str.rbegin(); it != str.rend(); it++, count++)
+            if (!str.empty())
             {
-                if (static_cast<uint16_t>(*it) > ' ')
-                    break;
+                size_t count = 0;
+                for (auto it = str.rbegin(); it != str.rend(); it++, count++)
+                {
+                    if (static_cast<uint16_t>(*it) > ' ')
+                        break;
+                }
+                str.remove_suffix(count);
             }
-            str.remove_suffix(count);
             return str;
         }
 
@@ -735,13 +811,24 @@ namespace piv
          * @param pos 删除的起始位置
          * @param count 删除的文字数量
          */
-        template <typename EncodeT, typename CharT>
-        std::basic_string<CharT> &remove_words(std::basic_string<CharT> &str, size_t pos, size_t count)
+        template <typename EncodeT, typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        remove_words(T &&str, size_t pos, size_t count)
         {
             pos_with_word<EncodeT>(str, pos, count);
             if (pos < str.size() && count > 0)
                 str.erase(pos, count);
-            return str;
+            return std::forward<T>(str);
+        }
+
+        template <typename EncodeT, typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        remove_words(T &&str, size_t pos, size_t count)
+        {
+            pos_with_word<EncodeT>(str, pos, count);
+            if (pos < str.size() && count > 0)
+                str.erase(pos, count);
+            return std::forward<T>(str);
         }
 
         /**
@@ -819,7 +906,7 @@ namespace piv
          * @return 所分割出来的结果文本数目
          */
         template <typename StringT, typename ViewT, typename ValueT>
-        size_t split(StringT &lhs, const ViewT &delimit, std::vector<ValueT> &arr, bool trimAll = true, bool ignoreEmptyStr = true, size_t max_count = -1)
+        size_t split(const StringT &lhs, const ViewT &delimit, std::vector<ValueT> &arr, bool trimAll = true, bool ignoreEmptyStr = true, size_t max_count = -1)
         {
             arr.clear();
             if (delimit.empty())
@@ -882,7 +969,7 @@ namespace piv
          * @return 所分割出来的结果文本数目
          */
         template <typename StringT, typename ViewT, typename ValueT>
-        size_t split_substr(StringT &lhs, const ViewT &delimit, std::vector<ValueT> &arr, bool trimAll = true, bool ignoreEmptyStr = true, size_t max_count = -1)
+        size_t split_substr(const StringT &lhs, const ViewT &delimit, std::vector<ValueT> &arr, bool trimAll = true, bool ignoreEmptyStr = true, size_t max_count = -1)
         {
             arr.clear();
             if (delimit.empty())
@@ -1039,10 +1126,10 @@ namespace piv
          * @param resId 资源ID
          * @return 是否成功
          */
-        template <typename CharT>
-        bool load_resdata(basic_string_view<CharT> &lhs, int32_t resId)
+        template <typename CharT, typename T, typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, ::piv::basic_string_view<CharT>>::value>::type>
+        bool load_resdata(T &&lhs, int32_t resId)
         {
-            lhs.swap(basic_string_view<CharT>{});
+            lhs.swap(::piv::basic_string_view<CharT>{});
             if (resId == 0)
                 return false;
             HMODULE hModule = g_objVolApp.GetInstanceHandle();
@@ -1067,7 +1154,7 @@ namespace piv
                     count -= 3;
                 }
             }
-            lhs.swap(basic_string_view<CharT>{reinterpret_cast<const CharT *>(data), count / sizeof(CharT)});
+            lhs.swap(::piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(data), count / sizeof(CharT)});
             return true;
         }
 
@@ -1133,192 +1220,165 @@ namespace piv
          * @param count 所欲赋值的数据长度
          * @return 返回本文本
          */
-        template <typename CharT>
-        std::basic_string<CharT> &assign(std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        assign(T &&lhs, const std::string &rhs)
         {
-            return lhs.assign(rhs);
+            return std::forward<T>(lhs.assign(rhs));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &assign(std::basic_string<CharT> &lhs, std::basic_string<CharT> &&rhs)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        assign(T &&lhs, const std::string &rhs)
         {
-            return lhs.assign(rhs);
+            return std::forward<T>(lhs.assign(rhs));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &assign(std::basic_string<CharT> &lhs, const CharT *rhs, size_t count = -1)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        assign(T &&lhs, std::string &&rhs)
+        {
+            return std::forward<T>(lhs.assign(rhs));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        assign(T &&lhs, std::string &&rhs)
+        {
+            return std::forward<T>(lhs.assign(rhs));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        assign(T &&lhs, const ::piv::string_view &rhs, size_t count = -1)
+        {
+            return std::forward<T>(lhs.assign(rhs.data(), count == -1 ? rhs.size() : count));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        assign(T &&lhs, const ::piv::wstring_view &rhs, size_t count = -1)
+        {
+            return std::forward<T>(lhs.assign(rhs.data(), count == -1 ? rhs.size() : count));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        assign(T &&lhs, const char *rhs, size_t count = -1)
         {
             if (count == -1)
-                return lhs.assign(rhs);
+                return std::forward<T>(lhs.assign(rhs));
             else
-                return lhs.assign(rhs, count);
+                return std::forward<T>(lhs.assign(rhs, count));
         }
 
-        static std::string &assign(std::string &lhs, const wchar_t *rhs, size_t count = -1)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        assign(T &&lhs, const wchar_t *rhs, size_t count = -1)
         {
-            return lhs.assign(*PivW2A{rhs, count});
+            if (count == -1)
+                return std::forward<T>(lhs.assign(rhs));
+            else
+                return std::forward<T>(lhs.assign(rhs, count));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &assign(std::basic_string<CharT> &lhs, const CVolMem &rhs, size_t count = -1)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        assign(T &&lhs, const wchar_t *rhs, size_t count = -1)
         {
-            return lhs.assign(reinterpret_cast<const CharT *>(rhs.GetPtr()), count == -1 ? static_cast<size_t>(rhs.GetSize() / sizeof(CharT)) : count);
+            return std::forward<T>(lhs.assign(*PivW2A{rhs, count}));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &assign(std::basic_string<CharT> &lhs, const ::piv::basic_string_view<CharT> &rhs, size_t count = -1)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        assign(T &&lhs, const CVolMem &rhs, size_t count = -1)
         {
-            return lhs.assign(rhs.data(), count == -1 ? rhs.size() : count);
+            return std::forward<T>(lhs.assign(reinterpret_cast<const char *>(rhs.GetPtr()), count == -1 ? static_cast<size_t>(rhs.GetSize()) : count));
         }
 
-        static std::wstring &assign(std::wstring &lhs, const CWString &rhs, size_t count = -1)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        assign(T &&lhs, const CVolMem &rhs, size_t count = -1)
         {
-            return lhs.assign(rhs.GetText(), count == -1 ? rhs.GetLength() : count);
+            return std::forward<T>(lhs.assign(rhs.GetTextPtr(), count == -1 ? static_cast<size_t>(rhs.GetSize() / sizeof(wchar_t)) : count));
         }
 
-        static std::string &assign(std::string &lhs, const CWString &rhs, size_t count = -1)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        assign(T &&lhs, const CWString &rhs, size_t count = -1)
         {
-            return lhs.assign(*PivW2U{rhs, count});
+            return std::forward<T>(lhs.assign(*PivW2U{rhs, count}));
         }
 
-        static std::string &assign(std::string &lhs, int64_t rhs)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        assign(T &&lhs, const CWString &rhs, size_t count = -1)
         {
-            char buf[66] = {'\0'};
-            _i64toa(rhs, buf, 10);
-            return lhs.assign(buf);
+            return std::forward<T>(lhs.assign(rhs.GetText(), count == -1 ? rhs.GetLength() : count));
         }
 
-        static std::string &assign(std::string &lhs, uint64_t rhs)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        assign(T &&lhs, CWConstString &&rhs, size_t count = -1)
         {
-            char buf[66] = {'\0'};
-            _ui64toa(rhs, buf, 10);
-            return lhs.assign(buf);
+            return std::forward<T>(lhs.assign(*PivW2U{rhs, count}));
         }
 
-        static std::string &assign(std::string &lhs, int32_t rhs)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        assign(T &&lhs, CWConstString &&rhs, size_t count = -1)
         {
-            char buf[34] = {'\0'};
-            _ltoa(rhs, buf, 10);
-            return lhs.assign(buf);
+            return std::forward<T>(lhs.assign(rhs.GetText(), count == -1 ? rhs.GetLength() : count));
         }
 
-        static std::string &assign(std::string &lhs, uint32_t rhs)
+        template <typename T, typename V>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        assign(T &&lhs, V rhs, typename std::enable_if<std::is_integral<V>::value, V>::type * = nullptr)
         {
-            char buf[34] = {'\0'};
-            _ultoa(rhs, buf, 10);
-            return lhs.assign(buf);
+            char buf[sizeof(V) * 9] = {'\0'};
+            PIV_IF(std::numeric_limits<V>::is_signed)
+            {
+                _i64toa(rhs, buf, 10);
+            }
+            else
+            {
+                _ui64toa(rhs, buf, 10);
+            }
+            return std::forward<T>(lhs.assign(buf));
         }
 
-        static std::string &assign(std::string &lhs, int16_t rhs)
+        template <typename T, typename V>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        assign(T &&lhs, V rhs, typename std::enable_if<std::is_integral<V>::value, V>::type * = nullptr)
         {
-            char buf[18] = {'\0'};
-            _ltoa(rhs, buf, 10);
-            return lhs.assign(buf);
+            wchar_t buf[sizeof(V) * 9] = {'\0'};
+            PIV_IF(std::numeric_limits<V>::is_signed)
+            {
+                _i64tow(rhs, buf, 10);
+            }
+            else
+            {
+                _ui64tow(rhs, buf, 10);
+            }
+            return std::forward<T>(lhs.assign(buf));
         }
 
-        static std::string &assign(std::string &lhs, uint16_t rhs)
-        {
-            char buf[18] = {'\0'};
-            _ultoa(rhs, buf, 10);
-            return lhs.assign(buf);
-        }
-
-        static std::string &assign(std::string &lhs, int8_t rhs)
-        {
-            char buf[10] = {'\0'};
-            _ltoa(rhs, buf, 10);
-            return lhs.assign(buf);
-        }
-
-        static std::string &assign(std::string &lhs, uint8_t rhs)
-        {
-            char buf[10] = {'\0'};
-            _ultoa(rhs, buf, 10);
-            return lhs.assign(buf);
-        }
-
-        static std::string &assign(std::string &lhs, double rhs)
+        template <typename T, typename V>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        assign(T &&lhs, V rhs, typename std::enable_if<std::is_floating_point<V>::value, V>::type * = nullptr)
         {
             char buf[130] = {'\0'};
             sprintf(buf, "%f", rhs);
-            return lhs.assign(buf);
+            return std::forward<T>(lhs.assign(buf));
         }
 
-        static std::string &assign(std::string &lhs, float rhs)
-        {
-            char buf[130] = {'\0'};
-            sprintf(buf, "%lf", rhs);
-            return lhs.assign(buf);
-        }
-
-        static std::wstring &assign(std::wstring &lhs, int64_t rhs)
-        {
-            wchar_t buf[66] = {'\0'};
-            _i64tow(rhs, buf, 10);
-            return lhs.assign(buf);
-        }
-
-        static std::wstring &assign(std::wstring &lhs, uint64_t rhs)
-        {
-            wchar_t buf[66] = {'\0'};
-            _ui64tow(rhs, buf, 10);
-            return lhs.assign(buf);
-        }
-
-        static std::wstring &assign(std::wstring &lhs, int32_t rhs)
-        {
-            wchar_t buf[34] = {'\0'};
-            _ltow(rhs, buf, 10);
-            return lhs.assign(buf);
-        }
-
-        static std::wstring &assign(std::wstring &lhs, uint32_t rhs)
-        {
-            wchar_t buf[34] = {'\0'};
-            _ultow(rhs, buf, 10);
-            return lhs.assign(buf);
-        }
-
-        static std::wstring &assign(std::wstring &lhs, int16_t rhs)
-        {
-            wchar_t buf[18] = {'\0'};
-            _ltow(rhs, buf, 10);
-            return lhs.assign(buf);
-        }
-
-        static std::wstring &assign(std::wstring &lhs, uint16_t rhs)
-        {
-            wchar_t buf[18] = {'\0'};
-            _ultow(rhs, buf, 10);
-            return lhs.assign(buf);
-        }
-
-        static std::wstring &assign(std::wstring &lhs, int8_t rhs)
-        {
-            wchar_t buf[10] = {'\0'};
-            _ltow(rhs, buf, 10);
-            return lhs.assign(buf);
-        }
-
-        static std::wstring &assign(std::wstring &lhs, uint8_t rhs)
-        {
-            wchar_t buf[10] = {'\0'};
-            _ultow(rhs, buf, 10);
-            return lhs.assign(buf);
-        }
-
-        static std::wstring &assign(std::wstring &lhs, double rhs)
+        template <typename T, typename V>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        assign(T &&lhs, V rhs, typename std::enable_if<std::is_floating_point<V>::value, V>::type * = nullptr)
         {
             wchar_t buf[130] = {'\0'};
             swprintf(buf, L"%f", rhs);
-            return lhs.assign(buf);
-        }
-
-        static std::wstring &assign(std::wstring &lhs, float rhs)
-        {
-            wchar_t buf[130] = {'\0'};
-            swprintf(buf, L"%f", rhs);
-            return lhs.assign(buf);
+            return std::forward<T>(lhs.assign(buf));
         }
 
         /**
@@ -1329,64 +1389,92 @@ namespace piv
          * @param count 十六进制文本长度
          * @return 返回本文本
          */
-        template <typename CharT>
-        std::basic_string<CharT> &assign_hex(std::basic_string<CharT> &lhs, const piv::string_view &hexstr, size_t count = -1)
+        template <typename T, typename CharT>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        assign_hex(T &&lhs, const piv::basic_string_view<CharT> &hexstr, size_t count = -1)
         {
-            return piv::encoding::hex_to_str((count == -1) ? hexstr : hexstr.substr(0, count), lhs);
+            return std::forward<T>(piv::encoding::hex_to_str((count == -1) ? hexstr : hexstr.substr(0, count), lhs));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &assign_hex(std::basic_string<CharT> &lhs, const piv::wstring_view &hexstr, size_t count = -1)
+        template <typename T, typename CharT>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        assign_hex(T &&lhs, const piv::basic_string_view<CharT> &hexstr, size_t count = -1)
         {
-            return piv::encoding::hex_to_str((count == -1) ? hexstr : hexstr.substr(0, count), lhs);
+            return std::forward<T>(piv::encoding::hex_to_str((count == -1) ? hexstr : hexstr.substr(0, count), lhs));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &assign_hex(std::basic_string<CharT> &lhs, const std::string &hexstr, size_t count = -1)
+        template <typename T, typename CharT>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        assign_hex(T &&lhs, const std::basic_string<CharT> &hexstr, size_t count = -1)
         {
-            return piv::encoding::hex_to_str((count == -1) ? hexstr : piv::string_view{hexstr.c_str(), count}, lhs);
+            return std::forward<T>(piv::encoding::hex_to_str((count == -1) ? hexstr : ::piv::basic_string_view<CharT>{hexstr.c_str(), count}, lhs));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &assign_hex(std::basic_string<CharT> &lhs, const std::wstring &hexstr, size_t count = -1)
+        template <typename T, typename CharT>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        assign_hex(T &&lhs, const std::basic_string<CharT> &hexstr, size_t count = -1)
         {
-            return piv::encoding::hex_to_str((count == -1) ? hexstr : piv::wstring_view{hexstr.c_str(), count}, lhs);
+            return std::forward<T>(piv::encoding::hex_to_str((count == -1) ? hexstr : ::piv::basic_string_view<CharT>{hexstr.c_str(), count}, lhs));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &assign_hex(std::basic_string<CharT> &lhs, const char *hexstr, size_t count = -1)
+        template <typename T, typename CharT>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        assign_hex(T &&lhs, const CharT *hexstr, size_t count = -1)
         {
-            return piv::encoding::hex_to_str((count == -1) ? piv::string_view{hexstr} : piv::string_view{hexstr, count},
-                                             lhs);
+            return std::forward<T>(piv::encoding::hex_to_str((count == -1) ? ::piv::basic_string_view<CharT>{hexstr} : ::piv::basic_string_view<CharT>{hexstr.c_str(), count}, lhs));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &assign_hex(std::basic_string<CharT> &lhs, const wchar_t *hexstr, size_t count = -1)
+        template <typename T, typename CharT>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        assign_hex(T &&lhs, const CharT *hexstr, size_t count = -1)
         {
-            return piv::encoding::hex_to_str((count == -1) ? piv::wstring_view{hexstr} : piv::wstring_view{hexstr, count},
-                                             lhs);
+            return std::forward<T>(piv::encoding::hex_to_str((count == -1) ? ::piv::basic_string_view<CharT>{hexstr} : ::piv::basic_string_view<CharT>{hexstr.c_str(), count}, lhs));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &assign_hex(std::basic_string<CharT> &lhs, const CWString &hexstr, size_t count = -1)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        assign_hex(T &&lhs, const CWString &hexstr, size_t count = -1)
         {
-            return piv::encoding::hex_to_str((count == -1) ? piv::wstring_view{hexstr.GetText()} : piv::wstring_view{hexstr.GetText(), count},
-                                             lhs);
+            return std::forward<T>(piv::encoding::hex_to_str((count == -1) ? ::piv::wstring_view{hexstr.GetText()} : ::piv::wstring_view{hexstr.GetText(), count}, lhs));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &assign_hex(std::basic_string<CharT> &lhs, const CVolMem &hexstr, size_t count = -1)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        assign_hex(T &&lhs, const CWString &hexstr, size_t count = -1)
+        {
+            return std::forward<T>(piv::encoding::hex_to_str((count == -1) ? ::piv::wstring_view{hexstr.GetText()} : ::piv::wstring_view{hexstr.GetText(), count}, lhs));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        assign_hex(T &&lhs, const CVolMem &hexstr, size_t count = -1)
         {
             if (hexstr.GetSize() < 2)
                 return lhs;
             if (hexstr.Get_S_BYTE(1) == 0)
-                return piv::encoding::hex_to_str(piv::wstring_view{reinterpret_cast<const wchar_t *>(hexstr.GetPtr()),
-                                                                   static_cast<size_t>(hexstr.GetSize() / sizeof(wchar_t))},
-                                                 lhs);
+                return std::forward<T>(piv::encoding::hex_to_str(::piv::wstring_view{reinterpret_cast<const wchar_t *>(hexstr.GetPtr()),
+                                                                                     static_cast<size_t>(hexstr.GetSize() / sizeof(wchar_t))},
+                                                                 lhs));
             else
-                return piv::encoding::hex_to_str(piv::string_view{reinterpret_cast<const char *>(hexstr.GetPtr()),
-                                                                  static_cast<size_t>(hexstr.GetSize())},
-                                                 lhs);
+                return std::forward<T>(piv::encoding::hex_to_str(::piv::string_view{reinterpret_cast<const char *>(hexstr.GetPtr()),
+                                                                                    static_cast<size_t>(hexstr.GetSize())},
+                                                                 lhs));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        assign_hex(T &&lhs, const CVolMem &hexstr, size_t count = -1)
+        {
+            if (hexstr.GetSize() < 2)
+                return lhs;
+            if (hexstr.Get_S_BYTE(1) == 0)
+                return std::forward<T>(piv::encoding::hex_to_str(::piv::wstring_view{reinterpret_cast<const wchar_t *>(hexstr.GetPtr()),
+                                                                                     static_cast<size_t>(hexstr.GetSize() / sizeof(wchar_t))},
+                                                                 lhs));
+            else
+                return std::forward<T>(piv::encoding::hex_to_str(::piv::string_view{reinterpret_cast<const char *>(hexstr.GetPtr()),
+                                                                                    static_cast<size_t>(hexstr.GetSize())},
+                                                                 lhs));
         }
 
         /**
@@ -1401,7 +1489,7 @@ namespace piv
         bool assign_resdata(std::basic_string<CharT> &lhs, int32_t resId)
         {
             piv::basic_string_view<CharT> sv;
-            if (piv::edit::load_resdata(sv, resId))
+            if (piv::edit::load_resdata<CharT>(sv, resId))
             {
                 lhs.assign(sv.data(), sv.size());
                 return true;
@@ -1419,18 +1507,36 @@ namespace piv
          * @param ...args
          * @return 返回本文本
          */
-        template <typename CharT, typename... Args>
-        std::basic_string<CharT> &push_back(std::basic_string<CharT> &lhs, const CharT &ch, Args &&...args)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        push_back(T &&lhs, char ch)
         {
             lhs.push_back(ch);
-            return piv::str::push_back(lhs, std::forward<Args>(args)...);
+            return std::forward<T>(lhs);
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &push_back(std::basic_string<CharT> &lhs, const CharT &ch)
+        template <typename T, typename... Args>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        push_back(T &&lhs, char ch, Args &&...args)
         {
             lhs.push_back(ch);
-            return lhs;
+            return std::forward<T>(piv::str::push_back(lhs, std::forward<Args>(args)...));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        push_back(T &&lhs, wchar_t ch)
+        {
+            lhs.push_back(ch);
+            return std::forward<T>(lhs);
+        }
+
+        template <typename T, typename... Args>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        push_back(T &&lhs, wchar_t ch, Args &&...args)
+        {
+            lhs.push_back(ch);
+            return std::forward<T>(piv::str::push_back(lhs, std::forward<Args>(args)...));
         }
 
         /**
@@ -1441,192 +1547,137 @@ namespace piv
          * @param count 所欲加入的数据长度
          * @return 返回本文本
          */
-        template <typename CharT>
-        std::basic_string<CharT> &append(std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append(T &&lhs, const std::string &rhs, size_t count = -1)
         {
-            return lhs.append(rhs);
+            return std::forward<T>(lhs.append(rhs.data(), count == -1 ? rhs.size() : count));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &append(std::basic_string<CharT> &lhs, std::basic_string<CharT> &&rhs)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append(T &&lhs, const std::wstring &rhs, size_t count = -1)
         {
-            return lhs.append(rhs);
+            return std::forward<T>(lhs.append(rhs.data(), count == -1 ? rhs.size() : count));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &append(std::basic_string<CharT> &lhs, const CharT *rhs, size_t count = -1)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append(T &&lhs, const ::piv::string_view &rhs, size_t count = -1)
+        {
+            return std::forward<T>(lhs.append(rhs.data(), count == -1 ? rhs.size() : count));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append(T &&lhs, const ::piv::wstring_view &rhs, size_t count = -1)
+        {
+            return std::forward<T>(lhs.append(rhs.data(), count == -1 ? rhs.size() : count));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append(T &&lhs, const char *rhs, size_t count = -1)
         {
             if (count == -1)
-                return lhs.append(rhs);
+                return std::forward<T>(lhs.append(rhs));
             else
-                return lhs.append(rhs, count);
+                return std::forward<T>(lhs.append(rhs, count));
         }
 
-        static std::string &append(std::string &lhs, const wchar_t *rhs, size_t count = -1)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append(T &&lhs, const wchar_t *rhs, size_t count = -1)
         {
-            return lhs.append(*PivW2A{rhs, count});
+            if (count == -1)
+                return std::forward<T>(lhs.append(rhs));
+            else
+                return std::forward<T>(lhs.append(rhs, count));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &append(std::basic_string<CharT> &lhs, const CVolMem &rhs, size_t count = -1)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append(T &&lhs, const wchar_t *rhs, size_t count = -1)
         {
-            return lhs.append(reinterpret_cast<const CharT *>(rhs.GetPtr()), count == -1 ? static_cast<size_t>(rhs.GetSize() / sizeof(CharT)) : count);
+            return std::forward<T>(lhs.append(*PivW2A{rhs, count}));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &append(std::basic_string<CharT> &lhs, const ::piv::basic_string_view<CharT> &rhs, size_t count = -1)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append(T &&lhs, const CVolMem &rhs, size_t count = -1)
         {
-            return lhs.append(rhs.data(), count == -1 ? rhs.size() : count);
+            return std::forward<T>(lhs.append(reinterpret_cast<const char *>(rhs.GetPtr()), count == -1 ? static_cast<size_t>(rhs.GetSize()) : count));
         }
 
-        static std::wstring &append(std::wstring &lhs, const CWString &rhs, size_t count = -1)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append(T &&lhs, const CVolMem &rhs, size_t count = -1)
         {
-            return lhs.append(rhs.GetText(), count == -1 ? rhs.GetLength() : count);
+            return std::forward<T>(lhs.append(reinterpret_cast<const wchar_t *>(rhs.GetPtr()), count == -1 ? static_cast<size_t>(rhs.GetSize() / sizeof(wchar_t)) : count));
         }
 
-        static std::string &append(std::string &lhs, const CWString &rhs, size_t count = -1)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append(T &&lhs, const CWString &rhs, size_t count = -1)
         {
-            return lhs.append(*PivW2U{rhs, count});
+            return std::forward<T>(lhs.append(*PivW2U{rhs, count}));
         }
 
-        static std::string &append(std::string &lhs, int64_t rhs)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append(T &&lhs, const CWString &rhs, size_t count = -1)
         {
-            char buf[66] = {'\0'};
-            _i64toa(rhs, buf, 10);
-            return lhs.append(buf);
+            return std::forward<T>(lhs.append(rhs.GetText(), count == -1 ? rhs.GetLength() : count));
         }
 
-        static std::string &append(std::string &lhs, uint64_t rhs)
+        template <typename T, typename V>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append(T &&lhs, V rhs, typename std::enable_if<std::is_integral<V>::value, V>::type * = nullptr)
         {
-            char buf[66] = {'\0'};
-            _ui64toa(rhs, buf, 10);
-            return lhs.append(buf);
+            char buf[sizeof(V) * 9] = {'\0'};
+            PIV_IF(std::numeric_limits<V>::is_signed)
+            {
+                _i64toa(rhs, buf, 10);
+            }
+            else
+            {
+                _ui64toa(rhs, buf, 10);
+            }
+            return std::forward<T>(lhs.append(buf));
         }
 
-        static std::string &append(std::string &lhs, int32_t rhs)
+        template <typename T, typename V>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append(T &&lhs, V rhs, typename std::enable_if<std::is_integral<V>::value, V>::type * = nullptr)
         {
-            char buf[34] = {'\0'};
-            _ltoa(rhs, buf, 10);
-            return lhs.append(buf);
+            wchar_t buf[sizeof(V) * 9] = {'\0'};
+            PIV_IF(std::numeric_limits<V>::is_signed)
+            {
+                _i64tow(rhs, buf, 10);
+            }
+            else
+            {
+                _ui64tow(rhs, buf, 10);
+            }
+            return std::forward<T>(lhs.append(buf));
         }
 
-        static std::string &append(std::string &lhs, uint32_t rhs)
-        {
-            char buf[34] = {'\0'};
-            _ultoa(rhs, buf, 10);
-            return lhs.append(buf);
-        }
-
-        static std::string &append(std::string &lhs, int16_t rhs)
-        {
-            char buf[18] = {'\0'};
-            _ltoa(rhs, buf, 10);
-            return lhs.append(buf);
-        }
-
-        static std::string &append(std::string &lhs, uint16_t rhs)
-        {
-            char buf[18] = {'\0'};
-            _ultoa(rhs, buf, 10);
-            return lhs.append(buf);
-        }
-
-        static std::string &append(std::string &lhs, int8_t rhs)
-        {
-            char buf[10] = {'\0'};
-            _ltoa(rhs, buf, 10);
-            return lhs.append(buf);
-        }
-
-        static std::string &append(std::string &lhs, uint8_t rhs)
-        {
-            char buf[10] = {'\0'};
-            _ultoa(rhs, buf, 10);
-            return lhs.append(buf);
-        }
-
-        static std::string &append(std::string &lhs, double rhs)
+        template <typename T, typename V>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append(T &&lhs, V rhs, typename std::enable_if<std::is_floating_point<V>::value, V>::type * = nullptr)
         {
             char buf[130] = {'\0'};
             sprintf(buf, "%f", rhs);
-            return lhs.append(buf);
+            return std::forward<T>(lhs.append(buf));
         }
 
-        static std::string &append(std::string &lhs, float rhs)
-        {
-            char buf[130] = {'\0'};
-            sprintf(buf, "%f", rhs);
-            return lhs.append(buf);
-        }
-
-        static std::wstring &append(std::wstring &lhs, int64_t rhs)
-        {
-            wchar_t buf[66] = {'\0'};
-            _i64tow(rhs, buf, 10);
-            return lhs.append(buf);
-        }
-
-        static std::wstring &append(std::wstring &lhs, uint64_t rhs)
-        {
-            wchar_t buf[66] = {'\0'};
-            _ui64tow(rhs, buf, 10);
-            return lhs.append(buf);
-        }
-
-        static std::wstring &append(std::wstring &lhs, int32_t rhs)
-        {
-            wchar_t buf[34] = {'\0'};
-            _ltow(rhs, buf, 10);
-            return lhs.append(buf);
-        }
-
-        static std::wstring &append(std::wstring &lhs, uint32_t rhs)
-        {
-            wchar_t buf[34] = {'\0'};
-            _ultow(rhs, buf, 10);
-            return lhs.append(buf);
-        }
-
-        static std::wstring &append(std::wstring &lhs, int16_t rhs)
-        {
-            wchar_t buf[18] = {'\0'};
-            _ltow(rhs, buf, 10);
-            return lhs.append(buf);
-        }
-
-        static std::wstring &append(std::wstring &lhs, uint16_t rhs)
-        {
-            wchar_t buf[18] = {'\0'};
-            _ultow(rhs, buf, 10);
-            return lhs.append(buf);
-        }
-
-        static std::wstring &append(std::wstring &lhs, int8_t rhs)
-        {
-            wchar_t buf[10] = {'\0'};
-            _ltow(rhs, buf, 10);
-            return lhs.append(buf);
-        }
-
-        static std::wstring &append(std::wstring &lhs, uint8_t rhs)
-        {
-            wchar_t buf[10] = {'\0'};
-            _ultow(rhs, buf, 10);
-            return lhs.append(buf);
-        }
-
-        static std::wstring &append(std::wstring &lhs, double rhs)
+        template <typename T, typename V>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append(T &&lhs, V rhs, typename std::enable_if<std::is_floating_point<V>::value, V>::type * = nullptr)
         {
             wchar_t buf[130] = {'\0'};
             swprintf(buf, L"%f", rhs);
-            return lhs.append(buf);
-        }
-
-        static std::wstring &append(std::wstring &lhs, float rhs)
-        {
-            wchar_t buf[130] = {'\0'};
-            swprintf(buf, L"%f", rhs);
-            return lhs.append(buf);
+            return std::forward<T>(lhs.append(buf));
         }
 
         /**
@@ -1639,17 +1690,34 @@ namespace piv
          * @param ...args 可扩展数据
          * @return 返回本文本
          */
-        template <typename CharT, typename T>
-        std::basic_string<CharT> &appends(std::basic_string<CharT> &lhs, T &&first)
+        template <typename T, typename V>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        appends(T &&lhs, V &&first)
         {
-            return ::piv::str::append(lhs, std::forward<T>(first));
+            return std::forward<T>(::piv::str::append(lhs, std::forward<V>(first)));
         }
 
-        template <typename CharT, typename T, typename... Args>
-        std::basic_string<CharT> &appends(std::basic_string<CharT> &lhs, T &&first, Args &&...args)
+        template <typename T, typename V>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        appends(T &&lhs, V &&first)
         {
-            ::piv::str::append(lhs, std::forward<T>(first));
-            return ::piv::str::appends(lhs, std::forward<Args>(args)...);
+            return std::forward<T>(::piv::str::append(lhs, std::forward<V>(first)));
+        }
+
+        template <typename T, typename V, typename... Args>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        appends(T &&lhs, V &&first, Args &&...args)
+        {
+            ::piv::str::append(lhs, std::forward<V>(first));
+            return std::forward<T>(::piv::str::appends(lhs, std::forward<Args>(args)...));
+        }
+
+        template <typename T, typename V, typename... Args>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        appends(T &&lhs, V &&first, Args &&...args)
+        {
+            ::piv::str::append(lhs, std::forward<V>(first));
+            return std::forward<T>(::piv::str::appends(lhs, std::forward<Args>(args)...));
         }
 
         /**
@@ -1660,20 +1728,44 @@ namespace piv
          * @param rhs 所欲加入到尾部的文本数据
          * @return 返回本文本
          */
-        template <typename CharT, typename T>
-        std::basic_string<CharT> &append_line(std::basic_string<CharT> &lhs, T &&rhs)
+        template <typename T, typename P>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append_line(T &&lhs, P &&rhs)
         {
-            piv::str::append(lhs, std::forward<T>(rhs));
+            ::piv::str::append(lhs, std::forward<P>(rhs));
             lhs.push_back('\r');
             lhs.push_back('\n');
-            return lhs;
+            return std::forward<T>(lhs);
         }
 
-        template <typename CharT, typename T, typename... Args>
-        std::basic_string<CharT> &append_line(std::basic_string<CharT> &lhs, T &&first, Args &&...args)
+        template <typename T, typename P>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append_line(T &&lhs, P &&rhs)
         {
-            piv::str::append_line(lhs, std::forward<T>(first));
-            return piv::str::append_line(lhs, std::forward<Args>(args)...);
+            ::piv::str::append(lhs, std::forward<P>(rhs));
+            lhs.push_back('\r');
+            lhs.push_back('\n');
+            return std::forward<T>(lhs);
+        }
+
+        template <typename T, typename P, typename... Args>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append_line(T &&lhs, P &&first, Args &&...args)
+        {
+            ::piv::str::append(lhs, std::forward<P>(first));
+            lhs.push_back('\r');
+            lhs.push_back('\n');
+            return ::piv::str::append_line(lhs, std::forward<Args>(args)...);
+        }
+
+        template <typename T, typename P, typename... Args>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append_line(T &&lhs, P &&first, Args &&...args)
+        {
+            ::piv::str::append(lhs, std::forward<P>(first));
+            lhs.push_back('\r');
+            lhs.push_back('\n');
+            return ::piv::str::append_line(lhs, std::forward<Args>(args)...);
         }
 
         /**
@@ -1684,12 +1776,18 @@ namespace piv
          * @param rhs 无符号值
          * @return 返回本文本
          */
-        template <typename CharT, typename T>
-        std::basic_string<CharT> &append_unsigned(std::basic_string<CharT> &lhs, T &&rhs)
+        template <typename T, typename V, typename std::enable_if<std::is_integral<V>::value>::type>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append_unsigned(T &&lhs, V rhs)
         {
-            if (std::is_integral<T>::value)
-                return piv::str::append(lhs, static_cast<std::make_unsigned<T>::type>(rhs));
-            return lhs;
+            return std::forward<T>(::piv::str::append(lhs, static_cast<std::make_unsigned<V>::type>(rhs)));
+        }
+
+        template <typename T, typename V, typename std::enable_if<std::is_integral<V>::value>::type>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append_unsigned(T &&lhs, V rhs)
+        {
+            return std::forward<T>(::piv::str::append(lhs, static_cast<std::make_unsigned<V>::type>(rhs)));
         }
 
         /**
@@ -1701,12 +1799,24 @@ namespace piv
          * @param times 所欲添加的次数
          * @return 返回本文本
          */
-        template <typename CharT, typename T>
-        std::basic_string<CharT> &append_repeat(std::basic_string<CharT> &lhs, T &&rhs, size_t times)
+        template <typename T, typename P>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append_repeat(T &&lhs, P &&rhs, size_t times)
         {
             for (size_t i = 0; i < times; i++)
             {
-                piv::str::append(lhs, std::forward<T>(rhs));
+                ::piv::str::append(lhs, std::forward<P>(rhs));
+            }
+            return lhs;
+        }
+
+        template <typename T, typename P>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append_repeat(T &&lhs, P &&rhs, size_t times)
+        {
+            for (size_t i = 0; i < times; i++)
+            {
+                ::piv::str::append(lhs, std::forward<P>(rhs));
             }
             return lhs;
         }
@@ -1764,65 +1874,151 @@ namespace piv
          * @param count 十六进制文本长度
          * @return 返回本文本
          */
-        template <typename CharT>
-        std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const piv::string_view &hexstr, size_t count = -1)
+        template <typename T, typename CharT>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append_hex(T &&lhs, const piv::basic_string_view<CharT> &hexstr, size_t count = -1)
         {
-            return lhs.append(piv::encoding::hex_to_str((count == -1) ? hexstr : hexstr.substr(0, count), std::basic_string<CharT>{}));
+            typename std::remove_reference<T>::type str;
+            return std::forward<T>(lhs.append(piv::encoding::hex_to_str((count == -1) ? hexstr : hexstr.substr(0, count), str)));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const piv::wstring_view &hexstr, size_t count = -1)
+        template <typename T, typename CharT>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append_hex(T &&lhs, const piv::basic_string_view<CharT> &hexstr, size_t count = -1)
         {
-            return lhs.append(piv::encoding::hex_to_str((count == -1) ? hexstr : hexstr.substr(0, count), std::basic_string<CharT>{}));
+            typename std::remove_reference<T>::type str;
+            return std::forward<T>(lhs.append(piv::encoding::hex_to_str((count == -1) ? hexstr : hexstr.substr(0, count), str)));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const std::string &hexstr, size_t count = -1)
+        template <typename T, typename CharT>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append_hex(T &&lhs, const std::basic_string<CharT> &hexstr, size_t count = -1)
         {
-            return lhs.append(piv::encoding::hex_to_str((count == -1) ? hexstr : piv::string_view{hexstr.c_str(), count}, std::basic_string<CharT>{}));
+            typename std::remove_reference<T>::type str;
+            return std::forward<T>(lhs.append(piv::encoding::hex_to_str((count == -1) ? hexstr : piv::basic_string_view<CharT>{hexstr.c_str(), count}, str)));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const std::wstring &hexstr, size_t count = -1)
+        template <typename T, typename CharT>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append_hex(T &&lhs, const std::basic_string<CharT> &hexstr, size_t count = -1)
         {
-            return lhs.append(piv::encoding::hex_to_str((count == -1) ? hexstr : piv::wstring_view{hexstr.c_str(), count}, std::basic_string<CharT>{}));
+            typename std::remove_reference<T>::type str;
+            return std::forward<T>(lhs.append(piv::encoding::hex_to_str((count == -1) ? hexstr : piv::basic_string_view<CharT>{hexstr.c_str(), count}, str)));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const char *hexstr, size_t count = -1)
+        template <typename T, typename CharT>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append_hex(T &&lhs, const CharT *hexstr, size_t count = -1)
         {
-            return lhs.append(piv::encoding::hex_to_str((count == -1) ? piv::string_view{hexstr} : piv::string_view{hexstr, count},
-                                                        std::basic_string<CharT>{}));
+            typename std::remove_reference<T>::type str;
+            return std::forward<T>(lhs.append(piv::encoding::hex_to_str((count == -1) ? piv::basic_string_view<CharT>{hexstr} : piv::basic_string_view<CharT>{hexstr, count},
+                                                                        str)));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const wchar_t *hexstr, size_t count = -1)
+        template <typename T, typename CharT>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append_hex(T &&lhs, const CharT *hexstr, size_t count = -1)
         {
-            return lhs.append(piv::encoding::hex_to_str((count == -1) ? piv::wstring_view{hexstr} : piv::wstring_view{hexstr, count},
-                                                        std::basic_string<CharT>{}));
+            typename std::remove_reference<T>::type str;
+            return std::forward<T>(lhs.append(piv::encoding::hex_to_str((count == -1) ? piv::basic_string_view<CharT>{hexstr} : piv::basic_string_view<CharT>{hexstr, count},
+                                                                        str)));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const CWString &hexstr, size_t count = -1)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append_hex(T &&lhs, const CWString &hexstr, size_t count = -1)
         {
-            return lhs.append(piv::encoding::hex_to_str((count == -1) ? piv::wstring_view{hexstr.GetText()} : piv::wstring_view{hexstr.GetText(), count},
-                                                        std::basic_string<CharT>{}));
+            typename std::remove_reference<T>::type str;
+            return std::forward<T>(lhs.append(piv::encoding::hex_to_str((count == -1) ? piv::wstring_view{hexstr.GetText()} : piv::wstring_view{hexstr.GetText(), count},
+                                                                        str)));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const CVolMem &hexstr, size_t count = -1)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append_hex(T &&lhs, const CWString &hexstr, size_t count = -1)
+        {
+            typename std::remove_reference<T>::type str;
+            return std::forward<T>(lhs.append(piv::encoding::hex_to_str((count == -1) ? piv::wstring_view{hexstr.GetText()} : piv::wstring_view{hexstr.GetText(), count},
+                                                                        str)));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append_hex(T &&lhs, const CVolMem &hexstr, size_t count = -1)
         {
             if (hexstr.GetSize() < 2)
-                return lhs;
+                return std::forward<T>(lhs);
+            typename std::remove_reference<T>::type str;
             if (hexstr.Get_S_BYTE(1) == 0)
-                return lhs.append(piv::encoding::hex_to_str(piv::wstring_view{reinterpret_cast<const wchar_t *>(hexstr.GetPtr()),
-                                                                              static_cast<size_t>(hexstr.GetSize() / sizeof(wchar_t))},
-                                                            std::basic_string<CharT>{}));
+                return std::forward<T>(lhs.append(piv::encoding::hex_to_str(piv::wstring_view{reinterpret_cast<const wchar_t *>(hexstr.GetPtr()),
+                                                                                              static_cast<size_t>(hexstr.GetSize() / sizeof(wchar_t))},
+                                                                            str)));
             else
-                return lhs.append(piv::encoding::hex_to_str(piv::string_view{reinterpret_cast<const char *>(hexstr.GetPtr()),
-                                                                             static_cast<size_t>(hexstr.GetSize())},
-                                                            std::basic_string<CharT>{}));
+                return std::forward<T>(lhs.append(piv::encoding::hex_to_str(piv::string_view{reinterpret_cast<const char *>(hexstr.GetPtr()),
+                                                                                             static_cast<size_t>(hexstr.GetSize())},
+                                                                            str)));
         }
+        /*
+                template <typename CharT>
+                std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const piv::string_view &hexstr, size_t count = -1)
+                {
+                    return lhs.append(piv::encoding::hex_to_str((count == -1) ? hexstr : hexstr.substr(0, count), std::basic_string<CharT>{}));
+                }
+
+                template <typename CharT>
+                std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const piv::wstring_view &hexstr, size_t count = -1)
+                {
+                    return lhs.append(piv::encoding::hex_to_str((count == -1) ? hexstr : hexstr.substr(0, count), std::basic_string<CharT>{}));
+                }
+
+                template <typename CharT>
+                std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const std::string &hexstr, size_t count = -1)
+                {
+                    return lhs.append(piv::encoding::hex_to_str((count == -1) ? hexstr : piv::string_view{hexstr.c_str(), count}, std::basic_string<CharT>{}));
+                }
+
+                template <typename CharT>
+                std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const std::wstring &hexstr, size_t count = -1)
+                {
+                    return lhs.append(piv::encoding::hex_to_str((count == -1) ? hexstr : piv::wstring_view{hexstr.c_str(), count}, std::basic_string<CharT>{}));
+                }
+
+                template <typename CharT>
+                std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const char *hexstr, size_t count = -1)
+                {
+                    return lhs.append(piv::encoding::hex_to_str((count == -1) ? piv::string_view{hexstr} : piv::string_view{hexstr, count},
+                                                                std::basic_string<CharT>{}));
+                }
+
+                template <typename CharT>
+                std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const wchar_t *hexstr, size_t count = -1)
+                {
+                    return lhs.append(piv::encoding::hex_to_str((count == -1) ? piv::wstring_view{hexstr} : piv::wstring_view{hexstr, count},
+                                                                std::basic_string<CharT>{}));
+                }
+
+                template <typename CharT>
+                std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const CWString &hexstr, size_t count = -1)
+                {
+                    return lhs.append(piv::encoding::hex_to_str((count == -1) ? piv::wstring_view{hexstr.GetText()} : piv::wstring_view{hexstr.GetText(), count},
+                                                                std::basic_string<CharT>{}));
+                }
+
+                template <typename CharT>
+                std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const CVolMem &hexstr, size_t count = -1)
+                {
+                    if (hexstr.GetSize() < 2)
+                        return lhs;
+                    if (hexstr.Get_S_BYTE(1) == 0)
+                        return lhs.append(piv::encoding::hex_to_str(piv::wstring_view{reinterpret_cast<const wchar_t *>(hexstr.GetPtr()),
+                                                                                      static_cast<size_t>(hexstr.GetSize() / sizeof(wchar_t))},
+                                                                    std::basic_string<CharT>{}));
+                    else
+                        return lhs.append(piv::encoding::hex_to_str(piv::string_view{reinterpret_cast<const char *>(hexstr.GetPtr()),
+                                                                                     static_cast<size_t>(hexstr.GetSize())},
+                                                                    std::basic_string<CharT>{}));
+                }
+        */
 
         /**
          * @brief 加入小写文本
@@ -1831,32 +2027,66 @@ namespace piv
          * @param rhs 所欲加入并转换为小写的文本
          * @return 返回本文本
          */
-        template <typename CharT>
-        std::basic_string<CharT> &append_lower(std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &rhs)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append_lower(T &&lhs, const piv::string_view &rhs)
         {
-            std::basic_string<CharT> lower;
+            T lower;
             lower.resize(rhs.size());
             std::transform(rhs.begin(), rhs.end(), lower.begin(),
-                           [](CharT c) -> CharT
-                           { return (CharT)piv::edit::tolower(static_cast<uint16_t>(c)); });
-            return lhs.append(lower);
+                           [](char c) -> char
+                           { return (char)piv::edit::tolower(static_cast<uint16_t>(c)); });
+            return std::forward<T>(lhs.append(lower));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &append_lower(std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append_lower(T &&lhs, const piv::wstring_view &rhs)
         {
-            std::basic_string<CharT> lower;
+            T lower;
             lower.resize(rhs.size());
             std::transform(rhs.begin(), rhs.end(), lower.begin(),
-                           [](CharT c) -> CharT
-                           { return (CharT)piv::edit::tolower(static_cast<uint16_t>(c)); });
-            return lhs.append(lower);
+                           [](wchar_t c) -> wchar_t
+                           { return (wchar_t)piv::edit::tolower(static_cast<uint16_t>(c)); });
+            return std::forward<T>(lhs.append(lower));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &append_lower(std::basic_string<CharT> &lhs, const CharT *rhs, size_t count = -1)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append_lower(T &&lhs, const T &rhs)
         {
-            return piv::str::append_lower(lhs, (count == -1) ? piv::basic_string_view<CharT>{rhs} : piv::basic_string_view<CharT>{rhs, count});
+            T lower;
+            lower.resize(rhs.size());
+            std::transform(rhs.begin(), rhs.end(), lower.begin(),
+                           [](char c) -> char
+                           { return (char)piv::edit::tolower(static_cast<uint16_t>(c)); });
+            return std::forward<T>(lhs.append(lower));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append_lower(T &&lhs, const T &rhs)
+        {
+            T lower;
+            lower.resize(rhs.size());
+            std::transform(rhs.begin(), rhs.end(), lower.begin(),
+                           [](wchar_t c) -> wchar_t
+                           { return (wchar_t)piv::edit::tolower(static_cast<uint16_t>(c)); });
+            return std::forward<T>(lhs.append(lower));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append_lower(T &&lhs, const char *rhs, size_t count = -1)
+        {
+            return std::forward<T>(piv::str::append_lower(lhs, (count == -1) ? piv::string_view{rhs} : piv::string_view{rhs, count}));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append_lower(T &&lhs, const wchar_t *rhs, size_t count = -1)
+        {
+            return std::forward<T>(piv::str::append_lower(lhs, (count == -1) ? piv::wstring_view{rhs} : piv::wstring_view{rhs, count}));
         }
 
         /**
@@ -1866,32 +2096,66 @@ namespace piv
          * @param rhs 所欲加入并转换为大写的文本
          * @return 返回本文本
          */
-        template <typename CharT>
-        std::basic_string<CharT> &append_upper(std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &rhs)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append_upper(T &&lhs, const piv::string_view &rhs)
         {
-            std::basic_string<CharT> lower;
+            T lower;
             lower.resize(rhs.size());
             std::transform(rhs.begin(), rhs.end(), lower.begin(),
-                           [](CharT c) -> CharT
-                           { return (CharT)piv::edit::toupper(static_cast<uint16_t>(c)); });
-            return lhs.append(lower);
+                           [](char c) -> char
+                           { return (char)piv::edit::toupper(static_cast<uint16_t>(c)); });
+            return std::forward<T>(lhs.append(lower));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &append_upper(std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append_upper(T &&lhs, const piv::wstring_view &rhs)
         {
-            std::basic_string<CharT> lower;
+            T lower;
             lower.resize(rhs.size());
             std::transform(rhs.begin(), rhs.end(), lower.begin(),
-                           [](CharT c) -> CharT
-                           { return (CharT)piv::edit::toupper(static_cast<uint16_t>(c)); });
-            return lhs.append(lower);
+                           [](wchar_t c) -> wchar_t
+                           { return (wchar_t)piv::edit::toupper(static_cast<uint16_t>(c)); });
+            return std::forward<T>(lhs.append(lower));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &append_upper(std::basic_string<CharT> &lhs, const CharT *rhs, size_t count = -1)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append_upper(T &&lhs, const T &rhs)
         {
-            return piv::str::append_upper(lhs, (count == -1) ? piv::basic_string_view<CharT>{rhs} : piv::basic_string_view<CharT>{rhs, count});
+            T lower;
+            lower.resize(rhs.size());
+            std::transform(rhs.begin(), rhs.end(), lower.begin(),
+                           [](char c) -> char
+                           { return (char)piv::edit::toupper(static_cast<uint16_t>(c)); });
+            return std::forward<T>(lhs.append(lower));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append_upper(T &&lhs, const T &rhs)
+        {
+            T lower;
+            lower.resize(rhs.size());
+            std::transform(rhs.begin(), rhs.end(), lower.begin(),
+                           [](wchar_t c) -> wchar_t
+                           { return (wchar_t)piv::edit::toupper(static_cast<uint16_t>(c)); });
+            return std::forward<T>(lhs.append(lower));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        append_upper(T &&lhs, const char *rhs, size_t count = -1)
+        {
+            return std::forward<T>(piv::str::append_upper(lhs, (count == -1) ? piv::string_view{rhs} : piv::string_view{rhs, count}));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        append_upper(T &&lhs, const wchar_t *rhs, size_t count = -1)
+        {
+            return std::forward<T>(piv::str::append_upper(lhs, (count == -1) ? piv::wstring_view{rhs} : piv::wstring_view{rhs, count}));
         }
 
         /**
@@ -1904,7 +2168,7 @@ namespace piv
          * @return 是否成功
          */
         template <typename EncodeT, typename CharT>
-        bool read_from_file(std::basic_string<CharT> &lhs, const wchar_t *FileName, const int32_t &ReadDataSize = -1, const VOL_STRING_ENCODE_TYPE &ReadEncode = VSET_UTF_16, uint32_t code_page = CP_ACP)
+        bool read_from_file(std::basic_string<CharT> &lhs, const wchar_t *FileName, int32_t ReadDataSize = -1, VOL_STRING_ENCODE_TYPE ReadEncode = VSET_UTF_16, uint32_t code_page = CP_ACP)
         {
             ASSERT(ReadDataSize >= -1);
             ASSERT_R_STR(FileName);
@@ -2024,7 +2288,7 @@ namespace piv
          * @return
          */
         template <typename EncodeT, typename CharT>
-        bool write_into_file(std::basic_string<CharT> &lhs, const wchar_t *FileName, const int32_t &WriteDataSize = -1, const VOL_STRING_ENCODE_TYPE &WriteEncode = VSET_UTF_16, bool with_bom = true, uint32_t code_page = CP_ACP)
+        bool write_into_file(const std::basic_string<CharT> &lhs, const wchar_t *FileName, int32_t WriteDataSize = -1, VOL_STRING_ENCODE_TYPE WriteEncode = VSET_UTF_16, bool with_bom = true, uint32_t code_page = CP_ACP)
         {
             ASSERT(WriteDataSize >= -1);
             ASSERT_R_STR(FileName);
@@ -2139,20 +2403,20 @@ namespace piv
          * @return 复制的字符数
          */
         template <typename CharT>
-        size_t copy(std::basic_string<CharT> &lhs, CharT *dest, size_t pos, size_t count)
+        size_t copy(const std::basic_string<CharT> &lhs, CharT *dest, size_t pos, size_t count)
         {
             ASSERT(pos <= lhs.size()); // 判断索引位置是否有效
             return lhs.copy(dest, count, pos);
         }
 
         template <typename CharT>
-        size_t copy(std::basic_string<CharT> &lhs, const ptrdiff_t &dest, size_t pos, size_t count)
+        size_t copy(const std::basic_string<CharT> &lhs, const ptrdiff_t &dest, size_t pos, size_t count)
         {
             return lhs.copy(const_cast<CharT *>(reinterpret_cast<const CharT *>(dest)), pos, count);
         }
 
         template <typename CharT>
-        size_t copy(std::basic_string<CharT> &lhs, CVolMem &dest, size_t pos, size_t count)
+        size_t copy(const std::basic_string<CharT> &lhs, CVolMem &dest, size_t pos, size_t count)
         {
             dest.Alloc(count, TRUE);
             size_t n = lhs.copy(const_cast<CharT *>(reinterpret_cast<const CharT *>(dest.GetPtr())), pos, count);
@@ -2164,7 +2428,7 @@ namespace piv
         }
 
         template <typename CharT>
-        size_t copy(std::basic_string<CharT> &lhs, std::basic_string<CharT> &dest, size_t pos, size_t count)
+        size_t copy(const std::basic_string<CharT> &lhs, std::basic_string<CharT> &dest, size_t pos, size_t count)
         {
             dest.resize(count, '\0');
             size_t n = copy(const_cast<CharT *>(dest.data()), pos, count);
@@ -2175,7 +2439,7 @@ namespace piv
             return n;
         }
 
-        static size_t copy(std::wstring &lhs, CWString &dest, size_t pos, size_t count)
+        static size_t copy(const std::wstring &lhs, CWString &dest, size_t pos, size_t count)
         {
             dest.SetLength(count);
             size_t n = lhs.copy(const_cast<wchar_t *>(dest.GetText()), pos, count);
@@ -2196,24 +2460,48 @@ namespace piv
          * @param count2 用作替换的长度
          * @return 返回本文本
          */
-        template <typename CharT>
-        std::basic_string<CharT> &replace(std::basic_string<CharT> &lhs, size_t pos, size_t count, const piv::basic_string_view<CharT> &rhs, size_t pos2 = 0, size_t count2 = (size_t)-1)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        replace(T &&lhs, size_t pos, size_t count, const piv::string_view &rhs, size_t pos2 = 0, size_t count2 = (size_t)-1)
         {
             ASSERT(pos >= 0 && pos <= lhs.size() && count >= 0);
             if (count2 == (size_t)-1)
-                return lhs.replace(pos, count, rhs.data(), rhs.size());
+                return std::forward<T>(lhs.replace(pos, count, rhs.data(), rhs.size()));
             else
-                return lhs.replace(pos, count, rhs, pos2, count2);
+                return std::forward<T>(lhs.replace(pos, count, rhs, pos2, count2));
         }
 
-        template <typename CharT>
-        std::basic_string<CharT> &replace(std::basic_string<CharT> &lhs, size_t pos, size_t count, const std::basic_string<CharT> &rhs, size_t pos2 = 0, size_t count2 = (size_t)-1)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        replace(T &&lhs, size_t pos, size_t count, const T &rhs, size_t pos2 = 0, size_t count2 = (size_t)-1)
         {
             ASSERT(pos >= 0 && pos <= lhs.size() && count >= 0);
             if (count2 == (size_t)-1)
-                return lhs.replace(pos, count, rhs);
+                return std::forward<T>(lhs.replace(pos, count, rhs.data(), rhs.size()));
             else
-                return lhs.replace(pos, count, rhs, pos2, count2);
+                return std::forward<T>(lhs.replace(pos, count, rhs, pos2, count2));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        replace(T &&lhs, size_t pos, size_t count, const T &rhs, size_t pos2 = 0, size_t count2 = (size_t)-1)
+        {
+            ASSERT(pos >= 0 && pos <= lhs.size() && count >= 0);
+            if (count2 == (size_t)-1)
+                return std::forward<T>(lhs.replace(pos, count, rhs));
+            else
+                return std::forward<T>(lhs.replace(pos, count, rhs, pos2, count2));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        replace(T &&lhs, size_t pos, size_t count, const piv::wstring_view &rhs, size_t pos2 = 0, size_t count2 = (size_t)-1)
+        {
+            ASSERT(pos >= 0 && pos <= lhs.size() && count >= 0);
+            if (count2 == (size_t)-1)
+                return std::forward<T>(lhs.replace(pos, count, rhs));
+            else
+                return std::forward<T>(lhs.replace(pos, count, rhs, pos2, count2));
         }
 
         /**
@@ -2227,9 +2515,10 @@ namespace piv
          * @param case_sensitive 是否区分大小写
          * @return 返回本文本
          */
-        template <typename CharT>
-        std::basic_string<CharT> &replace_text(std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &str1, const piv::basic_string_view<CharT> &str2,
-                                               size_t pos = 0, size_t times = (size_t)-1, bool case_sensitive = true)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        replace_text(T &&lhs, const piv::string_view &str1, const piv::string_view &str2,
+                     size_t pos = 0, size_t times = (size_t)-1, bool case_sensitive = true)
         {
             ASSERT(pos >= 0 && pos <= lhs.size());
             size_t fpos = 0, i = 0;
@@ -2239,7 +2528,7 @@ namespace piv
                     fpos = lhs.find(str1.data(), pos, str1.size());
                 else
                     fpos = piv::edit::ifind(lhs, str1, pos);
-                if (fpos == std::basic_string<CharT>::npos)
+                if (fpos == -1)
                     break;
                 lhs.replace(fpos, str1.size(), str2.data(), str2.size());
                 pos = fpos + str2.size();
@@ -2247,7 +2536,31 @@ namespace piv
                 if (times > 0 && i >= times)
                     break;
             }
-            return lhs;
+            return std::forward<T>(lhs);
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        replace_text(T &&lhs, const piv::wstring_view &str1, const piv::wstring_view &str2,
+                     size_t pos = 0, size_t times = (size_t)-1, bool case_sensitive = true)
+        {
+            ASSERT(pos >= 0 && pos <= lhs.size());
+            size_t fpos = 0, i = 0;
+            while (fpos < lhs.size())
+            {
+                if (case_sensitive)
+                    fpos = lhs.find(str1.data(), pos, str1.size());
+                else
+                    fpos = piv::edit::ifind(lhs, str1, pos);
+                if (fpos == -1)
+                    break;
+                lhs.replace(fpos, str1.size(), str2.data(), str2.size());
+                pos = fpos + str2.size();
+                i++;
+                if (times > 0 && i >= times)
+                    break;
+            }
+            return std::forward<T>(lhs);
         }
 
         /**
@@ -2258,19 +2571,19 @@ namespace piv
          * @return 找到的位置
          */
         template <typename CharT>
-        size_t find_first_of(std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &rhs, size_t pos = 0)
+        size_t find_first_of(const std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &rhs, size_t pos = 0)
         {
             return lhs.find_first_of(rhs.data(), pos, rhs.size());
         }
 
         template <typename CharT>
-        size_t find_first_of(std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs, size_t pos = 0)
+        size_t find_first_of(const std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs, size_t pos = 0)
         {
             return lhs.find_first_of(rhs, pos);
         }
 
         template <typename CharT>
-        size_t find_first_of(std::basic_string<CharT> &lhs, const CharT *rhs, size_t pos = 0)
+        size_t find_first_of(const std::basic_string<CharT> &lhs, const CharT *rhs, size_t pos = 0)
         {
             return lhs.find_first_of(rhs, pos);
         }
@@ -2283,19 +2596,19 @@ namespace piv
          * @return 找到的位置
          */
         template <typename CharT>
-        size_t find_last_of(std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &rhs, size_t pos = 0)
+        size_t find_last_of(const std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &rhs, size_t pos = 0)
         {
             return lhs.find_last_of(rhs.data(), pos, rhs.size());
         }
 
         template <typename CharT>
-        size_t find_last_of(std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs, size_t pos = 0)
+        size_t find_last_of(const std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs, size_t pos = 0)
         {
             return lhs.find_last_of(rhs, pos);
         }
 
         template <typename CharT>
-        size_t find_last_of(std::basic_string<CharT> &lhs, const CharT *rhs, size_t pos = 0)
+        size_t find_last_of(const std::basic_string<CharT> &lhs, const CharT *rhs, size_t pos = 0)
         {
             return lhs.find_last_of(rhs, pos);
         }
@@ -2308,19 +2621,19 @@ namespace piv
          * @return 找到的位置
          */
         template <typename CharT>
-        size_t find_first_not_of(std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &rhs, size_t pos = 0)
+        size_t find_first_not_of(const std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &rhs, size_t pos = 0)
         {
             return lhs.find_first_not_of(rhs.data(), pos, rhs.size());
         }
 
         template <typename CharT>
-        size_t find_first_not_of(std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs, size_t pos = 0)
+        size_t find_first_not_of(const std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs, size_t pos = 0)
         {
             return lhs.find_first_not_of(rhs, pos);
         }
 
         template <typename CharT>
-        size_t find_first_not_of(std::basic_string<CharT> &lhs, const CharT *rhs, size_t pos = 0)
+        size_t find_first_not_of(const std::basic_string<CharT> &lhs, const CharT *rhs, size_t pos = 0)
         {
             return lhs.find_first_not_of(rhs, pos);
         }
@@ -2333,19 +2646,19 @@ namespace piv
          * @return 找到的位置
          */
         template <typename CharT>
-        size_t find_last_not_of(std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &rhs, size_t pos = 0)
+        size_t find_last_not_of(const std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &rhs, size_t pos = 0)
         {
             return lhs.find_last_not_of(rhs.data(), pos, rhs.size());
         }
 
         template <typename CharT>
-        size_t find_last_not_of(std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs, size_t pos = 0)
+        size_t find_last_not_of(const std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs, size_t pos = 0)
         {
             return lhs.find_last_not_of(rhs, pos);
         }
 
         template <typename CharT>
-        size_t find_last_not_of(std::basic_string<CharT> &lhs, const CharT *rhs, size_t pos = 0)
+        size_t find_last_not_of(const std::basic_string<CharT> &lhs, const CharT *rhs, size_t pos = 0)
         {
             return lhs.find_last_not_of(rhs, pos);
         }
@@ -2364,20 +2677,20 @@ namespace piv
          * @return 复制的字符数
          */
         template <typename CharT>
-        size_t copy(piv::basic_string_view<CharT> &lhs, CharT *dest, size_t pos, size_t count)
+        size_t copy(const piv::basic_string_view<CharT> &lhs, CharT *dest, size_t pos, size_t count)
         {
             ASSERT(pos <= lhs.size()); // 判断索引位置是否有效
             return lhs.copy(dest, count, pos);
         }
 
         template <typename CharT>
-        size_t copy(piv::basic_string_view<CharT> &lhs, const ptrdiff_t &dest, size_t pos, size_t count)
+        size_t copy(const piv::basic_string_view<CharT> &lhs, const ptrdiff_t &dest, size_t pos, size_t count)
         {
             return lhs.copy(const_cast<CharT *>(reinterpret_cast<const CharT *>(dest)), pos, count);
         }
 
         template <typename CharT>
-        size_t copy(piv::basic_string_view<CharT> &lhs, CVolMem &dest, size_t pos, size_t count)
+        size_t copy(const piv::basic_string_view<CharT> &lhs, CVolMem &dest, size_t pos, size_t count)
         {
             dest.Alloc(count, TRUE);
             size_t n = lhs.copy(const_cast<CharT *>(reinterpret_cast<const CharT *>(dest.GetPtr())), pos, count);
@@ -2389,7 +2702,7 @@ namespace piv
         }
 
         template <typename CharT>
-        size_t copy(piv::basic_string_view<CharT> &lhs, std::basic_string<CharT> &dest, size_t pos, size_t count)
+        size_t copy(const piv::basic_string_view<CharT> &lhs, std::basic_string<CharT> &dest, size_t pos, size_t count)
         {
             dest.resize(count, '\0');
             size_t n = copy(const_cast<CharT *>(dest.data()), pos, count);
@@ -2400,7 +2713,7 @@ namespace piv
             return n;
         }
 
-        static size_t copy(piv::wstring_view &lhs, CWString &dest, size_t pos, size_t count)
+        static size_t copy(const piv::wstring_view &lhs, CWString &dest, size_t pos, size_t count)
         {
             dest.SetLength(count);
             size_t n = lhs.copy(const_cast<wchar_t *>(dest.GetText()), pos, count);

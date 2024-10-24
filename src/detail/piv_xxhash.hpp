@@ -8,7 +8,7 @@
 #ifndef PIV_XXHASH_HPP
 #define PIV_XXHASH_HPP
 
-#include "../piv_string.hpp"
+#include "../piv_encoding.hpp"
 
 #ifndef XXH_INLINE_ALL
 #define XXH_INLINE_ALL
@@ -57,34 +57,47 @@ namespace piv
          * @return hash值
          */
         template <typename T>
-        T &Get_XXH128(const void *input, const size_t &len, const uint64_t &seed = 0, T &rethash = T{})
+        T &&Get_XXH128(const void *input, size_t len, uint64_t seed = 0, T &&rethash = T{})
         {
-            return piv::encoding::value_to_hex(XXH3_128bits_withSeed(input, len, seed), rethash);
+            return std::forward<T>(piv::encoding::value_to_hex(XXH3_128bits_withSeed(input, len, seed), rethash));
         }
+
         template <typename T>
-        T &Get_XXH128(const ptrdiff_t &input, const size_t &len, const uint64_t &seed = 0, T &rethash = T{})
+        T &&Get_XXH128(const ptrdiff_t &input, size_t len, uint64_t seed = 0, T &&rethash = T{})
         {
-            return Get_XXH128(reinterpret_cast<const void *>(input), len, seed, rethash);
+            return std::forward<T>(piv::encoding::value_to_hex(XXH3_128bits_withSeed(reinterpret_cast<const void *>(input), len, seed), rethash));
         }
+
         template <typename T>
-        T &Get_XXH128(const CVolMem &input, const size_t &len = (size_t)-1, const uint64_t &seed = 0, T &rethash = T{})
+        T &&Get_XXH128(const CVolMem &input, size_t len = (size_t)-1, uint64_t seed = 0, T &&rethash = T{})
         {
-            return Get_XXH128(input.GetPtr(), len == (size_t)-1 ? static_cast<size_t>(input.GetSize()) : len, seed, rethash);
+            return std::forward<T>(piv::encoding::value_to_hex(XXH3_128bits_withSeed(input.GetPtr(),
+                                                                                     len == (size_t)-1 ? static_cast<size_t>(input.GetSize()) : len, seed),
+                                                               rethash));
         }
+
         template <typename T>
-        T &Get_XXH128(const CVolString &input, const size_t &len = (size_t)-1, const uint64_t &seed = 0, T &rethash = T{})
+        T &&Get_XXH128(const CWString &input, size_t len = (size_t)-1, uint64_t seed = 0, T &&rethash = T{})
         {
-            return Get_XXH128(input.GetText(), len == (size_t)-1 ? input.GetLength() * 2 : len, seed, rethash);
+            return std::forward<T>(piv::encoding::value_to_hex(XXH3_128bits_withSeed(input.GetText(),
+                                                                                     len == (size_t)-1 ? static_cast<size_t>(input.GetLength() * 2) : len, seed),
+                                                               rethash));
         }
+
         template <typename T, typename CharT>
-        T &Get_XXH128(const std::basic_string<CharT> &input, const size_t &len = (size_t)-1, const uint64_t &seed = 0, T &rethash = T{})
+        T &&Get_XXH128(const std::basic_string<CharT> &input, size_t len = (size_t)-1, uint64_t seed = 0, T &&rethash = T{})
         {
-            return Get_XXH128(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed, rethash);
+            return std::forward<T>(piv::encoding::value_to_hex(XXH3_128bits_withSeed(input.data(),
+                                                                                     len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed),
+                                                               rethash));
         }
+
         template <typename T, typename CharT>
-        T &Get_XXH128(const basic_string_view<CharT> &input, const size_t &len = (size_t)-1, const uint64_t &seed = 0, T &rethash = T{})
+        T &&Get_XXH128(const basic_string_view<CharT> &input, size_t len = (size_t)-1, uint64_t seed = 0, T &&rethash = T{})
         {
-            return Get_XXH128(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed, rethash);
+            return std::forward<T>(piv::encoding::value_to_hex(XXH3_128bits_withSeed(input.data(),
+                                                                                     len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed),
+                                                               rethash));
         }
 
         /**
@@ -98,37 +111,42 @@ namespace piv
          * @return hash值
          */
         template <typename T>
-        T &Get_XXH128_withSecret(const void *input, const size_t &len, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0, T &rethash = T{})
+        T &&Get_XXH128_withSecret(const void *input, size_t len, const CVolMem &secret = CVolMem{}, uint64_t seed = 0, T &&rethash = T{})
         {
             if (secret.GetSize() > 0)
-                return piv::encoding::value_to_hex(XXH3_128bits_withSecretandSeed(input, len, secret.GetPtr(), static_cast<size_t>(secret.GetSize()), seed), rethash);
+                return std::forward<T>(piv::encoding::value_to_hex(XXH3_128bits_withSecretandSeed(input, len, secret.GetPtr(), static_cast<size_t>(secret.GetSize()), seed), rethash));
             else
-                return piv::encoding::value_to_hex(XXH3_128bits_withSeed(input, len, seed), rethash);
+                return std::forward<T>(piv::encoding::value_to_hex(XXH3_128bits_withSeed(input, len, seed), rethash));
         }
+
         template <typename T>
-        T &Get_XXH128_withSecret(const ptrdiff_t &input, const size_t &len, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0, T &rethash = T{})
+        T &&Get_XXH128_withSecret(const ptrdiff_t &input, size_t len, const CVolMem &secret = CVolMem{}, uint64_t seed = 0, T &&rethash = T{})
         {
-            return Get_XXH128_withSecret(reinterpret_cast<const void *>(input), len, secret, seed, rethash);
+            return std::forward<T>(Get_XXH128_withSecret(reinterpret_cast<const void *>(input), len, secret, seed, rethash));
         }
+
         template <typename T>
-        T &Get_XXH128_withSecret(const CVolMem &input, const size_t &len = (size_t)-1, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0, T &rethash = T{})
+        T &&Get_XXH128_withSecret(const CVolMem &input, size_t len = (size_t)-1, const CVolMem &secret = CVolMem{}, uint64_t seed = 0, T &&rethash = T{})
         {
-            return Get_XXH128_withSecret(input.GetPtr(), len == (size_t)-1 ? static_cast<size_t>(input.GetSize()) : len, secret, seed, rethash);
+            return std::forward<T>(Get_XXH128_withSecret(input.GetPtr(), len == (size_t)-1 ? static_cast<size_t>(input.GetSize()) : len, secret, seed, rethash));
         }
+
         template <typename T>
-        T &Get_XXH128_withSecret(const CVolString &input, const size_t &len = (size_t)-1, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0, T &rethash = T{})
+        T &&Get_XXH128_withSecret(const CWString &input, size_t len = (size_t)-1, const CVolMem &secret = CVolMem{}, uint64_t seed = 0, T &&rethash = T{})
         {
-            return Get_XXH128_withSecret(input.GetText(), len == (size_t)-1 ? input.GetLength() * 2 : len, secret, seed, rethash);
+            return std::forward<T>(Get_XXH128_withSecret(input.GetText(), len == (size_t)-1 ? input.GetLength() * 2 : len, secret, seed, rethash));
         }
+
         template <typename T, typename CharT>
-        T &Get_XXH128_withSecret(const std::basic_string<CharT> &input, const size_t &len = (size_t)-1, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0, T &rethash = T{})
+        T &&Get_XXH128_withSecret(const std::basic_string<CharT> &input, size_t len = (size_t)-1, const CVolMem &secret = CVolMem{}, uint64_t seed = 0, T &&rethash = T{})
         {
-            return Get_XXH128_withSecret(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, secret, seed, rethash);
+            return std::forward<T>(Get_XXH128_withSecret(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, secret, seed, rethash));
         }
+
         template <typename T, typename CharT>
-        T &Get_XXH128_withSecret(const basic_string_view<CharT> &input, const size_t &len = (size_t)-1, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0, T &rethash = T{})
+        T &&Get_XXH128_withSecret(const basic_string_view<CharT> &input, size_t len = (size_t)-1, const CVolMem &secret = CVolMem{}, uint64_t seed = 0, T &&rethash = T{})
         {
-            return Get_XXH128_withSecret(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, secret, seed, rethash);
+            return std::forward<T>(Get_XXH128_withSecret(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, secret, seed, rethash));
         }
 
         /**
@@ -143,7 +161,7 @@ namespace piv
          * @return hash值
          */
         template <typename T>
-        T &GetFile_XXH128(const wchar_t *filename, int64_t off, uint64_t len, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0, T &rethash = T{})
+        T &&GetFile_XXH128(const wchar_t *filename, int64_t off, uint64_t len, const CVolMem &secret = CVolMem{}, uint64_t seed = 0, T &&rethash = T{})
         {
             XXH128_hash_t hash = {0};
             FILE *file = NULL;
@@ -173,7 +191,7 @@ namespace piv
                 XXH3_freeState(state);
                 fclose(file);
             }
-            return piv::encoding::value_to_hex(hash, rethash);
+            return std::forward<T>(piv::encoding::value_to_hex(hash, rethash));
         }
 
         /**
@@ -188,19 +206,19 @@ namespace piv
          * @return hash值
          */
         template <typename T>
-        T &GetRes_XXH128(int32_t resId, int64_t off, uint64_t len, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0, T &rethash = T{})
+        T &&GetRes_XXH128(int32_t resId, int64_t off, uint64_t len, const CVolMem &secret = CVolMem{}, uint64_t seed = 0, T &&rethash = T{})
         {
             XXH128_hash_t hash = {0};
             if (resId == 0)
-                return piv::encoding::value_to_hex(hash, rethash);
+                return std::forward<T>(piv::encoding::value_to_hex(hash, rethash));
             HMODULE hModule = g_objVolApp.GetInstanceHandle();
             HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCE(static_cast<WORD>(resId)), RT_RCDATA);
             if (hSrc == NULL)
-                return piv::encoding::value_to_hex(hash, rethash);
+                return std::forward<T>(piv::encoding::value_to_hex(hash, rethash));
             HGLOBAL resdata = ::LoadResource(hModule, hSrc);
             if (resdata == NULL)
-                return piv::encoding::value_to_hex(hash, rethash);
-            const byte *buffer = reinterpret_cast<const byte *>(::LockResource(resdata));
+                return std::forward<T>(piv::encoding::value_to_hex(hash, rethash));
+            const uint8_t *buffer = reinterpret_cast<const uint8_t *>(::LockResource(resdata));
             size_t _size = ::SizeofResource(hModule, hSrc);
             XXH3_state_t *state = XXH3_createState();
             if (secret.GetSize() >= 136)
@@ -210,13 +228,13 @@ namespace piv
             if (off > 0 && buffer != nullptr)
             {
                 size_t fileOff = static_cast<size_t>(off);
-                buffer = (fileOff < _size) ? (buffer + fileOff) : (buffer + size);
+                buffer = (fileOff < _size) ? (buffer + fileOff) : (buffer + _size);
                 _size = (fileOff < _size) ? _size - fileOff : 0;
             }
             XXH3_128bits_update(state, buffer, _size > static_cast<size_t>(len) ? static_cast<size_t>(len) : _size);
             hash = XXH3_128bits_digest(state);
             XXH3_freeState(state);
-            return piv::encoding::value_to_hex(hash, rethash);
+            return std::forward<T>(piv::encoding::value_to_hex(hash, rethash));
         }
 
         /**
@@ -226,29 +244,34 @@ namespace piv
          * @param seed 种子
          * @return hash值
          */
-        static XXH64_hash_t Get_XXH3(const void *input, const size_t &len, const uint64_t &seed = 0)
+        static XXH64_hash_t Get_XXH3(const void *input, size_t len, uint64_t seed = 0)
         {
             return XXH3_64bits_withSeed(input, len, seed);
         }
-        static XXH64_hash_t Get_XXH3(const ptrdiff_t &input, const size_t &len, const uint64_t &seed = 0)
+
+        static XXH64_hash_t Get_XXH3(const ptrdiff_t &input, size_t len, uint64_t seed = 0)
         {
             return XXH3_64bits_withSeed(reinterpret_cast<const void *>(input), len, seed);
         }
-        static XXH64_hash_t Get_XXH3(const CVolMem &input, const size_t &len = (size_t)-1, const uint64_t &seed = 0)
+
+        static XXH64_hash_t Get_XXH3(const CVolMem &input, size_t len = (size_t)-1, uint64_t seed = 0)
         {
             return XXH3_64bits_withSeed(input.GetPtr(), len == (size_t)-1 ? static_cast<size_t>(input.GetSize()) : len, seed);
         }
-        static XXH64_hash_t Get_XXH3(const CVolString &input, const size_t &len = (size_t)-1, const uint64_t &seed = 0)
+
+        static XXH64_hash_t Get_XXH3(const CWString &input, size_t len = (size_t)-1, uint64_t seed = 0)
         {
             return XXH3_64bits_withSeed(input.GetText(), len == (size_t)-1 ? input.GetLength() * 2 : len, seed);
         }
+
         template <typename CharT>
-        static XXH64_hash_t Get_XXH3(const std::basic_string<CharT> &input, const size_t &len = -1, const uint64_t &seed = 0)
+        static XXH64_hash_t Get_XXH3(const std::basic_string<CharT> &input, size_t len = -1, uint64_t seed = 0)
         {
             return XXH3_64bits_withSeed(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed);
         }
+
         template <typename CharT>
-        XXH64_hash_t Get_XXH3(const basic_string_view<CharT> &input, const size_t &len = -1, const uint64_t &seed = 0)
+        XXH64_hash_t Get_XXH3(const basic_string_view<CharT> &input, size_t len = -1, uint64_t seed = 0)
         {
             return XXH3_64bits_withSeed(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed);
         }
@@ -261,32 +284,37 @@ namespace piv
          * @param seed 种子
          * @return hash值
          */
-        static XXH64_hash_t Get_XXH3_withSecret(const void *input, const size_t &len, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0)
+        static XXH64_hash_t Get_XXH3_withSecret(const void *input, size_t len, const CVolMem &secret = CVolMem{}, uint64_t seed = 0)
         {
             if (secret.GetSize() > 0)
                 return XXH3_64bits_withSecretandSeed(input, len, secret.GetPtr(), static_cast<size_t>(secret.GetSize()), seed);
             else
                 return XXH3_64bits_withSeed(input, len, seed);
         }
-        static XXH64_hash_t Get_XXH3_withSecret(const ptrdiff_t &input, const size_t &len = (size_t)-1, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0)
+
+        static XXH64_hash_t Get_XXH3_withSecret(const ptrdiff_t &input, size_t len = (size_t)-1, const CVolMem &secret = CVolMem{}, uint64_t seed = 0)
         {
             return Get_XXH3_withSecret(reinterpret_cast<const void *>(input), len, secret, seed);
         }
-        static XXH64_hash_t Get_XXH3_withSecret(const CVolMem &input, const size_t &len = (size_t)-1, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0)
+
+        static XXH64_hash_t Get_XXH3_withSecret(const CVolMem &input, size_t len = (size_t)-1, const CVolMem &secret = CVolMem{}, uint64_t seed = 0)
         {
             return Get_XXH3_withSecret(input.GetPtr(), len == (size_t)-1 ? static_cast<size_t>(input.GetSize()) : len, secret, seed);
         }
-        static XXH64_hash_t Get_XXH3_withSecret(const CVolString &input, const size_t &len = (size_t)-1, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0)
+
+        static XXH64_hash_t Get_XXH3_withSecret(const CWString &input, size_t len = (size_t)-1, const CVolMem &secret = CVolMem{}, uint64_t seed = 0)
         {
             return Get_XXH3_withSecret(input.GetText(), len == (size_t)-1 ? input.GetLength() * 2 : len, secret, seed);
         }
+
         template <typename CharT>
-        static XXH64_hash_t Get_XXH3_withSecret(const std::basic_string<CharT> &input, const size_t &len = (size_t)-1, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0)
+        static XXH64_hash_t Get_XXH3_withSecret(const std::basic_string<CharT> &input, size_t len = (size_t)-1, const CVolMem &secret = CVolMem{}, uint64_t seed = 0)
         {
             return Get_XXH3_withSecret(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, secret, seed);
         }
+
         template <typename CharT>
-        XXH64_hash_t Get_XXH3_withSecret(const basic_string_view<CharT> &input, const size_t &len = (size_t)-1, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0)
+        XXH64_hash_t Get_XXH3_withSecret(const basic_string_view<CharT> &input, size_t len = (size_t)-1, const CVolMem &secret = CVolMem{}, uint64_t seed = 0)
         {
             return Get_XXH3_withSecret(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, secret, seed);
         }
@@ -300,7 +328,7 @@ namespace piv
          * @param seed 种子
          * @return hash值
          */
-        static XXH64_hash_t GetFile_XXH3(const wchar_t *filename, int64_t off, uint64_t len, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0)
+        static XXH64_hash_t GetFile_XXH3(const wchar_t *filename, int64_t off, uint64_t len, const CVolMem &secret = CVolMem{}, uint64_t seed = 0)
         {
             XXH64_hash_t hash = 0;
             FILE *file = NULL;
@@ -342,7 +370,7 @@ namespace piv
          * @param seed 种子
          * @return hash值
          */
-        static XXH64_hash_t GetRes_XXH3(int32_t resId, int64_t off, uint64_t len, const CVolMem &secret = CVolMem{}, const uint64_t &seed = 0)
+        static XXH64_hash_t GetRes_XXH3(int32_t resId, int64_t off, uint64_t len, const CVolMem &secret = CVolMem{}, uint64_t seed = 0)
         {
             XXH64_hash_t hash = 0;
             if (resId == 0)
@@ -354,7 +382,7 @@ namespace piv
             HGLOBAL resdata = ::LoadResource(hModule, hSrc);
             if (resdata == NULL)
                 return hash;
-            const byte *buffer = reinterpret_cast<const byte *>(::LockResource(resdata));
+            const uint8_t *buffer = reinterpret_cast<const uint8_t *>(::LockResource(resdata));
             size_t _size = ::SizeofResource(hModule, hSrc);
             XXH3_state_t *state = XXH3_createState();
             if (secret.GetSize() >= 136)
@@ -380,29 +408,34 @@ namespace piv
          * @param seed 种子
          * @return hash值
          */
-        static XXH64_hash_t Get_XXH64(const void *input, const size_t &len, const uint64_t &seed = 0)
+        static XXH64_hash_t Get_XXH64(const void *input, size_t len, uint64_t seed = 0)
         {
             return XXH64(input, len, seed);
         }
-        static XXH64_hash_t Get_XXH64(const ptrdiff_t &input, const size_t &len, const uint64_t &seed = 0)
+
+        static XXH64_hash_t Get_XXH64(const ptrdiff_t &input, size_t len, uint64_t seed = 0)
         {
             return XXH64(reinterpret_cast<const void *>(input), len, seed);
         }
-        static XXH64_hash_t Get_XXH64(const CVolMem &input, const size_t &len = (size_t)-1, const uint64_t &seed = 0)
+
+        static XXH64_hash_t Get_XXH64(const CVolMem &input, size_t len = (size_t)-1, uint64_t seed = 0)
         {
             return XXH64(input.GetPtr(), len == (size_t)-1 ? static_cast<size_t>(input.GetSize()) : len, seed);
         }
-        static XXH64_hash_t Get_XXH64(const CVolString &input, const size_t &len = (size_t)-1, const uint64_t &seed = 0)
+
+        static XXH64_hash_t Get_XXH64(const CWString &input, size_t len = (size_t)-1, uint64_t seed = 0)
         {
             return XXH64(input.GetText(), len == (size_t)-1 ? input.GetLength() * 2 : len, seed);
         }
+
         template <typename CharT>
-        static XXH64_hash_t Get_XXH64(const std::basic_string<CharT> &input, const size_t &len = -1, const uint64_t &seed = 0)
+        static XXH64_hash_t Get_XXH64(const std::basic_string<CharT> &input, size_t len = -1, uint64_t seed = 0)
         {
             return XXH64(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed);
         }
+
         template <typename CharT>
-        XXH64_hash_t Get_XXH64(const basic_string_view<CharT> &input, const size_t &len = -1, const uint64_t &seed = 0)
+        XXH64_hash_t Get_XXH64(const basic_string_view<CharT> &input, size_t len = -1, uint64_t seed = 0)
         {
             return XXH64(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed);
         }
@@ -415,7 +448,7 @@ namespace piv
          * @param seed 种子
          * @return hash值
          */
-        static XXH64_hash_t GetFile_XXH64(const wchar_t *filename, int64_t off, uint64_t len, const uint64_t &seed = 0)
+        static XXH64_hash_t GetFile_XXH64(const wchar_t *filename, int64_t off, uint64_t len, uint64_t seed = 0)
         {
             XXH64_hash_t hash = 0;
             FILE *file = NULL;
@@ -453,7 +486,7 @@ namespace piv
          * @param seed 种子
          * @return hash值
          */
-        static XXH64_hash_t GetRes_XXH64(int32_t resId, int64_t off, uint64_t len, const uint64_t &seed = 0)
+        static XXH64_hash_t GetRes_XXH64(int32_t resId, int64_t off, uint64_t len, uint64_t seed = 0)
         {
             XXH64_hash_t hash = 0;
             if (resId == 0)
@@ -465,7 +498,7 @@ namespace piv
             HGLOBAL resdata = ::LoadResource(hModule, hSrc);
             if (resdata == NULL)
                 return hash;
-            const byte *buffer = reinterpret_cast<const byte *>(::LockResource(resdata));
+            const uint8_t *buffer = reinterpret_cast<const uint8_t *>(::LockResource(resdata));
             size_t _size = ::SizeofResource(hModule, hSrc);
             XXH64_state_t *state = XXH64_createState();
             XXH64_reset(state, seed);
@@ -488,29 +521,34 @@ namespace piv
          * @param seed 种子
          * @return hash值
          */
-        static XXH32_hash_t Get_XXH32(const void *input, const size_t &len, const uint32_t &seed = 0)
+        static XXH32_hash_t Get_XXH32(const void *input, size_t len, uint32_t seed = 0)
         {
             return XXH32(input, len, seed);
         }
-        static XXH32_hash_t Get_XXH32(const ptrdiff_t &input, const size_t &len, const uint32_t &seed = 0)
+
+        static XXH32_hash_t Get_XXH32(const ptrdiff_t &input, size_t len, uint32_t seed = 0)
         {
             return XXH32(reinterpret_cast<const void *>(input), len, seed);
         }
-        static XXH32_hash_t Get_XXH32(const CVolMem &input, const size_t &len = (size_t)-1, const uint32_t &seed = 0)
+
+        static XXH32_hash_t Get_XXH32(const CVolMem &input, size_t len = (size_t)-1, uint32_t seed = 0)
         {
             return XXH32(input.GetPtr(), len == (size_t)-1 ? static_cast<size_t>(input.GetSize()) : len, seed);
         }
-        static XXH32_hash_t Get_XXH32(const CVolString &input, const size_t &len = (size_t)-1, const uint32_t &seed = 0)
+
+        static XXH32_hash_t Get_XXH32(const CWString &input, size_t len = (size_t)-1, uint32_t seed = 0)
         {
             return XXH32(input.GetText(), len == (size_t)-1 ? input.GetLength() * 2 : len, seed);
         }
+
         template <typename CharT>
-        static XXH32_hash_t Get_XXH32(const std::basic_string<CharT> &input, const size_t &len = -1, const uint32_t &seed = 0)
+        static XXH32_hash_t Get_XXH32(const std::basic_string<CharT> &input, size_t len = -1, uint32_t seed = 0)
         {
             return XXH32(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed);
         }
+
         template <typename CharT>
-        XXH32_hash_t Get_XXH32(const basic_string_view<CharT> &input, const size_t &len = -1, const uint32_t &seed = 0)
+        XXH32_hash_t Get_XXH32(const basic_string_view<CharT> &input, size_t len = -1, uint32_t seed = 0)
         {
             return XXH32(input.data(), len == (size_t)-1 ? input.size() * sizeof(CharT) : len, seed);
         }
@@ -523,7 +561,7 @@ namespace piv
          * @param seed 种子
          * @return hash值
          */
-        static XXH32_hash_t GetFile_XXH32(const wchar_t *filename, int64_t off, uint64_t len, const uint32_t &seed = 0)
+        static XXH32_hash_t GetFile_XXH32(const wchar_t *filename, int64_t off, uint64_t len, uint32_t seed = 0)
         {
             XXH32_hash_t hash = 0;
             FILE *file = NULL;
@@ -561,7 +599,7 @@ namespace piv
          * @param seed 种子
          * @return hash值
          */
-        static XXH32_hash_t GetRes_XXH32(int32_t resId, int64_t off, uint64_t len, const uint64_t &seed = 0)
+        static XXH32_hash_t GetRes_XXH32(int32_t resId, int64_t off, uint64_t len, uint32_t seed = 0)
         {
             XXH32_hash_t hash = 0;
             if (resId == 0)
@@ -573,7 +611,7 @@ namespace piv
             HGLOBAL resdata = ::LoadResource(hModule, hSrc);
             if (resdata == NULL)
                 return hash;
-            const byte *buffer = reinterpret_cast<const byte *>(::LockResource(resdata));
+            const uint8_t *buffer = reinterpret_cast<const uint8_t *>(::LockResource(resdata));
             size_t _size = ::SizeofResource(hModule, hSrc);
             XXH32_state_t *state = XXH32_createState();
             XXH32_reset(state, seed);

@@ -51,7 +51,7 @@
         @ TCHAR buf [MAX_PATH + 1] { 0 };
         @ if (::GetModuleFileName (NULL, buf, MAX_PATH) > 0)
         @     return @an<CVolString> (buf);
-        @ return _CT ("");
+        @ return @an<CVolString>(L"");
     }
 
     方法 禁止重复运行 <公开 静态 注释 = "禁止当前程序多开运行" 折叠>
@@ -647,7 +647,7 @@
         @     ofn.lpstrFilter = NULL;
         @ } else {
         @     szFilter.AddTextValue(@<过滤器>, TRUE);
-        @     szFilter.ReplaceBin(CVolMem(_CT("|")), CVolMem().AddManyBytes(2, 0, 0), 0, 0);
+        @     szFilter.ReplaceBin(CVolMem(_CT2(L"|")), CVolMem().AddManyBytes(2, 0, 0), 0, 0);
         @     szFilter.AddWord(0);
         @     ofn.lpstrFilter = reinterpret_cast<const WCHAR*>(szFilter.GetPtr());
         @ }
@@ -696,7 +696,7 @@
         @     ofn.lpstrFilter = NULL;
         @ } else {
         @     szFilter.AddTextValue(@<过滤器>, TRUE);
-        @     szFilter.ReplaceBin(CVolMem(_CT("|")), CVolMem().AddManyBytes(2, 0, 0), 0, 0);
+        @     szFilter.ReplaceBin(CVolMem(_CT2(L"|")), CVolMem().AddManyBytes(2, 0, 0), 0, 0);
         @     szFilter.AddWord(0);
         @     ofn.lpstrFilter = reinterpret_cast<const WCHAR*>(szFilter.GetPtr());
         @ }
@@ -747,7 +747,7 @@
         @     ofn.lpstrFilter = NULL;
         @ } else {
         @     szFilter.AddTextValue(@<过滤器>, TRUE);
-        @     szFilter.ReplaceBin(CVolMem(_CT("|")), CVolMem().AddManyBytes(2, 0, 0), 0, 0);
+        @     szFilter.ReplaceBin(CVolMem(_CT2(L"|")), CVolMem().AddManyBytes(2, 0, 0), 0, 0);
         @     szFilter.AddWord(0);
         @     ofn.lpstrFilter = reinterpret_cast<const WCHAR*>(szFilter.GetPtr());
         @ }
@@ -858,16 +858,17 @@
 
     # @begin
     # <> <include>
-    # static BOOL CALLBACK nEnumFontFamExProc(LPLOGFONTW lplf, LPTEXTMETRIC lptm, DWORD iType, LPARAM lpData) {
-    #     (*(@dt<文本数组类>*)lpData).data().Add(CVolString (lplf->lfFaceName));
-    #     return TRUE;
-    # }
+    # static BOOL CALLBACK nEnumFontFamExProc(LPLOGFONTW lplf, LPTEXTMETRIC lptm, DWORD iType, LPARAM lpData);
     # static BOOL CALLBACK eEnumFontFamExProc(LPLOGFONTW lplf, LPTEXTMETRIC lptm, DWORD iType, LPARAM lpData) {
     #     if (((@sn<current_class>*)lpData)->@<字体回调>(@an<CVolString>(lplf->lfFaceName), (INT)iType) == 0)
     #         return TRUE;
     #     return FALSE;
     # }
     # <> </include>
+    # BOOL CALLBACK @sn<current_class>::nEnumFontFamExProc(LPLOGFONTW lplf, LPTEXTMETRIC lptm, DWORD iType, LPARAM lpData) {
+    #     (*(@dt<文本数组类>*)lpData).data().Add(lplf->lfFaceName);
+    #     return TRUE;
+    # }
     # @end
 
     方法 取系统字体列表 <公开 类型 = 整数 注释 = "枚举系统中的字体到文本数组类中" 返回值注释 = "成功返回字体数量" 折叠 @禁止流程检查 = 真>
@@ -928,7 +929,7 @@
     }
 }
 
-类 字体字符集类 <公开 注释 = "\"字体枚举类\"的辅助类" 折叠 @文档 = "category = \"系统操作.辅助类\"" @常量类 = 字节>
+类 字体字符集类 <公开 注释 = "\"字体枚举类\"的辅助类" 折叠 @文档 = "category = \"系统操作.辅助类\"" @常量类 = 短整数>
 {
     常量 ANSI <公开 值 = @ANSI_CHARSET>
     常量 波罗的语族 <公开 值 = @BALTIC_CHARSET>

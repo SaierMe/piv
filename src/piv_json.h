@@ -171,9 +171,9 @@ namespace piv
          * @return 返回是否解析成功
          */
         template <typename J, typename T, typename F>
-        inline bool ParseText(J &json, const T &input, const F cb, bool allow_exceptions, bool ignore_comments)
+        inline bool ParseText(J &&json, const T &input, const F cb, bool allow_exceptions, bool ignore_comments)
         {
-            json = J::parse(input, cb, allow_exceptions, ignore_comments);
+            json = std::decay<J>::type::parse(input, cb, allow_exceptions, ignore_comments);
             return !json.is_discarded();
         }
 
@@ -186,12 +186,12 @@ namespace piv
          * @return 返回是否解析成功
          */
         template <typename J, typename F>
-        bool ParseFile(J &json, const wchar_t *file, const F cb, bool allow_exceptions, bool ignore_comments)
+        bool ParseFile(J &&json, const wchar_t *file, const F cb, bool allow_exceptions, bool ignore_comments)
         {
             FILE *fp = _wfopen(file, L"r");
             if (!fp)
                 return false;
-            json = J::parse(fp, cb, allow_exceptions, ignore_comments);
+            json = std::decay<J>::type::parse(fp, cb, allow_exceptions, ignore_comments);
             fclose(fp);
             return !json.is_discarded();
         }
@@ -207,7 +207,7 @@ namespace piv
          * @return 返回是否解析成功
          */
         template <typename J, typename F>
-        bool Parse(J &json, const ::piv::string_view &input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
+        bool Parse(J &&json, const ::piv::string_view &input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
         {
             ::piv::string_view test{input};
             piv::edit::trim_left(test);
@@ -221,7 +221,7 @@ namespace piv
         }
 
         template <typename J, typename F>
-        bool Parse(J &json, const ::piv::wstring_view &input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
+        bool Parse(J &&json, const ::piv::wstring_view &input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
         {
             ::piv::wstring_view test{input};
             piv::edit::trim_left(test);
@@ -235,13 +235,13 @@ namespace piv
         }
 
         template <typename J, typename F>
-        inline bool Parse(J &json, const std::string &input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
+        inline bool Parse(J &&json, const std::string &input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
         {
             return Parse(json, ::piv::string_view{input}, cb, allow_exceptions, ignore_comments);
         }
 
         template <typename J, typename F>
-        bool Parse(J &json, const std::wstring &input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
+        bool Parse(J &&json, const std::wstring &input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
         {
             ::piv::wstring_view test{input};
             piv::edit::trim_left(test);
@@ -255,7 +255,7 @@ namespace piv
         }
 
         template <typename J, typename F>
-        bool Parse(J &json, const CWString &input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
+        bool Parse(J &&json, const CWString &input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
         {
             ::piv::wstring_view test{input.GetText()};
             piv::edit::trim_left(test);
@@ -269,13 +269,13 @@ namespace piv
         }
 
         template <typename J, typename F>
-        inline bool Parse(J &json, const wchar_t *input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
+        inline bool Parse(J &&json, const wchar_t *input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
         {
             return Parse(json, ::piv::wstring_view{input}, cb, allow_exceptions, ignore_comments, encoding);
         }
 
         template <typename J, typename F>
-        inline bool Parse(J &json, const CVolMem &input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
+        inline bool Parse(J &&json, const CVolMem &input, const F cb, bool allow_exceptions, bool ignore_comments, int32_t encoding = 1)
         {
             const BYTE *data = input.GetPtr();
             size_t len = static_cast<size_t>(input.GetSize());
@@ -292,7 +292,7 @@ namespace piv
                     data += 4;
                     len -= 4;
                 }
-                json = J::parse(reinterpret_cast<const char32_t *>(data), reinterpret_cast<const char32_t *>(data) + len, cb, allow_exceptions, ignore_comments);
+                json = std::decay<J>::type::parse(reinterpret_cast<const char32_t *>(data), reinterpret_cast<const char32_t *>(data) + len, cb, allow_exceptions, ignore_comments);
                 return !json.is_discarded();
             }
             if ((encoding & 2) == 2) // UTF-16LE
@@ -327,22 +327,25 @@ namespace piv
          * @return 返回输入类型
          */
         template <typename = void>
-        inline const ::piv::string_view input_t(const CVolMem &input)
+        const ::piv::string_view input_t(const CVolMem &input)
         {
             return ::piv::string_view{reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize())};
         }
 
-        inline const std::vector<uint8_t> &input_t(const std::vector<uint8_t> &input)
+        template <typename = void>
+        const std::vector<uint8_t> &input_t(const std::vector<uint8_t> &input)
         {
             return input;
         }
 
-        inline const ::piv::string_view &input_t(const ::piv::string_view &input)
+        template <typename = void>
+        const ::piv::string_view &input_t(const ::piv::string_view &input)
         {
             return input;
         }
 
-        inline const std::string &input_t(const std::string &input)
+        template <typename = void>
+        const std::string &input_t(const std::string &input)
         {
             return input;
         }
@@ -356,9 +359,9 @@ namespace piv
          * @return 返回是否解析成功
          */
         template <typename J, typename T>
-        inline bool From_bjdata(J &json, const T &input, bool strict, bool allow_exceptions)
+        inline bool From_bjdata(J &&json, const T &input, bool strict, bool allow_exceptions)
         {
-            json = J::from_bjdata(input_t(input), strict, allow_exceptions);
+            json = std::decay<J>::type::from_bjdata(input_t(input), strict, allow_exceptions);
             return !json.is_discarded();
         }
 
@@ -371,9 +374,9 @@ namespace piv
          * @return 返回是否解析成功
          */
         template <typename J, typename T>
-        inline bool From_bson(J &json, const T &input, bool strict, bool allow_exceptions)
+        inline bool From_bson(J &&json, const T &input, bool strict, bool allow_exceptions)
         {
-            json = J::from_bson(input_t(input), strict, allow_exceptions);
+            json = std::decay<J>::type::from_bson(input_t(input), strict, allow_exceptions);
             return !json.is_discarded();
         }
 
@@ -387,9 +390,9 @@ namespace piv
          * @return 返回是否解析成功
          */
         template <typename J, typename T>
-        inline bool From_cbor(J &json, const T &input, bool strict, bool allow_exceptions, int32_t tag_handler)
+        inline bool From_cbor(J &&json, const T &input, bool strict, bool allow_exceptions, int32_t tag_handler)
         {
-            json = J::from_cbor(input_t(input), strict, allow_exceptions, static_cast<J::cbor_tag_handler_t>(tag_handler));
+            json = std::decay<J>::type::from_cbor(input_t(input), strict, allow_exceptions, static_cast<J::cbor_tag_handler_t>(tag_handler));
             return !json.is_discarded();
         }
 
@@ -402,9 +405,9 @@ namespace piv
          * @return 返回是否解析成功
          */
         template <typename J, typename T>
-        inline bool From_msgpack(J &json, const T &input, bool strict, bool allow_exceptions)
+        inline bool From_msgpack(J &&json, const T &input, bool strict, bool allow_exceptions)
         {
-            json = J::from_msgpack(input_t(input), strict, allow_exceptions);
+            json = std::decay<J>::type::from_msgpack(input_t(input), strict, allow_exceptions);
             return !json.is_discarded();
         }
 
@@ -417,9 +420,9 @@ namespace piv
          * @return 返回是否解析成功
          */
         template <typename J, typename T>
-        inline bool From_ubjson(J &json, const T &input, bool strict, bool allow_exceptions)
+        inline bool From_ubjson(J &&json, const T &input, bool strict, bool allow_exceptions)
         {
-            json = J::from_ubjson(input_t(input), strict, allow_exceptions);
+            json = std::decay<J>::type::from_ubjson(input_t(input), strict, allow_exceptions);
             return !json.is_discarded();
         }
 
@@ -445,15 +448,15 @@ namespace piv
          * @return 返回序列化文本
          */
         template <typename J>
-        inline std::string Dump(J &json, int32_t indent, wchar_t indent_char, bool ensure_ascii, int32_t error_handler)
+        inline std::string Dump(J &&json, int32_t indent, wchar_t indent_char, bool ensure_ascii, int32_t error_handler)
         {
-            return json.dump(indent, IndentWcharToChar(indent_char), ensure_ascii, static_cast<J::error_handler_t>(error_handler));
+            return json.dump(indent, IndentWcharToChar(indent_char), ensure_ascii, static_cast<typename std::decay<J>::type::error_handler_t>(error_handler));
         }
 
         template <typename R, typename J>
-        inline R DumpTo(J &json, int32_t indent, wchar_t indent_char, bool ensure_ascii, int32_t error_handler)
+        inline R DumpTo(J &&json, int32_t indent, wchar_t indent_char, bool ensure_ascii, int32_t error_handler)
         {
-            std::string str = json.dump(indent, IndentWcharToChar(indent_char), ensure_ascii, static_cast<J::error_handler_t>(error_handler));
+            std::string str = json.dump(indent, IndentWcharToChar(indent_char), ensure_ascii, static_cast<typename std::decay<J>::type::error_handler_t>(error_handler));
             return R(str.data(), str.size());
         }
 
@@ -465,7 +468,7 @@ namespace piv
          * @return 返回字节集
          */
         template <typename J> // 到BJData
-        inline CVolMem To_bjdata(J &json, bool use_size, bool use_type)
+        inline CVolMem To_bjdata(const J &json, bool use_size, bool use_type)
         {
             std::vector<std::uint8_t> bin;
             J::to_bjdata(json, bin, use_size, use_type);
@@ -473,7 +476,7 @@ namespace piv
         }
 
         template <typename J> // 到BSON
-        inline CVolMem To_bson(J &json)
+        inline CVolMem To_bson(const J &json)
         {
             std::vector<std::uint8_t> bin;
             J::to_bson(json, bin);
@@ -481,7 +484,7 @@ namespace piv
         }
 
         template <typename J> // 到CBOR
-        inline CVolMem To_cbor(J &json)
+        inline CVolMem To_cbor(const J &json)
         {
             std::vector<std::uint8_t> bin;
             J::to_cbor(json, bin);
@@ -489,7 +492,7 @@ namespace piv
         }
 
         template <typename J> // 到MsgPack
-        inline CVolMem To_msgpack(J &json)
+        inline CVolMem To_msgpack(const J &json)
         {
             std::vector<std::uint8_t> bin;
             J::to_msgpack(json, bin);
@@ -497,7 +500,7 @@ namespace piv
         }
 
         template <typename J> // 到UBJSON
-        inline CVolMem To_ubjson(J &json, bool use_size, bool use_type)
+        inline CVolMem To_ubjson(const J &json, bool use_size, bool use_type)
         {
             std::vector<std::uint8_t> bin;
             J::to_ubjson(json, bin, use_size, use_type);
@@ -516,20 +519,20 @@ namespace piv
             return num;
         }
 
-        template <typename = void>
-        int32_t to_value(int32_t num)
-        {
-            return num;
-        }
-
-        template <typename = void>
-        int64_t to_value(int64_t num)
+        template <typename V, typename = std::enable_if<std::is_integral<V>::value>::type>
+        V to_value(V num)
         {
             return num;
         }
 
         template <typename = void>
         double to_value(double num)
+        {
+            return num;
+        }
+
+        template <typename = void>
+        float to_value(float num)
         {
             return num;
         }
@@ -582,22 +585,40 @@ namespace piv
             return ::piv::string_view{reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())};
         }
 
+        template <typename = void>
+        PivJSON &to_value(PivJSON &value)
+        {
+            return value;
+        }
+
+        template <typename = void>
+        PivJSON_Unordered &to_value(PivJSON_Unordered &value)
+        {
+            return value;
+        }
+
+        template <typename = void>
+        const PivJSON &to_value(const PivJSON &value)
+        {
+            return value;
+        }
+
+        template <typename = void>
+        const PivJSON_Unordered &to_value(const PivJSON_Unordered &value)
+        {
+            return value;
+        }
+
         /**
          * @brief 转换到JSON索引或键名
          * @param idx 所欲转换的索引
          * @param key 所欲转换的键名
          * @return 返回兼容的JSON索引或键名
          */
-        template <typename = void>
-        uint32_t to_key(int32_t idx)
+        template <typename I, typename = std::enable_if<std::is_integral<I>::value>::type>
+        typename std::make_unsigned<I>::type to_key(I idx)
         {
-            return static_cast<uint32_t>(idx);
-        }
-
-        template <typename = void>
-        uint64_t to_key(int64_t idx)
-        {
-            return static_cast<uint64_t>(idx);
+            return static_cast<typename std::make_unsigned<I>::type>(idx);
         }
 
         template <typename = void>
@@ -667,27 +688,22 @@ namespace piv
          * @param allow_exceptions 允许异常
          * @return 返回成员值参考
          */
-        template <typename J>
-        inline J &At(J &json, int32_t idx, bool allow_exceptions = false)
-        {
-            if (!allow_exceptions && !json.is_array())
-                json = J::array();
-            return json[static_cast<uint32_t>(idx)];
-        }
-
-        template <typename J>
-        inline J &At(J &json, int64_t idx, bool allow_exceptions = false)
-        {
-            if (!allow_exceptions && !json.is_array())
-                json = J::array();
-            return json[static_cast<uint64_t>(idx)];
-        }
 
         template <typename J, typename K>
         inline J &At(J &json, K &&key, bool allow_exceptions = false)
         {
-            if (!allow_exceptions && !json.is_object())
-                json = J::object();
+            if (!allow_exceptions)
+            {
+                if (std::is_integral<typename std::decay<K>::type>::value)
+                {
+                    if (!json.is_array())
+                        json = J::array();
+                }
+                else if (!json.is_object())
+                {
+                    json = J::object();
+                }
+            }
             return json[to_key(std::forward<K>(key))];
         }
 
@@ -697,22 +713,16 @@ namespace piv
          * @param val 成员值
          * @param ...args 可变长成员值
          */
-        template <typename J>
-        inline void PushBack(J &json)
+        template <typename J, typename V>
+        inline void PushBack(J &&json, V &&val)
         {
+            json.push_back(to_value(val));
         }
 
         template <typename J, typename V, typename... Args>
-        inline void PushBack(J &json, const V &val, Args &&...args)
+        inline void PushBack(J &&json, V &&val, Args &&...args)
         {
             json.push_back(to_value(val));
-            PushBack(json, std::forward<Args>(args)...);
-        }
-
-        template <typename J, typename... Args>
-        inline void PushBack(J &json, const J &val, Args &&...args)
-        {
-            json.push_back(val);
             PushBack(json, std::forward<Args>(args)...);
         }
 
@@ -723,32 +733,20 @@ namespace piv
          * @param val 键置
          */
         template <typename J>
-        inline void Emplace(J &json)
-        {
-        }
-
-        template <typename J>
-        inline void Emplace(J &json, const J &val)
+        inline void Emplace(J &&json)
         {
         }
 
         template <typename J, typename K>
-        inline void Emplace(J &json, K &&key)
+        inline void Emplace(J &&json, K &&key)
         {
             json[to_key(std::forward<K>(key))] = nullptr;
         }
 
         template <typename J, typename K, typename V, typename... Args>
-        inline void Emplace(J &json, K &&key, const V &val, Args &&...args)
+        inline void Emplace(J &&json, K &&key, V &&val, Args &&...args)
         {
             json[to_key(std::forward<K>(key))] = to_value(val);
-            Emplace(json, std::forward<Args>(args)...);
-        }
-
-        template <typename J, typename K, typename... Args>
-        inline void Emplace(J &json, K &&key, const J &val, Args &&...args)
-        {
-            json[to_key(std::forward<K>(key))] = val;
             Emplace(json, std::forward<Args>(args)...);
         }
 
@@ -772,11 +770,11 @@ namespace piv
          * @return 返回自身
          */
         template <typename J, typename... Args>
-        inline J &SetArray(J &json, Args &&...args)
+        inline J &&SetArray(J &&json, Args &&...args)
         {
-            json = J::array();
+            json = std::decay<J>::type::array();
             PushBack(json, std::forward<Args>(args)...);
-            return json;
+            return std::forward<J>(json);
         }
 
         /**
@@ -786,10 +784,10 @@ namespace piv
          * @return 返回自身
          */
         template <typename J, typename... Args>
-        inline J &PushBackArgs(J &json, Args &&...args)
+        inline J &&PushBackArgs(J &&json, Args &&...args)
         {
             PushBack(json, std::forward<Args>(args)...);
-            return json;
+            return std::forward<J>(json);
         }
 
         /**
@@ -802,17 +800,17 @@ namespace piv
          */
 
         template <typename J>
-        inline J &Insert(J &json, ptrdiff_t pos, const J &val, size_t cnt = 1)
+        inline J &&Insert(J &&json, ptrdiff_t pos, const J &val, size_t cnt = 1)
         {
             json.insert(json.begin() + pos, cnt, val);
-            return json;
+            return std::forward<J>(json);
         }
 
         template <typename J, typename V>
-        inline J &Insert(J &json, ptrdiff_t pos, const V &val, size_t cnt = 1)
+        inline J &&Insert(J &&json, ptrdiff_t pos, const V &val, size_t cnt = 1)
         {
             json.insert(json.begin() + pos, cnt, to_value(val));
-            return json;
+            return std::forward<J>(json);
         }
 
         /**
@@ -835,11 +833,11 @@ namespace piv
          * @return 返回自身
          */
         template <typename J, typename... Args>
-        inline J &SetObject(J &json, Args &&...args)
+        inline J &&SetObject(J &&json, Args &&...args)
         {
-            json = J::object();
+            json = std::decay<J>::type::object();
             Emplace(json, std::forward<Args>(args)...);
-            return json;
+            return std::forward<J>(json);
         }
 
         /**
@@ -967,7 +965,7 @@ namespace piv
          * @return 返回JSON对象
          */
         template <typename J, typename P>
-        J ValuePathObj(J &json, P &&path)
+        J ValuePathObj(const J &json, P &&path)
         {
             try
             {
@@ -989,7 +987,7 @@ namespace piv
          * @return 返回JSON数组
          */
         template <typename J, typename P>
-        J ValuePathArray(J &json, P &&path)
+        J ValuePathArray(const J &json, P &&path)
         {
             try
             {
@@ -1114,21 +1112,21 @@ namespace piv
          * @return 返回是否置入成功
          */
         template <typename J, typename I, typename V>
-        bool EmplaceAtIdx(J &json, const I &idx, V &&val, bool replace = false)
+        bool EmplaceAtIdx(J &&json, const I &idx, V &&val, bool replace = false)
         {
             try
             {
                 if (!json.is_array() && !json.is_null())
                 {
                     if (replace)
-                        json = J::array();
+                        json = std::decay<J>::type::array();
                     else
                         return false;
                 }
                 json[idx] = val;
                 return true;
             }
-            catch (const J::exception &e)
+            catch (const typename std::decay<J>::type::exception &e)
             {
                 (void)e;
                 return false;
@@ -1144,21 +1142,21 @@ namespace piv
          * @return 返回是否置入成功
          */
         template <typename J, typename K, typename V>
-        bool EmplaceAtKey(J &json, K &&key, V &&val, bool replace = false)
+        bool EmplaceAtKey(J &&json, K &&key, V &&val, bool replace = false)
         {
             try
             {
                 if (!json.is_object() && !json.is_null())
                 {
                     if (replace)
-                        json = J::object();
+                        json = std::decay<J>::type::object();
                     else
                         return false;
                 }
                 json[std::forward<K>(key)] = val;
                 return true;
             }
-            catch (const J::exception &e)
+            catch (const typename std::decay<J>::type::exception &e)
             {
                 (void)e;
                 return false;
@@ -1173,14 +1171,14 @@ namespace piv
          * @return 返回是否置入成功
          */
         template <typename J, typename P, typename V>
-        bool EmplaceAtPath(J &json, P &&path, V &&val)
+        bool EmplaceAtPath(J &&json, P &&path, V &&val)
         {
             try
             {
                 json[std::forward<P>(path)] = val;
                 return true;
             }
-            catch (const J::exception &e)
+            catch (const typename std::decay<J>::type::exception &e)
             {
                 (void)e;
                 return false;
@@ -1198,195 +1196,99 @@ namespace piv
          * @return 返回是否置入成功
          */
         template <typename J, typename V>
-        inline bool EmplaceAt(J &json, int32_t idx, const V &val, bool replace = false)
+        inline bool EmplaceAt(J &&json, int32_t idx, V &&val, bool replace = false)
         {
             return EmplaceAtIdx(json, static_cast<uint32_t>(idx), to_value(val), replace);
         }
 
         template <typename J, typename V>
-        inline bool EmplaceAt(J &json, int64_t idx, const V &val, bool replace = false)
+        inline bool EmplaceAt(J &&json, int64_t idx, V &&val, bool replace = false)
         {
             return EmplaceAtIdx(json, static_cast<uint64_t>(idx), to_value(val), replace);
         }
 
         template <typename J, typename V>
-        inline bool EmplaceAt(J &json, const wchar_t *path, const V &val, bool replace = false)
+        inline bool EmplaceAt(J &&json, const wchar_t *path, V &&val, bool replace = false)
         {
             if (path[0] == '/')
-                return EmplaceAtPath(json, typename J::json_pointer{*PivW2U{path}}, to_value(val));
+                return EmplaceAtPath(json, std::decay<J>::type::json_pointer{*PivW2U{path}}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
 
         template <typename J, typename V>
-        inline bool EmplaceAt(J &json, const char *path, const V &val, bool replace = false)
+        inline bool EmplaceAt(J &&json, const char *path, V &&val, bool replace = false)
         {
             if (path[0] == '/')
-                return EmplaceAtPath(json, typename J::json_pointer{path}, to_value(val));
+                return EmplaceAtPath(json, std::decay<J>::type::json_pointer{path}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
 
         template <typename J, typename V>
-        inline bool EmplaceAt(J &json, const CWString &path, const V &val, bool replace = false)
+        inline bool EmplaceAt(J &&json, const CWString &path, V &&val, bool replace = false)
         {
             if (path.IsEmpty())
                 return false;
             if (path.GetCharAt(0) == '/')
-                return EmplaceAtPath(json, typename J::json_pointer{*PivW2U{path}}, to_value(val));
+                return EmplaceAtPath(json, std::decay<J>::type::json_pointer{*PivW2U{path}}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
 
         template <typename J, typename V>
-        inline bool EmplaceAt(J &json, const std::string &path, const V &val, bool replace = false)
+        inline bool EmplaceAt(J &&json, const std::string &path, V &&val, bool replace = false)
         {
             if (path.empty())
                 return false;
             if (path.front() == '/')
-                return EmplaceAtPath(json, typename J::json_pointer{path}, to_value(val));
+                return EmplaceAtPath(json, std::decay<J>::type::json_pointer{path}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
 
         template <typename J, typename V>
-        inline bool EmplaceAt(J &json, const std::wstring &path, const V &val, bool replace = false)
+        inline bool EmplaceAt(J &&json, const std::wstring &path, V &&val, bool replace = false)
         {
             if (path.empty())
                 return false;
             if (path.front() == '/')
-                return EmplaceAtPath(json, typename J::json_pointer{*PivW2U{path}}, to_value(val));
+                return EmplaceAtPath(json, std::decay<J>::type::json_pointer{*PivW2U{path}}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
 
         template <typename J, typename V>
-        inline bool EmplaceAt(J &json, const ::piv::string_view &path, const V &val, bool replace = false)
+        inline bool EmplaceAt(J &&json, const ::piv::string_view &path, V &&val, bool replace = false)
         {
             if (path.empty())
                 return false;
             if (path.front() == '/')
-                return EmplaceAtPath(json, typename J::json_pointer{path.data()}, to_value(val));
+                return EmplaceAtPath(json, std::decay<J>::type::json_pointer{path.data()}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
 
         template <typename J, typename V>
-        inline bool EmplaceAt(J &json, const ::piv::wstring_view &path, const V &val, bool replace = false)
+        inline bool EmplaceAt(J &&json, const ::piv::wstring_view &path, V &&val, bool replace = false)
         {
             if (path.empty())
                 return false;
             if (path.front() == '/')
-                return EmplaceAtPath(json, typename J::json_pointer{*PivW2U{path}}, to_value(val));
+                return EmplaceAtPath(json, std::decay<J>::type::json_pointer{*PivW2U{path}}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
 
         template <typename J, typename V>
-        inline bool EmplaceAt(J &json, const CVolMem &path, const V &val, bool replace = false)
+        inline bool EmplaceAt(J &&json, const CVolMem &path, V &&val, bool replace = false)
         {
             if (path.IsEmpty())
                 return false;
             if (path.Get_S_BYTE(0) == '/')
-                return EmplaceAtPath(json, typename J::json_pointer{*PivW2U{path}}, to_value(val));
+                return EmplaceAtPath(json, std::decay<J>::type::json_pointer{*PivW2U{path}}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
-        }
-
-        template <typename J>
-        inline bool EmplaceAt(J &json, int32_t idx, const J &val, bool replace = false)
-        {
-            return EmplaceAtIdx(json, static_cast<uint32_t>(idx), val, replace);
-        }
-
-        template <typename J>
-        inline bool EmplaceAt(J &json, int64_t idx, const J &val, bool replace = false)
-        {
-            return EmplaceAtIdx(json, static_cast<uint64_t>(idx), val, replace);
-        }
-
-        template <typename J>
-        inline bool EmplaceAt(J &json, const wchar_t *path, const J &val, bool replace = false)
-        {
-            if (path[0] == '/')
-                return EmplaceAtPath(json, typename J::json_pointer{*PivW2U{path}}, val);
-            else
-                return EmplaceAtKey(json, to_key(path), val, replace);
-        }
-
-        template <typename J>
-        inline bool EmplaceAt(J &json, const char *path, const J &val, bool replace = false)
-        {
-            if (path[0] == '/')
-                return EmplaceAtPath(json, typename J::json_pointer{path}, val);
-            else
-                return EmplaceAtKey(json, to_key(path), val, replace);
-        }
-
-        template <typename J>
-        inline bool EmplaceAt(J &json, const CWString &path, const J &val, bool replace = false)
-        {
-            if (path.IsEmpty())
-                return false;
-            if (path.GetCharAt(0) == '/')
-                return EmplaceAtPath(json, typename J::json_pointer{*PivW2U{path}}, val);
-            else
-                return EmplaceAtKey(json, to_key(path), val, replace);
-        }
-
-        template <typename J>
-        inline bool EmplaceAt(J &json, const std::string &path, const J &val, bool replace = false)
-        {
-            if (path.empty())
-                return false;
-            if (path.front() == '/')
-                return EmplaceAtPath(json, typename J::json_pointer{path}, val);
-            else
-                return EmplaceAtKey(json, to_key(path), val, replace);
-        }
-
-        template <typename J>
-        inline bool EmplaceAt(J &json, const std::wstring &path, const J &val, bool replace = false)
-        {
-            if (path.empty())
-                return false;
-            if (path.front() == '/')
-                return EmplaceAtPath(json, typename J::json_pointer{*PivW2U{path}}, val);
-            else
-                return EmplaceAtKey(json, to_key(path), val, replace);
-        }
-
-        template <typename J>
-        inline bool EmplaceAt(J &json, const ::piv::string_view &path, const J &val, bool replace = false)
-        {
-            if (path.empty())
-                return false;
-            if (path.front() == '/')
-                return EmplaceAtPath(json, typename J::json_pointer{path}, val);
-            else
-                return EmplaceAtKey(json, to_key(path), val, replace);
-        }
-
-        template <typename J>
-        inline bool EmplaceAt(J &json, const ::piv::wstring_view &path, const J &val, bool replace = false)
-        {
-            if (path.empty())
-                return false;
-            if (path.front() == '/')
-                return EmplaceAtPath(json, typename J::json_pointer{*PivW2U{path}}, val);
-            else
-                return EmplaceAtKey(json, to_key(path), val, replace);
-        }
-
-        template <typename J>
-        inline bool EmplaceAt(J &json, const CVolMem &path, const J &val, bool replace = false)
-        {
-            if (path.IsEmpty())
-                return false;
-            if (path.Get_S_BYTE(0) == '/')
-                return EmplaceAtPath(json, typename J::json_pointer{*PivW2U{path}}, val);
-            else
-                return EmplaceAtKey(json, to_key(path), val, replace);
         }
 
         /**

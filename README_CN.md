@@ -112,6 +112,35 @@
 
 ※我经常修改现有的代码，比如修正bug、优化效率、规范格式、修订备注等……如果功能和用法没有改变，一般不会写在更新日志里，所以每次更新改动的地方其实还是有不少的。
 
+### 📅 2024/10/24
+
+1. 新增「YYJSON值」、「YYJSON只读值」以及相关辅助类型和常量；
+2. 新增全局方法「提交到主线程」，其子语句体中的代码将发送到UI主线程执行，方便在线程中操作界面；
+3. 「进程操作类」新增「读内存数值」与「读模块数值」，相比现有的「读内存整数/长整数/小数...」，可以明确返回是否读取成功；
+4. 「简易HOOK类/多重HOOK类」的方法改为静态，请直接用类名调用方法，而无需定义类变量；
+5. Imgui 更新到 1.91.4-docking；
+6. bit7z 更新到 4.0.8，请重新替换静态库文件；
+7. 修正「正则查找类」；
+8. 修正「高并发网络访问类」；
+9. 其他优化；
+
+### 📅 2024/08/06
+
+1. 修正「网络异步访问类」；
+2. 修正「标准文本类(W/U/A)」的「加入文本」方法；
+3. 其他优化与调整；
+
+### 📅 2024/07/21
+
+1. 修正已知错误；
+
+### 📅 2024/07/19
+
+1. 适配火山 2024-07-19 版；
+2. 新增「位集合」(std::bitset)，可快捷获取和设置二进制位的值；
+3. ImGui 源码升级到 v1.90.9-docking；
+4. 修正已知错误；
+
 ### 📅 2024/07/01
 
 1. 修复「配置文件操作类」；
@@ -129,7 +158,7 @@
 
 ### 📅 2024/06/17
 
-1. 初步检查并处理代码与C++20的兼容问题；
+1. 初步检查并处理代码与 C++20 的兼容问题；
 2. 修正已知错误；
 
 ### 📅 2024/06/15
@@ -600,14 +629,14 @@
 - **[{fmt}](https://github.com/fmtlib/fmt)**  `10.2.0`  `MIT license` 格式化文本库，等同 C++20 std::format 的实现 
 - **[md4c](https://github.com/mity/md4c)** `0.4.8`  `MIT license` CommonMark 0.30 规范 + GFM 的 Markdown 解析库
 - **[simpleini](https://github.com/brofield/simpleini)** `4.20` `MIT license` 简易的 INI 配置文件读写库
-- **[simdutf](https://github.com/simdutf/simdutf)** `5.2.8` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
+- **[simdutf](https://github.com/simdutf/simdutf)** `5.6.0` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
 - **[OpenCC](https://github.com/BYVoid/OpenCC)** `1.1.6` `Apache-2.0 license` 中文简繁转换开源项目，支持词汇级别的转换、异体字转换和地区习惯用词转换
 - **[7-zip](https://www.7-zip.org/)** `24.05` `GNU LGPL license` 免费的高压缩率开源压缩软件（采用GNU LGPL协议，只使用它的 dll 文件不会传染）
 - **[bit7z](https://github.com/rikyoz/bit7z)** `4.0.7` `Mozilla Public License v2.0` 7-zip 的封装类
 - **[MinHook](https://github.com/TsudaKageyu/minhook)** `1.3.3` `BSD-2-Clause License` 极简的 x86/x64 API Hook 库
 - **[MMKV](https://github.com/Tencent/MMKV)** `1.3.5` `BSD-3-Clause License` 腾讯开源的高效键值对存储框架
 - **[xxHash](https://github.com/Cyan4973/xxHash)** `8.0.2` `BSD-2-Clause License` 速度接近 RAM 限制的高速散列算法
-- **[Dear ImGui](https://github.com/ocornut/imgui)** `1.90.8` `MIT license` 轻量级的即时渲染界面开发框架
+- **[Dear ImGui](https://github.com/ocornut/imgui)** `1.91.4-docking` `MIT license` 轻量级的即时渲染界面开发框架
 - **[GLFW](https://www.glfw.org)** `3.3.8` `zlib/libpng license` 跨平台的 OpenGL/Vulkan 桌面应用框架
 - **[glad](https://github.com/Dav1dde/glad)** `2023-04-04` `MIT License` 多语言的Vulkan/GL/GLES/EGL/GLX/WGL加载程序生成器
 - **[SDL](https://github.com/libsdl-org/SDL)** `2.26.5` `Zlib license` Simple DirectMedia Layer 是一个跨平台的多媒体开发库

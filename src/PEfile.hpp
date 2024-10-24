@@ -709,7 +709,7 @@ public:
             m_Error = 15;
             return 0;
         }
-        szModuleName->SetText(GetWideText(PIV_PTR_FORWARD(const CHAR *, m_PE->pPeBase, GetRealAddress(m_PE->pExport->Name)), CVolMem(), NULL));
+        szModuleName->SetText(PivA2Ws{PIV_PTR_FORWARD(const CHAR *, m_PE->pPeBase, GetRealAddress(m_PE->pExport->Name))}.c_str());
         DWORD *pFunctions = PIV_PTR_FORWARD(DWORD *, m_PE->pPeBase, GetRealAddress(m_PE->pExport->AddressOfFunctions));
         DWORD *pNames = PIV_PTR_FORWARD(DWORD *, m_PE->pPeBase, GetRealAddress(m_PE->pExport->AddressOfNames));
         WORD *pOrdinals = PIV_PTR_FORWARD(WORD *, m_PE->pPeBase, GetRealAddress(m_PE->pExport->AddressOfNameOrdinals));
@@ -721,7 +721,7 @@ public:
         }
         for (DWORD i = 0; i < m_PE->pExport->NumberOfNames; i++)
         {
-            vecFunName->at(i).SetText(GetWideText(PIV_PTR_FORWARD(const CHAR *, m_PE->pPeBase, GetRealAddress(pNames[i])), CVolMem(), NULL));
+            vecFunName->at(i).SetText(PivA2Ws{PIV_PTR_FORWARD(const CHAR *, m_PE->pPeBase, GetRealAddress(pNames[i]))}.c_str());
         }
         m_Error = 0;
         return m_PE->pExport->NumberOfFunctions;
@@ -753,7 +753,7 @@ public:
         DWORD dwDiff = dwThunkSize == 4 ? 1 : 2;
         while (pImport->Name) // 历遍导入表
         {
-            vecModuleName->push_back(CVolString(GetWideText(PIV_PTR_FORWARD(const CHAR *, m_PE->pPeBase, GetRealAddress(pImport->Name)), CVolMem(), NULL)));
+            vecModuleName->emplace_back(PivA2Ws{PIV_PTR_FORWARD(const CHAR *, m_PE->pPeBase, GetRealAddress(pImport->Name))}.c_str());
             PDWORD dwINT_Thunk = PIV_PTR_FORWARD(PDWORD, m_PE->pPeBase, GetRealAddress(pImport->OriginalFirstThunk));
             PDWORD dwIAT_Thunk = PIV_PTR_FORWARD(PDWORD, m_PE->pPeBase, GetRealAddress(pImport->FirstThunk));
             PDWORD dwThunk = pImport->OriginalFirstThunk ? dwINT_Thunk : dwIAT_Thunk;
@@ -789,7 +789,7 @@ public:
                     if (pByName)
                     {
                         dwOrdinal = pByName->Hint;
-                        szName.SetText(GetWideText(pByName->Name, CVolMem(), NULL));
+                        szName.SetText(PivA2Ws{pByName->Name}.c_str());
                     }
                 }
                 else // PE运行时,FirstThunk指向的地址被替换为真实的函数地址(VA)
@@ -814,7 +814,7 @@ public:
                         if (pByName)
                         {
                             dwOrdinal = pByName->Hint;
-                            szName.SetText(GetWideText(pByName->Name, CVolMem(), NULL));
+                            szName.SetText(PivA2Ws{pByName->Name}.c_str());
                         }
                     }
                 }
@@ -1003,7 +1003,7 @@ protected:
         while (pImport->Name != 0)
         {
             PDWORD pRealThunk = PIV_PTR_FORWARD(PDWORD, m_PE->pPeBase, pImport->FirstThunk);
-            Nt.RtlInitUnicodeString(&ModuleFileName, GetWideText(PIV_PTR_FORWARD(LPCSTR, m_PE->pPeBase, pImport->Name), buffer, NULL));
+            Nt.RtlInitUnicodeString(&ModuleFileName, PivA2Ws{PIV_PTR_FORWARD(LPCSTR, m_PE->pPeBase, pImport->Name)}.c_str());
             if (NT_SUCCESS(Nt.LdrLoadDll(NULL, 0, &ModuleFileName, &hModule)))
             {
                 vecHmodule->push_back(hModule);

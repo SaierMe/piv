@@ -155,7 +155,7 @@ namespace piv
         mmkvEvent(mmkvEvent &&) = delete;
         mmkvEvent &operator=(const mmkvEvent &) = delete;
         mmkvEvent &operator=(mmkvEvent &&) = delete;
-        
+
         void *userdate = nullptr;
 
     public:
@@ -204,7 +204,7 @@ public:
      * @param expectedCapacity 预期容量
      * @return
      */
-    int32_t OpenMMKV(const wchar_t *mmapID, const int32_t &mode, const wchar_t *cryptKey, const wchar_t *rootPath, size_t expectedCapacity = 0)
+    int32_t OpenMMKV(const wchar_t *mmapID, int32_t mode, const wchar_t *cryptKey, const wchar_t *rootPath, size_t expectedCapacity = 0)
     {
         Close();
         if (MMKV::getRootDir().empty() == true)
@@ -243,7 +243,7 @@ public:
      */
     inline CWString GetMmapID()
     {
-        return m_MMKV ? PivU2Ws{m_MMKV->mmapID()}.cref() : _CT("");
+        return m_MMKV ? PivU2Ws{m_MMKV->mmapID()}.cref() : CWString(L"");
     }
 
     /**
@@ -261,7 +261,7 @@ public:
      */
     inline CWString GetCryptKey()
     {
-        return m_MMKV ? PivU2Ws{m_MMKV->cryptKey()}.cref() : _CT("");
+        return m_MMKV ? PivU2Ws{m_MMKV->cryptKey()}.cref() : CWString(L"");
     }
 
     /**
@@ -379,7 +379,7 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline BOOL GetBool(const KeyT &key, const BOOL &defaultValue, bool *hasValue)
+    inline BOOL GetBool(const KeyT &key, BOOL defaultValue, bool *hasValue)
     {
         return m_MMKV ? m_MMKV->getBool(*PivAny2Us{key}, defaultValue ? true : false, hasValue) : defaultValue;
     }
@@ -392,7 +392,7 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline int32_t GetInt32(const KeyT &key, const int32_t &defaultValue, bool *hasValue)
+    inline int32_t GetInt32(const KeyT &key, int32_t defaultValue, bool *hasValue)
     {
         return m_MMKV ? m_MMKV->getInt32(*PivAny2Us{key}, defaultValue, hasValue) : defaultValue;
     }
@@ -405,9 +405,9 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline int64_t GetInt64(const KeyT &key, const int64_t &defaultValue, bool *hasValue)
+    inline int64_t GetInt64(const KeyT &key, int64_t defaultValue, bool *hasValue)
     {
-        return m_MMKV ? m_MMKV->getInt64(*ivAny2Us{key}, defaultValue, hasValue) : defaultValue;
+        return m_MMKV ? m_MMKV->getInt64(*PivAny2Us{key}, defaultValue, hasValue) : defaultValue;
     }
 
     /**
@@ -418,7 +418,7 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline double GetDouble(const KeyT &key, const double &defaultValue, bool *hasValue)
+    inline double GetDouble(const KeyT &key, double defaultValue, bool *hasValue)
     {
         return m_MMKV ? m_MMKV->getDouble(*PivAny2Us{key}, defaultValue, hasValue) : defaultValue;
     }
@@ -431,7 +431,7 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline float GetFloat(const KeyT &key, const float &defaultValue, bool *hasValue)
+    inline float GetFloat(const KeyT &key, float defaultValue, bool *hasValue)
     {
         return m_MMKV ? m_MMKV->getFloat(*PivAny2Us{key}, defaultValue, hasValue) : defaultValue;
     }
@@ -569,7 +569,7 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline ptrdiff_t GetValueSize(const KeyT &key, const bool &actualSize)
+    inline ptrdiff_t GetValueSize(const KeyT &key, bool actualSize)
     {
         return m_MMKV ? static_cast<ptrdiff_t>(m_MMKV->getValueSize(*PivAny2Us{key}, actualSize)) : 0;
     }

@@ -84,7 +84,7 @@ namespace piv
 
         // 取基本值
         template <typename R, typename K>
-        R GetAs(::toml::table &tbl, const K &key)
+        R GetAs(const ::toml::table &tbl, const K &key)
         {
             auto val = tbl.get_as<R>(*PivS2V{key});
             if (val)
@@ -94,22 +94,40 @@ namespace piv
 
         // 取键值表
         template <typename K>
-        ::toml::table &GetTable(::toml::table &tbl, const K &key, ::toml::table &def_val = ::toml::table{})
+        ::toml::table &GetTable(::toml::table &tbl, const K &key, ::toml::table &def_val)
+        {
+            auto val = tbl.get_as<::toml::table>(*PivS2V{key});
+            if (val)
+                return const_cast<::toml::table &>(*val);
+            return def_val;
+        }
+
+        template <typename K>
+        auto GetTable(::toml::table &tbl, const K &key, ::toml::table &&def_val = ::toml::table{})
         {
             auto val = tbl.get_as<::toml::table>(*PivS2V{key});
             if (val)
                 return *val;
-            return def_val;
+            return std::forward<::toml::table &&>(def_val);
         }
 
         // 取表数组
         template <typename K>
-        ::toml::array &GetArr(::toml::table &tbl, const K &key, ::toml::array &def_val = ::toml::array{})
+        ::toml::array &GetArr(::toml::table &tbl, const K &key, ::toml::array &def_val)
         {
             auto val = tbl.get_as<::toml::array>(*PivS2V{key});
             if (val)
                 return *val;
             return def_val;
+        }
+
+        template <typename K>
+        auto GetArr(::toml::table &tbl, const K &key, ::toml::array &&def_val = ::toml::array{})
+        {
+            auto val = tbl.get_as<::toml::array>(*PivS2V{key});
+            if (val)
+                return *val;
+            return std::forward<::toml::array &&>(def_val);
         }
     }
 }

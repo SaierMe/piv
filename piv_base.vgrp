@@ -36,4 +36,5 @@ file
     name = "p_VMProtect.wsv"
     name = "p_Windows.wsv"
     name = "p_WinHTTP.wsv"
+    name = "p_yyjson.wsv"
 }

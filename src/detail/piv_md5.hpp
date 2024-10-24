@@ -251,30 +251,42 @@ namespace piv
             memset(&ctx, 0, sizeof(ctx));
         }
 
-        CVolString &Final(CVolString &str = CVolString{}, bool upper = true)
+        CWString &Final(CWString &str, bool upper = true)
         {
             unsigned char out[16];
             Final(out);
             str.Empty();
             return piv::encoding::value_to_hex(out, str, upper);
         }
-        std::string &Final(std::string &str = std::string{}, bool upper = true)
+    
+        CWString &&Final(CWString &&str = CWString{}, bool upper = true)
+        {
+            unsigned char out[16];
+            Final(out);
+            str.Empty();
+            return std::forward<CWString &&>(piv::encoding::value_to_hex(out, str, upper));
+        }
+    
+        template <typename CharT>
+        std::basic_string<CharT> &Final(std::basic_string<CharT> &str, bool upper = true)
         {
             unsigned char out[16];
             Final(out);
             str.clear();
             return piv::encoding::value_to_hex(out, str, upper);
         }
-        std::wstring &Final(std::wstring &str = std::wstring{}, bool upper = true)
+
+        template <typename CharT>
+        std::basic_string<CharT> &&Final(std::basic_string<CharT> &&str = std::basic_string<CharT>{}, bool upper = true)
         {
             unsigned char out[16];
             Final(out);
             str.clear();
-            return piv::encoding::value_to_hex(out, str, upper);
+            return std::forward<std::basic_string<CharT> &&>(piv::encoding::value_to_hex(out, str, upper));
         }
     };
 
-    static CVolString GetFileMd5(FILE *file, bool upper, int64_t off, uint64_t len)
+    static CWString GetFileMd5(FILE *file, bool upper, int64_t off, uint64_t len)
     {
         MD5Checksum md5;
         char buff[65536];
@@ -291,14 +303,14 @@ namespace piv
             md5.Update(buff, rsize);
             len -= rsize;
         }
-        return md5.Final(CVolString{}, upper);
+        return md5.Final(CWString{}, upper);
     }
 
-    static CVolString GetFileMd5(const wchar_t *filename, bool upper, int64_t off, uint64_t len)
+    static CWString GetFileMd5(const wchar_t *filename, bool upper, int64_t off, uint64_t len)
     {
         FILE *file = NULL;
         file = _wfopen(filename, L"rb");
-        CVolString res;
+        CWString res;
         if (file == NULL)
             return res;
         res = GetFileMd5(file, upper, off, len);
@@ -306,19 +318,19 @@ namespace piv
         return res;
     }
 
-    static CVolString GetDataMd5(const void *data, size_t len, bool upper)
+    static CWString GetDataMd5(const void *data, size_t len, bool upper)
     {
         MD5Checksum md5;
         md5.Update(data, len);
-        return md5.Final(CVolString{}, upper);
+        return md5.Final(CWString{}, upper);
     }
 
-    static CVolString GetDataMd5(CVolMem &data, bool upper)
+    static CWString GetDataMd5(CVolMem &data, bool upper)
     {
         return GetDataMd5(data.GetPtr(), static_cast<size_t>(data.GetSize()), upper);
     }
 
-    static CVolString GetDataMd5(int32_t resId, bool upper)
+    static CWString GetDataMd5(int32_t resId, bool upper)
     {
         if (resId == 0)
             return GetDataMd5(nullptr, 0, upper);
@@ -331,14 +343,14 @@ namespace piv
             return GetDataMd5(nullptr, 0, upper);
         MD5Checksum md5;
         md5.Update(::LockResource(resdata), ::SizeofResource(hModule, hSrc));
-        return md5.Final(CVolString{}, upper);
+        return md5.Final(CWString{}, upper);
     }
 
     /* Generate shorter md5sum by something like base62 instead of base16 or base10. 0~61 are represented by 0-9a-zA-Z */
-    static CVolString GetDataMd5sum6(const void *data, size_t len)
+    static CWString GetDataMd5sum6(const void *data, size_t len)
     {
         static const char *tbl = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        CVolString res;
+        CWString res;
         unsigned char out[16];
         MD5Checksum md5;
         md5.Update(data, len);
@@ -350,31 +362,57 @@ namespace piv
         return res;
     }
 
-    static CVolString GetDataMd5sum6(CVolMem &data)
+    static CWString GetDataMd5sum6(CVolMem &data)
     {
         return GetDataMd5sum6(data.GetPtr(), static_cast<size_t>(data.GetSize()));
     }
 
     template <typename CharT>
-    std::basic_string<CharT> &GetStringMd5(const std::basic_string<CharT> &data, bool upper = true, std::basic_string<CharT> &ret = std::basic_string<CharT>{})
+    std::basic_string<CharT> &GetStringMd5(const std::basic_string<CharT> &data, bool upper, std::basic_string<CharT> &ret)
     {
         MD5Checksum md5;
         md5.Update(data.data(), data.size() * sizeof(CharT));
         return md5.Final(ret, upper);
     }
+
     template <typename CharT>
-    std::basic_string<CharT> &GetStringMd5(const CharT *data, size_t len, bool upper = true, std::basic_string<CharT> &ret = std::basic_string<CharT>{})
+    std::basic_string<CharT> &GetStringMd5(const CharT *data, size_t len, bool upper, std::basic_string<CharT> &ret)
     {
         MD5Checksum md5;
         md5.Update(data, len);
         return md5.Final(ret, upper);
     }
+
     template <typename CharT>
-    std::basic_string<CharT> &GetStringMd5(const piv::basic_string_view<CharT> &data, bool upper = true, std::basic_string<CharT> &ret = std::basic_string<CharT>{})
+    std::basic_string<CharT> &GetStringMd5(const piv::basic_string_view<CharT> &data, bool upper, std::basic_string<CharT> &ret)
     {
         MD5Checksum md5;
         md5.Update(data.data(), data.size() * sizeof(CharT));
         return md5.Final(ret, upper);
+    }
+
+    template <typename CharT>
+    std::basic_string<CharT> &&GetStringMd5(const std::basic_string<CharT> &data, bool upper = true, std::basic_string<CharT> &&ret = std::basic_string<CharT>{})
+    {
+        MD5Checksum md5;
+        md5.Update(data.data(), data.size() * sizeof(CharT));
+        return std::forward<std::basic_string<CharT> &&>(md5.Final(ret, upper));
+    }
+
+    template <typename CharT>
+    std::basic_string<CharT> &&GetStringMd5(const CharT *data, size_t len, bool upper = true, std::basic_string<CharT> &&ret = std::basic_string<CharT>{})
+    {
+        MD5Checksum md5;
+        md5.Update(data, len);
+        return std::forward<std::basic_string<CharT> &&>(md5.Final(ret, upper));
+    }
+    
+    template <typename CharT>
+    std::basic_string<CharT> &&GetStringMd5(const piv::basic_string_view<CharT> &data, bool upper = true, std::basic_string<CharT> &&ret = std::basic_string<CharT>{})
+    {
+        MD5Checksum md5;
+        md5.Update(data.data(), data.size() * sizeof(CharT));
+        return std::forward<std::basic_string<CharT> &&>(md5.Final(ret, upper));
     }
 
 } // namespace piv

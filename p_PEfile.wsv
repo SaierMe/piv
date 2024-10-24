@@ -2,7 +2,7 @@
 
 包 火山.PIV基础类 <注释 = "PE文件解析与操作" 注释 = "https://github.com/SaierMe/piv" @视窗.外部头文件 = "src\\PEfile.hpp">
 
-类 PE文件操作类 <公开 注释 = "解析可执行文件的各种数据" @文档 = "category = \"PE文件操作\"">
+类 PE文件操作类 <公开 注释 = "解析可执行文件的各种数据" 折叠 @文档 = "category = \"PE文件操作\"">
 {
 
     # @ @m<DECLARE_REF_OBJECT_CLASS_WITH_DATA> (PivPeFile)
@@ -202,7 +202,7 @@
 
     # ---
 
-    方法 取导入表 <公开 类型 = 整数 注释 = "获取可执行文件的模块导入表信息." 返回值注释 = "成功返回导入的模块数量,失败返回0." @禁止流程检查 = 真>
+    方法 取导入表 <公开 类型 = 整数 注释 = "获取可执行文件的模块导入表信息." 返回值注释 = "成功返回导入的模块数量,失败返回0." 折叠 @禁止流程检查 = 真>
     参数 导入表 <类型 = 导入表数组类 注释 = "成功在此返回导入表信息">
     {
         @ @<导入表>.data().clear();
@@ -224,7 +224,7 @@
         @ return (INT)@<导入表>.data().size();
     }
 
-    方法 取导出表 <公开 类型 = 整数 注释 = "获取DLL文件的函数导出表信息,EXE文件没有导出表." 返回值注释 = "成功返回导出的函数数量,失败返回0." @禁止流程检查 = 真>
+    方法 取导出表 <公开 类型 = 整数 注释 = "获取DLL文件的函数导出表信息,EXE文件没有导出表." 返回值注释 = "成功返回导出的函数数量,失败返回0." 折叠 @禁止流程检查 = 真>
     参数 导出表 <类型 = 导出表类 注释 = "成功在此返回导出表信息">
     {
         @ @<导出表>.ResetToNullObject ();
@@ -291,7 +291,7 @@
     方法 函数名取地址 <公开 类型 = 变整数 注释 = "获取DLL模块中指定名称的函数地址(VA)." 返回值注释 = "成功返回函数地址,失败返回0." 折叠 @嵌入式方法 = "">
     参数 函数名称 <类型 = 文本型 注释 = "所欲取地址的函数名称">
     {
-        @ (INT_P)@sn<this>.data().MemGetProcAddress(GetMbsText(@<函数名称>.GetText(), CVolMem(), NULL))
+        @ (INT_P)@sn<this>.data().MemGetProcAddress(PivW2A{@<函数名称>}.c_str())
     }
 
     方法 函数序号取地址 <公开 类型 = 变整数 注释 = "获取DLL模块中指定序号的函数地址(VA)." 返回值注释 = "成功返回函数地址,失败返回0." 折叠 @嵌入式方法 = "">
@@ -330,8 +330,8 @@
 
 # ------
 
-类 IMAGE_DOS_HEADER <公开 基础类 = PIV结构模板 注释 = "PE文件DOS头,64字节" 折叠 @文档 = "category = \"PE文件操作.辅助类\""
-        @别名 = "IMAGE_DOS_HEADER" @模板实现类 = "IMAGE_DOS_HEADER">
+类 IMAGE_DOS_HEADER <公开 基础类 = PIV结构模板 注释 = "PE文件DOS头,64字节" 折叠 折叠2 @文档 = "category = \"PE文件操作.辅助类\""
+        @别名 = "IMAGE_DOS_HEADER" @别名类型 = 本地结构 @模板实现类 = "IMAGE_DOS_HEADER">
 {
     变量 e_magic <公开 类型 = 短整数 注释 = "DOS可执行文件头标记,必定为\"MZ\"(0x5A4D 4Dh 5Ah/23117)IMAGE_DOS_SIGNATURE"
             @输出名 = "e_magic">
@@ -375,8 +375,8 @@
 }
 
 类 IMAGE_FILE_HEADER <公开 基础类 = PIV结构模板 注释 = "PE文件逻辑分布信息,20字节."
-        注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_file_header" 折叠
-        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_FILE_HEADER" @模板实现类 = "IMAGE_FILE_HEADER">
+        注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_file_header" 折叠 折叠2
+        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_FILE_HEADER" @别名类型 = 本地结构 @模板实现类 = "IMAGE_FILE_HEADER">
 {
     变量 Machine <公开 类型 = 短整数 注释 = "  可执行文件的目标CPU类型" 注释 = "  IMAGE_FILE_MACHINE_I386   0x014c  x86"
             注释 = "  IMAGE_FILE_MACHINE_IA64   0x0200  Intel Itanium"
@@ -409,9 +409,8 @@
     }
 }
 
-类 IMAGE_OPTIONAL_HEADER32 <公开 基础类 = PIV结构模板 注释 = "32位PE文件可选头"
-        注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_optional_header32" 折叠
-        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_OPTIONAL_HEADER32" @模板实现类 = "IMAGE_OPTIONAL_HEADER32">
+类 IMAGE_OPTIONAL_HEADER32 <公开 基础类 = PIV结构模板 注释 = "32位PE文件可选头" 折叠 折叠2 @文档 = "category = \"PE文件操作.辅助类\""
+        @别名 = "IMAGE_OPTIONAL_HEADER32" @别名类型 = 本地结构 @模板实现类 = "IMAGE_OPTIONAL_HEADER32">
 {
     变量 Magic <公开 类型 = 短整数 注释 = "  映像文件类型" 注释 = "  IMAGE_NT_OPTIONAL_HDR32_MAGIC  0x10b  32位程序"
             注释 = "  IMAGE_NT_OPTIONAL_HDR64_MAGIC  0x20b  64位程序"
@@ -490,9 +489,9 @@
     }
 }
 
-类 IMAGE_OPTIONAL_HEADER64 <公开 基础类 = PIV结构模板 注释 = "64位PE文件可选头"
-        注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_optional_header64" 折叠
-        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_OPTIONAL_HEADER64" @模板实现类 = "IMAGE_OPTIONAL_HEADER64">
+类 IMAGE_OPTIONAL_HEADER64 <公开 基础类 = PIV结构模板 注释 = "64位PE文件可选头" 注释 = "" 折叠 折叠2
+        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_OPTIONAL_HEADER64" @别名类型 = 本地结构
+        @模板实现类 = "IMAGE_OPTIONAL_HEADER64">
 {
     变量 Magic <公开 类型 = 短整数 注释 = "  映像文件类型" 注释 = "  IMAGE_NT_OPTIONAL_HDR32_MAGIC  0x10b  32位程序"
             注释 = "  IMAGE_NT_OPTIONAL_HDR64_MAGIC  0x20b  64位程序"
@@ -571,9 +570,9 @@
     }
 }
 
-类 IMAGE_NT_HEADERS32 <公开 基础类 = PIV结构模板 注释 = "32位PE文件NT头"
-        注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_nt_headers32" 折叠
-        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_NT_HEADERS32" @模板实现类 = "IMAGE_NT_HEADERS32">
+类 IMAGE_NT_HEADERS32 <公开 基础类 = PIV结构模板 注释 = "32位PE文件NT头" 注释 = "" 折叠 折叠2
+        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_NT_HEADERS32" @别名类型 = 本地结构
+        @模板实现类 = "IMAGE_NT_HEADERS32">
 {
     变量 Signature <公开 类型 = 整数 注释 = "PE文件的标识,固定为\"PE\\0\\0\"{50,45,00,00},整数为 0x4550/17744"
             注释 = "  IMAGE_DOS_SIGNATURE    0x5A4D      MZ" 注释 = "  IMAGE_OS2_SIGNATURE    0x454E      NE"
@@ -595,9 +594,8 @@
     }
 }
 
-类 IMAGE_NT_HEADERS64 <公开 基础类 = PIV结构模板 注释 = "64位PE文件NT头"
-        注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_nt_headers64" 折叠
-        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_NT_HEADERS64" @模板实现类 = "IMAGE_NT_HEADERS64">
+类 IMAGE_NT_HEADERS64 <公开 基础类 = PIV结构模板 注释 = "64位PE文件NT头" 折叠 折叠2 @文档 = "category = \"PE文件操作.辅助类\""
+        @别名 = "IMAGE_NT_HEADERS64" @别名类型 = 本地结构 @模板实现类 = "IMAGE_NT_HEADERS64">
 {
     变量 Signature <公开 类型 = 整数 注释 = "  PE文件的标识,固定为\"PE\\0\\0\"{50,45,00,00},整数为 0x4550/17744"
             注释 = "  IMAGE_DOS_SIGNATURE    0x5A4D      MZ" 注释 = "  IMAGE_OS2_SIGNATURE    0x454E      NE"
@@ -619,9 +617,8 @@
     }
 }
 
-类 IMAGE_DATA_DIRECTORY <公开 基础类 = PIV结构模板 注释 = "PE文件数据目录"
-        注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_data_directory" 折叠
-        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_DATA_DIRECTORY" @模板实现类 = "IMAGE_DATA_DIRECTORY">
+类 IMAGE_DATA_DIRECTORY <公开 基础类 = PIV结构模板 注释 = "PE文件数据目录" 折叠 折叠2 @文档 = "category = \"PE文件操作.辅助类\""
+        @别名 = "IMAGE_DATA_DIRECTORY" @别名类型 = 本地结构 @模板实现类 = "IMAGE_DATA_DIRECTORY">
 {
     变量 VirtualAddress <公开 类型 = 整数 注释 = "指向的数据结构的虚拟地址(RAV)" 折叠 @输出名 = "VirtualAddress">
     变量 Size <公开 类型 = 整数 注释 = "数据结构的大小" @输出名 = "Size">
@@ -633,9 +630,8 @@
     }
 }
 
-类 IMAGE_SECTION_HEADER <公开 基础类 = PIV结构模板 注释 = "PE文件的节区表"
-        注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_section_header" 折叠
-        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_SECTION_HEADER" @模板实现类 = "IMAGE_SECTION_HEADER">
+类 IMAGE_SECTION_HEADER <公开 基础类 = PIV结构模板 注释 = "PE文件的节区表" 折叠 折叠2 @文档 = "category = \"PE文件操作.辅助类\""
+        @别名 = "IMAGE_SECTION_HEADER" @别名类型 = 本地结构 @模板实现类 = "IMAGE_SECTION_HEADER">
 {
     变量 Name <公开 类型 = "字节 [8]" 注释 = "节名称" @输出名 = "Name">
     变量 PhysicalAddress <公开 类型 = 整数 注释 = "也可以是VirtualSize,在可执行文件中,它是内容的大小.在目标文件中,它是内容重定位到的地址."
@@ -667,8 +663,9 @@
 类 节区表数组类 <公开 基础类 = PIV数组模板 注释 = "节区表数组" @文档 = "category = \"PE文件操作.辅助类\""
         @模板实现类 = "IMAGE_SECTION_HEADER">
 
-类 IMAGE_IMPORT_DESCRIPTOR <公开 基础类 = PIV结构模板 注释 = "PE文件的导入表描述符结构体" 折叠 @文档 = "category = \"PE文件操作.辅助类\""
-        @别名 = "IMAGE_IMPORT_DESCRIPTOR" @模板实现类 = "IMAGE_IMPORT_DESCRIPTOR">
+类 IMAGE_IMPORT_DESCRIPTOR <公开 基础类 = PIV结构模板 注释 = "PE文件的导入表描述符结构体" 折叠 折叠2
+        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_IMPORT_DESCRIPTOR" @别名类型 = 本地结构
+        @模板实现类 = "IMAGE_IMPORT_DESCRIPTOR">
 {
     变量 Characteristics <公开 类型 = 整数 注释 = "如果是数组的最后一项,则为0" @输出名 = "Characteristics">
     变量 OriginalFirstThunk <公开 类型 = 整数 注释 = "原始未绑定IAT(PIMAGE_THUNK_DATA)的相对虚拟地址"
@@ -694,8 +691,8 @@
 
 类 导入表描述符数组类 <公开 基础类 = PIV数组模板 @文档 = "category = \"PE文件操作.辅助类\"" @模板实现类 = "IMAGE_IMPORT_DESCRIPTOR">
 
-类 IMAGE_EXPORT_DIRECTORY <公开 基础类 = PIV结构模板 注释 = "PE文件的导出表结构体" 折叠 @文档 = "category = \"PE文件操作.辅助类\""
-        @别名 = "IMAGE_EXPORT_DIRECTORY" @模板实现类 = "IMAGE_EXPORT_DIRECTORY">
+类 IMAGE_EXPORT_DIRECTORY <公开 基础类 = PIV结构模板 注释 = "PE文件的导出表结构体" 折叠 折叠2 @文档 = "category = \"PE文件操作.辅助类\""
+        @别名 = "IMAGE_EXPORT_DIRECTORY" @别名类型 = 本地结构 @模板实现类 = "IMAGE_EXPORT_DIRECTORY">
 {
     变量 Characteristics <公开 类型 = 整数 注释 = "未使用,总为0" @输出名 = "Characteristics">
     变量 TimeDateStamp <公开 类型 = 整数 注释 = "文件创建时间戳" @输出名 = "TimeDateStamp">

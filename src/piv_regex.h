@@ -2173,10 +2173,10 @@ __do_next_opt:
 			return c - '0';
 		}
 		if (c>='a' && c<='f') {
-			return c - 'a';
+			return c - 'a' + 10;
 		}
 		if (c>='A' && c<='F') {
-			return c - 'A';
+			return c - 'A' + 10;
 		}
 		return -1;
 	}

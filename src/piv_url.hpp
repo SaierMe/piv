@@ -59,6 +59,7 @@ public:
         fragment = other.fragment;
         params = other.params;
     }
+
     PivUrlParser(PivUrlParser &&other) noexcept
     {
         urlstr = std::move(other.urlstr);
@@ -86,19 +87,23 @@ public:
     {
         Parse(urlAdress, storeBuf, simple, count);
     }
+
     PivUrlParser(const piv::basic_string_view<CharT> &urlAdress, bool storeBuf = false, bool simple = false)
     {
         Parse(urlAdress, storeBuf, simple);
     }
+
     PivUrlParser(const std::basic_string<CharT> &urlAdress, bool storeBuf = false, bool simple = false)
     {
         Parse(urlAdress, storeBuf, simple);
     }
+
     PivUrlParser(const CVolMem &urlAdress, bool storeBuf = false, bool simple = false)
     {
         Parse(urlAdress, storeBuf, simple);
     }
-    PivUrlParser(const CVolString &urlAdress, bool storeBuf = false, bool simple = false)
+
+    PivUrlParser(const CWString &urlAdress, bool storeBuf = false, bool simple = false)
     {
         Parse(urlAdress, storeBuf, simple);
     }
@@ -124,6 +129,7 @@ public:
         params = other.params;
         return *this;
     }
+
     PivUrlParser &operator=(PivUrlParser &&other) noexcept
     {
         urlstr = std::move(other.urlstr);
@@ -148,19 +154,19 @@ public:
     {
         urlstr.clear();
         port_str.clear();
-        url.swap(piv::basic_string_view<CharT>{});
-        scheme.swap(piv::basic_string_view<CharT>{});
-        user.swap(piv::basic_string_view<CharT>{});
-        password.swap(piv::basic_string_view<CharT>{});
-        host.swap(piv::basic_string_view<CharT>{});
-        port.swap(piv::basic_string_view<CharT>{});
-        path.swap(piv::basic_string_view<CharT>{});
-        query.swap(piv::basic_string_view<CharT>{});
-        fragment.swap(piv::basic_string_view<CharT>{});
+        url = std::move(piv::basic_string_view<CharT>{});
+        scheme = std::move(piv::basic_string_view<CharT>{});
+        user = std::move(piv::basic_string_view<CharT>{});
+        password = std::move(piv::basic_string_view<CharT>{});
+        host = std::move(piv::basic_string_view<CharT>{});
+        port = std::move(piv::basic_string_view<CharT>{});
+        path = std::move(piv::basic_string_view<CharT>{});
+        query = std::move(piv::basic_string_view<CharT>{});
+        fragment = std::move(piv::basic_string_view<CharT>{});
         params.clear();
     }
 
-    virtual void GetDumpString(CVolString &strDump, INT nMaxDumpSize) override
+    virtual void GetDumpString(CWString &strDump, INT nMaxDumpSize) override
     {
         strDump.AddFormatText(L"<URL地址解析类%s> 解析结果:\r\n1. 协议: %s\r\n2. 账户: %s\r\n3. 密码: %s\r\n4. 域名: %s\r\n5. 端口: %s\r\n6. 路径: %s\r\n7. 参数: %s\r\n8. 段落: %s\r\n",
                               (sizeof(EncodeT) == 2) ? L"W" : (sizeof(EncodeT) == 3 ? L"U" : L"A"),
@@ -328,19 +334,23 @@ public:
             params[query.substr(pos1, pos3 - pos1)] = query.substr(pos3 + 1, query.size() - pos3 - 1);
         }
     }
+
     inline void Parse(const CharT *urlAdress, bool storeBuf = false, bool simple = false, size_t count = static_cast<size_t>(-1))
     {
         Parse((count == static_cast<size_t>(-1)) ? piv::basic_string_view<CharT>{urlAdress} : piv::basic_string_view<CharT>{urlAdress, count}, storeBuf, simple);
     }
+
     inline void Parse(const std::basic_string<CharT> &urlAdress, bool storeBuf = false, bool simple = false)
     {
         Parse(piv::basic_string_view<CharT>{urlAdress}, storeBuf, simple);
     }
+
     inline void Parse(const CVolMem &urlAdress, bool storeBuf = false, bool simple = false)
     {
         Parse(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(urlAdress.GetPtr()), static_cast<size_t>(urlAdress.GetSize()) / sizeof(CharT)}, storeBuf, simple);
     }
-    inline void Parse(const CVolString &urlAdress, bool storeBuf = false, bool simple = false)
+
+    inline void Parse(const CWString &urlAdress, bool storeBuf = false, bool simple = false)
     {
         PIV_IF(sizeof(EncodeT) == 2)
         {
@@ -373,34 +383,42 @@ public:
     {
         return url;
     }
+
     inline const piv::basic_string_view<CharT> &Scheme() const noexcept
     {
         return scheme;
     }
+
     inline const piv::basic_string_view<CharT> &User() const noexcept
     {
         return user;
     }
+
     inline const piv::basic_string_view<CharT> &Password() const noexcept
     {
         return password;
     }
+
     inline const piv::basic_string_view<CharT> &Host() const noexcept
     {
         return host;
     }
+
     inline const piv::basic_string_view<CharT> &Port() const noexcept
     {
         return port;
     }
+
     inline const piv::basic_string_view<CharT> &Path() const noexcept
     {
         return path;
     }
+
     inline const piv::basic_string_view<CharT> &Query() const noexcept
     {
         return query;
     }
+
     inline const piv::basic_string_view<CharT> &Fragment() const noexcept
     {
         return fragment;
@@ -410,11 +428,11 @@ public:
      * @brief 取协议
      * @return 返回文本型
      */
-    inline CVolString GetScheme() const
+    inline CWString GetScheme() const
     {
         PIV_IF(sizeof(EncodeT) == 2)
         {
-            return CVolString(scheme.data(), scheme.size());
+            return CWString(scheme.data(), scheme.size());
         }
         PIV_ELSE_IF(sizeof(EncodeT) == 3)
         {
@@ -431,7 +449,7 @@ public:
      * @param utf8 是否为UTF-8编码
      * @return 返回文本
      */
-    inline CVolString GetUser(bool utf8 = true) const
+    inline CWString GetUser(bool utf8 = true) const
     {
         std::basic_string<CharT> str;
         if (piv::encoding::UrlDecodeNeed(user.data(), user.size()))
@@ -440,7 +458,7 @@ public:
             str.assign(user.data(), user.size());
         PIV_IF(sizeof(EncodeT) == 2)
         {
-            return CVolString(str.c_str());
+            return CWString(str.c_str());
         }
         PIV_ELSE_IF(sizeof(EncodeT) == 3)
         {
@@ -451,9 +469,10 @@ public:
             return *PivA2Ws{reinterpret_cast<const char *>(str.data()), str.size()};
         }
     }
+
     inline std::basic_string<CharT> DecodeUser(bool utf8 = true) const
     {
-        return piv::encoding::UrlStrDecode(user, utf8);
+        return piv::encoding::UrlStrDecode(user, utf8, std::basic_string<CharT>{});
     }
 
     /**
@@ -462,7 +481,7 @@ public:
      * @param utf8 是否为UTF-8编码
      * @return 返回文本
      */
-    inline CVolString GetPassword(bool utf8 = true) const
+    inline CWString GetPassword(bool utf8 = true) const
     {
         std::basic_string<CharT> str;
         if (piv::encoding::UrlDecodeNeed(password.data(), password.size()))
@@ -471,7 +490,7 @@ public:
             str.assign(password.data(), password.size());
         PIV_IF(sizeof(EncodeT) == 2)
         {
-            return CVolString(str.c_str());
+            return CWString(str.c_str());
         }
         PIV_ELSE_IF(sizeof(EncodeT) == 3)
         {
@@ -482,20 +501,21 @@ public:
             return *PivA2Ws{reinterpret_cast<const char *>(str.data()), str.size()};
         }
     }
+
     inline std::basic_string<CharT> DecodePassword(bool utf8 = true) const
     {
-        return piv::encoding::UrlStrDecode(password, utf8);
+        return piv::encoding::UrlStrDecode(password, utf8, std::basic_string<CharT>{});
     }
 
     /**
      * @brief 取域名
      * @return 返回文本型
      */
-    inline CVolString GetHost() const
+    inline CWString GetHost() const
     {
         PIV_IF(sizeof(EncodeT) == 2)
         {
-            return CVolString(host.data(), host.size());
+            return CWString(host.data(), host.size());
         }
         PIV_ELSE_IF(sizeof(EncodeT) == 3)
         {
@@ -511,11 +531,11 @@ public:
      * @brief 取路径
      * @return 返回文本型
      */
-    inline CVolString GetPath() const
+    inline CWString GetPath() const
     {
         PIV_IF(sizeof(EncodeT) == 2)
         {
-            return CVolString(path.data(), path.size());
+            return CWString(path.data(), path.size());
         }
         PIV_ELSE_IF(sizeof(EncodeT) == 3)
         {
@@ -531,11 +551,11 @@ public:
      * @brief 取端口
      * @return 返回文本型
      */
-    inline CVolString GetPort() const
+    inline CWString GetPort() const
     {
         PIV_IF(sizeof(EncodeT) == 2)
         {
-            return CVolString(port.data(), port.size());
+            return CWString(port.data(), port.size());
         }
         PIV_ELSE_IF(sizeof(EncodeT) == 3)
         {
@@ -551,11 +571,11 @@ public:
      * @brief 取参数
      * @return 返回文本型
      */
-    inline CVolString GetQuery() const
+    inline CWString GetQuery() const
     {
         PIV_IF(sizeof(EncodeT) == 2)
         {
-            return CVolString(query.data(), query.size());
+            return CWString(query.data(), query.size());
         }
         PIV_ELSE_IF(sizeof(EncodeT) == 3)
         {
@@ -571,11 +591,11 @@ public:
      * @brief 取段落
      * @return 返回文本型
      */
-    inline CVolString GetFragment() const
+    inline CWString GetFragment() const
     {
         PIV_IF(sizeof(EncodeT) == 2)
         {
-            return CVolString(fragment.data(), fragment.size());
+            return CWString(fragment.data(), fragment.size());
         }
         PIV_ELSE_IF(sizeof(EncodeT) == 3)
         {
@@ -601,23 +621,27 @@ public:
         }
         else if (piv::encoding::UrlEncodeNeed(name.data(), name.size()))
         {
-            return params[piv::basic_string_view<CharT>{piv::encoding::UrlStrEncode(name, utf8, false)}];
+            return params[piv::basic_string_view<CharT>{piv::encoding::UrlStrEncode(name, utf8, false, std::basic_string<CharT>{})}];
         }
         return piv::basic_string_view<CharT>{};
     }
+
     inline piv::basic_string_view<CharT> GetParam(const CharT *name, bool utf8 = true)
     {
         return GetParam(piv::basic_string_view<CharT>{name}, utf8);
     }
+
     inline piv::basic_string_view<CharT> GetParam(const std::basic_string<CharT> &name, bool utf8 = true)
     {
         return GetParam(piv::basic_string_view<CharT>{name.data(), name.size()}, utf8);
     }
+
     inline piv::basic_string_view<CharT> GetParam(const CVolMem &name, bool utf8 = true)
     {
         return GetParam(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(name.GetPtr()), static_cast<size_t>(name.GetSize()) / sizeof(CharT)}, utf8);
     }
-    inline piv::basic_string_view<CharT> GetParam(const CVolString &name, bool utf8 = true)
+
+    inline piv::basic_string_view<CharT> GetParam(const CWString &name, bool utf8 = true)
     {
         PIV_IF(sizeof(EncodeT) == 2)
         {
@@ -639,25 +663,16 @@ public:
      * @param utf8 是否为UTF-8编码
      * @return 返回文本型
      */
-    inline CVolString &GetParamVolStr(const piv::basic_string_view<CharT> &name, bool utf8 = true, CVolString &param = CVolString{})
+    template <typename T>
+    inline CWString &GetParamVolStr(T &&name, bool utf8, CWString &param)
     {
-        return piv::encoding::UrlStrDecode(GetParam(name, utf8), param, utf8);
+        return piv::encoding::UrlStrDecode(GetParam(name, utf8), utf8, param);
     }
-    inline CVolString GetParamVolStr(const CharT *name, bool utf8 = true, CVolString &param = CVolString{})
+
+    template <typename T>
+    inline CWString &&GetParamVolStr(T &&name, bool utf8, CWString &&param = CWString{})
     {
-        return piv::encoding::UrlStrDecode(GetParam(name, utf8), param, utf8);
-    }
-    inline CVolString GetParamVolStr(const std::basic_string<CharT> &name, bool utf8 = true, CVolString &param = CVolString{})
-    {
-        return piv::encoding::UrlStrDecode(GetParam(name, utf8), param, utf8);
-    }
-    inline CVolString GetParamVolStr(const CVolMem &name, bool utf8 = true, CVolString &param = CVolString{})
-    {
-        return piv::encoding::UrlStrDecode(GetParam(name, utf8), param, utf8);
-    }
-    inline CVolString GetParamVolStr(const CVolString &name, bool utf8 = true, CVolString &param = CVolString{})
-    {
-        return piv::encoding::UrlStrDecode(GetParam(name, utf8), param, utf8);
+        return std::forward<CWString &&>(piv::encoding::UrlStrDecode(GetParam(name, utf8), utf8, param));
     }
 
     /**
@@ -666,25 +681,10 @@ public:
      * @param utf8 是否为UTF-8编码
      * @return 返回std::basic_string
      */
-    inline std::basic_string<CharT> GetDecodeParam(const piv::basic_string_view<CharT> &name, bool utf8 = true)
+    template <typename T>
+    inline std::basic_string<CharT> GetDecodeParam(T &&name, bool utf8 = true)
     {
-        return piv::encoding::UrlStrDecode(GetParam(name, utf8), utf8);
-    }
-    inline std::basic_string<CharT> GetDecodeParam(const CharT *name, bool utf8 = true)
-    {
-        return piv::encoding::UrlStrDecode(GetParam(name, utf8), utf8);
-    }
-    inline std::basic_string<CharT> GetDecodeParam(const std::basic_string<CharT> &name, bool utf8 = true)
-    {
-        return piv::encoding::UrlStrDecode(GetParam(name, utf8), utf8);
-    }
-    inline std::basic_string<CharT> GetDecodeParam(const CVolMem &name, bool utf8 = true)
-    {
-        return piv::encoding::UrlStrDecode(GetParam(name, utf8), utf8);
-    }
-    inline std::basic_string<CharT> GetDecodeParam(const CVolString &name, bool utf8 = true)
-    {
-        return piv::encoding::UrlStrDecode(GetParam(name, utf8), utf8);
+        return piv::encoding::UrlStrDecode(GetParam(name, utf8), utf8, std::basic_string<CharT>{});
     }
 
 }; // PivUrlParser
@@ -740,7 +740,8 @@ private:
             form.AddU8Char('=');
         }
     }
-    inline void AddKey(const CVolString &key, bool utf8 = true)
+
+    inline void AddKey(const CWString &key, bool utf8 = true)
     {
         PIV_IF(sizeof(EncodeT) == 2)
         {
@@ -755,14 +756,17 @@ private:
             AddKey(reinterpret_cast<const CharT *>(PivW2A{key}.c_str()), -1, utf8);
         }
     }
+
     inline void AddKey(const CVolMem &key, bool utf8 = true)
     {
         AddKey(reinterpret_cast<const CharT *>(key.GetPtr()), static_cast<size_t>(key.GetSize()) / sizeof(CharT), utf8);
     }
+
     inline void AddKey(const std::basic_string<CharT> &key, bool utf8 = true)
     {
         AddKey(key.c_str(), -1, utf8);
     }
+
     inline void AddKey(const CharT *key, const size_t count = -1, bool utf8 = true)
     {
         AddKey((count == -1) ? piv::basic_string_view<CharT>{key} : piv::basic_string_view<CharT>{key, count}, utf8);
@@ -796,7 +800,8 @@ private:
         // 如果上面都没有返回,说明不需要URL编码
         form.Append(reinterpret_cast<const void *>(value.data()), value.size() * sizeof(CharT));
     }
-    inline void AddValue(const CVolString &value, bool utf8)
+
+    inline void AddValue(const CWString &value, bool utf8)
     {
         PIV_IF(sizeof(EncodeT) == 2)
         {
@@ -811,14 +816,17 @@ private:
             AddValue(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(PivW2A{value}.c_str())}, utf8);
         }
     }
+
     inline void AddValue(const CVolMem &value, bool utf8)
     {
         AddValue(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(value.GetPtr()), static_cast<size_t>(value.GetSize()) / sizeof(CharT)}, utf8);
     }
+
     inline void AddValue(const std::basic_string<CharT> &value, bool utf8)
     {
         AddValue(piv::basic_string_view<CharT>{value.c_str()}, utf8);
     }
+
     inline void AddValue(const CharT *value, bool utf8, size_t count = -1)
     {
         AddValue((count == static_cast<size_t>(-1)) ? piv::basic_string_view<CharT>{value} : piv::basic_string_view<CharT>{value, count}, utf8);
@@ -832,6 +840,7 @@ public:
     {
         form.SetMemAlignSize(2048);
     }
+
     ~PivFormCreater() {}
 
     /**
@@ -842,6 +851,7 @@ public:
     {
         form = other.form;
     }
+
     PivFormCreater(PivFormCreater &&other) noexcept
     {
         form = std::move(other.form);
@@ -857,6 +867,7 @@ public:
         form = other.form;
         return *this;
     }
+
     PivFormCreater &operator=(PivFormCreater &&other) noexcept
     {
         form = std::move(other.form);
@@ -868,7 +879,7 @@ public:
      * @param strDump 展示内容
      * @param nMaxDumpSize 最大展示数据尺寸
      */
-    virtual void GetDumpString(CVolString &strDump, INT nMaxDumpSize) override
+    virtual void GetDumpString(CWString &strDump, INT nMaxDumpSize) override
     {
         this->GetStr(strDump);
     }
@@ -964,11 +975,11 @@ public:
      * @brief 到文本型
      * @return 返回火山文本型
      */
-    inline CVolString ToStr() const
+    inline CWString ToStr() const
     {
         PIV_IF(sizeof(EncodeT) == 2)
         {
-            return CVolString(reinterpret_cast<const wchar_t *>(form.GetPtr()), form.GetSize() / 2);
+            return CWString(reinterpret_cast<const wchar_t *>(form.GetPtr()), form.GetSize() / 2);
         }
         PIV_ELSE_IF(sizeof(EncodeT) == 3)
         {
@@ -984,7 +995,7 @@ public:
      * @brief 取文本
      * @param s 用来获取数据的文本变量
      */
-    inline void GetStr(CVolString &s) const
+    inline void GetStr(CWString &s) const
     {
         PIV_IF(sizeof(EncodeT) == 2)
         {
@@ -1031,6 +1042,7 @@ public:
         form_str = other.form_str;
         params = other.params;
     }
+
     PivFormParser(PivFormParser &&other) noexcept
     {
         form = std::move(other.form);
@@ -1048,19 +1060,23 @@ public:
     {
         Parse(s, storeBuf, count);
     }
+
     PivFormParser(const piv::basic_string_view<CharT> &s, bool storeBuf = false)
     {
         Parse(s, storeBuf);
     }
+
     PivFormParser(const std::basic_string<CharT> &s, bool storeBuf = false)
     {
         Parse(s, storeBuf);
     }
+
     PivFormParser(const CVolMem &s, bool storeBuf = false)
     {
         Parse(s, storeBuf);
     }
-    PivFormParser(const CVolString &s, bool storeBuf = false)
+
+    PivFormParser(const CWString &s, bool storeBuf = false)
     {
         Parse(s, storeBuf);
     }
@@ -1077,6 +1093,7 @@ public:
         params = other.params;
         return *this;
     }
+
     PivFormParser &operator=(PivFormParser &&other) noexcept
     {
         form = std::move(other.form);
@@ -1090,7 +1107,7 @@ public:
      * @param strDump 展示内容
      * @param nMaxDumpSize 最大展示数据尺寸
      */
-    virtual void GetDumpString(CVolString &strDump, INT nMaxDumpSize) override
+    virtual void GetDumpString(CWString &strDump, INT nMaxDumpSize) override
     {
         strDump.AddFormatLine(L"<表单解析类%s> 总共 %d 个键值对:", (sizeof(EncodeT) == 2) ? L"W" : (sizeof(EncodeT) == 3 ? L"U" : L"A"), (int32_t)params.size());
         int32_t i = 0;
@@ -1152,7 +1169,7 @@ public:
     inline void Clear()
     {
         form_str.clear();
-        form.swap(piv::basic_string_view<CharT>{});
+        form = std::move(piv::basic_string_view<CharT>{});
         params.clear();
     }
 
@@ -1188,7 +1205,7 @@ public:
         if (form.front() == '{')
         {
             form_str.clear();
-            form.swap(piv::basic_string_view<CharT>{});
+            form = std::move(piv::basic_string_view<CharT>{});
             return false;
         }
         size_t pos1 = 0, pos2 = 0, pos3 = 0;
@@ -1212,7 +1229,7 @@ public:
         if (params.empty())
         {
             form_str.clear();
-            form.swap(piv::basic_string_view<CharT>{});
+            form = std::move(piv::basic_string_view<CharT>{});
             return false;
         }
         else
@@ -1220,19 +1237,23 @@ public:
             return true;
         }
     }
+
     inline bool Parse(const CharT *s, bool storeBuf = false, size_t count = static_cast<size_t>(-1))
     {
         return Parse((count == static_cast<size_t>(-1)) ? piv::basic_string_view<CharT>{s} : piv::basic_string_view<CharT>{s, count}, storeBuf);
     }
+
     inline bool Parse(const std::basic_string<CharT> &s, bool storeBuf = false)
     {
         return Parse(piv::basic_string_view<CharT>{s}, storeBuf);
     }
+
     inline bool Parse(const CVolMem &s, bool storeBuf = false)
     {
         return Parse(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(s.GetPtr()), static_cast<size_t>(s.GetSize()) / sizeof(CharT)}, storeBuf);
     }
-    inline bool Parse(const CVolString &s, bool storeBuf = false)
+
+    inline bool Parse(const CWString &s, bool storeBuf = false)
     {
         PIV_IF(sizeof(EncodeT) == 2)
         {
@@ -1261,23 +1282,27 @@ public:
         }
         else if (piv::encoding::UrlEncodeNeed(name.data(), name.size()))
         {
-            return params[piv::basic_string_view<CharT>{piv::encoding::UrlStrEncode(name, utf8, false)}];
+            return params[piv::basic_string_view<CharT>{piv::encoding::UrlStrEncode(name, utf8, false, std::basic_string<CharT>{})}];
         }
         return piv::basic_string_view<CharT>{};
     }
+
     inline piv::basic_string_view<CharT> GetParam(const CharT *name, bool utf8 = true, size_t count = static_cast<size_t>(-1))
     {
         return GetParam((count == static_cast<size_t>(-1)) ? piv::basic_string_view<CharT>{name} : piv::basic_string_view<CharT>{name, count}, utf8);
     }
+
     inline piv::basic_string_view<CharT> GetParam(const std::basic_string<CharT> &name, bool utf8 = true)
     {
         return GetParam(piv::basic_string_view<CharT>{name}, utf8);
     }
+
     inline piv::basic_string_view<CharT> GetParam(const CVolMem &name, bool utf8 = true)
     {
         return GetParam(piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(name.GetPtr()), static_cast<size_t>(name.GetSize()) / sizeof(CharT)}, utf8);
     }
-    inline piv::basic_string_view<CharT> GetParam(const CVolString &name, bool utf8 = true)
+
+    inline piv::basic_string_view<CharT> GetParam(const CWString &name, bool utf8 = true)
     {
         PIV_IF(sizeof(EncodeT) == 2)
         {
@@ -1300,9 +1325,9 @@ public:
      * @return
      */
     template <typename T>
-    std::basic_string<CharT> GetDecodeParam(const T &name, bool utf8 = true)
+    std::basic_string<CharT> GetDecodeParam(T &&name, bool utf8 = true)
     {
-        return piv::encoding::UrlStrDecode(GetParam(name, utf8), utf8);
+        return piv::encoding::UrlStrDecode(GetParam(name, utf8), utf8, std::basic_string<CharT>{});
     }
 
     /**
@@ -1313,9 +1338,15 @@ public:
      * @return
      */
     template <typename T>
-    CVolString &GetParamStr(const T &name, bool utf8 = true, CVolString &value = CVolString{})
+    CWString &GetParamStr(T &&name, bool utf8, CWString &value)
     {
-        return piv::encoding::UrlStrDecode(GetParam(name, utf8), value, utf8);
+        return piv::encoding::UrlStrDecode(GetParam(name, utf8), utf8, value);
+    }
+
+    template <typename T>
+    CWString &&GetParamStr(T &&name, bool utf8 = true, CWString &&value = CWString{})
+    {
+        return std::forward<CWString &&>(piv::encoding::UrlStrDecode(GetParam(name, utf8), utf8, value));
     }
 
     /**
@@ -1340,7 +1371,7 @@ public:
 class PivUrlCreaterW : public CVolObject
 {
 private:
-    CVolString url;
+    CWString url;
     ptrdiff_t host_len;
     ptrdiff_t path_len;
 
@@ -1370,22 +1401,27 @@ private:
         }
         url.AddChar('=');
     }
+
     inline void AddKey(const wchar_t *key, size_t len, bool utf8 = true)
     {
         AddKey(piv::wstring_view{key, len}, utf8);
     }
+
     inline void AddKey(const wchar_t *key, bool utf8 = true)
     {
         AddKey(piv::wstring_view{key}, utf8);
     }
-    inline void AddKey(const CVolString &key, bool utf8 = true)
+
+    inline void AddKey(const CWString &key, bool utf8 = true)
     {
         AddKey(piv::wstring_view{key.GetText()}, utf8);
     }
+
     inline void AddKey(const std::wstring &key, bool utf8 = true)
     {
         AddKey(piv::wstring_view{key.c_str()}, utf8);
     }
+
     inline void AddKey(const CVolMem &key, bool utf8 = true)
     {
         AddKey(piv::wstring_view{key.GetTextPtr(), static_cast<size_t>(key.GetSize() / 2)}, utf8);
@@ -1410,22 +1446,27 @@ private:
             url.AddText(value, len);
         }
     }
+
     inline void AddValue(const wchar_t *value, bool utf8 = true)
     {
         AddValue(value, wcslen(value), utf8);
     }
-    inline void AddValue(const CVolString &value, bool utf8 = true)
+
+    inline void AddValue(const CWString &value, bool utf8 = true)
     {
         AddValue(value.GetText(), static_cast<size_t>(value.GetLength()), utf8);
     }
+
     inline void AddValue(const std::wstring &value, bool utf8 = true)
     {
         AddValue(value.c_str(), value.size(), utf8);
     }
+
     inline void AddValue(const piv::wstring_view &value, bool utf8 = true)
     {
         AddValue(value.data(), value.size(), utf8);
     }
+
     inline void AddValue(const CVolMem &value, bool utf8 = true)
     {
         AddValue(value.GetTextPtr(), static_cast<size_t>(value.GetSize() / 2), utf8);
@@ -1441,6 +1482,7 @@ public:
         host_len = 0;
         path_len = 0;
     }
+
     ~PivUrlCreaterW() {}
 
     /**
@@ -1453,6 +1495,7 @@ public:
         host_len = other.host_len;
         path_len = other.path_len;
     }
+
     PivUrlCreaterW(PivUrlCreaterW &&other) noexcept
     {
         url = std::move(other.url);
@@ -1479,7 +1522,7 @@ public:
      * @brief 取地址
      * @return
      */
-    inline CVolString &data() noexcept
+    inline CWString &data() noexcept
     {
         return url;
     }
@@ -1520,22 +1563,27 @@ public:
         }
         return *this;
     }
+
     inline PivUrlCreaterW &SetHost(const wchar_t *host)
     {
         return SetHost(host, static_cast<ptrdiff_t>(wcslen(host)));
     }
-    inline PivUrlCreaterW &SetHost(const CVolString &host)
+
+    inline PivUrlCreaterW &SetHost(const CWString &host)
     {
         return SetHost(host.GetText(), host.GetLength());
     }
+
     inline PivUrlCreaterW &SetHost(const std::wstring &host)
     {
         return SetHost(host.c_str(), static_cast<ptrdiff_t>(host.size()));
     }
+
     inline PivUrlCreaterW &SetHost(const piv::wstring_view &host)
     {
         return SetHost(host.data(), static_cast<ptrdiff_t>(host.size()));
     }
+
     inline PivUrlCreaterW &SetHost(const CVolMem &host)
     {
         return SetHost(host.GetTextPtr(), host.GetSize() / 2);
@@ -1574,22 +1622,27 @@ public:
         }
         return *this;
     }
+
     inline PivUrlCreaterW &SetPath(const wchar_t *path)
     {
         return SetPath(path, static_cast<ptrdiff_t>(wcslen(path)));
     }
-    inline PivUrlCreaterW &SetPath(const CVolString &path)
+
+    inline PivUrlCreaterW &SetPath(const CWString &path)
     {
         return SetPath(path.GetText(), path.GetLength());
     }
+
     inline PivUrlCreaterW &SetPath(const std::wstring &path)
     {
         return SetPath(path.c_str(), static_cast<ptrdiff_t>(path.size()));
     }
+
     inline PivUrlCreaterW &SetPath(const piv::wstring_view &path)
     {
         return SetPath(path.data(), static_cast<ptrdiff_t>(path.size()));
     }
+
     inline PivUrlCreaterW &SetPath(const CVolMem &path)
     {
         return SetPath(path.GetTextPtr(), path.GetSize() / 2);
@@ -1612,7 +1665,7 @@ public:
         return *this;
     }
 
-    virtual void GetDumpString(CVolString &strDump, INT nMaxDumpSize) override
+    virtual void GetDumpString(CWString &strDump, INT nMaxDumpSize) override
     {
         strDump = url;
     }

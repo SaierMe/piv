@@ -87,7 +87,7 @@ namespace piv
             CVolString utf16str;
             utf16str.SetLength(utf16words);
             utf16words = simdutf::convert_valid_utf8_to_utf16le(utf8str, len, reinterpret_cast<char16_t *>(const_cast<WCHAR *>(utf16str.GetText())));
-            return utf16words ? utf16str.Left(utf16words) : _CT("");
+            return utf16words ? utf16str.Left(utf16words) : "");
         }
 
         // UTF-16LE转换到UTF-8(多种写法和类型重载)

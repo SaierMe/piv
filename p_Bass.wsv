@@ -5,7 +5,7 @@
         @视窗.附属文件 = "BASS\\$(p)\\bass.dll">
 
 类 BASS音频类 <公开 注释 = "BASS version: 2.4.16.7" 注释 = "http://www.un4seen.com"
-        注释 = "BASS 可以在非盈利软件中免费使用,商用则需要购买许可证." 折叠>
+        注释 = "BASS 可以在非盈利软件中免费使用,商用则需要购买许可证.">
 {
     变量 错误对照表 <静态 类型 = 整数到文本哈希表>
     变量 格式过滤器 <静态 类型 = 文本型>
@@ -45,19 +45,34 @@
         @ static_cast<INT>(BassDll::Fn().BASS_GetConfig(static_cast<DWORD>(@<选项>)))
     }
 
-    方法 置配置选项_指针 <公开 类型 = 逻辑型 注释 = "设置指针类型的配置选项" 返回值注释 = "返回设置是否成功,如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
-            @嵌入式方法 = "">
+    方法 置配置选项_指针 <公开 类型 = 逻辑型 注释 = "请改用\"置文本配置项\",本方法将在2025年删除." 注释 = "设置指针类型的配置选项"
+            返回值注释 = "返回设置是否成功,如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "" @废弃 = 警告>
     参数 选项 <类型 = 整数 注释 = "使用\"BASS_配置选项_指针\"里的常量值">
     参数 值 <类型 = 变整数 注释 = "具体可用的设置值可以看\"BASS_配置选项_指针\"里的常量备注">
     {
-        @ BassDll::Fn().BASS_SetConfigPtr(static_cast<DWORD>(@<选项>), &@<值>)
+        @ BassDll::Fn().BASS_SetConfigPtr(static_cast<DWORD>(@<选项>), (const void *)@<值>)
     }
 
-    方法 取配置选项_指针 <公开 类型 = 变整数 注释 = "获取指针类型的配置选项" 返回值注释 = "成功返回配置值的指针,失败返回0,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
-            折叠 @嵌入式方法 = "">
+    方法 取配置选项_指针 <公开 类型 = 变整数 注释 = "请改用\"取文本配置项\",本方法将在2025年删除." 注释 = "获取指针类型的配置选项"
+            返回值注释 = "成功返回配置值的指针,失败返回0,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠 @嵌入式方法 = "" @废弃 = 警告>
     参数 选项 <类型 = 整数 注释 = "使用\"BASS_配置选项_指针\"里的常量值">
     {
         @ reinterpret_cast<INT_P>(BassDll::Fn().BASS_GetConfigPtr(@<选项>))
+    }
+
+    方法 置文本配置项 <公开 类型 = 逻辑型 注释 = "设置文本类型的配置选项" 返回值注释 = "返回设置是否成功,如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
+            @嵌入式方法 = "">
+    参数 选项 <类型 = 整数 注释 = "使用\"BASS_文本配置项\"里的常量值">
+    参数 值 <类型 = 文本型 注释 = "具体可用的设置值可以看\"BASS_文本配置项\"里的常量备注;" 注释 = "注: 空对象表示NULL(空文本指针)" @默认值 = 空对象>
+    {
+        @ BassDll::Fn().BASS_SetConfigPtr(static_cast<DWORD>(@<选项>) | BASS_UNICODE, @<值>.GetTextMaybeNull())
+    }
+
+    方法 取文本配置项 <公开 类型 = 文本型 注释 = "获取文本类型的配置选项" 返回值注释 = "成功返回配置值的指针,失败返回0,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
+            折叠 @嵌入式方法 = "">
+    参数 选项 <类型 = 整数 注释 = "使用\"BASS_文本配置项\"里的常量值">
+    {
+        @ @an<CVolString>(reinterpret_cast<const WCHAR *>(BassDll::Fn().BASS_GetConfigPtr(@<选项> | BASS_UNICODE)))
     }
 
     方法 取版本 <公开 类型 = 整数 注释 = "获取已加载的BASS的版本号" 返回值注释 = "  返回BASS版本; 例如, 0x02040103(十六进制)将是版本2.4.1.3"
@@ -818,7 +833,7 @@
         @ const char* ret = BassDll::Fn().BASS_RecordGetInputName(@<输入设备>);
         @ if (ret)
         @     return @an<CVolString>(ret);
-        @ return _CT ("");
+        @ return @an<CVolString>(L"");
     }
 
     方法 置录制设备设置 <公开 类型 = 逻辑型 注释 = "调整录制输入源的设置" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
@@ -835,7 +850,7 @@
     参数 输入设备 <类型 = 整数 注释 = "0 = 第一个设备, -1 = 主设备.">
     参数 音量 <类型 = 单精度小数类 注释 = "返回音量" @默认值 = 空对象>
     {
-        @ static_cast<INT>(BassDll::Fn().BASS_RecordGetInput(@<输入设备>, &@<音量.值>))
+        @ static_cast<INT>(BassDll::Fn().BASS_RecordGetInput(@<输入设备>, piv::GetBaseDataPtr<float*>(@<音量>)))
     }
 
     方法 取录制设备类型 <公开 类型 = 整数 注释 = "返回录制输入设备的类型值" 返回值注释 = "请用\"BASS_录制标志\"的常量与返回值比较,以此判断输入设备的类型." 折叠>
@@ -844,12 +859,10 @@
         返回 (位与 (取录制设备设置 (输入设备), BASS_录制标志.BASS_INPUT_TYPE_MASK))
     }
 
-    方法 取录制设备类型名称 <公开 类型 = 文本型 注释 = "返回录制设备的类型名称(中文名称)" 返回值注释 = "成功返回录制设备的类型名称" 折叠>
+    方法 取录制设备类型名称 <公开 类型 = 文本型 注释 = "返回录制设备的类型名称(中文名称)" 返回值注释 = "成功返回录制设备的类型名称">
     参数 输入设备 <类型 = 整数>
     {
-        变量 类型值 <类型 = 整数>
-        类型值 = 位与 (取录制设备设置 (输入设备), BASS_录制标志.BASS_INPUT_TYPE_MASK)
-        分支判断 (类型值)
+        分支判断 (取录制设备类型 (输入设备))
         {
             分支 (BASS_录制标志.BASS_INPUT_TYPE_UNDEF)
             {
@@ -984,11 +997,12 @@
         @ @<标签数组>.data().RemoveAll();
         @ const char *comments = BassDll::Fn().BASS_ChannelGetTags(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<标签>));
         @ if (!comments) return -1;
+        @ @an<CVolMem> buf;
         @ while (*comments) {
         @     if (@<标签> == BASS_TAG_HTTP || @<标签> == BASS_TAG_ICY || @<标签> == BASS_TAG_RIFF_INFO) {
-        @         @<标签数组>.data().Add(GetWideText(comments, CVolMem(), NULL));
+        @         @<标签数组>.data().Add(GetWideText(comments, buf, NULL));
         @     else
-        @         @<标签数组>.data().Add(Utf8ToWStr(comments, -1, CVolMem(), NULL, NULL, TRUE)); // UTF8
+        @         @<标签数组>.data().Add(Utf8ToWStr(comments, -1, buf, NULL, NULL, TRUE)); // UTF8
         @     comments += strlen(comments) + 1;
         @ }
         @ return static_cast<INT>(@<标签数组>.data().GetCount());
@@ -1004,10 +1018,11 @@
     {
         @ const char *text = BassDll::Fn().BASS_ChannelGetTags(static_cast<DWORD>(@<通道句柄>), static_cast<DWORD>(@<标签>));
         @ if (text) {
+        @     @an<CVolMem> buf;
         @     if (@<标签> == BASS_TAG_VENDOR || @<标签> == BASS_TAG_MUSIC_AUTH) {
-        @         return CVolString(Utf8ToWStr(text, -1, CVolMem(), NULL, NULL, TRUE)); // UTF8
+        @         return @an<CVolString>{text}; // UTF8
         @     else
-        @         return CVolString(GetWideText(text, CVolMem(), NULL));
+        @         return @an<CVolString>{GetWideText(text, buf, NULL)};
         @ }
         返回 ("")
     }
@@ -1018,13 +1033,14 @@
     参数 标签 <类型 = TAG_ID3 注释 = "返回的标签信息">
     {
         @ const TAG_ID3* ret = reinterpret_cast<const TAG_ID3*>(BassDll::Fn().BASS_ChannelGetTags(static_cast<DWORD>(@<通道句柄>), BASS_TAG_ID3));
+        @ @an<CVolMem> buf;
         @ if (ret) {
         @     @<标签.ID> = ret->id;
-        @     @<标签.标题>.SetText(GetWideText(ret->title, CVolMem(), NULL));
-        @     @<标签.艺术家>.SetText(GetWideText(ret->artist, CVolMem(), NULL));
-        @     @<标签.专辑>.SetText(GetWideText(ret->album, CVolMem(), NULL));
-        @     @<标签.年份>.SetText(GetWideText(ret->year, CVolMem(), NULL));
-        @     @<标签.注释>.SetText(GetWideText(ret->comment, CVolMem(), NULL));
+        @     @<标签.标题>.SetText(GetWideText(ret->title, buf, NULL));
+        @     @<标签.艺术家>.SetText(GetWideText(ret->artist, buf, NULL));
+        @     @<标签.专辑>.SetText(GetWideText(ret->album, buf, NULL));
+        @     @<标签.年份>.SetText(GetWideText(ret->year, buf, NULL));
+        @     @<标签.注释>.SetText(GetWideText(ret->comment, buf, NULL));
         @     @<标签.流派> = ret->genre;
         @     return TRUE;
         @ }
@@ -1320,7 +1336,7 @@
             注释 = "为\"取通道数据\"的二次封装版本,缓冲区改成字节集类了,而原始版本更适合在回调事件中使用."
             返回值注释 = "  失败返回-1,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息.." 返回值注释 = "  请求FFT数据时,返回从通道读取的字节数(用于执行FFT)."
             返回值注释 = "  请求样本数据时,将返回写入缓冲区的字节数(不一定与使用BASS_DATA_FLOAT标志时读取的字节数相同)."
-            返回值注释 = "  使用BASS_DATA_AVAILABLE标志时,将返回通道缓冲区中的字节数." @禁止流程检查 = 真>
+            返回值注释 = "  使用BASS_DATA_AVAILABLE标志时,将返回通道缓冲区中的字节数." 折叠 @禁止流程检查 = 真>
     参数 通道句柄 <类型 = 整数 注释 = "通道句柄,可以是HCHANNEL、HMUSIC、HSTREAM或HRECORD句柄.">
     参数 缓冲区 <类型 = 字节集类 注释 = "  用来接收数据的缓冲区字节集." 注释 = "  当句柄是录制句柄(HRECORD)时,可以为\"空对象\",以丢弃从录制缓冲区请求的数据."
             @默认值 = 空对象>
@@ -1457,10 +1473,10 @@
         @ BassDll::Fn().BASS_ChannelRemoveFX(@<通道句柄>, static_cast<HFX>(@<音效句柄>))
     }
 
-    方法 置音效参数 <公开 类型 = 逻辑型 注释 = "设置音效的具体参数" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息." 折叠
+    方法 置音效参数 <公开 类型 = 逻辑型 注释 = "设置音效的具体参数" 返回值注释 = "返回是否成功. 如果失败,可以用\"取错误代码\"或\"取错误描述\"获取具体的错误信息."
             @嵌入式方法 = "">
     参数 音效句柄 <类型 = 整数 注释 = "音效的句柄">
-    参数 参数 <类型 = 变整数 注释 = "  欲设置参数的结构体指针,该指针可以由\"参数类型.转换到结构体()\"获取."
+    参数 参数 <类型 = 变整数 注释 = "  欲设置参数的结构体指针,该指针可以由\"参数类型.取变整数地址()\"获取."
             注释 = "  参数必须为以下的类型之一(具体类型由\"置通道音效\"的效果类型决定):"
             注释 = "  BASS_DX8_CHORUS、BASS_DX8_COMPRESSOR、BASS_DX8_DISTORTION、BASS_DX8_ECHO、"
             注释 = "  BASS_DX8_FLANGER、BASS_DX8_GARGLE、BASS_DX8_I3DL2REVERB、BASS_DX8_PARAMEQ、"
@@ -1688,7 +1704,7 @@
 # 信息类型和标志等
 
 类 BASS_设备信息 <公开 基础类 = PIV结构模板 注释 = "\"取设备信息/BASS_GetDeviceInfo\"返回的信息" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_DEVICEINFO" @模板实现类 = "BASS_设备信息">
+        @别名 = "BASS_DEVICEINFO" @别名类型 = 本地结构 @模板实现类 = "BASS_设备信息">
 {
     方法 名称 <公开 静态 属性读 类型 = 文本型 注释 = "设备名称和描述" 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = BASS_设备信息>
@@ -1714,7 +1730,7 @@
 类 BASS_设备信息数组 <公开 基础类 = PIV数组模板 @文档 = "category = \"辅助类\"" @模板实现类 = "BASS_设备信息">
 
 类 BASS_插件信息 <公开 基础类 = PIV指针模板 注释 = "\"取插件信息/BASS_PluginGetInfo\"返回的信息" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "const BASS_PLUGININFO*" @模板实现类 = "BASS_插件信息">
+        @别名 = "const BASS_PLUGININFO*" @别名类型 = 本地参考类型 @模板实现类 = "BASS_插件信息">
 {
     变量 插件版本 <公开 类型 = 整数 注释 = "插件版本号" @输出名 = "version">
     变量 格式数量 <公开 类型 = 整数 注释 = "支持的格式数量" @输出名 = "formatc">
@@ -1733,7 +1749,7 @@
 类 BASS_插件信息数组 <公开 基础类 = PIV数组模板 @文档 = "category = \"辅助类\"" @模板实现类 = "BASS_插件信息">
 
 类 BASS_插件格式 <公开 基础类 = PIV结构模板 注释 = "\"BASS_插件信息\"中的支持格式成员" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_PLUGINFORM" @模板实现类 = "BASS_插件信息">
+        @别名 = "BASS_PLUGINFORM" @别名类型 = 本地结构 @模板实现类 = "BASS_插件信息">
 {
     变量 通道类型 <公开 类型 = 整数 注释 = "音轨的类型,如\"BASS_音轨信息\"结构中所示" @输出名 = "ctype">
 
@@ -1781,7 +1797,7 @@
 }
 
 类 BASS_录制信息 <公开 基础类 = PIV结构模板 注释 = "\"取录制信息/BASS_RecordGetInfo\"返回的信息" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_RECORDINFO" @模板实现类 = "BASS_录制信息">
+        @别名 = "BASS_RECORDINFO" @别名类型 = 本地结构 @模板实现类 = "BASS_录制信息">
 {
     变量 标志 <公开 类型 = 整数 注释 = "DSCCAPS_EMULDRIVER 0x00000020 设备的驱动程序不支持DirectSound,因此只能模拟输出"
             注释 = "DSCCAPS_CERTIFIED 0x00000040 设备的驱动程序已通过Microsoft认证,此标志始终设置在WDM驱动程序上" @输出名 = "flags">
@@ -1876,7 +1892,7 @@
 }
 
 类 BASS_样本 <公开 基础类 = PIV结构模板 注释 = "\"取样本信息/BASS_SampleGetInfo\"返回的信息" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_SAMPLE" @模板实现类 = "BASS_样本">
+        @别名 = "BASS_SAMPLE" @别名类型 = 本地结构 @模板实现类 = "BASS_样本">
 {
     变量 采样率 <公开 类型 = 整数 注释 = "freq, 默认播放采样率" @输出名 = "freq">
     变量 音量 <公开 类型 = 单精度小数 注释 = "volume，默认音量 (0-1)" @输出名 = "volume">
@@ -1906,7 +1922,7 @@
 }
 
 类 BASS_通道信息 <公开 基础类 = PIV结构模板 注释 = "\"取通道信息/BASS_ChannelGetInfo\"返回的信息" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_CHANNELINFO" @模板实现类 = "BASS_通道信息">
+        @别名 = "BASS_CHANNELINFO" @别名类型 = 本地结构 @模板实现类 = "BASS_通道信息">
 {
     变量 采样率 <公开 类型 = 整数 注释 = "默认采样率" @输出名 = "freq">
     变量 声道数 <公开 类型 = 整数 注释 = "1=单声道,2=立体声,以此类推" @输出名 = "chans">
@@ -1936,7 +1952,7 @@
 }
 
 类 BASS_信息 <公开 基础类 = PIV结构模板 注释 = "\"取输出信息/BASS_GetInfo\"返回的信息" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_INFO" @模板实现类 = "BASS_信息">
+        @别名 = "BASS_INFO" @别名类型 = 本地结构 @模板实现类 = "BASS_信息">
 {
     变量 标志 <公开 类型 = 整数 注释 = "设备的DirectSound功能,为以下常量的组合值："
             注释 = "DSCAPS_EMULDRIVER 0x00000020 设备的驱动程序不支持DirectSound,因此只能模拟输出"
@@ -2155,7 +2171,8 @@
     常量 BASS_CONFIG_SPLIT_BUFFER <公开 类型 = 整数 值 = 0x10610 注释 = "【BASS混合器类】分离器的缓冲区长度." 注释 = "参数: 缓冲区长度(单位为毫秒)">
 }
 
-类 BASS_配置选项_指针 <公开 注释 = "\"置配置选项_指针/BASS_SetConfigPtr\"的选项" 折叠 @文档 = "category = \"常量\"">
+类 BASS_配置选项_指针 <公开 注释 = "请改用常量\"BASS_文本配置项\",本常量类将在2025年删除." 注释 = "\"置配置选项_指针/BASS_SetConfigPtr\"的选项"
+        折叠 @文档 = "category = \"常量\"" @废弃 = 警告>
 {
     常量 BASS_CONFIG_NET_AGENT <公开 类型 = 整数 值 = @BASS_CONFIG_NET_AGENT 注释 = "发送到服务器的\"User-Agent\"请求头."
             注释 = "参数: User-Agent的文本指针">
@@ -2166,7 +2183,21 @@
             注释 = "参数: OpenSSL库的文件名指针,NULL=使用默认值">
     常量 BASS_CONFIG_FILENAME <公开 类型 = 整数 值 = @BASS_CONFIG_FILENAME 注释 = "这是一个只读配置选项,用于获取加载的BASS库的完整路径.">
     常量 BASS_CONFIG_THREAD <公开 类型 = 整数 值 = @BASS_CONFIG_THREAD 注释 = "标志: 将设置限定在当前线程中">
-    常量 BASS_UNICODE <公开 类型 = 整数 值 = @BASS_UNICODE 注释 = "使用UTF-16编码的文本">
+    常量 BASS_UNICODE <类型 = 整数 值 = @BASS_UNICODE 注释 = "使用UTF-16编码的文本">
+}
+
+类 BASS_文本配置项 <公开 注释 = "\"置文本配置项/BASS_SetConfigPtr\"的选项" 折叠 @文档 = "category = \"常量\"">
+{
+    常量 BASS_CONFIG_NET_AGENT <公开 类型 = 整数 值 = @BASS_CONFIG_NET_AGENT 注释 = "发送到服务器的\"User-Agent\"请求头."
+            注释 = "参数: User-Agent文本">
+    常量 BASS_CONFIG_NET_PROXY <公开 类型 = 整数 值 = @BASS_CONFIG_NET_PROXY 注释 = "代理服务器设置."
+            注释 = "参数: 以\"user:pass@server:port\"为格式, 空对象(NULL)=不使用代理, \"\"(空文本)=使用操作系统的默认代理设置."
+            注释 = "如果只指定了\"user:pass@\"部分,则这些授权凭据将用于默认代理服务器. 如果只指定了\"server:port\"部分,则在没有任何授权凭据的情况下使用该代理服务器.">
+    常量 BASS_CONFIG_LIBSSL <公开 类型 = 整数 值 = @BASS_CONFIG_LIBSSL 注释 = "用于处理HTTPS连接的OpenSSL库."
+            注释 = "参数: OpenSSL库的文件名,空对象(NULL)=使用默认值">
+    常量 BASS_CONFIG_FILENAME <公开 类型 = 整数 值 = @BASS_CONFIG_FILENAME 注释 = "这是一个只读配置选项,用于获取加载的BASS库的完整路径.">
+    常量 BASS_CONFIG_THREAD <公开 类型 = 整数 值 = @BASS_CONFIG_THREAD 注释 = "标志: 将设置限定在当前线程中">
+    常量 BASS_UNICODE <类型 = 整数 值 = @BASS_UNICODE 注释 = "使用UTF-16编码的文本">
 }
 
 类 BASS_设备标志 <公开 注释 = "\"初始化/BASS_Init\"时使用的标志" 折叠 @文档 = "category = \"常量\"">
@@ -2658,7 +2689,7 @@
 }
 
 类 BASS_DX8_CHORUS <公开 基础类 = PIV结构模板 注释 = "BASS_FX_DX8_CHORUS 和声音效的结构类" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_DX8_CHORUS" @模板实现类 = "BASS_DX8_CHORUS">
+        @别名 = "BASS_DX8_CHORUS" @别名类型 = 本地结构 @模板实现类 = "BASS_DX8_CHORUS">
 {
     变量 干湿比 <公开 类型 = 单精度小数 注释 = "湿(已处理)信号与干(未处理)信号的比率. 必须在0到100之间(全湿). 默认值为50." @输出名 = "fWetDryMix">
     变量 深度 <公开 类型 = 单精度小数 注释 = "低频振荡器(LFO)调制延迟时间的百分比. 必须在0到100之间. 默认值为10." @输出名 = "fDepth">
@@ -2666,9 +2697,9 @@
     变量 频率 <公开 类型 = 单精度小数 注释 = "LFO的频率,在0到10之间. 默认值为1.1" @输出名 = "fFrequency">
     变量 波形 <公开 类型 = 整数 注释 = "LFO的波形. 0 = 三角, 1 = 正弦. 默认的波形为正弦." @输出名 = "lWaveform">
     变量 延迟 <公开 类型 = 单精度小数 注释 = "在播放输入之前延迟的毫秒数,范围为0到20. 默认值为16毫秒." @输出名 = "fDelay">
-    变量 相位差 <公开 类型 = 整数 注释 = "左右LFO之间的相位差,为以下选项的其中之一. 默认值为 BASS_DX8_PHASE_90."
-            注释 = "BASS_DX8_PHASE_NEG_180、BASS_DX8_PHASE_NEG_90、BASS_DX8_PHASE_ZERO、BASS_DX8_PHASE_90 和 BASS_DX8_PHASE_180."
-            @输出名 = "lPhase">
+    变量 相位差 <公开 类型 = 整数 注释 = "左右LFO之间的相位差,为以下选项的其中之一,默认值为 BASS_DX8_PHASE_90."
+            注释 = " 0 = BASS_DX8_PHASE_NEG_180" 注释 = " 1 = BASS_DX8_PHASE_NEG_90" 注释 = " 2 = BASS_DX8_PHASE_ZERO"
+            注释 = " 3 = BASS_DX8_PHASE_90" 注释 = " 4 = BASS_DX8_PHASE_180" @输出名 = "lPhase">
 
     方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用." 折叠>
     参数 欲操作本对象 <类型 = BASS_DX8_CHORUS>
@@ -2680,7 +2711,7 @@
 }
 
 类 BASS_DX8_COMPRESSOR <公开 基础类 = PIV结构模板 注释 = "BASS_FX_DX8_COMPRESSOR 压限音效的结构类" 折叠
-        @文档 = "category = \"辅助类\"" @别名 = "BASS_DX8_COMPRESSOR" @模板实现类 = "BASS_DX8_COMPRESSOR">
+        @文档 = "category = \"辅助类\"" @别名 = "BASS_DX8_COMPRESSOR" @别名类型 = 本地结构 @模板实现类 = "BASS_DX8_COMPRESSOR">
 {
     变量 增益 <公开 类型 = 单精度小数 注释 = "信号压限后的输出增益,范围为-60到60. 默认值为0 dB." @输出名 = "fGain">
     变量 起奏 <公开 类型 = 单精度小数 注释 = "压限达到其完整值之前的时间,范围为0.01到500. 默认值为10毫秒." @输出名 = "fAttack">
@@ -2699,7 +2730,7 @@
 }
 
 类 BASS_DX8_DISTORTION <公开 基础类 = PIV结构模板 注释 = "BASS_FX_DX8_DISTORTION 失真音效的结构类" 折叠
-        @文档 = "category = \"辅助类\"" @别名 = "BASS_DX8_DISTORTION" @模板实现类 = "BASS_DX8_COMPRESSOR">
+        @文档 = "category = \"辅助类\"" @别名 = "BASS_DX8_DISTORTION" @别名类型 = 本地结构 @模板实现类 = "BASS_DX8_COMPRESSOR">
 {
     变量 增益 <公开 类型 = 单精度小数 注释 = "失真后的信号变化量,范围为-60到0. 默认值为-18 dB." @输出名 = "fGain">
     变量 边缘 <公开 类型 = 单精度小数 注释 = "失真强度的百分比,范围为0到100. 默认值为15%." @输出名 = "fEdge">
@@ -2717,7 +2748,7 @@
 }
 
 类 BASS_DX8_ECHO <公开 基础类 = PIV结构模板 注释 = "BASS_FX_DX8_ECHO 回声音效的结构类" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_DX8_ECHO" @模板实现类 = "BASS_DX8_ECHO">
+        @别名 = "BASS_DX8_ECHO" @别名类型 = 本地结构 @模板实现类 = "BASS_DX8_ECHO">
 {
     变量 干湿比 <公开 类型 = 单精度小数 注释 = "湿(已处理)信号与干(未处理)信号的比率. 必须在0到100之间(全湿). 默认值为50." @输出名 = "fWetDryMix">
     变量 反馈 <公开 类型 = 单精度小数 注释 = "输出信号反馈到效果输入的百分比, 范围为0到100. 默认值为50." @输出名 = "fFeedback">
@@ -2735,7 +2766,7 @@
 }
 
 类 BASS_DX8_FLANGER <公开 基础类 = PIV结构模板 注释 = "BASS_FX_DX8_FLANGER 镶边音效的结构类" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_DX8_FLANGER" @模板实现类 = "BASS_DX8_FLANGER">
+        @别名 = "BASS_DX8_FLANGER" @别名类型 = 本地结构 @模板实现类 = "BASS_DX8_FLANGER">
 {
     变量 干湿比 <公开 类型 = 单精度小数 注释 = "湿(已处理)信号与干(未处理)信号的比率. 必须在0到100之间(全湿). 默认值为50." @输出名 = "fWetDryMix">
     变量 深度 <公开 类型 = 单精度小数 注释 = "低频振荡器(LFO)调制延迟时间的百分比. 必须在0到100之间. 默认值为100." @输出名 = "fDepth">
@@ -2743,9 +2774,9 @@
     变量 频率 <公开 类型 = 单精度小数 注释 = "LFO的频率,在0到10之间. 默认值为0.25" @输出名 = "fFrequency">
     变量 波形 <公开 类型 = 整数 注释 = "LFO的波形. 0 = 三角, 1 = 正弦. 默认的波形为正弦." @输出名 = "lWaveform">
     变量 延迟 <公开 类型 = 单精度小数 注释 = "在播放输入之前延迟的毫秒数,范围为0到4. 默认值为2毫秒." @输出名 = "fDelay">
-    变量 相位差 <公开 类型 = 整数 注释 = "左右LFO之间的相位差,为以下选项的其中之一. 默认值为 BASS_DX8_PHASE_ZERO."
-            注释 = "BASS_DX8_PHASE_NEG_180、BASS_DX8_PHASE_NEG_90、BASS_DX8_PHASE_ZERO、BASS_DX8_PHASE_90 和 BASS_DX8_PHASE_180."
-            @输出名 = "lPhase">
+    变量 相位差 <公开 类型 = 整数 注释 = "左右LFO之间的相位差,为以下选项的其中之一,默认值为 BASS_DX8_PHASE_90."
+            注释 = " 0 = BASS_DX8_PHASE_NEG_180" 注释 = " 1 = BASS_DX8_PHASE_NEG_90" 注释 = " 2 = BASS_DX8_PHASE_ZERO"
+            注释 = " 3 = BASS_DX8_PHASE_90" 注释 = " 4 = BASS_DX8_PHASE_180" @输出名 = "lPhase">
 
     方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用." 折叠>
     参数 欲操作本对象 <类型 = BASS_DX8_FLANGER>
@@ -2757,7 +2788,7 @@
 }
 
 类 BASS_DX8_GARGLE <公开 基础类 = PIV结构模板 注释 = "BASS_FX_DX8_GARGLE 含漱音效的结构类" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_DX8_GARGLE" @模板实现类 = "BASS_DX8_GARGLE">
+        @别名 = "BASS_DX8_GARGLE" @别名类型 = 本地结构 @模板实现类 = "BASS_DX8_GARGLE">
 {
     变量 调制速率 <公开 类型 = 整数 注释 = "调制速率,单位为赫兹. 必须在1到1000之间. 默认值为20." @输出名 = "dwRateHz">
     变量 波形形状 <公开 类型 = 整数 注释 = "调制波形的形状. 0=三角形, 1=正方形. 默认为三角波形." @输出名 = "dwWaveShape">
@@ -2771,7 +2802,8 @@
 }
 
 类 BASS_DX8_I3DL2REVERB <公开 基础类 = PIV结构模板 注释 = "BASS_FX_DX8_I3DL2REVERB I3DL2(交互式3D音效 Level 2)混响音效的结构类"
-        折叠 @文档 = "category = \"辅助类\"" @别名 = "BASS_DX8_I3DL2REVERB" @模板实现类 = "BASS_DX8_I3DL2REVERB">
+        折叠 @文档 = "category = \"辅助类\"" @别名 = "BASS_DX8_I3DL2REVERB" @别名类型 = 本地结构
+        @模板实现类 = "BASS_DX8_I3DL2REVERB">
 {
     变量 房间 <公开 类型 = 整数 注释 = "房间效果的衰减,单位为毫贝(mB),范围为-10000到0 mB. 默认值为-1000 mB." @输出名 = "lRoom">
     变量 房间高频 <公开 类型 = 整数 注释 = "房间高频效果的衰减,单位为mB,范围为-10000到0 mB. 默认值为-100 mB." @输出名 = "lRoomHF">
@@ -2797,7 +2829,7 @@
 }
 
 类 BASS_DX8_PARAMEQ <公开 基础类 = PIV结构模板 注释 = "BASS_FX_DX8_PARAMEQ 频段均衡器音效的结构类" 折叠
-        @文档 = "category = \"辅助类\"" @别名 = "BASS_DX8_PARAMEQ" @模板实现类 = "BASS_DX8_PARAMEQ">
+        @文档 = "category = \"辅助类\"" @别名 = "BASS_DX8_PARAMEQ" @别名类型 = 本地结构 @模板实现类 = "BASS_DX8_PARAMEQ">
 {
     变量 中置频率 <公开 类型 = 单精度小数 注释 = "中置频率,单位为赫兹." @输出名 = "fCenter">
     变量 带宽 <公开 类型 = 单精度小数 注释 = "带宽,以半音阶表示,范围从1到36. 默认值为12." @输出名 = "fBandwidth">
@@ -2812,7 +2844,7 @@
 }
 
 类 BASS_DX8_REVERB <公开 基础类 = PIV结构模板 注释 = "BASS_FX_DX8_REVERB 混响音效的结构类" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_DX8_REVERB" @模板实现类 = "BASS_DX8_REVERB">
+        @别名 = "BASS_DX8_REVERB" @别名类型 = 本地结构 @模板实现类 = "BASS_DX8_REVERB">
 {
     变量 输入增益 <公开 类型 = 单精度小数 注释 = "信号的输入增益,单位为分贝(dB),范围为-96到0. 默认值为0 dB." @输出名 = "fInGain">
     变量 混响混合 <公开 类型 = 单精度小数 注释 = "混响混合,单位为分贝,范围为-96到0. 默认值为0 dB." @输出名 = "fReverbMix">
@@ -2829,7 +2861,7 @@
 }
 
 类 BASS_FX_VOLUME_PARAM <公开 基础类 = PIV结构模板 注释 = "BASS_FX_VOLUME_PARAM 音量级别调节音效的结构类" 注释 = "" 折叠
-        @文档 = "category = \"辅助类\"" @别名 = "BASS_FX_VOLUME_PARAM" @模板实现类 = "BASS_FX_VOLUME_PARAM">
+        @文档 = "category = \"辅助类\"" @别名 = "BASS_FX_VOLUME_PARAM" @别名类型 = 本地结构 @模板实现类 = "BASS_FX_VOLUME_PARAM">
 {
     变量 目标音量 <公开 类型 = 单精度小数 注释 = "新的音量级别. 0=静音,1.0=正常,大于1.0=放大. 默认值为1." @输出名 = "fTarget">
     变量 当前音量 <公开 类型 = 单精度小数 注释 = "当前音量级别. -1=设置参数时保持当前的级别. 默认值为1." @输出名 = "fCurrent">

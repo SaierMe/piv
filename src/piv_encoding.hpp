@@ -569,12 +569,13 @@ namespace piv
          * @param hexstr 返回的十六进制文本
          * @return
          */
-        template <typename StringT, typename CharT>
-        std::basic_string<CharT> &str_to_hex(const StringT &str, bool separator = false, std::basic_string<CharT> &hexstr = std::basic_string<CharT>{})
+        template <typename CharT, typename StringT, typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::basic_string<CharT>>::value, T>::type
+        str_to_hex(const StringT &str, bool separator /* = false */, T &&hexstr)
         {
             hexstr.clear();
             if (str.empty())
-                return hexstr;
+                return std::forward<T>(hexstr);
             hexstr.reserve(str.size() * (separator ? 3 : 2));
             const unsigned char *pStr = reinterpret_cast<const unsigned char *>(str.data());
             size_t count = str.size() * sizeof(typename StringT::value_type);
@@ -587,15 +588,17 @@ namespace piv
             }
             if (hexstr.back() == ' ')
                 hexstr.pop_back();
-            return hexstr;
+            return std::forward<T>(hexstr);
+            ;
         }
 
-        template <typename StringT>
-        CWString &str_to_hex(const StringT &str, bool separator = false, CWString &hexstr = CWString{})
+        template <typename StringT, typename T /* = CWString */>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, CWString>::value, T>::type
+        str_to_hex(const StringT &str, bool separator /* = false */, T &&hexstr)
         {
             hexstr.Empty();
             if (str.empty())
-                return hexstr;
+                return std::forward<T>(hexstr);
             hexstr.SetNumAlignChars(str.size() * (separator ? 3 : 2));
             const unsigned char *pStr = reinterpret_cast<const unsigned char *>(str.data());
             size_t count = str.size() * sizeof(typename StringT::value_type);
@@ -607,7 +610,7 @@ namespace piv
                     hexstr.AddChar(' ');
             }
             hexstr.TrimRight();
-            return hexstr;
+            return std::forward<T>(hexstr);
         }
 
         /**
@@ -616,12 +619,12 @@ namespace piv
          * @param str 返回还原后的文本
          * @return
          */
-        template <typename T, typename StringT>
-        T &hex_to_str(const StringT &hexstr, T &str = T{})
+        template <typename T /* = std::basic_string<CharT> */, typename StringT>
+        T &&hex_to_str(const StringT &hexstr, T &&str)
         {
             str.clear();
             if (hexstr.size() < 2 * sizeof(typename StringT::value_type))
-                return str;
+                return std::forward<T>(str);
             str.resize(hexstr.size() / (2 * sizeof(typename StringT::value_type)));
             unsigned char *pStr = const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(str.data()));
             typename StringT::value_type ch1, ch2;
@@ -637,7 +640,7 @@ namespace piv
                 }
             }
             str.resize(n / sizeof(typename StringT::value_type));
-            return str;
+            return std::forward<T>(str);
         }
 
         /**
@@ -647,8 +650,9 @@ namespace piv
          * @param usc2 返回的USC2文本
          * @return
          */
-        template <typename CharT, typename StringT>
-        std::basic_string<CharT> &to_usc2(const StringT &str, bool en_ascii = false, std::basic_string<CharT> &usc2 = std::basic_string<CharT>{})
+        template <typename CharT, typename StringT, typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::basic_string<CharT>>::value, T>::type
+        to_usc2(const StringT &str, bool en_ascii, T &&usc2)
         {
             usc2.clear();
             usc2.reserve(str.size() * 6);
@@ -658,7 +662,7 @@ namespace piv
                 ch = str[i];
                 if (!en_ascii && ch < 128)
                 {
-                    usc2.push_back(static_cast<CharT>(ch));
+                    usc2.push_back(static_cast<typename T::value_type>(ch));
                     continue;
                 }
                 usc2.push_back('\\');
@@ -668,11 +672,12 @@ namespace piv
                 usc2.push_back(hexLowCh[static_cast<unsigned char>((ch & 0x00FF) >> 4)]);
                 usc2.push_back(hexLowCh[static_cast<unsigned char>(ch & 0x000F)]);
             }
-            return usc2;
+            return std::forward<T>(usc2);
         }
 
-        template <typename StringT>
-        static CWString &to_usc2str(const StringT &str, bool en_ascii, CWString &usc2 = CWString{})
+        template <typename StringT, typename T /* = CWString */>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, CWString>::value, T>::type
+        to_usc2(const StringT &str, bool en_ascii, T &&usc2)
         {
             usc2.Empty();
             usc2.SetNumAlignChars(str.size() * 6);
@@ -692,7 +697,7 @@ namespace piv
                 usc2.AddChar(hexLowCh[static_cast<unsigned char>((ch & 0x00FF) >> 4)]);
                 usc2.AddChar(hexLowCh[static_cast<unsigned char>(ch & 0x000F)]);
             }
-            return usc2;
+            return std::forward<T>(usc2);
         }
 
         /**
@@ -701,8 +706,9 @@ namespace piv
          * @param ret 返回文本
          * @return
          */
-        template <typename StringT>
-        std::wstring &usc2_to_str(const StringT &usc2, std::wstring &ret = std::wstring{})
+        template <typename StringT, typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        usc2_to_str(const StringT &usc2, T &&ret)
         {
             ret.clear();
             size_t len = usc2.size();
@@ -731,7 +737,7 @@ namespace piv
                     ret.push_back(static_cast<wchar_t>(ch));
                 }
             }
-            return ret;
+            return std::forward<T>(ret);
         }
 
         /**
@@ -740,20 +746,23 @@ namespace piv
          * @param hexstr 返回的十六进制
          * @return
          */
-        template <typename T>
-        CVolMem &value_to_hex(const T &v, CVolMem &hex = CVolMem())
+        template <typename V, typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, CVolMem>::value, T>::type
+        value_to_hex(const V &v, T &&hex)
         {
-            hex.Append(&v, sizeof(T));
-            return hex;
+            hex.Append(&v, sizeof(V));
+            return std::forward<T>(hex);
         }
-        template <typename T>
-        CWString &value_to_hex(const T &v, CWString &hex, bool upper = true)
+
+        template <typename V, typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, CWString>::value, T>::type
+        value_to_hex(const V &v, T &&hex, bool upper = true)
         {
             const unsigned char *pValue = reinterpret_cast<const unsigned char *>(&v);
-            wchar_t *pStr = const_cast<wchar_t *>(reinterpret_cast<const wchar_t *>(hex.m_mem.Alloc(((sizeof(T) * 2) + 1) * 2, TRUE)));
+            wchar_t *pStr = const_cast<wchar_t *>(reinterpret_cast<const wchar_t *>(hex.m_mem.Alloc(((sizeof(V) * 2) + 1) * 2, TRUE)));
             if (upper)
             {
-                for (size_t i = 0, n = 0; i < sizeof(T); ++i)
+                for (size_t i = 0, n = 0; i < sizeof(V); ++i)
                 {
                     pStr[n++] = hexUpCh[static_cast<unsigned char>(pValue[i]) >> 4];
                     pStr[n++] = hexUpCh[static_cast<unsigned char>(pValue[i]) & 0xF];
@@ -761,21 +770,23 @@ namespace piv
             }
             else
             {
-                for (size_t i = 0, n = 0; i < sizeof(T); ++i)
+                for (size_t i = 0, n = 0; i < sizeof(V); ++i)
                 {
                     pStr[n++] = hexLowCh[static_cast<unsigned char>(pValue[i]) >> 4];
                     pStr[n++] = hexLowCh[static_cast<unsigned char>(pValue[i]) & 0xF];
                 }
             }
-            return hex;
+            return std::forward<T>(hex);
         }
-        template <typename T, typename CharT>
-        std::basic_string<CharT> &value_to_hex(const T &v, std::basic_string<CharT> &hex, bool upper = true)
+
+        template <typename V, typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        value_to_hex(const V &v, T &&hex, bool upper = true)
         {
             const unsigned char *pValue = reinterpret_cast<const unsigned char *>(&v);
             if (upper)
             {
-                for (size_t i = 0; i < sizeof(T); ++i)
+                for (size_t i = 0; i < sizeof(V); ++i)
                 {
                     hex.push_back(hexUpCh[static_cast<unsigned char>(pValue[i]) >> 4]);
                     hex.push_back(hexUpCh[static_cast<unsigned char>(pValue[i]) & 0xF]);
@@ -783,13 +794,37 @@ namespace piv
             }
             else
             {
-                for (size_t i = 0; i < sizeof(T); ++i)
+                for (size_t i = 0; i < sizeof(V); ++i)
                 {
                     hex.push_back(hexLowCh[static_cast<unsigned char>(pValue[i]) >> 4]);
                     hex.push_back(hexLowCh[static_cast<unsigned char>(pValue[i]) & 0xF]);
                 }
             }
-            return hex;
+            return std::forward<T>(hex);
+        }
+
+        template <typename V, typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        value_to_hex(const V &v, T &&hex, bool upper = true)
+        {
+            const unsigned char *pValue = reinterpret_cast<const unsigned char *>(&v);
+            if (upper)
+            {
+                for (size_t i = 0; i < sizeof(V); ++i)
+                {
+                    hex.push_back(hexUpCh[static_cast<unsigned char>(pValue[i]) >> 4]);
+                    hex.push_back(hexUpCh[static_cast<unsigned char>(pValue[i]) & 0xF]);
+                }
+            }
+            else
+            {
+                for (size_t i = 0; i < sizeof(V); ++i)
+                {
+                    hex.push_back(hexLowCh[static_cast<unsigned char>(pValue[i]) >> 4]);
+                    hex.push_back(hexLowCh[static_cast<unsigned char>(pValue[i]) & 0xF]);
+                }
+            }
+            return std::forward<T>(hex);
         }
     } // namespace encoding
 
@@ -1011,6 +1046,12 @@ public:
         return str;
     }
 
+    inline CWString &&to_volstr(CWString &&str) const
+    {
+        str.SetText(_data.c_str());
+        return std::forward<CWString &&>(str);
+    }
+
     /**
      * @brief 将转换后的文本数据复制火山的字节集类
      * @param mem 文本数据将复制到此字节集中
@@ -1021,6 +1062,13 @@ public:
         mem.Empty();
         mem.Append(_data.c_str(), (_data.size() + (null_char ? 1 : 0)) * 2);
         return mem;
+    }
+
+    inline CVolMem &&to_volmem(CVolMem &&mem, bool null_char = false) const
+    {
+        mem.Empty();
+        mem.Append(_data.c_str(), (_data.size() + (null_char ? 1 : 0)) * 2);
+        return std::forward<CVolMem &&>(mem);
     }
 }; // PivA2W
 
@@ -1246,6 +1294,13 @@ public:
         mem.Append(_data.c_str(), _data.size() + (null_char ? 1 : 0));
         return mem;
     }
+
+    inline CVolMem &&to_volmem(CVolMem &&mem, bool null_char = false) const
+    {
+        mem.Empty();
+        mem.Append(_data.c_str(), _data.size() + (null_char ? 1 : 0));
+        return std::forward<CVolMem &&>(mem);
+    }
 }; // PivW2A
 
 /**
@@ -1470,6 +1525,13 @@ public:
         mem.Append(_data.c_str(), _data.size() + (null_char ? 1 : 0));
         return mem;
     }
+
+    inline CVolMem &&to_volmem(CVolMem &&mem, bool null_char = false) const
+    {
+        mem.Empty();
+        mem.Append(_data.c_str(), _data.size() + (null_char ? 1 : 0));
+        return std::forward<CVolMem &&>(mem);
+    }
 }; // PivW2U
 
 /**
@@ -1688,6 +1750,12 @@ public:
         return str;
     }
 
+    inline CWString &&to_volstr(CWString &&str) const
+    {
+        str.SetText(_data.c_str());
+        return std::forward<CWString &&>(str);
+    }
+
     /**
      * @brief 将转换后的文本数据复制火山的字节集类
      * @param mem 文本数据将复制到此字节集中
@@ -1698,6 +1766,13 @@ public:
         mem.Empty();
         mem.Append(_data.c_str(), (_data.size() + (null_char ? 1 : 0)) * 2);
         return mem;
+    }
+
+    inline CVolMem &&to_volmem(CVolMem &&mem, bool null_char = false) const
+    {
+        mem.Empty();
+        mem.Append(_data.c_str(), (_data.size() + (null_char ? 1 : 0)) * 2);
+        return std::forward<CVolMem &&>(mem);
     }
 }; // PivU2W
 
@@ -1918,6 +1993,13 @@ public:
         mem.Append(_data.c_str(), _data.size() + (null_char ? 1 : 0));
         return mem;
     }
+
+    inline CVolMem &&to_volmem(CVolMem &&mem, bool null_char = false) const
+    {
+        mem.Empty();
+        mem.Append(_data.c_str(), _data.size() + (null_char ? 1 : 0));
+        return std::forward<CVolMem &&>(mem);
+    }
 }; // PivU2A
 
 /**
@@ -2132,6 +2214,13 @@ public:
         mem.Empty();
         mem.Append(_data.c_str(), _data.size() + (null_char ? 1 : 0));
         return mem;
+    }
+
+    inline CVolMem &&to_volmem(CVolMem &&mem, bool null_char = false) const
+    {
+        mem.Empty();
+        mem.Append(_data.c_str(), _data.size() + (null_char ? 1 : 0));
+        return std::forward<CVolMem &&>(mem);
     }
 }; // PivA2U
 
@@ -2359,6 +2448,12 @@ public:
         return str;
     }
 
+    inline CWString &&to_volstr(CWString &&str) const
+    {
+        str.SetText(_data.GetText());
+        return std::forward<CWString &&>(str);
+    }
+
     /**
      * @brief 将转换后的文本数据复制火山的字节集类
      * @param mem 文本数据将复制到此字节集中
@@ -2369,6 +2464,13 @@ public:
         mem.Empty();
         mem.Append(_data.GetText(), (_data.GetLength() + (null_char ? 1 : 0)) * 2);
         return mem;
+    }
+
+    inline CVolMem &&to_volmem(CVolMem &&mem, bool null_char = false) const
+    {
+        mem.Empty();
+        mem.Append(_data.GetText(), (_data.GetLength() + (null_char ? 1 : 0)) * 2);
+        return std::forward<CVolMem &&>(mem);
     }
 }; // PivA2Ws
 
@@ -2593,6 +2695,12 @@ public:
         return str;
     }
 
+    inline CWString &&to_volstr(CWString &&str) const
+    {
+        str.SetText(_data.GetText());
+        return std::forward<CWString &&>(str);
+    }
+
     /**
      * @brief 将转换后的文本数据复制火山的字节集类
      * @param mem 文本数据将复制到此字节集中
@@ -2603,6 +2711,13 @@ public:
         mem.Empty();
         mem.Append(_data.GetText(), (_data.GetLength() + (null_char ? 1 : 0)) * 2);
         return mem;
+    }
+
+    inline CVolMem &&to_volmem(CVolMem &&mem, bool null_char = false) const
+    {
+        mem.Empty();
+        mem.Append(_data.GetText(), (_data.GetLength() + (null_char ? 1 : 0)) * 2);
+        return std::forward<CVolMem &&>(mem);
     }
 }; // PivU2Ws
 
@@ -2625,7 +2740,7 @@ public:
     {
         PIV_IF(sizeof(CharT) == 2)
         {
-            _c_str = rhs.GetText();
+            _c_str = (const CharT *)rhs.GetText();
         }
         else
         {
@@ -3476,173 +3591,194 @@ namespace piv
          * @param decoded 返回解码后的文本
          * @param utf8 是否为UTF-8编码
          */
-        template <typename CharT>
-        std::basic_string<CharT> &UrlStrDecode(const ::piv::basic_string_view<CharT> &str, bool utf8 = true, std::basic_string<CharT> &decoded = std::basic_string<CharT>{})
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        UrlStrDecode(const ::piv::string_view &str, bool utf8, T &&decoded)
         {
             decoded.clear();
             if (str.size() == 0)
-                return decoded;
+                return std::forward<T>(decoded);
+            if (piv::encoding::UrlDecodeNeed(str.data(), str.size()))
+            {
+                size_t buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(str.data()), str.size());
+                decoded.resize(buffer_len);
+                piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(str.data()), str.size(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(decoded.data())), buffer_len);
+            }
+            else
+            {
+                decoded.assign(str.data(), str.size());
+            }
+            return std::forward<T>(decoded);
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        UrlStrDecode(const ::piv::wstring_view &str, bool utf8, T &&decoded)
+        {
+            decoded.clear();
+            if (str.size() == 0)
+                return std::forward<T>(decoded);
             if (piv::encoding::UrlDecodeNeed(str.data(), str.size()))
             {
                 size_t buffer_len;
-                PIV_IF(sizeof(CharT) == 2)
+                std::string buffer;
+                if (utf8)
                 {
-                    std::string buffer;
-                    if (utf8)
-                    {
-                        PivW2U urlstr(reinterpret_cast<const wchar_t *>(str.data()), str.size());
-                        buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes());
-                        buffer.resize(buffer_len);
-                        piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(buffer.data())), buffer_len);
-                        decoded.assign(reinterpret_cast<const CharT *>(PivU2W{buffer}.c_str()));
-                    }
-                    else
-                    {
-                        PivW2A urlstr(reinterpret_cast<const wchar_t *>(str.data()), str.size());
-                        buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes());
-                        buffer.resize(buffer_len);
-                        piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(buffer.data())), buffer_len);
-                        decoded.assign(reinterpret_cast<const CharT *>(PivA2W{buffer}.c_str()));
-                    }
+                    PivW2U urlstr(str.data(), str.size());
+                    buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes());
+                    buffer.resize(buffer_len);
+                    piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(buffer.data())), buffer_len);
+                    decoded.assign(PivU2W{buffer}.c_str());
                 }
                 else
                 {
-                    buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(str.data()), str.size());
-                    decoded.resize(buffer_len);
-                    piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(str.data()), str.size(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(decoded.data())), buffer_len);
+                    PivW2A urlstr(str.data(), str.size());
+                    buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes());
+                    buffer.resize(buffer_len);
+                    piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(buffer.data())), buffer_len);
+                    decoded.assign(PivA2W{buffer}.c_str());
                 }
             }
             else
             {
                 decoded.assign(str.data(), str.size());
             }
-            return decoded;
+            return std::forward<T>(decoded);
         }
+
         template <typename CharT>
-        std::basic_string<CharT> &UrlStrDecode(const std::basic_string<CharT> &str, bool utf8 = true, std::basic_string<CharT> &decoded = std::basic_string<CharT>{})
+        std::basic_string<CharT> &UrlStrDecode(const std::basic_string<CharT> &str, bool utf8, std::basic_string<CharT> &decoded)
         {
             return piv::encoding::UrlStrDecode(::piv::basic_string_view<CharT>{str}, utf8, decoded);
         }
 
         template <typename CharT>
-        CVolMem &UrlStrDecode(const ::piv::basic_string_view<CharT> &str, CVolMem &decoded, bool utf8 = true)
+        std::basic_string<CharT> &&UrlStrDecode(const std::basic_string<CharT> &str, bool utf8, std::basic_string<CharT> &&decoded)
+        {
+            return std::forward<std::basic_string<CharT> &&>(piv::encoding::UrlStrDecode(::piv::basic_string_view<CharT>{str}, utf8, decoded));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, CVolMem>::value, T>::type
+        UrlStrDecode(const ::piv::string_view &str, bool utf8, T &&decoded)
         {
             decoded.Empty();
             if (str.size() == 0)
-                return decoded;
+                return std::forward<T>(decoded);
             size_t buffer_len;
             if (piv::encoding::UrlDecodeNeed(str.data(), str.size()))
             {
+                buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(str.data()), str.size());
+                piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(str.data()), str.size(), decoded.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len);
+                return std::forward<T>(decoded);
+            }
+            decoded.Append(reinterpret_cast<const void *>(str.data()), str.size());
+            return std::forward<T>(decoded);
+        }
 
-                PIV_IF(sizeof(CharT) == 2)
-                {
-                    std::string buffer;
-                    if (utf8)
-                    {
-                        PivW2U urlstr(reinterpret_cast<const wchar_t *>(str.data()), str.size());
-                        buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes());
-                        buffer.resize(buffer_len);
-                        piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(buffer.data())), buffer_len);
-                        return PivU2W{buffer}.to_volmem(decoded);
-                    }
-                    else
-                    {
-                        PivW2A urlstr(reinterpret_cast<const wchar_t *>(str.data()), str.size());
-                        buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes());
-                        buffer.resize(buffer_len);
-                        piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(buffer.data())), buffer_len);
-                        return PivA2W{buffer}.to_volmem(decoded);
-                    }
-                }
-                else
-                {
-                    buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(str.data()), str.size());
-                    piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(str.data()), str.size(), decoded.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len);
-                    return decoded;
-                }
-            }
-            decoded.Append(reinterpret_cast<const void *>(str.data()), str.size() * sizeof(CharT));
-            return decoded;
-        }
-        template <typename CharT>
-        CVolMem &UrlStrDecode(const std::basic_string<CharT> &str, CVolMem &decoded, bool utf8 = true)
-        {
-            return piv::encoding::UrlStrDecode(::piv::basic_string_view<CharT>{str.c_str()}, decoded, utf8);
-        }
-        template <typename = void>
-        CVolMem &UrlStrDecode(const CVolMem &str, bool utf8 = true, CVolMem &decoded = CVolMem{})
-        {
-            return piv::encoding::UrlStrDecode(::piv::string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), decoded, utf8);
-        }
-        template <typename = void>
-        CWString &UrlStrDecode(const CVolMem &str, bool utf8, CWString &decoded = CWString{})
-        {
-            if (piv::encoding::UrlDecodeNeed(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())))
-            {
-                CVolMem buffer;
-                piv::encoding::UrlStrDecode(::piv::string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), buffer, utf8);
-                if (utf8)
-                    return PivU2Ws{buffer}.to_volstr(decoded);
-                else
-                    return PivA2Ws{buffer}.to_volstr(decoded);
-            }
-            else
-            {
-                if (utf8)
-                    return PivU2Ws{str}.to_volstr(decoded);
-                else
-                    return PivA2Ws{str}.to_volstr(decoded);
-            }
-        }
-        template <typename CharT>
-        CWString &UrlStrDecode(const ::piv::basic_string_view<CharT> &str, CWString &decoded, bool utf8 = true)
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, CVolMem>::value, T>::type
+        UrlStrDecode(const ::piv::wstring_view &str, bool utf8, T &&decoded)
         {
             decoded.Empty();
             if (str.size() == 0)
-                return decoded;
+                return std::forward<T>(decoded);
             size_t buffer_len;
             if (piv::encoding::UrlDecodeNeed(str.data(), str.size()))
             {
                 std::string buffer;
-                PIV_IF(sizeof(CharT) == 2)
+                if (utf8)
                 {
-                    if (utf8)
-                    {
-                        PivW2U urlstr(reinterpret_cast<const wchar_t *>(str.data()), str.size());
-                        buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes());
-                        buffer.resize(buffer_len);
-                        piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(buffer.data())), buffer_len);
-                        return PivU2Ws{buffer}.to_volstr(decoded);
-                    }
-                    else
-                    {
-                        PivW2A urlstr(reinterpret_cast<const wchar_t *>(str.data()), str.size());
-                        buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes());
-                        buffer.resize(buffer_len);
-                        piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.GetSize(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(buffer.data())), buffer_len);
-                        return PivA2Ws{buffer}.to_volstr(decoded);
-                    }
+                    PivW2U urlstr(str.data(), str.size());
+                    buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes());
+                    buffer.resize(buffer_len);
+                    piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(buffer.data())), buffer_len);
+
+                    return std::forward<T>(PivU2W{buffer}.to_volmem(decoded));
                 }
                 else
                 {
-                    buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(str.data()), str.size());
+                    PivW2A urlstr(str.data(), str.size());
+                    buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes());
                     buffer.resize(buffer_len);
-                    piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(str.data()), str.size(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(buffer.data())), buffer_len);
-                    if (utf8)
-                        return PivU2Ws{buffer}.to_volstr(decoded);
-                    else
-                        return PivA2Ws{buffer}.to_volstr(decoded);
+                    piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(buffer.data())), buffer_len);
+                    return std::forward<T>(PivA2W{buffer}.to_volmem(decoded));
                 }
             }
-            PIV_IF(sizeof(CharT) == 1)
+            decoded.Append(reinterpret_cast<const void *>(str.data()), str.size() * sizeof(wchar_t));
+            return std::forward<T>(decoded);
+        }
+
+        template <typename CharT, typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, CVolMem>::value, T>::type
+        UrlStrDecode(const std::basic_string<CharT> &str, bool utf8, T &&decoded)
+        {
+            return std::forward<T>(piv::encoding::UrlStrDecode(::piv::basic_string_view<CharT>{str.c_str()}, utf8, decoded));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, CWString>::value, T>::type
+        UrlStrDecode(const ::piv::string_view &str, bool utf8, T &&decoded)
+        {
+            decoded.Empty();
+            if (str.size() == 0)
+                return std::forward<T>(decoded);
+            if (piv::encoding::UrlDecodeNeed(str.data(), str.size()))
+            {
+                std::string buffer;
+                size_t buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(str.data()), str.size());
+                buffer.resize(buffer_len);
+                piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(str.data()), str.size(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(buffer.data())), buffer_len);
+                if (utf8)
+                    return std::forward<T>(PivU2Ws{buffer}.to_volstr(decoded));
+                else
+                    return std::forward<T>(PivA2Ws{buffer}.to_volstr(decoded));
+            }
+            else
             {
                 if (utf8)
-                    return PivU2Ws{reinterpret_cast<const char *>(str.data()), str.size()}.to_volstr(decoded);
+                    return std::forward<T>(PivU2Ws{reinterpret_cast<const char *>(str.data()), str.size()}.to_volstr(decoded));
                 else
-                    return PivA2Ws{reinterpret_cast<const char *>(str.data()), str.size()}.to_volstr(decoded);
+                    return std::forward<T>(PivA2Ws{reinterpret_cast<const char *>(str.data()), str.size()}.to_volstr(decoded));
             }
-            decoded.SetText(reinterpret_cast<const wchar_t *>(str.data()), str.size());
-            return decoded;
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, CWString>::value, T>::type
+        UrlStrDecode(const ::piv::wstring_view &str, bool utf8, T &&decoded)
+        {
+            decoded.Empty();
+            if (str.size() == 0)
+                return std::forward<T>(decoded);
+            if (piv::encoding::UrlDecodeNeed(str.data(), str.size()))
+            {
+                std::string buffer;
+                if (utf8)
+                {
+                    PivW2U urlstr(str.data(), str.size());
+                    size_t buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes());
+                    buffer.resize(buffer_len);
+                    piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(buffer.data())), buffer_len);
+                    return std::forward<T>(PivU2Ws{buffer}.to_volstr(decoded));
+                }
+                else
+                {
+                    PivW2A urlstr(str.data(), str.size());
+                    size_t buffer_len = piv::encoding::GuessUrlDecodeBound(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes());
+                    buffer.resize(buffer_len);
+                    piv::encoding::UrlDecode(reinterpret_cast<const unsigned char *>(urlstr.data()), urlstr.size_bytes(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(buffer.data())), buffer_len);
+                    return std::forward<T>(PivA2Ws{buffer}.to_volstr(decoded));
+                }
+            }
+            decoded.SetText(str.data(), static_cast<INT_P>(str.size()));
+            return std::forward<T>(decoded);
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, CWString>::value, T>::type
+        UrlStrDecode(const CVolMem &str, bool utf8, T &&decoded)
+        {
+            return std::forward<T>(piv::encoding::UrlStrDecode(::piv::string_view{reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())}, utf8, decoded));
         }
 
         /**
@@ -3652,130 +3788,163 @@ namespace piv
          * @param utf8 是否为UTF-8编码
          * @param ReservedWord 是否不编码保留字符
          */
-        template <typename CharT>
-        std::basic_string<CharT> &UrlStrEncode(const ::piv::basic_string_view<CharT> &str, bool utf8 = true, bool ReservedWord = false, std::basic_string<CharT> &encoded = std::basic_string<CharT>{})
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        UrlStrEncode(const ::piv::string_view &str, bool utf8, bool ReservedWord, T &&encoded)
         {
-            size_t buffer_len;
             if (piv::encoding::UrlEncodeNeed(str.data(), str.size(), ReservedWord))
             {
-                PIV_IF(sizeof(CharT) == 2)
+                size_t buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(str.data()), str.size(), ReservedWord);
+                encoded.resize(buffer_len);
+                piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(str.data()), str.size(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(encoded.data())), buffer_len, ReservedWord);
+                encoded.resize(buffer_len);
+            }
+            else
+            {
+                encoded.assign(str.data(), str.size());
+            }
+            return std::forward<T>(encoded);
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        UrlStrEncode(const ::piv::wstring_view &str, bool utf8, bool ReservedWord, T &&encoded)
+        {
+            if (piv::encoding::UrlEncodeNeed(str.data(), str.size(), ReservedWord))
+            {
+                CVolMem buffer;
+                size_t buffer_len;
+                if (utf8)
                 {
+                    PivW2U text{str.data(), str.size()};
+                    buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(text.data()), text.size_bytes(), ReservedWord);
                     CVolMem buffer;
-                    if (utf8)
-                    {
-                        PivW2U text{reinterpret_cast<const wchar_t *>(str.data()), str.size()};
-                        buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(text.data()), text.size_bytes(), ReservedWord);
-                        CVolMem buffer;
-                        piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(text.data()), text.size_bytes(), buffer.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
-                        PivU2W urled{buffer, buffer_len};
-                        encoded.assign(reinterpret_cast<const CharT *>(urled.c_str()), urled.size());
-                    }
-                    else
-                    {
-                        PivW2A text{reinterpret_cast<const wchar_t *>(str.data()), str.size()};
-                        buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(text.data()), text.size_bytes(), ReservedWord);
-                        CVolMem buffer;
-                        piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(text.data()), text.size_bytes(), buffer.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
-                        PivA2W urled{buffer, buffer_len};
-                        encoded.assign(reinterpret_cast<const CharT *>(urled.c_str()), urled.size());
-                    }
+                    piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(text.data()), text.size_bytes(), buffer.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
+                    PivU2W urled{buffer, buffer_len};
+                    encoded.assign(urled.c_str(), urled.size());
                 }
                 else
                 {
-                    buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(str.data()), str.size(), ReservedWord);
-                    encoded.resize(buffer_len);
-                    piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(str.data()), str.size(), const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(encoded.data())), buffer_len, ReservedWord);
-                    encoded.resize(buffer_len);
+                    PivW2A text{str.data(), str.size()};
+                    buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(text.data()), text.size_bytes(), ReservedWord);
+                    CVolMem buffer;
+                    piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(text.data()), text.size_bytes(), buffer.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
+                    PivA2W urled{buffer, buffer_len};
+                    encoded.assign(urled.c_str(), urled.size());
                 }
             }
             else
             {
                 encoded.assign(str.data(), str.size());
             }
-            return encoded;
+            return std::forward<T>(encoded);
         }
+
         template <typename CharT>
-        std::basic_string<CharT> &UrlStrEncode(const std::basic_string<CharT> &str, bool utf8 = true, bool ReservedWord = false, std::basic_string<CharT> &encoded = std::basic_string<CharT>{})
+        std::basic_string<CharT> &UrlStrEncode(const std::basic_string<CharT> &str, bool utf8, bool ReservedWord, std::basic_string<CharT> &encoded)
         {
             return piv::encoding::UrlStrEncode(::piv::basic_string_view<CharT>{str.c_str()}, utf8, ReservedWord, encoded);
         }
 
         template <typename CharT>
-        CVolMem &UrlDataEncode(const basic_string_view<CharT> &str, bool utf8 = true, bool ReservedWord = false, CVolMem &encoded = CVolMem{})
+        std::basic_string<CharT> &&UrlStrEncode(const std::basic_string<CharT> &str, bool utf8, bool ReservedWord, std::basic_string<CharT> &&encoded)
+        {
+            return std::forward<std::basic_string<CharT> &&>(piv::encoding::UrlStrEncode(::piv::basic_string_view<CharT>{str.c_str()}, utf8, ReservedWord, encoded));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, CVolMem>::value, T>::type
+        UrlDataEncode(const ::piv::string_view &str, bool utf8, bool ReservedWord, T &&encoded)
         {
             encoded.Empty();
-            size_t buffer_len;
             if (piv::encoding::UrlEncodeNeed(str.data(), str.size(), ReservedWord))
             {
-                PIV_IF(sizeof(CharT) == 2)
+                size_t buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(str.data()), str.size(), ReservedWord);
+                piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(str.data()), str.size(), encoded.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
+                encoded.Realloc(buffer_len);
+                return std::forward<T>(encoded);
+            }
+            else
+            {
+                encoded.Append(reinterpret_cast<const void *>(str.data()), str.size() * 2);
+            }
+            return std::forward<T>(encoded);
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, CVolMem>::value, T>::type
+        UrlDataEncode(const ::piv::wstring_view &str, bool utf8, bool ReservedWord, T &&encoded)
+        {
+            encoded.Empty();
+            if (piv::encoding::UrlEncodeNeed(str.data(), str.size(), ReservedWord))
+            {
+                CVolMem buffer;
+                size_t buffer_len;
+                if (utf8)
                 {
-                    CVolMem buffer;
-                    if (utf8)
-                    {
-                        PivW2U text{reinterpret_cast<const wchar_t *>(str.data()), str.size()};
-                        buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(text.data()), text.size_bytes(), ReservedWord);
-                        piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(text.data()), text.size_bytes(), buffer.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
-                        return PivU2W{buffer, buffer_len}.to_volmem(encoded);
-                    }
-                    else
-                    {
-                        PivW2A text{reinterpret_cast<const wchar_t *>(str.data()), str.size()};
-                        buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(text.data()), text.size_bytes(), ReservedWord);
-                        piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(text.data()), text.size_bytes(), buffer.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
-                        return PivA2W{buffer, buffer_len}.to_volmem(encoded);
-                    }
+                    PivW2U text{str.data(), str.size()};
+                    buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(text.data()), text.size_bytes(), ReservedWord);
+                    piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(text.data()), text.size_bytes(), buffer.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
+                    return std::forward<T>(PivU2W{buffer, buffer_len}.to_volmem(encoded));
                 }
                 else
                 {
-                    buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(str.data()), str.size(), ReservedWord);
-                    piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(str.data()), str.size(), encoded.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
-                    encoded.Realloc(buffer_len);
-                    return encoded;
+                    PivW2A text{str.data(), str.size()};
+                    buffer_len = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<const unsigned char *>(text.data()), text.size_bytes(), ReservedWord);
+                    piv::encoding::UrlEncode(reinterpret_cast<const unsigned char *>(text.data()), text.size_bytes(), buffer.Alloc(static_cast<INT_P>(buffer_len), TRUE), buffer_len, ReservedWord);
+                    return std::forward<T>(PivA2W{buffer, buffer_len}.to_volmem(encoded));
                 }
             }
             else
             {
-                encoded.Append(reinterpret_cast<const void *>(str.data()), str.size() * sizeof(CharT));
+                encoded.Append(reinterpret_cast<const void *>(str.data()), str.size() * 2);
             }
-            return encoded;
-        }
-        template <typename CharT>
-        CVolMem &UrlDataEncode(const std::basic_string<CharT> &str, bool utf8 = true, bool ReservedWord = false, CVolMem &encoded = CVolMem{})
-        {
-            return piv::encoding::UrlDataEncode(std::basic_string<CharT>{str.c_str()}, utf8, ReservedWord, encoded);
+            return std::forward<T>(encoded);
         }
 
-        template <typename = void>
-        CVolMem &UrlDataEncode(const CWString &str, bool utf8 = true, bool ReservedWord = false, CVolMem &encoded = CVolMem{})
+        template <typename CharT, typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, CVolMem>::value, T>::type
+        UrlDataEncode(const std::basic_string<CharT> &str, bool utf8, bool ReservedWord, T &&encoded)
         {
-            return piv::encoding::UrlDataEncode(::piv::wstring_view(str.GetText()), utf8, ReservedWord, encoded);
+            return std::forward<T>(piv::encoding::UrlDataEncode(std::basic_string<CharT>{str.c_str()}, utf8, ReservedWord, encoded));
         }
-        template <typename = void>
-        CVolMem &UrlDataEncode(const CVolMem &str, bool utf8 = true, bool ReservedWord = false, CVolMem &encoded = CVolMem{})
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, CVolMem>::value, T>::type
+        UrlDataEncode(const CWString &str, bool utf8, bool ReservedWord, T &&encoded)
         {
-            return piv::encoding::UrlDataEncode(::piv::string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), utf8, ReservedWord, encoded);
+            return std::forward<T>(piv::encoding::UrlDataEncode(::piv::wstring_view(str.GetText()), utf8, ReservedWord, encoded));
         }
-        template <typename = void>
-        CWString &UrlStrEncode(const CVolMem &str, CWString &encoded, bool utf8 = true, bool ReservedWord = false)
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, CVolMem>::value, T>::type
+        UrlDataEncode(const CVolMem &str, bool utf8, bool ReservedWord, T &&encoded)
+        {
+            return std::forward<T>(piv::encoding::UrlDataEncode(::piv::string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), utf8, ReservedWord, encoded));
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, CWString>::value, T>::type
+        UrlStrEncode(const CVolMem &str, T &&encoded, bool utf8 = true, bool ReservedWord = false)
         {
             if (piv::encoding::UrlEncodeNeed(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize()), ReservedWord))
             {
                 CVolMem buffer;
                 piv::encoding::UrlDataEncode<char>(::piv::string_view(reinterpret_cast<const char *>(str.GetPtr()), static_cast<size_t>(str.GetSize())), utf8, ReservedWord, buffer);
                 if (utf8)
-                    return PivU2Ws{buffer}.to_volstr(encoded);
+                    return std::forward<T>(PivU2Ws{buffer}.to_volstr(encoded));
                 else
-                    return PivA2Ws{buffer}.to_volstr(encoded);
+                    return std::forward<T>(PivA2Ws{buffer}.to_volstr(encoded));
             }
             else
             {
                 if (utf8)
-                    return PivU2Ws{str}.to_volstr(encoded);
+                    return std::forward<T>(PivU2Ws{str}.to_volstr(encoded));
                 else
-                    return PivA2Ws{str}.to_volstr(encoded);
+                    return std::forward<T>(PivA2Ws{str}.to_volstr(encoded));
             }
             encoded.Empty();
-            return encoded;
+            return std::forward<T>(encoded);
         }
 
     } // namespace encoding
@@ -3796,6 +3965,7 @@ namespace piv
                     (c >= 97 && c <= 122) || // a-z
                     (c == 10) || (c == 13)); // \r\n
         }
+
         inline void AddChar(std::basic_string<CharT> &s, const unsigned char &c, uint32_t &count, uint32_t max_line_len) noexcept
         {
             if (count < max_line_len)
@@ -3811,6 +3981,7 @@ namespace piv
                 count = 1;
             }
         }
+
         inline void AddChar(CWString &s, const unsigned char &c, uint32_t &count, uint32_t max_line_len) noexcept
         {
             if (count < max_line_len)
@@ -3888,14 +4059,17 @@ namespace piv
             }
             return ret;
         }
+
         inline std::basic_string<CharT> encode(const basic_string_view<CharT> &input, int line_len = 0)
         {
             return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), line_len);
         }
+
         inline std::basic_string<CharT> encode(const std::basic_string<CharT> &input, int line_len = 0)
         {
             return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), line_len);
         }
+
         inline std::basic_string<CharT> encode(const CVolMem &input, int line_len = 0)
         {
             return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()), line_len);
@@ -3905,14 +4079,17 @@ namespace piv
         {
             return encode<CWString>(input, len, line_len);
         }
+
         inline CWString Encode(const ::piv::basic_string_view<CharT> &input, int line_len = 0)
         {
             return encode<CWString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), line_len);
         }
+
         inline CWString Encode(const std::basic_string<CharT> &input, int line_len = 0)
         {
             return encode<CWString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), line_len);
         }
+
         inline CWString Encode(const CVolMem &input, int line_len = 0)
         {
             return encode<CWString>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()), line_len);
@@ -3930,8 +4107,8 @@ namespace piv
                 len = sizeof(T) == 1 ? strlen(reinterpret_cast<const char *>(input)) : wcslen(reinterpret_cast<const wchar_t *>(input));
             /*
             #ifdef SIMDUTF_H
-                        output.Alloc(simdutf::maximal_binary_length_from_base64(input, len), TRUE);
-                        simdutf::base64_to_binary(input, len, output.GetPtr(), simdutf::base64_default);
+                output.Alloc(simdutf::maximal_binary_length_from_base64(input, len), TRUE);
+                simdutf::base64_to_binary(input, len, output.GetPtr(), simdutf::base64_default);
             #else
             */
             int i = 0;
@@ -3992,14 +4169,17 @@ namespace piv
         {
             decode(input.data(), output, input.size());
         }
+
         inline void decode(const std::basic_string<CharT> &input, CVolMem &output)
         {
             decode(input.c_str(), output, input.size());
         }
+
         inline void decode(const CVolMem &input, CVolMem &output)
         {
             decode(reinterpret_cast<const CharT *>(input.GetPtr()), output, static_cast<size_t>(input.GetSize()) / sizoef(CharT));
         }
+
         inline void decode(const CWString &input, CVolMem &output)
         {
             decode(input.GetText(), output, static_cast<size_t>(input.GetLength()));
@@ -4012,6 +4192,7 @@ namespace piv
             decode(input, buffer);
             return std::basic_string<CharT>{reinterpret_cast<const CharT *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize()) / sizeof(CharT)};
         }
+
         template <typename T>
         inline CVolMem Decode(const T &input)
         {
@@ -4034,14 +4215,17 @@ namespace piv
         {
             s.push_back(c);
         }
+
         inline void AddChar(CWString &s, const unsigned char &c) noexcept
         {
             s.AddChar(c);
         }
+
         inline void ClearStr(std::basic_string<CharT> &s) noexcept
         {
             s.clear();
         }
+
         inline void ClearStr(CWString &s) noexcept
         {
             s.Empty();
@@ -4095,10 +4279,12 @@ namespace piv
             }
             return output;
         }
+
         inline std::basic_string<CharT> encode(const std::basic_string<CharT> &input, bool padding = false)
         {
             return encode(::piv::basic_string_view<CharT>{input}, padding);
         }
+
         inline std::basic_string<CharT> encode(const CVolMem &input, bool padding = false)
         {
             return encode(::piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / sizeof(CharT)}, padding);
@@ -4122,10 +4308,12 @@ namespace piv
             }
             return output;
         }
+
         inline CWString Encode(const std::basic_string<CharT> &input, bool padding = false)
         {
             return Encode(CVolMem(input.c_str(), input.size() * sizeof(CharT)), padding);
         }
+
         inline CWString Encode(const ::piv::basic_string_view<CharT> &input, bool padding = false)
         {
             return Encode(CVolMem(input.data(), input.size() * sizeof(CharT)), padding);
@@ -4166,22 +4354,27 @@ namespace piv
             }
             return true;
         }
+
         inline bool decode(const ::piv::basic_string_view<CharT> &input, CVolMem &output)
         {
             return decode(input.data(), output, input.size());
         }
+
         inline bool decode(const std::basic_string<CharT> &input, CVolMem &output)
         {
             return decode(input.c_str(), output, input.size());
         }
+
         inline bool decode(const CVolMem &input, CVolMem &output)
         {
             return decode(reinterpret_cast<const CharT *>(input.GetPtr()), output, static_cast<size_t>(input.GetSize()) / sizoef(CharT));
         }
+
         inline bool decode(const CWString &input, CVolMem &output)
         {
             return decode(input.GetText(), output, static_cast<size_t>(input.GetLength()));
         }
+
         template <typename T>
         inline std::basic_string<CharT> decode(const T &input)
         {
@@ -4189,6 +4382,7 @@ namespace piv
             decode(input, buffer);
             return std::basic_string<CharT>{reinterpret_cast<const CharT *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize()) / sizeof(CharT)};
         }
+
         template <typename T>
         inline CVolMem Decode(const T &input)
         {
@@ -4211,6 +4405,7 @@ namespace piv
         {
             s.push_back(c);
         }
+
         inline void AddChar(CWString &s, unsigned char c) noexcept
         {
             s.AddChar(c);
@@ -4266,10 +4461,12 @@ namespace piv
         {
             return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
         }
+
         inline std::basic_string<CharT> encode(const std::basic_string<CharT> &input)
         {
             return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
         }
+
         inline std::basic_string<CharT> encode(const CVolMem &input)
         {
             return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
@@ -4279,10 +4476,12 @@ namespace piv
         {
             return encode<CWString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
         }
+
         inline CWString Encode(const std::basic_string<CharT> &input)
         {
             return encode<CWString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
         }
+
         inline CWString Encode(const CVolMem &input)
         {
             return encode<CWString>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
@@ -4348,22 +4547,27 @@ namespace piv
             if (val != -1)
                 output.AddU8Char((U8CHAR)(queue | val << nbits));
         }
+
         inline void decode(const ::piv::basic_string_view<CharT> &input, CVolMem &output)
         {
             decode(input.data(), output, input.size());
         }
+
         inline void decode(const std::basic_string<CharT> &input, CVolMem &output)
         {
             decode(input.c_str(), output, input.size());
         }
+
         inline void decode(const CVolMem &input, CVolMem &output)
         {
             decode(reinterpret_cast<const CharT *>(input.GetPtr()), output, static_cast<size_t>(input.GetSize()) / sizoef(CharT));
         }
+
         inline void decode(const CWString &input, CVolMem &output)
         {
             decode(input.GetText(), output, static_cast<size_t>(input.GetLength()));
         }
+
         template <typename T>
         inline std::basic_string<CharT> decode(const T &input)
         {
@@ -4371,6 +4575,7 @@ namespace piv
             decode(input, buffer);
             return std::basic_string<CharT>{reinterpret_cast<const CharT *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize()) / sizeof(CharT)};
         }
+
         template <typename T>
         inline CVolMem Decode(const T &input)
         {

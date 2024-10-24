@@ -150,8 +150,11 @@ public:
     // 取内存使用情况
     BOOL get_memory_info(PROCESS_MEMORY_COUNTERS *pMemCounters)
     {
-        if (hProcess != NULL)
+        if (hProcess != NULL && pMemCounters != nullptr)
+        {
+            pMemCounters->cb = sizeof(PROCESS_MEMORY_COUNTERS);
             return ::GetProcessMemoryInfo(hProcess, pMemCounters, sizeof(PROCESS_MEMORY_COUNTERS));
+        }
         return FALSE;
     }
 
@@ -349,7 +352,7 @@ public:
                 return BaseName;
             }
         }
-        return _CT("");
+        return CWString(L"");
     }
 
     // 取模块文件名
@@ -364,7 +367,7 @@ public:
                 return FileName;
             }
         }
-        return _CT("");
+        return CWString(L"");
     }
 
     // 取模块路径
@@ -383,7 +386,7 @@ public:
                     return FileName.Left(pos);
             }
         }
-        return _CT("");
+        return CWString(L"");
     }
 
     // 取内存映射文件
@@ -398,7 +401,7 @@ public:
                 return FileName;
             }
         }
-        return _CT("");
+        return CWString(L"");
     }
 
     // 取进程映像文件名
@@ -413,7 +416,7 @@ public:
                 return ImageFilename;
             }
         }
-        return _CT("");
+        return CWString(L"");
     }
 
     // 创建远程线程
@@ -487,19 +490,18 @@ public:
         const BYTE *EndAddress = (end_ptr == NULL) ? ProcessEnd : reinterpret_cast<const BYTE *>(MAX(StartAddress, end_ptr));
         const BYTE *RetAddress = 0;
         // 特征码转字节数组
-        CVolMem sign_buf;
-        GetMbsText(signatures, sign_buf, NULL);
-        sign_buf.ReplaceBin(CVolMem(static_cast<S_BYTE>(' ')), CVolMem(), 0, 0);
-        char *Tzm = reinterpret_cast<char *>(sign_buf.GetPtr());
-        size_t TzmLength = strlen(Tzm) / 2 + 1;
-        WORD *TzmArray = new WORD[TzmLength];
+        CWString SignatureStr{signatures};
+        SignatureStr.Replace(L" ", L"");
+        wchar_t *SignatureCode = const_cast<wchar_t *>(SignatureStr.GetText());
+        size_t SignatureLength = static_cast<size_t>(SignatureStr.GetLength()) / 2;
+        WORD *BytesetSequence = new WORD[SignatureLength];
         // 将十六进制特征码转为十进制
-        for (size_t i = 0, n = 0; i < strlen(Tzm); n++)
+        for (size_t i = 0, n = 0; i < static_cast<size_t>(SignatureStr.GetLength()); n++)
         {
-            char num[2]{Tzm[i++], Tzm[i++]};
+            wchar_t num[2]{SignatureCode[i++], SignatureCode[i++]};
             if (num[0] != '?' && num[1] != '?')
             {
-                char a[2];
+                WORD a[2];
                 for (size_t i = 0; i < 2; i++)
                 {
                     if (num[i] >= '0' && num[i] <= '9')
@@ -515,11 +517,11 @@ public:
                         a[i] = num[i] - 55;
                     }
                 }
-                TzmArray[n] = a[0] * 16 + a[1];
+                BytesetSequence[n] = a[0] * 16 + a[1];
             }
             else
             {
-                TzmArray[n] = 256;
+                BytesetSequence[n] = 256;
             }
         }
         // 获取Next数组begin
@@ -529,9 +531,9 @@ public:
         {
             Next[i] = -1;
         }
-        for (short i = 0; i < static_cast<short>(TzmLength); i++)
+        for (short i = 0; i < static_cast<short>(SignatureLength); i++)
         {
-            Next[TzmArray[i]] = i;
+            Next[BytesetSequence[i]] = i;
         }
         // 获取Next数组end
         MEMORY_BASIC_INFORMATION mbi{0};
@@ -550,24 +552,24 @@ public:
                     {
                         j = m;
                         k = 0;
-                        for (; k < TzmLength && j < BLOCKMAXSIZE && (TzmArray[k] == MemoryData[j] || TzmArray[k] == 256); k++, j++)
+                        for (; k < SignatureLength && j < BLOCKMAXSIZE && (BytesetSequence[k] == MemoryData[j] || BytesetSequence[k] == 256); k++, j++)
                             ;
-                        if (k == TzmLength)
+                        if (k == SignatureLength)
                         {
                             if (address_array.Add2(reinterpret_cast<INT_P>(StartAddress) + (BLOCKMAXSIZE * i) + m) >= (max_count - 1))
                             {
                                 return static_cast<int32_t>(max_count); // 达到所欲获取的最大数组成员数后退出
                             }
                         }
-                        if ((m + TzmLength) >= BLOCKMAXSIZE)
+                        if ((m + SignatureLength) >= BLOCKMAXSIZE)
                         {
                             break;
                         }
-                        int32_t num = Next[MemoryData[m + TzmLength]];
+                        int32_t num = Next[MemoryData[m + SignatureLength]];
                         if (num == -1)
-                            m += (TzmLength - Next[256]);
+                            m += (SignatureLength - Next[256]);
                         else
-                            m += (TzmLength - num);
+                            m += (SignatureLength - num);
                     }
                 }
                 BlockSize -= BLOCKMAXSIZE;
@@ -579,9 +581,9 @@ public:
                 {
                     j = m;
                     k = 0;
-                    for (; k < TzmLength && j < BlockSize && (TzmArray[k] == MemoryData[j] || TzmArray[k] == 256); k++, j++)
+                    for (; k < SignatureLength && j < BlockSize && (BytesetSequence[k] == MemoryData[j] || BytesetSequence[k] == 256); k++, j++)
                         ;
-                    if (k == TzmLength)
+                    if (k == SignatureLength)
                     {
                         if (address_array.Add2(reinterpret_cast<INT_P>(StartAddress) + (BLOCKMAXSIZE * i) + m) >= (max_count - 1))
                         {
@@ -589,15 +591,15 @@ public:
                         }
                         break;
                     }
-                    if ((m + TzmLength) >= BlockSize)
+                    if ((m + SignatureLength) >= BlockSize)
                     {
                         break;
                     }
-                    int32_t num = Next[MemoryData[m + TzmLength]];
+                    int32_t num = Next[MemoryData[m + SignatureLength]];
                     if (num == -1)
-                        m += (TzmLength - Next[256]);
+                        m += (SignatureLength - Next[256]);
                     else
-                        m += (TzmLength - num);
+                        m += (SignatureLength - num);
                 }
             }
         Next_Region:
@@ -607,7 +609,7 @@ public:
                 break;
             }
         }
-        delete[] TzmArray;
+        delete[] BytesetSequence;
         delete[] MemoryData;
         return static_cast<int32_t>(address_array.GetCount());
     }
@@ -726,6 +728,13 @@ public:
             }
         }
         return CVolMem();
+    }
+
+    // 读内存数值
+    template <typename T>
+    BOOL read_memory_num(const void *read_address, T &value)
+    {
+        return (hProcess != NULL && ::ReadProcessMemory(hProcess, read_address, &value, sizeof(T), NULL));
     }
 
     // 读内存值
@@ -892,6 +901,25 @@ public:
     }
 
     // 读模块内存值
+    template <typename T>
+    BOOL read_module_num(const HMODULE &hModule, T &value, const size_t &read_off)
+    {
+        if (hProcess != NULL)
+        {
+            MODULEINFO ModuleInfo{0};
+            if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && read_off < ModuleInfo.SizeOfImage)
+            {
+                if (::ReadProcessMemory(hProcess, reinterpret_cast<const BYTE *>(ModuleInfo.lpBaseOfDll) + read_off,
+                                        &value, sizeof(T), NULL))
+                {
+                    return TRUE;
+                }
+            }
+        }
+        return FALSE;
+    }
+
+    // 读模块内存值
     template <typename R>
     R read_module_value(const HMODULE &hModule, const size_t &read_off)
     {
@@ -910,6 +938,7 @@ public:
         }
         return value;
     }
+
     // 写模块数据
     BOOL write_module_memory(const HMODULE &hModule, const size_t &write_off, const void *data_address, const size_t &data_size)
     {
