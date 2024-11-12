@@ -12,6 +12,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cctype>
 #include <cwctype>
 #include <cstdlib>
 #include <type_traits>

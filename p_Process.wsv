@@ -1240,29 +1240,25 @@
     参数 欲运行的命令行 <类型 = 文本型 注释 = "所欲执行的命令行,可以为空." @默认值 = 空对象>
     参数 是否等待进程运行完毕 <类型 = 逻辑型 注释 = "是否等待进程运行完毕才返回,为真时会一直等待,直到运行的进程结束," 注释 = "默认是等待进程创建后返回." @默认值 = 假>
     参数 被运行程序窗口显示方式 <类型 = 程序窗口显示方式 @默认值 = 程序窗口显示方式.普通激活>
+    参数 默认当前目录 <类型 = 文本型 注释 = "提供命令执行时的默认当前目录" @默认值 = 空对象>
     {
-        @ STARTUPINFO infStartup{0};
-        @ infStartup.cb = sizeof(infStartup);
-        @ if (@<被运行程序窗口显示方式> >= 0)
-        @ {
+        @ STARTUPINFO infStartup{sizeof(infStartup), 0};
+        @ if (@<被运行程序窗口显示方式> >= 0) {
         @     infStartup.dwFlags |= STARTF_USESHOWWINDOW;
         @     infStartup.wShowWindow = static_cast<WORD>(@<被运行程序窗口显示方式>);
         @ }
         @ PROCESS_INFORMATION pi{0};
         @ CVolMem memCommandLine;
-        @ memCommandLine.AddString (@<欲运行的命令行>.GetText());
-        @ if (!::CreateProcessW (@<欲运行的可执行文件>.IsEmpty() ? NULL : @<欲运行的可执行文件>.GetText(),
-        @                        @<欲运行的命令行>.IsEmpty() ? NULL : memCommandLine.GetTextPtr(),
-        @                        NULL, NULL, FALSE, 0, NULL, NULL, &infStartup, &pi)) {
+        @ memCommandLine.AddString(@<欲运行的命令行>.GetText());
+        @ if (!::CreateProcessW(@<欲运行的可执行文件>.GetTextMaybeNull(), memCommandLine.GetTextPtr(),
+        @                       NULL, NULL, FALSE, 0, NULL, @<默认当前目录>.GetTextMaybeNull(), &infStartup, &pi))
         @     return 0;
-        @ }
-        @ if (@<是否等待进程运行完毕>) {
-        @     ::WaitForSingleObject (pi.hProcess, INFINITE);
-        @ } else {
-        @     ::WaitForInputIdle (pi.hProcess, 500);
-        @ }
-        @ ::CloseHandle (pi.hThread);
-        @ ::CloseHandle (pi.hProcess);
+        @ if (@<是否等待进程运行完毕>)
+        @     ::WaitForSingleObject(pi.hProcess, INFINITE);
+        @ else
+        @     ::WaitForInputIdle(pi.hProcess, 500);
+        @ ::CloseHandle(pi.hThread);
+        @ ::CloseHandle(pi.hProcess);
         @ return static_cast<INT>(pi.dwProcessId);
     }
 
