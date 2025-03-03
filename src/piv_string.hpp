@@ -407,7 +407,7 @@ namespace piv
         }
 
         /**
-         * @brief std::wstring 格式化
+         * @brief std::wstring 格式化v
          * @param format
          */
         template <typename = void>
@@ -1162,44 +1162,13 @@ namespace piv
 
     namespace detail
     {
-        /**
-         * @brief 文本小于比较(不区分大小写)
-         */
-        template <typename KeyT>
-        struct ci_less
+        struct ci_compare
         {
-            struct nocase_compare
+            bool operator()(const int &c1, const int &c2) const
             {
-                bool operator()(const int &c1, const int &c2) const
-                {
-                    return (piv::edit::tolower(static_cast<uint16_t>(c1)) < piv::edit::tolower(static_cast<uint16_t>(c2)));
-                }
-            };
-            bool operator()(const KeyT &s1, const KeyT &s2) const
-            {
-                return std::lexicographical_compare(s1.begin(), s1.end(), s2.begin(), s2.end(), nocase_compare());
+                return (piv::edit::tolower(static_cast<uint16_t>(c1)) < piv::edit::tolower(static_cast<uint16_t>(c2)));
             }
         };
-
-        /**
-         * @brief 取大小写无关哈希值
-         */
-        template <typename StringT>
-        size_t ci_hash(StringT &&str)
-        {
-            size_t upHash = 0;
-            for (size_t Idx = 0; Idx < str.size(); ++Idx)
-            {
-                const size_t upChar = str[Idx];
-                upHash *= 5;
-                if (upChar >= 'a' && upChar <= 'z') // 为小写字母?
-                    upHash += (upChar - 'a' + 'A'); // 转换为大写字母加入
-                else
-                    upHash += upChar;
-            }
-            return (upHash | 1);
-        }
-
     } // namespace detail
 
 } // namespace piv
@@ -2725,6 +2694,114 @@ namespace piv
         }
 
     } // namespace str
+
 } // namespace piv
 
 #endif // _PIV_STD_STRING_HPP
+
+#ifndef _PIV_STD_STRING_CASE_INSENSITIVE_FUNTION
+#define _PIV_STD_STRING_CASE_INSENSITIVE_FUNTION
+
+namespace piv
+{
+    template <>
+    struct ci_hash<std::string>
+    {
+        size_t operator()(const std::string &key) const
+        {
+            std::string upper;
+            upper.resize(key.size());
+            std::transform(key.begin(), key.end(), upper.begin(),
+                           [](char c) -> char
+                           { return (char)piv::edit::toupper(static_cast<uint16_t>(c)); });
+            return ::piv::detail::hash(reinterpret_cast<const unsigned char *>(upper.c_str()), upper.size() * sizeof(char));
+        }
+    };
+
+    template <>
+    struct ci_hash<std::wstring>
+    {
+        size_t operator()(const std::wstring &key) const
+        {
+            std::wstring upper;
+            upper.resize(key.size());
+            std::transform(key.begin(), key.end(), upper.begin(),
+                           [](wchar_t c) -> wchar_t
+                           { return (wchar_t)piv::edit::toupper(static_cast<uint16_t>(c)); });
+            return ::piv::detail::hash(reinterpret_cast<const unsigned char *>(upper.c_str()), upper.size() * sizeof(wchar_t));
+        }
+    };
+
+    template <>
+    struct ci_hash<::piv::string_view>
+    {
+        size_t operator()(const ::piv::string_view &key) const
+        {
+            std::string upper;
+            upper.resize(key.size());
+            std::transform(key.begin(), key.end(), upper.begin(),
+                           [](char c) -> char
+                           { return (char)piv::edit::toupper(static_cast<uint16_t>(c)); });
+            return ::piv::detail::hash(reinterpret_cast<const unsigned char *>(upper.c_str()), upper.size() * sizeof(char));
+        }
+    };
+
+    template <>
+    struct ci_hash<::piv::wstring_view>
+    {
+        size_t operator()(const ::piv::wstring_view &key) const
+        {
+            std::wstring upper;
+            upper.resize(key.size());
+            std::transform(key.begin(), key.end(), upper.begin(),
+                           [](wchar_t c) -> wchar_t
+                           { return (wchar_t)piv::edit::toupper(static_cast<uint16_t>(c)); });
+            return ::piv::detail::hash(reinterpret_cast<const unsigned char *>(upper.c_str()), upper.size() * sizeof(wchar_t));
+        }
+    };
+
+    /**
+     * @brief 文本小于比较(不区分大小写)
+     */
+    template <typename CharT>
+    struct ci_less<std::basic_string<CharT>>
+    {
+        bool operator()(const std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs) const
+        {
+            return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), ::piv::detail::ci_compare());
+        }
+    };
+
+    template <typename CharT>
+    struct ci_less<::piv::basic_string_view<CharT>>
+    {
+        bool operator()(const ::piv::basic_string_view<CharT> &lhs, const ::piv::basic_string_view<CharT> &rhs) const
+        {
+            return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), ::piv::detail::ci_compare());
+        }
+    };
+
+    /**
+     * @brief 文本等于比较(不区分大小写)
+     */
+    template <typename CharT>
+    struct ci_equal_to<std::basic_string<CharT>>
+    {
+        bool operator()(const std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs) const
+        {
+            return ::piv::edit::iequals(lsh, rhs);
+        }
+    };
+
+    template <typename CharT>
+    struct ci_equal_to<::piv::basic_string_view<CharT>>
+    {
+        bool operator()(const ::piv::basic_string_view<CharT> &lhs, const ::piv::basic_string_view<CharT> &rhs) const
+        {
+            return ::piv::edit::iequals(lsh, rhs);
+        }
+    };
+
+} // namespace piv
+
+#endif // _PIV_STD_STRING_CASE_INSENSITIVE_FUNTION

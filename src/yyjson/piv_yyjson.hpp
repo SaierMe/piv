@@ -2456,6 +2456,8 @@ public:
         if (ctx)
             ctx->doc = m_shared_doc ? m_shared_doc : m_weak_doc;
         yyjson_mut_val *val_to_add = _doc()->to_val(std::forward<V>(val), deep_copy);
+        if (yyjson_mut_is_null(m_val))
+            yyjson_mut_set_obj(m_val);
         if (m_val == _doc()->root())
         {
             if (replaced)

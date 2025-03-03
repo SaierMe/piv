@@ -1,34 +1,41 @@
-﻿#ifndef _PIV_STD_THREAD_POOL_HPP
+﻿/*********************************************\
+ * 火山视窗PIV模块 - 标准线程池              *
+ * 作者: Xelloss                             *
+ * 网站: https://piv.ink                     *
+ * 邮箱: xelloss@vip.qq.com                  *
+\*********************************************/
+
+#ifndef _PIV_STD_THREAD_POOL_HPP
 #define _PIV_STD_THREAD_POOL_HPP
 
 #include "detail/piv_base.hpp"
-#include <future>
+#include <future> // include <thread>
 
 class PivThreadPoolPro
 {
 protected:
-    enum ThreadPoolState // 线程状态
+    enum class ThreadPoolState // 线程状态
     {
-        ThreadPoolState_Closed = 0,   // 线程池已被关闭
-        ThreadPoolState_Closing = 1,  // 正在关闭线程池
-        ThreadPoolState_Starting = 2, // 正在创建线程池
-        ThreadPoolState_Normal = 3,   // 线程池正常工作
-        ThreadPoolState_Adjust = 4,   // 调整线程池容量
-        ThreadPoolState_Suspend = 5,  // 线程池暂停
-        ThreadPoolState_Clear = 6     // 正在清空任务
+        Closed = 0,   // 线程池已被关闭
+        Closing = 1,  // 正在关闭线程池
+        Starting = 2, // 正在创建线程池
+        Normal = 3,   // 线程池正常工作
+        Adjust = 4,   // 调整线程池容量
+        Suspend = 5,  // 线程池暂停
+        Clear = 6     // 正在清空任务
     };
     struct THREADPOOL_INFO // 线程池信息
     {
-        HANDLE hCompletionPort = NULL;                               // IOCP完成端口
-        HANDLE hResumeSemaphore = NULL;                              // 暂停继续的信号灯
-        HANDLE hExitSemaphore = NULL;                                // 是否需要退出信号灯
-        std::mutex lock;                                             // 互斥锁
-        std::atomic<ThreadPoolState> state = ThreadPoolState_Closed; // 工作状态(ThreadPoolState)
-        std::atomic<int32_t> ThreadsCount = 0;                       // 现行线程数
-        std::atomic<int32_t> Capacity = 0;                           // 线程池容量
-        std::atomic<int32_t> WorkerTask = 0;                         // 执行任务数
-        std::atomic<int64_t> QueueTask = 0;                          // 队列任务数量
-        std::atomic<int64_t> ComplateTask = 0;                       // 已完成任务数
+        HANDLE hCompletionPort = NULL;                                // IOCP完成端口
+        HANDLE hResumeSemaphore = NULL;                               // 暂停继续的信号灯
+        HANDLE hExitSemaphore = NULL;                                 // 是否需要退出信号灯
+        std::mutex lock;                                              // 互斥锁
+        std::atomic<ThreadPoolState> state = ThreadPoolState::Closed; // 工作状态(ThreadPoolState)
+        std::atomic<int32_t> ThreadsCount = 0;                        // 现行线程数
+        std::atomic<int32_t> Capacity = 0;                            // 线程池容量
+        std::atomic<int32_t> WorkerTask = 0;                          // 执行任务数
+        std::atomic<int64_t> QueueTask = 0;                           // 队列任务数量
+        std::atomic<int64_t> ComplateTask = 0;                        // 已完成任务数
         THREADPOOL_INFO()
         {
             hCompletionPort = ::CreateIoCompletionPort((HANDLE)-1, NULL, 0, 0);
@@ -67,7 +74,7 @@ public:
     {
         // 线程池已创建则直接返回真,其他情况返回假
         if (m_ThreadPool)
-            return (m_ThreadPool->state >= ThreadPoolState_Normal) ? TRUE : FALSE;
+            return (m_ThreadPool->state >= ThreadPoolState::Normal) ? TRUE : FALSE;
         m_ThreadPool.reset(new THREADPOOL_INFO());
         if (!m_ThreadPool)
             return FALSE;
@@ -76,7 +83,7 @@ public:
             m_ThreadPool.reset();
             return FALSE;
         }
-        m_ThreadPool->state = ThreadPoolState_Starting;
+        m_ThreadPool->state = ThreadPoolState::Starting;
         m_ThreadPool->Capacity = (Capacity <= 0) ? (GetProcessorsCount() + 1) : Capacity;
         // 创建线程
         try
@@ -93,7 +100,7 @@ public:
             return FALSE;
         }
         // 创建成功,状态设置为正常工作
-        m_ThreadPool->state = ThreadPoolState_Normal;
+        m_ThreadPool->state = ThreadPoolState::Normal;
         return TRUE;
     }
 
@@ -108,11 +115,11 @@ public:
         if (!m_ThreadPool)
             return TRUE;
         // 如果当前为暂停状态,转为强制销毁
-        ForceDestroy = (m_ThreadPool->state == ThreadPoolState_Suspend) ? TRUE : ForceDestroy;
+        ForceDestroy = (m_ThreadPool->state == ThreadPoolState::Suspend) ? TRUE : ForceDestroy;
         // 如果正在销毁返回假
-        if (m_ThreadPool->state == ThreadPoolState_Closing)
+        if (m_ThreadPool->state == ThreadPoolState::Closing)
             return FALSE;
-        m_ThreadPool->state = ThreadPoolState_Closing;
+        m_ThreadPool->state = ThreadPoolState::Closing;
         // 非强制模式时限时等待队列的任务执行完成
         if (!ForceDestroy)
         {
@@ -154,10 +161,10 @@ public:
      */
     inline BOOL SuspendThreadPool()
     {
-        if (!m_ThreadPool || m_ThreadPool->state != ThreadPoolState_Normal)
+        if (!m_ThreadPool || m_ThreadPool->state != ThreadPoolState::Normal)
             return FALSE;
         ReSetSemaphore(m_ThreadPool->hResumeSemaphore);
-        m_ThreadPool->state = ThreadPoolState_Suspend;
+        m_ThreadPool->state = ThreadPoolState::Suspend;
         return TRUE;
     }
 
@@ -167,11 +174,11 @@ public:
      */
     inline BOOL ResumeThreadPool()
     {
-        if (!m_ThreadPool || m_ThreadPool->state != ThreadPoolState_Suspend)
+        if (!m_ThreadPool || m_ThreadPool->state != ThreadPoolState::Suspend)
             return FALSE;
         // 发信号让等待事件结束
         ::ReleaseSemaphore(m_ThreadPool->hResumeSemaphore, static_cast<LONG>(m_ThreadPool->ThreadsCount), NULL);
-        m_ThreadPool->state = ThreadPoolState_Normal;
+        m_ThreadPool->state = ThreadPoolState::Normal;
         return TRUE;
     }
 
@@ -184,27 +191,27 @@ public:
     template <typename Fun, typename... Args>
     inline BOOL PostTask(Fun &&fun, Args &&...args)
     {
-        if (!m_ThreadPool || m_ThreadPool->state < ThreadPoolState_Normal)
+        if (!m_ThreadPool || m_ThreadPool->state < ThreadPoolState::Normal)
             return FALSE;
-        std::packaged_task<void()> *task = new std::packaged_task<void()>(std::bind(std::forward<Fun>(fun), std::forward<Args>(args)...));
+        std::function<void()> *task = new std::function<void()>(std::bind(std::forward<Fun>(fun), std::forward<Args>(args)...));
         m_ThreadPool->QueueTask++;
         return ::PostQueuedCompletionStatus(m_ThreadPool->hCompletionPort, 1, 0, reinterpret_cast<LPOVERLAPPED>(task));
     }
 
     inline BOOL PostTask2(std::function<void()> &&fun)
     {
-        if (!m_ThreadPool || m_ThreadPool->state < ThreadPoolState_Normal)
+        if (!m_ThreadPool || m_ThreadPool->state < ThreadPoolState::Normal)
             return FALSE;
-        std::packaged_task<void()> *task = new std::packaged_task<void()>(std::forward<std::function<void()>>(fun));
+        std::function<void()> *task = new std::function<void()>(std::forward<std::function<void()> &&>(fun));
         m_ThreadPool->QueueTask++;
         return ::PostQueuedCompletionStatus(m_ThreadPool->hCompletionPort, 1, 0, reinterpret_cast<LPOVERLAPPED>(task));
     }
 
     inline BOOL PostTask2(const std::function<void()> &fun)
     {
-        if (!m_ThreadPool || m_ThreadPool->state < ThreadPoolState_Normal)
+        if (!m_ThreadPool || m_ThreadPool->state < ThreadPoolState::Normal)
             return FALSE;
-        std::packaged_task<void()> *task = new std::packaged_task<void()>(fun);
+        std::function<void()> *task = new std::function<void()>(fun);
         m_ThreadPool->QueueTask++;
         return ::PostQueuedCompletionStatus(m_ThreadPool->hCompletionPort, 1, 0, reinterpret_cast<LPOVERLAPPED>(task));
     }
@@ -219,14 +226,14 @@ public:
             return FALSE;
         if (m_ThreadPool->QueueTask <= 0)
             return TRUE;
-        if (m_ThreadPool->state == ThreadPoolState_Suspend)
+        if (m_ThreadPool->state == ThreadPoolState::Suspend)
         {
             std::thread(&ThreadPoolClearTask, m_ThreadPool).join();
             return TRUE;
         }
-        if (m_ThreadPool->state != ThreadPoolState_Normal)
+        if (m_ThreadPool->state != ThreadPoolState::Normal)
             return FALSE;
-        m_ThreadPool->state = ThreadPoolState_Clear;
+        m_ThreadPool->state = ThreadPoolState::Clear;
         return TRUE;
     }
 
@@ -238,7 +245,7 @@ public:
     BOOL SetThreadPoolCapacity(int32_t nNewThreadNum)
     {
         // 非正常状态时返回假
-        if (!m_ThreadPool || m_ThreadPool->state < ThreadPoolState_Normal)
+        if (!m_ThreadPool || m_ThreadPool->state < ThreadPoolState::Normal)
             return FALSE;
         nNewThreadNum = (nNewThreadNum <= 0) ? m_Processors + 1 : nNewThreadNum;
         // 新旧线程数量一样时直接返回真
@@ -254,7 +261,7 @@ public:
         }
         else
         {
-            m_ThreadPool->state = ThreadPoolState_Adjust;
+            m_ThreadPool->state = ThreadPoolState::Adjust;
             for (int32_t i = m_ThreadPool->ThreadsCount - nNewThreadNum; i > 0; i--)
                 ::PostQueuedCompletionStatus(m_ThreadPool->hCompletionPort, 0, 0, nullptr);
         }
@@ -371,40 +378,41 @@ protected:
         ThreadPool->ThreadsCount++;
         DWORD dwStatus = 0;
         ULONG_PTR CompletionKey = 0;
-        std::packaged_task<void()> *task = nullptr; // 任务函数指针
+        std::function<void()> *task = nullptr; // 任务函数指针
         // 无限循环获取完成端口的状态(接收线程任务)
         while (::GetQueuedCompletionStatus(ThreadPool->hCompletionPort, &dwStatus, &CompletionKey, reinterpret_cast<LPOVERLAPPED *>(&task), INFINITE))
         {
-            std::unique_ptr<std::packaged_task<void()>> WorkProc(task);
+            std::unique_ptr<std::function<void()>> work_task(task);
+            task = nullptr;
             if (dwStatus == 10086)
                 break;
             else if (dwStatus == 1)
                 ThreadPool->QueueTask--;
             switch (ThreadPool->state.load())
             {
-            case ThreadPoolState_Suspend:
+            case ThreadPoolState::Suspend:
             {
                 ::WaitForSingleObject(ThreadPool->hResumeSemaphore, INFINITE);
                 break;
             }
-            case ThreadPoolState_Clear:
+            case ThreadPoolState::Clear:
             {
-                WorkProc.reset(nullptr);
+                work_task.reset(nullptr);
                 if (ThreadPool->QueueTask <= 0)
-                    ThreadPool->state = ThreadPoolState_Normal;
+                    ThreadPool->state = ThreadPoolState::Normal;
                 break;
             }
-            case ThreadPoolState_Adjust:
+            case ThreadPoolState::Adjust:
             {
                 if (ThreadPool->ThreadsCount == ThreadPool->Capacity)
-                    ThreadPool->state = ThreadPoolState_Normal;
+                    ThreadPool->state = ThreadPoolState::Normal;
                 break;
             }
             }
-            if (WorkProc != nullptr && WorkProc->valid())
+            if (work_task && *work_task)
             {
-                ThreadPool->WorkerTask++; // 原子锁递增执行任务数
-                (*WorkProc)(); // 执行任务
+                ThreadPool->WorkerTask++;   // 原子锁递增执行任务数
+                (*work_task)();             // 执行任务
                 ThreadPool->ComplateTask++; // 原子锁递增已完成任务数
                 ThreadPool->WorkerTask--;   // 原子锁递减执行任务数
             }
@@ -435,7 +443,7 @@ protected:
     {
         DWORD dwStatus = 0;
         ULONG_PTR CompletionKey = 0;
-        std::packaged_task<void()> *task = nullptr;
+        std::function<void()> *task = nullptr;
         while (::GetQueuedCompletionStatus(ThreadPool->hCompletionPort, &dwStatus,
                                            &CompletionKey, reinterpret_cast<LPOVERLAPPED *>(&task), 100))
         {
@@ -448,7 +456,7 @@ protected:
             if (ThreadPool->QueueTask <= 0)
                 break;
         }
-        ThreadPool->state = ThreadPoolState_Normal;
+        ThreadPool->state = ThreadPoolState::Normal;
         return 0;
     }
 

@@ -2059,7 +2059,7 @@
 # =====
 
 类 WinHTTP网络类 <公开 注释 = "  完整封装了WinHTTP的API,本类仅供给对HTTP协议有足够认识的开发者使用."
-        注释 = "  请注意部分方法对Windows版本的要求,如果使用了这些方法,你需要使用版本" 注释 = "足够高的Windows SDK才能编译." 折叠
+        注释 = "  请注意部分方法对Windows版本的要求,如果使用了这些方法,你需要使用版本" 注释 = "足够高的Windows SDK才能编译."
         @文档 = "category = \"WinHTTP\"" @禁止创建对象 = 真>
 {
     常量 User_Agent <类型 = 文本型
@@ -2142,7 +2142,7 @@
         @ }
         @ hRequest = WinHttpOpenRequest ((HINTERNET)@<连接句柄>, (LPCWSTR)@<请求方式>.GetText (),
         @                                (LPCWSTR)@<目标路径>.GetText (),
-        @                                @<HTTP版本>.IsEmpty () ? NULL : (LPCWSTR)@<HTTP版本>.GetText (),
+        @                                @<HTTP版本>.GetTextMaybeNull(),
         @                                @<来源参考>.IsEmpty () ? WINHTTP_NO_REFERER : (LPCWSTR)@<来源参考>.GetText (),
         @                                ppwszAcceptTypes, (DWORD)@<请求标志>);
         @ if (ppwszAcceptTypes) { free (ppwszAcceptTypes); }
@@ -2168,8 +2168,8 @@
     参数 密码 <类型 = 文本型 注释 = "提供有效的密码,密码可以为空." @默认值 = 空对象>
     {
         @ return WinHttpSetCredentials ((HINTERNET)@<请求句柄>, (DWORD)@<身份验证目标>,
-        @                               (DWORD)@<身份验证方案>, (LPCWSTR)@<用户名>.GetText (),
-        @                               @<密码>.IsEmpty () ? NULL : (LPCWSTR)@<密码>.GetText (), NULL);
+        @                               (DWORD)@<身份验证方案>, (LPCWSTR)@<用户名>.GetText(),
+        @                               @<密码>.GetTextMaybeNull(), NULL);
     }
 
     方法 发送请求 <公开 静态 类型 = 逻辑型 注释 = "将指定的请求发送到HTTP服务器." 注释 = "异步模式下执行成功会响应\"发送请求完成\"回调,接着应调用\"接收响应\"."
@@ -3036,9 +3036,8 @@
     参数 关闭状态码 <类型 = 短整数 注释 = "提供关闭状态码,请参考\"关闭状态码_WinHTTP\"中的常量.">
     参数 关闭原因 <类型 = 文本型 注释 = "提供关闭的详细原因,不能超过60个字符,可以留空." @默认值 = 空对象>
     {
-        @ return (INT)WinHttpWebSocketShutdown ((HINTERNET)@<WebSocket句柄>, (USHORT)@<关闭状态码>,
-        @                                       @<关闭原因>.IsEmpty () ? NULL : (PVOID)@<关闭原因>.GetText (),
-        @                                       @<关闭原因>.IsEmpty () ? 0 : (DWORD)@<关闭原因>.GetLength ());
+        @ return (INT)WinHttpWebSocketShutdown((HINTERNET)@<WebSocket句柄>, (USHORT)@<关闭状态码>,
+        @                                      (PVOID)@<关闭原因>.GetTextMaybeNull(), (DWORD)@<关闭原因>.GetLength());
     }
 
     方法 关闭WebSocket <公开 静态 类型 = 整数 注释 = "完全关闭WebSocket连接." 注释 = "本方法此为Windows 8新增的API,之前的系统不可用."
@@ -3047,9 +3046,8 @@
     参数 关闭状态码 <类型 = 短整数 注释 = "提供关闭状态码,请参考\"关闭状态码_WinHTTP\"中的常量.">
     参数 关闭原因 <类型 = 文本型 注释 = "提供关闭的详细原因,不能超过60个字符,可以留空." @默认值 = 空对象>
     {
-        @ return (INT)WinHttpWebSocketClose ((HINTERNET)@<WebSocket句柄>, (USHORT)@<关闭状态码>,
-        @                                    @<关闭原因>.IsEmpty () ? NULL : (PVOID)@<关闭原因>.GetText (),
-        @                                    @<关闭原因>.IsEmpty () ? 0 : (DWORD)@<关闭原因>.GetLength ());
+        @ return (INT)WinHttpWebSocketClose((HINTERNET)@<WebSocket句柄>, (USHORT)@<关闭状态码>,
+        @                                   (PVOID)@<关闭原因>.GetTextMaybeNull(), (DWORD)@<关闭原因>.GetLength ());
     }
 
     方法 取WebSocket关闭状态 <公开 静态 类型 = 整数 注释 = "获取WebSocket服务器发来的关闭状态码." 返回值注释 = "成功返回0,失败返回错误码." 折叠 @禁止流程检查 = 真>
@@ -3077,9 +3075,8 @@
     参数 缓冲区类型 <类型 = 整数 注释 = "提供缓冲区的类型,请参考\"缓冲区类型_WinHTTP\"中的常量.">
     参数 缓冲区 <类型 = 字节集类 注释 = "所欲发送的缓冲区数据." @默认值 = 空对象>
     {
-        @ return (INT)WinHttpWebSocketSend ((HINTERNET)@<WebSocket句柄>, (WINHTTP_WEB_SOCKET_BUFFER_TYPE)@<缓冲区类型>,
-        @                                   @<缓冲区>.IsEmpty () ? NULL : (PVOID)@<缓冲区>.GetPtr (),
-        @                                   (DWORD)@<缓冲区>.GetSize ());
+        @ return (INT)WinHttpWebSocketSend((HINTERNET)@<WebSocket句柄>, (WINHTTP_WEB_SOCKET_BUFFER_TYPE)@<缓冲区类型>,
+        @                                  (PVOID)@<缓冲区>.GetPtr(), (DWORD)@<缓冲区>.GetSize());
     }
 
     方法 WebSocket接收数据 <公开 静态 类型 = 整数 注释 = "通过WebSocket连接接收数据." 注释 = "本方法此为Windows 8新增的API,之前的系统不可用."
@@ -3122,11 +3119,9 @@
 
     方法 置WebSocket保持活动间隔 <公开 静态 类型 = 逻辑型 注释 = "设置通过连接发送保持活动状态数据包的时间间隔." 返回值注释 = "返回设置是否成功." 折叠 @禁止流程检查 = 真>
     参数 WebSocket句柄 <类型 = 变整数 注释 = "请提供调用\"WebSocket升级完成\"返回的句柄.">
-    参数 间隔 <类型 = 整数 注释 = "默认为300000(毫秒),即30秒,最小间隔为15000(15秒)">
+    参数 间隔 <类型 = 整数 注释 = "默认为30000(毫秒),即30秒,最小间隔为15000(15秒)">
     {
-        @ DWORD dwOption = (DWORD)@<间隔>;
-        @ return WinHttpSetOption ((HINTERNET)@<WebSocket句柄>, 116, // WINHTTP_OPTION_WEB_SOCKET_KEEPALIVE_INTERVAL
-        @                          (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<WebSocket句柄>, 116, &@<间隔>, 4); // WINHTTP_OPTION_WEB_SOCKET_KEEPALIVE_INTERVAL
     }
 
     方法 取WebSocket保持活动间隔 <公开 静态 类型 = 整数 注释 = "获取通过连接发送保持活动状态数据包的时间间隔." 返回值注释 = "返回间隔(毫秒)." 折叠 @禁止流程检查 = 真>
@@ -3134,8 +3129,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption = 0, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<WebSocket句柄>, 116, // WINHTTP_OPTION_WEB_SOCKET_KEEPALIVE_INTERVAL
-        @                                      (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<WebSocket句柄>, 116, // WINHTTP_OPTION_WEB_SOCKET_KEEPALIVE_INTERVAL
+        @                                     &dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
@@ -3144,9 +3139,7 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 大小 <类型 = 整数 注释 = "单位为字节">
     {
-        @ DWORD dwOption = (DWORD)@<大小>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          122, (LPVOID)&dwOption, 4); // WINHTTP_OPTION_WEB_SOCKET_RECEIVE_BUFFER_SIZE
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, 122, &@<大小>, 4); // WINHTTP_OPTION_WEB_SOCKET_RECEIVE_BUFFER_SIZE
     }
 
     方法 取WebSocket接收缓冲区大小 <公开 静态 类型 = 整数 注释 = "获取在WebSocket连接上使用的接收缓冲区大小."
@@ -3155,8 +3148,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption = 0, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                                      122, (LPVOID)&dwOption, &dwLength); // WINHTTP_OPTION_WEB_SOCKET_RECEIVE_BUFFER_SIZE
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<网络句柄>,
+        @                                     122, &dwOption, &dwLength); // WINHTTP_OPTION_WEB_SOCKET_RECEIVE_BUFFER_SIZE
         @ return (INT)dwOption;
     }
 
@@ -3165,9 +3158,7 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 大小 <类型 = 整数 注释 = "单位为字节">
     {
-        @ DWORD dwOption = (DWORD)@<大小>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          123, (LPVOID)&dwOption, 4); // WINHTTP_OPTION_WEB_SOCKET_SEND_BUFFER_SIZE
+        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>, 123, &@<大小>, 4); // WINHTTP_OPTION_WEB_SOCKET_SEND_BUFFER_SIZE
     }
 
     方法 取WebSocket发送缓冲区大小 <公开 静态 类型 = 整数 注释 = "获取在WebSocket连接上使用的发送缓冲区大小."
@@ -3176,8 +3167,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption = 0, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                                      123, (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<网络句柄>,
+        @                                     123, (LPVOID)&dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
@@ -3187,9 +3178,7 @@
             返回值注释 = "返回设置是否成功." 折叠 @禁止流程检查 = 真>
     参数 线程数量 <类型 = 整数 注释 = "默认为0,等于CPU的线程数.">
     {
-        @ DWORD dwOption = (DWORD)@<线程数量>;
-        @ return WinHttpSetOption (NULL,
-        @                          WINHTTP_OPTION_WORKER_THREAD_COUNT, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption(NULL, WINHTTP_OPTION_WORKER_THREAD_COUNT, &@<线程数量>, 4);
     }
 
     # 通用选项 ---
@@ -3199,8 +3188,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ LPVOID pOption = NULL; DWORD dwLength = sizeof(LPVOID);
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                                      WINHTTP_OPTION_CALLBACK, (LPVOID)&pOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<网络句柄>,
+        @                                     WINHTTP_OPTION_CALLBACK, (LPVOID)&pOption, &dwLength);
         @ return (INT_P)pOption;
     }
 
@@ -3209,9 +3198,7 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 超时时间 <类型 = 整数 注释 = "默认为无限时,一直等待到解析结束.">
     {
-        @ DWORD dwOption = (DWORD)@<超时时间>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          WINHTTP_OPTION_RESOLVE_TIMEOUT, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_RESOLVE_TIMEOUT, &@<超时时间>, 4);
     }
 
     方法 取选项_解析超时 <公开 静态 类型 = 整数 注释 = "获取解析域名的超时时间,默认为无限." 注释 = "如果设置了非默认值,则为每个域名解析增加一个创建线程的开销."
@@ -3220,8 +3207,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption = 0, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                                      WINHTTP_OPTION_RESOLVE_TIMEOUT, (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<网络句柄>,
+        @                                     WINHTTP_OPTION_RESOLVE_TIMEOUT, (LPVOID)&dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
@@ -3230,9 +3217,7 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 超时时间 <类型 = 整数 注释 = "默认为600000(毫秒),即60秒.设置为-1时禁用超时.">
     {
-        @ DWORD dwOption = (DWORD)@<超时时间>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          WINHTTP_OPTION_CONNECT_TIMEOUT, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_CONNECT_TIMEOUT, &@<超时时间>, 4);
     }
 
     方法 取选项_连接超时 <公开 静态 类型 = 整数 注释 = "获取WinHTTP连接的超时时间,如果连接的时间超过该选项则会取消请求."
@@ -3241,8 +3226,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption = 0, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                                      WINHTTP_OPTION_CONNECT_TIMEOUT, (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<网络句柄>,
+        @                                     WINHTTP_OPTION_CONNECT_TIMEOUT, (LPVOID)&dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
@@ -3252,9 +3237,7 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 重试次数 <类型 = 整数 注释 = "默认为5次.">
     {
-        @ DWORD dwOption = (DWORD)@<重试次数>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          WINHTTP_OPTION_CONNECT_RETRIES, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_CONNECT_RETRIES, &@<重试次数>, 4);
     }
 
     方法 取选项_重连次数 <公开 静态 类型 = 整数 注释 = "获取WinHTTP尝试连接到主机的次数."
@@ -3264,8 +3247,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption = 0, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                                      WINHTTP_OPTION_CONNECT_RETRIES, (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<网络句柄>,
+        @                                     WINHTTP_OPTION_CONNECT_RETRIES, &dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
@@ -3275,8 +3258,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption = 0, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                                      WINHTTP_OPTION_SEND_TIMEOUT, (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<网络句柄>,
+        @                                     WINHTTP_OPTION_SEND_TIMEOUT, &dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
@@ -3285,9 +3268,7 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 超时时间 <类型 = 整数 注释 = "默认为300000(毫秒),即30秒.设置为-1时禁用超时.">
     {
-        @ DWORD dwOption = (DWORD)@<超时时间>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          WINHTTP_OPTION_SEND_TIMEOUT, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_SEND_TIMEOUT, &@<超时时间>, 4);
     }
 
     方法 置选项_接收超时 <公开 静态 类型 = 逻辑型 注释 = "设置接收部分响应的超时时间,如果在此超时期限内未接收完数据,则会取消请求." 返回值注释 = "返回设置是否成功." 折叠
@@ -3295,9 +3276,7 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 超时时间 <类型 = 整数 注释 = "默认为300000(毫秒),即30秒.设置为-1时禁用超时.">
     {
-        @ DWORD dwOption = (DWORD)@<超时时间>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          WINHTTP_OPTION_RECEIVE_TIMEOUT, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_RECEIVE_TIMEOUT, &@<超时时间>, 4);
     }
 
     方法 取选项_接收超时 <公开 静态 类型 = 整数 注释 = "获取接收部分响应的超时时间,如果在此超时期限内未接收完数据,则会取消请求." 返回值注释 = "返回超时时间." 折叠
@@ -3306,8 +3285,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption = 0, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                                      WINHTTP_OPTION_RECEIVE_TIMEOUT, (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<网络句柄>,
+        @                                     WINHTTP_OPTION_RECEIVE_TIMEOUT, &dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
@@ -3317,9 +3296,7 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 超时时间 <类型 = 整数 注释 = "默认为900000(毫秒),即90秒.设置为-1时禁用超时.">
     {
-        @ DWORD dwOption = (DWORD)@<超时时间>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          WINHTTP_OPTION_RECEIVE_RESPONSE_TIMEOUT, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_RECEIVE_RESPONSE_TIMEOUT, &@<超时时间>, 4);
     }
 
     方法 取选项_接收响应头超时 <公开 静态 类型 = 整数 注释 = "获取等待到接收所有响应头为止的超时时间,如果WinHTTP在此超时期限内无法接收所有标头,则会取消请求."
@@ -3329,8 +3306,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption = 0, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                                      WINHTTP_OPTION_RECEIVE_RESPONSE_TIMEOUT, (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<网络句柄>,
+        @                                     WINHTTP_OPTION_RECEIVE_RESPONSE_TIMEOUT, &dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
@@ -3340,8 +3317,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                                      WINHTTP_OPTION_HANDLE_TYPE, (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<网络句柄>,
+        @                                     WINHTTP_OPTION_HANDLE_TYPE, &dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
@@ -3350,8 +3327,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ HINTERNET hOption; DWORD dwLength = sizeof(HINTERNET);
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                                      WINHTTP_OPTION_PARENT_HANDLE, (LPVOID)&hOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<网络句柄>,
+        @                                     WINHTTP_OPTION_PARENT_HANDLE, &hOption, &dwLength);
         @ return (INT_P)hOption;
     }
 
@@ -3360,8 +3337,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption; DWORD dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                                      WINHTTP_OPTION_EXTENDED_ERROR, (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<网络句柄>,
+        @                                     WINHTTP_OPTION_EXTENDED_ERROR, &dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
@@ -3370,21 +3347,21 @@
     参数 代理信息 <类型 = WinHTTP代理信息类>
     {
         @ WINHTTP_PROXY_INFO proxyInfo;
-        @ @<代理信息>.GetInfo (&proxyInfo);
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          WINHTTP_OPTION_PROXY, (LPVOID)&proxyInfo, sizeof(WINHTTP_PROXY_INFO));
+        @ @<代理信息>.GetInfo(&proxyInfo);
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_PROXY,
+        @                         &proxyInfo, sizeof(WINHTTP_PROXY_INFO));
     }
 
     方法 取选项_代理信息 <公开 静态 类型 = 逻辑型 注释 = "获取现有会话句柄或请求句柄上的代理数据." 返回值注释 = "返回是否成功." 折叠 @禁止流程检查 = 真>
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄." 注释 = "为0时会自动获取当前的会话句柄." @默认值 = 0>
     参数 代理信息 <类型 = WinHTTP代理信息类 注释 = "成功返回代理信息.">
     {
-        @ @<代理信息>.ResetToNullObject ();
+        @ @<代理信息>.ResetToNullObject();
         @ WINHTTP_PROXY_INFO proxyInfo;
         @ dwLength = sizeof(WINHTTP_PROXY_INFO);
-        @ if (WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                         WINHTTP_OPTION_PROXY, (LPVOID)&proxyInfo, &dwLength)) {
-        @     @<代理信息>.SetInfo (&proxyInfo);
+        @ if (WinHttpQueryOption((HINTERNET)@<网络句柄>,
+        @                        WINHTTP_OPTION_PROXY, &proxyInfo, &dwLength)) {
+        @     @<代理信息>.SetInfo(&proxyInfo);
         @     return TRUE;
         @ }
         @ return FALSE;
@@ -3395,9 +3372,7 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 上下文值 <类型 = 变整数>
     {
-        @ DWORD_PTR dwOption = (DWORD_PTR)@<上下文值>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          WINHTTP_OPTION_CONTEXT_VALUE, (LPVOID)&dwOption, sizeof(DWORD_PTR));
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_CONTEXT_VALUE, &@<上下文值>, sizeof(DWORD_PTR));
     }
 
     方法 取选项_上下文值 <公开 静态 类型 = 变整数 注释 = "获取跟网络句柄关联的上下文值指针." 返回值注释 = "返回上下文值,失败时为0." 折叠 @禁止流程检查 = 真>
@@ -3405,8 +3380,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD_PTR pOption = NULL; DWORD dwLength = sizeof(DWORD_PTR);
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                                      WINHTTP_OPTION_CONTEXT_VALUE, (LPVOID)&pOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_CONTEXT_VALUE,
+        @                                     &pOption, &dwLength);
         @ return (INT_P)pOption;
     }
 
@@ -3418,8 +3393,8 @@
         @ HTTP_VERSION_INFO httpVer;
         @ httpVer.dwMajorVersion = (DWORD)@<主要版本>;
         @ httpVer.dwMinorVersion = (DWORD)@<次要版本>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          WINHTTP_OPTION_HTTP_VERSION, (LPVOID)&httpVer, sizeof(httpVer));
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_HTTP_VERSION,
+        @                         &httpVer, sizeof(httpVer));
     }
 
     方法 取选项_HTTP版本 <公开 静态 类型 = 逻辑型 注释 = "获取HTTP的版本号." 返回值注释 = "返回获取是否成功." 折叠 @禁止流程检查 = 真>
@@ -3429,8 +3404,8 @@
     {
         @ HTTP_VERSION_INFO httpVer;
         @ DWORD dwLength = sizeof(HTTP_VERSION_INFO);
-        @ BOOL bRes =  WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                                  WINHTTP_OPTION_HTTP_VERSION, (LPVOID)&httpVer, &dwLength);
+        @ BOOL bRes = WinHttpQueryOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_HTTP_VERSION,
+        @                                &httpVer, &dwLength);
         @ @<主要版本.值> = (INT)httpVer.dwMajorVersion;
         @ @<次要版本.值> = (INT)httpVer.dwMinorVersion;
         @ return bRes;
@@ -3441,24 +3416,21 @@
     参数 启用功能 <类型 = 整数 注释 = "只能使用以下两个数值之一:" 注释 = "  1 允许SSL吊销,只能在请求句柄上设置此值;"
             注释 = "  2 将在SSL证书身份验证操作期间临时还原客户端模拟,只能在会话句柄上设置此值.">
     {
-        @ DWORD dwOption = (DWORD)@<启用功能>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          WINHTTP_OPTION_ENABLE_FEATURE, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_ENABLE_FEATURE, &@<启用功能>, 4);
     }
 
     方法 置选项_启用跟踪 <公开 静态 类型 = 逻辑型 注释 = "设置是否允许启用跟踪." 返回值注释 = "返回设置是否成功." 折叠 @禁止流程检查 = 真>
     参数 是否启用 <类型 = 逻辑型>
     {
-        @ BOOL bOption = @<是否启用>;
-        @ return WinHttpSetOption (NULL, WINHTTP_OPTION_ENABLETRACING, (LPVOID)&bOption, 4);
+        @ return WinHttpSetOption(NULL, WINHTTP_OPTION_ENABLETRACING, &@<是否启用>, 4);
     }
 
     方法 取选项_跟踪状态 <公开 静态 类型 = 逻辑型 注释 = "返回是否允许跟踪." 返回值注释 = "返回是否跟踪." 折叠 @禁止流程检查 = 真>
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ BOOL bOption; DWORD dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption (NULL,
-        @                                      WINHTTP_OPTION_ENABLETRACING, (LPVOID)&bOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption(NULL, WINHTTP_OPTION_ENABLETRACING,
+        @                                     &bOption, &dwLength);
         @ return bOption;
     }
 
@@ -3467,9 +3439,7 @@
     参数 重定向策略 <类型 = 整数 注释 = "只能设置为以下三个值之一:" 注释 = "  0 不遵从重定向;" 注释 = "  1 遵从重定向,除了拒绝从HTTPS重定向到HTTP,此为默认值;"
             注释 = "  2 遵从所有重定向;">
     {
-        @ DWORD dwOption = (DWORD)@<重定向策略>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          WINHTTP_OPTION_REDIRECT_POLICY, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_REDIRECT_POLICY, &@<重定向策略>, 4);
     }
 
     方法 取选项_重定向策略 <公开 静态 类型 = 整数 注释 = "获取WinHTTP处理30x HTTP重定向状态码的行为." 返回值注释 = "返回重定向策略:"
@@ -3479,8 +3449,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption = 0, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                                      WINHTTP_OPTION_REDIRECT_POLICY, (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_REDIRECT_POLICY,
+        @                                     &dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
@@ -3488,9 +3458,7 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 重定向次数 <类型 = 整数 注释 = "默认为10次.">
     {
-        @ DWORD dwOption = (DWORD)@<重定向次数>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          WINHTTP_OPTION_MAX_HTTP_AUTOMATIC_REDIRECTS, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_MAX_HTTP_AUTOMATIC_REDIRECTS, &@<重定向次数>, 4);
     }
 
     方法 取选项_最大重定向次数 <公开 静态 类型 = 整数 注释 = "返回WinHTTP遵循的最大重定向次数." 返回值注释 = "返回最大重定向次数." 折叠 @禁止流程检查 = 真>
@@ -3498,8 +3466,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption = 0, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                                      WINHTTP_OPTION_MAX_HTTP_AUTOMATIC_REDIRECTS, (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_MAX_HTTP_AUTOMATIC_REDIRECTS,
+        @                                     &dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
@@ -3508,9 +3476,7 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 继续次数 <类型 = 整数 注释 = "默认为10次.">
     {
-        @ DWORD dwOption = (DWORD)@<继续次数>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          WINHTTP_OPTION_MAX_HTTP_STATUS_CONTINUE, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_MAX_HTTP_STATUS_CONTINUE, &@<继续次数>, 4);
     }
 
     方法 取选项_最大继续状态次数 <公开 静态 类型 = 整数 注释 = "获取在返回最终状态码到客户端之前,忽略100-199信息状态码响应的最大次数."
@@ -3519,8 +3485,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption = 0, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                                      WINHTTP_OPTION_MAX_HTTP_STATUS_CONTINUE, (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_MAX_HTTP_STATUS_CONTINUE,
+        @                                     &dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
@@ -3529,9 +3495,7 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 数据量 <类型 = 整数 注释 = "单位为字节,默认为65536(64KB).">
     {
-        @ DWORD dwOption = (DWORD)@<数据量>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          WINHTTP_OPTION_MAX_RESPONSE_HEADER_SIZE, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_MAX_RESPONSE_HEADER_SIZE, &@<数据量>, 4);
     }
 
     方法 取选项_最大响应头大小 <公开 静态 类型 = 整数 注释 = "获取服务器响应头部分的最大尺寸限制."
@@ -3540,8 +3504,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption = 0, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                                      WINHTTP_OPTION_MAX_RESPONSE_HEADER_SIZE, (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_MAX_RESPONSE_HEADER_SIZE,
+        @                                     &dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
@@ -3549,9 +3513,7 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 数据量 <类型 = 整数 注释 = "单位为字节,默认为1048576(1MB)." "">
     {
-        @ DWORD dwOption = (DWORD)@<数据量>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          WINHTTP_OPTION_MAX_RESPONSE_DRAIN_SIZE, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_MAX_RESPONSE_DRAIN_SIZE, &@<数据量>, 4);
     }
 
     方法 取选项_最大响应排出大小 <公开 静态 类型 = 整数 注释 = "获取从响应中排出数据量的最大限制,以便重用连接." 返回值注释 = "返回数据量." 折叠 @禁止流程检查 = 真>
@@ -3559,31 +3521,30 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption = 0, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                                      WINHTTP_OPTION_MAX_RESPONSE_DRAIN_SIZE, (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_MAX_RESPONSE_DRAIN_SIZE, &dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
     方法 置选项_全局代理凭据 <公开 静态 类型 = 逻辑型 注释 = "设置全局的代理服务器凭据." 注释 = "需要将\"置选项_使用全局服务器凭据\"设置为真." 返回值注释 = "返回设置是否成功."
-            @禁止流程检查 = 真>
+            折叠 @禁止流程检查 = 真>
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 用户凭据 <类型 = WinHTTP用户凭据类>
     {
         @ WINHTTP_CREDS_EX creds;
-        @ @<用户凭据>.GetInfo (&creds);
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          WINHTTP_OPTION_GLOBAL_PROXY_CREDS, (LPVOID)&creds, sizeof(WINHTTP_CREDS_EX));
+        @ @<用户凭据>.GetInfo(&creds);
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_GLOBAL_PROXY_CREDS,
+        @                         &creds, sizeof(WINHTTP_CREDS_EX));
     }
 
     方法 置选项_全局服务器凭据 <公开 静态 类型 = 逻辑型 注释 = "设置全局的服务器凭据." 注释 = "需要将\"置选项_使用全局服务器凭据\"设置为真." 返回值注释 = "返回设置是否成功."
-            @禁止流程检查 = 真>
+            折叠 @禁止流程检查 = 真>
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 用户凭据 <类型 = WinHTTP用户凭据类>
     {
         @ WINHTTP_CREDS_EX creds;
-        @ @<用户凭据>.GetInfo (&creds);
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          WINHTTP_OPTION_GLOBAL_SERVER_CREDS, (LPVOID)&creds, sizeof(WINHTTP_CREDS_EX));
+        @ @<用户凭据>.GetInfo(&creds);
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_GLOBAL_SERVER_CREDS,
+        @                         &creds, sizeof(WINHTTP_CREDS_EX));
     }
 
     方法 置选项_使用全局服务器凭据 <公开 静态 类型 = 逻辑型 注释 = "设置是否使用全局服务器凭据."
@@ -3591,9 +3552,7 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 是否启用 <类型 = 逻辑型 注释 = "默认为假">
     {
-        @ BOOL bOption = @<是否启用>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          WINHTTP_OPTION_USE_GLOBAL_SERVER_CREDENTIALS, (LPVOID)&bOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_USE_GLOBAL_SERVER_CREDENTIALS, &@<是否启用>, 4);
     }
 
     方法 置选项_接收代理连接响应 <公开 静态 类型 = 逻辑型 注释 = "设置是否可以获取代理的响应实体." 注释 = "默认情况下,此选项处于禁用状态." 返回值注释 = "返回设置是否成功." 折叠
@@ -3601,9 +3560,7 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 是否启用 <类型 = 逻辑型 注释 = "默认为假.">
     {
-        @ BOOL bOption = @<是否启用>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          WINHTTP_OPTION_RECEIVE_PROXY_CONNECT_RESPONSE, (LPVOID)&bOption, 4);
+        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>, WINHTTP_OPTION_RECEIVE_PROXY_CONNECT_RESPONSE, &@<是否启用>, 4);
     }
 
     方法 取选项_是否代理连接响应 <公开 静态 类型 = 逻辑型 注释 = "获取是否可以获取代理返回的连接响应." 返回值注释 = "返回是否可以获取." 折叠 @禁止流程检查 = 真>
@@ -3611,8 +3568,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ BOOL bOption; DWORD dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<网络句柄>,
-        @                                      WINHTTP_OPTION_IS_PROXY_CONNECT_RESPONSE, (LPVOID)&bOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<网络句柄>, WINHTTP_OPTION_IS_PROXY_CONNECT_RESPONSE,
+        @                                     &bOption, &dwLength);
         @ return bOption;
     }
 
@@ -3625,9 +3582,7 @@
     参数 解压缩选项 <类型 = 整数 注释 = "只能使用下列4个数值之一,默认为0" 注释 = "  0 禁用解压缩" 注释 = "  1 使用gzip" 注释 = "  2 使用deflate"
             注释 = "  3 同时使用gzip和deflate" @默认值 = 3>
     {
-        @ DWORD dwOption = (DWORD)@<解压缩选项>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          118, (LPVOID)&dwOption, 4); // WINHTTP_OPTION_DECOMPRESSION
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, 118, &@<解压缩选项>, 4); // WINHTTP_OPTION_DECOMPRESSION
     }
 
     方法 置选项_启用HTTP协议 <公开 静态 类型 = 逻辑型 注释 = "设置是否使用更高的HTTP版本."
@@ -3636,9 +3591,7 @@
     参数 位掩码 <类型 = 整数 注释 = "只能使用以下三个数值之一:" 注释 = "  0 将请求限制为HTTP/1.1及更早版本" 注释 = "  1 为请求启用HTTP/2"
             注释 = "  2 为请求启用HTTP/3">
     {
-        @ DWORD dwOption = (DWORD)@<位掩码>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          133, (LPVOID)&dwOption, 4); // WINHTTP_OPTION_ENABLE_HTTP_PROTOCOL
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, 133, &@<位掩码>, 4); // WINHTTP_OPTION_ENABLE_HTTP_PROTOCOL
     }
 
     方法 置选项_URL编码 <公开 静态 类型 = 逻辑型 注释 = "是否对URL路径和查询字段启用URL编码."
@@ -3646,9 +3599,7 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 是否启用 <类型 = 逻辑型 注释 = "是否启用URL编码">
     {
-        @ BOOL bOption = @<是否启用>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          138, (LPVOID)&bOption, 4); // WINHTTP_OPTION_ENCODE_EXTRA
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, 138, &@<是否启用>, 4); // WINHTTP_OPTION_ENCODE_EXTRA
     }
 
     方法 置选项_禁止流队列 <公开 静态 类型 = 逻辑型 注释 = "允许新请求在达到最大并发流限制时打开其他HTTP/2连接,而不是等待现有连接上的下一个可用流."
@@ -3656,9 +3607,7 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 是否启用 <类型 = 逻辑型 注释 = "真为禁止">
     {
-        @ BOOL bOption = (DWORD)@<是否启用>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          139, (LPVOID)&bOption, 4); // WINHTTP_OPTION_DISABLE_STREAM_QUEUE
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, 139, &@<是否启用>, 4); // WINHTTP_OPTION_DISABLE_STREAM_QUEUE
     }
 
     方法 置选项_必需HTTP协议 <公开 静态 类型 = 逻辑型 注释 = "设置是否防止将\"置选项_启用HTTP协议\"设置之外的协议版本用于请求."
@@ -3666,9 +3615,7 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 是否启用 <类型 = 逻辑型>
     {
-        @ BOOL bOption = @<是否启用>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>,
-        @                          145, (LPVOID)&bOption, 4); // WINHTTP_OPTION_HTTP_PROTOCOL_REQUIRED
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, 145, &@<是否启用>, 4); // WINHTTP_OPTION_HTTP_PROTOCOL_REQUIRED
     }
 
     方法 置选项_必须流结束标志 <公开 静态 类型 = 逻辑型 注释 = "设置是否忽略\"Content-Length\"响应头,并继续在流上接收,直到收到END_STREAM标志."
@@ -3676,9 +3623,7 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 是否启用 <类型 = 逻辑型 @默认值 = 真>
     {
-        @ BOOL bOption = (DWORD)@<是否启用>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>, 160, // WINHTTP_OPTION_REQUIRE_STREAM_END
-        @                          (LPVOID)&bOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, 160, &@<是否启用>, 4); // WINHTTP_OPTION_REQUIRE_STREAM_END
     }
 
     方法 置选项_HTTP2传输编码 <公开 静态 类型 = 逻辑型 注释 = "控制HTTP/2响应包含\"Transfer-Encoding\"协议头时的行为方式."
@@ -3686,14 +3631,12 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 是否启用 <类型 = 逻辑型 注释 = "本参数只能设置为真,填假将返回失败." @默认值 = 真>
     {
-        @ BOOL bOption = (DWORD)@<是否启用>;
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>, 169, // WINHTTP_OPTION_HTTP2_PLUS_TRANSFER_ENCODING
-        @                          (LPVOID)&bOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, 169, &<是否启用>, 4); // WINHTTP_OPTION_HTTP2_PLUS_TRANSFER_ENCODING
     }
 
     # 会话句柄专用选项 ---
 
-    方法 置选项_用户代理 <公开 静态 类型 = 逻辑型 注释 = "设置后续请求的用户代理(User-Agent)." 返回值注释 = "返回设置是否成功." 折叠 @禁止流程检查 = 真>
+    方法 置选项_用户代理 <公开 静态 类型 = 逻辑型 注释 = "设置后续请求的用户代理(User-Agent)." 返回值注释 = "返回设置是否成功." @禁止流程检查 = 真>
     参数 会话句柄 <类型 = 变整数 注释 = "请提供调用\"初始化\"成功时返回的会话句柄.">
     参数 用户代理 <类型 = 文本型>
     {

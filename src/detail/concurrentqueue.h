@@ -29,8 +29,7 @@
 
 // Also dual-licensed under the Boost Software License (see LICENSE.md)
 
-#ifndef _MOODYCAMEL_CONCURRENT_QUEUE_H
-#define _MOODYCAMEL_CONCURRENT_QUEUE_H
+#pragma once
 
 #if defined(__GNUC__) && !defined(__INTEL_COMPILER)
 // Disable -Wconversion warnings (spuriously triggered when Traits::size_t and
@@ -510,9 +509,9 @@ namespace details
 	template<typename T>
 	static inline void swap_relaxed(std::atomic<T>& left, std::atomic<T>& right)
 	{
-		T temp = std::move(left.load(std::memory_order_relaxed));
-		left.store(std::move(right.load(std::memory_order_relaxed)), std::memory_order_relaxed);
-		right.store(std::move(temp), std::memory_order_relaxed);
+		T temp = left.load(std::memory_order_relaxed);
+		left.store(right.load(std::memory_order_relaxed), std::memory_order_relaxed);
+		right.store(temp, std::memory_order_relaxed);
 	}
 	
 	template<typename T>
@@ -1480,7 +1479,7 @@ private:
 			while (head != nullptr) {
 				auto prevHead = head;
 				auto refs = head->freeListRefs.load(std::memory_order_relaxed);
-				if ((refs & REFS_MASK) == 0 || !head->freeListRefs.compare_exchange_strong(refs, refs + 1, std::memory_order_acquire, std::memory_order_relaxed)) {
+				if ((refs & REFS_MASK) == 0 || !head->freeListRefs.compare_exchange_strong(refs, refs + 1, std::memory_order_acquire)) {
 					head = freeListHead.load(std::memory_order_acquire);
 					continue;
 				}
@@ -1530,7 +1529,7 @@ private:
 				node->freeListRefs.store(1, std::memory_order_release);
 				if (!freeListHead.compare_exchange_strong(head, node, std::memory_order_release, std::memory_order_relaxed)) {
 					// Hmm, the add failed, but we can only try again when the refcount goes back to zero
-					if (node->freeListRefs.fetch_add(SHOULD_BE_ON_FREELIST - 1, std::memory_order_release) == 1) {
+					if (node->freeListRefs.fetch_add(SHOULD_BE_ON_FREELIST - 1, std::memory_order_acq_rel) == 1) {
 						continue;
 					}
 				}
@@ -1605,7 +1604,7 @@ private:
 			}
 			else {
 				// Increment counter
-				auto prevVal = elementsCompletelyDequeued.fetch_add(1, std::memory_order_release);
+				auto prevVal = elementsCompletelyDequeued.fetch_add(1, std::memory_order_acq_rel);
 				assert(prevVal < BLOCK_SIZE);
 				return prevVal == BLOCK_SIZE - 1;
 			}
@@ -1628,7 +1627,7 @@ private:
 			}
 			else {
 				// Increment counter
-				auto prevVal = elementsCompletelyDequeued.fetch_add(count, std::memory_order_release);
+				auto prevVal = elementsCompletelyDequeued.fetch_add(count, std::memory_order_acq_rel);
 				assert(prevVal + count <= BLOCK_SIZE);
 				return prevVal + count == BLOCK_SIZE;
 			}
@@ -3746,5 +3745,3 @@ inline void swap(typename ConcurrentQueue<T, Traits>::ImplicitProducerKVP& a, ty
 #if defined(__GNUC__) && !defined(__INTEL_COMPILER)
 #pragma GCC diagnostic pop
 #endif
-
-#endif // _MOODYCAMEL_CONCURRENT_QUEUE_H

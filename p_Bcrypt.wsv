@@ -6,7 +6,7 @@
         注释 = "  - 桌面系统需要Windows Vista及更高版本." 注释 = "  - 服务器系统需要Windows Server 2008及更高版本."
         注释 = "  - 部分加密算法有更高的系统版本要求." @视窗.外部头文件 = "bcrypt.h" @视窗.外部库 = "Bcrypt.lib">
 
-类 CNG加解密 <公开 注释 = "提供密码学的加解密支持" 折叠 @文档 = "category = \"加解密\"" @禁止创建对象 = 真>
+类 CNG加解密 <公开 注释 = "提供密码学的加解密支持" 折叠 @文档 = "category = \"加解密\"" @类用途 = 禁止创建对象>
 {
 
     # 对称加解密算法
@@ -26,55 +26,54 @@
         @ BCRYPT_ALG_HANDLE phAlgorithm;
         @ BCRYPT_KEY_HANDLE phKey;
         @ NTSTATUS Status;
-        @ @<类型> = GetClipValue ((INT)@<类型>, 1, 2);
-        @ Status = ::BCryptOpenAlgorithmProvider (&phAlgorithm, (LPCWSTR)@<算法类型>.GetText (), NULL, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
-        @     return CVolMem ();
-        @ }
+        @ @<类型> = @<类型> < 1 ? 1 : (@<类型> > 2 ? 2 : @<类型>);
+        @ Status = ::BCryptOpenAlgorithmProvider(&phAlgorithm, @<算法类型>.GetText(), NULL, 0);
+        @ if (!BCRYPT_SUCCESS(Status))
+        @     return CVolMem();
         @ // 设置算法属性
-        @ Status = ::BCryptSetProperty ((BCRYPT_HANDLE)phAlgorithm, L"ChainingMode",
-        @                               (PUCHAR)@<密码链接模式>.GetText (), (ULONG)@<密码链接模式>.GetLength () * 2 + 2, 0);
+        @ Status = ::BCryptSetProperty((BCRYPT_HANDLE)phAlgorithm, L"ChainingMode",
+        @                              (PUCHAR)@<密码链接模式>.GetText(), (ULONG)@<密码链接模式>.GetLength() * 2 + 2, 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @     return CVolMem ();
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @     return CVolMem();
         @ }
         @ if (@<算法类型> == @<CNG_算法类型.对称加密_RC2>) { // RC2 设置密码位数
-        @     Status = ::BCryptSetProperty ((BCRYPT_HANDLE)phAlgorithm, L"EffectiveKeyLength", (PUCHAR)&@<密钥位>, 4, 0);
+        @     Status = ::BCryptSetProperty((BCRYPT_HANDLE)phAlgorithm, L"EffectiveKeyLength", (PUCHAR)&@<密钥位>, 4, 0);
         @     if (!BCRYPT_SUCCESS(Status)) {
-        @         ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @         return CVolMem ();
+        @         ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @         return CVolMem();
         @     }
         @ }
         @ if (@<密码链接模式> == @<CNG_链接模式.CFB>) { // CFB 模式时设置位数(只支持8位和128位,1/8)
-        @     Status = ::BCryptSetProperty ((BCRYPT_HANDLE)phAlgorithm, L"MessageBlockLength", (PUCHAR)&@<预留参数1>, 4, 0);
+        @     Status = ::BCryptSetProperty((BCRYPT_HANDLE)phAlgorithm, L"MessageBlockLength", (PUCHAR)&@<预留参数1>, 4, 0);
         @     if (!BCRYPT_SUCCESS(Status)) {
-        @         ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @         return CVolMem ();
+        @         ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @         return CVolMem();
         @     }
         @ }
         // 获取块大小
         @ DWORD dwBlockLen, dwPropertySize;
-        @ Status = ::BCryptGetProperty ((BCRYPT_HANDLE)phAlgorithm, L"BlockLength", (PUCHAR)&dwBlockLen, 4, &dwPropertySize, 0);
+        @ Status = ::BCryptGetProperty((BCRYPT_HANDLE)phAlgorithm, L"BlockLength", (PUCHAR)&dwBlockLen, 4, &dwPropertySize, 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @     return CVolMem ();
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @     return CVolMem();
         @ }
         // 设置初始向量
         @ @an<CVolMem> IV = @<初始向量>;
-        @ if (@<初始向量>.GetSize () > @<向量大小>)
-        @     IV.RemoveToEnd (@<向量大小>);
+        @ if (@<初始向量>.GetSize() > @<向量大小>)
+        @     IV.RemoveToEnd(@<向量大小>);
         @ else
-        @     IV.AddSpace (@<向量大小> - @<初始向量>.GetSize (), TRUE);
+        @     IV.AddSpace(@<向量大小> - @<初始向量>.GetSize(), TRUE);
         @ // 生成密钥
         @ @an<CVolMem> Key = @<密钥>;
-        @ if (@<密钥>.GetSize () > @<密钥位> / 8)
-        @     Key.RemoveToEnd (@<密钥位> / 8);
+        @ if (@<密钥>.GetSize() > @<密钥位> / 8)
+        @     Key.RemoveToEnd(@<密钥位> / 8);
         @ else
-        @     Key.AddSpace (@<密钥位> / 8 - @<密钥>.GetSize (), TRUE);
-        @ Status = ::BCryptGenerateSymmetricKey (phAlgorithm, &phKey, NULL, 0, (PUCHAR)Key.GetPtr (), (ULONG)Key.GetSize (), 0);
+        @     Key.AddSpace(@<密钥位> / 8 - @<密钥>.GetSize(), TRUE);
+        @ Status = ::BCryptGenerateSymmetricKey(phAlgorithm, &phKey, NULL, 0, (PUCHAR)Key.GetPtr(), (ULONG)Key.GetSize(), 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @     return CVolMem ();
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @     return CVolMem();
         @ }
         @ @an<CVolMem> OutputData;
         @ DWORD dwDataLen; // 返回的数据长度
@@ -84,42 +83,42 @@
         @     // 处理数据对齐
         @     @an<CVolMem> InputData = @<数据>; // 欲加密的数据
         @     if (@<填充方式> == @<CNG_填充方式.对称_零填充>) // 用零字节填充,对齐数据
-        @         InputData.AddSpace (dwBlockLen - ((DWORD)@<数据>.GetSize () % dwBlockLen), TRUE);
+        @         InputData.AddSpace(dwBlockLen - ((DWORD)@<数据>.GetSize() % dwBlockLen), TRUE);
         @     // 获取加密后的长度
-        @     Status = ::BCryptEncrypt (phKey, (PUCHAR)InputData.GetPtr (), (ULONG)InputData.GetSize (), NULL,
-        @                               NULL, 0, OutputData.GetPtr (), NULL, &dwDataLen, dwFlag);
+        @     Status = ::BCryptEncrypt(phKey, (PUCHAR)InputData.GetPtr(), (ULONG)InputData.GetSize(), NULL,
+        @                              NULL, 0, OutputData.GetPtr(), NULL, &dwDataLen, dwFlag);
         @     if (!BCRYPT_SUCCESS(Status)) {
-        @         ::BCryptDestroyKey (phKey);
-        @         ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @         return CVolMem ();
+        @         ::BCryptDestroyKey(phKey);
+        @         ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @         return CVolMem();
         @     }
-        @     OutputData.Alloc (dwDataLen, TRUE);
+        @     OutputData.Alloc(dwDataLen, TRUE);
         @     // 获取加密后的数据
-        @     Status = ::BCryptEncrypt (phKey, (PUCHAR)InputData.GetPtr (), (ULONG)InputData.GetSize (), NULL,
-        @                               (@<初始向量>.IsNullObject ()) ? NULL : (PUCHAR)IV.GetPtr (), (@<初始向量>.IsNullObject ()) ? 0 : (ULONG)IV.GetSize (),
-        @                               (PUCHAR)OutputData.GetPtr (), dwDataLen, &dwDataLen, dwFlag);
+        @     Status = ::BCryptEncrypt(phKey, (PUCHAR)InputData.GetPtr(), (ULONG)InputData.GetSize(), NULL,
+        @                               (@<初始向量>.IsNullObject()) ? NULL : (PUCHAR)IV.GetPtr(), (@<初始向量>.IsNullObject()) ? 0 : (ULONG)IV.GetSize(),
+        @                               (PUCHAR)OutputData.GetPtr(), dwDataLen, &dwDataLen, dwFlag);
         @ } else {
         // 解密
         @     // 获取解密后的长度
-        @     Status = ::BCryptDecrypt (phKey, (PUCHAR)@<数据>.GetPtr (), (ULONG)@<数据>.GetSize (), NULL,
-        @                               NULL, 0, (PUCHAR)OutputData.GetPtr (), NULL, &dwDataLen, dwFlag);
+        @     Status = ::BCryptDecrypt(phKey, (PUCHAR)@<数据>.GetPtr(), (ULONG)@<数据>.GetSize(), NULL,
+        @                              NULL, 0, (PUCHAR)OutputData.GetPtr(), NULL, &dwDataLen, dwFlag);
         @     if (!BCRYPT_SUCCESS(Status)) {
-        @         BCryptDestroyKey (phKey);
-        @         BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @         return CVolMem ();
+        @         BCryptDestroyKey(phKey);
+        @         BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @         return CVolMem();
         @     }
-        @     OutputData.Alloc (dwDataLen, TRUE);
+        @     OutputData.Alloc(dwDataLen, TRUE);
         @     // 获取解密后的数据
-        @     Status = ::BCryptDecrypt (phKey, (PUCHAR)@<数据>.GetPtr (), (ULONG)@<数据>.GetSize (), NULL,
-        @                              (@<初始向量>.IsNullObject ()) ? NULL : (PUCHAR)IV.GetPtr (), (@<初始向量>.IsNullObject ()) ? 0 : (ULONG)IV.GetSize (),
-        @                              (PUCHAR)OutputData.GetPtr (), dwDataLen, &dwDataLen, dwFlag);
+        @     Status = ::BCryptDecrypt(phKey, (PUCHAR)@<数据>.GetPtr(), (ULONG)@<数据>.GetSize(), NULL,
+        @                              (@<初始向量>.IsNullObject()) ? NULL : (PUCHAR)IV.GetPtr(), (@<初始向量>.IsNullObject()) ? 0 : (ULONG)IV.GetSize(),
+        @                              (PUCHAR)OutputData.GetPtr(), dwDataLen, &dwDataLen, dwFlag);
         @ }
-        @ ::BCryptDestroyKey (phKey);
-        @ ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
+        @ ::BCryptDestroyKey(phKey);
+        @ ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     return CVolMem (); // 失败返回原数据
+        @     return CVolMem(); // 失败返回原数据
         @ }
-        @ OutputData.RemoveToEnd (dwDataLen);
+        @ OutputData.RemoveToEnd(dwDataLen);
         @ return OutputData;
     }
 
@@ -139,111 +138,111 @@
         @ BCRYPT_ALG_HANDLE phAlgorithm;
         @ BCRYPT_KEY_HANDLE phKey;
         @ NTSTATUS Status;
-        @ @<类型> = GetClipValue ((INT)@<类型>, 1, 2);
-        @ Status = ::BCryptOpenAlgorithmProvider (&phAlgorithm, (LPCWSTR)@<算法类型>.GetText (), NULL, 0);
+        @ @<类型> = @<类型> < 1 ? 1 : (@<类型> > 2 ? 2 : @<类型>);
+        @ Status = ::BCryptOpenAlgorithmProvider(&phAlgorithm, @<算法类型>.GetText(), NULL, 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     return CVolMem ();
+        @     return CVolMem();
         @ }
         @ // 设置算法属性
-        @ Status = ::BCryptSetProperty ((BCRYPT_HANDLE)phAlgorithm, L"ChainingMode",
-        @                               (PUCHAR)@<密码链接模式>.GetText (), (ULONG)@<密码链接模式>.GetLength () * 2 + 2, 0);
+        @ Status = ::BCryptSetProperty((BCRYPT_HANDLE)phAlgorithm, L"ChainingMode",
+        @                              (PUCHAR)@<密码链接模式>.GetText(), (ULONG)@<密码链接模式>.GetLength() * 2 + 2, 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @     return CVolMem ();
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @     return CVolMem();
         @ }
         // 获取块大小
         @ DWORD dwBlockLen, dwPropertySize;
-        @ Status = ::BCryptGetProperty ((BCRYPT_HANDLE)phAlgorithm, L"BlockLength", (PUCHAR)&dwBlockLen, 4, &dwPropertySize, 0);
+        @ Status = ::BCryptGetProperty((BCRYPT_HANDLE)phAlgorithm, L"BlockLength", (PUCHAR)&dwBlockLen, 4, &dwPropertySize, 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @     return CVolMem ();
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @     return CVolMem();
         @ }
         @ // 获取属性(GCM)
         @ BCRYPT_AUTH_TAG_LENGTHS_STRUCT authTagLen;
-        @ Status = ::BCryptGetProperty ((BCRYPT_HANDLE)phAlgorithm, L"AuthTagLength", (PUCHAR)&authTagLen, sizeof(authTagLen), &dwPropertySize, 0);
+        @ Status = ::BCryptGetProperty((BCRYPT_HANDLE)phAlgorithm, L"AuthTagLength", (PUCHAR)&authTagLen, sizeof(authTagLen), &dwPropertySize, 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @     return CVolMem ();
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @     return CVolMem();
         @ }
         // 设置初始向量
         @ @an<CVolMem> IV = @<初始向量>;
-        @ if (@<初始向量>.GetSize () > @<向量大小>)
-        @     IV.RemoveToEnd (@<向量大小>);
+        @ if (@<初始向量>.GetSize() > @<向量大小>)
+        @     IV.RemoveToEnd(@<向量大小>);
         @ else
-        @     IV.AddSpace (@<向量大小> - @<初始向量>.GetSize () , TRUE);
+        @     IV.AddSpace(@<向量大小> - @<初始向量>.GetSize() , TRUE);
         @ // 生成密钥
         @ @an<CVolMem> Key = @<密钥>;
-        @ if (@<密钥>.GetSize () > @<密钥位> / 8)
-        @     Key.RemoveToEnd (@<密钥位> / 8);
+        @ if (@<密钥>.GetSize() > @<密钥位> / 8)
+        @     Key.RemoveToEnd(@<密钥位> / 8);
         @ else
-        @     Key.AddSpace (@<密钥位> / 8 - @<密钥>.GetSize () , TRUE);
-        @ Status = ::BCryptGenerateSymmetricKey (phAlgorithm, &phKey, NULL, 0, (PUCHAR)Key.GetPtr (), (ULONG)Key.GetSize (), 0);
+        @     Key.AddSpace(@<密钥位> / 8 - @<密钥>.GetSize() , TRUE);
+        @ Status = ::BCryptGenerateSymmetricKey(phAlgorithm, &phKey, NULL, 0, (PUCHAR)Key.GetPtr(), (ULONG)Key.GetSize(), 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @     return CVolMem ();
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @     return CVolMem();
         @ }
         @ @an<CVolMem> OutputData;
         @ DWORD dwDataLen; // 返回的数据长度
         @ BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO authInfo;
         @ // 自动授权结构体
-        @ BCRYPT_INIT_AUTH_MODE_INFO (authInfo);
+        @ BCRYPT_INIT_AUTH_MODE_INFO(authInfo);
         @ @an<CVolMem> Tag;
-        @ Tag.Alloc (authTagLen.dwMaxLength, FALSE);
-        @ authInfo.pbNonce = (PUCHAR)IV.GetPtr ();
-        @ authInfo.cbNonce = (ULONG)IV.GetSize ();
-        @ authInfo.pbTag = (PUCHAR)Tag.GetPtr ();
-        @ authInfo.cbTag = (ULONG)Tag.GetSize ();
+        @ Tag.Alloc(authTagLen.dwMaxLength, FALSE);
+        @ authInfo.pbNonce = (PUCHAR)IV.GetPtr();
+        @ authInfo.cbNonce = (ULONG)IV.GetSize();
+        @ authInfo.pbTag = (PUCHAR)Tag.GetPtr();
+        @ authInfo.cbTag = (ULONG)Tag.GetSize();
         @ ULONG dwFlag = (@<填充方式> < 0) ? 0 : (ULONG)@<填充方式>;
         @ if (@<类型> == 1) {
         // 加密
         @     // 处理数据对齐
         @     @an<CVolMem> InputData = @<数据>; // 欲加密的数据
         @     if (@<填充方式> == @<CNG_填充方式.对称_零填充>) // 用零字节填充,对齐数据
-        @         InputData.AddSpace (dwBlockLen - (DWORD)@<数据>.GetSize () % dwBlockLen , TRUE);
+        @         InputData.AddSpace(dwBlockLen - (DWORD)@<数据>.GetSize() % dwBlockLen , TRUE);
         @     // 获取加密后的长度
-        @     Status = ::BCryptEncrypt (phKey, (PUCHAR)InputData.GetPtr (), (ULONG)InputData.GetSize (), &authInfo,
-        @                               (@<初始向量>.IsNullObject ()) ? NULL : (PUCHAR)IV.GetPtr (), (@<初始向量>.IsNullObject ()) ? 0 : (ULONG)IV.GetSize (),
-        @                               (PUCHAR)OutputData.GetPtr (), 0, &dwDataLen, dwFlag);
+        @     Status = ::BCryptEncrypt(phKey, (PUCHAR)InputData.GetPtr(), (ULONG)InputData.GetSize(), &authInfo,
+        @                              (@<初始向量>.IsNullObject()) ? NULL : (PUCHAR)IV.GetPtr(), (@<初始向量>.IsNullObject()) ? 0 : (ULONG)IV.GetSize(),
+        @                              (PUCHAR)OutputData.GetPtr(), 0, &dwDataLen, dwFlag);
         @     if (!BCRYPT_SUCCESS(Status)) {
-        @         ::BCryptDestroyKey (phKey);
-        @         ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @         return CVolMem ();
+        @         ::BCryptDestroyKey(phKey);
+        @         ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @         return CVolMem();
         @     }
-        @     OutputData.Alloc (dwDataLen, TRUE);
+        @     OutputData.Alloc(dwDataLen, TRUE);
         @     // 获取加密后的数据
-        @     Status = ::BCryptEncrypt (phKey, (PUCHAR)InputData.GetPtr (), (ULONG)InputData.GetSize (), &authInfo,
-        @                               (@<初始向量>.IsNullObject ()) ? NULL : (PUCHAR)IV.GetPtr (), (@<初始向量>.IsNullObject ()) ? 0 : (ULONG)IV.GetSize (),
-        @                               (PUCHAR)OutputData.GetPtr (), dwDataLen, &dwDataLen, dwFlag);
+        @     Status = ::BCryptEncrypt(phKey, (PUCHAR)InputData.GetPtr(), (ULONG)InputData.GetSize(), &authInfo,
+        @                              (@<初始向量>.IsNullObject()) ? NULL : (PUCHAR)IV.GetPtr(), (@<初始向量>.IsNullObject()) ? 0 : (ULONG)IV.GetSize(),
+        @                              (PUCHAR)OutputData.GetPtr(), dwDataLen, &dwDataLen, dwFlag);
         @ } else // 解密
         @ {
-        @     DWORD HalfSize = (DWORD)@<数据>.GetSize () / 2;
-        @     OutputData.Alloc (@<数据>.GetSize (), TRUE);
+        @     DWORD HalfSize = (DWORD)@<数据>.GetSize() / 2;
+        @     OutputData.Alloc(@<数据>.GetSize(), TRUE);
         @     @an<CVolMem> macContext;
-        @     macContext.Alloc (authTagLen.dwMaxLength, TRUE);
-        @     authInfo.pbMacContext = (PUCHAR)macContext.GetPtr ();
-        @     authInfo.cbMacContext = (ULONG)macContext.GetSize ();
+        @     macContext.Alloc(authTagLen.dwMaxLength, TRUE);
+        @     authInfo.pbMacContext = (PUCHAR)macContext.GetPtr();
+        @     authInfo.cbMacContext = (ULONG)macContext.GetSize();
         @     authInfo.dwFlags = BCRYPT_AUTH_MODE_CHAIN_CALLS_FLAG;
         @     // 第一次解密,每次一半
-        @     Status = ::BCryptDecrypt (phKey, (PUCHAR)@<数据>.GetPtr (), HalfSize, &authInfo,
-        @                               (@<初始向量>.IsNullObject ()) ? NULL : (PUCHAR)IV.GetPtr (), (@<初始向量>.IsNullObject ()) ? 0 : (ULONG)IV.GetSize (),
-        @                               (PUCHAR)OutputData.GetPtr (), HalfSize, &dwDataLen, dwFlag);
+        @     Status = ::BCryptDecrypt(phKey, (PUCHAR)@<数据>.GetPtr(), HalfSize, &authInfo,
+        @                              (@<初始向量>.IsNullObject()) ? NULL : (PUCHAR)IV.GetPtr(), (@<初始向量>.IsNullObject()) ? 0 : (ULONG)IV.GetSize(),
+        @                              (PUCHAR)OutputData.GetPtr(), HalfSize, &dwDataLen, dwFlag);
         @     if (!BCRYPT_SUCCESS(Status)) {
-        @         ::BCryptDestroyKey (phKey);
-        @         ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @         return CVolMem ();
+        @         ::BCryptDestroyKey(phKey);
+        @         ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @         return CVolMem();
         @     }
         @     // 第二次解密,每次一半
-        @     Status = ::BCryptDecrypt (phKey, (PUCHAR)@<数据>.GetPtr () + HalfSize, HalfSize,
-        @                               (@<密码链接模式> == @<CNG_链接模式.GCM>)? &authInfo : NULL,
-        @                               (@<初始向量>.IsNullObject ()) ? NULL : (PUCHAR)IV.GetPtr (), (@<初始向量>.IsNullObject ()) ? 0 : (ULONG)IV.GetSize (),
-        @                               (PUCHAR)OutputData.GetPtr () + HalfSize, HalfSize, &dwDataLen, dwFlag);
+        @     Status = ::BCryptDecrypt(phKey, (PUCHAR)@<数据>.GetPtr() + HalfSize, HalfSize,
+        @                              (@<密码链接模式> == @<CNG_链接模式.GCM>)? &authInfo : NULL,
+        @                              (@<初始向量>.IsNullObject()) ? NULL : (PUCHAR)IV.GetPtr(), (@<初始向量>.IsNullObject()) ? 0 : (ULONG)IV.GetSize(),
+        @                              (PUCHAR)OutputData.GetPtr() + HalfSize, HalfSize, &dwDataLen, dwFlag);
         @ }
-        @ ::BCryptDestroyKey (phKey);
-        @ ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
+        @ ::BCryptDestroyKey(phKey);
+        @ ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     return CVolMem (); // 失败返回原数据
+        @     return CVolMem(); // 失败返回原数据
         @ }
-        @ OutputData.RemoveToEnd (dwDataLen);
+        @ OutputData.RemoveToEnd(dwDataLen);
         @ return OutputData;
     }
 
@@ -1041,42 +1040,42 @@
         @ BCRYPT_ALG_HANDLE phAlgorithm;
         @ BCRYPT_HASH_HANDLE phHash;
         @ NTSTATUS Status;
-        @ if (@<密码>.IsNullObject ()) { // 无密码 Hash
-        @     Status = ::BCryptOpenAlgorithmProvider (&phAlgorithm, (LPCWSTR)@<算法类型>.GetText (), NULL, 0);
+        @ if (@<密码>.IsNullObject()) { // 无密码 Hash
+        @     Status = ::BCryptOpenAlgorithmProvider(&phAlgorithm, @<算法类型>.GetText(), NULL, 0);
         @     if (!BCRYPT_SUCCESS(Status)) {
-        @         return CVolMem ();
+        @         return CVolMem();
         @     }
-        @     Status = ::BCryptCreateHash (phAlgorithm, &phHash, NULL, NULL, NULL, 0, 0);
+        @     Status = ::BCryptCreateHash(phAlgorithm, &phHash, NULL, NULL, NULL, 0, 0);
         @ } else { // 加密 Hash
-        @     Status = ::BCryptOpenAlgorithmProvider (&phAlgorithm, (LPCWSTR)@<算法类型>.GetText (), NULL, BCRYPT_ALG_HANDLE_HMAC_FLAG);
+        @     Status = ::BCryptOpenAlgorithmProvider(&phAlgorithm, @<算法类型>.GetText(), NULL, BCRYPT_ALG_HANDLE_HMAC_FLAG);
         @     if (!BCRYPT_SUCCESS(Status)) {
-        @         return CVolMem ();
+        @         return CVolMem();
         @     }
-        @     Status = ::BCryptCreateHash (phAlgorithm, &phHash, NULL, NULL, (PUCHAR)@<密码>.GetPtr (), (ULONG)@<密码>.GetSize (), 0);
+        @     Status = ::BCryptCreateHash(phAlgorithm, &phHash, NULL, NULL, (PUCHAR)@<密码>.GetPtr(), (ULONG)@<密码>.GetSize(), 0);
         @ }
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @     return CVolMem ();
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @     return CVolMem();
         @ }
-        @ Status = ::BCryptHashData (phHash, (PUCHAR)@<数据>.GetPtr (), (ULONG)@<数据>.GetSize (), 0);
+        @ Status = ::BCryptHashData(phHash, (PUCHAR)@<数据>.GetPtr(), (ULONG)@<数据>.GetSize(), 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     ::BCryptDestroyHash (phHash);
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @     return CVolMem ();
+        @     ::BCryptDestroyHash(phHash);
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @     return CVolMem();
         @ }
         @ DWORD dwHashDigLen, dwPropertySize;
-        @ Status = ::BCryptGetProperty (phAlgorithm, BCRYPT_HASH_LENGTH, (PUCHAR)&dwHashDigLen, 4, &dwPropertySize, 0);
+        @ Status = ::BCryptGetProperty(phAlgorithm, BCRYPT_HASH_LENGTH, (PUCHAR)&dwHashDigLen, 4, &dwPropertySize, 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     ::BCryptDestroyHash (phHash);
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @     return CVolMem ();
+        @     ::BCryptDestroyHash(phHash);
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @     return CVolMem();
         @ }
-        @ HashData.Alloc ((INT)dwHashDigLen, TRUE);
-        @ Status = ::BCryptFinishHash (phHash, (PUCHAR)HashData.GetPtr (), (ULONG)HashData.GetSize (), 0);
-        @ ::BCryptDestroyHash (phHash);
-        @ ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
+        @ HashData.Alloc((INT)dwHashDigLen, TRUE);
+        @ Status = ::BCryptFinishHash (phHash, (PUCHAR)HashData.GetPtr(), (ULONG)HashData.GetSize(), 0);
+        @ ::BCryptDestroyHash(phHash);
+        @ ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     return CVolMem ();
+        @     return CVolMem();
         @ }
         @ return HashData;
     }
@@ -1323,16 +1322,16 @@
     参数 密钥类型 <类型 = CNG_密钥类型>
     参数 填充方式 <类型 = CNG_填充方式>
     {
-        @ if (@<密钥>.IsEmpty()) return CVolMem ();
+        @ if (@<密钥>.IsEmpty()) return CVolMem();
         @ BCRYPT_ALG_HANDLE phAlgorithm;
         @ BCRYPT_KEY_HANDLE phKey;
         @ NTSTATUS Status;
-        @ Status = ::BCryptOpenAlgorithmProvider (&phAlgorithm, @<算法类型>.GetText (), NULL, 0);
+        @ Status = ::BCryptOpenAlgorithmProvider(&phAlgorithm, @<算法类型>.GetText(), NULL, 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     return CVolMem ();
+        @     return CVolMem();
         @ }
-        @ const WCHAR* keyType = @<密钥类型>.GetText ();
-        @ if (@<算法类型>.compare (BCRYPT_RSA_ALGORITHM, TRUE) == 0) {
+        @ const WCHAR* keyType = @<密钥类型>.GetText();
+        @ if (@<算法类型>.compare(BCRYPT_RSA_ALGORITHM, TRUE) == 0) {
         @     switch (reinterpret_cast<BCRYPT_RSAKEY_BLOB*>(@<密钥>.GetPtr())->Magic) {
         @         case BCRYPT_RSAPUBLIC_MAGIC : keyType = BCRYPT_RSAPUBLIC_BLOB; break;
         @         case BCRYPT_RSAPRIVATE_MAGIC : keyType = BCRYPT_RSAPRIVATE_BLOB; break;
@@ -1340,53 +1339,53 @@
         @     }
         @ }
         // 导入密钥
-        @ Status = ::BCryptImportKeyPair (phAlgorithm, NULL, keyType, &phKey, (PUCHAR)@<密钥>.GetPtr (),
-        @                                 (ULONG)@<密钥>.GetSize (), BCRYPT_NO_KEY_VALIDATION);
+        @ Status = ::BCryptImportKeyPair(phAlgorithm, NULL, keyType, &phKey, (PUCHAR)@<密钥>.GetPtr(),
+        @                                (ULONG)@<密钥>.GetSize(), BCRYPT_NO_KEY_VALIDATION);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @     return CVolMem ();
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @     return CVolMem();
         @ }
         @ @an<CVolMem> OutputData;
         @ DWORD dwDataLen; // 返回的数据长度
         @ if (@<类型> == 1) {
         // 加密
         @     // 获取加密后的长度
-        @     Status = ::BCryptEncrypt (phKey, (PUCHAR)@<数据>.GetPtr (), (ULONG)@<数据>.GetSize (), NULL,
-        @                               NULL, 0, NULL, 0, &dwDataLen, (ULONG)@<填充方式>);
+        @     Status = ::BCryptEncrypt(phKey, (PUCHAR)@<数据>.GetPtr(), (ULONG)@<数据>.GetSize(), NULL,
+        @                              NULL, 0, NULL, 0, &dwDataLen, (ULONG)@<填充方式>);
         @     if (!BCRYPT_SUCCESS(Status)) {
-        @         ::BCryptDestroyKey (phKey);
-        @         ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @         return CVolMem ();
+        @         ::BCryptDestroyKey(phKey);
+        @         ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @         return CVolMem();
         @     }
-        @     OutputData.Alloc (dwDataLen, TRUE);
+        @     OutputData.Alloc(dwDataLen, TRUE);
         @     // 获取加密后的数据
-        @     Status = ::BCryptEncrypt (phKey, (PUCHAR)@<数据>.GetPtr (), (ULONG)@<数据>.GetSize (), NULL,
-        @                               NULL, 0, (PUCHAR)OutputData.GetPtr (), dwDataLen, &dwDataLen, (ULONG)@<填充方式>);
+        @     Status = ::BCryptEncrypt(phKey, (PUCHAR)@<数据>.GetPtr(), (ULONG)@<数据>.GetSize(), NULL,
+        @                              NULL, 0, (PUCHAR)OutputData.GetPtr(), dwDataLen, &dwDataLen, (ULONG)@<填充方式>);
         @ } else {
         // 解密
         @     // 获取解密后的长度
-        @     Status = ::BCryptDecrypt (phKey, (PUCHAR)@<数据>.GetPtr (), (ULONG)@<数据>.GetSize (), NULL,
-        @                               NULL, 0, NULL, 0, &dwDataLen, (ULONG)@<填充方式>);
+        @     Status = ::BCryptDecrypt(phKey, (PUCHAR)@<数据>.GetPtr(), (ULONG)@<数据>.GetSize(), NULL,
+        @                              NULL, 0, NULL, 0, &dwDataLen, (ULONG)@<填充方式>);
         @     if (!BCRYPT_SUCCESS(Status)) {
-        @         ::BCryptDestroyKey (phKey);
-        @         ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @         return CVolMem ();
+        @         ::BCryptDestroyKey(phKey);
+        @         ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @         return CVolMem();
         @     }
-        @     OutputData.Alloc (dwDataLen, TRUE);
+        @     OutputData.Alloc(dwDataLen, TRUE);
         @     // 获取解密后的数据
-        @     Status = ::BCryptDecrypt (phKey, (PUCHAR)@<数据>.GetPtr (), (ULONG)@<数据>.GetSize (), NULL,
-        @                               NULL, 0, (PUCHAR)OutputData.GetPtr (), dwDataLen, &dwDataLen, (ULONG)@<填充方式>);
+        @     Status = ::BCryptDecrypt(phKey, (PUCHAR)@<数据>.GetPtr(), (ULONG)@<数据>.GetSize(), NULL,
+        @                              NULL, 0, (PUCHAR)OutputData.GetPtr(), dwDataLen, &dwDataLen, (ULONG)@<填充方式>);
         @ }
-        @ ::BCryptDestroyKey (phKey);
-        @ ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
+        @ ::BCryptDestroyKey(phKey);
+        @ ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     return CVolMem (); // 失败返回原数据
+        @     return CVolMem(); // 失败返回原数据
         @ }
-        @ OutputData.RemoveToEnd (dwDataLen);
+        @ OutputData.RemoveToEnd(dwDataLen);
         @ return OutputData;
     }
 
-    方法 加密_RSA_私钥 <公开 静态 类型 = 字节集类 注释 = "使用私钥对指定数据进行RSA加密" 返回值注释 = "成功返回加密后的数据,失败返回空字节集." 折叠 @禁止流程检查 = 真>
+    方法 加密_RSA_私钥 <公开 静态 类型 = 字节集类 注释 = "使用私钥对指定数据进行RSA加密" 返回值注释 = "成功返回加密后的数据,失败返回空字节集." 折叠>
     参数 数据 <类型 = 字节集类 注释 = "  提供所欲加密的数据" 注释 = "  注意输入的数据长度,不能超过(密钥位/8-填充尺寸),例如生成密钥为2048位,"
             注释 = "无填充的情况下可加密256字节的数据.">
     参数 指定私钥 <类型 = 字节集类 注释 = "提供本次加密所欲使用的BLOB格式私钥数据">
@@ -1395,7 +1394,7 @@
     }
 
     方法 加密_RSA_公钥 <公开 静态 类型 = 字节集类 注释 = "使用公钥对指定数据进行RSA加密" 返回值注释 = "成功返回加密后的数据,失败返回空字节集." 折叠
-            编辑时信息 = "12E4B, 0, 0, 0" @禁止流程检查 = 真>
+            编辑时信息 = "12E4B, 0, 0, 0">
     参数 数据 <类型 = 字节集类 注释 = "提供所欲加密的数据" 注释 = "注意输入的数据长度,不能超过(密钥位/8-填充尺寸),例如生成密钥为2048位,无填充的情况下可加密256字节的数据."
             编辑时信息 = "12E4B, 0, 0, 0">
     参数 指定公钥 <类型 = 字节集类 注释 = "提供本次加密所欲使用的BLOB格式公钥数据" 编辑时信息 = "12E4B, 0, 0, 0">
@@ -1403,8 +1402,7 @@
         返回 (RSA加解密 (1, 数据, 指定公钥, CNG_算法类型.公钥_RSA, CNG_密钥类型.RSA_公钥, CNG_填充方式.非对称_PKCS1))
     }
 
-    方法 解密_RSA_私钥 <公开 静态 类型 = 字节集类 注释 = "使用私钥对指定RSA公钥/私钥加密的数据进行解密" 返回值注释 = "成功返回解密后的数据,失败返回空字节集" 折叠
-            @禁止流程检查 = 真>
+    方法 解密_RSA_私钥 <公开 静态 类型 = 字节集类 注释 = "使用私钥对指定RSA公钥/私钥加密的数据进行解密" 返回值注释 = "成功返回解密后的数据,失败返回空字节集" 折叠>
     参数 数据 <类型 = 字节集类 注释 = "提供待解密的数据" 编辑时信息 = "11B3A, 0, 0, 0">
     参数 指定私钥 <类型 = 字节集类 注释 = "提供本次解密所欲使用的BLOB格式私钥数据" 编辑时信息 = "11B3A, 0, 0, 0">
     {
@@ -1412,7 +1410,7 @@
     }
 
     方法 加密_RSA_PEM私钥 <公开 静态 类型 = 字节集类 注释 = "使用私钥对指定数据进行RSA加密." 注释 = "注: 本方法支持PKCS#1 PEM格式密钥."
-            返回值注释 = "成功返回加密后的数据,失败返回空字节集." 折叠 @禁止流程检查 = 真>
+            返回值注释 = "成功返回加密后的数据,失败返回空字节集." 折叠>
     参数 数据 <类型 = 字节集类 注释 = "  提供所欲加密的数据." 注释 = "  注意输入的数据长度,不能超过(密钥位/8-填充尺寸),例如生成密钥为2048位,"
             注释 = "无填充的情况下可加密256字节的数据.">
     参数 PEM私钥 <类型 = 文本型 注释 = "提供本次加密所欲使用的PEM格式私钥,自动识别PKCS#1和PKCS#8版本.">
@@ -1421,7 +1419,7 @@
     }
 
     方法 加密_RSA_PEM公钥 <公开 静态 类型 = 字节集类 注释 = "使用公钥对指定数据进行RSA加密." 注释 = "注: 本方法支持PKCS#1 PEM格式密钥."
-            返回值注释 = "成功返回加密后的数据,失败返回空字节集." 折叠 @禁止流程检查 = 真>
+            返回值注释 = "成功返回加密后的数据,失败返回空字节集." 折叠>
     参数 数据 <类型 = 字节集类 注释 = "  提供所欲加密的数据." 注释 = "  注意输入的数据长度,不能超过(密钥位/8-填充尺寸),例如生成密钥为2048位,"
             注释 = "无填充的情况下可加密256字节的数据." 编辑时信息 = "12E4B, 0, 0, 0">
     参数 PEM公钥 <类型 = 文本型 注释 = "提供本次加密所欲使用的PEM格式公钥" 编辑时信息 = "12E4B, 0, 0, 0">
@@ -1430,7 +1428,7 @@
     }
 
     方法 解密_RSA_PEM私钥 <公开 静态 类型 = 字节集类 注释 = "使用私钥对指定RSA公钥/私钥加密的数据进行解密." 注释 = "注: 本方法支持PKCS#1 PEM格式密钥."
-            返回值注释 = "成功返回解密后的数据,失败返回空字节集." 折叠 @禁止流程检查 = 真>
+            返回值注释 = "成功返回解密后的数据,失败返回空字节集." 折叠>
     参数 数据 <类型 = 字节集类 注释 = "提供待解密的数据" 编辑时信息 = "11B3A, 0, 0, 0">
     参数 PEM私钥 <类型 = 文本型 注释 = "提供本次解密所欲使用的PEM格式私钥,自动识别PKCS#1和PKCS#8版本." 编辑时信息 = "11B3A, 0, 0, 0">
     {
@@ -1854,54 +1852,54 @@
         @ BCRYPT_ALG_HANDLE phAlgorithm;
         @ BCRYPT_KEY_HANDLE phKey;
         @ NTSTATUS Status;
-        @ Status = ::BCryptOpenAlgorithmProvider (&phAlgorithm, (LPCWSTR)@<算法类型>.GetText (), NULL, 0);
+        @ Status = ::BCryptOpenAlgorithmProvider(&phAlgorithm, @<算法类型>.GetText(), NULL, 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
         @     return FALSE;
         @ }
         // 生成密钥对
-        @ Status = ::BCryptGenerateKeyPair (phAlgorithm, &phKey, (ULONG)@<密钥位>, 0);
+        @ Status = ::BCryptGenerateKeyPair(phAlgorithm, &phKey, (ULONG)@<密钥位>, 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @     return FALSE;
         @ }
         // 完成密钥对设置
-        @ Status = ::BCryptFinalizeKeyPair (phKey, 0);
+        @ Status = ::BCryptFinalizeKeyPair(phKey, 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     ::BCryptDestroyKey (phKey);
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
+        @     ::BCryptDestroyKey(phKey);
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @     return FALSE;
         @ }
         // 取公钥数据
         @ ULONG dwResultSize;
-        @ Status = ::BCryptExportKey (phKey, NULL, (LPCWSTR)@<公钥类型>.GetText (), NULL, 0, &dwResultSize, 0);
+        @ Status = ::BCryptExportKey(phKey, NULL, @<公钥类型>.GetText(), NULL, 0, &dwResultSize, 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     ::BCryptDestroyKey (phKey);
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
+        @     ::BCryptDestroyKey(phKey);
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @     return FALSE;
         @ }
-        @ @<公钥数据>.Alloc (dwResultSize, TRUE);
-        @ Status = ::BCryptExportKey (phKey, NULL, (LPCWSTR)@<公钥类型>.GetText (), (PUCHAR)@<公钥数据>.GetPtr(), dwResultSize, &dwResultSize, 0);
+        @ @<公钥数据>.Alloc(dwResultSize, TRUE);
+        @ Status = ::BCryptExportKey(phKey, NULL, @<公钥类型>.GetText(), (PUCHAR)@<公钥数据>.GetPtr(), dwResultSize, &dwResultSize, 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     ::BCryptDestroyKey (phKey);
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
+        @     ::BCryptDestroyKey(phKey);
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @     return FALSE;
         @ }
-        @ @<公钥数据>.RemoveToEnd (dwResultSize);
+        @ @<公钥数据>.RemoveToEnd(dwResultSize);
         // 取私钥数据
-        @ Status = ::BCryptExportKey (phKey, NULL, (LPCWSTR)@<私钥类型>.GetText (), NULL, 0, &dwResultSize, 0);
+        @ Status = ::BCryptExportKey(phKey, NULL, @<私钥类型>.GetText(), NULL, 0, &dwResultSize, 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     ::BCryptDestroyKey (phKey);
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
+        @     ::BCryptDestroyKey(phKey);
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @     return FALSE;
         @ }
-        @ @<私钥数据>.Alloc (dwResultSize, TRUE);
-        @ Status = ::BCryptExportKey (phKey, NULL, (LPCWSTR)@<私钥类型>.GetText (), (PUCHAR)@<私钥数据>.GetPtr (), dwResultSize, &dwResultSize, 0);
-        @ ::BCryptDestroyKey (phKey);
-        @ ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
+        @ @<私钥数据>.Alloc(dwResultSize, TRUE);
+        @ Status = ::BCryptExportKey(phKey, NULL, @<私钥类型>.GetText (), (PUCHAR)@<私钥数据>.GetPtr(), dwResultSize, &dwResultSize, 0);
+        @ ::BCryptDestroyKey(phKey);
+        @ ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @ if (!BCRYPT_SUCCESS(Status)) {
         @     return FALSE;
         @ }
-        @ @<私钥数据>.RemoveToEnd (dwResultSize);
+        @ @<私钥数据>.RemoveToEnd(dwResultSize);
         @ return TRUE;
     }
 
@@ -2040,7 +2038,7 @@
         @ return SignatureBlob;
     }
 
-    方法 验证签名 <静态 类型 = 逻辑型 注释 = "提供指定的数据以及该数据对应的签名内容,验证数据与签名是否对应,以保障数据的完整性." 返回值注释 = "返回该数据签名是否验证成功"
+    方法 验证签名 <静态 类型 = 逻辑型 注释 = "提供指定的数据以及该数据对应的签名内容,验证数据与签名是否对应,以保障数据的完整性." 返回值注释 = "返回该数据签名是否验证成功" 折叠
             @禁止流程检查 = 真>
     参数 数据 <类型 = 字节集类 注释 = "提供所欲验证签名的数据">
     参数 签名内容 <类型 = 字节集类 注释 = "提供该数据对应的签名内容">
@@ -2052,33 +2050,28 @@
         变量 数据摘要 <类型 = 字节集类>
         // 计算数据哈希值
         数据摘要 = 取数据Hash (数据, 摘要算法)
-        @ if (@<数据摘要>.IsNullObject () == TRUE) {
+        @ if (@<数据摘要>.IsNullObject() == TRUE)
         @     return FALSE;
-        @ }
         @ BCRYPT_ALG_HANDLE phAlgorithm;
         @ BCRYPT_KEY_HANDLE phKey;
         @ NTSTATUS Status;
         // 打开数字签名算法句柄
-        @ Status = ::BCryptOpenAlgorithmProvider (&phAlgorithm, (LPCWSTR)@<签名算法>.GetText (), NULL, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
+        @ Status = ::BCryptOpenAlgorithmProvider(&phAlgorithm, @<签名算法>.GetText(), NULL, 0);
+        @ if (!BCRYPT_SUCCESS(Status))
         @     return FALSE;
-        @ }
         // 导入公钥
-        @ Status = ::BCryptImportKeyPair (phAlgorithm, NULL, (LPCWSTR)@<公钥类型>.GetText (), &phKey,
-        @                                 (PUCHAR)@<公钥数据>.GetPtr (), (ULONG)@<公钥数据>.GetSize (), BCRYPT_NO_KEY_VALIDATION);
+        @ Status = ::BCryptImportKeyPair(phAlgorithm, NULL, @<公钥类型>.GetText(), &phKey,
+        @                                (PUCHAR)@<公钥数据>.GetPtr(), (ULONG)@<公钥数据>.GetSize(), BCRYPT_NO_KEY_VALIDATION);
         @ if (!BCRYPT_SUCCESS(Status)) {
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @     return FALSE;
         @ }
         // 验证签名
-        @ Status = ::BCryptVerifySignature (phKey, NULL, (PUCHAR)@<数据摘要>.GetPtr (), (ULONG)@<数据摘要>.GetSize (),
-        @                                   (PUCHAR)@<签名内容>.GetPtr (), (ULONG)@<签名内容>.GetSize (), 0);
-        @ ::BCryptDestroyKey (phKey);
-        @ ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
-        @     return FALSE;
-        @ }
-        @ return TRUE;
+        @ Status = ::BCryptVerifySignature(phKey, NULL, (PUCHAR)@<数据摘要>.GetPtr(), (ULONG)@<数据摘要>.GetSize(),
+        @                                  (PUCHAR)@<签名内容>.GetPtr(), (ULONG)@<签名内容>.GetSize(), 0);
+        @ ::BCryptDestroyKey(phKey);
+        @ ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @ return BCRYPT_SUCCESS(Status);
     }
 
     方法 数字签名_DSA <公开 静态 类型 = 字节集类 注释 = "将指定数据进行DSA数字签名,可通过\"验证签名\"验证数据完整性." 注释 = "请先用\"生成密钥对_DSA\"生成私钥和公钥."
@@ -2109,44 +2102,44 @@
         变量 数据摘要 <类型 = 字节集类>
         // 计算数据哈希值
         数据摘要 = 取数据Hash (数据, 摘要算法)
-        @ if (@<数据摘要>.IsNullObject () == TRUE) return CVolMem ();
+        @ if (@<数据摘要>.IsNullObject() == TRUE) return CVolMem();
         @ BCRYPT_ALG_HANDLE phAlgorithm;
         @ BCRYPT_KEY_HANDLE phKey;
         @ NTSTATUS Status;
         // 打开数字签名算法句柄
-        @ if (!BCRYPT_SUCCESS(::BCryptOpenAlgorithmProvider (&phAlgorithm, BCRYPT_RSA_SIGN_ALGORITHM, NULL, 0)))
-        @     return CVolMem ();
+        @ if (!BCRYPT_SUCCESS(::BCryptOpenAlgorithmProvider(&phAlgorithm, BCRYPT_RSA_SIGN_ALGORITHM, NULL, 0)))
+        @     return CVolMem();
         // 导入私钥
-        @ if (!BCRYPT_SUCCESS(::BCryptImportKeyPair (phAlgorithm, NULL, BCRYPT_RSAPRIVATE_BLOB, &phKey,
-        @                                            (PUCHAR)@<私钥数据>.GetPtr (), (ULONG)@<私钥数据>.GetSize (), BCRYPT_NO_KEY_VALIDATION)))
+        @ if (!BCRYPT_SUCCESS(::BCryptImportKeyPair(phAlgorithm, NULL, BCRYPT_RSAPRIVATE_BLOB, &phKey,
+        @                                           (PUCHAR)@<私钥数据>.GetPtr(), (ULONG)@<私钥数据>.GetSize(), BCRYPT_NO_KEY_VALIDATION)))
         @ {
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @     return CVolMem ();
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @     return CVolMem();
         @ }
         // 哈希值签名
         @ BCRYPT_PKCS1_PADDING_INFO padding_PKCS1;
-        @ padding_PKCS1.pszAlgId = (LPCWSTR)@<摘要算法>.GetText ();
+        @ padding_PKCS1.pszAlgId = @<摘要算法>.GetText();
         @ ULONG SignatureLen;
-        @ if (!BCRYPT_SUCCESS(::BCryptSignHash (phKey, &padding_PKCS1, (PUCHAR)@<数据摘要>.GetPtr (), (ULONG)@<数据摘要>.GetSize (),
-        @                                       NULL, 0, &SignatureLen, BCRYPT_PAD_PKCS1)))
+        @ if (!BCRYPT_SUCCESS(::BCryptSignHash(phKey, &padding_PKCS1, (PUCHAR)@<数据摘要>.GetPtr(), (ULONG)@<数据摘要>.GetSize(),
+        @                                      NULL, 0, &SignatureLen, BCRYPT_PAD_PKCS1)))
         @ { // 获取签名长度失败
-        @     ::BCryptDestroyKey (phKey);
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @     return CVolMem ();
+        @     ::BCryptDestroyKey(phKey);
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @     return CVolMem();
         @ }
         @ @an<CVolMem> SignatureBlob;
-        @ SignatureBlob.Alloc (SignatureLen, TRUE);
+        @ SignatureBlob.Alloc(SignatureLen, TRUE);
         @ ULONG ResultLen;
-        @ if (!BCRYPT_SUCCESS(::BCryptSignHash (phKey, &padding_PKCS1, (PUCHAR)@<数据摘要>.GetPtr (), (ULONG)@<数据摘要>.GetSize (),
-        @                                       (PUCHAR)SignatureBlob.GetPtr(), SignatureLen, &ResultLen, BCRYPT_PAD_PKCS1)))
+        @ if (!BCRYPT_SUCCESS(::BCryptSignHash(phKey, &padding_PKCS1, (PUCHAR)@<数据摘要>.GetPtr(), (ULONG)@<数据摘要>.GetSize(),
+        @                                      (PUCHAR)SignatureBlob.GetPtr(), SignatureLen, &ResultLen, BCRYPT_PAD_PKCS1)))
         @ { // 获取签名数据失败
-        @     ::BCryptDestroyKey (phKey);
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @     return CVolMem ();
+        @     ::BCryptDestroyKey(phKey);
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @     return CVolMem();
         @ }
         // 清理句柄
-        @ ::BCryptDestroyKey (phKey);
-        @ ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
+        @ ::BCryptDestroyKey(phKey);
+        @ ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @ return SignatureBlob;
     }
 
@@ -2168,28 +2161,27 @@
         @ BCRYPT_KEY_HANDLE phKey;
         @ NTSTATUS Status;
         // 打开数字签名算法句柄
-        @ if (!BCRYPT_SUCCESS(::BCryptOpenAlgorithmProvider (&phAlgorithm, BCRYPT_RSA_SIGN_ALGORITHM, NULL, 0)))
+        @ if (!BCRYPT_SUCCESS(::BCryptOpenAlgorithmProvider(&phAlgorithm, BCRYPT_RSA_SIGN_ALGORITHM, NULL, 0)))
         @     return FALSE;
         // 导入公钥
-        @ if (!BCRYPT_SUCCESS(::BCryptImportKeyPair (phAlgorithm, NULL, BCRYPT_RSAPUBLIC_BLOB, &phKey,
-        @                                            (PUCHAR)@<公钥数据>.GetPtr (), (ULONG)@<公钥数据>.GetSize (), BCRYPT_NO_KEY_VALIDATION)))
+        @ if (!BCRYPT_SUCCESS(::BCryptImportKeyPair(phAlgorithm, NULL, BCRYPT_RSAPUBLIC_BLOB, &phKey,
+        @                                           (PUCHAR)@<公钥数据>.GetPtr(), (ULONG)@<公钥数据>.GetSize(), BCRYPT_NO_KEY_VALIDATION)))
         @ {
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @     return FALSE;
         @ }
         @ BCRYPT_PKCS1_PADDING_INFO padding_PKCS1;
-        @ padding_PKCS1.pszAlgId = (LPCWSTR)@<摘要算法>.GetText ();
+        @ padding_PKCS1.pszAlgId = @<摘要算法>.GetText();
         // 验证签名
-        @ Status = ::BCryptVerifySignature (phKey, &padding_PKCS1, (PUCHAR)@<数据摘要>.GetPtr (), (ULONG)@<数据摘要>.GetSize (),
-        @                                   (PUCHAR)@<签名内容>.GetPtr (), (ULONG)@<签名内容>.GetSize (), BCRYPT_PAD_PKCS1);
-        @ ::BCryptDestroyKey (phKey);
-        @ ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) return FALSE;
-        @ return TRUE;
+        @ Status = ::BCryptVerifySignature(phKey, &padding_PKCS1, (PUCHAR)@<数据摘要>.GetPtr(), (ULONG)@<数据摘要>.GetSize(),
+        @                                  (PUCHAR)@<签名内容>.GetPtr(), (ULONG)@<签名内容>.GetSize(), BCRYPT_PAD_PKCS1);
+        @ ::BCryptDestroyKey(phKey);
+        @ ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @ return BCRYPT_SUCCESS(Status);
     }
 
     方法 数字签名_RSA_PEM <公开 静态 类型 = 字节集类 注释 = "将指定数据进行RSA数字签名,可通过\"验证签名\"验证数据完整性."
-            返回值注释 = "签名成功将会返回签名内容,签名失败返回空字节集." 折叠 @禁止流程检查 = 真>
+            返回值注释 = "签名成功将会返回签名内容,签名失败返回空字节集." 折叠>
     参数 数据 <类型 = 字节集类 注释 = "提供所欲签名的数据">
     参数 私钥数据 <类型 = 文本型 注释 = "提供本次签名所使用的PEM格式私钥数据">
     参数 摘要算法 <类型 = CNG_算法类型 注释 = "签名所使用的摘要算法" @默认值 = CNG_算法类型.哈希_SHA1>
@@ -2198,7 +2190,7 @@
     }
 
     方法 验证签名_RSA_PEM <公开 静态 类型 = 逻辑型 注释 = "提供指定的数据以及该数据对应的签名内容,验证数据与签名是否对应,以保障数据的完整性."
-            返回值注释 = "返回该数据签名是否验证成功" 折叠 @禁止流程检查 = 真>
+            返回值注释 = "返回该数据签名是否验证成功" 折叠>
     参数 数据 <类型 = 字节集类 注释 = "提供所欲验证签名的数据">
     参数 签名内容 <类型 = 字节集类 注释 = "提供该数据对应的签名内容">
     参数 公钥数据 <类型 = 文本型 注释 = "提供本次验证所使用的PEM格式公钥数据">
@@ -2273,22 +2265,18 @@
         @ BCRYPT_ALG_HANDLE phAlgorithm;
         @ NTSTATUS Status;
         @ INT dwRandom;
-        @ Status = ::BCryptOpenAlgorithmProvider (&phAlgorithm, (LPCWSTR)@<算法类型>.GetText (), NULL, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
+        @ Status = ::BCryptOpenAlgorithmProvider(&phAlgorithm, @<算法类型>.GetText(), NULL, 0);
+        @ if (!BCRYPT_SUCCESS(Status))
         @     return 0;
-        @ }
-        @ Status = ::BCryptGenRandom (phAlgorithm, (PUCHAR)&dwRandom, 4, 0);
-        @ ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
-        @     return 0;
-        @ }
-        @ return (INT)dwRandom;
+        @ Status = ::BCryptGenRandom(phAlgorithm, (PUCHAR)&dwRandom, 4, 0);
+        @ ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @ return BCRYPT_SUCCESS(Status) ? (INT)dwRandom : 0;
     }
 
     方法 取随机数_RNG <公开 静态 类型 = 整数 注释 = "用椭圆曲线算法生成随机数" 返回值注释 = "返回随机数" 折叠 @禁止流程检查 = 真>
     {
         @ INT dwRandom;
-        @ ::BCryptGenRandom (NULL, (PUCHAR)&dwRandom, 4, BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+        @ ::BCryptGenRandom(NULL, (PUCHAR)&dwRandom, 4, BCRYPT_USE_SYSTEM_PREFERRED_RNG);
         @ return (INT)dwRandom;
     }
 

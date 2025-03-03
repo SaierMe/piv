@@ -903,42 +903,42 @@
 # class PivBuffer
 # {
 # private:
-#     ELEMENT_T *p = nullptr;
-#     MEM_SIZE size = 0;
+#     ELEMENT_T *_p = nullptr;
+#     MEM_SIZE _size = 0;
 # public:
 #     PivBuffer() {}
 #     ~PivBuffer() { Free(); }
 #     PivBuffer(MEM_SIZE npSize, bool zero = true) { Alloc(npSize, zero); }
 #     ELEMENT_T *Alloc(MEM_SIZE npSize, bool zero = true) {
-#         size = npSize * sizeof(ELEMENT_T);
-#         if (!p)
-#             p = reinterpret_cast<ELEMENT_T *>(g_objVolApp.GetPoolMem()->Alloc(static_cast<INT_P>(size)));
+#         _size = npSize * sizeof(ELEMENT_T);
+#         if (!_p)
+#             _p = reinterpret_cast<ELEMENT_T *>(g_objVolApp.GetPoolMem()->Alloc(static_cast<INT_P>(_size)));
 #         else
-#             p = reinterpret_cast<ELEMENT_T *>(g_objVolApp.GetPoolMem()->Realloc((void *)p, static_cast<INT_P>(size)));
+#             _p = reinterpret_cast<ELEMENT_T *>(g_objVolApp.GetPoolMem()->Realloc((void *)_p, static_cast<INT_P>(_size)));
 #         if (zero)
-#             memset(p, 0, static_cast<size_t>(size));
-#         return p;
+#             memset(_p, 0, static_cast<size_t>(_size));
+#         return _p;
 #     }
 #     inline ELEMENT_T *Realloc(MEM_SIZE npNewSize, bool zero = true) {
-#         size = npNewSize * sizeof(ELEMENT_T);
-#         p = reinterpret_cast<ELEMENT_T *>(g_objVolApp.GetPoolMem()->Realloc((void *)p, static_cast<INT_P>(size)));
+#         _size = npNewSize * sizeof(ELEMENT_T);
+#         _p = reinterpret_cast<ELEMENT_T *>(g_objVolApp.GetPoolMem()->Realloc((void *)_p, static_cast<INT_P>(_size)));
 #         if (zero)
-#             memset(p, 0, static_cast<size_t>(size));
-#         return p;
+#             memset(_p, 0, static_cast<size_t>(_size));
+#         return _p;
 #     }
 #     inline void Free() {
-#         if (p)
-#             g_objVolApp.GetPoolMem()->Free((void *)p);
-#         size = 0;
+#         if (_p)
+#             g_objVolApp.GetPoolMem()->Free((void *)_p);
+#         _size = 0;
 #     }
-#     inline ELEMENT_T *GetPtr() { return p; }
+#     inline ELEMENT_T *GetPtr() { return _p; }
 #     template <typename R = ELEMENT_T>
-#     inline R *Get() { return reinterpret_cast<R *>(p); }
-#     inline MEM_SIZE GetSize() { return size; }
-#     inline MEM_SIZE GetCount() { return size / sizeof(ELEMENT_T); }
-#     ELEMENT_T &At(MEM_SIZE pos) { return p[pos]; }
-#     ELEMENT_T *operator*() { return p; }
-#     ELEMENT_T &operator[](MEM_SIZE pos) { return p[pos]; }
+#     inline R *Get() { return reinterpret_cast<R *>(_p); }
+#     inline MEM_SIZE GetSize() { return _size; }
+#     inline MEM_SIZE GetCount() { return _size / sizeof(ELEMENT_T); }
+#     ELEMENT_T &At(MEM_SIZE pos) { return _p[pos]; }
+#     ELEMENT_T *operator*() { return _p; }
+#     ELEMENT_T &operator[](MEM_SIZE pos) { return _p[pos]; }
 # }; // PivBuffer
 # #endif // _PIV_BUFFER_CLASS
 # <> </include>

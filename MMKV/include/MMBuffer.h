@@ -41,7 +41,15 @@ enum MMBufferCopyFlag : bool {
 struct KeyValueHolderCrypt;
 #endif
 
-class MMBuffer {
+#ifdef MMKV_APPLE
+#ifdef __OBJC__
+using NSDataType = NSData;
+#else
+using NSDataType = void;
+#endif
+#endif // MMKV_APPLE
+
+class MMKV_EXPORT MMBuffer {
     enum MMBufferType : uint8_t {
         MMBufferType_Small,  // store small buffer in stack memory
         MMBufferType_Normal, // store in heap memory
@@ -54,12 +62,12 @@ class MMBuffer {
             size_t size;
             void *ptr;
 #ifdef MMKV_APPLE
-            NSData *m_data;
+            NSDataType *m_data;
 #endif
         };
         struct {
             uint8_t paddedSize;
-            // make at least 10 bytes to hold all primitive types (negative int32, int64, double etc) on 32 bit device
+            // make at least 10 bytes to hold all primitive types (negative int32, int64, double etc.) on 32 bit device
             // on 64 bit device it's guaranteed larger than 10 bytes
             uint8_t paddedBuffer[10];
         };
@@ -73,7 +81,7 @@ public:
     explicit MMBuffer(size_t length = 0);
     MMBuffer(void *source, size_t length, MMBufferCopyFlag flag = MMBufferCopy);
 #ifdef MMKV_APPLE
-    explicit MMBuffer(NSData *data, MMBufferCopyFlag flag = MMBufferCopy);
+    explicit MMBuffer(NSDataType *data, MMBufferCopyFlag flag = MMBufferCopy);
 #endif
 
     MMBuffer(MMBuffer &&other) noexcept;

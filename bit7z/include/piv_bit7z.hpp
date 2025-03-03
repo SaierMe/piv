@@ -100,6 +100,8 @@ namespace piv
                 return bit7z::BitFormat::Xz;
             case 0x0D:
                 return bit7z::BitFormat::Ppmd;
+            case 0x0E:
+                return bit7z::BitFormat::Zstd;
             case 0xC4:
                 return bit7z::BitFormat::Vhdx;
             case 0xC6:
@@ -648,7 +650,7 @@ public:
         {
             bit7z::BitFileExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
-            bit7z::BitInputArchive in_archive{extractor, in_file};
+            bit7z::BitInputArchive in_archive{extractor, in_file, bit7z::ArchiveStartOffset::None};
             for (const auto &item : in_archive)
             {
                 if (item.isDir())
@@ -679,7 +681,7 @@ public:
         {
             bit7z::BitMemExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
-            bit7z::BitInputArchive in_archive{extractor, buffer};
+            bit7z::BitInputArchive in_archive{extractor, buffer, bit7z::ArchiveStartOffset::None};
             for (const auto &item : in_archive)
             {
                 if (item.isDir())
@@ -769,7 +771,7 @@ public:
                 throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
             bit7z::BitFileExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
-            bit7z::BitInputArchive in_archive(extractor, in_file);
+            bit7z::BitInputArchive in_archive{extractor, in_file, bit7z::ArchiveStartOffset::None};
             for (const auto &item : in_archive)
             {
                 bool item_matches = bit7z::filesystem::fsutil::wildcard_match(filter, item.path());
@@ -803,7 +805,7 @@ public:
                 throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
             bit7z::BitMemExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
-            bit7z::BitInputArchive in_archive(extractor, buffer);
+            bit7z::BitInputArchive in_archive{extractor, buffer, bit7z::ArchiveStartOffset::None};
             for (const auto &item : in_archive)
             {
                 bool item_matches = bit7z::filesystem::fsutil::wildcard_match(filter, item.path());
@@ -904,7 +906,7 @@ public:
                 throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
             bit7z::BitFileExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
-            bit7z::BitInputArchive in_archive(extractor, in_file);
+            bit7z::BitInputArchive in_archive{extractor, in_file, bit7z::ArchiveStartOffset::None};
             const bit7z::tregex regex_filter(regex, bit7z::tregex::ECMAScript | bit7z::tregex::optimize);
             for (const auto &item : in_archive)
             {
@@ -946,7 +948,7 @@ public:
                 throw bit7z::BitException("Cannot extract items", bit7z::make_error_code(bit7z::BitError::FilterNotSpecified));
             bit7z::BitMemExtractor extractor{Piv7zLib::data().Get(), format};
             extractor.setPassword(password);
-            bit7z::BitInputArchive in_archive(extractor, buffer);
+            bit7z::BitInputArchive in_archive{extractor, buffer, bit7z::ArchiveStartOffset::None};
             const bit7z::tregex regex_filter(regex, bit7z::tregex::ECMAScript | bit7z::tregex::optimize);
             for (const auto &item : in_archive)
             {
@@ -1739,7 +1741,7 @@ public:
      * @param password 新密码
      * @param crypt_headers 加密文件头
      */
-    inline void SetPassword(const bit7z::tstring &password, bool crypt_headers)
+    inline void SetPasswordEx(const bit7z::tstring &password, bool crypt_headers)
     {
         if (m_archive)
             m_archive->setPassword(password, crypt_headers);

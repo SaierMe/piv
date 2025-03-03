@@ -1032,7 +1032,7 @@ public:
      * @param data_size 所欲写入的长度
      * @return 是否写入成功
      */
-    inline bool write_memory(PVOID64 write_address, const void *data_address, size_t data_size) noexcept
+    inline bool write_memory(PVOID64 write_address, const void *data_address, size_t data_size, BOOL change_protect = TRUE) noexcept
     {
         bool result = false;
         if (ProInfo)
@@ -1043,18 +1043,19 @@ public:
             }
             else
             {
+                if (!change_protect)
+                    return NT_SUCCESS(Nt.NtWriteVirtualMemory(ProInfo->hProcess, reinterpret_cast<PVOID>(write_address), data_address, data_size, NULL));
                 DWORD dwOldProtect = 0;
-
-                if (::VirtualProtectEx(ProInfo->hProcess, reinterpret_cast<PVOID>(write_address), data_size, PAGE_EXECUTE_READWRITE, &dwOldProtect))
+                if (::VirtualProtectEx(ProInfo->hProcess, reinterpret_cast<PVOID>(write_address), data_size, PAGE_READWRITE, &dwOldProtect))
                 {
                     result = NT_SUCCESS(Nt.NtWriteVirtualMemory(ProInfo->hProcess, reinterpret_cast<PVOID>(write_address), data_address, data_size, NULL));
-                    ::VirtualProtectEx(ProInfo->hProcess, reinterpret_cast<PVOID>(write_address), data_size, dwOldProtect, NULL);
+                    ::VirtualProtectEx(ProInfo->hProcess, reinterpret_cast<PVOID>(write_address), data_size, dwOldProtect, &dwOldProtect);
                 }
                 /*
-                if (NT_SUCCESS(Nt.NtProtectVirtualMemory(ProInfo->hProcess, reinterpret_cast<PVOID *>(&write_address), reinterpret_cast<PSIZE_T>(&data_size), PAGE_EXECUTE_READWRITE, &dwOldProtect)))
+                if (NT_SUCCESS(Nt.NtProtectVirtualMemory(ProInfo->hProcess, reinterpret_cast<PVOID *>(&write_address), reinterpret_cast<PSIZE_T>(&data_size), PAGE_READWRITE, &dwOldProtect)))
                 {
                     result = NT_SUCCESS(Nt.NtWriteVirtualMemory(ProInfo->hProcess, reinterpret_cast<PVOID>(write_address), data_address, data_size, NULL));
-                    Nt.NtProtectVirtualMemory(ProInfo->hProcess, reinterpret_cast<PVOID *>(&write_address), reinterpret_cast<PSIZE_T>(&data_size), dwOldProtect, NULL);
+                    Nt.NtProtectVirtualMemory(ProInfo->hProcess, reinterpret_cast<PVOID *>(&write_address), reinterpret_cast<PSIZE_T>(&data_size), dwOldProtect, &dwOldProtect);
                 }
                 */
             }
@@ -1068,9 +1069,9 @@ public:
      * @param data 所欲写入的字节集
      * @return 是否写入成功
      */
-    inline bool write_memory(PVOID64 write_address, const CVolMem &data) noexcept
+    inline bool write_memory(PVOID64 write_address, const CVolMem &data, BOOL change_protect = TRUE) noexcept
     {
-        return write_memory(write_address, data.GetPtr(), static_cast<size_t>(data.GetSize()));
+        return write_memory(write_address, data.GetPtr(), static_cast<size_t>(data.GetSize()), change_protect);
     }
 
     /**
@@ -1081,9 +1082,9 @@ public:
      * @return 是否写入成功
      */
     template <typename T>
-    inline bool write_memory_value(PVOID64 write_address, T value) noexcept
+    inline bool write_memory_value(PVOID64 write_address, T value, BOOL change_protect = TRUE) noexcept
     {
-        return write_memory(write_address, &value, sizeof(T));
+        return write_memory(write_address, &value, sizeof(T), change_protect);
     }
 
     /**
@@ -1266,7 +1267,7 @@ public:
      * @param data_size 所欲写入的长度
      * @return 是否写入成功
      */
-    inline bool write_module_memory(ULONG64 hModule, size_t write_off, const void *data_address, size_t data_size) noexcept
+    inline bool write_module_memory(ULONG64 hModule, size_t write_off, const void *data_address, size_t data_size, BOOL change_protect = TRUE) noexcept
     {
         if (ProInfo && enum_modules() > 0)
         {
@@ -1274,7 +1275,7 @@ public:
                 hModule = ProInfo->ImageBaseAddress;
             auto &it = ProInfo->ModulesMap.find(hModule);
             if (it != ProInfo->ModulesMap.end() && write_off < it->second.SizeOfImage)
-                return write_memory(PIV_PTR_FORWARD(PVOID64, it->first, write_off), data_address, data_size);
+                return write_memory(PIV_PTR_FORWARD(PVOID64, it->first, write_off), data_address, data_size, change_protect);
         }
         return false;
     }
@@ -1286,7 +1287,7 @@ public:
      * @param data 所欲写入的字节集
      * @return 是否写入成功
      */
-    inline bool write_module_memory(ULONG64 hModule, size_t write_off, const CVolMem &data) noexcept
+    inline bool write_module_memory(ULONG64 hModule, size_t write_off, const CVolMem &data, BOOL change_protect = TRUE) noexcept
     {
         if (ProInfo && enum_modules() > 0)
         {
@@ -1294,7 +1295,7 @@ public:
                 hModule = ProInfo->ImageBaseAddress;
             auto &it = ProInfo->ModulesMap.find(hModule);
             if (it != ProInfo->ModulesMap.end() && write_off < it->second.SizeOfImage)
-                return write_memory(PIV_PTR_FORWARD(PVOID64, it->first, write_off), data);
+                return write_memory(PIV_PTR_FORWARD(PVOID64, it->first, write_off), data, change_protect);
         }
         return false;
     }
@@ -1308,7 +1309,7 @@ public:
      * @return
      */
     template <typename T>
-    inline bool write_module_value(ULONG64 hModule, size_t write_off, T value) noexcept
+    inline bool write_module_value(ULONG64 hModule, size_t write_off, T value, BOOL change_protect = TRUE) noexcept
     {
         if (ProInfo && enum_modules() > 0)
         {
@@ -1316,7 +1317,7 @@ public:
                 hModule = ProInfo->ImageBaseAddress;
             auto &it = ProInfo->ModulesMap.find(hModule);
             if (it != ProInfo->ModulesMap.end() && write_off < it->second.SizeOfImage)
-                return write_memory(PIV_PTR_FORWARD(PVOID64, it->first, write_off), &value, sizeof(T));
+                return write_memory(PIV_PTR_FORWARD(PVOID64, it->first, write_off), &value, sizeof(T), change_protect);
         }
         return false;
     }

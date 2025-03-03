@@ -31,7 +31,7 @@ private:
     piv::basic_string_view<CharT> path;
     piv::basic_string_view<CharT> query;
     piv::basic_string_view<CharT> fragment;
-    std::map<piv::basic_string_view<CharT>, piv::basic_string_view<CharT>, piv::detail::ci_less<piv::basic_string_view<CharT>>> params;
+    std::map<piv::basic_string_view<CharT>, piv::basic_string_view<CharT>, piv::ci_less<piv::basic_string_view<CharT>>> params;
 
 public:
     /**
@@ -1023,7 +1023,7 @@ class PivFormParser : public CVolObject
 private:
     std::basic_string<CharT> form_str;
     piv::basic_string_view<CharT> form;
-    std::map<piv::basic_string_view<CharT>, piv::basic_string_view<CharT>, piv::detail::ci_less<piv::basic_string_view<CharT>>> params;
+    std::map<piv::basic_string_view<CharT>, piv::basic_string_view<CharT>, piv::ci_less<piv::basic_string_view<CharT>>> params;
 
 public:
     /**

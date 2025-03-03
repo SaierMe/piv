@@ -112,6 +112,13 @@
 
 ※我经常修改现有的代码，比如修正bug、优化效率、规范格式、修订备注等……如果功能和用法没有改变，一般不会写在更新日志里，所以每次更新改动的地方其实还是有不少的。
 
+### 📅 2025/03/03
+
+1. 新增「读写锁对象类」(std::shared_mutex)；
+2. bit7z 更新到 4.0.10，7z.dll 升级到 24.09，请替换静态库文件；
+3. MMKV 升级到 2.1.0，并修改了部分方法名，最后一个兼容 XP 的 MMKV 1.3.5 版已经另外独立成模块，可在网盘下载；
+4. 修正大量已知 bug；
+
 ### 📅 2024/11/12
 
 1. 优化和修正 YYJSON，减少内部智能指针的引用次数；
@@ -636,12 +643,12 @@
 - **[{fmt}](https://github.com/fmtlib/fmt)**  `10.2.0`  `MIT license` 格式化文本库，等同 C++20 std::format 的实现 
 - **[md4c](https://github.com/mity/md4c)** `0.4.8`  `MIT license` CommonMark 0.30 规范 + GFM 的 Markdown 解析库
 - **[simpleini](https://github.com/brofield/simpleini)** `4.20` `MIT license` 简易的 INI 配置文件读写库
-- **[simdutf](https://github.com/simdutf/simdutf)** `5.6.0` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
+- **[simdutf](https://github.com/simdutf/simdutf)** `6.2.0` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
 - **[OpenCC](https://github.com/BYVoid/OpenCC)** `1.1.6` `Apache-2.0 license` 中文简繁转换开源项目，支持词汇级别的转换、异体字转换和地区习惯用词转换
-- **[7-zip](https://www.7-zip.org/)** `24.05` `GNU LGPL license` 免费的高压缩率开源压缩软件（采用GNU LGPL协议，只使用它的 dll 文件不会传染）
-- **[bit7z](https://github.com/rikyoz/bit7z)** `4.0.7` `Mozilla Public License v2.0` 7-zip 的封装类
+- **[7-zip](https://www.7-zip.org/)** `24.09` `GNU LGPL license` 免费的高压缩率开源压缩软件（采用GNU LGPL协议，只使用它的 dll 文件不会传染）
+- **[bit7z](https://github.com/rikyoz/bit7z)** `4.0.10` `Mozilla Public License v2.0` 7-zip 的封装类
 - **[MinHook](https://github.com/TsudaKageyu/minhook)** `1.3.3` `BSD-2-Clause License` 极简的 x86/x64 API Hook 库
-- **[MMKV](https://github.com/Tencent/MMKV)** `1.3.5` `BSD-3-Clause License` 腾讯开源的高效键值对存储框架
+- **[MMKV](https://github.com/Tencent/MMKV)** `2.1.0` `BSD-3-Clause License` 腾讯开源的高效键值对存储框架
 - **[xxHash](https://github.com/Cyan4973/xxHash)** `8.0.2` `BSD-2-Clause License` 速度接近 RAM 限制的高速散列算法
 - **[Dear ImGui](https://github.com/ocornut/imgui)** `1.91.4-docking` `MIT license` 轻量级的即时渲染界面开发框架
 - **[GLFW](https://www.glfw.org)** `3.3.8` `zlib/libpng license` 跨平台的 OpenGL/Vulkan 桌面应用框架

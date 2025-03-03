@@ -22,7 +22,7 @@
 #define MMKV_SRC_MMKVPREDEF_H
 
 // disable encryption & decryption to reduce some code
-//#define MMKV_DISABLE_CRYPT
+// #define MMKV_DISABLE_CRYPT
 //#define MMKV_DISABLE_FLUTTER
 
 // using POSIX implementation
@@ -34,7 +34,7 @@
 #include <vector>
 #include <unordered_map>
 
-constexpr auto MMKV_VERSION = "v1.3.5";
+constexpr auto MMKV_VERSION = "v2.1.0";
 
 #ifdef DEBUG
 #    define MMKV_DEBUG
@@ -42,6 +42,10 @@ constexpr auto MMKV_VERSION = "v1.3.5";
 
 #ifdef NDEBUG
 #    undef MMKV_DEBUG
+#endif
+
+#if __cplusplus>=202002L
+#    define MMKV_HAS_CPP20
 #endif
 
 #ifdef __ANDROID__
@@ -116,12 +120,22 @@ using MMKVPath_t = std::string;
 
 #endif // MMKV_WIN32
 
+#ifdef MMKV_ANDROID
+#define MMKV_EXPORT __attribute__((visibility("default")))
+#else
+#define MMKV_EXPORT
+#endif
+
 #ifdef MMKV_APPLE
+#ifdef __OBJC__
 #    import <Foundation/Foundation.h>
+using MMKVLog_t = NSString *;
+#else
+using MMKVLog_t = void *;
+#endif
 #    define MMKV_NAMESPACE_BEGIN namespace mmkv {
 #    define MMKV_NAMESPACE_END }
 #    define MMKV_NAMESPACE_PREFIX mmkv
-using MMKVLog_t = NSString *;
 #else
 #    define MMKV_NAMESPACE_BEGIN
 #    define MMKV_NAMESPACE_END
@@ -165,7 +179,8 @@ typedef MMKVRecoverStrategic (*ErrorHandler)(const std::string &mmapID, MMKVErro
 // doesn't guarantee real-time notification
 typedef void (*ContentChangeHandler)(const std::string &mmapID);
 
-extern size_t DEFAULT_MMAP_SIZE;
+
+extern MMKV_EXPORT size_t DEFAULT_MMAP_SIZE;
 #define DEFAULT_MMAP_ID "mmkv.default"
 
 class MMBuffer;
@@ -178,11 +193,29 @@ struct KeyValueHolderCrypt;
 #endif
 
 #ifdef MMKV_APPLE
+
+#ifdef __OBJC__
+struct HybridStringCP {
+    NSString *str;
+    HybridStringCP(std::string_view cpp);
+    ~HybridStringCP();
+};
+
+struct HybridString {
+    NSString *str;
+    HybridString(std::string_view cpp);
+    ~HybridString();
+};
+
 struct KeyHasher {
+    // enables heterogeneous lookup
+    using is_transparent = void;
     size_t operator()(NSString *key) const { return key.hash; }
 };
 
 struct KeyEqualer {
+    // enables heterogeneous lookup
+    using is_transparent = void;
     bool operator()(NSString *left, NSString *right) const {
         if (left == right) {
             return true;
@@ -190,14 +223,45 @@ struct KeyEqualer {
         return ([left isEqualToString:right] == YES);
     }
 };
-
 using MMKVVector = std::vector<std::pair<NSString *, mmkv::MMBuffer>>;
 using MMKVMap = std::unordered_map<NSString *, mmkv::KeyValueHolder, KeyHasher, KeyEqualer>;
 using MMKVMapCrypt = std::unordered_map<NSString *, mmkv::KeyValueHolderCrypt, KeyHasher, KeyEqualer>;
-#else
+#else // type erase for pure C++ users
+using MMKVVector = std::vector<std::pair<void *, mmkv::MMBuffer>>;
+using MMKVMap = std::unordered_map<void *, mmkv::KeyValueHolder>;
+using MMKVMapCrypt = std::unordered_map<void *, mmkv::KeyValueHolderCrypt>;
+#endif // __OBJC__
+
+#else // !MMKV_APPLE
+
+struct KeyHasher {
+    // enables heterogeneous lookup
+    using is_transparent = void;
+
+    std::size_t operator()(const std::string_view& str) const {
+        return std::hash<std::string_view>{}(str);
+    }
+
+    std::size_t operator()(const std::string& str) const {
+        return std::hash<std::string>{}(str);
+    }
+};
+
+struct KeyEqualer {
+    // enables heterogeneous lookup
+    using is_transparent = void;
+
+    bool operator()(const std::string_view& lhs, const std::string_view& rhs) const {
+        return lhs == rhs;
+    }
+
+    bool operator()(const std::string& lhs, const std::string& rhs) const {
+        return lhs == rhs;
+    }
+};
 using MMKVVector = std::vector<std::pair<std::string, mmkv::MMBuffer>>;
-using MMKVMap = std::unordered_map<std::string, mmkv::KeyValueHolder>;
-using MMKVMapCrypt = std::unordered_map<std::string, mmkv::KeyValueHolderCrypt>;
+using MMKVMap = std::unordered_map<std::string, mmkv::KeyValueHolder, KeyHasher, KeyEqualer>;
+using MMKVMapCrypt = std::unordered_map<std::string, mmkv::KeyValueHolderCrypt, KeyHasher, KeyEqualer>;
 #endif // MMKV_APPLE
 
 template <typename T>
@@ -216,6 +280,18 @@ constexpr size_t AES_KEY_BITSET_LEN = 128;
 #endif
 
 #endif //cplus-plus
+
+#ifndef MMKV_WIN32
+#    ifndef likely
+#        define mmkv_unlikely(x) (__builtin_expect(bool(x), 0))
+#        define mmkv_likely(x) (__builtin_expect(bool(x), 1))
+#    endif
+#else
+#    ifndef likely
+#        define mmkv_unlikely(x) (x)
+#        define mmkv_likely(x) (x)
+#    endif
+#endif
 
 #if defined(__arm__)
   #if defined(__ARM_ARCH_7A__)

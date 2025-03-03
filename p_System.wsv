@@ -623,16 +623,15 @@
 
 类 通用文件对话框 <公开 注释 = "调用系统的文件对话框选择文件" 折叠 @文档 = "category = \"文件操作\"" @禁止创建对象 = 真>
 {
-    方法 打开文件 <公开 静态 类型 = 逻辑型 注释 = "调用系统的文件对话框选择打开文件." 返回值注释 = "  返回是否成功,成功时在\"文件名\"参数中返回全路径文件名."
-            返回值注释 = "  如失败或取消打开文件,则\"文件名\"参数返回空文本." 折叠 @禁止流程检查 = 真>
+    方法 打开文件 <公开 静态 类型 = 逻辑型 注释 = "调用系统的文件对话框选择打开文件." 返回值注释 = "返回是否成功,成功时在\"文件名\"参数中返回全路径文件名."
+            返回值注释 = "如失败或取消打开文件,则\"文件名\"参数返回空文本." 折叠 @禁止流程检查 = 真>
     参数 文件名 <类型 = 文本型 注释 = "用作初始化对话框中的文件名编辑框内容,以及返回用户所选择的全路径文件名.">
-    参数 过滤器 <类型 = 文本型 注释 = "  要选择的文件后缀,过滤器文本由单个或多个成对的文本串组成." 注释 = "  每对文本串的第一个提供显示文本,如:\"文本文件(*.txt)\","
-            注释 = "  第二个指定实际的过滤匹配符,如: \"*.txt\"." 注释 = "  所有各文本串之间用\"|\"号隔开."
-            注释 = "  例如 \"MP4文件(*.mp4;*.m4a)|*.mp4;*.m4a|所有文件(*.*)|*.*\"" 注释 = "  留空则不显示过滤器,可以选择所有类型的文件."
-            @默认值 = 空对象>
-    参数 父窗口句柄 <类型 = 变整数 注释 = "父窗口的句柄,0表示无父窗口" @默认值 = 0>
+    参数 过滤器 <类型 = 文本型 注释 = "要选择的文件后缀,过滤器文本由单个或多个成对的文本串组成." 注释 = "每对文本串的第一个提供显示文本,如:\"文本文件(*.txt)\","
+            注释 = "第二个指定实际的过滤匹配符,如: \"*.txt\"." 注释 = "所有各文本串之间用\"|\"号隔开."
+            注释 = "例如 \"MP4文件(*.mp4;*.m4a)|*.mp4;*.m4a|所有文件(*.*)|*.*\"" 注释 = "留空则不显示过滤器,可以选择所有类型的文件." @默认值 = 空对象>
+    参数 父窗口句柄 <类型 = 变整数 注释 = "父窗口的句柄,0表示无父窗口." 注释 = "打开选择对话框时将阻止对父窗口的操作." @默认值 = 0>
     参数 标题 <类型 = 文本型 注释 = "文件对话框的标题,默认为\"打开\"" @默认值 = 空对象>
-    参数 初始过滤器 <类型 = 整数 注释 = "  指定初始过滤器在\"过滤器\"属性中的索引位置(从1开始)," 注释 = "0为不指定初始过滤器,以第一个过滤器为初始项." @默认值 = 0>
+    参数 初始过滤器 <类型 = 整数 注释 = "指定初始过滤器在\"过滤器\"属性中的索引位置(从1开始)." 注释 = "0为不指定初始过滤器,以第一个过滤器为初始项." @默认值 = 0>
     参数 初始目录 <类型 = 文本型 注释 = "指定打开对话框时自动跳转到的目录" @默认值 = 空对象>
     参数 默认文件后缀 <类型 = 文本型 注释 = "当用户没有输入文件的后缀名称时,自动使用这里的文件后缀名称." @默认值 = 空对象>
     参数 创建时提示 <类型 = 逻辑型 注释 = "如果输入的文件不存在,提示是否创建文件" @默认值 = 假>
@@ -651,17 +650,17 @@
         @     szFilter.AddWord(0);
         @     ofn.lpstrFilter = reinterpret_cast<const WCHAR*>(szFilter.GetPtr());
         @ }
-        @ ofn.lpstrInitialDir = @<初始目录>.IsEmpty() ? NULL : @<初始目录>.GetText();
+        @ ofn.lpstrInitialDir = @<初始目录>.GetTextMaybeNull();
         @ WCHAR szBuffer[MAX_PATH * 4];
         @ if (@<文件名>.IsEmpty())
         @     szBuffer[0] = '\0';
         @ else
         @     wcscpy_s(szBuffer, MAX_PATH * 4, @<文件名>.GetText());
         @ ofn.lpstrFile = szBuffer;
-        @ ofn.lpstrTitle = @<标题>.IsEmpty() ? NULL : @<标题>.GetText();
+        @ ofn.lpstrTitle = @<标题>.GetTextMaybeNull();
         @ ofn.nMaxFile = sizeof(szBuffer);
         @ ofn.nFilterIndex = static_cast<DWORD>(@<初始过滤器>);
-        @ ofn.lpstrDefExt = @<默认文件后缀>.IsEmpty() ? NULL : @<默认文件后缀>.GetText();
+        @ ofn.lpstrDefExt = @<默认文件后缀>.GetTextMaybeNull();
         @ ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
         @ if (@<创建时提示>) ofn.Flags |= OFN_CREATEPROMPT;
         @ if (@<禁止解析快捷方式>) ofn.Flags |= OFN_NODEREFERENCELINKS;
@@ -677,13 +676,12 @@
     方法 打开选择多个文件 <公开 静态 类型 = 整数 注释 = "调用系统的文件对话框选择打开文件,允许多选." 返回值注释 = "成功返回文件名的数量,失败或未选择文件返回0." 折叠
             @禁止流程检查 = 真>
     参数 文件名列表 <类型 = 文本数组类 注释 = "成功在此返回文件名数组.不建议打开超过1000个文件,否则可能会因为缓冲区不足而失败.">
-    参数 过滤器 <类型 = 文本型 注释 = "  要选择的文件后缀,过滤器文本由单个或多个成对的文本串组成." 注释 = "  每对文本串的第一个提供显示文本,如:\"文本文件(*.txt)\","
-            注释 = "  第二个指定实际的过滤匹配符,如: \"*.txt\"." 注释 = "  所有各文本串之间用\"|\"号隔开."
-            注释 = "  例如 \"MP4文件(*.mp4;*.m4a)|*.mp4;*.m4a|所有文件(*.*)|*.*\"" 注释 = "  留空则不显示过滤器,可以选择所有类型的文件."
-            @默认值 = 空对象>
-    参数 父窗口句柄 <类型 = 变整数 注释 = "父窗口的句柄,0表示无父窗口" @默认值 = 0>
+    参数 过滤器 <类型 = 文本型 注释 = "要选择的文件后缀,过滤器文本由单个或多个成对的文本串组成." 注释 = "每对文本串的第一个提供显示文本,如:\"文本文件(*.txt)\","
+            注释 = "第二个指定实际的过滤匹配符,如: \"*.txt\"." 注释 = "所有各文本串之间用\"|\"号隔开."
+            注释 = "例如 \"MP4文件(*.mp4;*.m4a)|*.mp4;*.m4a|所有文件(*.*)|*.*\"" 注释 = "留空则不显示过滤器,可以选择所有类型的文件." @默认值 = 空对象>
+    参数 父窗口句柄 <类型 = 变整数 注释 = "父窗口的句柄,0表示无父窗口." 注释 = "打开选择对话框时将阻止对父窗口的操作." @默认值 = 0>
     参数 标题 <类型 = 文本型 注释 = "文件对话框的标题,默认为\"打开\"" @默认值 = 空对象>
-    参数 初始过滤器 <类型 = 整数 注释 = "  指定初始过滤器在\"过滤器\"属性中的索引位置(从1开始)," 注释 = "0为不指定初始过滤器,以第一个过滤器为初始项." @默认值 = 0>
+    参数 初始过滤器 <类型 = 整数 注释 = "指定初始过滤器在\"过滤器\"属性中的索引位置(从1开始)." 注释 = "0为不指定初始过滤器,以第一个过滤器为初始项." @默认值 = 0>
     参数 初始目录 <类型 = 文本型 注释 = "指定打开对话框时自动跳转到的目录" @默认值 = 空对象>
     参数 不改变目录 <类型 = 逻辑型 注释 = "是否在对话框关闭后,将\"当前目录\"还原为打开对话框之前的目录." @默认值 = 假>
     {
@@ -700,10 +698,10 @@
         @     szFilter.AddWord(0);
         @     ofn.lpstrFilter = reinterpret_cast<const WCHAR*>(szFilter.GetPtr());
         @ }
-        @ ofn.lpstrInitialDir = @<初始目录>.IsEmpty() ? NULL : @<初始目录>.GetText();
+        @ ofn.lpstrInitialDir = @<初始目录>.GetTextMaybeNull();
         // 这个缓冲区大小保守可以打开1000-2000个文件
         @ ofn.lpstrFile = reinterpret_cast<WCHAR *>(calloc(MAX_PATH * 512, sizeof(WCHAR)));
-        @ ofn.lpstrTitle = @<标题>.IsEmpty() ? NULL : @<标题>.GetText();
+        @ ofn.lpstrTitle = @<标题>.GetTextMaybeNull();
         @ ofn.nMaxFile = MAX_PATH * 512;
         @ ofn.nFilterIndex = static_cast<DWORD>(@<初始过滤器>);
         @ ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_ALLOWMULTISELECT | OFN_NODEREFERENCELINKS;
@@ -727,13 +725,12 @@
     方法 保存文件 <公开 静态 类型 = 逻辑型 注释 = "调用系统的文件对话框选择保存文件." 返回值注释 = "  返回是否成功,成功时在\"文件名\"参数中返回全路径文件名."
             返回值注释 = "  如失败或取消打开文件,则\"文件名\"参数返回空文本." 折叠 @禁止流程检查 = 真>
     参数 文件名 <类型 = 文本型 注释 = "用作初始化对话框中的文件名编辑框内容,以及返回用户所选择的全路径文件名.">
-    参数 过滤器 <类型 = 文本型 注释 = "  要选择的文件后缀,过滤器文本由单个或多个成对的文本串组成." 注释 = "  每对文本串的第一个提供显示文本,如:\"文本文件(*.txt)\","
-            注释 = "  第二个指定实际的过滤匹配符,如: \"*.txt\"." 注释 = "  所有各文本串之间用\"|\"号隔开."
-            注释 = "  例如 \"MP4文件(*.mp4;*.m4a)|*.mp4;*.m4a|所有文件(*.*)|*.*\"" 注释 = "  留空则不显示过滤器,可以选择所有类型的文件."
-            @默认值 = 空对象>
-    参数 父窗口句柄 <类型 = 变整数 注释 = "父窗口的句柄,0=表示无父窗口" @默认值 = 0>
+    参数 过滤器 <类型 = 文本型 注释 = "要选择的文件后缀,过滤器文本由单个或多个成对的文本串组成." 注释 = "每对文本串的第一个提供显示文本,如:\"文本文件(*.txt)\","
+            注释 = "第二个指定实际的过滤匹配符,如: \"*.txt\"." 注释 = "所有各文本串之间用\"|\"号隔开."
+            注释 = "例如 \"MP4文件(*.mp4;*.m4a)|*.mp4;*.m4a|所有文件(*.*)|*.*\"" 注释 = "留空则不显示过滤器,可以选择所有类型的文件." @默认值 = 空对象>
+    参数 父窗口句柄 <类型 = 变整数 注释 = "父窗口的句柄,0表示无父窗口." 注释 = "打开选择对话框时将阻止对父窗口的操作." @默认值 = 0>
     参数 标题 <类型 = 文本型 注释 = "文件对话框的标题,默认为\"保存\"" @默认值 = 空对象>
-    参数 初始过滤器 <类型 = 整数 注释 = "  指定初始过滤器在\"过滤器\"属性中的索引位置(从1开始)," 注释 = "0为不指定初始过滤器,以第一个过滤器为初始项." @默认值 = 0>
+    参数 初始过滤器 <类型 = 整数 注释 = "指定初始过滤器在\"过滤器\"属性中的索引位置(从1开始)." 注释 = "0为不指定初始过滤器,以第一个过滤器为初始项." @默认值 = 0>
     参数 初始目录 <类型 = 文本型 注释 = "指定打开对话框时自动跳转到的目录" @默认值 = 空对象>
     参数 默认文件后缀 <类型 = 文本型 注释 = "当用户没有输入文件的后缀名称时,自动使用这里的文件后缀名称." @默认值 = 空对象>
     参数 文件覆盖提示 <类型 = 逻辑型 注释 = "如果选择的文件已经存在,提示是否覆盖" @默认值 = 真>
@@ -751,17 +748,17 @@
         @     szFilter.AddWord(0);
         @     ofn.lpstrFilter = reinterpret_cast<const WCHAR*>(szFilter.GetPtr());
         @ }
-        @ ofn.lpstrInitialDir = @<初始目录>.IsEmpty() ? NULL : @<初始目录>.GetText();
+        @ ofn.lpstrInitialDir = @<初始目录>.GetTextMaybeNull();
         @ WCHAR szBuffer[MAX_PATH * 4];
         @ if (@<文件名>.IsEmpty())
         @     szBuffer[0] = '\0';
         @ else
         @     wcscpy_s(szBuffer, MAX_PATH * 4, @<文件名>.GetText());
         @ ofn.lpstrFile = szBuffer;
-        @ ofn.lpstrTitle = @<标题>.IsEmpty() ? NULL : @<标题>.GetText();
+        @ ofn.lpstrTitle = @<标题>.GetTextMaybeNull();
         @ ofn.nMaxFile = sizeof(szBuffer);
         @ ofn.nFilterIndex = static_cast<DWORD>(@<初始过滤器>);
-        @ ofn.lpstrDefExt = @<默认文件后缀>.IsEmpty() ? NULL : @<默认文件后缀>.GetText();
+        @ ofn.lpstrDefExt = @<默认文件后缀>.GetTextMaybeNull();
         @ ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
         @ if (@<文件覆盖提示>) ofn.Flags |= OFN_OVERWRITEPROMPT;
         @ if (@<不改变目录>) ofn.Flags |= OFN_NOCHANGEDIR;
@@ -772,6 +769,45 @@
         @ @<文件名>.Empty();
         @ return FALSE;
     }
+
+    方法 选择文件夹 <公开 静态 类型 = 文本型 注释 = "调用系统的文件对话框选择文件夹,并返回路径." 注释 = "注: 本方法最低系统要求为Windows Vista" 注释 = ""
+            返回值注释 = "成功返回选中的文件夹路径,取消或失败返回空文本." 折叠 @视窗.外部头文件 = "shobjidl_core.h" @视窗.预定义宏 = "_WIN32_WINNT=0x0600"
+            @禁止流程检查 = 真>
+    参数 父窗口句柄 <类型 = 变整数 注释 = "父窗口的句柄,0表示无父窗口." 注释 = "打开选择对话框时将阻止对父窗口的操作." @默认值 = 0>
+    参数 标题 <类型 = 文本型 注释 = "文件对话框的标题,默认为\"选择文件夹\"" @默认值 = 空对象>
+    参数 按钮标题 <类型 = 文本型 注释 = "打开的标题,默认为\"选择文件夹\"" @默认值 = 空对象>
+    {
+        @ CWString folderPath;
+        @ IFileDialog* pfd = nullptr;
+        @ HRESULT hr = ::CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd));
+        @ if (FAILED(hr))
+        @     return folderPath;
+        @ hr = pfd->SetOptions(FOS_PICKFOLDERS);
+        @ if (!@<标题>.IsNullObject())
+        @     hr = pfd->SetTitle(@<标题>.GetText());
+        @ if (!@<按钮标题>.IsNullObject())
+        @     hr = pfd->SetOkButtonLabel(@<按钮标题>.GetText());
+        @ hr = pfd->Show((HWND)@<父窗口句柄>);
+        @ if (FAILED(hr)) {
+        @     pfd->Release();
+        @     return folderPath;
+        @ }
+        @ IShellItem* psi = nullptr;
+        @ hr = pfd->GetResult(&psi);
+        @ if (FAILED(hr)) {
+        @     pfd->Release();
+        @     return folderPath;
+        @ }
+        @ PWSTR pszFolderPath = nullptr;
+        @ hr = psi->GetDisplayName(SIGDN_FILESYSPATH, &pszFolderPath);
+        @ if (SUCCEEDED(hr)) {
+        @     folderPath.SetText(pszFolderPath);
+        @     CoTaskMemFree(pszFolderPath);
+        @ }
+        @ psi->Release();
+        @ pfd->Release();
+        @ return folderPath;
+    }
 }
 
 类 文件拖放类 <公开 注释 = "给窗口组件启用文件拖放功能" 折叠 @文档 = "category = \"文件操作\"">
@@ -781,14 +817,13 @@
     # @begin
     # <> <include>
     # HWND m_hWnd = NULL;
-    # LONG_PTR m_OldWndProc = 0;
     # typedef BOOL(WINAPI* pChangeWindowMessageFilterEx)(HWND, UINT, DWORD, PVOID);
     # pChangeWindowMessageFilterEx API_ChangeWindowMessageFilterEx =
     #     (pChangeWindowMessageFilterEx)::GetProcAddress(::GetModuleHandle(L"User32.dll"), "ChangeWindowMessageFilterEx");
-    # static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+    # static LRESULT CALLBACK SubClassProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
     # <> </include>
-    # LRESULT CALLBACK @sn<current_class>::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    #     @sn<current_class>* pThis = reinterpret_cast<@sn<current_class>*>(::GetPropW(hwnd, L"_piv_DragUserData"));
+    # LRESULT CALLBACK @sn<current_class>::SubClassProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+    #     @sn<current_class>* pThis = reinterpret_cast<@sn<current_class>*>(uIdSubclass);
     #     if (pThis != NULL) {
     #         if (uMsg == WM_DROPFILES) {
     #             @dt<文本数组类> saryFileNames;
@@ -800,11 +835,9 @@
     #             }
     #             ::DragFinish((HDROP)wParam);
     #             pThis->@<文件被拖放>(saryFileNames);
-    #             return 0;
     #         }
-    #         return ::CallWindowProcW((WNDPROC)pThis->m_OldWndProc, hwnd, uMsg, wParam, lParam);
     #     }
-    #     return ::DefWindowProcW(hwnd, uMsg, wParam, lParam);
+    #     return ::DefSubclassProc(hwnd, uMsg, wParam, lParam);
     # }
     # @end
 
@@ -818,37 +851,36 @@
 
     方法 是否启用 <公开 属性读 类型 = 逻辑型 注释 = "返回当前是否启用了文件拖放" 折叠 @禁止流程检查 = 真>
     {
-        @ return (m_hWnd != NULL && m_OldWndProc != 0);
+        @ return (m_hWnd != NULL);
     }
 
-    方法 启用拖放 <公开 注释 = "启用文件拖放,并选择需要绑定的窗口组件" 折叠>
+    方法 启用拖放 <公开 类型 = 逻辑型 注释 = "启用文件拖放,并选择需要绑定的窗口组件" 折叠 @禁止流程检查 = 真>
     参数 绑定组件 <类型 = 变整数 注释 = "所欲绑定到拖放的窗口组件句柄(可使用\"取窗口句柄\"获取)">
     {
         @ if (!m_hWnd) { @<禁用拖放>(); } // 如果之前有绑定过其他组件,先将它禁用
         @ m_hWnd = (HWND)@<绑定组件>;
-        @ if (!m_OldWndProc) {
-        @     ::SetPropW(m_hWnd, L"_piv_DragUserData", (HANDLE)this);
-        @     ::SetWindowLongPtrW(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
-        @     m_OldWndProc = ::SetWindowLongPtrW(m_hWnd, GWLP_WNDPROC, (LONG_PTR)WindowProc);
+        @ if (!::SetWindowSubclass(m_hWnd, &SubClassProc, (UINT_PTR)this, (DWORD_PTR)this)) {
+        @     m_hWnd = NULL;
+        @     return FALSE;
         @ }
         @ ::DragAcceptFiles(m_hWnd, TRUE);
         @ if (API_ChangeWindowMessageFilterEx) {
         @     API_ChangeWindowMessageFilterEx(m_hWnd, WM_DROPFILES, 1, NULL); // WM_DROPFILES, MSGFLT_ADD
         @     API_ChangeWindowMessageFilterEx(m_hWnd, 0x0049, 1, NULL); // 0x0049 == WM_COPYGLOBALDATA, MSGFLT_ADD
         @ }
+        @ return TRUE;
     }
 
     方法 禁用拖放 <公开 注释 = "停止拖放功能" 折叠>
     {
-        @ if (m_hWnd && m_OldWndProc) {
+        @ if (m_hWnd) {
         @     ::DragAcceptFiles(m_hWnd, FALSE);
-        @     ::SetWindowLongPtrW(m_hWnd, GWLP_WNDPROC, m_OldWndProc);
         @     if (API_ChangeWindowMessageFilterEx) {
         @         API_ChangeWindowMessageFilterEx(m_hWnd, WM_DROPFILES, 0, NULL); // WM_DROPFILES, MSGFLT_RESET
         @         API_ChangeWindowMessageFilterEx(m_hWnd, 0x0049, 0, NULL); // 0x0049 == WM_COPYGLOBALDATA, MSGFLT_RESET
         @     }
-        @     ::RemovePropW(m_hWnd, L"_piv_DragUserData");
-        @     m_hWnd = NULL; m_OldWndProc = 0;
+        @     ::RemoveWindowSubclass(m_hWnd, &SubClassProc, (UINT_PTR)this);
+        @     m_hWnd = NULL;
         @ }
     }
 }
@@ -878,7 +910,7 @@
     参数 窗口句柄 <类型 = 变整数 注释 = "可空" @默认值 = 0>
     {
         @ @<字体列表>.data().RemoveAll();
-        @ HWND hwnd = (@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>;
+        @ HWND hwnd = (HWND)@<窗口句柄>;
         @ HDC hdc = ::GetDC(hwnd);
         @ LOGFONTW lf;
         @ memset(&lf, 0, sizeof(LOGFONTW));
@@ -894,8 +926,8 @@
     参数 检索字体 <类型 = 文本型 注释 = "为空返回所有字体, 否则只返回指定名称的字体(文本超长将被忽略)." @默认值 = 空对象>
     参数 窗口句柄 <类型 = 变整数 注释 = "可空" @默认值 = 0>
     {
-        @ HWND hwnd = (@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>;
-        @ HDC hdc = ::GetDC((@<窗口句柄> == 0) ? NULL : (HWND)@<窗口句柄>);
+        @ HWND hwnd = (HWND)@<窗口句柄>;
+        @ HDC hdc = ::GetDC((HWND)@<窗口句柄>);
         @ LOGFONTW lf;
         @ memset(&lf, 0, sizeof(LOGFONTW));
         @ lf.lfCharSet = (BYTE)@<字符集>;
@@ -1520,7 +1552,8 @@
         @ auto it = m_map.find(@<盘符>);
         @ if (it != m_map.end()) {
         @     it->second->Stop(@<删除USN日志>);
-        @     return m_map.erase(it) > 0;
+        @     m_map.erase(it);
+        @     return TRUE;
         @ }
         @ return FALSE;
     }

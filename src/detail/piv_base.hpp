@@ -33,23 +33,15 @@
 #ifdef PIV_HAS_CPP17
 #define PIV_IF if constexpr
 #define PIV_ELSE_IF else if constexpr
-#else
+#else // PIV_HAS_CPP17
 #define PIV_IF if
 #define PIV_ELSE_IF else if
-#endif
+#endif // PIV_HAS_CPP17
 
 // 向前移动指针N个字节
 #define PIV_PTR_FORWARD(cast, ptr, offset) ((cast)((uint64_t)(ptr) + (int64_t)(offset)))
 // 向后移动指针N个字节
 #define PIV_PTR_BACKWARD(cast, ptr, offset) ((cast)((uint64_t)(ptr) - (int64_t)(offset)))
-
-namespace piv
-{
-    namespace detail
-    {
-    } // namespace detail
-
-} // namespace piv
 
 #endif // _PIV_BASE_HPP
 
@@ -59,8 +51,8 @@ template <typename ELEMENT_T = BYTE, typename MEM_SIZE = DWORD>
 class PivBuffer
 {
 private:
-    ELEMENT_T *p = nullptr;
-    MEM_SIZE size = 0;
+    ELEMENT_T *_p = nullptr;
+    MEM_SIZE _size = 0;
 
 public:
     PivBuffer() {}
@@ -81,14 +73,14 @@ public:
      */
     ELEMENT_T *Alloc(MEM_SIZE npSize, bool zero = true)
     {
-        size = npSize * sizeof(ELEMENT_T);
-        if (!p)
-            p = reinterpret_cast<ELEMENT_T *>(g_objVolApp.GetPoolMem()->Alloc(static_cast<INT_P>(size)));
+        _size = npSize * sizeof(ELEMENT_T);
+        if (!_p)
+            _p = reinterpret_cast<ELEMENT_T *>(g_objVolApp.GetPoolMem()->Alloc(static_cast<INT_P>(_size)));
         else
-            p = reinterpret_cast<ELEMENT_T *>(g_objVolApp.GetPoolMem()->Realloc((void *)p, static_cast<INT_P>(size)));
+            _p = reinterpret_cast<ELEMENT_T *>(g_objVolApp.GetPoolMem()->Realloc((void *)_p, static_cast<INT_P>(_size)));
         if (zero)
-            memset(p, 0, static_cast<size_t>(size));
-        return p;
+            memset(_p, 0, static_cast<size_t>(_size));
+        return _p;
     }
 
     /**
@@ -99,11 +91,11 @@ public:
      */
     inline ELEMENT_T *Realloc(MEM_SIZE npNewSize, bool zero = true)
     {
-        size = npNewSize * sizeof(ELEMENT_T);
-        p = reinterpret_cast<ELEMENT_T *>(g_objVolApp.GetPoolMem()->Realloc((void *)p, static_cast<INT_P>(size)));
+        _size = npNewSize * sizeof(ELEMENT_T);
+        _p = reinterpret_cast<ELEMENT_T *>(g_objVolApp.GetPoolMem()->Realloc((void *)_p, static_cast<INT_P>(_size)));
         if (zero)
-            memset(p, 0, static_cast<size_t>(size));
-        return p;
+            memset(_p, 0, static_cast<size_t>(_size));
+        return _p;
     }
 
     /**
@@ -111,16 +103,16 @@ public:
      */
     inline void Free()
     {
-        if (p)
-            g_objVolApp.GetPoolMem()->Free((void *)p);
-        size = 0;
+        if (_p)
+            g_objVolApp.GetPoolMem()->Free((void *)_p);
+        _size = 0;
     }
 
     /**
      * @brief 取指针
      * @return
      */
-    inline ELEMENT_T *GetPtr() { return p; }
+    inline ELEMENT_T *GetPtr() { return _p; }
 
     /**
      * @brief 取指定类型指针
@@ -128,29 +120,29 @@ public:
      * @return
      */
     template <typename R = ELEMENT_T>
-    inline R *Get() { return reinterpret_cast<R *>(p); }
+    inline R *Get() { return reinterpret_cast<R *>(_p); }
 
     /**
      * @brief 取字节长度
      * @return
      */
-    inline MEM_SIZE GetSize() { return size; }
+    inline MEM_SIZE GetSize() { return _size; }
 
     /**
      * @brief 取成员数
      * @return
      */
-    inline MEM_SIZE GetCount() { return size / sizeof(ELEMENT_T); }
+    inline MEM_SIZE GetCount() { return _size / sizeof(ELEMENT_T); }
 
     /**
      * @brief 取成员
      * @param pos 索引
      * @return
      */
-    ELEMENT_T &At(MEM_SIZE pos) { return p[pos]; }
+    ELEMENT_T &At(MEM_SIZE pos) { return _p[pos]; }
 
-    ELEMENT_T *operator*() { return p; }
-    ELEMENT_T &operator[](MEM_SIZE pos) { return p[pos]; }
+    ELEMENT_T *operator*() { return _p; }
+    ELEMENT_T &operator[](MEM_SIZE pos) { return _p[pos]; }
 }; // PivBuffer
 #endif // _PIV_BUFFER_CLASS
 
@@ -185,3 +177,137 @@ static BOOL PivMsgAssert(const BOOL blpSucceed, const WCHAR *szErrorMessage, con
 #endif
 #endif // _PIV_ASSERT_HPP
 
+#ifndef _PIV_HASH_FUNCTION
+#define _PIV_HASH_FUNCTION
+namespace piv
+{
+    namespace detail
+    {
+        /**
+         * @brief 取哈希值(与MSVC std::hash的算法相同)
+         */
+        static size_t hash(const unsigned char *_First, size_t _Count)
+        {
+#if defined(_WIN64)
+            size_t _basis = 14695981039346656037ULL;
+            size_t _prime = 1099511628211ULL;
+#else
+            size_t _basis = 2166136261U;
+            size_t _prime = 16777619U;
+#endif
+            size_t _val = _basis;
+            for (size_t _Idx = 0; _Idx < _Count; ++_Idx)
+            {
+                _val ^= static_cast<size_t>(_First[_Idx]);
+                _val *= _prime;
+            }
+            return _val;
+        }
+    } // namespace detail
+
+    /**
+     * @brief 取哈希值基类(不区分大小写)
+     * @tparam T
+     */
+    template <class T>
+    struct ci_hash
+    {
+        size_t operator()(const T &_Keyval) const noexcept
+        {
+            return 0;
+        }
+    };
+
+    /**
+     * @brief 取文本型哈希值(不区分大小写)
+     */
+    template <>
+    struct ci_hash<CVolString>
+    {
+        size_t operator()(const CVolString &_Keyval) const noexcept
+        {
+            CVolString val(_Keyval);
+            val.MakeUpper();
+            return ::piv::detail::hash((const unsigned char *)val.GetText(), val.GetLength() * 2);
+        }
+    };
+
+    /**
+     * @brief 小于比较基类(不区分大小写)
+     * @tparam T
+     */
+    template <typename T>
+    struct ci_less
+    {
+        bool operator()(const T &lhs, const T &rhs) const
+        {
+            return lhs < rhs;
+        }
+    };
+
+    /**
+     * @brief 文本型小于比较(不区分大小写)
+     */
+    template <>
+    struct ci_less<CVolString>
+    {
+        bool operator()(const CVolString &lhs, const CVolString &rhs) const
+        {
+            return lhs.compare(rhs, false) < 0;
+        }
+    };
+
+    /**
+     * @brief 等于比较基类(不区分大小写)
+     * @tparam T
+     */
+    template <class T>
+    struct ci_equal_to
+    {
+        bool operator()(const T &lhs, const T &rhs) const
+        {
+            return lhs == rhs;
+        }
+    };
+
+    /**
+     * @brief 文本型等于比较(不区分大小写)
+     */
+    template <>
+    struct ci_equal_to<CVolString>
+    {
+        bool operator()(const CVolString &lhs, const CVolString &rhs) const
+        {
+            return lhs.IIsEqual(rhs);
+        }
+    };
+
+}
+
+namespace std
+{
+    /**
+     * @brief 文本型的std::hash
+     */
+    template <>
+    struct hash<CVolString>
+    {
+        size_t operator()(const CVolString &_Keyval) const noexcept
+        {
+            return ::piv::detail::hash((const unsigned char *)_Keyval.GetText(), _Keyval.GetLength() * 2);
+        }
+    };
+
+    /**
+     * @brief 字节集类的std::hash
+     */
+    template <>
+    struct hash<CVolMem>
+    {
+        size_t operator()(const CVolMem &_Keyval) const noexcept
+        {
+            return ::piv::detail::hash((const unsigned char *)_Keyval.GetPtr(), _Keyval.GetSize());
+        }
+    };
+}
+#endif // _PIV_HASH_FUNCTION

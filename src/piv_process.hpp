@@ -16,6 +16,7 @@
 #include <psapi.h>
 #include <winternl.h>
 #pragma comment(lib, "Psapi.lib")
+#include <memory>
 
 class PivProcess
 {
@@ -24,7 +25,7 @@ private:
     HANDLE hProcess = NULL;
     const BYTE *ProcessStart = NULL;
     const BYTE *ProcessEnd = NULL;
-    DWORD PID;
+    DWORD PID = 0;
 
     const uint32_t BLOCKMAXSIZE{409600};
     typedef BOOL(WINAPI *Piv_GetProcessDEPPolicy)(HANDLE, LPDWORD, PBOOL);
@@ -58,7 +59,7 @@ private:
 
 public:
     PivProcess() {}
-    PivProcess(const DWORD &process_id, const DWORD &desired_access)
+    PivProcess(DWORD process_id, DWORD desired_access)
     {
         open_process(process_id, desired_access);
     }
@@ -68,7 +69,7 @@ public:
     }
 
     // 打开进程
-    BOOL open_process(const DWORD &process_id, const DWORD &desired_access)
+    BOOL open_process(DWORD process_id, DWORD desired_access)
     {
         close_process();
         PID = process_id ? process_id : ::GetCurrentProcessId();
@@ -80,7 +81,7 @@ public:
     }
 
     // 打开自句柄
-    BOOL open_handle(const HANDLE &process, const BOOL &auto_close = false)
+    BOOL open_handle(HANDLE process, BOOL auto_close = false)
     {
         close_process();
         hProcess = process;
@@ -165,7 +166,7 @@ public:
     }
 
     // 置优先级
-    BOOL set_priority_class(const DWORD &priority)
+    BOOL set_priority_class(DWORD priority)
     {
         return ::SetPriorityClass(hProcess, priority);
     }
@@ -188,7 +189,7 @@ public:
     }
 
     // 是否为WOW64模式
-    BOOL is_wow64(const BOOL &currentProcess = TRUE)
+    BOOL is_wow64(BOOL currentProcess = TRUE)
     {
         BOOL result = FALSE;
         if (hProcess != NULL)
@@ -266,7 +267,7 @@ public:
     }
 
     // 取模块基址
-    void *get_module_base(const HMODULE &hMoudle)
+    void *get_module_base(HMODULE hMoudle)
     {
         if (hProcess != NULL)
         {
@@ -280,7 +281,7 @@ public:
     }
 
     // 枚举模块句柄
-    int32_t enum_modules(CMArray<INT_P> &module_array, const DWORD &filter_flag)
+    int32_t enum_modules(CMArray<INT_P> &module_array, DWORD filter_flag)
     {
         module_array.RemoveAll();
         if (hProcess != NULL)
@@ -302,7 +303,7 @@ public:
     }
 
     // 枚举模块名称
-    int32_t enum_modules(CMArray<INT_P> &module_array, CMStringArray &name_array, const BOOL &is_fullpath, const DWORD &filter_flag)
+    int32_t enum_modules(CMArray<INT_P> &module_array, CMStringArray &name_array, BOOL is_fullpath, DWORD filter_flag)
     {
         module_array.RemoveAll();
         name_array.RemoveAll();
@@ -331,7 +332,7 @@ public:
     }
 
     // 取模块信息
-    BOOL get_module_info(const HMODULE &hModule, MODULEINFO *pModuleInfo)
+    BOOL get_module_info(HMODULE hModule, MODULEINFO *pModuleInfo)
     {
         if (hProcess != NULL)
         {
@@ -341,7 +342,7 @@ public:
     }
 
     // 取模块名称
-    CVolString get_module_name(const HMODULE &hModule)
+    CVolString get_module_name(HMODULE hModule)
     {
         if (hProcess != NULL)
         {
@@ -356,7 +357,7 @@ public:
     }
 
     // 取模块文件名
-    CVolString get_module_filename(const HMODULE &hModule)
+    CVolString get_module_filename(HMODULE hModule)
     {
         if (hProcess != NULL)
         {
@@ -371,7 +372,7 @@ public:
     }
 
     // 取模块路径
-    CVolString get_module_path(const HMODULE &hModule)
+    CVolString get_module_path(HMODULE hModule)
     {
         if (hProcess != NULL)
         {
@@ -420,7 +421,7 @@ public:
     }
 
     // 创建远程线程
-    BOOL create_remote_thread(void *func_ptr, void *parm_ptr, const BOOL &is_wait)
+    BOOL create_remote_thread(void *func_ptr, void *parm_ptr, BOOL is_wait)
     {
         BOOL result = false;
         if (hProcess != NULL)
@@ -451,18 +452,18 @@ public:
     }
 
     // 分配虚拟内存
-    void *virtual_alloc(void *address, const size_t &men_size, const DWORD &allocation_type, const DWORD &protect)
+    void *virtual_alloc(void *address, size_t men_size, DWORD allocation_type, DWORD protect)
     {
         return ::VirtualAllocEx(hProcess, address, men_size, allocation_type, protect);
     }
 
     // 释放虚拟内存
-    BOOL virtual_free(void *address, const size_t &men_size, const DWORD &free_type)
+    BOOL virtual_free(void *address, size_t men_size, DWORD free_type)
     {
         return ::VirtualFreeEx(hProcess, address, men_size, free_type);
     }
     // 修改内存保护
-    int32_t modify_memory_protect(void *address, const size_t &mem_size, const DWORD &new_protect)
+    int32_t modify_memory_protect(void *address, size_t mem_size, DWORD new_protect)
     {
         if (hProcess != NULL)
         {
@@ -476,7 +477,7 @@ public:
     }
 
     // 寻找所有内存特征码
-    int32_t find_signatures(const wchar_t *signatures, CMArray<INT_P> &address_array, const void *start_ptr, const void *end_ptr, const DWORD &protect = 0, const DWORD &mem_type = 0, const ptrdiff_t &max_count = PTRDIFF_MAX)
+    int32_t find_signatures(const wchar_t *signatures, CMArray<INT_P> &address_array, const void *start_ptr, const void *end_ptr, DWORD protect = 0, DWORD mem_type = 0, ptrdiff_t max_count = PTRDIFF_MAX)
     {
         address_array.RemoveAll();
         if (hProcess == NULL)
@@ -494,7 +495,7 @@ public:
         SignatureStr.Replace(L" ", L"");
         wchar_t *SignatureCode = const_cast<wchar_t *>(SignatureStr.GetText());
         size_t SignatureLength = static_cast<size_t>(SignatureStr.GetLength()) / 2;
-        WORD *BytesetSequence = new WORD[SignatureLength];
+        std::unique_ptr<WORD[]> BytesetSequence{new WORD[SignatureLength]};
         // 将十六进制特征码转为十进制
         for (size_t i = 0, n = 0; i < static_cast<size_t>(SignatureStr.GetLength()); n++)
         {
@@ -537,7 +538,7 @@ public:
         }
         // 获取Next数组end
         MEMORY_BASIC_INFORMATION mbi{0};
-        BYTE *MemoryData = new BYTE[BLOCKMAXSIZE];
+        std::unique_ptr<BYTE[]> MemoryData{new BYTE[BLOCKMAXSIZE]};
         while (::VirtualQueryEx(hProcess, StartAddress, &mbi, sizeof(mbi)) != 0)
         {
             if ((protect != 0 && protect != mbi.Protect) || (mem_type != 0 && mem_type != mbi.Type))
@@ -546,7 +547,7 @@ public:
             uint32_t BlockSize = static_cast<uint32_t>(mbi.RegionSize);
             while (BlockSize >= BLOCKMAXSIZE)
             {
-                if (::ReadProcessMemory(hProcess, StartAddress + (BLOCKMAXSIZE * i), MemoryData, BLOCKMAXSIZE, NULL))
+                if (::ReadProcessMemory(hProcess, StartAddress + (BLOCKMAXSIZE * i), MemoryData.get(), BLOCKMAXSIZE, NULL))
                 {
                     for (size_t m = 0, j, k; m < BLOCKMAXSIZE;)
                     {
@@ -575,7 +576,7 @@ public:
                 BlockSize -= BLOCKMAXSIZE;
                 i++;
             }
-            if (::ReadProcessMemory(hProcess, StartAddress + (BLOCKMAXSIZE * i), MemoryData, BlockSize, NULL))
+            if (::ReadProcessMemory(hProcess, StartAddress + (BLOCKMAXSIZE * i), MemoryData.get(), BlockSize, NULL))
             {
                 for (size_t m = 0, j, k; m < BlockSize;)
                 {
@@ -609,13 +610,11 @@ public:
                 break;
             }
         }
-        delete[] BytesetSequence;
-        delete[] MemoryData;
         return static_cast<int32_t>(address_array.GetCount());
     }
 
     // 寻找内存特征码
-    ptrdiff_t find_signatures(const wchar_t *signatures, const void *start_ptr, const void *end_ptr, const DWORD &protect = 0, const DWORD &mem_type = 0)
+    ptrdiff_t find_signatures(const wchar_t *signatures, const void *start_ptr, const void *end_ptr, DWORD protect = 0, DWORD mem_type = 0)
     {
         if (hProcess != NULL)
         {
@@ -629,7 +628,7 @@ public:
     }
 
     // 寻找所有内存字节集
-    int32_t find_memory(const CVolMem &mem_data, CMArray<INT_P> &address_array, const void *start_ptr, const void *end_ptr, const DWORD &protect = 0, const DWORD &mem_type = 0, const ptrdiff_t &max_count = PTRDIFF_MAX)
+    int32_t find_memory(const CVolMem &mem_data, CMArray<INT_P> &address_array, const void *start_ptr, const void *end_ptr, DWORD protect = 0, DWORD mem_type = 0, ptrdiff_t max_count = PTRDIFF_MAX)
     {
         address_array.RemoveAll();
         if (hProcess == NULL)
@@ -691,7 +690,7 @@ public:
     }
 
     // 寻找内存字节集
-    ptrdiff_t find_memory(const CVolMem &mem_data, const void *start_ptr, const void *end_ptr, const DWORD &protect = 0, const DWORD &mem_type = 0)
+    ptrdiff_t find_memory(const CVolMem &mem_data, const void *start_ptr, const void *end_ptr, DWORD protect = 0, DWORD mem_type = 0)
     {
         if (hProcess != NULL)
         {
@@ -705,7 +704,7 @@ public:
     }
 
     // 读内存数据
-    BOOL read_memory(void *write_address, const void *read_address, const size_t &read_size)
+    BOOL read_memory(void *write_address, const void *read_address, size_t read_size)
     {
         if (hProcess != NULL)
         {
@@ -715,7 +714,7 @@ public:
     }
 
     // 读内存字节集
-    CVolMem read_memory(const void *read_address, const size_t &read_size)
+    CVolMem read_memory(const void *read_address, size_t read_size)
     {
         if (hProcess != NULL)
         {
@@ -750,58 +749,48 @@ public:
     }
 
     // 写内存数据
-    BOOL write_memory(void *write_address, const void *data_address, const size_t &data_size)
+    BOOL write_memory(void *write_address, const void *data_address, size_t data_size, BOOL change_protect = TRUE)
     {
+        if (hProcess == NULL)
+            return FALSE;
+        if (!change_protect)
+            return ::WriteProcessMemory(hProcess, write_address, data_address, data_size, NULL);
         BOOL result = FALSE;
-        if (hProcess != NULL)
+        DWORD dwOldProtect = 0;
+        if (::VirtualProtectEx(hProcess, write_address, data_size, PAGE_READWRITE, &dwOldProtect))
         {
-            DWORD dwOldProtect = 0;
-            if (::VirtualProtectEx(hProcess, write_address, data_size, PAGE_EXECUTE_READWRITE, &dwOldProtect))
-            {
-                result = ::WriteProcessMemory(hProcess, write_address, data_address, data_size, NULL);
-                ::VirtualProtectEx(hProcess, write_address, data_size, dwOldProtect, NULL);
-            }
+            result = ::WriteProcessMemory(hProcess, write_address, data_address, data_size, NULL);
+            ::VirtualProtectEx(hProcess, write_address, data_size, dwOldProtect, &dwOldProtect);
         }
         return result;
     }
 
     // 写内存字节集
-    BOOL write_memory(void *write_address, const CVolMem &data)
+    BOOL write_memory(void *write_address, const CVolMem &data, BOOL change_protect = TRUE)
     {
-        BOOL result = FALSE;
-        if (hProcess != NULL)
-        {
-            DWORD dwOldProtect = 0;
-            if (::VirtualProtectEx(hProcess, write_address, static_cast<size_t>(data.GetSize()), PAGE_EXECUTE_READWRITE, &dwOldProtect))
-            {
-                result = ::WriteProcessMemory(hProcess, write_address, data.GetPtr(),
-                                              static_cast<size_t>(data.GetSize()), NULL);
-                ::VirtualProtectEx(hProcess, write_address, static_cast<size_t>(data.GetSize()), dwOldProtect, NULL);
-            }
-        }
-        return result;
+        return write_memory(write_address, data.GetPtr(), static_cast<size_t>(data.GetSize()), change_protect);
     }
 
     // 写内存值
     template <typename T>
-    BOOL write_memory_value(void *write_address, const T &value)
+    BOOL write_memory_value(void *write_address, const T &value, BOOL change_protect = TRUE)
     {
-        BOOL result = false;
-        if (hProcess != NULL)
+        if (hProcess == NULL)
+            return FALSE;
+        if (!change_protect)
+            return ::WriteProcessMemory(hProcess, write_address, &value, sizeof(T), NULL);
+        BOOL result = FALSE;
+        DWORD dwOldProtect = 0;
+        if (::VirtualProtectEx(hProcess, write_address, sizeof(T), PAGE_READWRITE, &dwOldProtect))
         {
-            DWORD dwOldProtect = 0;
-            if (::VirtualProtectEx(hProcess, write_address, sizeof(T), PAGE_EXECUTE_READWRITE, &dwOldProtect))
-            {
-                result = ::WriteProcessMemory(hProcess, write_address,
-                                              &value, sizeof(T), NULL);
-                ::VirtualProtectEx(hProcess, write_address, sizeof(T), dwOldProtect, NULL);
-            }
+            result = ::WriteProcessMemory(hProcess, write_address, &value, sizeof(T), NULL);
+            ::VirtualProtectEx(hProcess, write_address, sizeof(T), dwOldProtect, &dwOldProtect);
         }
         return result;
     }
 
     // 寻找模块特征码
-    ptrdiff_t find_module_signatures(const HMODULE &hModule, const wchar_t *signatures, const size_t &start_off, const size_t &end_off, const DWORD &protect = 0, const DWORD &mem_type = 0)
+    ptrdiff_t find_module_signatures(HMODULE hModule, const wchar_t *signatures, size_t start_off, size_t end_off, DWORD protect = 0, DWORD mem_type = 0)
     {
         ptrdiff_t result = 0;
         if (hProcess != NULL)
@@ -818,7 +807,7 @@ public:
     }
 
     // 寻找所有模块特征码
-    int32_t find_module_signatures(const HMODULE &hModule, const wchar_t *signatures, CMArray<INT_P> &address_array, const size_t &start_off, const size_t &end_off, const DWORD &protect = 0, const DWORD &mem_type = 0)
+    int32_t find_module_signatures(HMODULE hModule, const wchar_t *signatures, CMArray<INT_P> &address_array, size_t start_off, size_t end_off, DWORD protect = 0, DWORD mem_type = 0)
     {
         int32_t result = 0;
         if (hProcess != NULL)
@@ -834,7 +823,7 @@ public:
     }
 
     // 寻找模块字节集
-    ptrdiff_t find_module_memory(const HMODULE &hModule, const CVolMem &mem_data, const size_t &start_off, const size_t &end_off, const DWORD &protect = 0, const DWORD &mem_type = 0)
+    ptrdiff_t find_module_memory(HMODULE hModule, const CVolMem &mem_data, size_t start_off, size_t end_off, DWORD protect = 0, DWORD mem_type = 0)
     {
         ptrdiff_t result = 0;
         if (hProcess != NULL)
@@ -850,7 +839,7 @@ public:
     }
 
     // 寻找所有模块字节集
-    int32_t find_module_memory(const HMODULE &hModule, const CVolMem &mem_data, CMArray<INT_P> &address_array, const size_t &start_off, const size_t &end_off, const DWORD &protect = 0, const DWORD &mem_type = 0)
+    int32_t find_module_memory(HMODULE hModule, const CVolMem &mem_data, CMArray<INT_P> &address_array, size_t start_off, size_t end_off, DWORD protect = 0, DWORD mem_type = 0)
     {
         int32_t result = 0;
         if (hProcess != NULL)
@@ -866,7 +855,7 @@ public:
     }
 
     // 读内存数据
-    BOOL read_module_memory(const HMODULE &hModule, void *write_address, const size_t &read_off, const size_t &read_size)
+    BOOL read_module_memory(HMODULE hModule, void *write_address, size_t read_off, size_t read_size)
     {
         if (hProcess != NULL)
         {
@@ -881,7 +870,7 @@ public:
     }
 
     // 读内存字节集
-    CVolMem read_module_memory(const HMODULE &hModule, const size_t &read_off, const size_t &read_size)
+    CVolMem read_module_memory(HMODULE hModule, size_t read_off, size_t read_size)
     {
         if (hProcess != NULL)
         {
@@ -902,7 +891,7 @@ public:
 
     // 读模块内存值
     template <typename T>
-    BOOL read_module_num(const HMODULE &hModule, T &value, const size_t &read_off)
+    BOOL read_module_num(HMODULE hModule, T &value, size_t read_off)
     {
         if (hProcess != NULL)
         {
@@ -921,7 +910,7 @@ public:
 
     // 读模块内存值
     template <typename R>
-    R read_module_value(const HMODULE &hModule, const size_t &read_off)
+    R read_module_value(HMODULE hModule, size_t read_off)
     {
         R value;
         if (hProcess != NULL)
@@ -940,64 +929,52 @@ public:
     }
 
     // 写模块数据
-    BOOL write_module_memory(const HMODULE &hModule, const size_t &write_off, const void *data_address, const size_t &data_size)
+    BOOL write_module_memory(HMODULE hModule, size_t write_off, const void *data_address, size_t data_size, BOOL change_protect = TRUE)
     {
-        BOOL result = false;
-        if (hProcess != NULL)
+        if (hProcess == NULL)
+            return FALSE;
+        MODULEINFO ModuleInfo{0};
+        BOOL result = FALSE;
+        if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && write_off < ModuleInfo.SizeOfImage)
         {
-            MODULEINFO ModuleInfo{0};
-            if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && write_off < ModuleInfo.SizeOfImage)
+            BYTE *write_address = reinterpret_cast<BYTE *>(ModuleInfo.lpBaseOfDll) + write_off;
+            if (!change_protect)
+                return ::WriteProcessMemory(hProcess, write_address, data_address, data_size, NULL);
+            DWORD dwOldProtect = 0;
+            if (::VirtualProtectEx(hProcess, write_address, data_size, PAGE_READWRITE, &dwOldProtect))
             {
-                DWORD dwOldProtect = 0;
-                BYTE *write_address = reinterpret_cast<BYTE *>(ModuleInfo.lpBaseOfDll) + write_off;
-                if (::VirtualProtectEx(hProcess, write_address, data_size, PAGE_EXECUTE_READWRITE, &dwOldProtect))
-                {
-                    result = ::WriteProcessMemory(hProcess, write_address, data_address, data_size, NULL);
-                    ::VirtualProtectEx(hProcess, write_address, data_size, dwOldProtect, NULL);
-                }
+                result = ::WriteProcessMemory(hProcess, write_address, data_address, data_size, NULL);
+                ::VirtualProtectEx(hProcess, write_address, data_size, dwOldProtect, &dwOldProtect);
             }
         }
         return result;
     }
 
     // 写模块字节集
-    BOOL write_module_memory(const HMODULE &hModule, const size_t &write_off, const CVolMem &data)
+    BOOL write_module_memory(HMODULE hModule, size_t write_off, const CVolMem &data, BOOL change_protect = TRUE)
     {
-        BOOL result = false;
-        if (hProcess != NULL)
-        {
-            MODULEINFO ModuleInfo{0};
-            if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && write_off < ModuleInfo.SizeOfImage)
-            {
-                DWORD dwOldProtect = 0;
-                BYTE *write_address = reinterpret_cast<BYTE *>(ModuleInfo.lpBaseOfDll) + write_off;
-                if (::VirtualProtectEx(hProcess, write_address, static_cast<size_t>(data.GetSize()), PAGE_EXECUTE_READWRITE, &dwOldProtect))
-                {
-                    result = ::WriteProcessMemory(hProcess, write_address, data.GetPtr(), static_cast<size_t>(data.GetSize()), NULL);
-                    ::VirtualProtectEx(hProcess, write_address, static_cast<size_t>(data.GetSize()), dwOldProtect, NULL);
-                }
-            }
-        }
-        return result;
+        return write_module_memory(hModule, write_off, data.GetPtr(), static_cast<size_t>(data.GetSize()), change_protect);
     }
 
     // 写模块值
     template <typename T>
-    BOOL write_module_value(const HMODULE &hModule, const size_t &write_off, const T &value)
+    BOOL write_module_value(HMODULE hModule, size_t write_off, const T &value, BOOL change_protect = TRUE)
     {
-        BOOL result = false;
-        if (hProcess != NULL)
+        if (hProcess == NULL)
+            return FALSE;
+        MODULEINFO ModuleInfo{0};
+        BOOL result = FALSE;
+        MODULEINFO ModuleInfo{0};
+        if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && write_off < ModuleInfo.SizeOfImage)
         {
-            MODULEINFO ModuleInfo{0};
-            if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && write_off < ModuleInfo.SizeOfImage)
+            BYTE *write_address = reinterpret_cast<BYTE *>(ModuleInfo.lpBaseOfDll) + write_off;
+            if (!change_protect)
+                return ::WriteProcessMemory(hProcess, write_address, &value, sizeof(T), NULL);
+            DWORD dwOldProtect = 0;
+            if (::VirtualProtectEx(hProcess, write_address, sizeof(T), PAGE_READWRITE, &dwOldProtect))
             {
-                DWORD dwOldProtect = 0;
-                BYTE *write_address = reinterpret_cast<BYTE *>(ModuleInfo.lpBaseOfDll) + write_off;
-                if (::VirtualProtectEx(hProcess, write_address, sizeof(T), PAGE_EXECUTE_READWRITE, &dwOldProtect))
-                {
-                    result = ::WriteProcessMemory(hProcess, write_address, &value, sizeof(T), NULL);
-                    ::VirtualProtectEx(hProcess, write_address, sizeof(T), dwOldProtect, NULL);
-                }
+                result = ::WriteProcessMemory(hProcess, write_address, &value, sizeof(T), NULL);
+                ::VirtualProtectEx(hProcess, write_address, sizeof(T), dwOldProtect, &dwOldProtect);
             }
         }
         return result;
