@@ -1659,7 +1659,8 @@
     # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, yyjson_read_err* value)
     # {
     #     if (value != nullptr)
-    #         strDebug.AddFormatText(L"<YYJSON解析错误> 错误代码: %u; 错误信息: %s; 错误位置: %u", value->code, value->msg, value->pos)
+    #         strDebug.AddFormatText(L"<YYJSON解析错误> 错误代码: %u; 错误信息: %s; 错误位置: %u",
+    #                                value->code, CVolString{value->msg}.GetText(), value->pos);
     #     else
     #         strDebug.SetText(L"yyjson_read_err: nullptr");
     # }
@@ -1717,7 +1718,8 @@
     # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, yyjson_write_err* value)
     # {
     #     if (value != nullptr)
-    #         strDebug.AddFormatText(L"<YYJSON序列化错误> 错误代码: %u; 错误信息: %s", value->code, value->msg)
+    #         strDebug.AddFormatText(L"<YYJSON序列化错误> 错误代码: %u; 错误信息: %s",
+    #                                value->code, CVolString{value->msg}.GetText());
     #     else
     #         strDebug.SetText(L"yyjson_write_err: nullptr");
     # }
@@ -1782,7 +1784,8 @@
     # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, yyjson_ptr_err* value)
     # {
     #     if (value != nullptr)
-    #         strDebug.AddFormatText(L"<YYJSON路径错误> 错误代码: %u; 错误信息: %s; 错误位置: %u", value->code, value->msg, value->pos)
+    #         strDebug.AddFormatText(L"<YYJSON路径错误> 错误代码: %u; 错误信息: %s; 错误位置: %u",
+    #                                value->code, CVolString{value->msg}.GetText(), value->pos);
     #     else
     #         strDebug.SetText(L"yyjson_ptr_err: nullptr");
     # }

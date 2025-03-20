@@ -3,7 +3,7 @@
 包 火山.PIV基础类 <注释 = "https://github.com/SaierMe/piv">
 
 类 调试信息类 <公开 注释 = "支持无符号数值和别名类型的调试输出" 注释 = "注意: const char*文本指针统一按UTF-8转换,所以本身是ANSI编码的会输出为乱码." 折叠
-        @全局类 = 真 "@视窗.外部头文件.全局-1200" = "src\\detail\\piv_debug.hpp">
+        @文档 = "category = \"调试信息\"" @全局类 = 真 "@视窗.外部头文件.全局-1200" = "src\\detail\\piv_debug.hpp">
 {
     方法 输出调试 <公开 静态 注释 = "向系统调试器内输出所指定数据的调试用文本并自动换行" 折叠 隐藏值属性 = "0"
             @嵌入式方法 = "req_obj_param_pointer = true\r\nreq_str_param_text_pointer = true">
