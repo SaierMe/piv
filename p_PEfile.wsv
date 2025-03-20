@@ -330,8 +330,8 @@
 
 # ------
 
-类 IMAGE_DOS_HEADER <公开 基础类 = PIV结构模板 注释 = "PE文件DOS头,64字节" 折叠 折叠2 @文档 = "category = \"PE文件操作.辅助类\""
-        @别名 = "IMAGE_DOS_HEADER" @别名类型 = 本地结构 @模板实现类 = "IMAGE_DOS_HEADER">
+类 IMAGE_DOS_HEADER <公开 基础类 = PIV结构模板 注释 = "PE文件DOS头,64字节" 折叠 @文档 = "category = \"PE文件操作.辅助类\""
+        @别名 = "IMAGE_DOS_HEADER" @模板实现类 = "IMAGE_DOS_HEADER">
 {
     变量 e_magic <公开 类型 = 短整数 注释 = "DOS可执行文件头标记,必定为\"MZ\"(0x5A4D 4Dh 5Ah/23117)IMAGE_DOS_SIGNATURE"
             @输出名 = "e_magic">
@@ -372,11 +372,32 @@
         加入格式文本 (展示内容, "}\r\n19. e_lfanew: %u", 欲操作本对象.e_lfanew)
         返回 (展示内容)
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, IMAGE_DOS_HEADER* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<IMAGE_DOS_HEADER> 总共 19 个成员:\r\n1. e_magic: %u\r\n2. e_cblp: %u\r\n3. e_cp: %u\r\n4. e_crlc: %u\r\n"
+    #                                L"5. e_cparhdr: %u\r\n6. e_minalloc: %u\r\n7. e_maxalloc: %u\r\n8. e_ss: %u\r\n9. e_sp: %u\r\n10. e_csum: %u\r\n"
+    #                                L"11. e_ip: %u\r\n12. e_cs: %u\r\n13. e_lfarlc: %u\r\n14. e_ovno: %u\r\n15. e_res: %s\r\n16. e_oemid: %u\r\n"
+    #                                L"17. e_oeminfo: %u\r\n18. e_res2: %s\r\n19. e_lfanew: %d\r\n",
+    #                                value->e_magic, value->e_cblp, value->e_cp, value->e_crlc, value->e_cparhdr,
+    #                                value->e_minalloc, value->e_maxalloc, value->e_ss, value->e_sp, value->e_csum,
+    #                                value->e_ip, value->e_cs, value->e_lfarlc, value->e_ovno, PivGetDumpStr<WORD, 4>(value->e_res),
+    #                                value->e_oemid, value->e_oeminfo, PivGetDumpStr<WORD, 10>(value->e_res2), value->e_lfanew);
+    #     else
+    #         strDebug.SetText(L"IMAGE_DOS_HEADER: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 IMAGE_FILE_HEADER <公开 基础类 = PIV结构模板 注释 = "PE文件逻辑分布信息,20字节."
-        注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_file_header" 折叠 折叠2
-        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_FILE_HEADER" @别名类型 = 本地结构 @模板实现类 = "IMAGE_FILE_HEADER">
+        注释 = "https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_file_header" 折叠
+        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_FILE_HEADER" @模板实现类 = "IMAGE_FILE_HEADER">
 {
     变量 Machine <公开 类型 = 短整数 注释 = "  可执行文件的目标CPU类型" 注释 = "  IMAGE_FILE_MACHINE_I386   0x014c  x86"
             注释 = "  IMAGE_FILE_MACHINE_IA64   0x0200  Intel Itanium"
@@ -407,10 +428,55 @@
         加入格式文本 (展示内容, 格式文本, 欲操作本对象.Machine, 欲操作本对象.NumberOfSections, 欲操作本对象.TimeDateStamp, 欲操作本对象.PointerToSymbolTable, 欲操作本对象.NumberOfSymbols, 欲操作本对象.SizeOfOptionalHeader, 欲操作本对象.Characteristics)
         返回 (展示内容)
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, IMAGE_FILE_HEADER* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<IMAGE_FILE_HEADER> 总共 7 个成员:\r\n1. Machine: %u\r\n2. NumberOfSections: %u\r\n3. TimeDateStamp: %u\r\n"
+    #                                L"4. PointerToSymbolTable: %u\r\n5. NumberOfSymbols: %u\r\n6. SizeOfOptionalHeader: %u\r\n7. Characteristics: %u",
+    #                                value->Machine, value->NumberOfSections, value->TimeDateStamp, value->PointerToSymbolTable, value->NumberOfSymbols,
+    #                                value->SizeOfOptionalHeader, value->Characteristics);
+    #     else
+    #         strDebug.SetText(L"IMAGE_FILE_HEADER: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
-类 IMAGE_OPTIONAL_HEADER32 <公开 基础类 = PIV结构模板 注释 = "32位PE文件可选头" 折叠 折叠2 @文档 = "category = \"PE文件操作.辅助类\""
-        @别名 = "IMAGE_OPTIONAL_HEADER32" @别名类型 = 本地结构 @模板实现类 = "IMAGE_OPTIONAL_HEADER32">
+类 IMAGE_DATA_DIRECTORY <公开 基础类 = PIV结构模板 注释 = "PE文件数据目录" 折叠 @文档 = "category = \"PE文件操作.辅助类\""
+        @别名 = "IMAGE_DATA_DIRECTORY" @模板实现类 = "IMAGE_DATA_DIRECTORY">
+{
+    变量 VirtualAddress <公开 类型 = 整数 注释 = "指向的数据结构的虚拟地址(RAV)" @输出名 = "VirtualAddress">
+    变量 Size <公开 类型 = 整数 注释 = "数据结构的大小" @输出名 = "Size">
+
+    方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用." 折叠>
+    参数 欲操作本对象 <类型 = IMAGE_DATA_DIRECTORY 注释 = "用作填入本对象中所有数据的展示文本">
+    {
+        返回 (取格式文本 ("<IMAGE_DATA_DIRECTORY> 总共 2 个成员:\r\n1. VirtualAddress: %u\r\n2. Size: %u", 欲操作本对象.VirtualAddress, 欲操作本对象.Size))
+    }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, IMAGE_DATA_DIRECTORY* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<IMAGE_DATA_DIRECTORY> { VirtualAddress: %u; Size: %u }", value->VirtualAddress, value->Size);
+    #     else
+    #         strDebug.SetText(L"IMAGE_DATA_DIRECTORY: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
+    #
+}
+
+类 IMAGE_OPTIONAL_HEADER32 <公开 基础类 = PIV结构模板 注释 = "32位PE文件可选头" 折叠 @文档 = "category = \"PE文件操作.辅助类\""
+        @别名 = "IMAGE_OPTIONAL_HEADER32" @模板实现类 = "IMAGE_OPTIONAL_HEADER32">
 {
     变量 Magic <公开 类型 = 短整数 注释 = "  映像文件类型" 注释 = "  IMAGE_NT_OPTIONAL_HDR32_MAGIC  0x10b  32位程序"
             注释 = "  IMAGE_NT_OPTIONAL_HDR64_MAGIC  0x20b  64位程序"
@@ -487,11 +553,39 @@
         加入格式文本 (展示内容, 格式文本, 欲操作本对象.Magic, 欲操作本对象.MajorLinkerVersion, 欲操作本对象.MinorLinkerVersion, 欲操作本对象.SizeOfCode, 欲操作本对象.SizeOfInitializedData, 欲操作本对象.SizeOfUninitializedData, 欲操作本对象.AddressOfEntryPoint, 欲操作本对象.BaseOfCode, 欲操作本对象.BaseOfData, 欲操作本对象.ImageBase, 欲操作本对象.SectionAlignment, 欲操作本对象.FileAlignment, 欲操作本对象.MajorOperatingSystemVersion, 欲操作本对象.MinorOperatingSystemVersion, 欲操作本对象.MajorImageVersion, 欲操作本对象.MinorImageVersion, 欲操作本对象.MajorSubsystemVersion, 欲操作本对象.MinorSubsystemVersion, 欲操作本对象.Win32VersionValue, 欲操作本对象.SizeOfImage, 欲操作本对象.SizeOfHeaders, 欲操作本对象.CheckSum, 欲操作本对象.Subsystem, 欲操作本对象.DllCharacteristics, 欲操作本对象.SizeOfStackReserve, 欲操作本对象.SizeOfStackCommit, 欲操作本对象.SizeOfHeapReserve, 欲操作本对象.SizeOfHeapCommit, 欲操作本对象.LoaderFlags, 欲操作本对象.NumberOfRvaAndSizes)
         返回 (展示内容)
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, IMAGE_OPTIONAL_HEADER32* value)
+    # {
+    #     if (value != nullptr) {
+    #         strDebug.AddFormatText(L"<IMAGE_OPTIONAL_HEADER32> 总共 31 个成员:\r\n1. Magic: %u\r\n2. MajorLinkerVersion: %u\r\n3. MinorLinkerVersion: %u\r\n"
+    #                                L"4. SizeOfCode: %u\r\n5. SizeOfInitializedData: %u\r\n6. SizeOfUninitializedData: %u\r\n7. AddressOfEntryPoint: %u\r\n"
+    #                                L"8. BaseOfCode: %u\r\n9. BaseOfData: %u\r\n10. ImageBase: %u\r\n11. SectionAlignment: %u\r\n12. FileAlignment: %u\r\n"
+    #                                L"13. MajorOperatingSystemVersion: %u\r\n14. MinorOperatingSystemVersion: %u\r\n15. MajorImageVersion: %u\r\n16. MinorImageVersion: %u\r\n"
+    #                                L"17. MajorSubsystemVersion: %u\r\n18. MinorSubsystemVersion: %u\r\n19. Win32VersionValue: %u\r\n20. SizeOfImage: %u\r\n"
+    #                                L"21. SizeOfHeaders: %u\r\n22. CheckSum: %u\r\n23. Subsystem: %u\r\n24. DllCharacteristics: %u\r\n25. SizeOfStackReserve: %u\r\n"
+    #                                L"26. SizeOfStackCommit: %u\r\n27. SizeOfHeapReserve: %u\r\n28. SizeOfHeapCommit: %u\r\n29. LoaderFlags: %u\r\n30. NumberOfRvaAndSizes: %u\r\n"
+    #                                L"31. DataDirectory [16]: ",
+    #                                value->Magic, value->MajorLinkerVersion, value->MinorLinkerVersion, value->SizeOfCode, value->SizeOfInitializedData,
+    #                                value->SizeOfUninitializedData, value->AddressOfEntryPoint, value->BaseOfCode, value->BaseOfData, value->ImageBase,
+    #                                value->SectionAlignment, value->FileAlignment, value->MajorOperatingSystemVersion, value->MinorOperatingSystemVersion, value->MajorImageVersion,
+    #                                value->MinorImageVersion, value->MajorSubsystemVersion, value->MinorSubsystemVersion, value->Win32VersionValue, value->SizeOfImage,
+    #                                value->SizeOfHeaders, value->CheckSum, value->Subsystem, value->DllCharacteristics, value->SizeOfStackReserve,
+    #                                value->SizeOfStackCommit, value->SizeOfHeapReserve, value->SizeOfHeapCommit, value->LoaderFlags, value->NumberOfRvaAndSizes);
+    #         for (int i = 0; i < 16; i++)
+    #             strDebug.AddFormatTextWithLeaderSpaces(2, L"\r\n%d. %s", i, PivGetDumpStr(&value->DataDirectory[i]));
+    #     } else
+    #         strDebug.SetText(L"IMAGE_OPTIONAL_HEADER32: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
-类 IMAGE_OPTIONAL_HEADER64 <公开 基础类 = PIV结构模板 注释 = "64位PE文件可选头" 注释 = "" 折叠 折叠2
-        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_OPTIONAL_HEADER64" @别名类型 = 本地结构
-        @模板实现类 = "IMAGE_OPTIONAL_HEADER64">
+类 IMAGE_OPTIONAL_HEADER64 <公开 基础类 = PIV结构模板 注释 = "64位PE文件可选头" 折叠 @文档 = "category = \"PE文件操作.辅助类\""
+        @别名 = "IMAGE_OPTIONAL_HEADER64" @模板实现类 = "IMAGE_OPTIONAL_HEADER64">
 {
     变量 Magic <公开 类型 = 短整数 注释 = "  映像文件类型" 注释 = "  IMAGE_NT_OPTIONAL_HDR32_MAGIC  0x10b  32位程序"
             注释 = "  IMAGE_NT_OPTIONAL_HDR64_MAGIC  0x20b  64位程序"
@@ -568,11 +662,39 @@
         加入格式文本 (展示内容, 格式文本, 欲操作本对象.Magic, 欲操作本对象.MajorLinkerVersion, 欲操作本对象.MinorLinkerVersion, 欲操作本对象.SizeOfCode, 欲操作本对象.SizeOfInitializedData, 欲操作本对象.SizeOfUninitializedData, 欲操作本对象.AddressOfEntryPoint, 欲操作本对象.BaseOfCode, 欲操作本对象.ImageBase, 欲操作本对象.SectionAlignment, 欲操作本对象.FileAlignment, 欲操作本对象.MajorOperatingSystemVersion, 欲操作本对象.MinorOperatingSystemVersion, 欲操作本对象.MajorImageVersion, 欲操作本对象.MinorImageVersion, 欲操作本对象.MajorSubsystemVersion, 欲操作本对象.MinorSubsystemVersion, 欲操作本对象.Win32VersionValue, 欲操作本对象.SizeOfImage, 欲操作本对象.SizeOfHeaders, 欲操作本对象.CheckSum, 欲操作本对象.Subsystem, 欲操作本对象.DllCharacteristics, 欲操作本对象.SizeOfStackReserve, 欲操作本对象.SizeOfStackCommit, 欲操作本对象.SizeOfHeapReserve, 欲操作本对象.SizeOfHeapCommit, 欲操作本对象.LoaderFlags, 欲操作本对象.NumberOfRvaAndSizes)
         返回 (展示内容)
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, IMAGE_OPTIONAL_HEADER64* value)
+    # {
+    #     if (value != nullptr) {
+    #         strDebug.AddFormatText(L"<IMAGE_OPTIONAL_HEADER64> 总共 30 个成员:\r\n1. Magic: %u\r\n2. MajorLinkerVersion: %u\r\n3. MinorLinkerVersion: %u\r\n"
+    #                                L"4. SizeOfCode: %u\r\n5. SizeOfInitializedData: %u\r\n6. SizeOfUninitializedData: %u\r\n7. AddressOfEntryPoint: %u\r\n"
+    #                                L"8. BaseOfCode: %u\r\n9. ImageBase: %I64u\r\n10. SectionAlignment: %u\r\n11. FileAlignment: %u\r\n"
+    #                                L"12. MajorOperatingSystemVersion: %u\r\n13. MinorOperatingSystemVersion: %u\r\n14. MajorImageVersion: %u\r\n15. MinorImageVersion: %u\r\n"
+    #                                L"16. MajorSubsystemVersion: %u\r\n17. MinorSubsystemVersion: %u\r\n18. Win32VersionValue: %u\r\n19. SizeOfImage: %u\r\n"
+    #                                L"20. SizeOfHeaders: %u\r\n21. CheckSum: %u\r\n22. Subsystem: %u\r\n23. DllCharacteristics: %u\r\n24. SizeOfStackReserve: %I64u\r\n"
+    #                                L"25. SizeOfStackCommit: %I64u\r\n26. SizeOfHeapReserve: %I64u\r\n27. SizeOfHeapCommit: %I64u\r\n28. LoaderFlags: %u\r\n29. NumberOfRvaAndSizes: %u\r\n"
+    #                                L"30. DataDirectory [16]: ",
+    #                                value->Magic, value->MajorLinkerVersion, value->MinorLinkerVersion, value->SizeOfCode, value->SizeOfInitializedData,
+    #                                value->SizeOfUninitializedData, value->AddressOfEntryPoint, value->BaseOfCode, value->ImageBase,
+    #                                value->SectionAlignment, value->FileAlignment, value->MajorOperatingSystemVersion, value->MinorOperatingSystemVersion, value->MajorImageVersion,
+    #                                value->MinorImageVersion, value->MajorSubsystemVersion, value->MinorSubsystemVersion, value->Win32VersionValue, value->SizeOfImage,
+    #                                value->SizeOfHeaders, value->CheckSum, value->Subsystem, value->DllCharacteristics, value->SizeOfStackReserve,
+    #                                value->SizeOfStackCommit, value->SizeOfHeapReserve, value->SizeOfHeapCommit, value->LoaderFlags, value->NumberOfRvaAndSizes);
+    #         for (int i = 0; i < 16; i++)
+    #             strDebug.AddFormatTextWithLeaderSpaces(2, L"\r\n%d. %s", i, PivGetDumpStr(&value->DataDirectory[i]));
+    #     } else
+    #         strDebug.SetText(L"IMAGE_OPTIONAL_HEADER64: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
-类 IMAGE_NT_HEADERS32 <公开 基础类 = PIV结构模板 注释 = "32位PE文件NT头" 注释 = "" 折叠 折叠2
-        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_NT_HEADERS32" @别名类型 = 本地结构
-        @模板实现类 = "IMAGE_NT_HEADERS32">
+类 IMAGE_NT_HEADERS32 <公开 基础类 = PIV结构模板 注释 = "32位PE文件NT头" 注释 = "" 折叠 @文档 = "category = \"PE文件操作.辅助类\""
+        @别名 = "IMAGE_NT_HEADERS32" @模板实现类 = "IMAGE_NT_HEADERS32">
 {
     变量 Signature <公开 类型 = 整数 注释 = "PE文件的标识,固定为\"PE\\0\\0\"{50,45,00,00},整数为 0x4550/17744"
             注释 = "  IMAGE_DOS_SIGNATURE    0x5A4D      MZ" 注释 = "  IMAGE_OS2_SIGNATURE    0x454E      NE"
@@ -592,10 +714,25 @@
         加入多行文本 (展示内容, 欲操作本对象.OptionalHeader.取展示内容 (), 2)
         返回 (展示内容)
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, IMAGE_NT_HEADERS32* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<IMAGE_NT_HEADERS32> 总共 3 个成员:\r\n1. Signature: %u\r\n2. FileHeader: \r\n%s\r\n3. OptionalHeader: \r\n%s",
+    #                                value->Signature, PivGetDumpStr(&value->FileHeader, 2), PivGetDumpStr(&value->OptionalHeader, 2));
+    #     else
+    #         strDebug.SetText(L"IMAGE_NT_HEADERS32: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
-类 IMAGE_NT_HEADERS64 <公开 基础类 = PIV结构模板 注释 = "64位PE文件NT头" 折叠 折叠2 @文档 = "category = \"PE文件操作.辅助类\""
-        @别名 = "IMAGE_NT_HEADERS64" @别名类型 = 本地结构 @模板实现类 = "IMAGE_NT_HEADERS64">
+类 IMAGE_NT_HEADERS64 <公开 基础类 = PIV结构模板 注释 = "64位PE文件NT头" 折叠 @文档 = "category = \"PE文件操作.辅助类\""
+        @别名 = "IMAGE_NT_HEADERS64" @模板实现类 = "IMAGE_NT_HEADERS64">
 {
     变量 Signature <公开 类型 = 整数 注释 = "  PE文件的标识,固定为\"PE\\0\\0\"{50,45,00,00},整数为 0x4550/17744"
             注释 = "  IMAGE_DOS_SIGNATURE    0x5A4D      MZ" 注释 = "  IMAGE_OS2_SIGNATURE    0x454E      NE"
@@ -615,23 +752,25 @@
         加入多行文本 (展示内容, 欲操作本对象.OptionalHeader.取展示内容 (), 2)
         返回 (展示内容)
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, IMAGE_NT_HEADERS64* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<IMAGE_NT_HEADERS64> 总共 3 个成员:\r\n1. Signature: %u\r\n2. FileHeader: \r\n%s\r\n3. OptionalHeader: \r\n%s",
+    #                                value->Signature, PivGetDumpStr(&value->FileHeader, 2), PivGetDumpStr(&value->OptionalHeader, 2));
+    #     else
+    #         strDebug.SetText(L"IMAGE_NT_HEADERS64: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
-类 IMAGE_DATA_DIRECTORY <公开 基础类 = PIV结构模板 注释 = "PE文件数据目录" 折叠 折叠2 @文档 = "category = \"PE文件操作.辅助类\""
-        @别名 = "IMAGE_DATA_DIRECTORY" @别名类型 = 本地结构 @模板实现类 = "IMAGE_DATA_DIRECTORY">
-{
-    变量 VirtualAddress <公开 类型 = 整数 注释 = "指向的数据结构的虚拟地址(RAV)" 折叠 @输出名 = "VirtualAddress">
-    变量 Size <公开 类型 = 整数 注释 = "数据结构的大小" @输出名 = "Size">
-
-    方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用.">
-    参数 欲操作本对象 <类型 = IMAGE_DATA_DIRECTORY 注释 = "用作填入本对象中所有数据的展示文本">
-    {
-        返回 (取格式文本 ("<IMAGE_DATA_DIRECTORY> 总共 2 个成员:\r\n1. VirtualAddress: %u\r\n2. Size: %u", 欲操作本对象.VirtualAddress, 欲操作本对象.Size))
-    }
-}
-
-类 IMAGE_SECTION_HEADER <公开 基础类 = PIV结构模板 注释 = "PE文件的节区表" 折叠 折叠2 @文档 = "category = \"PE文件操作.辅助类\""
-        @别名 = "IMAGE_SECTION_HEADER" @别名类型 = 本地结构 @模板实现类 = "IMAGE_SECTION_HEADER">
+类 IMAGE_SECTION_HEADER <公开 基础类 = PIV结构模板 注释 = "PE文件的节区表" 折叠 @文档 = "category = \"PE文件操作.辅助类\""
+        @别名 = "IMAGE_SECTION_HEADER" @模板实现类 = "IMAGE_SECTION_HEADER">
 {
     变量 Name <公开 类型 = "字节 [8]" 注释 = "节名称" @输出名 = "Name">
     变量 PhysicalAddress <公开 类型 = 整数 注释 = "也可以是VirtualSize,在可执行文件中,它是内容的大小.在目标文件中,它是内容重定位到的地址."
@@ -658,14 +797,31 @@
         加入格式文本 (展示内容, 格式文本, 多字节指针到文本 (取数组变量地址 (欲操作本对象.Name)), 欲操作本对象.VirtualSize, 欲操作本对象.VirtualAddress, 欲操作本对象.SizeOfRawData, 欲操作本对象.PointerToRawData, 欲操作本对象.PointerToRelocations, 欲操作本对象.PointerToLinenumbers, 欲操作本对象.NumberOfRelocations, 欲操作本对象.NumberOfLinenumbers, 欲操作本对象.Characteristics)
         返回 (展示内容)
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, IMAGE_SECTION_HEADER* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<IMAGE_SECTION_HEADER> 总共 10 个成员:\r\n1. Name: %s\r\n2. VirtualSize: %u\r\n3. VirtualAddress: %u\r\n"
+    #                                L"4. SizeOfRawData: %u\r\n5. PointerToRawData: %u\r\n6. PointerToRelocations: %u\r\n7. PointerToLinenumbers: %u\r\n"
+    #                                L"8. NumberOfRelocations: %u\r\n9. NumberOfLinenumbers: %u\r\n10. Characteristics: %u",
+    #                                (const char*)value->Name, value->Misc.VirtualSize, value->VirtualAddress, value->SizeOfRawData, value->PointerToRawData,
+    #                                value->PointerToRelocations, value->PointerToLinenumbers, value->NumberOfRelocations, value->NumberOfLinenumbers, value->Characteristics);
+    #     else
+    #         strDebug.SetText(L"IMAGE_SECTION_HEADER: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 节区表数组类 <公开 基础类 = PIV数组模板 注释 = "节区表数组" @文档 = "category = \"PE文件操作.辅助类\""
         @模板实现类 = "IMAGE_SECTION_HEADER">
 
-类 IMAGE_IMPORT_DESCRIPTOR <公开 基础类 = PIV结构模板 注释 = "PE文件的导入表描述符结构体" 折叠 折叠2
-        @文档 = "category = \"PE文件操作.辅助类\"" @别名 = "IMAGE_IMPORT_DESCRIPTOR" @别名类型 = 本地结构
-        @模板实现类 = "IMAGE_IMPORT_DESCRIPTOR">
+类 IMAGE_IMPORT_DESCRIPTOR <公开 基础类 = PIV结构模板 注释 = "PE文件的导入表描述符结构体" 折叠 @文档 = "category = \"PE文件操作.辅助类\""
+        @别名 = "IMAGE_IMPORT_DESCRIPTOR" @模板实现类 = "IMAGE_IMPORT_DESCRIPTOR">
 {
     变量 Characteristics <公开 类型 = 整数 注释 = "如果是数组的最后一项,则为0" @输出名 = "Characteristics">
     变量 OriginalFirstThunk <公开 类型 = 整数 注释 = "原始未绑定IAT(PIMAGE_THUNK_DATA)的相对虚拟地址"
@@ -687,12 +843,28 @@
         加入格式文本 (展示内容, 格式文本, 欲操作本对象.OriginalFirstThunk, 欲操作本对象.TimeDateStamp, 欲操作本对象.ForwarderChain, 欲操作本对象.Name, 欲操作本对象.FirstThunk)
         返回 (展示内容)
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, IMAGE_IMPORT_DESCRIPTOR* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<IMAGE_IMPORT_DESCRIPTOR> 总共 5 个成员:\r\n1. Characteristics/OriginalFirstThunk: %u\r\n2. TimeDateStamp: %u\r\n"
+    #                                L"3. ForwarderChain: %u\r\n4. Name: %u\r\n5. FirstThunk: %u",
+    #                                value->OriginalFirstThunk, value->TimeDateStamp, value->ForwarderChain, value->Name, value->FirstThunk);
+    #     else
+    #         strDebug.SetText(L"IMAGE_IMPORT_DESCRIPTOR: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 导入表描述符数组类 <公开 基础类 = PIV数组模板 @文档 = "category = \"PE文件操作.辅助类\"" @模板实现类 = "IMAGE_IMPORT_DESCRIPTOR">
 
-类 IMAGE_EXPORT_DIRECTORY <公开 基础类 = PIV结构模板 注释 = "PE文件的导出表结构体" 折叠 折叠2 @文档 = "category = \"PE文件操作.辅助类\""
-        @别名 = "IMAGE_EXPORT_DIRECTORY" @别名类型 = 本地结构 @模板实现类 = "IMAGE_EXPORT_DIRECTORY">
+类 IMAGE_EXPORT_DIRECTORY <公开 基础类 = PIV结构模板 注释 = "PE文件的导出表结构体" 折叠 @文档 = "category = \"PE文件操作.辅助类\""
+        @别名 = "IMAGE_EXPORT_DIRECTORY" @模板实现类 = "IMAGE_EXPORT_DIRECTORY">
 {
     变量 Characteristics <公开 类型 = 整数 注释 = "未使用,总为0" @输出名 = "Characteristics">
     变量 TimeDateStamp <公开 类型 = 整数 注释 = "文件创建时间戳" @输出名 = "TimeDateStamp">
@@ -719,6 +891,24 @@
         加入格式文本 (展示内容, 格式文本, 欲操作本对象.Characteristics, 欲操作本对象.TimeDateStamp, 欲操作本对象.MajorVersion, 欲操作本对象.MinorVersion, 欲操作本对象.Name, 欲操作本对象.Base, 欲操作本对象.NumberOfFunctions, 欲操作本对象.NumberOfNames, 欲操作本对象.AddressOfFunctions, 欲操作本对象.AddressOfNames, 欲操作本对象.AddressOfNameOrdinals)
         返回 (展示内容)
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, IMAGE_EXPORT_DIRECTORY* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<IMAGE_EXPORT_DIRECTORY> 总共 11 个成员:\r\n1. Characteristics: %u\r\n2. TimeDateStamp: %u\r\n3. MajorVersion: %u\r\n"
+    #                                L"4. MinorVersion: %u\r\n5. Name: %u\r\n6. Base: %u\r\n7. NumberOfFunctions: %u\r\n8. NumberOfNames: %u\r\n"
+    #                                L"9. AddressOfFunctions: %u\r\n10. AddressOfNames: %u\r\n11. AddressOfNameOrdinals: %u",
+    #                                value->Characteristics, value->TimeDateStamp, value->MajorVersion, value->MinorVersion, value->Name, value->Base,
+    #                                value->NumberOfFunctions, value->NumberOfNames, value->AddressOfFunctions, value->AddressOfNames, value->AddressOfNameOrdinals);
+    #     else
+    #         strDebug.SetText(L"IMAGE_EXPORT_DIRECTORY: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 PE函数类 <公开 基础类 = 扩展对象类 注释 = "PE文件导出表中的函数信息" 折叠 @文档 = "category = \"PE文件操作.辅助类\"">
@@ -752,7 +942,7 @@
     变量 模块名称 <公开 类型 = 文本型 @输出名 = "ModuleName">
     变量 函数列表 <公开 类型 = PE函数数组类 @输出名 = "aFunctions">
 
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
+    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖 @输出名 = "GetDumpString"
             @视窗.后缀文本 = "override">
     参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
     参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">

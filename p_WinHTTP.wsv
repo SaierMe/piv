@@ -832,8 +832,8 @@
             分支 ((整数)回调状态标志_WinHTTP.请求错误)  // 发生错误
             {
                 变量 异步结果 <类型 = WinHTTP异步结果类>
-                异步结果.置数据 (状态信息指针)
-                调试输出 (异步结果)
+                异步结果 = (WinHTTP异步结果类)状态信息指针
+                输出调试 (异步结果)
                 参数指针.值.返回结果.错误信息 = "异步请求错误: " + WinHTTP网络类.取最后错误信息 ()
                 _结束访问 (读指针处对象 (参数指针.值.实例指针, 网络异步访问类), 参数指针, 网络句柄)
             }
@@ -1482,8 +1482,8 @@
             分支 ((整数)回调状态标志_WinHTTP.请求错误)  // 发生错误
             {
                 变量 异步结果 <类型 = WinHTTP异步结果类>
-                异步结果.置数据 (状态信息指针)
-                调试输出 (异步结果)
+                异步结果 = (WinHTTP异步结果类)状态信息指针
+                输出调试 (异步结果)
                 参数指针.值.返回结果.错误信息 = "异步请求错误: " + WinHTTP网络类.取最后错误信息 ()
                 _结束访问EX (读指针处对象 (参数指针.值.实例指针, 网络异步访问类EX), 参数指针, 网络句柄)
             }
@@ -2059,7 +2059,7 @@
 # =====
 
 类 WinHTTP网络类 <公开 注释 = "  完整封装了WinHTTP的API,本类仅供给对HTTP协议有足够认识的开发者使用."
-        注释 = "  请注意部分方法对Windows版本的要求,如果使用了这些方法,你需要使用版本" 注释 = "足够高的Windows SDK才能编译."
+        注释 = "  请注意部分方法对Windows版本的要求,如果使用了这些方法,你需要使用版本" 注释 = "足够高的Windows SDK才能编译." 折叠
         @文档 = "category = \"WinHTTP\"" @禁止创建对象 = 真>
 {
     常量 User_Agent <类型 = 文本型
@@ -4399,6 +4399,21 @@
         加入格式文本 (展示内容, "4.自动登录: %d", 欲操作本对象.自动登录)
         返回 (展示内容)
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, WINHTTP_AUTOPROXY_OPTIONS* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<WinHTTP自动代理选项类> 总共 4 个成员:\r\n1.标志: %u\r\n2.自动检测选项: %u\r\n3.自动配置URL: %s\r\n4.自动登录: %d",
+    #                                value->dwFlags, value->dwAutoDetectFlags, value->lpszAutoConfigUrl, value->fAutoLogonIfChallenged);
+    #     else
+    #         strDebug.SetText(L"WINHTTP_AUTOPROXY_OPTIONS: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 WinHTTP代理结果类 <公开 基础类 = 扩展对象类 注释 = "用于\"WinHTTP网络类.取代理结果\"." 折叠 @文档 = "category = \"WinHTTP.辅助类\"">
@@ -4767,35 +4782,24 @@
     # @end
 }
 
-类 WinHTTP异步结果类 <公开 基础类 = 扩展对象类 注释 = "用于WinHTTP的异步操作" 折叠 @文档 = "category = \"WinHTTP.辅助类\"">
+类 WinHTTP异步结果类 <公开 基础类 = PIV指针模板 注释 = "用于WinHTTP的异步操作" 折叠 @文档 = "category = \"WinHTTP.辅助类\""
+        @别名 = "LPWINHTTP_ASYNC_RESULT" @模板实现类 = "WinHTTP异步结果类">
 {
-    变量 返回值 <公开 类型 = 整数 注释 = "请参考\"异步请求结果_WinHTTP\"中的常量" @输出名 = "dwResult">
-    变量 错误码 <公开 类型 = 整数 注释 = "异步函数的错误代码" @输出名 = "dwError">
-
-    方法 置数据 <公开 折叠 @嵌入式方法 = "">
-    参数 结构体指针 <类型 = 变整数>
-    {
-        @ @sn<this>.SetInfo ((LPWINHTTP_ASYNC_RESULT)@<结构体指针>)
-    }
-
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖>
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
-    {
-        展示内容 = "<WinHTTP异步结果类> 总共 2 个成员:\r\n"
-        加入文本 (展示内容, "1.返回值: " + 取调试文本2 (最大展示数据尺寸, 返回值) + "\r\n")
-        加入文本 (展示内容, "2.错误码: " + 取调试文本2 (最大展示数据尺寸, 错误码))
-    }
+    变量 返回值 <公开 类型 = 无符号整数 注释 = "请参考\"异步请求结果_WinHTTP\"中的常量" @输出名 = "dwResult">
+    变量 错误码 <公开 类型 = 无符号整数 注释 = "异步函数的错误代码" @输出名 = "dwError">
 
     # @begin
+    # <> <global>
     # <> <include>
-    # inline void SetInfo (LPWINHTTP_ASYNC_RESULT stInfo)
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, LPWINHTTP_ASYNC_RESULT value)
     # {
-    #     this->ResetObject ();
-    #     dwResult = (INT)stInfo->dwResult;
-    #     dwError = (INT)stInfo->dwError;
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<WinHTTP异步结果类> 总共 2 个成员:\r\n1.返回值: %u\r\n2.错误码: %u", value->dwResult, value->dwError);
+    #     else
+    #         strDebug.SetText(L"nullptr");
     # }
     # <> </include>
+    # <> </global>
     # @end
 }
 
@@ -5172,7 +5176,7 @@
             注释 = "状态信息指针: 已发送数据的字节长度(整数指针);" 注释 = "*当使用WebSocket时."
             注释 = "状态信息指针: 结构体指针,可用\"WebSocket状态类.置数据()\"获取; 状态信息长度: 结构体长度">
     常量 请求错误 <公开 值 = @WINHTTP_CALLBACK_STATUS_REQUEST_ERROR 注释 = "[2097152]发送HTTP请求时发生错误."
-            注释 = "状态信息指针: 可用\"WinHTTP异步结果类.置数据()\"获取,其中的\"返回值\"成员请参考\"异步请求结果_WinHTTP\";">
+            注释 = "状态信息指针: 可用\"WinHTTP异步结果类\"获取,其中的\"返回值\"成员请参考\"异步请求结果_WinHTTP\";">
     常量 发送请求完成 <公开 值 = @WINHTTP_CALLBACK_STATUS_SENDREQUEST_COMPLETE 注释 = "[4194304]成功发送请求." 注释 = "状态信息: 空">
     常量 从URL取代理完成 <公开 值 = 0x01000000 注释 = "[16777216]在异步调用\"从URL获取代理EX\"完成时触发,然后可以调用\"接收数据\".">
     常量 WS关闭完成 <公开 值 = 0x02000000 注释 = "[33554432]通过调用\"关闭WebSocket\"关闭连接成功.">

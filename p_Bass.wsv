@@ -1711,7 +1711,7 @@
 # 信息类型和标志等
 
 类 BASS_设备信息 <公开 基础类 = PIV结构模板 注释 = "\"取设备信息/BASS_GetDeviceInfo\"返回的信息" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_DEVICEINFO" @别名类型 = 本地结构 @模板实现类 = "BASS_设备信息">
+        @别名 = "BASS_DEVICEINFO" @模板实现类 = "BASS_设备信息">
 {
     方法 名称 <公开 静态 属性读 类型 = 文本型 注释 = "设备名称和描述" 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = BASS_设备信息>
@@ -1732,12 +1732,26 @@
     {
         返回 (取格式文本 ("<BASS_设备信息/BASS_DEVICEINFO> 总共 3 个成员:\r\n1. 名称: %s\r\n2. 驱动程序: %s\r\n2. 标志: %u", 欲操作本对象.名称, 欲操作本对象.驱动程序, 欲操作本对象.标志))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_DEVICEINFO* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_设备信息/BASS_DEVICEINFO> 总共 3 个成员:\r\n1. 名称: %s\r\n2. 驱动程序: %s\r\n2. 标志: %u", value->name, value->driver, value->flags);
+    #     else
+    #         strDebug.SetText(L"BASS_DEVICEINFO: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 BASS_设备信息数组 <公开 基础类 = PIV数组模板 @文档 = "category = \"辅助类\"" @模板实现类 = "BASS_设备信息">
 
 类 BASS_插件信息 <公开 基础类 = PIV指针模板 注释 = "\"取插件信息/BASS_PluginGetInfo\"返回的信息" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "const BASS_PLUGININFO*" @别名类型 = 本地参考类型 @模板实现类 = "BASS_插件信息">
+        @别名 = "const BASS_PLUGININFO*" @模板实现类 = "BASS_插件信息">
 {
     变量 插件版本 <公开 类型 = 整数 注释 = "插件版本号" @输出名 = "version">
     变量 格式数量 <公开 类型 = 整数 注释 = "支持的格式数量" @输出名 = "formatc">
@@ -1751,12 +1765,31 @@
         加入多行文本 (展示内容, 欲操作本对象.支持格式.取展示内容 (欲操作本对象.格式数量), 2)
         返回 (展示内容)
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_PLUGININFO* value)
+    # {
+    #     if (value != nullptr)
+    #     {
+    #         strDebug.AddFormatText(L"<BASS_插件信息/BASS_PLUGININFO> 总共 3 个成员:\r\n1. 插件版本: %u\r\n2. 格式数量: %u\r\n2. 支持格式: \r\n",
+    #                                value->version, value->formatc);
+    #         for (DWORD i = 0; i < value->formatc; i++ ) {
+    #             strDebug.AddMutilLineTextWithLeaderSpaces(PivGetDumpStr(&value->formats[i]), 2);
+    #         }
+    #     } else
+    #         strDebug.SetText(L"BASS_PLUGININFO: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 BASS_插件信息数组 <公开 基础类 = PIV数组模板 @文档 = "category = \"辅助类\"" @模板实现类 = "BASS_插件信息">
 
 类 BASS_插件格式 <公开 基础类 = PIV结构模板 注释 = "\"BASS_插件信息\"中的支持格式成员" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_PLUGINFORM" @别名类型 = 本地结构 @模板实现类 = "BASS_插件信息">
+        @别名 = "BASS_PLUGINFORM" @模板实现类 = "BASS_插件信息">
 {
     变量 通道类型 <公开 类型 = 整数 注释 = "音轨的类型,如\"BASS_音轨信息\"结构中所示" @输出名 = "ctype">
 
@@ -1777,6 +1810,21 @@
     {
         返回 (取格式文本 ("<BASS_插件格式/BASS_PLUGINFORM> 总共 3 个成员:\r\n1. 通道类型: %u\r\n2. 格式描述: %s\r\n2. 格式扩展名: %s", 欲操作本对象.通道类型, 欲操作本对象.格式描述, 欲操作本对象.格式扩展名))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_PLUGINFORM* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_插件格式/BASS_PLUGINFORM> 总共 3 个成员:\r\n1. 通道类型: %u\r\n2. 格式描述: %s\r\n2. 格式扩展名: %s",
+    #                                value->ctype, value->name, value->exts);
+    #     else
+    #         strDebug.SetText(L"BASS_PLUGINFORM: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 BASS_插件格式数组 <公开 折叠 @文档 = "category = \"辅助类\"" @别名 = "const BASS_PLUGINFORM*" @别名类型 = 本地参考类型>
@@ -1804,7 +1852,7 @@
 }
 
 类 BASS_录制信息 <公开 基础类 = PIV结构模板 注释 = "\"取录制信息/BASS_RecordGetInfo\"返回的信息" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_RECORDINFO" @别名类型 = 本地结构 @模板实现类 = "BASS_录制信息">
+        @别名 = "BASS_RECORDINFO" @模板实现类 = "BASS_录制信息">
 {
     变量 标志 <公开 类型 = 整数 注释 = "DSCCAPS_EMULDRIVER 0x00000020 设备的驱动程序不支持DirectSound,因此只能模拟输出"
             注释 = "DSCCAPS_CERTIFIED 0x00000040 设备的驱动程序已通过Microsoft认证,此标志始终设置在WDM驱动程序上" @输出名 = "flags">
@@ -1820,6 +1868,21 @@
                 值 = "<BASS_录制信息/BASS_RECORDINFO> 总共 5 个成员:\r\n1. 标志: %u\r\n2. 支持格式: %u\r\n3. 输入数量: %u\r\n4. 单独输入: %s\r\n5. 采样率: %u">
         返回 (取格式文本 (格式文本, 欲操作本对象.标志, 欲操作本对象.支持格式, 欲操作本对象.输入数量, 选择 (欲操作本对象.单独输入, "真", "假"), 欲操作本对象.采样率))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_RECORDINFO* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_录制信息/BASS_RECORDINFO> 总共 5 个成员:\r\n1. 标志: %u\r\n2. 支持格式: %u\r\n3. 输入数量: %u\r\n4. 单独输入: %s\r\n5. 采样率: %u",
+    #                                value->flags, value->formats, value->inputs, value->singlein ? L"真" : L"假", value->freq);
+    #     else
+    #         strDebug.SetText(L"BASS_RECORDINFO: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 BASS_WAVE格式 <公开 注释 = "\"BASS_录制信息\"类中支持格式的值范围" 折叠 @文档 = "category = \"常量\"">
@@ -1895,11 +1958,13 @@
     #     return this->IsNullObject() ? nullptr : reinterpret_cast<BASS_3DVECTOR*>(&this->@<x>);
     # }
     # <> <include>
+    # <> <global>
+    # <> <include>
     # @end
 }
 
 类 BASS_样本 <公开 基础类 = PIV结构模板 注释 = "\"取样本信息/BASS_SampleGetInfo\"返回的信息" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_SAMPLE" @别名类型 = 本地结构 @模板实现类 = "BASS_样本">
+        @别名 = "BASS_SAMPLE" @模板实现类 = "BASS_样本">
 {
     变量 采样率 <公开 类型 = 整数 注释 = "freq, 默认播放采样率" @输出名 = "freq">
     变量 音量 <公开 类型 = 单精度小数 注释 = "volume，默认音量 (0-1)" @输出名 = "volume">
@@ -1926,10 +1991,27 @@
                 值 = "<BASS_样本/BASS_SAMPLE> 总共 16 个成员:\r\n1. 采样率: %u\r\n2. 音量: %f\r\n3. 声像调节: %f\r\n4. 标志: %u\r\n5. 数据长度: %u\r\n5. 最大回放: %u\r\n6. 原始比特率: %u\r\n7. 通道数量: %u\r\n8. 最小间隔: %u\r\n9. 三维模式: %u\r\n10. 最小距离: %f\r\n11. 最大距离: %f\r\n12. 内投影角度: %u\r\n13. 外投影角度: %u\r\n14. 外投影音量: %f\r\n15. vam: %u\r\n16. 优先级: %u">
         返回 (取格式文本 (格式文本, 欲操作本对象.采样率, 欲操作本对象.音量, 欲操作本对象.声像调节, 欲操作本对象.标志, 欲操作本对象.数据长度, 欲操作本对象.最大回放, 欲操作本对象.原始比特率, 欲操作本对象.通道数量, 欲操作本对象.最小间隔, 欲操作本对象.三维模式, 欲操作本对象.最小距离, 欲操作本对象.最大距离, 欲操作本对象.内投影角度, 欲操作本对象.外投影角度, 欲操作本对象.外投影音量, 欲操作本对象.vam, 欲操作本对象.优先级))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_SAMPLE* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_样本/BASS_SAMPLE> 总共 16 个成员:\r\n1. 采样率: %u\r\n2. 音量: %f\r\n3. 声像调节: %f\r\n4. 标志: %u\r\n5. 数据长度: %u\r\n5. 最大回放: %u\r\n6. 原始比特率: %u\r\n"
+    #                                L"7. 通道数量: %u\r\n8. 最小间隔: %u\r\n9. 三维模式: %u\r\n10. 最小距离: %f\r\n11. 最大距离: %f\r\n12. 内投影角度: %u\r\n13. 外投影角度: %u\r\n14. 外投影音量: %f\r\n15. vam: %u\r\n16. 优先级: %u",
+    #                                value->freq, value->volume, value->pan, value->flags, value->length, value->max, value->origres, value->chans, value->mingap, value->mode3d,
+    #                                value->mindist, value->maxdist, value->iangle, value->oangle, value->outvol, value->vam, value->priority);
+    #     else
+    #         strDebug.SetText(L"BASS_SAMPLE: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 BASS_通道信息 <公开 基础类 = PIV结构模板 注释 = "\"取通道信息/BASS_ChannelGetInfo\"返回的信息" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_CHANNELINFO" @别名类型 = 本地结构 @模板实现类 = "BASS_通道信息">
+        @别名 = "BASS_CHANNELINFO" @模板实现类 = "BASS_通道信息">
 {
     变量 采样率 <公开 类型 = 整数 注释 = "默认采样率" @输出名 = "freq">
     变量 声道数 <公开 类型 = 整数 注释 = "1=单声道,2=立体声,以此类推" @输出名 = "chans">
@@ -1956,10 +2038,25 @@
                 值 = "<BASS_通道信息/BASS_CHANNELINFO> 总共 8 个成员:\r\n1. 采样率: %u\r\n2. 声道数: %u\r\n3. 标志: %u\r\n4. 通道类型: %u\r\n5. 原始比特率: %u\r\n6. 插件句柄: %u\r\n7. 样本句柄: %u\r\n8. 文件名: %s">
         返回 (取格式文本 (格式文本, 欲操作本对象.采样率, 欲操作本对象.声道数, 欲操作本对象.标志, 欲操作本对象.通道类型, 欲操作本对象.原始比特率, 欲操作本对象.插件句柄, 欲操作本对象.样本句柄, 欲操作本对象.文件名))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_CHANNELINFO* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_通道信息/BASS_CHANNELINFO> 总共 8 个成员:\r\n1. 采样率: %u\r\n2. 声道数: %u\r\n3. 标志: %u\r\n4. 通道类型: %u\r\n5. 原始比特率: %u\r\n6. 插件句柄: %u\r\n7. 样本句柄: %u\r\n8. 文件名: %s",
+    #                                value->freq, value->chans, value->flags, value->ctype, value->origres, value->plugin, value->sample, (const wchar_t*)value->filename);
+    #     else
+    #         strDebug.SetText(L"BASS_CHANNELINFO: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 BASS_信息 <公开 基础类 = PIV结构模板 注释 = "\"取输出信息/BASS_GetInfo\"返回的信息" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_INFO" @别名类型 = 本地结构 @模板实现类 = "BASS_信息">
+        @别名 = "BASS_INFO" @模板实现类 = "BASS_信息">
 {
     变量 标志 <公开 类型 = 整数 注释 = "设备的DirectSound功能,为以下常量的组合值："
             注释 = "DSCAPS_EMULDRIVER 0x00000020 设备的驱动程序不支持DirectSound,因此只能模拟输出"
@@ -1985,9 +2082,24 @@
     参数 欲操作本对象 <类型 = BASS_信息>
     {
         变量 格式文本 <类型 = 文本型
-                值 = "<BASS_信息/BASS_INFO> 总共 6 个成员:\r\n1. 标志: %u\r\n2. DirectSound版本: %u\r\n3. 时延: %u\r\n4. 初始化标志: %u\r\n5. 扬声器数量: %u\r\n6. 采样率: %u">
+                值 = "<BASS_信息/BASS_INFO> 总共 7 个成员:\r\n1. 标志: %u\r\n2. 最小缓冲: %u\r\n3. DirectSound版本: %u\r\n4. 时延: %u\r\n5. 初始化标志: %u\r\n6. 扬声器数量: %u\r\n7. 采样率: %u">
         返回 (取格式文本 (格式文本, 欲操作本对象.标志, 欲操作本对象.最小缓冲, 欲操作本对象.DirectSound版本, 欲操作本对象.时延, 欲操作本对象.初始化标志, 欲操作本对象.扬声器数量, 欲操作本对象.采样率))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_INFO* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_信息/BASS_INFO> 总共 7 个成员:\r\n1. 标志: %u\r\n2. 最小缓冲: %u\r\n3. DirectSound版本: %u\r\n4. 时延: %u\r\n5. 初始化标志: %u\r\n6. 扬声器数量: %u\r\n7. 采样率: %u",
+    #                                value->flags, value->minbuf, value->dsver, value->latency, value->initflags, value->speakers, value->freq);
+    #     else
+    #         strDebug.SetText(L"BASS_INFO: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 BASS_配置选项 <公开 注释 = "\"置配置选项/BASS_SetConfig\"的选项,含部分扩展的配置" 折叠 @文档 = "category = \"常量\"">
@@ -2696,7 +2808,7 @@
 }
 
 类 BASS_DX8_CHORUS <公开 基础类 = PIV结构模板 注释 = "BASS_FX_DX8_CHORUS 和声音效的结构类" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_DX8_CHORUS" @别名类型 = 本地结构 @模板实现类 = "BASS_DX8_CHORUS">
+        @别名 = "BASS_DX8_CHORUS" @模板实现类 = "BASS_DX8_CHORUS">
 {
     变量 干湿比 <公开 类型 = 单精度小数 注释 = "湿(已处理)信号与干(未处理)信号的比率. 必须在0到100之间(全湿). 默认值为50." @输出名 = "fWetDryMix">
     变量 深度 <公开 类型 = 单精度小数 注释 = "低频振荡器(LFO)调制延迟时间的百分比. 必须在0到100之间. 默认值为10." @输出名 = "fDepth">
@@ -2715,10 +2827,25 @@
                 值 = "<BASS_DX8_CHORUS> 总共 7 个成员:\r\n1. 干湿比: %f\r\n2. 深度: %f\r\n3. 反馈: %f\r\n4. 频率: %f\r\n5. 波形: %u\r\n6. 延迟: %f\r\n7. 相位差: %u">
         返回 (取格式文本 (格式文本, 欲操作本对象.干湿比, 欲操作本对象.深度, 欲操作本对象.反馈, 欲操作本对象.频率, 欲操作本对象.波形, 欲操作本对象.延迟, 欲操作本对象.相位差))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_DX8_CHORUS* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_DX8_CHORUS> 总共 7 个成员:\r\n1. 干湿比: %f\r\n2. 深度: %f\r\n3. 反馈: %f\r\n4. 频率: %f\r\n5. 波形: %u\r\n6. 延迟: %f\r\n7. 相位差: %u",
+    #                                value->fWetDryMix, value->fDepth, value->fFeedback, value->fFrequency, value->lWaveform, value->fDelay, value->lPhase);
+    #     else
+    #         strDebug.SetText(L"BASS_DX8_CHORUS: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 BASS_DX8_COMPRESSOR <公开 基础类 = PIV结构模板 注释 = "BASS_FX_DX8_COMPRESSOR 压限音效的结构类" 折叠
-        @文档 = "category = \"辅助类\"" @别名 = "BASS_DX8_COMPRESSOR" @别名类型 = 本地结构 @模板实现类 = "BASS_DX8_COMPRESSOR">
+        @文档 = "category = \"辅助类\"" @别名 = "BASS_DX8_COMPRESSOR" @模板实现类 = "BASS_DX8_COMPRESSOR">
 {
     变量 增益 <公开 类型 = 单精度小数 注释 = "信号压限后的输出增益,范围为-60到60. 默认值为0 dB." @输出名 = "fGain">
     变量 起奏 <公开 类型 = 单精度小数 注释 = "压限达到其完整值之前的时间,范围为0.01到500. 默认值为10毫秒." @输出名 = "fAttack">
@@ -2734,10 +2861,25 @@
                 值 = "<BASS_DX8_COMPRESSOR> 总共 6 个成员:\r\n1. 增益: %f\r\n2. 起奏: %f\r\n3. 释放: %f\r\n4. 阈值: %f\r\n5. 压限比: %f\r\n6. 预延迟: %f">
         返回 (取格式文本 (格式文本, 欲操作本对象.增益, 欲操作本对象.起奏, 欲操作本对象.释放, 欲操作本对象.阈值, 欲操作本对象.压限比, 欲操作本对象.预延迟))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_DX8_COMPRESSOR* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_DX8_COMPRESSOR> 总共 6 个成员:\r\n1. 增益: %f\r\n2. 起奏: %f\r\n3. 释放: %f\r\n4. 阈值: %f\r\n5. 压限比: %f\r\n6. 预延迟: %f",
+    #                                value->fGain, value->fAttack, value->fRelease, value->fThreshold, value->fRatio, value->fPredelay);
+    #     else
+    #         strDebug.SetText(L"BASS_DX8_COMPRESSOR: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 BASS_DX8_DISTORTION <公开 基础类 = PIV结构模板 注释 = "BASS_FX_DX8_DISTORTION 失真音效的结构类" 折叠
-        @文档 = "category = \"辅助类\"" @别名 = "BASS_DX8_DISTORTION" @别名类型 = 本地结构 @模板实现类 = "BASS_DX8_COMPRESSOR">
+        @文档 = "category = \"辅助类\"" @别名 = "BASS_DX8_DISTORTION" @模板实现类 = "BASS_DX8_DISTORTION">
 {
     变量 增益 <公开 类型 = 单精度小数 注释 = "失真后的信号变化量,范围为-60到0. 默认值为-18 dB." @输出名 = "fGain">
     变量 边缘 <公开 类型 = 单精度小数 注释 = "失真强度的百分比,范围为0到100. 默认值为15%." @输出名 = "fEdge">
@@ -2752,10 +2894,25 @@
                 值 = "<BASS_DX8_DISTORTION> 总共 5 个成员:\r\n1. 增益: %f\r\n2. 边缘: %f\r\n3. 后置EQ中置频率: %f\r\n4. 后置EQ带宽: %f\r\n5. 预低通切断: %f">
         返回 (取格式文本 (格式文本, 欲操作本对象.增益, 欲操作本对象.边缘, 欲操作本对象.后置EQ中置频率, 欲操作本对象.后置EQ带宽, 欲操作本对象.预低通切断))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_DX8_DISTORTION* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_DX8_DISTORTION> 总共 5 个成员:\r\n1. 增益: %f\r\n2. 边缘: %f\r\n3. 后置EQ中置频率: %f\r\n4. 后置EQ带宽: %f\r\n5. 预低通切断: %f",
+    #                                value->fGain, value->fEdge, value->fPostEQCenterFrequency, value->fPostEQBandwidth, value->fPreLowpassCutoff);
+    #     else
+    #         strDebug.SetText(L"BASS_DX8_DISTORTION: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 BASS_DX8_ECHO <公开 基础类 = PIV结构模板 注释 = "BASS_FX_DX8_ECHO 回声音效的结构类" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_DX8_ECHO" @别名类型 = 本地结构 @模板实现类 = "BASS_DX8_ECHO">
+        @别名 = "BASS_DX8_ECHO" @模板实现类 = "BASS_DX8_ECHO">
 {
     变量 干湿比 <公开 类型 = 单精度小数 注释 = "湿(已处理)信号与干(未处理)信号的比率. 必须在0到100之间(全湿). 默认值为50." @输出名 = "fWetDryMix">
     变量 反馈 <公开 类型 = 单精度小数 注释 = "输出信号反馈到效果输入的百分比, 范围为0到100. 默认值为50." @输出名 = "fFeedback">
@@ -2770,6 +2927,21 @@
                 值 = "<BASS_DX8_ECHO> 总共 5 个成员:\r\n1. 干湿比: %f\r\n2. 反馈: %f\r\n3. 左延迟: %f\r\n4. 右延迟: %f\r\n5. 交替延迟: %s\r\n">
         返回 (取格式文本 (格式文本, 欲操作本对象.干湿比, 欲操作本对象.反馈, 欲操作本对象.左延迟, 欲操作本对象.右延迟, 选择 (欲操作本对象.交替延迟, "真", "假")))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_DX8_ECHO* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_DX8_ECHO> 总共 5 个成员:\r\n1. 干湿比: %f\r\n2. 反馈: %f\r\n3. 左延迟: %f\r\n4. 右延迟: %f\r\n5. 交替延迟: %f",
+    #                                value->fWetDryMix, value->fFeedback, value->fLeftDelay, value->fRightDelay, value->lPanDelay);
+    #     else
+    #         strDebug.SetText(L"BASS_DX8_ECHO: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 BASS_DX8_FLANGER <公开 基础类 = PIV结构模板 注释 = "BASS_FX_DX8_FLANGER 镶边音效的结构类" 折叠 @文档 = "category = \"辅助类\""
@@ -2792,10 +2964,25 @@
                 值 = "<BASS_DX8_CHORUS> 总共 7 个成员:\r\n1. 干湿比: %f\r\n2. 深度: %f\r\n3. 反馈: %f\r\n4. 频率: %f\r\n5. 波形: %u\r\n6. 延迟: %f\r\n7. 相位差: %u">
         返回 (取格式文本 (格式文本, 欲操作本对象.干湿比, 欲操作本对象.深度, 欲操作本对象.反馈, 欲操作本对象.频率, 欲操作本对象.波形, 欲操作本对象.延迟, 欲操作本对象.相位差))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_DX8_FLANGER* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_DX8_FLANGER> 总共 6 个成员:\r\n1. 干湿比: %f\r\n2. 深度: %f\r\n3. 反馈: %f\r\n4. 频率: %f\r\n5. 波形: %u\r\n6. 延迟: %f\r\n7. 相位差: %u",
+    #                                value->fWetDryMix, value->fDepth, value->fFeedback, value->fFrequency, value->lWaveform, value->fDelay, value->lPhase);
+    #     else
+    #         strDebug.SetText(L"BASS_DX8_FLANGER: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 BASS_DX8_GARGLE <公开 基础类 = PIV结构模板 注释 = "BASS_FX_DX8_GARGLE 含漱音效的结构类" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_DX8_GARGLE" @别名类型 = 本地结构 @模板实现类 = "BASS_DX8_GARGLE">
+        @别名 = "BASS_DX8_GARGLE" @模板实现类 = "BASS_DX8_GARGLE">
 {
     变量 调制速率 <公开 类型 = 整数 注释 = "调制速率,单位为赫兹. 必须在1到1000之间. 默认值为20." @输出名 = "dwRateHz">
     变量 波形形状 <公开 类型 = 整数 注释 = "调制波形的形状. 0=三角形, 1=正方形. 默认为三角波形." @输出名 = "dwWaveShape">
@@ -2806,11 +2993,25 @@
         变量 格式文本 <类型 = 文本型 值 = "<BASS_DX8_GARGLE> 总共 2 个成员:\r\n1. 调制速率: %u\r\n2. 波形形状: %u">
         返回 (取格式文本 (格式文本, 欲操作本对象.调制速率, 欲操作本对象.波形形状))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_DX8_GARGLE* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_DX8_GARGLE> 总共 2 个成员:\r\n1. 调制速率: %u\r\n2. 波形形状: %u",
+    #                                value->dwRateHz, value->dwWaveShape);
+    #     else
+    #         strDebug.SetText(L"BASS_DX8_GARGLE: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 BASS_DX8_I3DL2REVERB <公开 基础类 = PIV结构模板 注释 = "BASS_FX_DX8_I3DL2REVERB I3DL2(交互式3D音效 Level 2)混响音效的结构类"
-        折叠 @文档 = "category = \"辅助类\"" @别名 = "BASS_DX8_I3DL2REVERB" @别名类型 = 本地结构
-        @模板实现类 = "BASS_DX8_I3DL2REVERB">
+        折叠 @文档 = "category = \"辅助类\"" @别名 = "BASS_DX8_I3DL2REVERB" @模板实现类 = "BASS_DX8_I3DL2REVERB">
 {
     变量 房间 <公开 类型 = 整数 注释 = "房间效果的衰减,单位为毫贝(mB),范围为-10000到0 mB. 默认值为-1000 mB." @输出名 = "lRoom">
     变量 房间高频 <公开 类型 = 整数 注释 = "房间高频效果的衰减,单位为mB,范围为-10000到0 mB. 默认值为-100 mB." @输出名 = "lRoomHF">
@@ -2833,10 +3034,27 @@
                 值 = "<BASS_DX8_I3DL2REVERB> 总共 12 个成员:\r\n1. 房间: %d\r\n2. 房间高频: %d\r\n3. 房间滚降系数: %f\r\n4. 衰减时间: %f\r\n5. 衰减高频比率: %f\r\n6. 反射: %d\r\n7. 反射延迟: %f\r\n8. 混响: %d\r\n9. 混响延迟: %f\r\n10. 扩散: %f\r\n11. 密度: %f\r\n12. 参考高频: %f">
         返回 (取格式文本 (格式文本, 欲操作本对象.房间, 欲操作本对象.房间高频, 欲操作本对象.房间滚降系数, 欲操作本对象.衰减时间, 欲操作本对象.衰减高频比率, 欲操作本对象.反射, 欲操作本对象.反射延迟, 欲操作本对象.混响, 欲操作本对象.混响延迟, 欲操作本对象.扩散, 欲操作本对象.密度, 欲操作本对象.参考高频))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_DX8_I3DL2REVERB* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_DX8_I3DL2REVERB> 总共 12 个成员:\r\n1. 房间: %d\r\n2. 房间高频: %d\r\n3. 房间滚降系数: %f\r\n4. 衰减时间: %f\r\n5. 衰减高频比率: %f\r\n"
+    #                                L"6. 反射: %d\r\n7. 反射延迟: %f\r\n8. 混响: %d\r\n9. 混响延迟: %f\r\n10. 扩散: %f\r\n11. 密度: %f\r\n12. 参考高频: %f",
+    #                                value->lRoom, value->lRoomHF, value->flRoomRolloffFactor, value->flDecayTime, value->flDecayHFRatio, value->lReflections,
+    #                                value->flReflectionsDelay, value->lReverb, value->flReverbDelay, value->flDiffusion, value->flDensity, value->flHFReference);
+    #     else
+    #         strDebug.SetText(L"BASS_DX8_I3DL2REVERB: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 BASS_DX8_PARAMEQ <公开 基础类 = PIV结构模板 注释 = "BASS_FX_DX8_PARAMEQ 参数均衡器音效的结构类" 折叠
-        @文档 = "category = \"辅助类\"" @别名 = "BASS_DX8_PARAMEQ" @别名类型 = 本地结构 @模板实现类 = "BASS_DX8_PARAMEQ">
+        @文档 = "category = \"辅助类\"" @别名 = "BASS_DX8_PARAMEQ" @模板实现类 = "BASS_DX8_PARAMEQ">
 {
     变量 中置频率 <公开 类型 = 单精度小数 注释 = "中置频率,单位为赫兹." @输出名 = "fCenter">
     变量 带宽 <公开 类型 = 单精度小数 注释 = "带宽,以半音阶表示,范围从1到36. 默认值为12." @输出名 = "fBandwidth">
@@ -2848,10 +3066,25 @@
         变量 格式文本 <类型 = 文本型 值 = "<BASS_DX8_I3DL2REVERB> 总共 3 个成员:\r\n1. 中置频率: %f\r\n2. 带宽: %f\r\n3. 增益: %f">
         返回 (取格式文本 (格式文本, 欲操作本对象.中置频率, 欲操作本对象.带宽, 欲操作本对象.增益))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_DX8_PARAMEQ* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_DX8_PARAMEQ> 总共 3 个成员:\r\n1. 中置频率: %f\r\n2. 带宽: %f\r\n3. 增益: %f",
+    #                                value->fCenter, value->fBandwidth, value->fGain);
+    #     else
+    #         strDebug.SetText(L"BASS_DX8_PARAMEQ: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 BASS_DX8_REVERB <公开 基础类 = PIV结构模板 注释 = "BASS_FX_DX8_REVERB 混响音效的结构类" 折叠 @文档 = "category = \"辅助类\""
-        @别名 = "BASS_DX8_REVERB" @别名类型 = 本地结构 @模板实现类 = "BASS_DX8_REVERB">
+        @别名 = "BASS_DX8_REVERB" @模板实现类 = "BASS_DX8_REVERB">
 {
     变量 输入增益 <公开 类型 = 单精度小数 注释 = "信号的输入增益,单位为分贝(dB),范围为-96到0. 默认值为0 dB." @输出名 = "fInGain">
     变量 混响混合 <公开 类型 = 单精度小数 注释 = "混响混合,单位为分贝,范围为-96到0. 默认值为0 dB." @输出名 = "fReverbMix">
@@ -2865,10 +3098,25 @@
                 值 = "<BASS_DX8_REVERB> 总共 4个成员:\r\n1. 输入增益: %f\r\n2. 混响混合: %f\r\n3. 混响时间: %f\r\n4. 高频混响时间比: %f">
         返回 (取格式文本 (格式文本, 欲操作本对象.输入增益, 欲操作本对象.混响混合, 欲操作本对象.混响时间, 欲操作本对象.高频混响时间比))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_DX8_REVERB* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_DX8_REVERB> 总共 4 个成员:\r\n1. 输入增益: %f\r\n2. 混响混合: %f\r\n3. 混响时间: %f\r\n4. 高频混响时间比: %f",
+    #                                value->fInGain, value->fReverbMix, value->fReverbTime, value->fHighFreqRTRatio);
+    #     else
+    #         strDebug.SetText(L"BASS_DX8_REVERB: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 BASS_FX_VOLUME_PARAM <公开 基础类 = PIV结构模板 注释 = "BASS_FX_VOLUME_PARAM 音量级别调节音效的结构类" 注释 = "" 折叠
-        @文档 = "category = \"辅助类\"" @别名 = "BASS_FX_VOLUME_PARAM" @别名类型 = 本地结构 @模板实现类 = "BASS_FX_VOLUME_PARAM">
+        @文档 = "category = \"辅助类\"" @别名 = "BASS_FX_VOLUME_PARAM" @模板实现类 = "BASS_FX_VOLUME_PARAM">
 {
     变量 目标音量 <公开 类型 = 单精度小数 注释 = "新的音量级别. 0=静音,1.0=正常,大于1.0=放大. 默认值为1." @输出名 = "fTarget">
     变量 当前音量 <公开 类型 = 单精度小数 注释 = "当前音量级别. -1=设置参数时保持当前的级别. 默认值为1." @输出名 = "fCurrent">
@@ -2882,6 +3130,21 @@
                 值 = "<BASS_FX_VOLUME_PARAM> 总共 4 个成员:\r\n1. 目标音量: %f\r\n2. 当前音量: %f\r\n3. 过渡时间: %f\r\n4. 曲线模式: %u">
         返回 (取格式文本 (格式文本, 欲操作本对象.目标音量, 欲操作本对象.当前音量, 欲操作本对象.过渡时间, 欲操作本对象.曲线模式))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_FX_VOLUME_PARAM* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_FX_VOLUME_PARAM> 总共 4 个成员:\r\n1. 目标音量: %f\r\n2. 当前音量: %f\r\n3. 过渡时间: %f\r\n4. 曲线模式: %u",
+    #                                value->fTarget, value->fCurrent, value->fTime, value->lCurve);
+    #     else
+    #         strDebug.SetText(L"BASS_FX_VOLUME_PARAM: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 TAG_ID3 <公开 基础类 = 扩展对象类 注释 = "ID3v1 标签的结构体" 折叠 @文档 = "category = \"辅助类\"">

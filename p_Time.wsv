@@ -636,7 +636,7 @@
 }
 
 类 系统时间结构类 <公开 基础类 = PIV结构模板 注释 = "SYSTEMTIME结构体" 折叠 折叠2 @文档 = "category = \"时间操作.辅助类\""
-        @别名 = "SYSTEMTIME" @别名类型 = 本地结构 @模板实现类 = "系统时间结构类">
+        @别名 = "SYSTEMTIME" @模板实现类 = "系统时间结构类">
 {
     变量 年 <公开 类型 = 短整数 注释 = "1601-30827" @输出名 = "wYear">
     变量 月 <公开 类型 = 短整数 注释 = "1-12" @输出名 = "wMonth">
@@ -685,10 +685,27 @@
                 值 = "<SYSTEMTIME> 总共 8 个成员:\r\n1.wYear(1601-30827): %u\r\n2.wMonth(1-12): %u\r\n3.wDayOfWeek(0-6): %u\r\n4.wDay(1-31): %u\r\n5.wHour(0-59): %u\r\n6.wMinute(0-59): %u\r\n7.wSecond(0-59): %u\r\n8.wMilliseconds(0-999): %u">
         返回 (取格式文本 (格式文本, 欲操作本对象.年, 欲操作本对象.月, 欲操作本对象.周, 欲操作本对象.日, 欲操作本对象.时, 欲操作本对象.分, 欲操作本对象.秒, 欲操作本对象.毫秒))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, SYSTEMTIME* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<SYSTEMTIME> 总共 8 个成员:\r\n1.wYear(1601-30827): %u\r\n2.wMonth(1-12): %u\r\n3.wDayOfWeek(0-6): %u\r\n"
+    #                                L"4.wDay(1-31): %u\r\n5.wHour(0-59): %u\r\n6.wMinute(0-59): %u\r\n7.wSecond(0-59): %u\r\n8.wMilliseconds(0-999): %u",
+    #                                value->wYear, value->wMonth, value->wDayOfWeek, value->wDay,
+    #                                value->wHour, value->wMinute, value->wSecond, value->wMilliseconds);
+    #     else
+    #         strDebug.SetText(L"SYSTEMTIME: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
-类 文件时间结构 <公开 基础类 = PIV结构模板 注释 = "FILETIME包含一个64位值,表示自1601年1月1日(UTC)以来的100纳秒间隔时间数." 折叠 折叠2
-        @文档 = "category = \"时间操作.辅助类\"" @别名 = "FILETIME" @别名类型 = 本地结构 @模板实现类 = "文件时间结构">
+类 文件时间结构 <公开 基础类 = PIV结构模板 注释 = "FILETIME包含一个64位值,表示自1601年1月1日(UTC)以来的100纳秒间隔时间数." 折叠
+        @文档 = "category = \"时间操作.辅助类\"" @别名 = "FILETIME" @模板实现类 = "文件时间结构">
 {
     变量 低位日期时间 <公开 类型 = 整数 注释 = "文件时间的低位部分" @输出名 = "dwLowDateTime">
     变量 高位日期时间 <公开 类型 = 整数 注释 = "文件时间的高位部分" @输出名 = "dwHighDateTime">
@@ -718,7 +735,7 @@
         返回 (欲操作本对象.到长整数 () / 10000 - 11644473600000)
     }
 
-    方法 到时间文本 <公开 静态 类型 = 文本型 注释 = "将文件时间结构转换到指定格式的时间文本" 折叠 @禁止流程检查 = 真>
+    方法 到时间文本 <静态 类型 = 文本型 注释 = "将文件时间结构转换到指定格式的时间文本" 折叠 @禁止流程检查 = 真>
     参数 欲操作本对象 <类型 = 文件时间结构>
     参数 格式文本 <类型 = 文本型 注释 = "默认格式为: \"2022-03-21 09:19:05\",转换后不能超过256个字符." 注释 = "下列为可用的格式替换符:"
             注释 = "   %%  %字符  |  %n 换行符  |  %t 水平制表符" 注释 = "   %C  年份向下整除100          例: 20"
@@ -747,6 +764,22 @@
         @ ::wcsftime(szTime, sizeof(szTime), @<格式文本>.GetText(), &timeinfo);
         @ return @an<CVolString>(szTime);
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, FILETIME* value)
+    # {
+    #     if (value != nullptr) {
+    #         ULONGLONG _time = (value->dwLowDateTime == 0 && value->dwHighDateTime == 0) ? 0 : (((ULONGLONG)value->dwLowDateTime | (ULONGLONG)value->dwHighDateTime << 32) / 10000000 - 11644473600);
+    #         strDebug.AddFormatText(L"<FILETIME> 总共 2 个成员:\r\n1. dwLowDateTime: %u\r\n2. dwHighDateTime: %u\r\n* FILETIME到时间戳: %I64u",
+    #                                value->dwLowDateTime, value->dwHighDateTime, _time);
+    #     } else
+    #         strDebug.SetText(L"FILETIME: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 纳秒时钟类 <公开 基础类 = PIV对象类 注释 = "一个基于x86 CPU时钟周期的低开销纳秒级精度时钟." 注释 = "源码: https://github.com/MengRao/tscns"

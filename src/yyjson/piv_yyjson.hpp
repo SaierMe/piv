@@ -51,10 +51,17 @@ public:
     static piv_yyjson_alc &get_inst()
     {
         static piv_yyjson_alc inst;
+#ifndef MIMALLOC_H
         if (inst.m_vol_alc.load(std::memory_order_acquire) == nullptr)
         {
             inst.set_pref(inst.vol_alc());
         }
+#else
+        if (inst.m_mi_alc.load(std::memory_order_acquire) == nullptr)
+        {
+            inst.set_pref(inst.mi_alc());
+        }
+#endif
         return inst;
     }
 
@@ -117,7 +124,7 @@ public:
         return p;
 #else
         return nullptr;
-#endif MIMALLOC_H
+#endif
     }
 
     static void *vol_malloc(void *ctx, size_t size)

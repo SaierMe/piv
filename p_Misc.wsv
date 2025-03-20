@@ -84,6 +84,29 @@
     {
         @ static_cast<INT64>(ulid::Time(@<欲操作本对象>))
     }
+
+    # ====
+    # 下面演示"输出调试"增加对自定义别名类型的支持
+    # 你需要熟识文本型(CVolString)在嵌入式代码中的使用
+    # @begin
+    # <> <global> // 必须在<global>空间中
+    # <> <include>
+    # // 第二个参数是最大展示数据尺寸,可以无视;
+    # // 第三个参数需要填对应本地类/结构体的指针类型;
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, ulid::ULID* value)
+    # {
+    #     if (value != nullptr) // 为了安全,需要先判断是否为空指针
+    #     {
+    #         wchar_t strBuf[27]; strBuf[26] = '\0';
+    #         ulid::MarshalTo<wchar_t>(*value, strBuf);
+    #         strDebug.SetText(strBuf);
+    #     }
+    #     else
+    #         strDebug.SetText(L"ulid::ULID: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 ULID排序集 <公开 基础类 = 通用排序集模板 注释 = "可用于对ULID类(可排序的唯一标识符)进行排序存储" 注释 = "" @文档 = "category = \"数据处理.排序集\""

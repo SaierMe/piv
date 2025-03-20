@@ -2421,11 +2421,27 @@
 }
 
 类 模块信息类 <公开 基础类 = PIV结构模板 注释 = "MODULEINFO" 折叠 @文档 = "category = \"进程操作.辅助类\"" @别名 = "MODULEINFO"
-        @别名类型 = 本地结构 @模板实现类 = "模块信息类" @强制依赖 = "进程操作类">
+        @模板实现类 = "模块信息类" @强制依赖 = "进程操作类">
 {
     变量 lpBaseOfDll <公开 类型 = 通用指针 注释 = "模块文件在虚拟内存中的基址(VA)" @输出名 = "lpBaseOfDll">
     变量 SizeOfImage <公开 类型 = 无符号整数 注释 = "映像文件的尺寸" @输出名 = "SizeOfImage">
     变量 EntryPoint <公开 类型 = 通用指针 注释 = "模块的入口点(VA)" @输出名 = "EntryPoint">
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, MODULEINFO* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<MODULEINFO> 总共 3 个成员:\r\n1. lpBaseOfDll: %I64u\r\n2. SizeOfImage: %u\r\n3. EntryPoint: %I64u",
+    #                                value->lpBaseOfDll, value->SizeOfImage, value->EntryPoint);
+    #     else
+    #         strDebug.SetText(L"MODULEINFO: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
+    #
 }
 
 类 "// 模块信息类" <公开 基础类 = 扩展对象类 注释 = "MODULEINFO" 折叠 @文档 = "category = \"进程操作.辅助类\"" @视窗.结构类 = 0>
@@ -2481,7 +2497,7 @@
 
 类 NT模块信息数组类 <公开 基础类 = PIV数组模板 @文档 = "category = \"进程操作.辅助类\"" @模板实现类 = "NT模块信息类">
 
-类 进程内存使用情况类 <公开 基础类 = 扩展对象类 注释 = "PROCESS_MEMORY_COUNTERS" 折叠 @视窗.结构类 = 0
+类 进程内存使用情况类 <公开 基础类 = 扩展对象类 注释 = "PROCESS_MEMORY_COUNTERS" 折叠 折叠2 @视窗.结构类 = 0
         @文档 = "category = \"进程操作.辅助类\"">
 {
     变量 结构体尺寸 <公开 类型 = 整数 注释 = "此结构体的尺寸" @输出名 = "cb">
@@ -2513,8 +2529,8 @@
     }
 }
 
-类 进程快照类 <公开 基础类 = PIV结构模板 注释 = "系统快照中的有效进程信息" 折叠 折叠2 @文档 = "category = \"进程操作.辅助类\""
-        @别名 = "PROCESSENTRY32W" @别名类型 = 本地结构 @模板实现类 = "进程快照类" @强制依赖 = "快照辅助类">
+类 进程快照类 <公开 基础类 = PIV结构模板 注释 = "系统快照中的有效进程信息" @文档 = "category = \"进程操作.辅助类\"" @别名 = "PROCESSENTRY32W"
+        @模板实现类 = "进程快照类" @强制依赖 = "快照辅助类">
 {
     变量 dwSize <公开 类型 = 整数 @输出名 = "dwSize">
     变量 进程ID <公开 类型 = 整数 注释 = "此进程的ID" @输出名 = "th32ProcessID">
@@ -2536,13 +2552,29 @@
                 值 = "<进程快照类 PROCESSENTRY32> 总共 6/10 个成员:\"\r\n1. dwSize: %u\r\n2. 进程ID(th32ProcessID): %u\r\n3. 线程数量(cntThreads): %u\r\n4. 父进程ID(th32ParentProcessID): %u\r\n5. 线程优先级(pcPriClassBase): %u\r\n6. 进程名称(szExeFile): %s">
         返回 (取格式文本 (格式文本, 欲操作本对象.dwSize, 欲操作本对象.进程ID, 欲操作本对象.线程数量, 欲操作本对象.父进程ID, 欲操作本对象.线程优先级, 欲操作本对象.进程名称))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, PROCESSENTRY32W* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<进程快照类/PROCESSENTRY32W> 总共 6/10 个成员:\r\n1. dwSize: %u\r\n2. 进程ID(th32ProcessID): %u\r\n3. 线程数量(cntThreads): %u\r\n"
+    #                                L"4. 父进程ID(th32ParentProcessID): %u\r\n5. 线程优先级(pcPriClassBase): %u\r\n6. 进程名称(szExeFile): %s",
+    #                                value->dwSize, value->th32ProcessID, value->cntThreads, value->th32ParentProcessID, value->pcPriClassBase, value->szExeFile);
+    #     else
+    #         strDebug.SetText(L"PROCESSENTRY32W: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 进程快照数组类 <公开 基础类 = PIV数组模板 注释 = "std::vector<PROCESSENTRY32W>" @文档 = "category = \"进程操作.辅助类\""
         @模板实现类 = "进程快照类">
 
-类 模块快照类 <公开 基础类 = PIV结构模板 注释 = "MODULEENTRY32W 系统快照中的有效模块信息" 注释 = "" 折叠 折叠2
-        @文档 = "category = \"进程操作.辅助类\"" @别名 = "MODULEENTRY32W" @别名类型 = 本地结构 @模板实现类 = "模块快照类" @强制依赖 = "快照辅助类">
+类 模块快照类 <公开 基础类 = PIV结构模板 注释 = "MODULEENTRY32W 系统快照中的有效模块信息" 注释 = "" 折叠 @文档 = "category = \"进程操作.辅助类\""
+        @别名 = "MODULEENTRY32W" @模板实现类 = "模块快照类" @强制依赖 = "快照辅助类">
 {
     变量 dwSize <公开 类型 = 整数 @输出名 = "dwSize">
     变量 "// 模块ID" <类型 = 整数 注释 = "当前模块的ID(无用)" @输出名 = "th32ModuleID">
@@ -2598,13 +2630,29 @@
                 值 = "<模块快照类 MODULEENTRY32> 总共 7/10 个成员:\"\r\n1. dwSize: %u\r\n2. 进程ID(th32ProcessID): %u\r\n3. 模块基址(modBaseAddr): %u\r\n4. 模块大小(modBaseSize): %u\r\n5. 模块句柄(hModule): %I64u\r\n6. 模块名称(szModule): %s\r\n7. 模块路径(szExePath): %s">
         返回 (取格式文本 (格式文本, 欲操作本对象.dwSize, 欲操作本对象.进程ID, 欲操作本对象.模块基址, 欲操作本对象.模块大小, 欲操作本对象.模块句柄, 欲操作本对象.模块名称, 欲操作本对象.模块路径))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, MODULEENTRY32W* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<模块快照类/MODULEENTRY32W> 总共 7/10 个成员:\r\n1. dwSize: %u\r\n2. 进程ID(th32ProcessID): %u\r\n3. 模块基址(modBaseAddr): %u\r\n"
+    #                                L"4. 模块大小(modBaseSize): %u\r\n5. 模块句柄(hModule): %I64u\r\n6. 模块名称(szModule): %s\r\n7. 模块路径(szExePath): %s",
+    #                                value->dwSize, value->th32ProcessID, value->modBaseAddr, value->modBaseSize, value->hModule, value->szModule, value->szExePath);
+    #     else
+    #         strDebug.SetText(L"MODULEENTRY32W: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 模块快照数组类 <公开 基础类 = PIV数组模板 注释 = "std::vector<MODULEENTRY32W>" @文档 = "category = \"进程操作.辅助类\""
         @模板实现类 = "模块快照类">
 
-类 线程快照类 <公开 基础类 = PIV结构模板 注释 = "THREADENTRY32 系统快照中的线程信息" 注释 = "" 折叠 折叠2
-        @文档 = "category = \"进程操作.辅助类\"" @别名 = "THREADENTRY32" @别名类型 = 本地结构 @模板实现类 = "线程快照类" @强制依赖 = "快照辅助类">
+类 线程快照类 <公开 基础类 = PIV结构模板 注释 = "THREADENTRY32 系统快照中的线程信息" 注释 = "" 折叠 @文档 = "category = \"进程操作.辅助类\""
+        @别名 = "THREADENTRY32" @模板实现类 = "线程快照类" @强制依赖 = "快照辅助类">
 {
     变量 dwSize <公开 类型 = 整数 @输出名 = "dwSize">
     变量 线程ID <公开 类型 = 整数 注释 = "线程的ID" @输出名 = "th32ThreadID">
@@ -2618,13 +2666,28 @@
                 值 = "<线程快照类 THREADENTRY32> 总共 4/7 个成员:\"\r\n1. dwSize: %u\r\n2. 线程ID(th32ThreadID): %u\r\n3. 进程ID:(th32OwnerProcessID): %u\r\n4. 基本优先级(tpBasePri): %d">
         返回 (取格式文本 (格式文本, 欲操作本对象.dwSize, 欲操作本对象.线程ID, 欲操作本对象.进程ID, 欲操作本对象.基本优先级))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, THREADENTRY32* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<线程快照类/THREADENTRY32> 总共 4/7 个成员:\r\n1. dwSize: %u\r\n2. 线程ID(th32ThreadID): %u\r\n3. 进程ID:(th32OwnerProcessID): %u\r\n4. 基本优先级(tpBasePri): %d",
+    #                                value->dwSize, value->th32ThreadID, value->th32OwnerProcessID, value->tpBasePri);
+    #     else
+    #         strDebug.SetText(L"THREADENTRY32: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 线程快照数组类 <公开 基础类 = PIV数组模板 注释 = "std::vector<THREADENTRY32>" @文档 = "category = \"进程操作.辅助类\""
         @模板实现类 = "线程快照类">
 
-类 堆块结构类 <公开 基础类 = PIV结构模板 注释 = "HEAPENTRY32" 折叠 折叠2 @文档 = "category = \"进程操作.辅助类\"" @别名 = "HEAPENTRY32"
-        @别名类型 = 本地结构 @模板实现类 = "堆块结构类" @强制依赖 = "快照辅助类">
+类 堆块结构类 <公开 基础类 = PIV结构模板 注释 = "HEAPENTRY32" 折叠 @文档 = "category = \"进程操作.辅助类\"" @别名 = "HEAPENTRY32"
+        @模板实现类 = "堆块结构类" @强制依赖 = "快照辅助类">
 {
     变量 dwSize <公开 类型 = 变整数 注释 = "HEAPENTRY32的结构体尺寸" @输出名 = "dwSize">
     变量 "// hHandle" <公开 类型 = 变整数 注释 = "堆块的句柄" @输出名 = "hHandle">
@@ -2654,9 +2717,25 @@
     参数 欲操作本对象 <类型 = 堆块结构类 注释 = "用作填入本对象中所有数据的展示文本">
     {
         变量 格式文本 <类型 = 文本型
-                值 = "<堆块结构类 HEAPENTRY3> 总共 9 个成员:\"\r\n1. dwSize: %u\r\n2. hHandle: %u\r\n3. dwAddress: %I64u\r\n4. dwBlockSize: %I64u\r\n5. dwFlags: %u\r\n6. dwLockCount: %u\r\n7. dwResvd: %u\r\n8. th32ProcessID: %u\r\n9. th32HeapID: %I64u">
+                值 = "<堆块结构类/HEAPENTRY32> 总共 9 个成员:\r\n1. dwSize: %u\r\n2. hHandle: %u\r\n3. dwAddress: %I64u\r\n4. dwBlockSize: %I64u\r\n5. dwFlags: %u\r\n6. dwLockCount: %u\r\n7. dwResvd: %u\r\n8. th32ProcessID: %u\r\n9. th32HeapID: %I64u">
         返回 (取格式文本 (格式文本, 欲操作本对象.dwSize, 欲操作本对象.hHandle, 欲操作本对象.dwAddress, 欲操作本对象.dwBlockSize, 欲操作本对象.dwFlags, 欲操作本对象.dwLockCount, 欲操作本对象.dwResvd, 欲操作本对象.th32ProcessID, 欲操作本对象.th32HeapID))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, HEAPENTRY32* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<堆块结构类/HEAPENTRY32> 总共 9 个成员:\r\n1. dwSize: %u\r\n2. hHandle: %I64u\r\n3. dwAddress: %I64u\r\n4. dwBlockSize: %I64u\r\n"
+    #                                L"5. dwFlags: %u\r\n6. dwLockCount: %u\r\n7. dwResvd: %u\r\n8. th32ProcessID: %u\r\n9. th32HeapID: %I64u\r\n",
+    #                                value->dwSize, value->hHandle, value->dwAddress, value->dwBlockSize, value->dwFlags, value->dwLockCount, value->dwResvd, value->th32ProcessID, value->th32HeapID);
+    #     else
+    #         strDebug.SetText(L"HEAPENTRY32: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 堆块结构数组类 <公开 基础类 = PIV数组模板 注释 = "std::vector<HEAPENTRY32>" @文档 = "category = \"进程操作.辅助类\""

@@ -35,19 +35,6 @@ namespace piv
             return (c >= 'a' && c <= 'z') ? (c - 32U) : c;
         }
 
-        template <typename CharT>
-        size_t count(const CharT *cstr)
-        {
-            PIV_IF(sizeof(CharT) == 2)
-            {
-                return wcslen(reinterpret_cast<const wchar_t *>(cstr));
-            }
-            else
-            {
-                return strlen(reinterpret_cast<const char *>(cstr));
-            }
-        }
-
         /**
          * @brief 寻找文本(不区分大小写)
          * @param lhs 被寻找的文本
@@ -291,7 +278,7 @@ namespace piv
         int32_t compare(const StringT &lhs, const typename StringT::value_type *rhs, bool case_insensitive = true, size_t count = -1)
         {
             if (count == -1)
-                count = piv::edit::count<typename StringT::value_type>(rhs);
+                count = piv::edit::size<typename StringT::value_type>(rhs);
             if (case_insensitive)
             {
                 return lhs.compare(0, lhs.size(), rhs, count);

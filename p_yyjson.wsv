@@ -1498,7 +1498,8 @@
         注释 = "* 如有特殊用途,可以通过\"创建...\"方法创建对应的分配器指针;" 折叠 隐藏值属性 = "0" @文档 = "category = \"JSON支持.YYJSON.辅助类\""
         @别名 = "yyjson_alc*" @别名类型 = 本地整数基本类型 @有效值范围 = "0">
 {
-    常量 偏好设置 <公开 类型 = YYJSON分配器 值 = @nullptr 注释 = "等于空指针,表示使用全局的偏好设置,默认为\"火山内存池\";"
+    常量 偏好设置 <公开 类型 = YYJSON分配器 值 = @nullptr
+            注释 = "等于空指针,表示使用全局的偏好设置,默认为\"火山内存池\"或\"mimalloc\"(配置了mimalloc模块后);"
             注释 = "偏好设置可以通过\"YYJSON分配器.置偏好设置()\"方法修改.">
     常量 默认 <公开 类型 = YYJSON分配器 值 = @"@piv_yyjson_alc::get_inst().def_alc()"
             注释 = "[线程安全]表示使用C的标准函数(malloc/realloc/free)分配内存.">
@@ -1509,7 +1510,7 @@
 
     # 全局设置 ---
 
-    方法 置偏好设置 <公开 静态 注释 = "设置YYJSON的全局默认内存分配器." 注释 = "* 默认的偏好设置为\"火山内存池\"(建议使用)."
+    方法 置偏好设置 <公开 静态 注释 = "设置YYJSON的全局默认内存分配器." 注释 = "* 默认的偏好设置为\"火山内存池\"或\"mimalloc\"(配置了mimalloc模块后)."
             注释 = "* \"YYJSON值\"对象实例化时只能使用\"偏好设置\"中的分配器." 注释 = "* 解析和序列化等方法可以通过参数使用其他的分配器."
             注释 = "* 不应将\"动态内存池\"和\"固定内存池\"等非线程安全的分配器设置为偏好设置." 折叠 @嵌入式方法 = "">
     参数 偏好分配器 <类型 = YYJSON分配器 注释 = "欲设置为偏好设置的分配器">
@@ -1651,6 +1652,20 @@
     {
         @ @<本指针> != nullptr ? (INT)@<本指针>->pos : -1
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, yyjson_read_err* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<YYJSON解析错误> 错误代码: %u; 错误信息: %s; 错误位置: %u", value->code, value->msg, value->pos)
+    #     else
+    #         strDebug.SetText(L"yyjson_read_err: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 YYJSON序列化错误 <公开 注释 = "提供JSON序列化时返回的错误信息." 注释 = "* 本类型为指针,仅当指针不为空时才会返回信息."
@@ -1695,6 +1710,20 @@
         @     return _CT2(L"本指针为空,无法获取错误信息.");
         @ return @<本指针>->msg != nullptr ? @an<CVolString>{@<本指针>->msg} : _CT2(L"");
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, yyjson_write_err* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<YYJSON序列化错误> 错误代码: %u; 错误信息: %s", value->code, value->msg)
+    #     else
+    #         strDebug.SetText(L"yyjson_write_err: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 YYJSON路径错误 <公开 注释 = "提供获取JSON路径时返回的错误信息." 注释 = "* 本类型为指针,仅当指针不为空时才会返回信息."
@@ -1746,6 +1775,20 @@
     {
         @ return @<本指针> != nullptr ? (INT)@<本指针>->pos : -1;
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, yyjson_ptr_err* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<YYJSON路径错误> 错误代码: %u; 错误信息: %s; 错误位置: %u", value->code, value->msg, value->pos)
+    #     else
+    #         strDebug.SetText(L"yyjson_ptr_err: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 YYJSON路径上下文 <公开 注释 = "提供JSON路径的上下文信息." 注释 = "* 本类型为指针,仅当指针不为空时才会返回信息."

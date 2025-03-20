@@ -375,7 +375,7 @@
 }
 
 类 VMProtect日期 <公开 基础类 = PIV结构模板 注释 = "VMProtectDate为序列号数据中的日期数据" 折叠 折叠2
-        @文档 = "category = \"VMProtect加密.辅助类\"" @别名 = "VMProtectDate" @别名类型 = 本地结构 @模板实现类 = "VMProtect日期"
+        @文档 = "category = \"VMProtect加密.辅助类\"" @别名 = "VMProtectDate" @模板实现类 = "VMProtect日期"
         @强制依赖 = "VMProtect">
 {
     变量 年 <公开 类型 = 短整数 注释 = "4位数年份" @输出名 = "wYear">
@@ -387,11 +387,25 @@
     {
         返回 (取格式文本 ("%04u-%02u-%02u", 欲操作本对象.年, 欲操作本对象.月, 欲操作本对象.日))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, VMProtectDate* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"%04u-%02u-%02u", value->wYear, value->bMonth, value->bDay);
+    #     else
+    #         strDebug.SetText(L"VMProtectDate: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
-类 VMProtect序列号数据 <公开 基础类 = PIV结构模板 注释 = "VMProtectSerialNumberData为\"取序列号数据\"返回的结构类" 折叠 折叠2
-        @文档 = "category = \"VMProtect加密.辅助类\"" @别名 = "VMProtectSerialNumberData" @别名类型 = 本地结构
-        @模板实现类 = "VMProtect序列号数据" @强制依赖 = "VMProtect">
+类 VMProtect序列号数据 <公开 基础类 = PIV结构模板 注释 = "VMProtectSerialNumberData为\"取序列号数据\"返回的结构类" 折叠
+        @文档 = "category = \"VMProtect加密.辅助类\"" @别名 = "VMProtectSerialNumberData" @模板实现类 = "VMProtect序列号数据"
+        @强制依赖 = "VMProtect">
 {
     变量 状态 <公开 类型 = 整数 注释 = "序列号的激活状态,0表示激活成功,其他含义请参考\"VMProtect序列号状态\"." @输出名 = "nState">
     变量 用户名 <公开 类型 = "字符 [256]" 注释 = "用户名称" @输出名 = "wUserName">
@@ -400,21 +414,8 @@
     变量 更新期限 <公开 类型 = VMProtect日期 注释 = "免费更新的期限,程序在此日期前编译的,可以免费使用." @输出名 = "dtMaxBuild">
     变量 运行时限 <公开 类型 = 整数 注释 = "从程序运行时开始计算,超过此参数(以分钟为单位)的时间后,将不再允许使用程序;"
             注释 = "注意: VMProtect本身未实现到时限提示或退出程序的功能,需要你自己编程实现," 注释 = "这里只是在序列号里提供了这个状态." @输出名 = "bRunningTime">
-    变量 "// 用户数据长度" <公开 类型 = 无符号字节 注释 = "用户数据已使用的字节数,最大255字节." @输出名 = "nUserDataLength">
+    变量 用户数据长度 <公开 类型 = 无符号字节 注释 = "用户数据已使用的字节数,最大255字节." @输出名 = "nUserDataLength">
     变量 用户数据 <公开 类型 = "字节 [255]" 注释 = "序列号中包含的用户数据,实际占用尺寸以\"用户数据长度\"为准." @输出名 = "bUserData">
-
-    方法 用户数据长度 <公开 静态 属性读 类型 = 整数 注释 = "用户数据已使用的字节数,最大255字节." 折叠 @嵌入式方法 = "">
-    参数 欲操作本对象 <类型 = VMProtect序列号数据>
-    {
-        @ (INT)@<欲操作本对象>.nUserDataLength
-    }
-
-    方法 用户数据长度 <公开 静态 属性写 注释 = "用户数据已使用的字节数,最大255字节." 折叠>
-    参数 欲操作本对象 <类型 = VMProtect序列号数据>
-    参数 值 <类型 = 整数 注释 = "最大不能超过255">
-    {
-        @ @<欲操作本对象>.nUserDataLength = (unsigned char)@<值>;
-    }
 
     方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用." 折叠>
     参数 欲操作本对象 <类型 = VMProtect序列号数据>
@@ -431,11 +432,28 @@
         加入格式文本 (展示内容, "8. 用户数据(bUserData): %s", 编码P.展示字节数据 (取数组变量地址 (欲操作本对象.用户数据), 欲操作本对象.用户数据长度))
         返回 (展示内容)
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, VMProtectSerialNumberData* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<VMProtectSerialNumberData> 总共 8 个成员:\r\n1. 状态(nState): %d\r\n2. 用户名(wUserName): %s\r\n3. 邮箱(wEMail): %s\r\n4. 到期日期(dtExpire): %s\r\n"
+    #                                L"5. 更新期限(dtMaxBuild): %s\r\n6. 运行时限(bRunningTime): %d\r\n7. 用户数据长度(nUserDataLength): %d\r\n8. 用户数据(bUserData): %s",
+    #                                value->nState, value->wUserName, value->wEMail, PivGetDumpStr(&value->dtExpire),
+    #                                PivGetDumpStr(&value->dtMaxBuild), value->bRunningTime, value->nUserDataLength, value->bUserData);
+    #     else
+    #         strDebug.SetText(L"VMProtectSerialNumberData: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
-类 VMProtect序列号数据类 <公开 基础类 = PIV结构模板 注释 = "\"取序列号数据2\"返回的火山对象类" 折叠 折叠2
-        @文档 = "category = \"VMProtect加密.辅助类\"" @别名 = "VMProtectSerialNumberData" @别名类型 = 本地结构
-        @模板实现类 = "VMProtect序列号数据类" @强制依赖 = "VMProtect">
+类 VMProtect序列号数据类 <公开 基础类 = PIV结构模板 注释 = "\"取序列号数据2\"返回的火山对象类" 折叠
+        @文档 = "category = \"VMProtect加密.辅助类\"" @别名 = "VMProtectSerialNumberData" @模板实现类 = "VMProtect序列号数据类"
+        @强制依赖 = "VMProtect">
 {
     变量 状态 <公开 类型 = 整数 注释 = "序列号的激活状态,0表示激活成功,其他含义请参考\"VMProtect序列号状态\"." @输出名 = "nState">
     变量 到期日期 <公开 类型 = VMProtect日期 注释 = "序列号的有效日期" @输出名 = "dtExpire">
@@ -941,7 +959,7 @@
 }
 
 类 VMProtectProductInfo <公开 基础类 = PIV结构模板 折叠 折叠2 @文档 = "category = \"VMProtect注册机.辅助类\""
-        @强制依赖 = "VMP注册机类" @别名 = "VMProtectProductInfo" @别名类型 = 本地结构 @模板实现类 = "VMProtectProductInfo">
+        @强制依赖 = "VMP注册机类" @别名 = "VMProtectProductInfo" @模板实现类 = "VMProtectProductInfo">
 {
     变量 algorithm <公开 类型 = 整数 注释 = "ALGORITHM_RSA = 0," 注释 = "ALGORITHM_PADDING = 0xFFFFFFFF"
             @输出名 = "algorithm">
@@ -952,10 +970,27 @@
     变量 pModulus <公开 类型 = PIV.类型.字节集指针 @输出名 = "pModulus">
     变量 nProductCodeSize <公开 类型 = PIV.类型.无符号变整型 @输出名 = "nProductCodeSize">
     变量 pProductCode <公开 类型 = PIV.类型.字节集指针 @输出名 = "pProductCode">
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, VMProtectProductInfo* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<VMProtectProductInfo> 总共 8 个成员:\r\n1. algorithm: %d\r\n2. nBits: %I64u\r\n3. nPrivateSize: %I64u\r\n4. pPrivate: %I64X\r\n"
+    #                                L"5. nModulusSize: %I64u\r\n6. pModulus: %I64X\r\n7. nProductCodeSize: %I64u\r\n8. pProductCode: %I64X",
+    #                                value->algorithm, value->nBits, value->nPrivateSize, value->pPrivate, value->nModulusSize,
+    #                                value->pModulus, value->nProductCodeSize, value->pProductCode);
+    #     else
+    #         strDebug.SetText(L"VMProtectProductInfo: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 VMProtectSerialNumberInfo <公开 基础类 = PIV结构模板 折叠 折叠2 @文档 = "category = \"VMProtect注册机.辅助类\""
-        @强制依赖 = "VMP注册机类" @别名 = "VMProtectSerialNumberInfo" @别名类型 = 本地结构 @模板实现类 = "VMProtectSerialNumberInfo">
+        @强制依赖 = "VMP注册机类" @别名 = "VMProtectSerialNumberInfo" @模板实现类 = "VMProtectSerialNumberInfo">
 {
     变量 标志 <公开 类型 = 整数 注释 = "\"VMProtect序列号标志\"中常量的位或值" @输出名 = "flags">
     变量 用户名 <公开 类型 = 文本指针 注释 = "用户名称的Unicode文本指针" @输出名 = "pUserName">
@@ -968,5 +1003,21 @@
     变量 用户数据长度 <公开 类型 = PIV.类型.无符号变整型 注释 = "用户数据已使用的字节数,最大255字节." @输出名 = "nUserDataLength">
     变量 用户数据 <公开 类型 = PIV.类型.字节集指针 注释 = "用户数据的字节集指针,实际占用尺寸以\"用户数据长度\"为准." @输出名 = "pUserData">
 
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, VMProtectSerialNumberInfo* value)
+    # {
+    #     if (value != nullptr) {
+    #         strDebug.AddFormatText(L"<VMProtectSerialNumberInfo> 总共 9 个成员:\r\n1. 标志: %d\r\n2. 用户名: %s\r\n3. 邮箱: %s\r\n4. 到期日期: %u\r\n"
+    #                                L"5. 更新期限: %u\r\n6. 运行时限: %u\r\n7. HWID: %s\r\n8. 用户数据长度: %I64u\r\n9. 用户数据: %I64X",
+    #                                value->flags, value->pUserName, value->pEMail, value->dwExpDate, value->dwMaxBuildDate,
+    #                                value->nRunningTimeLimit, value->pHardwareID, value->nUserDataLength, value->pUserData);
+    #     } else
+    #         strDebug.SetText(L"VMProtectSerialNumberInfo: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
     #
 }

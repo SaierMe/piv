@@ -3489,13 +3489,13 @@
 类 IM字体图集类 <公开 基础类 = PIV指针模板 注释 = "ImFontAtlas 本类使用指针封装,必须在创建或赋值后使用(用\"为空指针\"判断)." 折叠
         @文档 = "category = \"辅助类\"" @别名 = "ImFontAtlas*" @别名类型 = 本地参考类型 @模板实现类 = "IM字体图集类">
 {
-    方法 添加默认字体 <公开 静态 类型 = IM字体指针 注释 = "添加ImGui的默认字体(ProggyClean.ttf)" 返回值注释 = "返回字体指针" @嵌入式方法 = "">
+    方法 添加默认字体 <公开 静态 类型 = IM字体指针 注释 = "添加ImGui的默认字体(ProggyClean.ttf)" 返回值注释 = "返回字体指针" 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = IM字体图集类>
     {
         @ @<欲操作本对象>->AddFontDefault(nullptr)
     }
 
-    方法 添加字体文件 <公开 静态 类型 = IM字体指针 注释 = "从文件中添加字体" 返回值注释 = "返回字体" @嵌入式方法 = "">
+    方法 添加字体文件 <公开 静态 类型 = IM字体指针 注释 = "从文件中添加字体" 返回值注释 = "返回字体" 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = IM字体图集类>
     参数 文件名 <类型 = 文本型 注释 = "提供所欲添加的字体文件路径">
     参数 像素大小 <类型 = 单精度小数 注释 = "栅格化字体时的像素大小,每种字体的大小都不一样,请自行测试找到合适的大小.">
@@ -3505,7 +3505,7 @@
         @ @<欲操作本对象>->AddFontFromFileTTF(*PivAny2U{@<文件名>}, @<像素大小>, nullptr, ImFontAtlas().@pvpt<字形范围>())
     }
 
-    方法 添加内存字体 <公开 静态 类型 = IM字体指针 注释 = "从内存数据添加字体,添加后请勿自行释放字体的内存数据." 返回值注释 = "返回字体指针" @嵌入式方法 = "">
+    方法 添加内存字体 <公开 静态 类型 = IM字体指针 注释 = "从内存数据添加字体,添加后请勿自行释放字体的内存数据." 返回值注释 = "返回字体指针" 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = IM字体图集类>
     参数 字体数据地址 <类型 = 变整数 注释 = "提供所欲添加的字体数据地址,字体数据的所有权将自动转移到ImGui内部,由ImGui释放相关内存,所以请勿自行释放.">
     参数 字体数据大小 <类型 = 整数 注释 = "提供所欲添加的字体数据大小">
@@ -3517,7 +3517,7 @@
         @     @<像素大小>, nullptr, ImFontAtlas().@pvpt<字形范围>())
     }
 
-    方法 添加字体文件Ex <公开 静态 类型 = IM字体指针 注释 = "从文件中添加字体" 返回值注释 = "返回字体" @禁止流程检查 = 真>
+    方法 添加字体文件Ex <公开 静态 类型 = IM字体指针 注释 = "从文件中添加字体" 返回值注释 = "返回字体" 折叠 @禁止流程检查 = 真>
     参数 欲操作本对象 <类型 = IM字体图集类>
     参数 文件名 <类型 = 文本型 注释 = "提供所欲添加的字体文件路径">
     参数 像素大小 <类型 = 单精度小数 注释 = "栅格化字体时的像素大小,每种字体的大小都不一样,请自行测试找到合适的大小.">
@@ -3528,7 +3528,7 @@
         @ return @<欲操作本对象>->AddFontFromFileTTF(*PivAny2U{@<文件名>}, @<像素大小>, nullptr, out_ranges->Data);
     }
 
-    方法 添加内存字体Ex <公开 静态 类型 = IM字体指针 注释 = "从内存数据添加字体,添加后请勿自行释放字体的内存数据." 返回值注释 = "返回字体指针" @禁止流程检查 = 真>
+    方法 添加内存字体Ex <公开 静态 类型 = IM字体指针 注释 = "从内存数据添加字体,添加后请勿自行释放字体的内存数据." 返回值注释 = "返回字体指针" 折叠 @禁止流程检查 = 真>
     参数 欲操作本对象 <类型 = IM字体图集类>
     参数 字体数据地址 <类型 = 变整数 注释 = "提供所欲添加的字体数据地址,字体数据的所有权将自动转移到ImGui内部,由ImGui释放相关内存,所以请勿自行释放.">
     参数 字体数据大小 <类型 = 整数 注释 = "提供所欲添加的字体数据大小">
@@ -3790,6 +3790,20 @@
     {
         返回 (取格式文本 ("<ImVec2> {x: %f, y: %f}", 欲操作本对象.x, 欲操作本对象.y))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, ImVec2* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<ImVec2> {x: %f, y: %f}", value->x, value->y);
+    #     else
+    #         strDebug.SetText(L"ImVec2: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 ImVec2默认值 <公开 注释 = "提供ImVec2的常用默认值" 折叠 @文档 = "category = \"常量类\"">
@@ -3973,6 +3987,20 @@
     {
         返回 (取格式文本 ("<ImVec4> {x: %f, y: %f, z: %f, w: %f}", 欲操作本对象.x, 欲操作本对象.y, 欲操作本对象.z, 欲操作本对象.w))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, ImVec4* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<ImVec4> {x: %f, y: %f, z: %f, w: %f}", value->x, value->y, value->z, value->w);
+    #     else
+    #         strDebug.SetText(L"ImVec4: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 ImVec4默认值 <公开 注释 = "提供ImVec4的常用默认值" 折叠 @文档 = "category = \"常量类\"">
@@ -5883,4 +5911,21 @@
     #
 }
 
+# @begin
+# <> <global>
+# <> <include>
+# template <typename T>
+# static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, ImVector<T>* value)
+# {
+#     if (value != nullptr) {
+#         strDebug.AddFormatText(L"<ImVector> 总共 %d 个成员:", value->size());
+#         for (int i = 0; i < value->size(); i++) {
+#             strDebug.AddFormatText(L"\r\n%d. %s", i, PivGetDumpStr((*value)[i]));
+#         }
+#     } else
+#         strDebug.SetText(L"ImVector: nullptr");
+# }
+# <> </include>
+# <> </global>
+# @end
 #

@@ -1249,11 +1249,11 @@
 
     方法 UTF32到UTF16LE_Ex <公开 静态 类型 = 整数 注释 = "将UTF-32文本数据转换到UTF-16LE字节集."
             注释 = "跟\"UTF32到UTF16LE\"的区别是在参数中返回转换后的数据." 返回值注释 = "返回UTF-16LE文本的字符数(2字节),失败返回0." 折叠 @禁止流程检查 = 真>
-    参数 UTF32文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-32字符集文本数据">
-    参数 UTF16文本 <类型 = 字节集类 注释 = "转换后的UTF-16LE文本将保存在此参数中">
-    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
+    参数 UTF32文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-32字符集文本数据" @输出名 = "input">
+    参数 UTF16文本 <类型 = 字节集类 注释 = "转换后的UTF-16LE文本将保存在此参数中" @输出名 = "output">
+    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假 @输出名 = "null_terminated">
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
-            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
+            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假 @输出名 = "validate">
     {
         @ size_t outlen = simdutf::utf16_length_from_utf32(reinterpret_cast<const char32_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 4);
         @ if (!outlen) {
@@ -1271,11 +1271,11 @@
 
     方法 UTF32到UTF16BE_Ex <公开 静态 类型 = 整数 注释 = "将UTF-32文本数据转换到UTF-16BE字节集."
             注释 = "跟\"UTF32到UTF16BE\"的区别是在参数中返回转换后的数据." 返回值注释 = "返回UTF-16BE文本的字符数(2字节),失败返回0." 折叠 @禁止流程检查 = 真>
-    参数 UTF32文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-32字符集文本数据">
-    参数 UTF16文本 <类型 = 字节集类 注释 = "转换后的UTF-16BE文本将保存在此参数中">
-    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假>
+    参数 UTF32文本 <类型 = 字节集类 注释 = "提供所欲转换的UTF-32字符集文本数据" @输出名 = "input">
+    参数 UTF16文本 <类型 = 字节集类 注释 = "转换后的UTF-16BE文本将保存在此参数中" @输出名 = "output">
+    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定在所转换到的结果文本字节集中是否包括结束零字符" @默认值 = 假 @输出名 = "null_terminated">
     参数 是否校验文本 <类型 = 逻辑型 注释 = "  默认将输入的数据假定为有效的文本,不作校验地进行" 注释 = "转换,返回的结果可能会有乱码;"
-            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假>
+            注释 = "  为真时,在转换过程中会对数据进行验证,适合处理来源" 注释 = "不可信的文本,若校验失败可能会返回空文本." @默认值 = 假 @输出名 = "validate">
     {
         @ size_t outlen = simdutf::utf16_length_from_utf32(reinterpret_cast<const char32_t *>(input.GetPtr()), static_cast<size_t>(input.GetSize()) / 4);
         @ if (!outlen) {
@@ -1352,9 +1352,9 @@
     {
         @ PivBuffer<char, size_t> buf;
         @ buf.Alloc(simdutf::base64_length_from_binary(static_cast<size_t>(input.GetSize()),
-        @                                              static_cast<simdutf::base64_options>(options)), true);
+        @                                              options ? simdutf::base64_options::base64_url : simdutf::base64_options::base64_default), true);
         @ size_t wb = simdutf::binary_to_base64(reinterpret_cast<const char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()),
-        @                                       buf.GetPtr(), static_cast<simdutf::base64_options>(options));
+        @                                       buf.GetPtr(), options ? simdutf::base64_options::base64_url : simdutf::base64_options::base64_default);
         @ return @an<CVolString>(buf.GetPtr(), wb);
     }
 
@@ -1363,13 +1363,13 @@
     参数 URL专用 <类型 = 逻辑型 注释 = "选择BASE64的编码格式:" 注释 = " 真=URL专用" 注释 = " 假=标准BASE64" @默认值 = 假 @输出名 = "options">
     {
         @ simdutf::result ret;
-        @ PivBuffer<char, size_t> buf;
-        @ buf.Alloc(simdutf::maximal_binary_length_from_base64(reinterpret_cast<const char16_t *>(input.GetText()),
-        @                                                      static_cast<size_t>(input.GetLength())), true);
+        @ CVolMem buf;
+        @ buf.Alloc((INT_P)simdutf::maximal_binary_length_from_base64(reinterpret_cast<const char16_t *>(input.GetText()),
+        @                                                             static_cast<size_t>(input.GetLength())), TRUE);
         @ ret = simdutf::base64_to_binary(reinterpret_cast<const char16_t*>(input.GetText()), static_cast<size_t>(input.GetLength()),
-        @                                    buf.GetPtr(), static_cast<simdutf::base64_options>(options));
+        @                                 reinterpret_cast<char*>(buf.GetPtr()), options ? simdutf::base64_options::base64_url : simdutf::base64_options::base64_default);
         @ if (ret.error == simdutf::SUCCESS)
-        @     return @an<CVolMem>(buf.GetPtr(), ret.count);
+        @     return buf;
         @ return @an<CVolMem>();
     }
 

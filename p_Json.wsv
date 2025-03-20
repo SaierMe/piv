@@ -1179,6 +1179,19 @@
 {
 
     # @ @def_macro json PivJSON
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, PivJSON* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddText(value->dump(-1, ' ', false,  PivJSON::error_handler_t::replace).c_str());
+    #     else
+    #         strDebug.AddText(L"PivJSON: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 无序PivJSON <公开 基础类 = PivJSON模板类 注释 = "  本类可以存储各种类型的JSON值,JSON对象的键值对是无序的."
@@ -1187,6 +1200,19 @@
 {
 
     # @ @def_macro json PivJSON_Unordered
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, PivJSON_Unordered* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddText(value->dump(-1, ' ', false,  PivJSON::error_handler_t::replace).c_str());
+    #     else
+    #         strDebug.AddText(L"无序PivJSON: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 PivOrderJSON <公开 基础类 = PivJSON模板类 注释 = "跟\"PivJSON\"一样,为兼容之前的源码保留." 折叠
@@ -1217,7 +1243,7 @@
         @文档 = "category = \"JSON支持.PivJSON.常量类\"" @常量类 = 整数>
 {
     常量 严格 <公开 值 = 0 注释 = "strict  遇到无效的UTF-8时抛出\"PivJSON异常_类型错误\"">
-    常量 替换 <公开 值 = 1 注释 = "replace 将无效的UTF-8序列替换为U+FFFD(\uFFFD占位符)">
+    常量 替换 <公开 值 = 1 注释 = "replace 将无效的UTF-8序列替换为U+FFFD(�占位符)">
     常量 忽略 <公开 值 = 2 注释 = "ignore  忽略无效的UTF-8序列,将所有字节原封不动地复制输出">
 }
 

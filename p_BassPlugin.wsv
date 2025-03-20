@@ -1447,7 +1447,7 @@
 # BASS_WASAPI类.辅助类
 
 类 BASS_WASAPI_信息 <公开 基础类 = PIV结构模板 注释 = "\"BASS_WASAPI类::取信息/BASS_WASAPI_GetInfo\"返回的信息" 折叠 折叠2
-        @文档 = "category = \"WASAPI支持.辅助类\"" @别名 = "BASS_WASAPI_INFO" @别名类型 = 本地结构 @模板实现类 = "BASS_WASAPI_信息">
+        @文档 = "category = \"WASAPI支持.辅助类\"" @别名 = "BASS_WASAPI_INFO" @模板实现类 = "BASS_WASAPI_信息">
 {
     变量 初始化标志 <公开 类型 = 整数 注释 = "设备初始化时设置的标志" @输出名 = "initflags">
     变量 采样率 <公开 类型 = 整数 注释 = "采样率" @输出名 = "freq">
@@ -1467,11 +1467,26 @@
                 值 = "<BASS_WASAPI_信息> 总共 8 个成员:\r\n1. 初始化标志: %u\r\n2. 采样率: %u\r\n3. 声道数: %u\r\n4. 格式: %u\r\n5. 缓存长度: %u\r\n6. 最大音量: %f\r\n7. 最小音量: %f\r\n8. 音量步进: %f">
         返回 (取格式文本 (格式文本, 欲操作本对象.初始化标志, 欲操作本对象.采样率, 欲操作本对象.声道数, 欲操作本对象.格式, 欲操作本对象.缓存长度, 欲操作本对象.最大音量, 欲操作本对象.最小音量, 欲操作本对象.音量步进))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_WASAPI_INFO* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_WASAPI_信息/BASS_WASAPI_INFO> 总共 8 个成员:\r\n1. 初始化标志: %u\r\n2. 采样率: %u\r\n3. 声道数: %u\r\n4. 格式: %u\r\n5. 缓存长度: %u\r\n"
+    #                                L"6. 最大音量: %f\r\n7. 最小音量: %f\r\n8. 音量步进: %f",
+    #                                value->initflags, value->freq, value->chans, value->format, value->buflen, value->volmax, value->volmin, value->volstep);
+    #     else
+    #         strDebug.SetText(L"BASS_WASAPI_INFO: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 BASS_WASAPI_设备信息 <公开 基础类 = PIV结构模板 注释 = "\"BASS_WASAPI类::取设备信息/BASS_WASAPI_GetDeviceInfo\"返回的信息" 折叠
-        折叠2 @文档 = "category = \"WASAPI支持.辅助类\"" @别名 = "BASS_WASAPI_DEVICEINFO" @别名类型 = 本地结构
-        @模板实现类 = "BASS_WASAPI_设备信息">
+        @文档 = "category = \"WASAPI支持.辅助类\"" @别名 = "BASS_WASAPI_DEVICEINFO" @模板实现类 = "BASS_WASAPI_设备信息">
 {
     变量 "//名称" <公开 类型 = 文本型 注释 = "设备描述" @输出名 = "name">
     变量 "//驱动ID" <公开 类型 = 文本型 注释 = "驱动程序的识别ID" @输出名 = "id">
@@ -1507,6 +1522,22 @@
                 值 = "<BASS_WASAPI_设备信息> 总共 8 个成员:\r\n1. 名称: %s\r\n2. 驱动ID: %s\r\n3. 设备类型: %u\r\n4. 标志: %u\r\n5. 最小周期: %f\r\n6. 默认周期: %f\r\n7. 最低采样率: %u\r\n8. 最低声道: %u">
         返回 (取格式文本 (格式文本, 欲操作本对象.名称, 欲操作本对象.驱动ID, 欲操作本对象.设备类型, 欲操作本对象.标志, 欲操作本对象.最小周期, 欲操作本对象.默认周期, 欲操作本对象.最低采样率, 欲操作本对象.最低声道))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_WASAPI_DEVICEINFO* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_WASAPI_设备信息> 总共 8 个成员:\r\n1. 名称: %s\r\n2. 驱动ID: %s\r\n3. 设备类型: %u\r\n4. 标志: %u\r\n"
+    #                                L"5. 最小周期: %f\r\n6. 默认周期: %f\r\n7. 最低采样率: %u\r\n8. 最低声道: %u\r\n",
+    #                                (const wchar_t*)value->name, (const wchar_t*)value->id, value->type, value->flags, value->minperiod, value->defperiod, value->mixfreq, value->mixchans);
+    #     else
+    #         strDebug.SetText(L"BASS_WASAPI_DEVICEINFO: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 BASS_WASAPI_设备信息数组 <公开 基础类 = PIV数组模板 注释 = "\"BASS_WASAPI类::取所有设备信息\"返回的信息数组"
@@ -1605,10 +1636,26 @@
                 值 = "<BASS_ASIO_信息> 总共 9 个成员:\r\n1. 名称: %s\r\n2. 版本: %u\r\n3. 输入通道数: %u\r\n4. 输出通道数: %u\r\n5. 最小缓存: %u\r\n6. 最大缓存: %u\r\n7. 默认缓存: %u\r\n8. 缓存粒度: %d\r\n9. 初始标志: %u">
         返回 (取格式文本 (格式文本, 欲操作本对象.名称, 欲操作本对象.版本, 欲操作本对象.输入通道数, 欲操作本对象.输出通道数, 欲操作本对象.最小缓存, 欲操作本对象.最大缓存, 欲操作本对象.默认缓存, 欲操作本对象.缓存粒度, 欲操作本对象.初始标志))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_ASIO_INFO* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_ASIO_信息> 总共 9 个成员:\r\n1. 名称: %s\r\n2. 版本: %u\r\n3. 输入通道数: %u\r\n4. 输出通道数: %u\r\n5. 最小缓存: %u\r\n"
+    #                                L"6. 最大缓存: %u\r\n7. 默认缓存: %u\r\n8. 缓存粒度: %d\r\n9. 初始标志: %u\r\n",
+    #                                (const wchar_t*)value->name, value->version, value->inputs, value->outputs, value->bufmin, value->bufmax, value->bufpref, value->bufgran, value->initflags);
+    #     else
+    #         strDebug.SetText(L"BASS_ASIO_INFO: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
-类 BASS_ASIO_设备信息 <公开 基础类 = PIV结构模板 注释 = "\"BASS_ASIO类::取设备信息/BASS_ASIO_GetDeviceInfo\"返回的信息" 折叠 折叠2
-        @文档 = "category = \"ASIO支持.辅助类\"" @别名 = "BASS_ASIO_DEVICEINFO" @别名类型 = 本地结构 @模板实现类 = "BASS_ASIO_设备信息">
+类 BASS_ASIO_设备信息 <公开 基础类 = PIV结构模板 注释 = "\"BASS_ASIO类::取设备信息/BASS_ASIO_GetDeviceInfo\"返回的信息" 折叠
+        @文档 = "category = \"ASIO支持.辅助类\"" @别名 = "BASS_ASIO_DEVICEINFO" @模板实现类 = "BASS_ASIO_设备信息">
 {
     方法 名称 <公开 静态 属性读 类型 = 文本型 注释 = "设备描述" 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = BASS_ASIO_设备信息>
@@ -1628,14 +1675,28 @@
         变量 格式文本 <类型 = 文本型 值 = "<BASS_ASIO_设备信息> 总共 2 个成员:\r\n1. 名称: %s\r\n2. 驱动文件名: %s">
         返回 (取格式文本 (格式文本, 欲操作本对象.名称, 欲操作本对象.驱动文件名))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_ASIO_DEVICEINFO* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_ASIO_设备信息> 总共 2 个成员:\r\n1. 名称: %s\r\n2. 驱动文件名: %s",
+    #                                (const wchar_t*)value->name, (const wchar_t*)value->driver);
+    #     else
+    #         strDebug.SetText(L"BASS_ASIO_DEVICEINFO: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 BASS_ASIO_设备信息数组 <公开 基础类 = PIV数组模板 注释 = "\"BASS_ASIO类::取所有设备信息\"返回的信息数组"
         @文档 = "category = \"ASIO支持.辅助类\"" @模板实现类 = "BASS_ASIO_设备信息">
 
-类 BASS_ASIO_通道信息 <公开 基础类 = PIV结构模板 注释 = "\"BASS_ASIO类::取通道信息/BASS_ASIO_ChannelGetInfo\"返回的信息" 折叠 折叠2
-        @文档 = "category = \"ASIO支持.辅助类\"" @别名 = "BASS_ASIO_CHANNELINFO" @别名类型 = 本地结构
-        @模板实现类 = "BASS_ASIO_通道信息">
+类 BASS_ASIO_通道信息 <公开 基础类 = PIV结构模板 注释 = "\"BASS_ASIO类::取通道信息/BASS_ASIO_ChannelGetInfo\"返回的信息" 折叠
+        @文档 = "category = \"ASIO支持.辅助类\"" @别名 = "BASS_ASIO_CHANNELINFO" @模板实现类 = "BASS_ASIO_通道信息">
 {
     变量 群组 <公开 类型 = 整数 注释 = "通道的群组" @输出名 = "group">
     变量 采样格式 <公开 类型 = 整数 注释 = "通道的采样格式,为下列常量之一:" 注释 = "16 BASS_ASIO_FORMAT_16BIT 16位整数."
@@ -1657,6 +1718,21 @@
         变量 格式文本 <类型 = 文本型 值 = "<BASS_ASIO_通道信息> 总共 3 个成员:\r\n1. 群组: %u\r\n2. 采样格式: %u\r\n3. 名称: %s">
         返回 (取格式文本 (格式文本, 欲操作本对象.群组, 欲操作本对象.采样格式, 欲操作本对象.名称))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_ASIO_CHANNELINFO* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_ASIO_通道信息> 总共 8 个成员:\r\n1. 群组: %u\r\n2. 采样格式: %u\r\n3. 名称: %s",
+    #                                value->group, value->format, (const wchar_t*)value->name);
+    #     else
+    #         strDebug.SetText(L"BASS_ASIO_CHANNELINFO: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
 }
 
 类 BASS_ASIO_标志 <公开 折叠 @文档 = "category = \"ASIO支持.常量\"">
@@ -1670,7 +1746,7 @@
 }
 
 #
-# BASS混合器类.辅助类
+# BASS混合器类.辅助类 ====
 
 类 BASS_分离标志 <公开 注释 = "BASS混合器类::创建分离流" 折叠 @文档 = "category = \"BASS混合器.常量\"">
 {
@@ -1715,16 +1791,31 @@
 }
 
 类 BASS_MIXER_节点 <公开 基础类 = PIV结构模板 注释 = "BASS混合器类::置通道包络线" 折叠 折叠2 @文档 = "category = \"BASS混合器.辅助类\""
-        @别名 = "BASS_MIXER_NODE" @别名类型 = 本地结构 @模板实现类 = "BASS_MIXER_节点">
+        @别名 = "BASS_MIXER_NODE" @模板实现类 = "BASS_MIXER_节点">
 {
     变量 位置 <公开 类型 = 长整数 @输出名 = "pos">
-    变量 值 <公开 类型 = 单精度小数 @输出名 = "val">
+    变量 值 <公开 类型 = 单精度小数 @输出名 = "value">
 
     方法 取展示内容 <公开 静态 类型 = 文本型 注释 = "将本对象中的所有数据用文本方式返回,用作调试或其它场合展示时使用." 折叠>
     参数 欲操作本对象 <类型 = BASS_MIXER_节点 注释 = "用作填入本对象中所有数据的展示文本">
     {
         返回 (取格式文本 ("<BASS_MIXER_节点> {位置(pos): %I64u, 值(val): %f}", 欲操作本对象.位置, 欲操作本对象.值))
     }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, BASS_MIXER_NODE* value)
+    # {
+    #     if (value != nullptr)
+    #         strDebug.AddFormatText(L"<BASS_MIXER_节点> {位置(pos): %I64u, 值(value): %f}", value->pos, value->value);
+    #     else
+    #         strDebug.SetText(L"BASS_MIXER_NODE: nullptr");
+    # }
+    # <> </include>
+    # <> </global>
+    # @end
+    #
 }
 
 类 BASS_MIXER_节点数组 <公开 基础类 = PIV数组模板 注释 = "BASS混合器类::置通道包络线" @文档 = "category = \"BASS混合器.辅助类\""

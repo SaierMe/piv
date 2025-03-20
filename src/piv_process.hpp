@@ -489,7 +489,6 @@ public:
         }
         const BYTE *StartAddress = reinterpret_cast<const BYTE *>(MIN(start_ptr, end_ptr));
         const BYTE *EndAddress = (end_ptr == NULL) ? ProcessEnd : reinterpret_cast<const BYTE *>(MAX(StartAddress, end_ptr));
-        const BYTE *RetAddress = 0;
         // 特征码转字节数组
         CWString SignatureStr{signatures};
         SignatureStr.Replace(L" ", L"");
@@ -962,7 +961,6 @@ public:
     {
         if (hProcess == NULL)
             return FALSE;
-        MODULEINFO ModuleInfo{0};
         BOOL result = FALSE;
         MODULEINFO ModuleInfo{0};
         if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && write_off < ModuleInfo.SizeOfImage)

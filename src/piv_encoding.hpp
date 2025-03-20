@@ -114,23 +114,171 @@ namespace piv
             return ::piv::basic_string_view<CharT>{reinterpret_cast<const CharT *>(rhs.GetTextPtr()), count};
     }
 
-    namespace detail
+    namespace edit
     {
-        static ::piv::string_view const base64_chars =
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-            "abcdefghijklmnopqrstuvwxyz"
-            "0123456789+/";
-        static ::piv::string_view const base85_chars =
-            "0123456789"
-            "abcdefghijklmnopqrstuvwxyz"
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-            ".-:+=^!/*?&<>()[]{}@%$#";
-        static ::piv::string_view const base91_chars =
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-            "abcdefghijklmnopqrstuvwxyz"
-            "0123456789!#$%&()*+,./:;-="
-            "\\?@[]^_`{|}~\'";
-    } // namespace detail
+        /**
+         * @brief push_back
+         * @tparam CharT
+         * @param lhs
+         * @param c
+         */
+        template <typename CharT, typename T>
+        static void push_back(std::basic_string<CharT> &lhs, T value)
+        {
+            lhs.push_back(static_cast<CharT>(value));
+        }
+
+        template <typename T>
+        static void push_back(CWString &lhs, T value)
+        {
+            lhs.AddChar(static_cast<wchar_t>(value));
+        }
+
+        template <typename T>
+        static void push_back(CU8String &lhs, T value)
+        {
+            lhs.AddChar(static_cast<char>(value));
+        }
+
+        template <typename T>
+        static void push_back(CVolMem &lhs, T value)
+        {
+            lhs.Append(&value, sizeof(T));
+        }
+
+        /**
+         * @brief clear
+         * @tparam CharT
+         * @param lhs
+         */
+        template <typename CharT>
+        static void clear(std::basic_string<CharT> &lhs)
+        {
+            lhs.clear();
+        }
+
+        static void clear(CWString &lhs)
+        {
+            lhs.Empty();
+        }
+
+        static void clear(CU8String &lhs)
+        {
+            lhs.Empty();
+        }
+
+        static void clear(CVolMem &lhs)
+        {
+            lhs.Empty();
+        }
+
+        /**
+         * @brief reserve
+         * @tparam CharT
+         * @param lhs
+         * @param _size
+         */
+        template <typename CharT>
+        static void reserve(std::basic_string<CharT> &lhs, size_t _size)
+        {
+            lhs.reserve(_size);
+        }
+
+        static void reserve(CWString &lhs, size_t _size)
+        {
+            lhs.SetNumAlignChars(static_cast<INT_P>(_size));
+        }
+
+        static void reserve(CU8String &lhs, size_t _size)
+        {
+            lhs.SetNumAlignChars(static_cast<INT_P>(_size));
+        }
+
+        static void reserve(CVolMem &lhs, size_t _size)
+        {
+            lhs.SetMemAlignSize(static_cast<INT_P>(_size));
+        }
+
+        /**
+         * @brief 取字符大小
+         * @tparam CharT
+         * @param cstr
+         * @return
+         */
+        template <typename CharT>
+        static size_t size(const CharT *cstr)
+        {
+            PIV_IF(sizeof(CharT) == 2)
+            {
+                return wcslen(reinterpret_cast<const wchar_t *>(cstr));
+            }
+            else
+            {
+                return strlen(reinterpret_cast<const char *>(cstr));
+            }
+        }
+
+        template <typename CharT>
+        static size_t size(const std::basic_string<CharT> &lhs)
+        {
+            return lhs.size();
+        }
+
+        template <typename CharT>
+        static size_t size(const ::piv::basic_string_view<CharT> &lhs)
+        {
+            return lhs.size();
+        }
+
+        static size_t size(const CWString &lhs)
+        {
+            return lhs.GetLength();
+        }
+
+        static size_t size(const CU8String &lhs)
+        {
+            return lhs.GetLength();
+        }
+
+        static size_t size(const CVolMem &lhs)
+        {
+            return lhs.GetSize();
+        }
+
+        /**
+         * @brief 取字节大小
+         * @tparam CharT
+         * @param lhs
+         * @return
+         */
+        template <typename CharT>
+        static size_t size_bytes(const std::basic_string<CharT> &lhs)
+        {
+            return lhs.size() * sizeof(CharT);
+        }
+
+        template <typename CharT>
+        static size_t size_bytes(const ::piv::basic_string_view<CharT> &lhs)
+        {
+            return lhs.size() * sizeof(CharT);
+        }
+
+        static size_t size_bytes(const CWString &lhs)
+        {
+            return static_cast<size_t>(lhs.GetLength() * 2);
+        }
+
+        static size_t size_bytes(const CU8String &lhs)
+        {
+            return static_cast<size_t>(lhs.GetLength());
+        }
+
+        static size_t size_bytes(const CVolMem &lhs)
+        {
+            return static_cast<size_t>(lhs.GetSize());
+        }
+
+    } // namespace edit
 
     namespace encoding
     {
@@ -305,8 +453,8 @@ namespace piv
         static void U2Aex(std::string &mbstr, const char *utf8str, size_t utf8len = -1, uint32_t code_page = CP_ACP)
         {
             std::wstring utf16str;
-            piv::encoding::U2Wex(utf16str, utf8str, utf8len);
-            piv::encoding::W2Aex(mbstr, utf16str.c_str(), utf16str.size(), code_page);
+            ::piv::encoding::U2Wex(utf16str, utf8str, utf8len);
+            ::piv::encoding::W2Aex(mbstr, utf16str.c_str(), utf16str.size(), code_page);
         }
 
         /**
@@ -318,8 +466,8 @@ namespace piv
         static void A2Uex(std::string &utf8str, const char *mbstr, size_t mbslen = -1, uint32_t code_page = CP_ACP)
         {
             std::wstring utf16str;
-            piv::encoding::A2Wex(utf16str, mbstr, mbslen, code_page);
-            piv::encoding::W2Uex(utf8str, utf16str.c_str(), utf16str.size());
+            ::piv::encoding::A2Wex(utf16str, mbstr, mbslen, code_page);
+            ::piv::encoding::W2Uex(utf8str, utf16str.c_str(), utf16str.size());
         }
 
         /**
@@ -357,7 +505,7 @@ namespace piv
         {
             for (size_t i = 0; i < SrcLen; i++)
             {
-                if (!(piv::encoding::IsUrlValidWord(lpszSrc[i], ReservedWord)))
+                if (!(::piv::encoding::IsUrlValidWord(lpszSrc[i], ReservedWord)))
                 { // 判断是否已经URL编码
                     if (!(lpszSrc[i] == '%' && (i + 2) >= SrcLen && iswxdigit(lpszSrc[i + 1]) && iswxdigit(lpszSrc[i + 2])))
                         return true;
@@ -369,7 +517,7 @@ namespace piv
         {
             for (size_t i = 0; i < SrcLen; i++)
             {
-                if (!(piv::encoding::IsUrlValidWord(lpszSrc[i], ReservedWord)))
+                if (!(::piv::encoding::IsUrlValidWord(lpszSrc[i], ReservedWord)))
                 { // 判断是否已经URL编码
                     if (!(lpszSrc[i] == '%' && (i + 2) >= SrcLen && isxdigit(static_cast<unsigned char>(lpszSrc[i + 1])) && isxdigit(static_cast<unsigned char>(lpszSrc[i + 2]))))
                         return true;
@@ -417,7 +565,7 @@ namespace piv
             for (size_t i = 0; i < SrcLen; i++)
             {
                 unsigned char c = lpszSrc[i];
-                if (!(piv::encoding::IsUrlValidWord(lpszSrc[i], ReservedWord)))
+                if (!(::piv::encoding::IsUrlValidWord(lpszSrc[i], ReservedWord)))
                     Add += 2;
             }
             return SrcLen + Add;
@@ -466,7 +614,7 @@ namespace piv
                 if (j >= DestLen)
                     goto ERROR_DEST_LEN;
                 c = lpszSrc[i];
-                if (piv::encoding::IsUrlValidWord(lpszSrc[i], ReservedWord))
+                if (::piv::encoding::IsUrlValidWord(lpszSrc[i], ReservedWord))
                     lpszDest[j++] = c;
                 else
                 {
@@ -560,8 +708,8 @@ namespace piv
             return static_cast<unsigned char>(chHexChar);
         }
 
-        static const char hexUpCh[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
-        static const char hexLowCh[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+        static constexpr char hexUpCh[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+        static constexpr char hexLowCh[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
         /**
          * @brief 到十六进制文本
@@ -576,20 +724,18 @@ namespace piv
             hexstr.clear();
             if (str.empty())
                 return std::forward<T>(hexstr);
-            hexstr.reserve(str.size() * (separator ? 3 : 2));
-            const unsigned char *pStr = reinterpret_cast<const unsigned char *>(str.data());
             size_t count = str.size() * sizeof(typename StringT::value_type);
+            hexstr.resize(count * (separator ? 3 : 2), ' ');
+            StringT::value_type *pHex = const_cast<StringT::value_type *>(hexstr.data());
+            const unsigned char *pStr = reinterpret_cast<const unsigned char *>(str.data());
             for (size_t i = 0; i < count; ++i)
             {
-                hexstr.push_back(hexUpCh[static_cast<unsigned char>(pStr[i]) >> 4]);
-                hexstr.push_back(hexUpCh[static_cast<unsigned char>(pStr[i]) & 0xF]);
+                *pHex++ = hexUpCh[static_cast<unsigned char>(pStr[i]) >> 4];
+                *pHex++ = hexUpCh[static_cast<unsigned char>(pStr[i]) & 0xF];
                 if (separator)
-                    hexstr.push_back(' ');
+                    pHex++;
             }
-            if (hexstr.back() == ' ')
-                hexstr.pop_back();
             return std::forward<T>(hexstr);
-            ;
         }
 
         template <typename StringT, typename T /* = CWString */>
@@ -599,17 +745,26 @@ namespace piv
             hexstr.Empty();
             if (str.empty())
                 return std::forward<T>(hexstr);
-            hexstr.SetNumAlignChars(str.size() * (separator ? 3 : 2));
-            const unsigned char *pStr = reinterpret_cast<const unsigned char *>(str.data());
             size_t count = str.size() * sizeof(typename StringT::value_type);
+            wchar_t *pHex = nullptr;
+            if (!separator)
+            {
+                pHex = reinterpret_cast<wchar_t *>(hexstr.m_mem.Realloc(count * 4 + 2));
+                pHex[count * 2] = '\0';
+            }
+            else
+            {
+                hexstr.SetLength(count * 3);
+                pHex = const_cast<wchar_t *>(hexstr.GetText());
+            }
+            const unsigned char *pStr = reinterpret_cast<const unsigned char *>(str.data());
             for (size_t i = 0; i < count; ++i)
             {
-                hexstr.AddChar(hexUpCh[static_cast<unsigned char>(pStr[i]) >> 4]);
-                hexstr.AddChar(hexUpCh[static_cast<unsigned char>(pStr[i]) & 0xF]);
+                *pHex++ = hexUpCh[static_cast<unsigned char>(pStr[i]) >> 4];
+                *pHex++ = hexUpCh[static_cast<unsigned char>(pStr[i]) & 0xF];
                 if (separator)
-                    hexstr.AddChar(' ');
+                    pHex++;
             }
-            hexstr.TrimRight();
             return std::forward<T>(hexstr);
         }
 
@@ -650,52 +805,26 @@ namespace piv
          * @param usc2 返回的USC2文本
          * @return
          */
-        template <typename CharT, typename StringT, typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::basic_string<CharT>>::value, T>::type
-        to_usc2(const StringT &str, bool en_ascii, T &&usc2)
+        template <typename StringT, typename T>
+        T &&to_usc2(const StringT &str, bool en_ascii, T &&usc2)
         {
-            usc2.clear();
-            usc2.reserve(str.size() * 6);
+            edit::clear(usc2);
+            edit::reserve(usc2, str.size() * 6);
             wchar_t ch;
             for (size_t i = 0; i < str.size(); i++)
             {
                 ch = str[i];
                 if (!en_ascii && ch < 128)
                 {
-                    usc2.push_back(static_cast<typename T::value_type>(ch));
+                    edit::push_back(usc2, ch);
                     continue;
                 }
-                usc2.push_back('\\');
-                usc2.push_back('u');
-                usc2.push_back(hexLowCh[static_cast<unsigned char>(ch >> 12)]);
-                usc2.push_back(hexLowCh[static_cast<unsigned char>(ch >> 8 & 0x000F)]);
-                usc2.push_back(hexLowCh[static_cast<unsigned char>((ch & 0x00FF) >> 4)]);
-                usc2.push_back(hexLowCh[static_cast<unsigned char>(ch & 0x000F)]);
-            }
-            return std::forward<T>(usc2);
-        }
-
-        template <typename StringT, typename T /* = CWString */>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, CWString>::value, T>::type
-        to_usc2(const StringT &str, bool en_ascii, T &&usc2)
-        {
-            usc2.Empty();
-            usc2.SetNumAlignChars(str.size() * 6);
-            wchar_t ch;
-            for (size_t i = 0; i < str.size(); i++)
-            {
-                ch = str[i];
-                if (!en_ascii && ch < 128)
-                {
-                    usc2.AddChar(ch);
-                    continue;
-                }
-                usc2.AddChar('\\');
-                usc2.AddChar('u');
-                usc2.AddChar(hexLowCh[static_cast<unsigned char>(ch >> 12)]);
-                usc2.AddChar(hexLowCh[static_cast<unsigned char>(ch >> 8 & 0x000F)]);
-                usc2.AddChar(hexLowCh[static_cast<unsigned char>((ch & 0x00FF) >> 4)]);
-                usc2.AddChar(hexLowCh[static_cast<unsigned char>(ch & 0x000F)]);
+                edit::push_back(usc2, '\\');
+                edit::push_back(usc2, 'u');
+                edit::push_back(usc2, hexLowCh[static_cast<unsigned char>(ch >> 12)]);
+                edit::push_back(usc2, hexLowCh[static_cast<unsigned char>(ch >> 8 & 0x000F)]);
+                edit::push_back(usc2, hexLowCh[static_cast<unsigned char>((ch & 0x00FF) >> 4)]);
+                edit::push_back(usc2, hexLowCh[static_cast<unsigned char>(ch & 0x000F)]);
             }
             return std::forward<T>(usc2);
         }
@@ -746,82 +875,31 @@ namespace piv
          * @param hexstr 返回的十六进制
          * @return
          */
-        template <typename V, typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, CVolMem>::value, T>::type
-        value_to_hex(const V &v, T &&hex)
+        template <typename V>
+        CVolMem &value_to_hex(const V &v, CVolMem &hex)
         {
             hex.Append(&v, sizeof(V));
-            return std::forward<T>(hex);
+            return hex;
         }
 
         template <typename V, typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, CWString>::value, T>::type
-        value_to_hex(const V &v, T &&hex, bool upper = true)
-        {
-            const unsigned char *pValue = reinterpret_cast<const unsigned char *>(&v);
-            wchar_t *pStr = const_cast<wchar_t *>(reinterpret_cast<const wchar_t *>(hex.m_mem.Alloc(((sizeof(V) * 2) + 1) * 2, TRUE)));
-            if (upper)
-            {
-                for (size_t i = 0, n = 0; i < sizeof(V); ++i)
-                {
-                    pStr[n++] = hexUpCh[static_cast<unsigned char>(pValue[i]) >> 4];
-                    pStr[n++] = hexUpCh[static_cast<unsigned char>(pValue[i]) & 0xF];
-                }
-            }
-            else
-            {
-                for (size_t i = 0, n = 0; i < sizeof(V); ++i)
-                {
-                    pStr[n++] = hexLowCh[static_cast<unsigned char>(pValue[i]) >> 4];
-                    pStr[n++] = hexLowCh[static_cast<unsigned char>(pValue[i]) & 0xF];
-                }
-            }
-            return std::forward<T>(hex);
-        }
-
-        template <typename V, typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
-        value_to_hex(const V &v, T &&hex, bool upper = true)
+        T &&value_to_hex(const V &v, T &&hex, bool upper = true)
         {
             const unsigned char *pValue = reinterpret_cast<const unsigned char *>(&v);
             if (upper)
             {
-                for (size_t i = 0; i < sizeof(V); ++i)
+                for (size_t i = 0, n = 0; i < sizeof(V); i++)
                 {
-                    hex.push_back(hexUpCh[static_cast<unsigned char>(pValue[i]) >> 4]);
-                    hex.push_back(hexUpCh[static_cast<unsigned char>(pValue[i]) & 0xF]);
+                    ::piv::edit::push_back(hex, hexUpCh[static_cast<unsigned char>(pValue[i]) >> 4]);
+                    ::piv::edit::push_back(hex, hexUpCh[static_cast<unsigned char>(pValue[i]) & 0xF]);
                 }
             }
             else
             {
-                for (size_t i = 0; i < sizeof(V); ++i)
+                for (size_t i = 0, n = 0; i < sizeof(V); i++)
                 {
-                    hex.push_back(hexLowCh[static_cast<unsigned char>(pValue[i]) >> 4]);
-                    hex.push_back(hexLowCh[static_cast<unsigned char>(pValue[i]) & 0xF]);
-                }
-            }
-            return std::forward<T>(hex);
-        }
-
-        template <typename V, typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
-        value_to_hex(const V &v, T &&hex, bool upper = true)
-        {
-            const unsigned char *pValue = reinterpret_cast<const unsigned char *>(&v);
-            if (upper)
-            {
-                for (size_t i = 0; i < sizeof(V); ++i)
-                {
-                    hex.push_back(hexUpCh[static_cast<unsigned char>(pValue[i]) >> 4]);
-                    hex.push_back(hexUpCh[static_cast<unsigned char>(pValue[i]) & 0xF]);
-                }
-            }
-            else
-            {
-                for (size_t i = 0; i < sizeof(V); ++i)
-                {
-                    hex.push_back(hexLowCh[static_cast<unsigned char>(pValue[i]) >> 4]);
-                    hex.push_back(hexLowCh[static_cast<unsigned char>(pValue[i]) & 0xF]);
+                    ::piv::edit::push_back(hex, hexLowCh[static_cast<unsigned char>(pValue[i]) >> 4]);
+                    ::piv::edit::push_back(hex, hexLowCh[static_cast<unsigned char>(pValue[i]) & 0xF]);
                 }
             }
             return std::forward<T>(hex);
@@ -3949,50 +4027,94 @@ namespace piv
 
     } // namespace encoding
 
+    namespace detail
+    {
+        struct base64_table
+        {
+            static constexpr char *encode =
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                "abcdefghijklmnopqrstuvwxyz"
+                "0123456789+/";
+            static constexpr unsigned char decode[128] = {
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                // 0x00..0x0F
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                // 0x10..0x1F
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 62, 0, 0, 0, 63,              // 0x20..0x2F
+                52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 0, 0, 0, 0, 0, 0,      // 0x30..0x3F
+                0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,           // 0x40..0x4F
+                15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0, 0, 0, 0, 0,     // 0x50..0x5F
+                0, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, // 0x60..0x6F
+                41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 0, 0, 0, 0, 0,     // 0x70..0x7F
+            };
+        };
+
+        struct base85_table
+        {
+            static constexpr char *encode =
+                "0123456789"
+                "abcdefghijklmnopqrstuvwxyz"
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                ".-:+=^!/*?&<>()[]{}@%$#";
+            static constexpr unsigned char decode[128] = {
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                 // 0x00..0x0F
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                 // 0x10..0x1F
+                0, 68, 0, 84, 83, 82, 72, 0, 75, 76, 70, 65, 0, 63, 62, 69,     // 0x20..0x2F
+                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 64, 0, 73, 66, 74, 71,            // 0x30..0x3F
+                81, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, // 0x40..0x4F
+                51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 77, 0, 78, 67, 0,   // 0x50..0x5F
+                0, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,  // 0x60..0x6F
+                25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 79, 0, 80, 0, 0,    // 0x70..0x7F
+            };
+        };
+
+        struct base91_table
+        {
+            static constexpr char *encode =
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                "abcdefghijklmnopqrstuvwxyz"
+                "0123456789!#$%&()*+,./:;-="
+                "\\?@[]^_`{|}~\'";
+            static constexpr unsigned char decode[256] = {
+                91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 000..015
+                91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 016..031
+                91, 62, 91, 63, 64, 65, 66, 90, 67, 68, 69, 70, 71, 76, 72, 73, // 032..047 // @34: ", @39: ', @45: -
+                52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 74, 75, 91, 77, 91, 79, // 048..063 // @60: <, @62: >
+                80, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,           // 064..079
+                15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 81, 78, 82, 83, 84, // 080..095 // @92: slash
+                85, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, // 096..111
+                41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 86, 87, 88, 89, 91, // 112..127
+                91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 128..143
+                91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 144..159
+                91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 160..175
+                91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 176..191
+                91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 192..207
+                91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 208..223
+                91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 224..239
+                91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91  // 240..255
+            };
+        };
+    } // namespace detail
+
     /**
      * @brief BASE64编解码类
      * @tparam CharT 字符类型
      */
-    template <typename CharT>
+    template <typename CharT, typename TableT = detail::base64_table>
     class base64
     {
     private:
-        inline bool is_base64(const unsigned char &c) noexcept
-        {
-            return (c == 43 ||               // +
-                    (c >= 47 && c <= 57) ||  // /-9
-                    (c >= 65 && c <= 90) ||  // A-Z
-                    (c >= 97 && c <= 122) || // a-z
-                    (c == 10) || (c == 13)); // \r\n
-        }
-
-        inline void AddChar(std::basic_string<CharT> &s, const unsigned char &c, uint32_t &count, uint32_t max_line_len) noexcept
+        template <typename T>
+        inline void _AddChar(T &lhs, const unsigned char c, int32_t &count, int32_t max_line_len) noexcept
         {
             if (count < max_line_len)
             {
-                s.push_back(c);
+                edit::push_back(lhs, c);
                 count++;
             }
             else
             {
-                s.push_back('\r');
-                s.push_back('\n');
-                s.push_back(c);
-                count = 1;
-            }
-        }
-
-        inline void AddChar(CWString &s, const unsigned char &c, uint32_t &count, uint32_t max_line_len) noexcept
-        {
-            if (count < max_line_len)
-            {
-                s.AddChar(c);
-                count++;
-            }
-            else
-            {
-                s.AddText("\r\n");
-                s.AddChar(c);
+                edit::push_back(lhs, '\r');
+                edit::push_back(lhs, '\n');
+                edit::push_back(lhs, c);
                 count = 1;
             }
         }
@@ -4005,94 +4127,70 @@ namespace piv
          * @return 返回编码后的BASE64文本
          */
         template <typename T>
-        inline T encode(const unsigned char *input, size_t len, int line_len = 0)
+        inline T &encode(const unsigned char *input, size_t inlen, T &output, int32_t line_len = 0)
         {
-            T ret;
-            int i = 0;
-            int j = 0;
-            unsigned char char_array_3[3];
-            unsigned char char_array_4[4];
-            uint32_t count = 0;
-            uint32_t max_line_len;
-            if (line_len < 0)
-                max_line_len = (uint32_t)-1;
-            else
-                max_line_len = (line_len == 0) ? 76 : static_cast<uint32_t>(line_len);
-            while (len--)
+            edit::clear(output);
+            int32_t count = 0;
+            line_len = (line_len < 0) ? (uint32_t)-1 : ((line_len == 0) ? 76 : line_len);
+            unsigned char num = inlen % 3;
+            edit::reserve(output, inlen / 3 * 4);
+            for (int i = 0; i < inlen - num; i += 3)
             {
-                char_array_3[i++] = *(input++);
-                if (i == 3)
-                {
-                    char_array_4[0] = (unsigned char)((char_array_3[0] & 0xfc) >> 2);
-                    char_array_4[1] = (unsigned char)(((char_array_3[0] & 0x03) << 4) +
-                                                      ((char_array_3[1] & 0xf0) >> 4));
-                    char_array_4[2] = (unsigned char)(((char_array_3[1] & 0x0f) << 2) +
-                                                      ((char_array_3[2] & 0xc0) >> 6));
-                    char_array_4[3] = (unsigned char)(char_array_3[2] & 0x3f);
-                    for (i = 0; (i < 4); i++)
-                    {
-                        AddChar(ret, detail::base64_chars[char_array_4[i]], count, max_line_len);
-                    }
-                    i = 0;
-                }
+                _AddChar(output, TableT::encode[input[i] >> 2], count, line_len);
+                _AddChar(output, TableT::encode[(input[i] & 0x03) << 4 | (input[i + 1] >> 4)], count, line_len);
+                _AddChar(output, TableT::encode[(input[i + 1] & 0x0f) << 2 | (input[i + 2] >> 6)], count, line_len);
+                _AddChar(output, TableT::encode[input[i + 2] & 0x3f], count, line_len);
             }
-            if (i)
+            if (num == 1)
             {
-                for (j = i; j < 3; j++)
-                {
-                    char_array_3[j] = '\0';
-                }
-                char_array_4[0] = (unsigned char)((char_array_3[0] & 0xfc) >> 2);
-                char_array_4[1] = (unsigned char)(((char_array_3[0] & 0x03) << 4) +
-                                                  ((char_array_3[1] & 0xf0) >> 4));
-                char_array_4[2] = (unsigned char)(((char_array_3[1] & 0x0f) << 2) +
-                                                  ((char_array_3[2] & 0xc0) >> 6));
-                char_array_4[3] = (unsigned char)(char_array_3[2] & 0x3f);
-                for (j = 0; (j < i + 1); j++)
-                {
-                    AddChar(ret, detail::base64_chars[char_array_4[j]], count, max_line_len);
-                }
-                while ((i++ < 3))
-                {
-                    AddChar(ret, '=', count, max_line_len);
-                }
+                _AddChar(output, TableT::encode[input[inlen - 1] >> 2], count, line_len);
+                _AddChar(output, TableT::encode[(input[inlen - 1] & 0x03) << 4], count, line_len);
+                _AddChar(output, '=', count, line_len);
+                _AddChar(output, '=', count, line_len);
             }
-            return ret;
+            else if (num == 2)
+            {
+                _AddChar(output, TableT::encode[input[inlen - 2] >> 2], count, line_len);
+                _AddChar(output, TableT::encode[(input[inlen - 2] & 0x03) << 4 | (input[inlen - 1] >> 4)], count, line_len);
+                _AddChar(output, TableT::encode[(input[inlen - 1] & 0x0f) << 2], count, line_len);
+                _AddChar(output, '=', count, line_len);
+            }
+            return output;
         }
 
-        inline std::basic_string<CharT> encode(const basic_string_view<CharT> &input, int line_len = 0)
+        inline std::basic_string<CharT> &encode(const basic_string_view<CharT> &input, std::basic_string<CharT> &output, int line_len = 0)
         {
-            return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), line_len);
+            return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), output, line_len);
         }
 
-        inline std::basic_string<CharT> encode(const std::basic_string<CharT> &input, int line_len = 0)
+        inline std::basic_string<CharT> &encode(const std::basic_string<CharT> &input, std::basic_string<CharT> &output, int line_len = 0)
         {
-            return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), line_len);
+            return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), output, line_len);
         }
 
-        inline std::basic_string<CharT> encode(const CVolMem &input, int line_len = 0)
+        inline std::basic_string<CharT> &encode(const CVolMem &input, std::basic_string<CharT> &output, int line_len = 0)
         {
-            return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()), line_len);
+            return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()), output, line_len);
         }
 
-        inline CWString Encode(const unsigned char *input, size_t len, int line_len = 0)
+        inline CWString &Encode(const unsigned char *input, size_t len, CWString &output, int line_len = 0)
         {
-            return encode<CWString>(input, len, line_len);
+            return encode<CWString>(input, len, output, line_len);
         }
 
-        inline CWString Encode(const ::piv::basic_string_view<CharT> &input, int line_len = 0)
+        inline CWString &Encode(const ::piv::basic_string_view<CharT> &input, CWString &output, int line_len = 0)
         {
-            return encode<CWString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), line_len);
+            return encode<CWString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), output, line_len);
         }
 
-        inline CWString Encode(const std::basic_string<CharT> &input, int line_len = 0)
+        inline CWString &Encode(const std::basic_string<CharT> &input, CWString &output, int line_len = 0)
         {
-            return encode<CWString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), line_len);
+            return encode<CWString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), output, line_len);
         }
 
-        inline CWString Encode(const CVolMem &input, int line_len = 0)
+        inline CWString &Encode(const CVolMem &input, CWString &output, int line_len = 0)
         {
-            return encode<CWString>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()), line_len);
+            return encode<CWString>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()), output, line_len);
         }
 
         /**
@@ -4101,104 +4199,72 @@ namespace piv
          * @return 返回解码后的数据
          */
         template <typename T>
-        inline void decode(const T *input, CVolMem &output, size_t len = -1)
+        inline T &decode(const CharT *input, T &output, size_t length = -1)
         {
-            if (len == -1)
-                len = sizeof(T) == 1 ? strlen(reinterpret_cast<const char *>(input)) : wcslen(reinterpret_cast<const wchar_t *>(input));
-            /*
-            #ifdef SIMDUTF_H
-                output.Alloc(simdutf::maximal_binary_length_from_base64(input, len), TRUE);
-                simdutf::base64_to_binary(input, len, output.GetPtr(), simdutf::base64_default);
-            #else
-            */
-            int i = 0;
-            int j = 0;
-            int in_ = 0;
-            unsigned char char_array_4[4], char_array_3[3];
-            output.Empty();
-
-            while (len-- && (input[in_] != '=') && is_base64(static_cast<unsigned char>(input[in_])))
+            edit::clear(output);
+            if (length == -1)
+                length = edit::size(input);
+            int i = 0, j = 0;
+            CharT temp[4];
+            for (i = 0; i < length; i++)
             {
-                if (input[in_] == '\r' || input[in_] == '\n')
-                {
-                    in_++;
+                if (input[i] == '\r' || input[i] == '\n')
                     continue;
-                }
-                char_array_4[i++] = input[in_];
-                in_++;
-                if (i == 4)
+                temp[j] = input[i];
+                if (j++ == 3)
                 {
-                    for (i = 0; i < 4; i++)
-                    {
-                        char_array_4[i] = static_cast<unsigned char>(detail::base64_chars.find(char_array_4[i]));
-                    }
-
-                    char_array_3[0] = (unsigned char)((char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4));
-                    char_array_3[1] = (unsigned char)(((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2));
-                    char_array_3[2] = (unsigned char)(((char_array_4[2] & 0x3) << 6) + char_array_4[3]);
-
-                    for (i = 0; (i < 3); i++)
-                    {
-                        output.AddByte(char_array_3[i]);
-                    }
-                    i = 0;
+                    edit::push_back(output, static_cast<unsigned char>((TableT::decode[(unsigned char)temp[0]] << 2) | (TableT::decode[(unsigned char)temp[1]] >> 4)));
+                    edit::push_back(output, static_cast<unsigned char>((TableT::decode[(unsigned char)temp[1]] << 4) | (TableT::decode[(unsigned char)temp[2]] >> 2)));
+                    edit::push_back(output, static_cast<unsigned char>((TableT::decode[(unsigned char)temp[2]] << 6) | (TableT::decode[(unsigned char)temp[3]])));
+                    j = 0;
                 }
             }
-
-            if (i)
+            if (j != 0)
             {
-                for (j = i; j < 4; j++)
-                    char_array_4[j] = 0;
-
-                for (j = 0; j < 4; j++)
-                    char_array_4[j] = static_cast<unsigned char>(detail::base64_chars.find(char_array_4[j]));
-
-                char_array_3[0] = (unsigned char)((char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4));
-                char_array_3[1] = (unsigned char)(((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2));
-                char_array_3[2] = (unsigned char)(((char_array_4[2] & 0x3) << 6) + char_array_4[3]);
-
-                for (j = 0; (j < i - 1); j++)
-                {
-                    output.AddByte(char_array_3[j]);
-                }
+                if (j < 3)
+                    temp[3] = '=';
+                if (j < 2)
+                    temp[2] = '=';
+                edit::push_back(output, static_cast<unsigned char>((TableT::decode[(unsigned char)temp[0]] << 2) | (TableT::decode[(unsigned char)temp[1]] >> 4)));
+                edit::push_back(output, static_cast<unsigned char>((TableT::decode[(unsigned char)temp[1]] << 4) | (TableT::decode[(unsigned char)temp[2]] >> 2)));
+                edit::push_back(output, static_cast<unsigned char>((TableT::decode[(unsigned char)temp[2]] << 6) | (TableT::decode[(unsigned char)temp[3]])));
             }
-            // #endif
+            return output;
         }
 
-        inline void decode(const ::piv::basic_string_view<CharT> &input, CVolMem &output)
+        inline CVolMem &decode(const ::piv::basic_string_view<CharT> &input, CVolMem &output)
         {
-            decode(input.data(), output, input.size());
+            return decode(input.data(), output, input.size());
         }
 
-        inline void decode(const std::basic_string<CharT> &input, CVolMem &output)
+        inline CVolMem &decode(const std::basic_string<CharT> &input, CVolMem &output)
         {
-            decode(input.c_str(), output, input.size());
+            return decode(input.c_str(), output, input.size());
         }
 
-        inline void decode(const CVolMem &input, CVolMem &output)
+        inline CVolMem &decode(const CVolMem &input, CVolMem &output)
         {
-            decode(reinterpret_cast<const CharT *>(input.GetPtr()), output, static_cast<size_t>(input.GetSize()) / sizoef(CharT));
+            return decode(reinterpret_cast<const CharT *>(input.GetPtr()), output, static_cast<size_t>(input.GetSize()) / sizoef(CharT));
         }
 
-        inline void decode(const CWString &input, CVolMem &output)
+        inline CVolMem &decode(const CWString &input, CVolMem &output)
         {
-            decode(input.GetText(), output, static_cast<size_t>(input.GetLength()));
+            return decode(input.GetText(), output, static_cast<size_t>(input.GetLength()));
         }
 
         template <typename T>
         inline std::basic_string<CharT> decode(const T &input)
         {
-            CVolMem buffer;
-            decode(input, buffer);
-            return std::basic_string<CharT>{reinterpret_cast<const CharT *>(buffer.GetPtr()), static_cast<size_t>(buffer.GetSize()) / sizeof(CharT)};
+            CVolMem output;
+            decode(input, output);
+            return std::basic_string<CharT>{reinterpret_cast<const CharT *>(output.GetPtr()), output.GetSize() * sizeof(CharT)};
         }
 
         template <typename T>
         inline CVolMem Decode(const T &input)
         {
             CVolMem output;
-            decode(input, output);
-            return output;
+            return decode(input, output);
         }
 
     }; // base64
@@ -4207,30 +4273,9 @@ namespace piv
      * @brief BASE85编解码类
      * @tparam CharT 字符类型
      */
-    template <typename CharT>
+    template <typename CharT, typename TableT = detail::base85_table>
     class base85
     {
-    private:
-        inline void AddChar(std::basic_string<CharT> &s, const unsigned char &c) noexcept
-        {
-            s.push_back(c);
-        }
-
-        inline void AddChar(CWString &s, const unsigned char &c) noexcept
-        {
-            s.AddChar(c);
-        }
-
-        inline void ClearStr(std::basic_string<CharT> &s) noexcept
-        {
-            s.clear();
-        }
-
-        inline void ClearStr(CWString &s) noexcept
-        {
-            s.Empty();
-        }
-
     public:
         /**
          * @brief 将提供的数据编码为BASE85文本
@@ -4242,20 +4287,17 @@ namespace piv
         template <typename T>
         inline bool encode(const unsigned char *input, size_t len, T &output)
         {
-            ClearStr(output);
+            edit::clear(output);
             if (len % 4)
                 return false; // error: raw string size must be multiple of 4
-            unsigned char tmp[5];
             for (size_t o = 0; o < len * 5 / 4; input += 4, o += 5)
             {
-                unsigned value = (input[0] << 24) | (input[1] << 16) | (input[2] << 8) | input[3];
-                tmp[0] = detail::base85_chars[(value / 0x31C84B1) % 0x55];
-                tmp[1] = detail::base85_chars[(value / 0x95EED) % 0x55];
-                tmp[2] = detail::base85_chars[(value / 0x1C39) % 0x55];
-                tmp[3] = detail::base85_chars[(value / 0x55) % 0x55];
-                tmp[4] = detail::base85_chars[value % 0x55];
-                for (size_t i = 0; i < 5; i++)
-                    AddChar(output, tmp[i]);
+                unsigned int value = (input[0] << 24) | (input[1] << 16) | (input[2] << 8) | input[3];
+                edit::push_back(output, TableT::encode[(value / 0x31C84B1) % 0x55]);
+                edit::push_back(output, TableT::encode[(value / 0x95EED) % 0x55]);
+                edit::push_back(output, TableT::encode[(value / 0x1C39) % 0x55]);
+                edit::push_back(output, TableT::encode[(value / 0x55) % 0x55]);
+                edit::push_back(output, TableT::encode[value % 0x55]);
             }
             return true;
         }
@@ -4263,19 +4305,16 @@ namespace piv
         inline std::basic_string<CharT> encode(const ::piv::basic_string_view<CharT> &input, bool padding = false)
         {
             std::basic_string<CharT> output;
-            size_t remainder = input.size() * sizeof(CharT) % 4;
-            if (remainder == 0)
+            size_t mod = (input.size() * sizeof(CharT)) % 4;
+            if (mod == 0)
             {
-                encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), output);
+                encode(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT), output);
             }
-            else
+            else if (padding)
             {
-                if (padding)
-                {
-                    std::basic_string<CharT> pad{input.data(), input.size()};
-                    pad.append(remainder / sizeof(CharT), '\0');
-                    encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(pad.data()), pad.size() * sizeof(CharT), output);
-                }
+                std::basic_string<CharT> pad{input.data(), input.size()};
+                pad.append((4 - mod) / sizeof(CharT), '\0');
+                encode(reinterpret_cast<const unsigned char *>(pad.data()), pad.size() * sizeof(CharT), output);
             }
             return output;
         }
@@ -4293,18 +4332,16 @@ namespace piv
         inline CWString Encode(const CVolMem &input, bool padding = false)
         {
             CWString output;
-            if (input.GetSize() % 4 == 0)
+            INT_P mod = input.GetSize() % 4;
+            if (mod == 0)
             {
                 encode<CWString>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()), output);
             }
-            else
+            else if (padding)
             {
-                if (padding)
-                {
-                    CVolMem pad = input;
-                    pad.AddManyU8Chars('\0', input.GetSize() % 4);
-                    encode<CWString>(reinterpret_cast<const unsigned char *>(pad.GetPtr()), static_cast<size_t>(pad.GetSize()), output);
-                }
+                CVolMem pad = input;
+                pad.AddManyU8Chars('\0', 4 - mod);
+                encode<CWString>(reinterpret_cast<const unsigned char *>(pad.GetPtr()), static_cast<size_t>(pad.GetSize()), output);
             }
             return output;
         }
@@ -4324,33 +4361,22 @@ namespace piv
          * @param input 所欲转换的BASE85编码
          * @return 返回解码后的数据
          */
-        template <typename T>
-        inline bool decode(const T *input, CVolMem &output, size_t len = -1)
+        template <typename CharT, typename T>
+        inline bool decode(const CharT *input, T &output, size_t length = -1)
         {
-            if (len == -1)
-                len = sizeof(T) == 1 ? strlen(reinterpret_cast<const char *>(input)) : wcslen(reinterpret_cast<const wchar_t *>(input));
-            if (len % 5)
+            if (length == -1)
+                length = edit::size(input);
+            if (length % 5)
                 return false; // error: z85 string size must be multiple of 5
-            // decode
-            const unsigned char decoder[128] = {
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                 // 0x00..0x0F
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                 // 0x10..0x1F
-                0, 68, 0, 84, 83, 82, 72, 0, 75, 76, 70, 65, 0, 63, 62, 69,     // 0x20..0x2F
-                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 64, 0, 73, 66, 74, 71,            // 0x30..0x3F
-                81, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, // 0x40..0x4F
-                51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 77, 0, 78, 67, 0,   // 0x50..0x5F
-                0, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,  // 0x60..0x6F
-                25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 79, 0, 80, 0, 0,    // 0x70..0x7F
-            };
-            output.SetMemAlignSize(len * 4 / 5);
-            for (size_t o = 0; o < len * 4 / 5; input += 5, o += 4)
+            edit::reserve(output, length * 4 / 5);
+            for (size_t o = 0; o < length * 4 / 5; input += 5, o += 4)
             {
-                uint32_t value = decoder[input[0]] * 0x31C84B1 + decoder[input[1]] * 0x95EED +
-                                 decoder[input[2]] * 0x1C39 + decoder[input[3]] * 0x55 + decoder[input[4]];
-                output.AddU8Char(U8CHAR((value >> 24) & 0xFF));
-                output.AddU8Char(U8CHAR((value >> 16) & 0xFF));
-                output.AddU8Char(U8CHAR((value >> 8) & 0xFF));
-                output.AddU8Char(U8CHAR((value >> 0) & 0xFF));
+                uint32_t value = TableT::decode[input[0]] * 0x31C84B1 + TableT::decode[input[1]] * 0x95EED +
+                                 TableT::decode[input[2]] * 0x1C39 + TableT::decode[input[3]] * 0x55 + TableT::decode[input[4]];
+                edit::push_back(output, static_cast<unsigned char>((value >> 24) & 0xFF));
+                edit::push_back(output, static_cast<unsigned char>((value >> 16) & 0xFF));
+                edit::push_back(output, static_cast<unsigned char>((value >> 8) & 0xFF));
+                edit::push_back(output, static_cast<unsigned char>((value >> 0) & 0xFF));
             }
             return true;
         }
@@ -4397,20 +4423,9 @@ namespace piv
      * @brief BASE91编解码类
      * @tparam CharT 字符类型
      */
-    template <typename CharT>
+    template <typename CharT, typename TableT = detail::base91_table>
     class base91
     {
-    private:
-        inline void AddChar(std::basic_string<CharT> &s, const unsigned char &c) noexcept
-        {
-            s.push_back(c);
-        }
-
-        inline void AddChar(CWString &s, unsigned char c) noexcept
-        {
-            s.AddChar(c);
-        }
-
     public:
         /**
          * @brief 将提供的数据编码为BASE91文本
@@ -4419,9 +4434,9 @@ namespace piv
          * @return 返回编码后的BASE91文本
          */
         template <typename T>
-        inline T encode(const unsigned char *input, size_t len)
+        inline T &encode(T &output, const unsigned char *input, size_t len)
         {
-            T ret;
+            edit::clear(output);
             unsigned long queue = 0;
             unsigned int nbits = 0;
 
@@ -4443,48 +4458,84 @@ namespace piv
                         queue >>= 14;
                         nbits -= 14;
                     }
-                    AddChar(ret, detail::base91_chars[val % 91]);
-                    AddChar(ret, detail::base91_chars[val / 91]);
+                    edit::push_back(output, TableT::encode[val % 91]);
+                    edit::push_back(output, TableT::encode[val / 91]);
                 }
             }
             /* process remaining bits from bit queue; write up to 2 bytes */
             if (nbits)
             {
-                AddChar(ret, detail::base91_chars[queue % 91]);
+                edit::push_back(output, TableT::encode[queue % 91]);
                 if (nbits > 7 || queue > 90)
-                    AddChar(ret, detail::base91_chars[queue / 91]);
+                    edit::push_back(output, TableT::encode[queue / 91]);
             }
-            return ret;
+            return output;
+        }
+
+        inline std::basic_string<CharT> &encode(std::basic_string<CharT> &output, const ::piv::basic_string_view<CharT> &input)
+        {
+            return encode(output, reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
         }
 
         inline std::basic_string<CharT> encode(const ::piv::basic_string_view<CharT> &input)
         {
-            return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
+            std::basic_string<CharT> output;
+            return encode(output, reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
+        }
+
+        inline std::basic_string<CharT> &encode(std::basic_string<CharT> &output, const std::basic_string<CharT> &input)
+        {
+            return encode(output, reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
         }
 
         inline std::basic_string<CharT> encode(const std::basic_string<CharT> &input)
         {
-            return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
+            std::basic_string<CharT> output;
+            return encode(output, reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
+        }
+
+        inline std::basic_string<CharT> &encode(std::basic_string<CharT> &output, const CVolMem &input)
+        {
+            return encode(output, reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
         }
 
         inline std::basic_string<CharT> encode(const CVolMem &input)
         {
-            return encode<std::basic_string<CharT>>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
+            std::basic_string<CharT> output;
+            return encode(output, reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
+        }
+
+        inline CWString &Encode(CWString &output, const ::piv::basic_string_view<CharT> &input)
+        {
+            return encode(output, reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
         }
 
         inline CWString Encode(const ::piv::basic_string_view<CharT> &input)
         {
-            return encode<CWString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
+            CWString output;
+            return encode(output, reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
+        }
+
+        inline CWString &Encode(CWString &output, const std::basic_string<CharT> &input)
+        {
+            return encode(output, reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
         }
 
         inline CWString Encode(const std::basic_string<CharT> &input)
         {
-            return encode<CWString>(reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
+            CWString output;
+            return encode(output, reinterpret_cast<const unsigned char *>(input.data()), input.size() * sizeof(CharT));
+        }
+
+        inline CWString &Encode(CWString &output, const CVolMem &input)
+        {
+            return encode(output, reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
         }
 
         inline CWString Encode(const CVolMem &input)
         {
-            return encode<CWString>(reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
+            CWString output;
+            return encode(output, reinterpret_cast<const unsigned char *>(input.GetPtr()), static_cast<size_t>(input.GetSize()));
         }
 
         /**
@@ -4493,38 +4544,22 @@ namespace piv
          * @return 返回解码后的数据
          */
         template <typename T>
-        inline void decode(const T *input, CVolMem &output, size_t len = -1)
+        inline void decode(const CharT *input, T &output, size_t length = -1)
         {
-            if (len == -1)
-                len = sizeof(T) == 1 ? strlen(reinterpret_cast<const char *>(input)) : wcslen(reinterpret_cast<const wchar_t *>(input));
-            const unsigned char dectab[256] = {
-                91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 000..015
-                91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 016..031
-                91, 62, 91, 63, 64, 65, 66, 90, 67, 68, 69, 70, 71, 76, 72, 73, // 032..047 // @34: ", @39: ', @45: -
-                52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 74, 75, 91, 77, 91, 79, // 048..063 // @60: <, @62: >
-                80, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,           // 064..079
-                15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 81, 78, 82, 83, 84, // 080..095 // @92: slash
-                85, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, // 096..111
-                41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 86, 87, 88, 89, 91, // 112..127
-                91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 128..143
-                91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 144..159
-                91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 160..175
-                91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 176..191
-                91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 192..207
-                91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 208..223
-                91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, // 224..239
-                91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91, 91  // 240..255
-            };
-            output.SetMemAlignSize(len * sizeof(T) * 6 / 4);
-            const unsigned char *ib = reinterpret_cast<const unsigned char *>(input);
+            edit::clear(output);
+            size_t cbInput = ((length == -1) ? edit::size(input) : length) * sizeof(CharT);
+            if (cbInput <= 0)
+                return;
+            edit::reserve(output, cbInput * 6 / 4);
 
             unsigned long queue = 0;
             unsigned int nbits = 0;
             int val = -1;
+            const unsigned char *ib = reinterpret_cast<const unsigned char *>(input);
 
-            for (size_t i = len * sizeof(T); i--;)
+            for (size_t i = cbInput; i--;)
             {
-                unsigned int d = dectab[*ib++];
+                unsigned char d = TableT::decode[*ib++];
                 if (d == 91)
                     continue; /* ignore non-alphabet chars */
                 if (val == -1)
@@ -4536,7 +4571,7 @@ namespace piv
                     nbits += (val & 8191) > 88 ? 13 : 14;
                     do
                     {
-                        output.AddU8Char((U8CHAR)queue);
+                        edit::push_back(output, static_cast<unsigned char>(queue));
                         queue >>= 8;
                         nbits -= 8;
                     } while (nbits > 7);
@@ -4545,7 +4580,7 @@ namespace piv
             }
             /* process remaining bits; write at most 1 byte */
             if (val != -1)
-                output.AddU8Char((U8CHAR)(queue | val << nbits));
+                edit::push_back(output, static_cast<unsigned char>(queue | val << nbits));
         }
 
         inline void decode(const ::piv::basic_string_view<CharT> &input, CVolMem &output)
@@ -4558,14 +4593,29 @@ namespace piv
             decode(input.c_str(), output, input.size());
         }
 
+        inline void decode(const ::piv::basic_string_view<CharT> &input, std::string &output)
+        {
+            decode(input.data(), output, input.size());
+        }
+
+        inline void decode(const std::basic_string<CharT> &input, std::string &output)
+        {
+            decode(input.c_str(), output, input.size());
+        }
+
         inline void decode(const CVolMem &input, CVolMem &output)
         {
-            decode(reinterpret_cast<const CharT *>(input.GetPtr()), output, static_cast<size_t>(input.GetSize()) / sizoef(CharT));
+            decode(reinterpret_cast<const CharT *>(input.GetPtr()), output, input.GetSize() / sizeof(CharT));
         }
 
         inline void decode(const CWString &input, CVolMem &output)
         {
             decode(input.GetText(), output, static_cast<size_t>(input.GetLength()));
+        }
+
+        inline void decode(const CU8String &input, CVolMem &output)
+        {
+            decode(rinput.GetText(), output, static_cast<size_t>(input.GetLength()));
         }
 
         template <typename T>
