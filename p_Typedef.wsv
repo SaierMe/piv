@@ -1,6 +1,34 @@
 <火山程序 类型 = "通常" 版本 = 1 />
 
-包 PIV.类型 <注释 = "https://github.com/SaierMe/piv">
+包 PIV.类型 <注释 = "https://github.com/SaierMe/piv" "@视窗.外部头文件.全局-1200" = "src\\detail\\piv_debug.hpp">
+
+类 调试信息类 <公开 注释 = "支持无符号数值和别名类型的调试输出" 注释 = "注意: const char*文本指针统一按UTF-8转换,所以本身是ANSI编码的会输出为乱码." 折叠
+        @文档 = "category = \"调试信息\"" @全局类 = 真>
+{
+    方法 输出调试 <公开 静态 注释 = "向系统调试器内输出所指定数据的调试用文本并自动换行" 折叠 隐藏值属性 = "0"
+            @嵌入式方法 = "req_obj_param_pointer = true\r\nreq_str_param_text_pointer = true">
+    参数 所欲输出的数据 <注释 = "  每个所输出数据后附加一个\", \"文本用作分隔,输出行的最后添加一个换行符." 注释 = "  支持所有基本数值类型(能正确输出无符号数);"
+            注释 = "  支持火山对象类,自定义类型需要覆盖虚拟方法\"取展示内容\"来提供输出内容;"
+            注释 = "  支持C++标准库的常用STL类型,如vector、string、string_view、set、map、array" 注释 = "等等(需要以别名类型封装);"
+            注释 = "  其他别名类型,可以通过重载下面的函数来输出内容(可参考\"ULID类\"的源码):"
+            注释 = "  void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, T* value)" 编辑时信息 = "1B285, 0, 0, 0"
+            @匹配类型 = 通用型 @可扩展 = "">
+    {
+        @ _DEBUG_STATMENT (PivDebugTrace (FALSE, 0, 0, _T (@sn<pm_types>), @<所欲输出的数据>))
+    }
+
+    方法 可跳转输出调试 <公开 静态 注释 = "向系统调试器内输出所指定数据的调试用文本并自动换行." 注释 = "本方法输出行的首部将携带当前源码位置,在输出窗口中双击此行即可跳转到该源码位置." 折叠
+            隐藏值属性 = "0" @嵌入式方法 = "req_obj_param_pointer = true\r\nreq_str_param_text_pointer = true">
+    参数 所欲输出的数据 <注释 = "  每个所输出数据后附加一个\", \"文本用作分隔,输出行的最后添加一个换行符." 注释 = "  支持所有基本数值类型(能正确输出无符号数);"
+            注释 = "  支持火山对象类,自定义类型需要覆盖虚拟方法\"取展示内容\"来提供输出内容;"
+            注释 = "  支持C++标准库的常用STL类型,如vector、string、string_view、set、map、array" 注释 = "等等(需要以别名类型封装);"
+            注释 = "  其他别名类型,可以通过重载下面的函数来输出内容(可参考\"ULID类\"的源码):"
+            注释 = "  void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, T* value)" 编辑时信息 = "B554A, 0, 0, 0"
+            @匹配类型 = 通用型 @可扩展 = "">
+    {
+        @ _DEBUG_STATMENT (PivDebugTraceWithSourcePos (_CT (@sn<current_source_file>), _CT (@sn<current_source_line>), FALSE, 0, 0, _T (@sn<pm_types>), @<所欲输出的数据>))
+    }
+}
 
 # 类型模板
 
