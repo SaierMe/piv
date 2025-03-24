@@ -880,11 +880,11 @@
     #     if (value != nullptr) {
     #         strDebug.AddFormatText(L"<INPUT> 总共 2 个成员:\r\n1. 类型(type): %d\r\n", value->type);
     #         if (value->type == 0)
-    #             strDebug.AddFromatText(L"2. 联合体(mi): %s", PivGetDumpStr(&value->mi));
+    #             strDebug.AddFormatText(L"2. 联合体(mi): \r\n%s", PivGetDumpStr(&value->mi, 3));
     #         else if (value->type == 1)
-    #             strDebug.AddFromatText(L"2. 联合体(ki): %s", PivGetDumpStr(&value->ki));
+    #             strDebug.AddFormatText(L"2. 联合体(ki): \r\n%s", PivGetDumpStr(&value->ki, 3));
     #         else if (value->type == 2)
-    #             strDebug.AddFromatText(L"2. 联合体(hi): %s", PivGetDumpStr(&value->hi));
+    #             strDebug.AddFormatText(L"2. 联合体(hi): \r\n%s", PivGetDumpStr(&value->hi, 3));
     #     } else
     #         strDebug.SetText(L"INPUT: nullptr");
     # }
