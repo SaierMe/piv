@@ -157,7 +157,7 @@ namespace piv
             }
             else if (str_encoding == 0) // ANSI
             {
-                return Accept<J>(PivA2U{reinterpret_cast<const char *>(input.GetPtr()), len}.ref(), ignore_comments);
+                return Accept<J>(PivA2U{reinterpret_cast<const char *>(input.GetPtr()), len}.str, ignore_comments);
             }
             return false;
         }
@@ -316,7 +316,7 @@ namespace piv
             }
             if (encoding == 0) // ANSI
             {
-                return ParseText(json, PivA2U{reinterpret_cast<const char *>(data), len}.ref(), cb, allow_exceptions, ignore_comments);
+                return ParseText(json, PivA2U{reinterpret_cast<const char *>(data), len}.str, cb, allow_exceptions, ignore_comments);
             }
             return false;
         }
@@ -540,7 +540,7 @@ namespace piv
         template <typename = void>
         std::string to_value(const wchar_t *str)
         {
-            return *PivW2U{str};
+            return PivW2U{str}.str;
         }
 
         template <typename = void>
@@ -552,7 +552,7 @@ namespace piv
         template <typename = void>
         std::string to_value(const CWString &str)
         {
-            return *PivW2U{str};
+            return PivW2U{str}.str;
         }
 
         template <typename = void>
@@ -570,13 +570,13 @@ namespace piv
         template <typename = void>
         std::string to_value(const std::wstring &str)
         {
-            return *PivW2U{str};
+            return PivW2U{str}.str;
         }
 
         template <typename = void>
         std::string to_value(const ::piv::wstring_view &str)
         {
-            return *PivW2U{str.data(), str.size()};
+            return PivW2U{str.data(), str.size()}.str;
         }
 
         template <typename = void>
@@ -624,7 +624,7 @@ namespace piv
         template <typename = void>
         std::string to_key(const wchar_t *key)
         {
-            return *PivW2U{key};
+            return PivW2U{key}.str;
         }
 
         template <typename = void>
@@ -636,7 +636,7 @@ namespace piv
         template <typename = void>
         std::string to_key(const CWString &key)
         {
-            return *PivW2U{key};
+            return PivW2U{key}.str;
         }
 
         template <typename = void>
@@ -654,13 +654,13 @@ namespace piv
         template <typename = void>
         std::string to_key(const std::wstring &key)
         {
-            return *PivW2U{key};
+            return PivW2U{key}.str;
         }
 
         template <typename = void>
         std::string to_key(const ::piv::wstring_view &key)
         {
-            return *PivW2U{key.data(), key.size()};
+            return PivW2U{key.data(), key.size()}.str;
         }
 
         template <typename = void>
@@ -677,7 +677,7 @@ namespace piv
         template <typename J, typename T>
         auto to_pointer(T &&path)
         {
-            return typename J::json_pointer{*PivAny2Us{path}};
+            return typename J::json_pointer{PivAny2Us{path}.str};
         }
 
         /**
@@ -928,7 +928,7 @@ namespace piv
         {
             try
             {
-                return *PivU2Ws{json.at(to_pointer<J>(std::forward<P>(path))).get_ref<const std::string &>()};
+                return PivU2Ws{json.at(to_pointer<J>(std::forward<P>(path))).get_ref<const std::string &>()}.str;
             }
             catch (const J::exception &e)
             {
@@ -1050,7 +1050,7 @@ namespace piv
         {
             try
             {
-                return *PivU2Ws{json.at(to_key(std::forward<K>(key))).get_ref<const std::string &>()};
+                return PivU2Ws{json.at(to_key(std::forward<K>(key))).get_ref<const std::string &>()}.str;
             }
             catch (const J::exception &e)
             {
@@ -1211,7 +1211,7 @@ namespace piv
         inline bool EmplaceAt(J &&json, const wchar_t *path, V &&val, bool replace = false)
         {
             if (path[0] == '/')
-                return EmplaceAtPath(json, std::decay<J>::type::json_pointer{*PivW2U{path}}, to_value(val));
+                return EmplaceAtPath(json, std::decay<J>::type::json_pointer{PivW2U{path}.str}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
@@ -1231,7 +1231,7 @@ namespace piv
             if (path.IsEmpty())
                 return false;
             if (path.GetCharAt(0) == '/')
-                return EmplaceAtPath(json, std::decay<J>::type::json_pointer{*PivW2U{path}}, to_value(val));
+                return EmplaceAtPath(json, std::decay<J>::type::json_pointer{PivW2U{path}.str}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
@@ -1253,7 +1253,7 @@ namespace piv
             if (path.empty())
                 return false;
             if (path.front() == '/')
-                return EmplaceAtPath(json, std::decay<J>::type::json_pointer{*PivW2U{path}}, to_value(val));
+                return EmplaceAtPath(json, std::decay<J>::type::json_pointer{PivW2U{path}.str}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
@@ -1275,7 +1275,7 @@ namespace piv
             if (path.empty())
                 return false;
             if (path.front() == '/')
-                return EmplaceAtPath(json, std::decay<J>::type::json_pointer{*PivW2U{path}}, to_value(val));
+                return EmplaceAtPath(json, std::decay<J>::type::json_pointer{PivW2U{path}.str}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }
@@ -1286,7 +1286,7 @@ namespace piv
             if (path.IsEmpty())
                 return false;
             if (path.Get_S_BYTE(0) == '/')
-                return EmplaceAtPath(json, std::decay<J>::type::json_pointer{*PivW2U{path}}, to_value(val));
+                return EmplaceAtPath(json, std::decay<J>::type::json_pointer{PivW2U{path}.str}, to_value(val));
             else
                 return EmplaceAtKey(json, to_key(path), to_value(val), replace);
         }

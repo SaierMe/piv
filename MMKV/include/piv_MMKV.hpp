@@ -211,9 +211,9 @@ public:
         PivW2U _cryptKey{cryptKey};
         std::wstring _rootPath{rootPath};
         if (_mmapID.empty())
-            m_MMKV = MMKV::defaultMMKV(mode, _cryptKey.empty() ? nullptr : &_cryptKey.ref());
+            m_MMKV = MMKV::defaultMMKV(mode, _cryptKey.empty() ? nullptr : &_cryptKey.str);
         else
-            m_MMKV = MMKV::mmkvWithID(_mmapID, mode, _cryptKey.empty() ? nullptr : &_cryptKey.ref(),
+            m_MMKV = MMKV::mmkvWithID(_mmapID, mode, _cryptKey.empty() ? nullptr : &_cryptKey.str,
                                       _rootPath.empty() ? nullptr : &_rootPath, expectedCapacity);
         if (m_MMKV != nullptr)
             return (m_MMKV->count(false) > 0) ? 1 : 0;
@@ -288,7 +288,7 @@ public:
         if (m_MMKV)
         {
             PivW2U _cryptKey{cryptKey};
-            m_MMKV->checkReSetCryptKey(&_cryptKey.cref());
+            m_MMKV->checkReSetCryptKey(&_cryptKey.str);
         }
     }
 
@@ -329,7 +329,7 @@ public:
     template <typename T, typename KeyT>
     inline bool setString(T &&value, const KeyT &key, int32_t expireDuration = -1)
     {
-        return set(*PivS2V{value}, key, expireDuration);
+        return set(PivS2V{value}.sv, key, expireDuration);
     }
 
     /**
@@ -650,7 +650,7 @@ public:
             std::vector<std::string> keys;
             for (INT_P i = 0; i < keysArray.GetCount(); ++i)
             {
-                keys.push_back(*PivW2U{keysArray.GetAt(i)});
+                keys.push_back(PivW2U{keysArray.GetAt(i)}.str);
             }
             return m_MMKV->removeValuesForKeys(keys);
         }

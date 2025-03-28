@@ -571,7 +571,7 @@
     {
         @ data().Reset();
         @ data().SetUnicode(true);
-        @ return data().LoadData(*PivW2U(@<配置内容>.GetText()));
+        @ return data().LoadData(PivW2U{@<配置内容>.GetText()}.str);
     }
 
     方法 创建自字节集 <公开 类型 = 整数 注释 = "从字节集数据中读入ini配置数据,本方法会覆盖本类之前的数据." 返回值注释 = "返回值大于等于0表示成功,小于0表示失败." 折叠
@@ -585,7 +585,7 @@
         @     return data().LoadData(reinterpret_cast<const char*>(@<配置内容>.GetPtr()), @<配置内容>.GetSize());
         @ } else if (@<文本编码> == VSET_UTF_16) {
         @     data().SetUnicode(true);
-        @     return data().LoadData(*PivW2U(reinterpret_cast<const wchar_t*>(@<配置内容>.GetPtr()), @<配置内容>.GetSize() / 2));
+        @     return data().LoadData(PivW2U{reinterpret_cast<const wchar_t*>(@<配置内容>.GetPtr()), @<配置内容>.GetSize() / 2}.str);
         @ } else {
         @     data().SetUnicode(false);
         @     return data().LoadData(reinterpret_cast<const char*>(@<配置内容>.GetPtr()), @<配置内容>.GetSize());
@@ -635,7 +635,7 @@
         @ }
         @ if (m_nType == VSET_UTF_16 || (m_nType == VSET_UNKNOWN && @<文本编码> == VSET_UTF_16)) {
         @     data().SetUnicode(true);
-        @     nRet = static_cast<INT>(data().LoadData(*PivW2U(reinterpret_cast<const WCHAR*>(szData + (hasBom ? 2 : 0)), (hasBom ? (nSize - 2) : nSize) / 2)));
+        @     nRet = static_cast<INT>(data().LoadData(PivW2U{reinterpret_cast<const WCHAR*>(szData + (hasBom ? 2 : 0)), (hasBom ? (nSize - 2) : nSize) / 2}.str));
         @ } else if (m_nType == VSET_UTF_8 || (m_nType == VSET_UNKNOWN && @<文本编码> == VSET_UTF_8)) {
         @     data().SetUnicode(true);
         @     nRet = static_cast<INT>(data().LoadData(reinterpret_cast<const char*>(szData), nSize));
@@ -726,9 +726,9 @@
         @ std::string szBuffer;
         @ data().Save(szBuffer, false);
         @ if (data().IsUnicode())
-        @     return *PivU2Ws{szBuffer};
+        @     return PivU2Ws{szBuffer}.str;
         @ else
-        @     return *PivA2Ws{szBuffer};
+        @     return PivA2Ws{szBuffer}.str;
     }
 
     方法 到字节集 <公开 类型 = 字节集类 注释 = "将内存中的配置数据输出到字节集类." 注释 = "本方法不做编码转换,直接返回类的内部数据,内部只使用多字节和UTF8两种编码." 折叠

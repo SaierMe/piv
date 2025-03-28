@@ -256,7 +256,7 @@
     方法 置当前协程调试信息 <公开 注释 = "设置当前协程调试信息,打印调试信息时将回显" 折叠 @嵌入式方法 = "">
     参数 调试信息 <类型 = 文本型>
     {
-        @ @sn<this>.pdata()->SetCurrentTaskDebugInfo(*PivW2A{@<调试信息>})
+        @ @sn<this>.pdata()->SetCurrentTaskDebugInfo(PivW2A{@<调试信息>}.str)
     }
 
     # @begin

@@ -492,6 +492,8 @@ public:
         // 特征码转字节数组
         CWString SignatureStr{signatures};
         SignatureStr.Replace(L" ", L"");
+        if (SignatureStr.GetLength() % 2 != 0)
+            return 0;
         wchar_t *SignatureCode = const_cast<wchar_t *>(SignatureStr.GetText());
         size_t SignatureLength = static_cast<size_t>(SignatureStr.GetLength()) / 2;
         std::unique_ptr<WORD[]> BytesetSequence{new WORD[SignatureLength]};

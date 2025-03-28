@@ -50,7 +50,7 @@
         @     @an<CVolMem> buffer;
         @     piv::encoding::UrlEncode(reinterpret_cast<BYTE *>(urlstr.data()), urlstr.size_bytes(),
         @                              buffer.Alloc(static_cast<INT_P>(DestLen), TRUE), DestLen, @<不编码保留字符>);
-        @     return *PivU2Ws{reinterpret_cast<const char *>(buffer.GetPtr()), DestLen};
+        @     return PivU2Ws{reinterpret_cast<const char *>(buffer.GetPtr()), DestLen}.str;
         @ } else {
         @     PivW2A urlstr{@<欲编码文本>.GetText()};
         @     DestLen = piv::encoding::GuessUrlEncodeBound(reinterpret_cast<BYTE *>(urlstr.data()),
@@ -58,7 +58,7 @@
         @     @an<CVolMem> buffer;
         @     piv::encoding::UrlEncode(reinterpret_cast<BYTE *>(urlstr.data()), urlstr.size_bytes(),
         @                               buffer.Alloc(static_cast<INT_P>(DestLen), TRUE), DestLen, @<不编码保留字符>);
-        @     return *PivA2Ws{reinterpret_cast<const char *>(buffer.GetPtr()), DestLen};
+        @     return PivA2Ws{reinterpret_cast<const char *>(buffer.GetPtr()), DestLen}.str;
         @ }
     }
 
@@ -111,7 +111,7 @@
         @         @an<CVolMem> buffer;
         @         piv::encoding::UrlDecode(reinterpret_cast<BYTE *>(urlstr.data()), urlstr.size_bytes(),
         @                                  reinterpret_cast<BYTE *>(buffer.Alloc(static_cast<INT_P>(DestLen), TRUE)), DestLen);
-        @         return *PivU2Ws {reinterpret_cast<const char *>(buffer.GetPtr()), DestLen};
+        @         return PivU2Ws{reinterpret_cast<const char *>(buffer.GetPtr()), DestLen}.str;
         @     }
         @ } else {
         @     PivW2A urlstr {@<欲解码文本>.GetText()};
@@ -120,7 +120,7 @@
         @         @an<CVolMem> buffer;
         @         piv::encoding::UrlDecode(reinterpret_cast<BYTE *>(urlstr.data()), urlstr.size_bytes(),
         @                                  reinterpret_cast<BYTE *>(buffer.Alloc(static_cast<INT_P>(DestLen), TRUE)), DestLen);
-        @         return *PivA2Ws {reinterpret_cast<const char *>(buffer.GetPtr()), DestLen};
+        @         return PivA2Ws{reinterpret_cast<const char *>(buffer.GetPtr()), DestLen}.str;
         @     }
         @ }
         @ return @<欲解码文本>;

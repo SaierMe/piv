@@ -20,7 +20,7 @@ namespace piv
          * @param c
          * @return
          */
-        static uint16_t tolower(uint16_t c) noexcept
+        inline static uint16_t tolower(uint16_t c) noexcept
         {
             return (c >= 'A' && c <= 'Z') ? (c + 32U) : c;
         }
@@ -30,7 +30,7 @@ namespace piv
          * @param c
          * @return
          */
-        static uint16_t toupper(uint16_t c) noexcept
+        inline static uint16_t toupper(uint16_t c) noexcept
         {
             return (c >= 'a' && c <= 'z') ? (c - 32U) : c;
         }
@@ -301,26 +301,26 @@ namespace piv
         }
 
         template <typename StringT>
-        int32_t compare(const StringT &lhs, const std::basic_string<typename StringT::value_type> &rhs, bool case_insensitive = true)
+        inline int32_t compare(const StringT &lhs, const std::basic_string<typename StringT::value_type> &rhs, bool case_insensitive = true)
         {
             return piv::edit::compare(lhs, rhs.data(), case_insensitive, rhs.size());
         }
 
         template <typename StringT>
-        int32_t compare(const StringT &lhs, const piv::basic_string_view<typename StringT::value_type> &rhs, bool case_insensitive = true)
+        inline int32_t compare(const StringT &lhs, const piv::basic_string_view<typename StringT::value_type> &rhs, bool case_insensitive = true)
         {
             return piv::edit::compare(lhs, rhs.data(), case_insensitive, rhs.size());
         }
 
         template <typename StringT>
-        int32_t compare(const StringT &lhs, const CVolMem &rhs, bool case_insensitive = true)
+        inline int32_t compare(const StringT &lhs, const CVolMem &rhs, bool case_insensitive = true)
         {
             return piv::edit::compare(lhs, reinterpret_cast<const typename StringT::value_type *>(rhs.GetPtr()),
                                       case_insensitive, static_cast<size_t>(rhs.GetSize() / sizeof(typename StringT::value_type)));
         }
 
         template <typename StringT>
-        int32_t compare(const StringT &lhs, const CWString &rhs, bool case_insensitive = true)
+        inline int32_t compare(const StringT &lhs, const CWString &rhs, bool case_insensitive = true)
         {
             PIV_IF(sizeof(typename StringT::value_type) == 2)
             {
@@ -419,10 +419,10 @@ namespace piv
         {
             std::basic_string<typename StringT::value_type> reverse;
             size_t n = str.size(), i = 0;
-            typename StringT::value_type ch;
             reverse.resize(n);
             PIV_IF(sizeof(EncodeT) == 2)
             {
+                typename StringT::value_type ch;
                 while (n--)
                 {
                     ch = str[i++];
@@ -442,37 +442,38 @@ namespace piv
                 size_t len = n;
                 while (n--)
                 {
-                    ch = str[i];
-                    if (ch >> 7 == 0) // c <= 0x7F 1字节
+                    unsigned int ch = static_cast<unsigned int>(str[i]);
+                    if ((ch & 0x80) == 0) // 1字节
                     {
-                        reverse[n] = ch;
+                        reverse[n] = str[i];
                         i++;
                     }
-                    else if (ch >= (char)0xE0 && ch <= (char)0xEF && i + 2 <= len) // 3字节
+                    else if (((ch & 0xE0) == 0xC0) && i + 1 <= len) // 2字节
+                    {
+                        reverse[n] = str[i + 1];
+                        reverse[--n] = str[i];
+                        i += 2;
+                    }
+                    else if (((ch & 0xF0) == 0xE0) && i + 2 <= len) // 3字节
                     {
                         reverse[n] = str[i + 2];
                         reverse[--n] = str[i + 1];
-                        reverse[--n] = ch;
+                        reverse[--n] = str[i];
                         i += 3;
                     }
-                    else if (ch >= (char)0xC0 && ch <= (char)0xDF && i + 1 <= len) // 2字节
-                    {
-                        reverse[n] = str[i + 1];
-                        reverse[--n] = ch;
-                        i += 2;
-                    }
-                    else if (ch >= (char)0xF0 && ch <= (char)0xF7 && i + 3 <= len) // 4字节
+                    else if (((ch & 0xF8) == 0xF0) && i + 3 <= len) // 4字节
                     {
                         reverse[n] = str[i + 3];
                         reverse[--n] = str[i + 2];
                         reverse[--n] = str[i + 1];
-                        reverse[--n] = ch;
+                        reverse[--n] = str[i];
                         i += 4;
                     }
                 }
             }
             else
             {
+                typename StringT::value_type ch;
                 while (n--)
                 {
                     ch = str[i++];
@@ -617,7 +618,7 @@ namespace piv
                 for (size_t i = 0; i < len; i++)
                 {
                     ch = str[i];
-                    if (ch >= (char)0xE0 && ch <= (char)0xEF && i + 2 < len)
+                    if (((ch & (char)0xF0) == (char)0xE0) && i + 2 < len)
                     {
                         fullCh = (((uint32_t)((((uint16_t)str[i + 2]) & 0xFF) | (((uint16_t)str[i + 1]) << 8))) & 0xFFFF) | (((uint32_t)(uint8_t)ch) << 16);
                         if (fullCh == 0xE38080)
@@ -707,12 +708,11 @@ namespace piv
                 for (size_t i = 0; i < str.size(); i++, count++)
                 {
                     ch = str[i];
-                    // if (ch >> 7 == 0) // c <= 0x7F 1字节
-                    if (ch >= (typename StringT::value_type)0xE0 && ch <= (typename StringT::value_type)0xEF) // 3字节
-                        i += 2;
-                    else if (ch >= (typename StringT::value_type)0xC0 && ch <= (typename StringT::value_type)0xDF) // 2字节
+                    if ((ch & (typename StringT::value_type)0xE0) == (typename StringT::value_type)0xC0) // 2字节
                         i++;
-                    else if (ch >= (typename StringT::value_type)0xF0 && ch <= (typename StringT::value_type)0xF7) // 4字节
+                    else if ((ch & (typename StringT::value_type)0xF0) == (typename StringT::value_type)0xE0) // 3字节
+                        i += 2;
+                    else if ((ch & (typename StringT::value_type)0xF8) == (typename StringT::value_type)0xF0) // 4字节
                         i += 3;
                 }
             }
@@ -753,11 +753,11 @@ namespace piv
                 }
                 PIV_ELSE_IF(sizeof(EncodeT) == 3)
                 {
-                    if (ch >= (typename StringT::value_type)0xE0 && ch <= (typename StringT::value_type)0xEF) // 3字节
-                        i += 2;
-                    else if (ch >= (typename StringT::value_type)0xC0 && ch <= (typename StringT::value_type)0xDF) // 2字节
+                    if ((ch & (typename StringT::value_type)0xE0) == (typename StringT::value_type)0xC0) // 2字节
                         i++;
-                    else if (ch >= (typename StringT::value_type)0xF0 && ch <= (typename StringT::value_type)0xF7) // 4字节
+                    else if ((ch & (typename StringT::value_type)0xF0) == (typename StringT::value_type)0xE0) // 3字节
+                        i += 2;
+                    else if ((ch & (typename StringT::value_type)0xF8) == (typename StringT::value_type)0xF0) // 4字节
                         i += 3;
                 }
                 else
@@ -784,7 +784,7 @@ namespace piv
          * @return
          */
         template <typename EncodeT, typename StringT>
-        StringT substr_with_word(const StringT &str, size_t pos, size_t count)
+        inline StringT substr_with_word(const StringT &str, size_t pos, size_t count)
         {
             pos_with_word<EncodeT, StringT>(str, pos, count);
             if (pos < str.size() && count > 0)
@@ -799,8 +799,7 @@ namespace piv
          * @param count 删除的文字数量
          */
         template <typename EncodeT, typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
-        remove_words(T &&str, size_t pos, size_t count)
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type inline remove_words(T &&str, size_t pos, size_t count)
         {
             pos_with_word<EncodeT>(str, pos, count);
             if (pos < str.size() && count > 0)
@@ -809,8 +808,7 @@ namespace piv
         }
 
         template <typename EncodeT, typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
-        remove_words(T &&str, size_t pos, size_t count)
+        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type inline remove_words(T &&str, size_t pos, size_t count)
         {
             pos_with_word<EncodeT>(str, pos, count);
             if (pos < str.size() && count > 0)
@@ -828,7 +826,7 @@ namespace piv
          * @return 寻找到的位置
          */
         template <typename StringL, typename StringR>
-        size_t search(const StringL &lhs, const StringR &rhs, size_t pos = 0, bool case_insensitive = false)
+        inline size_t search(const StringL &lhs, const StringR &rhs, size_t pos = 0, bool case_insensitive = false)
         {
             if (!case_insensitive)
                 return lhs.find(rhs.data(), pos, rhs.size());
@@ -846,7 +844,7 @@ namespace piv
          * @return 寻找到的位置
          */
         template <typename StringL, typename StringR>
-        size_t rsearch(const StringL &lhs, const StringR &rhs, size_t pos = -1, bool case_insensitive = false)
+        inline size_t rsearch(const StringL &lhs, const StringR &rhs, size_t pos = -1, bool case_insensitive = false)
         {
             if (!case_insensitive)
                 return lhs.rfind(rhs.data(), (pos == -1) ? lhs.size() : pos);
@@ -862,7 +860,7 @@ namespace piv
          * @return
          */
         template <typename StringL, typename StringR>
-        size_t starts_with(const StringL &lhs, const StringR &rhs, bool case_sensitive = true)
+        inline size_t starts_with(const StringL &lhs, const StringR &rhs, bool case_sensitive = true)
         {
             return piv::edit::search(lhs, rhs, 0, !case_sensitive) == 0;
         }
@@ -875,7 +873,7 @@ namespace piv
          * @return
          */
         template <typename StringL, typename StringR>
-        size_t ends_with(const StringL &lhs, const StringR &rhs, bool case_sensitive = true)
+        inline size_t ends_with(const StringL &lhs, const StringR &rhs, bool case_sensitive = true)
         {
             if (rhs.size() > lhs.size())
                 return false;
@@ -1068,7 +1066,7 @@ namespace piv
          * @return 返回取出的子文本
          */
         template <typename StringT, typename StringR>
-        StringT get_left(const StringT &lhs, const StringR &rhs, size_t pos, bool case_insensitive = false, bool include_str = false, bool reverse = false, bool retorg_failed = false)
+        inline StringT get_left(const StringT &lhs, const StringR &rhs, size_t pos, bool case_insensitive = false, bool include_str = false, bool reverse = false, bool retorg_failed = false)
         {
             size_t spos;
             if (reverse)
@@ -1092,7 +1090,7 @@ namespace piv
          * @return 返回取出的子文本
          */
         template <typename StringT, typename StringL>
-        StringT get_right(const StringT &lhs, const StringL &rhs, size_t pos, bool case_insensitive = false, bool include_str = false, bool reverse = false, bool retorg_failed = false)
+        inline StringT get_right(const StringT &lhs, const StringL &rhs, size_t pos, bool case_insensitive = false, bool include_str = false, bool reverse = false, bool retorg_failed = false)
         {
             size_t spos = 0;
             if (reverse)
@@ -1177,49 +1175,49 @@ namespace piv
          * @return 返回本文本
          */
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         assign(T &&lhs, const std::string &rhs)
         {
             return std::forward<T>(lhs.assign(rhs));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         assign(T &&lhs, const std::string &rhs)
         {
             return std::forward<T>(lhs.assign(rhs));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         assign(T &&lhs, std::string &&rhs)
         {
             return std::forward<T>(lhs.assign(rhs));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         assign(T &&lhs, std::string &&rhs)
         {
             return std::forward<T>(lhs.assign(rhs));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         assign(T &&lhs, const ::piv::string_view &rhs, size_t count = -1)
         {
             return std::forward<T>(lhs.assign(rhs.data(), count == -1 ? rhs.size() : count));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         assign(T &&lhs, const ::piv::wstring_view &rhs, size_t count = -1)
         {
             return std::forward<T>(lhs.assign(rhs.data(), count == -1 ? rhs.size() : count));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         assign(T &&lhs, const char *rhs, size_t count = -1)
         {
             if (count == -1)
@@ -1229,7 +1227,7 @@ namespace piv
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         assign(T &&lhs, const wchar_t *rhs, size_t count = -1)
         {
             if (count == -1)
@@ -1239,56 +1237,56 @@ namespace piv
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         assign(T &&lhs, const wchar_t *rhs, size_t count = -1)
         {
-            return std::forward<T>(lhs.assign(*PivW2A{rhs, count}));
+            return std::forward<T>(lhs.assign(PivW2A{rhs, count}.str));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         assign(T &&lhs, const CVolMem &rhs, size_t count = -1)
         {
             return std::forward<T>(lhs.assign(reinterpret_cast<const char *>(rhs.GetPtr()), count == -1 ? static_cast<size_t>(rhs.GetSize()) : count));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         assign(T &&lhs, const CVolMem &rhs, size_t count = -1)
         {
             return std::forward<T>(lhs.assign(rhs.GetTextPtr(), count == -1 ? static_cast<size_t>(rhs.GetSize() / sizeof(wchar_t)) : count));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         assign(T &&lhs, const CWString &rhs, size_t count = -1)
         {
-            return std::forward<T>(lhs.assign(*PivW2U{rhs, count}));
+            return std::forward<T>(lhs.assign(PivW2U{rhs, count}.str));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         assign(T &&lhs, const CWString &rhs, size_t count = -1)
         {
             return std::forward<T>(lhs.assign(rhs.GetText(), count == -1 ? rhs.GetLength() : count));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         assign(T &&lhs, CWConstString &&rhs, size_t count = -1)
         {
-            return std::forward<T>(lhs.assign(*PivW2U{rhs, count}));
+            return std::forward<T>(lhs.assign(PivW2U{rhs, count}.str));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         assign(T &&lhs, CWConstString &&rhs, size_t count = -1)
         {
             return std::forward<T>(lhs.assign(rhs.GetText(), count == -1 ? rhs.GetLength() : count));
         }
 
         template <typename T, typename V>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         assign(T &&lhs, V rhs, typename std::enable_if<std::is_integral<V>::value, V>::type * = nullptr)
         {
             char buf[sizeof(V) * 9] = {'\0'};
@@ -1304,7 +1302,7 @@ namespace piv
         }
 
         template <typename T, typename V>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         assign(T &&lhs, V rhs, typename std::enable_if<std::is_integral<V>::value, V>::type * = nullptr)
         {
             wchar_t buf[sizeof(V) * 9] = {'\0'};
@@ -1320,7 +1318,7 @@ namespace piv
         }
 
         template <typename T, typename V>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         assign(T &&lhs, V rhs, typename std::enable_if<std::is_floating_point<V>::value, V>::type * = nullptr)
         {
             char buf[130] = {'\0'};
@@ -1329,7 +1327,7 @@ namespace piv
         }
 
         template <typename T, typename V>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         assign(T &&lhs, V rhs, typename std::enable_if<std::is_floating_point<V>::value, V>::type * = nullptr)
         {
             wchar_t buf[130] = {'\0'};
@@ -1346,63 +1344,63 @@ namespace piv
          * @return 返回本文本
          */
         template <typename T, typename CharT>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         assign_hex(T &&lhs, const piv::basic_string_view<CharT> &hexstr, size_t count = -1)
         {
             return std::forward<T>(piv::encoding::hex_to_str((count == -1) ? hexstr : hexstr.substr(0, count), lhs));
         }
 
         template <typename T, typename CharT>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         assign_hex(T &&lhs, const piv::basic_string_view<CharT> &hexstr, size_t count = -1)
         {
             return std::forward<T>(piv::encoding::hex_to_str((count == -1) ? hexstr : hexstr.substr(0, count), lhs));
         }
 
         template <typename T, typename CharT>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         assign_hex(T &&lhs, const std::basic_string<CharT> &hexstr, size_t count = -1)
         {
             return std::forward<T>(piv::encoding::hex_to_str((count == -1) ? hexstr : ::piv::basic_string_view<CharT>{hexstr.c_str(), count}, lhs));
         }
 
         template <typename T, typename CharT>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         assign_hex(T &&lhs, const std::basic_string<CharT> &hexstr, size_t count = -1)
         {
             return std::forward<T>(piv::encoding::hex_to_str((count == -1) ? hexstr : ::piv::basic_string_view<CharT>{hexstr.c_str(), count}, lhs));
         }
 
         template <typename T, typename CharT>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         assign_hex(T &&lhs, const CharT *hexstr, size_t count = -1)
         {
             return std::forward<T>(piv::encoding::hex_to_str((count == -1) ? ::piv::basic_string_view<CharT>{hexstr} : ::piv::basic_string_view<CharT>{hexstr.c_str(), count}, lhs));
         }
 
         template <typename T, typename CharT>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         assign_hex(T &&lhs, const CharT *hexstr, size_t count = -1)
         {
             return std::forward<T>(piv::encoding::hex_to_str((count == -1) ? ::piv::basic_string_view<CharT>{hexstr} : ::piv::basic_string_view<CharT>{hexstr.c_str(), count}, lhs));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         assign_hex(T &&lhs, const CWString &hexstr, size_t count = -1)
         {
             return std::forward<T>(piv::encoding::hex_to_str((count == -1) ? ::piv::wstring_view{hexstr.GetText()} : ::piv::wstring_view{hexstr.GetText(), count}, lhs));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         assign_hex(T &&lhs, const CWString &hexstr, size_t count = -1)
         {
             return std::forward<T>(piv::encoding::hex_to_str((count == -1) ? ::piv::wstring_view{hexstr.GetText()} : ::piv::wstring_view{hexstr.GetText(), count}, lhs));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         assign_hex(T &&lhs, const CVolMem &hexstr, size_t count = -1)
         {
             if (hexstr.GetSize() < 2)
@@ -1418,7 +1416,7 @@ namespace piv
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         assign_hex(T &&lhs, const CVolMem &hexstr, size_t count = -1)
         {
             if (hexstr.GetSize() < 2)
@@ -1464,7 +1462,7 @@ namespace piv
          * @return 返回本文本
          */
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         push_back(T &&lhs, char ch)
         {
             lhs.push_back(ch);
@@ -1472,7 +1470,7 @@ namespace piv
         }
 
         template <typename T, typename... Args>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         push_back(T &&lhs, char ch, Args &&...args)
         {
             lhs.push_back(ch);
@@ -1480,7 +1478,7 @@ namespace piv
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         push_back(T &&lhs, wchar_t ch)
         {
             lhs.push_back(ch);
@@ -1488,7 +1486,7 @@ namespace piv
         }
 
         template <typename T, typename... Args>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         push_back(T &&lhs, wchar_t ch, Args &&...args)
         {
             lhs.push_back(ch);
@@ -1504,35 +1502,35 @@ namespace piv
          * @return 返回本文本
          */
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         append(T &&lhs, const std::string &rhs, size_t count = -1)
         {
             return std::forward<T>(lhs.append(rhs.data(), count == -1 ? rhs.size() : count));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         append(T &&lhs, const std::wstring &rhs, size_t count = -1)
         {
             return std::forward<T>(lhs.append(rhs.data(), count == -1 ? rhs.size() : count));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         append(T &&lhs, const ::piv::string_view &rhs, size_t count = -1)
         {
             return std::forward<T>(lhs.append(rhs.data(), count == -1 ? rhs.size() : count));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         append(T &&lhs, const ::piv::wstring_view &rhs, size_t count = -1)
         {
             return std::forward<T>(lhs.append(rhs.data(), count == -1 ? rhs.size() : count));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         append(T &&lhs, const char *rhs, size_t count = -1)
         {
             if (count == -1)
@@ -1542,7 +1540,7 @@ namespace piv
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         append(T &&lhs, const wchar_t *rhs, size_t count = -1)
         {
             if (count == -1)
@@ -1552,35 +1550,35 @@ namespace piv
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         append(T &&lhs, const wchar_t *rhs, size_t count = -1)
         {
-            return std::forward<T>(lhs.append(*PivW2A{rhs, count}));
+            return std::forward<T>(lhs.append(PivW2A{rhs, count}.str));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         append(T &&lhs, const CVolMem &rhs, size_t count = -1)
         {
             return std::forward<T>(lhs.append(reinterpret_cast<const char *>(rhs.GetPtr()), count == -1 ? static_cast<size_t>(rhs.GetSize()) : count));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         append(T &&lhs, const CVolMem &rhs, size_t count = -1)
         {
             return std::forward<T>(lhs.append(reinterpret_cast<const wchar_t *>(rhs.GetPtr()), count == -1 ? static_cast<size_t>(rhs.GetSize() / sizeof(wchar_t)) : count));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         append(T &&lhs, const CWString &rhs, size_t count = -1)
         {
-            return std::forward<T>(lhs.append(*PivW2U{rhs, count}));
+            return std::forward<T>(lhs.append(PivW2U{rhs, count}.str));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         append(T &&lhs, const CWString &rhs, size_t count = -1)
         {
             return std::forward<T>(lhs.append(rhs.GetText(), count == -1 ? rhs.GetLength() : count));
@@ -1647,21 +1645,21 @@ namespace piv
          * @return 返回本文本
          */
         template <typename T, typename V>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         appends(T &&lhs, V &&first)
         {
             return std::forward<T>(::piv::str::append(lhs, std::forward<V>(first)));
         }
 
         template <typename T, typename V>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         appends(T &&lhs, V &&first)
         {
             return std::forward<T>(::piv::str::append(lhs, std::forward<V>(first)));
         }
 
         template <typename T, typename V, typename... Args>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         appends(T &&lhs, V &&first, Args &&...args)
         {
             ::piv::str::append(lhs, std::forward<V>(first));
@@ -1669,7 +1667,7 @@ namespace piv
         }
 
         template <typename T, typename V, typename... Args>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         appends(T &&lhs, V &&first, Args &&...args)
         {
             ::piv::str::append(lhs, std::forward<V>(first));
@@ -1685,7 +1683,7 @@ namespace piv
          * @return 返回本文本
          */
         template <typename T, typename P>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         append_line(T &&lhs, P &&rhs)
         {
             ::piv::str::append(lhs, std::forward<P>(rhs));
@@ -1695,7 +1693,7 @@ namespace piv
         }
 
         template <typename T, typename P>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         append_line(T &&lhs, P &&rhs)
         {
             ::piv::str::append(lhs, std::forward<P>(rhs));
@@ -1705,7 +1703,7 @@ namespace piv
         }
 
         template <typename T, typename P, typename... Args>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         append_line(T &&lhs, P &&first, Args &&...args)
         {
             ::piv::str::append(lhs, std::forward<P>(first));
@@ -1715,7 +1713,7 @@ namespace piv
         }
 
         template <typename T, typename P, typename... Args>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         append_line(T &&lhs, P &&first, Args &&...args)
         {
             ::piv::str::append(lhs, std::forward<P>(first));
@@ -1733,14 +1731,14 @@ namespace piv
          * @return 返回本文本
          */
         template <typename T, typename V, typename std::enable_if<std::is_integral<V>::value>::type>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         append_unsigned(T &&lhs, V rhs)
         {
             return std::forward<T>(::piv::str::append(lhs, static_cast<std::make_unsigned<V>::type>(rhs)));
         }
 
         template <typename T, typename V, typename std::enable_if<std::is_integral<V>::value>::type>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         append_unsigned(T &&lhs, V rhs)
         {
             return std::forward<T>(::piv::str::append(lhs, static_cast<std::make_unsigned<V>::type>(rhs)));
@@ -1786,25 +1784,25 @@ namespace piv
          * @return 返回本文本
          */
         template <typename EncodeT, typename CharT, typename... Args>
-        std::basic_string<CharT> &append_format(std::basic_string<CharT> &lhs, const std::basic_string<CharT> &format, Args &&...args)
+        inline std::basic_string<CharT> &append_format(std::basic_string<CharT> &lhs, const std::basic_string<CharT> &format, Args &&...args)
         {
             return lhs.append(piv::edit::format<CharT>(format.c_str(), std::forward<Args>(args)...));
         }
 
         template <typename EncodeT, typename CharT, typename... Args>
-        std::basic_string<CharT> &append_format(std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &format, Args &&...args)
+        inline std::basic_string<CharT> &append_format(std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &format, Args &&...args)
         {
             return lhs.append(piv::edit::format<CharT>(format.data(), std::forward<Args>(args)...));
         }
 
         template <typename EncodeT, typename CharT, typename... Args>
-        std::basic_string<CharT> &append_format(std::basic_string<CharT> &lhs, const CVolMem &format, Args &&...args)
+        inline std::basic_string<CharT> &append_format(std::basic_string<CharT> &lhs, const CVolMem &format, Args &&...args)
         {
             return lhs.append(piv::edit::format<CharT>(reinterpret_cast<const CharT *>(format.GetPtr()), std::forward<Args>(args)...));
         }
 
         template <typename EncodeT, typename CharT, typename... Args>
-        std::basic_string<CharT> &append_format(std::basic_string<CharT> &lhs, const CharT *format, Args &&...args)
+        inline std::basic_string<CharT> &append_format(std::basic_string<CharT> &lhs, const CharT *format, Args &&...args)
         {
             return lhs.append(piv::edit::format<CharT>(format, std::forward<Args>(args)...));
         }
@@ -1832,6 +1830,14 @@ namespace piv
          */
         template <typename T, typename CharT>
         typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline append_hex(T &&lhs, const piv::basic_string_view<CharT> &hexstr, size_t count = -1)
+        {
+            typename std::remove_reference<T>::type str;
+            return std::forward<T>(lhs.append(piv::encoding::hex_to_str((count == -1) ? hexstr : hexstr.substr(0, count), str)));
+        }
+
+        template <typename T, typename CharT>
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         append_hex(T &&lhs, const piv::basic_string_view<CharT> &hexstr, size_t count = -1)
         {
             typename std::remove_reference<T>::type str;
@@ -1839,15 +1845,7 @@ namespace piv
         }
 
         template <typename T, typename CharT>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
-        append_hex(T &&lhs, const piv::basic_string_view<CharT> &hexstr, size_t count = -1)
-        {
-            typename std::remove_reference<T>::type str;
-            return std::forward<T>(lhs.append(piv::encoding::hex_to_str((count == -1) ? hexstr : hexstr.substr(0, count), str)));
-        }
-
-        template <typename T, typename CharT>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         append_hex(T &&lhs, const std::basic_string<CharT> &hexstr, size_t count = -1)
         {
             typename std::remove_reference<T>::type str;
@@ -1855,7 +1853,7 @@ namespace piv
         }
 
         template <typename T, typename CharT>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         append_hex(T &&lhs, const std::basic_string<CharT> &hexstr, size_t count = -1)
         {
             typename std::remove_reference<T>::type str;
@@ -1863,7 +1861,7 @@ namespace piv
         }
 
         template <typename T, typename CharT>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         append_hex(T &&lhs, const CharT *hexstr, size_t count = -1)
         {
             typename std::remove_reference<T>::type str;
@@ -1872,7 +1870,7 @@ namespace piv
         }
 
         template <typename T, typename CharT>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         append_hex(T &&lhs, const CharT *hexstr, size_t count = -1)
         {
             typename std::remove_reference<T>::type str;
@@ -1881,7 +1879,7 @@ namespace piv
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         append_hex(T &&lhs, const CWString &hexstr, size_t count = -1)
         {
             typename std::remove_reference<T>::type str;
@@ -1890,7 +1888,7 @@ namespace piv
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         append_hex(T &&lhs, const CWString &hexstr, size_t count = -1)
         {
             typename std::remove_reference<T>::type str;
@@ -1914,67 +1912,6 @@ namespace piv
                                                                                              static_cast<size_t>(hexstr.GetSize())},
                                                                             str)));
         }
-        /*
-                template <typename CharT>
-                std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const piv::string_view &hexstr, size_t count = -1)
-                {
-                    return lhs.append(piv::encoding::hex_to_str((count == -1) ? hexstr : hexstr.substr(0, count), std::basic_string<CharT>{}));
-                }
-
-                template <typename CharT>
-                std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const piv::wstring_view &hexstr, size_t count = -1)
-                {
-                    return lhs.append(piv::encoding::hex_to_str((count == -1) ? hexstr : hexstr.substr(0, count), std::basic_string<CharT>{}));
-                }
-
-                template <typename CharT>
-                std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const std::string &hexstr, size_t count = -1)
-                {
-                    return lhs.append(piv::encoding::hex_to_str((count == -1) ? hexstr : piv::string_view{hexstr.c_str(), count}, std::basic_string<CharT>{}));
-                }
-
-                template <typename CharT>
-                std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const std::wstring &hexstr, size_t count = -1)
-                {
-                    return lhs.append(piv::encoding::hex_to_str((count == -1) ? hexstr : piv::wstring_view{hexstr.c_str(), count}, std::basic_string<CharT>{}));
-                }
-
-                template <typename CharT>
-                std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const char *hexstr, size_t count = -1)
-                {
-                    return lhs.append(piv::encoding::hex_to_str((count == -1) ? piv::string_view{hexstr} : piv::string_view{hexstr, count},
-                                                                std::basic_string<CharT>{}));
-                }
-
-                template <typename CharT>
-                std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const wchar_t *hexstr, size_t count = -1)
-                {
-                    return lhs.append(piv::encoding::hex_to_str((count == -1) ? piv::wstring_view{hexstr} : piv::wstring_view{hexstr, count},
-                                                                std::basic_string<CharT>{}));
-                }
-
-                template <typename CharT>
-                std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const CWString &hexstr, size_t count = -1)
-                {
-                    return lhs.append(piv::encoding::hex_to_str((count == -1) ? piv::wstring_view{hexstr.GetText()} : piv::wstring_view{hexstr.GetText(), count},
-                                                                std::basic_string<CharT>{}));
-                }
-
-                template <typename CharT>
-                std::basic_string<CharT> &append_hex(std::basic_string<CharT> &lhs, const CVolMem &hexstr, size_t count = -1)
-                {
-                    if (hexstr.GetSize() < 2)
-                        return lhs;
-                    if (hexstr.Get_S_BYTE(1) == 0)
-                        return lhs.append(piv::encoding::hex_to_str(piv::wstring_view{reinterpret_cast<const wchar_t *>(hexstr.GetPtr()),
-                                                                                      static_cast<size_t>(hexstr.GetSize() / sizeof(wchar_t))},
-                                                                    std::basic_string<CharT>{}));
-                    else
-                        return lhs.append(piv::encoding::hex_to_str(piv::string_view{reinterpret_cast<const char *>(hexstr.GetPtr()),
-                                                                                     static_cast<size_t>(hexstr.GetSize())},
-                                                                    std::basic_string<CharT>{}));
-                }
-        */
 
         /**
          * @brief 加入小写文本
@@ -2032,14 +1969,14 @@ namespace piv
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         append_lower(T &&lhs, const char *rhs, size_t count = -1)
         {
             return std::forward<T>(piv::str::append_lower(lhs, (count == -1) ? piv::string_view{rhs} : piv::string_view{rhs, count}));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         append_lower(T &&lhs, const wchar_t *rhs, size_t count = -1)
         {
             return std::forward<T>(piv::str::append_lower(lhs, (count == -1) ? piv::wstring_view{rhs} : piv::wstring_view{rhs, count}));
@@ -2101,14 +2038,14 @@ namespace piv
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::string>::value, T>::type
         append_upper(T &&lhs, const char *rhs, size_t count = -1)
         {
             return std::forward<T>(piv::str::append_upper(lhs, (count == -1) ? piv::string_view{rhs} : piv::string_view{rhs, count}));
         }
 
         template <typename T>
-        typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
+        inline typename std::enable_if<std::is_same<typename std::remove_reference<T>::type, std::wstring>::value, T>::type
         append_upper(T &&lhs, const wchar_t *rhs, size_t count = -1)
         {
             return std::forward<T>(piv::str::append_upper(lhs, (count == -1) ? piv::wstring_view{rhs} : piv::wstring_view{rhs, count}));
@@ -2527,19 +2464,19 @@ namespace piv
          * @return 找到的位置
          */
         template <typename CharT>
-        size_t find_first_of(const std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &rhs, size_t pos = 0)
+        inline size_t find_first_of(const std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &rhs, size_t pos = 0)
         {
             return lhs.find_first_of(rhs.data(), pos, rhs.size());
         }
 
         template <typename CharT>
-        size_t find_first_of(const std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs, size_t pos = 0)
+        inline size_t find_first_of(const std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs, size_t pos = 0)
         {
             return lhs.find_first_of(rhs, pos);
         }
 
         template <typename CharT>
-        size_t find_first_of(const std::basic_string<CharT> &lhs, const CharT *rhs, size_t pos = 0)
+        inline size_t find_first_of(const std::basic_string<CharT> &lhs, const CharT *rhs, size_t pos = 0)
         {
             return lhs.find_first_of(rhs, pos);
         }
@@ -2552,19 +2489,19 @@ namespace piv
          * @return 找到的位置
          */
         template <typename CharT>
-        size_t find_last_of(const std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &rhs, size_t pos = 0)
+        inline size_t find_last_of(const std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &rhs, size_t pos = 0)
         {
             return lhs.find_last_of(rhs.data(), pos, rhs.size());
         }
 
         template <typename CharT>
-        size_t find_last_of(const std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs, size_t pos = 0)
+        inline size_t find_last_of(const std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs, size_t pos = 0)
         {
             return lhs.find_last_of(rhs, pos);
         }
 
         template <typename CharT>
-        size_t find_last_of(const std::basic_string<CharT> &lhs, const CharT *rhs, size_t pos = 0)
+        inline size_t find_last_of(const std::basic_string<CharT> &lhs, const CharT *rhs, size_t pos = 0)
         {
             return lhs.find_last_of(rhs, pos);
         }
@@ -2577,19 +2514,19 @@ namespace piv
          * @return 找到的位置
          */
         template <typename CharT>
-        size_t find_first_not_of(const std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &rhs, size_t pos = 0)
+        inline size_t find_first_not_of(const std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &rhs, size_t pos = 0)
         {
             return lhs.find_first_not_of(rhs.data(), pos, rhs.size());
         }
 
         template <typename CharT>
-        size_t find_first_not_of(const std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs, size_t pos = 0)
+        inline size_t find_first_not_of(const std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs, size_t pos = 0)
         {
             return lhs.find_first_not_of(rhs, pos);
         }
 
         template <typename CharT>
-        size_t find_first_not_of(const std::basic_string<CharT> &lhs, const CharT *rhs, size_t pos = 0)
+        inline size_t find_first_not_of(const std::basic_string<CharT> &lhs, const CharT *rhs, size_t pos = 0)
         {
             return lhs.find_first_not_of(rhs, pos);
         }
@@ -2602,19 +2539,19 @@ namespace piv
          * @return 找到的位置
          */
         template <typename CharT>
-        size_t find_last_not_of(const std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &rhs, size_t pos = 0)
+        inline size_t find_last_not_of(const std::basic_string<CharT> &lhs, const piv::basic_string_view<CharT> &rhs, size_t pos = 0)
         {
             return lhs.find_last_not_of(rhs.data(), pos, rhs.size());
         }
 
         template <typename CharT>
-        size_t find_last_not_of(const std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs, size_t pos = 0)
+        inline size_t find_last_not_of(const std::basic_string<CharT> &lhs, const std::basic_string<CharT> &rhs, size_t pos = 0)
         {
             return lhs.find_last_not_of(rhs, pos);
         }
 
         template <typename CharT>
-        size_t find_last_not_of(const std::basic_string<CharT> &lhs, const CharT *rhs, size_t pos = 0)
+        inline size_t find_last_not_of(const std::basic_string<CharT> &lhs, const CharT *rhs, size_t pos = 0)
         {
             return lhs.find_last_not_of(rhs, pos);
         }
@@ -2633,14 +2570,14 @@ namespace piv
          * @return 复制的字符数
          */
         template <typename CharT>
-        size_t copy(const piv::basic_string_view<CharT> &lhs, CharT *dest, size_t pos, size_t count)
+        inline size_t copy(const piv::basic_string_view<CharT> &lhs, CharT *dest, size_t pos, size_t count)
         {
             ASSERT(pos <= lhs.size()); // 判断索引位置是否有效
             return lhs.copy(dest, count, pos);
         }
 
         template <typename CharT>
-        size_t copy(const piv::basic_string_view<CharT> &lhs, const ptrdiff_t &dest, size_t pos, size_t count)
+        inline size_t copy(const piv::basic_string_view<CharT> &lhs, const ptrdiff_t &dest, size_t pos, size_t count)
         {
             return lhs.copy(const_cast<CharT *>(reinterpret_cast<const CharT *>(dest)), pos, count);
         }
@@ -2658,7 +2595,7 @@ namespace piv
         }
 
         template <typename CharT>
-        size_t copy(const piv::basic_string_view<CharT> &lhs, std::basic_string<CharT> &dest, size_t pos, size_t count)
+        inline size_t copy(const piv::basic_string_view<CharT> &lhs, std::basic_string<CharT> &dest, size_t pos, size_t count)
         {
             dest.resize(count, '\0');
             size_t n = copy(const_cast<CharT *>(dest.data()), pos, count);
@@ -2669,7 +2606,7 @@ namespace piv
             return n;
         }
 
-        static size_t copy(const piv::wstring_view &lhs, CWString &dest, size_t pos, size_t count)
+        inline static size_t copy(const piv::wstring_view &lhs, CWString &dest, size_t pos, size_t count)
         {
             dest.SetLength(count);
             size_t n = lhs.copy(const_cast<wchar_t *>(dest.GetText()), pos, count);

@@ -1464,7 +1464,7 @@
 
     方法 标题 <公开 属性读 类型 = 文本型 注释 = "返回本窗口的当前标题文本" 折叠 @禁止流程检查 = 真>
     {
-        @ return *PivU2Ws{SDL_GetWindowTitle(m_window)};
+        @ return PivU2Ws{SDL_GetWindowTitle(m_window)}.str;
     }
 
     方法 标题 <公开 属性写 注释 = "设置本窗口的当前标题文本" 折叠>

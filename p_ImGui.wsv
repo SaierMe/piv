@@ -95,7 +95,7 @@
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
     {
-        @ ImGui::FontSelector(*PivAny2U{@<标签文本>})
+        @ ImGui::FontSelector(PivAny2U{@<标签文本>}.c_str())
     }
 
     方法 取版本名称 <公开 静态 类型 = 文本型 注释 = "返回ImGui的版本名称" 折叠 @嵌入式方法 = "">
@@ -134,7 +134,7 @@
     参数 打开状态 <类型 = 逻辑型类 注释 = "本参数非空将在窗口上显示一个关闭按钮,通过按钮关闭窗口后会将本参数的逻辑值设置为假." @默认值 = 空对象>
     参数 窗口标志 <类型 = 整数 注释 = "请参考\"IM窗口标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM窗口标志.无>
     {
-        @ if (ImGui::Begin(*PivAny2U{@<窗口名称>}, piv::GetBaseDataPtr<bool*>(@<打开状态>), static_cast<ImGuiWindowFlags>(@<窗口标志>)) == true)
+        @ if (ImGui::Begin(PivAny2U{@<窗口名称>}.c_str(), piv::GetBaseDataPtr<bool*>(@<打开状态>), static_cast<ImGuiWindowFlags>(@<窗口标志>)) == true)
     }
 
     方法 创建子窗口 <公开 静态 注释 = "在窗口中创建一个子窗口,然后可以在子语句体中添加组件,子窗口也可以嵌入自己的子窗口."
@@ -146,7 +146,7 @@
     参数 子窗口标志 <类型 = 整数 注释 = "请参考\"IM子窗口标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM子窗口标志.无>
     参数 窗口标志 <类型 = 整数 注释 = "请参考\"IM窗口标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM窗口标志.无>
     {
-        @ if (ImGui::BeginChild(*PivAny2U{@<文本ID>}, @<子窗口尺寸>, (ImGuiChildFlags)@<子窗口标志>, static_cast<ImGuiWindowFlags>(@<窗口标志>)) == true)
+        @ if (ImGui::BeginChild(PivAny2U{@<文本ID>}.c_str(), @<子窗口尺寸>, (ImGuiChildFlags)@<子窗口标志>, static_cast<ImGuiWindowFlags>(@<窗口标志>)) == true)
     }
 
     方法 窗口开端 <公开 静态 类型 = 逻辑型 注释 = "将窗口推送到堆栈并开始添加组件" 返回值注释 = "返回假表示窗口已被折叠或被完全裁剪,此时你可以省略往窗口中提交内容." 折叠
@@ -157,7 +157,7 @@
     参数 打开状态 <类型 = 逻辑型类 注释 = "本参数非空将在窗口上显示一个关闭按钮,通过按钮关闭窗口后会将本参数的逻辑值设置为假." @默认值 = 空对象>
     参数 窗口标志 <类型 = 整数 注释 = "请参考\"IM窗口标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM窗口标志.无>
     {
-        @ ImGui::Begin(*PivAny2U{@<窗口名称>}, piv::GetBaseDataPtr<bool*>(@<打开状态>), static_cast<ImGuiWindowFlags>(@<窗口标志>))
+        @ ImGui::Begin(PivAny2U{@<窗口名称>}.c_str(), piv::GetBaseDataPtr<bool*>(@<打开状态>), static_cast<ImGuiWindowFlags>(@<窗口标志>))
     }
 
     方法 窗口末端 <公开 静态 注释 = "从堆栈中弹出窗口,结束窗口的布局设计." 注释 = "无论\"窗口开端\"的返回值如何,都必须成对调用本方法." 折叠 @嵌入式方法 = "">
@@ -173,7 +173,7 @@
     参数 子窗口标志 <类型 = 整数 注释 = "请参考\"IM子窗口标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM子窗口标志.无>
     参数 窗口标志 <类型 = 整数 注释 = "请参考\"IM窗口标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM窗口标志.无>
     {
-        @ ImGui::BeginChild(*PivAny2U{@<文本ID>}, @<子窗口尺寸>, static_cast<ImGuiChildFlags>(@<子窗口标志>), static_cast<ImGuiWindowFlags>(@<窗口标志>))
+        @ ImGui::BeginChild(PivAny2U{@<文本ID>}.c_str(), @<子窗口尺寸>, static_cast<ImGuiChildFlags>(@<子窗口标志>), static_cast<ImGuiWindowFlags>(@<窗口标志>))
     }
 
     方法 子窗口末端 <公开 静态 注释 = "结束子窗口的布局设计." 注释 = "无论\"子窗口开端\"的返回值如何,都必须成对调用本方法." 折叠 @嵌入式方法 = "">
@@ -313,7 +313,7 @@
     参数 窗口位置 <类型 = ImVec2>
     参数 执行条件 <类型 = IM执行条件 @默认值 = IM执行条件.无>
     {
-        @ ImGui::SetWindowPos(*PivAny2U{@<窗口名称>}, @<窗口位置>, static_cast<ImGuiCond>(@<执行条件>))
+        @ ImGui::SetWindowPos(PivAny2U{@<窗口名称>}.c_str(), @<窗口位置>, static_cast<ImGuiCond>(@<执行条件>))
     }
 
     方法 置窗口尺寸 <公开 静态 注释 = "设置指定窗口的尺寸,请在\"窗口开端\"之前调用. set axis to 0.0f to force an auto-fit on this axis." 折叠
@@ -324,7 +324,7 @@
     参数 窗口尺寸 <类型 = ImVec2>
     参数 执行条件 <类型 = IM执行条件 @默认值 = IM执行条件.无>
     {
-        @ ImGui::SetWindowSize(*PivAny2U{@<窗口名称>}, @<窗口尺寸>, static_cast<ImGuiCond>(@<执行条件>))
+        @ ImGui::SetWindowSize(PivAny2U{@<窗口名称>}.c_str(), @<窗口尺寸>, static_cast<ImGuiCond>(@<执行条件>))
     }
 
     方法 置窗口折叠状态 <公开 静态 注释 = "设置指定窗口的折叠状态" 折叠 @嵌入式方法 = "">
@@ -334,7 +334,7 @@
     参数 是否折叠 <类型 = 逻辑型>
     参数 执行条件 <类型 = IM执行条件 @默认值 = IM执行条件.无>
     {
-        @ ImGui::SetWindowCollapsed(*PivAny2U{@<窗口名称>}, static_cast<bool>(@<是否折叠>), static_cast<ImGuiCond>(@<执行条件>))
+        @ ImGui::SetWindowCollapsed(PivAny2U{@<窗口名称>}.c_str(), static_cast<bool>(@<是否折叠>), static_cast<ImGuiCond>(@<执行条件>))
     }
 
     方法 置窗口获得焦点 <公开 静态 注释 = "设置指定窗口获得输入焦点" 折叠 @嵌入式方法 = "">
@@ -342,7 +342,7 @@
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
     {
-        @ ImGui::SetWindowFocus(*PivAny2U{@<窗口名称>})
+        @ ImGui::SetWindowFocus(PivAny2U{@<窗口名称>}.c_str())
     }
 
     # 滚动窗口 | Windows Scrolling
@@ -734,7 +734,7 @@
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
     {
-        @ ImGui::PushID(*PivAny2U{@<文本ID>});
+        @ ImGui::PushID(PivAny2U{@<文本ID>}.c_str());
     }
 
     方法 设置整数ID <公开 静态 注释 = "在子语句体内的项目中添加指定的整数ID,可用于快速区别不同项目的唯一ID." 折叠 隐藏值属性 = "0"
@@ -749,7 +749,7 @@
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
     {
-        @ ImGui::GetID(*PivAny2U{@<文本ID>})
+        @ ImGui::GetID(PivAny2U{@<文本ID>}.c_str())
     }
 
     方法 取指针ID <公开 静态 类型 = 整数 注释 = "使用所提供指针ID和整个ID堆栈的hash值,计算出唯一的ID." 折叠 @嵌入式方法 = "">
@@ -769,7 +769,7 @@
     方法 无格式文本框 <公开 静态 注释 = "创建一个文本框,用于显示无格式的原生文本." 注释 = "本方法无内存复制和缓冲区大小限制,建议用于长文本." 折叠 @嵌入式方法 = "">
     参数 文本内容 <注释 = "提供显示在文本框中的文本内容;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     {
-        @ ImGui::TextUnformatted(*PivAny2U{@<文本内容>})
+        @ ImGui::TextUnformatted(PivAny2U{@<文本内容>}.c_str())
     }
 
     方法 文本框 <公开 静态 注释 = "创建一个文本框,支持格式化文本." 折叠 隐藏值属性 = "0" @嵌入式方法 = "req_str_param_text_pointer_u8 = true">
@@ -777,7 +777,7 @@
             @匹配类型 = 通用型>
     参数 替换数据 <注释 = "用作给格式文本中的格式替换符提供替换数据,格式替换符的数目和数据类型必须与替换数据保持一致." @匹配类型 = 通用基本型 @可扩展 = "" @默认值 = 0>
     {
-        @ ImGui::Text(*PivAny2U{@<格式文本>}, @<替换数据>)
+        @ ImGui::Text(PivAny2U{@<格式文本>}.c_str(), @<替换数据>)
     }
 
     方法 彩色文本框 <公开 静态 注释 = "创建一个文本框,用于显示带颜色的格式化文本." 折叠 隐藏值属性 = "0"
@@ -787,7 +787,7 @@
             @匹配类型 = 通用型>
     参数 替换数据 <注释 = "用作给格式文本中的格式替换符提供替换数据,格式替换符的数目和数据类型必须与替换数据保持一致." @匹配类型 = 通用基本型 @可扩展 = "" @默认值 = 0>
     {
-        @ ImGui::TextColored(@<文本颜色>, *PivAny2U{@<格式文本>}, @<替换数据>)
+        @ ImGui::TextColored(@<文本颜色>, PivAny2U{@<格式文本>}.c_str(), @<替换数据>)
     }
 
     方法 被禁用文本框 <公开 静态 注释 = "创建一个显示为禁用状态的文本框,支持格式化文本." 折叠 隐藏值属性 = "0"
@@ -796,7 +796,7 @@
             @匹配类型 = 通用型>
     参数 替换数据 <注释 = "用作给格式文本中的格式替换符提供替换数据,格式替换符的数目和数据类型必须与替换数据保持一致." @匹配类型 = 通用基本型 @可扩展 = "" @默认值 = 0>
     {
-        @ ImGui::TextDisabled(*PivAny2U{@<格式文本>}, @<替换数据>)
+        @ ImGui::TextDisabled(PivAny2U{@<格式文本>}.c_str(), @<替换数据>)
     }
 
     方法 换行文本框 <公开 静态 注释 = "创建一段可以自动换行的文本框,支持格式化文本." 折叠 隐藏值属性 = "0"
@@ -805,7 +805,7 @@
             @匹配类型 = 通用型>
     参数 替换数据 <注释 = "用作给格式文本中的格式替换符提供替换数据,格式替换符的数目和数据类型必须与替换数据保持一致." @匹配类型 = 通用基本型 @可扩展 = "" @默认值 = 0>
     {
-        @ ImGui::TextWrapped(*PivAny2U{@<格式文本>}, @<替换数据>)
+        @ ImGui::TextWrapped(PivAny2U{@<格式文本>}.c_str(), @<替换数据>)
     }
 
     方法 标签文本框 <公开 静态 注释 = "创建一个带标签的文本框,支持格式化文本." 折叠 隐藏值属性 = "0"
@@ -817,7 +817,7 @@
             @匹配类型 = 通用型>
     参数 替换数据 <注释 = "用作给格式文本中的格式替换符提供替换数据,格式替换符的数目和数据类型必须与替换数据保持一致." @匹配类型 = 通用基本型 @可扩展 = "" @默认值 = 0>
     {
-        @ ImGui::LabelText(*PivAny2U{@<标签文本>}, *PivAny2U{@<格式文本>}, @<替换数据>)
+        @ ImGui::LabelText(PivAny2U{@<标签文本>}.c_str(), PivAny2U{@<格式文本>}.c_str(), @<替换数据>)
     }
 
     方法 项目符号文本框 <公开 静态 注释 = "创建一个带项目符号的文本框,支持格式化文本." 折叠 隐藏值属性 = "0"
@@ -826,13 +826,13 @@
             @匹配类型 = 通用型>
     参数 替换数据 <注释 = "用作给格式文本中的格式替换符提供替换数据,格式替换符的数目和数据类型必须与替换数据保持一致." @匹配类型 = 通用基本型 @可扩展 = "" @默认值 = 0>
     {
-        @ ImGui::BulletText(*PivAny2U{@<格式文本>}, @<替换数据>)
+        @ ImGui::BulletText(PivAny2U{@<格式文本>}.c_str(), @<替换数据>)
     }
 
     方法 分隔文本框 <公开 静态 注释 = "创建一个带水平分隔线的文本框,用于显示无格式的原生文本." 折叠 @嵌入式方法 = "">
     参数 文本内容 <注释 = "提供显示在文本框中的文本内容;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     {
-        @ ImGui::SeparatorText(*PivAny2U{@<文本内容>})
+        @ ImGui::SeparatorText(PivAny2U{@<文本内容>}.c_str())
     }
 
     # 组件: 主要 | Widgets: Main
@@ -843,7 +843,7 @@
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
     参数 按钮尺寸 <类型 = ImVec2 注释 = "提供按钮的宽高,ImVec2(0, 0)为自动根据标签文本的长度调整宽度." @默认值 = ImVec2默认值.零值>
     {
-        @ ImGui::Button(*PivAny2U{@<标签文本>}, @<按钮尺寸>)
+        @ ImGui::Button(PivAny2U{@<标签文本>}.c_str(), @<按钮尺寸>)
     }
 
     方法 小按钮 <公开 静态 类型 = 逻辑型 注释 = "创建一个框边距为0的小按钮组件,按钮被单击后返回真." 注释 = "小按钮适合嵌入到文本行中." 返回值注释 = "按钮被单击后返回真" 折叠
@@ -852,7 +852,7 @@
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
     {
-        @ ImGui::SmallButton(*PivAny2U{@<标签文本>})
+        @ ImGui::SmallButton(PivAny2U{@<标签文本>}.c_str())
     }
 
     方法 隐身按钮 <公开 静态 类型 = 逻辑型 注释 = "创建一个不可见的按钮组件,但它仍会占用窗口位置和响应按钮行为." 返回值注释 = "本返回值受\"按钮标志\"影响" 折叠 @嵌入式方法 = "">
@@ -860,14 +860,14 @@
     参数 按钮尺寸 <类型 = ImVec2 注释 = "提供按钮的宽高">
     参数 按钮标志 <类型 = 整数 注释 = "按钮标志将影响返回值的结果" @默认值 = IM按钮标志.无>
     {
-        @ ImGui::InvisibleButton(*PivAny2U{@<文本ID>}, @<按钮尺寸>, static_cast<ImGuiButtonFlags>(@<按钮标志>))
+        @ ImGui::InvisibleButton(PivAny2U{@<文本ID>}.c_str(), @<按钮尺寸>, static_cast<ImGuiButtonFlags>(@<按钮标志>))
     }
 
     方法 箭头按钮 <公开 静态 类型 = 逻辑型 注释 = "创建一个箭头形状的按钮,可以选择箭头的方向." 返回值注释 = "按钮被单击后返回真" 折叠 @嵌入式方法 = "">
     参数 文本ID <注释 = "提供组件的唯一文本ID,本ID不会显示在按钮中;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     参数 箭头方向 <类型 = IM基本方向 注释 = "提供箭头的方向">
     {
-        @ ImGui::ArrowButton(*PivAny2U{@<文本ID>}, static_cast<ImGuiDir>(@<箭头方向>))
+        @ ImGui::ArrowButton(PivAny2U{@<文本ID>}.c_str(), static_cast<ImGuiDir>(@<箭头方向>))
     }
 
     方法 复选框 <公开 静态 类型 = 逻辑型 注释 = "创建一个复选框" 返回值注释 = "复选框被单击后返回真" 折叠 @嵌入式方法 = "">
@@ -876,7 +876,7 @@
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
     参数 选中状态 <类型 = 逻辑型 注释 = "必须提供一个逻辑型变量,表示复选框的选中状态." @需求类型 = 可写入变量>
     {
-        @ ImGui::Checkbox(*PivAny2U{@<标签文本>}, reinterpret_cast<bool*>(&@<选中状态>))
+        @ ImGui::Checkbox(PivAny2U{@<标签文本>}.c_str(), reinterpret_cast<bool*>(&@<选中状态>))
     }
 
     方法 标志复选框 <公开 静态 类型 = 逻辑型 注释 = "创建一个复选框,复选框被选中后,在\"当前标志\"中设置标志值,否则为取消设置标志值." 返回值注释 = "复选框被单击后返回真" 折叠
@@ -887,7 +887,7 @@
     参数 当前标志 <类型 = 整数 注释 = "必须提供一个整数变量,复选框被单击后可能会更改变量的值." @需求类型 = 可写入变量>
     参数 标志值 <类型 = 整数 注释 = "提供一个标志值,复选框被选中时按位或赋值(当前标志 |= 标志值),取消选中时按位异或赋值(当前标志 ^= 标志值).">
     {
-        @ ImGui::CheckboxFlags(*PivAny2U{@<标签文本>}, &@<当前标志>, @<标志值>)
+        @ ImGui::CheckboxFlags(PivAny2U{@<标签文本>}.c_str(), &@<当前标志>, @<标志值>)
     }
 
     方法 单选按钮 <公开 静态 类型 = 逻辑型 注释 = "创建一个单选按钮" 返回值注释 = "按钮被单击后返回真" 折叠 @嵌入式方法 = "">
@@ -896,7 +896,7 @@
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
     参数 是否选中 <类型 = 逻辑型>
     {
-        @ ImGui::RadioButton(*PivAny2U{@<标签文本>}, static_cast<bool>(@<是否选中>))
+        @ ImGui::RadioButton(PivAny2U{@<标签文本>}.c_str(), static_cast<bool>(@<是否选中>))
     }
 
     方法 单选按钮Ex <公开 静态 类型 = 逻辑型 注释 = "创建一个单选按钮,提供提供的整数变量决定选中项." 返回值注释 = "按钮被单击后返回真" 折叠 @嵌入式方法 = "">
@@ -906,7 +906,7 @@
     参数 现行选中项目 <类型 = 整数 注释 = "必须提供一个整数变量,用来指定选中的单选按钮." @需求类型 = 可写入变量>
     参数 索引值 <类型 = 整数 注释 = "当前单选按钮的自定义索引值,当\"现行选中项目 == 索引值\",则选中当前按钮.">
     {
-        @ ImGui::RadioButton(*PivAny2U{@<标签文本>}, &@<现行选中项目>, @<索引值>)
+        @ ImGui::RadioButton(PivAny2U{@<标签文本>}.c_str(), &@<现行选中项目>, @<索引值>)
     }
 
     方法 进度条 <公开 静态 注释 = "创建一个进度条组件" 折叠 @嵌入式方法 = "">
@@ -929,7 +929,7 @@
             注释 = "若想多个项目使用同一个标签,请使用\"##\"区分不同的元素ID,比如\"你好##foo1\";"
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
     {
-        @ ImGui::TextLink(*PivAny2U{@<标签文本>})
+        @ ImGui::TextLink(PivAny2U{@<标签文本>}.c_str())
     }
 
     方法 超文本链接_打开URL <公开 静态 注释 = "绘制一个超文本链接按钮,点击按钮后自动打开提供的URL." 折叠 @嵌入式方法 = "">
@@ -938,7 +938,7 @@
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
     参数 URL <注释 = "所欲打开的URL链接" @匹配类型 = 通用型 @默认值 = 常量字符串指针.空指针>
     {
-        @ ImGui::TextLinkOpenURL(*PivAny2U{@<标签文本>}, PivAny2U{@<URL>}.data())
+        @ ImGui::TextLinkOpenURL(PivAny2U{@<标签文本>}.c_str(), PivAny2U{@<URL>}.data())
     }
 
     # 组件: 图片 | Widgets: Images
@@ -963,7 +963,7 @@
     参数 背景颜色 <类型 = ImVec4 注释 = "ImVec4.创建(0, 0, 0, 0) 为黑色背景" @默认值 = ImVec4默认值.零值>
     参数 色调 <类型 = ImVec4 注释 = "ImVec4.创建(1, 1, 1, 1) 表示不添加色调" @默认值 = ImVec4默认值.全一值>
     {
-        @ ImGui::ImageButton(*PivAny2U{@<文本ID>}, (ImTextureID)@<图片纹理ID>, @<图片尺寸>, @<左上纹理坐标>, @<右下纹理坐标>, @<背景颜色>, @<色调>)
+        @ ImGui::ImageButton(PivAny2U{@<文本ID>}.c_str(), (ImTextureID)@<图片纹理ID>, @<图片尺寸>, @<左上纹理坐标>, @<右下纹理坐标>, @<背景颜色>, @<色调>)
     }
 
     # 组件: 组合框(下拉) | Widgets: Combo Box (Dropdown)
@@ -976,7 +976,7 @@
     参数 预览项目 <注释 = "提供组合框的默认项目文本;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     参数 组合框标志 <类型 = 整数 注释 = "设置组合框的标志" @默认值 = IM组合框标志.无>
     {
-        @ if (ImGui::BeginCombo(*PivAny2U{@<标签文本>}, *PivAny2U{@<预览项目>}, static_cast<ImGuiComboFlags>(@<组合框标志>)) == true)
+        @ if (ImGui::BeginCombo(PivAny2U{@<标签文本>}.c_str(), PivAny2U{@<预览项目>}.c_str(), static_cast<ImGuiComboFlags>(@<组合框标志>)) == true)
     }
 
     方法 组合框 <公开 静态 类型 = 逻辑型 注释 = "创建一个组合框(下拉列表框)组件" 返回值注释 = "返回是否创建成功" 折叠 @嵌入式方法 = "">
@@ -988,7 +988,7 @@
     参数 项目数组 <类型 = IM文本数组类 注释 = "提供所创建组合框的项目文本数组">
     参数 弹出框高度 <类型 = 整数 注释 = "提供组合框弹出列表框的高度,以项目数量为单位." 注释 = "比如8指的是8个项目的高度,实际项目数超过本值将显示滚动条." @默认值 = -1>
     {
-        @ ImGui::Combo(*PivAny2U{@<标签文本>}, &@<现行选中项>, &@dt<IM文本数组类>::ItemGetter, IM_STRARRAY_PTR_AND_SIZE(@<项目数组>.pdata()), @<弹出框高度>)
+        @ ImGui::Combo(PivAny2U{@<标签文本>}.c_str(), &@<现行选中项>, &@dt<IM文本数组类>::ItemGetter, IM_STRARRAY_PTR_AND_SIZE(@<项目数组>.pdata()), @<弹出框高度>)
     }
 
     # 组件: 拖动滑块 | Widgets: Drag Sliders
@@ -1005,7 +1005,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.3f">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::DragFloat(*PivAny2U{@<标签文本>}, &@<值变量>, @<速度>, @<最小值>, @<最大值>,
+        @ ImGui::DragFloat(PivAny2U{@<标签文本>}.c_str(), &@<值变量>, @<速度>, @<最小值>, @<最大值>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1021,7 +1021,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.6f">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::DragScalarT<double>(*PivAny2U{@<标签文本>}, ImGuiDataType_Double, &@<值变量>, @<速度>, @<最小值>,
+        @ ImGui::DragScalarT<double>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_Double, &@<值变量>, @<速度>, @<最小值>,
         @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1037,7 +1037,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::DragScalarT<char>(*PivAny2U{@<标签文本>}, ImGuiDataType_S8, &@<值变量>, @<速度>, @<最小值>,
+        @ ImGui::DragScalarT<char>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S8, &@<值变量>, @<速度>, @<最小值>,
         @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1053,7 +1053,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::DragScalarT<short>(*PivAny2U{@<标签文本>}, ImGuiDataType_S16, &@<值变量>, @<速度>, @<最小值>,
+        @ ImGui::DragScalarT<short>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S16, &@<值变量>, @<速度>, @<最小值>,
         @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1069,7 +1069,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::DragInt(*PivAny2U{@<标签文本>}, &@<值变量>, @<速度>, @<最小值>,
+        @ ImGui::DragInt(PivAny2U{@<标签文本>}.c_str(), &@<值变量>, @<速度>, @<最小值>,
         @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1085,7 +1085,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%I64d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::DragScalarT<INT64>(*PivAny2U{@<标签文本>}, ImGuiDataType_S64, &@<值变量>, @<速度>, @<最小值>,
+        @ ImGui::DragScalarT<INT64>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S64, &@<值变量>, @<速度>, @<最小值>,
         @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1101,7 +1101,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.3f">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::DragScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, IM_ARRAY_AND_SIZE(@<数组变量>), @<速度>,
+        @ ImGui::DragScalarTN<float>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_Float, IM_ARRAY_AND_SIZE(@<数组变量>), @<速度>,
         @     @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1117,7 +1117,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.6f">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::DragScalarTN<double>(*PivAny2U{@<标签文本>}, ImGuiDataType_Double, IM_ARRAY_AND_SIZE(@<数组变量>), @<速度>,
+        @ ImGui::DragScalarTN<double>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_Double, IM_ARRAY_AND_SIZE(@<数组变量>), @<速度>,
         @     @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1133,7 +1133,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::DragScalarTN<char>(*PivAny2U{@<标签文本>}, ImGuiDataType_S8, IM_ARRAY_AND_SIZE(@<数组变量>), @<速度>,
+        @ ImGui::DragScalarTN<char>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S8, IM_ARRAY_AND_SIZE(@<数组变量>), @<速度>,
         @     @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1149,7 +1149,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::DragScalarTN<short>(*PivAny2U{@<标签文本>}, ImGuiDataType_S16, IM_ARRAY_AND_SIZE(@<数组变量>), @<速度>,
+        @ ImGui::DragScalarTN<short>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S16, IM_ARRAY_AND_SIZE(@<数组变量>), @<速度>,
         @     @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1165,7 +1165,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::DragScalarTN<int>(*PivAny2U{@<标签文本>}, ImGuiDataType_S32, IM_ARRAY_AND_SIZE(@<数组变量>), @<速度>,
+        @ ImGui::DragScalarTN<int>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S32, IM_ARRAY_AND_SIZE(@<数组变量>), @<速度>,
         @     @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1181,7 +1181,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%I64d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::DragScalarTN<INT64>(*PivAny2U{@<标签文本>}, ImGuiDataType_S64, IM_ARRAY_AND_SIZE(@<数组变量>), @<速度>,
+        @ ImGui::DragScalarTN<INT64>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S64, IM_ARRAY_AND_SIZE(@<数组变量>), @<速度>,
         @     @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1197,7 +1197,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.3f">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::DragScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, reinterpret_cast<float*>(&@<数据变量>), 2, @<速度>,
+        @ ImGui::DragScalarTN<float>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_Float, reinterpret_cast<float*>(&@<数据变量>), 2, @<速度>,
         @     @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1213,7 +1213,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.3f">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::DragScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, reinterpret_cast<float*>(&@<数据变量>), 4, @<速度>,
+        @ ImGui::DragScalarTN<float>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_Float, reinterpret_cast<float*>(&@<数据变量>), 4, @<速度>,
         @     @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1231,7 +1231,7 @@
     参数 较大值格式 <类型 = 文本型 注释 = "较大值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.3f">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.始终限制范围>
     {
-        @ ImGui::DragFloatRange2(*PivAny2U{@<标签文本>}, &@<当前较小值>, &@<当前较大值> @<速度>, @<最小值>, @<最大值>,
+        @ ImGui::DragFloatRange2(PivAny2U{@<标签文本>}.c_str(), &@<当前较小值>, &@<当前较大值> @<速度>, @<最小值>, @<最大值>,
         @     u8@sn<quot>@pvpt<较小值格式>@sn<quot>, u8@sn<quot>@pvpt<较大值格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1249,7 +1249,7 @@
     参数 较大值格式 <类型 = 文本型 注释 = "较大值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.始终限制范围>
     {
-        @ ImGui::DragIntRange2(*PivAny2U{@<标签文本>}, &@<当前较小值>, &@<当前较大值>, @<速度>, @<最小值>, @<最大值>,
+        @ ImGui::DragIntRange2(PivAny2U{@<标签文本>}.c_str(), &@<当前较小值>, &@<当前较大值>, @<速度>, @<最小值>, @<最大值>,
         @     u8@sn<quot>@pvpt<较小值格式>@sn<quot>, u8@sn<quot>@pvpt<较大值格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1266,7 +1266,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.3f">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::SliderFloat(*PivAny2U{@<标签文本>}, &@<值变量>, @<最小值>, @<最大值>,
+        @ ImGui::SliderFloat(PivAny2U{@<标签文本>}.c_str(), &@<值变量>, @<最小值>, @<最大值>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1281,7 +1281,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.6f">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::SliderScalarT<double>(*PivAny2U{@<标签文本>}, ImGuiDataType_Double, &@<值变量>, @<最小值>, @<最大值>,
+        @ ImGui::SliderScalarT<double>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_Double, &@<值变量>, @<最小值>, @<最大值>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1296,7 +1296,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::SliderScalarT<char>(*PivAny2U{@<标签文本>}, ImGuiDataType_S8, &@<值变量>, @<最小值>, @<最大值>,
+        @ ImGui::SliderScalarT<char>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S8, &@<值变量>, @<最小值>, @<最大值>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1311,7 +1311,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::SliderScalarT<short>(*PivAny2U{@<标签文本>}, ImGuiDataType_S16, &@<值变量>, @<最小值>, @<最大值>,
+        @ ImGui::SliderScalarT<short>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S16, &@<值变量>, @<最小值>, @<最大值>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1326,7 +1326,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::SliderInt(*PivAny2U{@<标签文本>}, &@<值变量>, @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
+        @ ImGui::SliderInt(PivAny2U{@<标签文本>}.c_str(), &@<值变量>, @<最小值>, @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
     方法 长整数滑块条 <公开 静态 类型 = 逻辑型 注释 = "创建一个滑块条,可以在指定的的范围内拖动更改一个64位长整数变量的值." 注释 = "注: Ctrl+点击滑块可以切换到手动输入数值."
@@ -1340,7 +1340,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%I64d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::SliderScalarT<INT64>(*PivAny2U{@<标签文本>}, ImGuiDataType_S64, &@<值变量>, @<最小值>, @<最大值>,
+        @ ImGui::SliderScalarT<INT64>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S64, &@<值变量>, @<最小值>, @<最大值>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1355,7 +1355,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.0f°">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::SliderAngle(*PivAny2U{@<标签文本>}, &@<值变量>, @<最小角度>, @<最大角度>,
+        @ ImGui::SliderAngle(PivAny2U{@<标签文本>}.c_str(), &@<值变量>, @<最小角度>, @<最大角度>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1370,7 +1370,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.3f">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::SliderScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, IM_ARRAY_AND_SIZE(@<数组变量>), @<最小值>, @<最大值>,
+        @ ImGui::SliderScalarTN<float>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_Float, IM_ARRAY_AND_SIZE(@<数组变量>), @<最小值>, @<最大值>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1385,7 +1385,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.6f">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::SliderScalarTN<double>(*PivAny2U{@<标签文本>}, ImGuiDataType_Double, IM_ARRAY_AND_SIZE(@<数组变量>), @<最小值>, @<最大值>,
+        @ ImGui::SliderScalarTN<double>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_Double, IM_ARRAY_AND_SIZE(@<数组变量>), @<最小值>, @<最大值>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1400,7 +1400,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::SliderScalarTN<char>(*PivAny2U{@<标签文本>}, ImGuiDataType_S8, IM_ARRAY_AND_SIZE(@<数组变量>), @<最小值>, @<最大值>,
+        @ ImGui::SliderScalarTN<char>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S8, IM_ARRAY_AND_SIZE(@<数组变量>), @<最小值>, @<最大值>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1415,7 +1415,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::SliderScalarTN<short>(*PivAny2U{@<标签文本>}, ImGuiDataType_S16, IM_ARRAY_AND_SIZE(@<数组变量>), @<最小值>, @<最大值>,
+        @ ImGui::SliderScalarTN<short>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S16, IM_ARRAY_AND_SIZE(@<数组变量>), @<最小值>, @<最大值>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1430,7 +1430,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::SliderScalarTN<int>(*PivAny2U{@<标签文本>}, ImGuiDataType_S32, IM_ARRAY_AND_SIZE(@<数组变量>), @<最小值>, @<最大值>,
+        @ ImGui::SliderScalarTN<int>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S32, IM_ARRAY_AND_SIZE(@<数组变量>), @<最小值>, @<最大值>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1445,7 +1445,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%I64d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::SliderScalarTN<INT64>(*PivAny2U{@<标签文本>}, ImGuiDataType_S64, IM_ARRAY_AND_SIZE(@<数组变量>), @<最小值>,
+        @ ImGui::SliderScalarTN<INT64>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S64, IM_ARRAY_AND_SIZE(@<数组变量>), @<最小值>,
         @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1460,7 +1460,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.3f">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::SliderScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, reinterpret_cast<float*>(&@<数据变量>), 2, @<最小值>, @<最大值>,
+        @ ImGui::SliderScalarTN<float>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_Float, reinterpret_cast<float*>(&@<数据变量>), 2, @<最小值>, @<最大值>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1475,7 +1475,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.3f">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::SliderScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, reinterpret_cast<float*>(&@<数据变量>), 4, @<最小值>,
+        @ ImGui::SliderScalarTN<float>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_Float, reinterpret_cast<float*>(&@<数据变量>), 4, @<最小值>,
         @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1491,7 +1491,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.3f">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::VSliderFloat(*PivAny2U{@<标签文本>}, @<尺寸>, &@<值变量>, @<最小值>, @<最大值>,
+        @ ImGui::VSliderFloat(PivAny2U{@<标签文本>}.c_str(), @<尺寸>, &@<值变量>, @<最小值>, @<最大值>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1507,7 +1507,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.6f">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::VSliderScalarT<double>(*PivAny2U{@<标签文本>}, @<尺寸>, ImGuiDataType_Double, &@<值变量>, @<最小值>,
+        @ ImGui::VSliderScalarT<double>(PivAny2U{@<标签文本>}.c_str(), @<尺寸>, ImGuiDataType_Double, &@<值变量>, @<最小值>,
         @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1523,7 +1523,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::VSliderScalarT<char>(*PivAny2U{@<标签文本>}, @<尺寸>, ImGuiDataType_S8, &@<值变量>, @<最小值>,
+        @ ImGui::VSliderScalarT<char>(PivAny2U{@<标签文本>}.c_str(), @<尺寸>, ImGuiDataType_S8, &@<值变量>, @<最小值>,
         @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1539,7 +1539,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::VSliderScalarT<short>(*PivAny2U{@<标签文本>}, @<尺寸>, ImGuiDataType_S16, &@<值变量>, @<最小值>,
+        @ ImGui::VSliderScalarT<short>(PivAny2U{@<标签文本>}.c_str(), @<尺寸>, ImGuiDataType_S16, &@<值变量>, @<最小值>,
         @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1555,7 +1555,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::VSliderInt(*PivAny2U{@<标签文本>}, @<尺寸>, &@<值变量>, @<最小值>, @<最大值>,
+        @ ImGui::VSliderInt(PivAny2U{@<标签文本>}.c_str(), @<尺寸>, &@<值变量>, @<最小值>, @<最大值>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1571,7 +1571,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%I64d">
     参数 滑块标志 <类型 = 整数 注释 = "请使用\"IM滑块标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM滑块标志.无>
     {
-        @ ImGui::VSliderScalarT<INT64>(*PivAny2U{@<标签文本>}, @<尺寸>, ImGuiDataType_S64, &@<值变量>, @<最小值>,
+        @ ImGui::VSliderScalarT<INT64>(PivAny2U{@<标签文本>}.c_str(), @<尺寸>, ImGuiDataType_S64, &@<值变量>, @<最小值>,
         @     @<最大值>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiSliderFlags>(@<滑块标志>))
     }
 
@@ -1587,7 +1587,7 @@
     参数 回调函数 <类型 = IM输入框回调指针 注释 = "请使用\"IM输入框回调指针.创建 ()\"来取静态方法地址." @默认值 = 空对象>
     参数 用户数据 <类型 = 变整数 注释 = "传递到回调函数的用户数据" @默认值 = 0>
     {
-        @ ImGui::InputText(*PivAny2U{@<标签文本>}, &@<文本内容>, static_cast<ImGuiInputTextFlags>(@<输入框标志>), @<回调函数>, (void*)@<用户数据>)
+        @ ImGui::InputText(PivAny2U{@<标签文本>}.c_str(), &@<文本内容>, static_cast<ImGuiInputTextFlags>(@<输入框标志>), @<回调函数>, (void*)@<用户数据>)
     }
 
     方法 多行文本输入框 <公开 静态 类型 = 逻辑型 注释 = "创建一个多行文本输入框,输入的UTF-8编码内容将保存在\"文本内容\"参数中."
@@ -1601,7 +1601,7 @@
     参数 回调函数 <类型 = IM输入框回调指针 注释 = "请使用\"IM输入框回调指针.创建 ()\"来取静态方法地址." @默认值 = 空对象>
     参数 用户数据 <类型 = 变整数 注释 = "传递到回调函数的用户数据" @默认值 = 0>
     {
-        @ ImGui::InputTextMultiline(*PivAny2U{@<标签文本>}, &@<文本内容>, @<尺寸>, static_cast<ImGuiInputTextFlags>(@<输入框标志>), @<回调函数>, (void*)@<用户数据>)
+        @ ImGui::InputTextMultiline(PivAny2U{@<标签文本>}.c_str(), &@<文本内容>, @<尺寸>, static_cast<ImGuiInputTextFlags>(@<输入框标志>), @<回调函数>, (void*)@<用户数据>)
     }
 
     方法 提示输入框 <公开 静态 类型 = 逻辑型 注释 = "创建一个文本输入框,未输入内容时将以灰色显示提示文本,输入的UTF-8编码内容将保存在\"文本内容\"参数中."
@@ -1615,7 +1615,7 @@
     参数 回调函数 <类型 = IM输入框回调指针 注释 = "请使用\"IM输入框回调指针.创建 ()\"来取静态方法地址." @默认值 = 空对象>
     参数 用户数据 <类型 = 变整数 注释 = "传递到回调函数的用户数据" @默认值 = 0>
     {
-        @ ImGui::InputTextWithHint(*PivAny2U{@<标签文本>}, *PivAny2U{@<提示文本>}, &@<文本内容>, static_cast<ImGuiInputTextFlags>(@<输入框标志>), @<回调函数>, (void*)@<用户数据>)
+        @ ImGui::InputTextWithHint(PivAny2U{@<标签文本>}.c_str(), PivAny2U{@<提示文本>}.c_str(), &@<文本内容>, static_cast<ImGuiInputTextFlags>(@<输入框标志>), @<回调函数>, (void*)@<用户数据>)
     }
 
     方法 单浮点输入框 <公开 静态 类型 = 逻辑型 注释 = "创建一个输入框,用于输入单精度小数值,可选添加两个增加按钮." 返回值注释 = "值被改变时返回真" 折叠 @嵌入式方法 = "">
@@ -1628,7 +1628,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.3f">
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
-        @ ImGui::InputFloat(*PivAny2U{@<标签文本>}, &@<值变量>, @<增减量>, @<快速增减量>,
+        @ ImGui::InputFloat(PivAny2U{@<标签文本>}.c_str(), &@<值变量>, @<增减量>, @<快速增减量>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
@@ -1642,7 +1642,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.6f">
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
-        @ ImGui::InputDouble(*PivAny2U{@<标签文本>}, &@<值变量>, @<增减量>, @<快速增减量>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
+        @ ImGui::InputDouble(PivAny2U{@<标签文本>}.c_str(), &@<值变量>, @<增减量>, @<快速增减量>, u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
     方法 字节输入框 <公开 静态 类型 = 逻辑型 注释 = "创建一个输入框,用于输入8位字节值,可选添加两个增加按钮." 返回值注释 = "值被改变时返回真" 折叠 @嵌入式方法 = "">
@@ -1655,7 +1655,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
-        @ ImGui::InputScalarT<char>(*PivAny2U{@<标签文本>}, ImGuiDataType_S8, &@<值变量>, @<增减量>, @<快速增减量>,
+        @ ImGui::InputScalarT<char>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S8, &@<值变量>, @<增减量>, @<快速增减量>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
@@ -1669,7 +1669,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
-        @ ImGui::InputScalarT<short>(*PivAny2U{@<标签文本>}, ImGuiDataType_S16, &@<值变量>, @<增减量>, @<快速增减量>,
+        @ ImGui::InputScalarT<short>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S16, &@<值变量>, @<增减量>, @<快速增减量>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
@@ -1682,7 +1682,7 @@
     参数 快速增减量 <类型 = 整数 注释 = "Ctrl+单击\"-/+\"按钮时的增减值." @默认值 = 0>
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
-        @ ImGui::InputInt(*PivAny2U{@<标签文本>}, &@<值变量>, @<增减量>, @<快速增减量>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
+        @ ImGui::InputInt(PivAny2U{@<标签文本>}.c_str(), &@<值变量>, @<增减量>, @<快速增减量>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
     方法 长整数输入框 <公开 静态 类型 = 逻辑型 注释 = "创建一个输入框,用于输入62位长整数值,可选添加两个增加按钮." 返回值注释 = "值被改变时返回真" 折叠 @嵌入式方法 = "">
@@ -1695,7 +1695,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%I64d">
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
-        @ ImGui::InputScalarT<INT64>(*PivAny2U{@<标签文本>}, ImGuiDataType_S64, &@<值变量>, @<增减量>, @<快速增减量>,
+        @ ImGui::InputScalarT<INT64>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S64, &@<值变量>, @<增减量>, @<快速增减量>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
@@ -1710,7 +1710,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.3f">
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
-        @ ImGui::InputScalarTN<float>(*PivAny2U{@<标签文本>}, ImGuiDataType_Float, IM_ARRAY_AND_SIZE(@<数组变量>), @<增减量>, @<快速增减量>,
+        @ ImGui::InputScalarTN<float>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_Float, IM_ARRAY_AND_SIZE(@<数组变量>), @<增减量>, @<快速增减量>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
@@ -1724,7 +1724,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%.6f">
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
-        @ ImGui::InputScalarTN<double>(*PivAny2U{@<标签文本>}, ImGuiDataType_Double, IM_ARRAY_AND_SIZE(@<数组变量>), @<增减量>, @<快速增减量>,
+        @ ImGui::InputScalarTN<double>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_Double, IM_ARRAY_AND_SIZE(@<数组变量>), @<增减量>, @<快速增减量>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
@@ -1738,7 +1738,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
-        @ ImGui::InputScalarTN<char>(*PivAny2U{@<标签文本>}, ImGuiDataType_S8, IM_ARRAY_AND_SIZE(@<数组变量>), @<增减量>, @<快速增减量>,
+        @ ImGui::InputScalarTN<char>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S8, IM_ARRAY_AND_SIZE(@<数组变量>), @<增减量>, @<快速增减量>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
@@ -1752,7 +1752,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
-        @ ImGui::InputScalarTN<short>(*PivAny2U{@<标签文本>}, ImGuiDataType_S16, IM_ARRAY_AND_SIZE(@<数组变量>), @<增减量>, @<快速增减量>,
+        @ ImGui::InputScalarTN<short>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S16, IM_ARRAY_AND_SIZE(@<数组变量>), @<增减量>, @<快速增减量>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
@@ -1766,7 +1766,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%d">
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
-        @ ImGui::InputScalarTN<int>(*PivAny2U{@<标签文本>}, ImGuiDataType_S32, IM_ARRAY_AND_SIZE(@<数组变量>), @<增减量>, @<快速增减量>,
+        @ ImGui::InputScalarTN<int>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S32, IM_ARRAY_AND_SIZE(@<数组变量>), @<增减量>, @<快速增减量>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
@@ -1780,7 +1780,7 @@
     参数 显示格式 <类型 = 文本型 注释 = "数值在界面中的显示格式(请参考\"取格式文本\"),本参数不能提供变量,只能填立即数和常量." @需求类型 = 立即数或常量 @默认值 = "%I64d">
     参数 输入框标志 <类型 = 整数 注释 = "请使用\"IM输入框标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM输入框标志.无>
     {
-        @ ImGui::InputScalarTN<INT64>(*PivAny2U{@<标签文本>}, ImGuiDataType_S64, IM_ARRAY_AND_SIZE(@<数组变量>), @<增减量>, @<快速增减量>,
+        @ ImGui::InputScalarTN<INT64>(PivAny2U{@<标签文本>}.c_str(), ImGuiDataType_S64, IM_ARRAY_AND_SIZE(@<数组变量>), @<增减量>, @<快速增减量>,
         @     u8@sn<quot>@pvpt<显示格式>@sn<quot>, static_cast<ImGuiInputTextFlags>(@<输入框标志>))
     }
 
@@ -1795,7 +1795,7 @@
     参数 颜色 <类型 = ImVec4 注释 = "必须提供一个变量,而且要确保变量的生命周期." @需求类型 = 可写入变量>
     参数 颜色编辑标志 <类型 = 整数 注释 = "请使用\"IM颜色编辑标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM颜色编辑标志.无>
     {
-        @ ImGui::ColorEdit3(*PivAny2U{@<标签文本>}, reinterpret_cast<float*>(&@<颜色>), static_cast<ImGuiColorEditFlags>(@<颜色编辑标志>))
+        @ ImGui::ColorEdit3(PivAny2U{@<标签文本>}.c_str(), reinterpret_cast<float*>(&@<颜色>), static_cast<ImGuiColorEditFlags>(@<颜色编辑标志>))
     }
 
     方法 颜色编辑器RGBA <公开 静态 类型 = 逻辑型 注释 = "创建一个颜色编辑框,可以设置RGBA颜色."
@@ -1807,7 +1807,7 @@
     参数 颜色 <类型 = ImVec4 注释 = "必须提供一个变量,而且要确保变量的生命周期." @需求类型 = 可写入变量>
     参数 颜色编辑标志 <类型 = 整数 注释 = "请使用\"IM颜色编辑标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM颜色编辑标志.无>
     {
-        @ ImGui::ColorEdit4(*PivAny2U{@<标签文本>}, reinterpret_cast<float*>(&@<颜色>), static_cast<ImGuiColorEditFlags>(@<颜色编辑标志>))
+        @ ImGui::ColorEdit4(PivAny2U{@<标签文本>}.c_str(), reinterpret_cast<float*>(&@<颜色>), static_cast<ImGuiColorEditFlags>(@<颜色编辑标志>))
     }
 
     方法 颜色选取器RGB <公开 静态 类型 = 逻辑型 注释 = "创建一个颜色选取器,可以选取RGB颜色."
@@ -1819,7 +1819,7 @@
     参数 选取颜色 <类型 = ImVec4 注释 = "必须提供一个变量,而且要确保变量的生命周期." @需求类型 = 可写入变量>
     参数 颜色编辑标志 <类型 = 整数 注释 = "请使用\"IM颜色编辑标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM颜色编辑标志.无>
     {
-        @ ImGui::ColorPicker3(*PivAny2U{@<标签文本>}, reinterpret_cast<float*>(&@<选取颜色>), static_cast<ImGuiColorEditFlags>(@<颜色编辑标志>))
+        @ ImGui::ColorPicker3(PivAny2U{@<标签文本>}.c_str(), reinterpret_cast<float*>(&@<选取颜色>), static_cast<ImGuiColorEditFlags>(@<颜色编辑标志>))
     }
 
     方法 颜色选取器RGBA <公开 静态 类型 = 逻辑型 注释 = "创建一个颜色选取器,可以选取RGBA颜色."
@@ -1832,7 +1832,7 @@
     参数 参考颜色地址 <类型 = 变整数 注释 = "提供一个参考颜色的指针(ImVec4.取变整数地址),例如原来的颜色,可以留空." @默认值 = 0>
     参数 颜色编辑标志 <类型 = 整数 注释 = "请使用\"IM颜色编辑标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM颜色编辑标志.无>
     {
-        @ ImGui::ColorPicker4(*PivAny2U{@<标签文本>}, reinterpret_cast<float*>(&@<选取颜色>), static_cast<ImGuiColorEditFlags>(@<颜色编辑标志>), reinterpret_cast<float*>(@<参考颜色地址>))
+        @ ImGui::ColorPicker4(PivAny2U{@<标签文本>}.c_str(), reinterpret_cast<float*>(&@<选取颜色>), static_cast<ImGuiColorEditFlags>(@<颜色编辑标志>), reinterpret_cast<float*>(@<参考颜色地址>))
     }
 
     方法 色板按钮 <公开 静态 类型 = 逻辑型 注释 = "创建一个色板按钮,鼠标在按钮上悬停时会显示颜色的详细信息."
@@ -1845,7 +1845,7 @@
     参数 颜色编辑标志 <类型 = 整数 注释 = "请使用\"IM颜色编辑标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM颜色编辑标志.无>
     参数 尺寸 <类型 = ImVec2 注释 = "提供按钮的尺寸,ImVec2(0, 0)为默认尺寸." @默认值 = ImVec2默认值.零值>
     {
-        @ ImGui::ColorButton(*PivAny2U{@<描述文本>}, @<颜色>, static_cast<ImGuiColorEditFlags>(@<颜色编辑标志>), @<尺寸>)
+        @ ImGui::ColorButton(PivAny2U{@<描述文本>}.c_str(), @<颜色>, static_cast<ImGuiColorEditFlags>(@<颜色编辑标志>), @<尺寸>)
     }
 
     方法 置颜色编辑选项 <公开 静态 注释 = "如果你想自定义默认格式和选取类型,请在新建帧之前初始化当前选项." 折叠 @嵌入式方法 = "">
@@ -1863,7 +1863,7 @@
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
     参数 树节点标志 <类型 = 整数 注释 = "请使用\"IM树节点标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM树节点标志.无>
     {
-        @ if (ImGui::TreeNodeEx(*PivAny2U{@<标签文本>}, static_cast<ImGuiTreeNodeFlags>(@<树节点标志>)) == true)
+        @ if (ImGui::TreeNodeEx(PivAny2U{@<标签文本>}.c_str(), static_cast<ImGuiTreeNodeFlags>(@<树节点标志>)) == true)
     }
 
     方法 创建树节点Ex <公开 静态 注释 = "创建一个可以展开和折叠的树节点,可以在子语句体内添加组件." 注释 = "树节点被折叠时不执行子语句体中的代码." 折叠 隐藏值属性 = "0"
@@ -1874,7 +1874,7 @@
             @匹配类型 = 通用型>
     参数 替换数据 <注释 = "用作给格式文本中的格式替换符提供替换数据,格式替换符的数目和数据类型必须与替换数据保持一致." @匹配类型 = 通用基本型 @可扩展 = "" @默认值 = 0>
     {
-        @ if (ImGui::TreeNodeEx(*PivAny2U{@<文本ID>}, static_cast<ImGuiTreeNodeFlags>(@<树节点标志>), *PivAny2U{@<格式文本>}, @<替换数据>) == true)
+        @ if (ImGui::TreeNodeEx(PivAny2U{@<文本ID>}.c_str(), static_cast<ImGuiTreeNodeFlags>(@<树节点标志>), PivAny2U{@<格式文本>}.c_str(), @<替换数据>) == true)
     }
 
     方法 取树节点和标签间距 <公开 静态 类型 = 单精度小数 注释 = "获取\"树节点/项目符号\"和标签之间的距离" 折叠 @嵌入式方法 = "">
@@ -1889,7 +1889,7 @@
     参数 打开状态 <类型 = 逻辑型类 注释 = "本参数非空将在标题右边显示一个关闭按钮,单击按钮会删掉本标题并将本参数的逻辑值设置为假." @默认值 = 空对象>
     参数 树节点标志 <类型 = 整数 注释 = "请使用\"IM树节点标志\"中的常量,可以使用\"连续位或\"组合多个标志." @默认值 = IM树节点标志.无>
     {
-        @ ImGui::CollapsingHeader(*PivAny2U{@<标签文本>}, piv::GetBaseDataPtr<bool*>(@<打开状态>), static_cast<ImGuiTreeNodeFlags>(@<树节点标志>))
+        @ ImGui::CollapsingHeader(PivAny2U{@<标签文本>}.c_str(), piv::GetBaseDataPtr<bool*>(@<打开状态>), static_cast<ImGuiTreeNodeFlags>(@<树节点标志>))
     }
 
     方法 置下一项目展开 <公开 静态 注释 = "设置下一个\"树节点/可折叠标题\"的展开/折叠状态." 折叠 @嵌入式方法 = "">
@@ -1917,7 +1917,7 @@
     参数 尺寸 <类型 = ImVec2 注释 = "x等于0.0：使用剩余宽度,x大于0.0：使用指定宽度;" 注释 = "y等于0.0: 使用标签文本高度,y大于0.0: 使用指定高度;"
             @默认值 = ImVec2默认值.零值>
     {
-        @ ImGui::Selectable(*PivAny2U{@<标签文本>}, static_cast<bool>(@<是否选中>), static_cast<ImGuiSelectableFlags>(@<可选项标志>), @<尺寸>)
+        @ ImGui::Selectable(PivAny2U{@<标签文本>}.c_str(), static_cast<bool>(@<是否选中>), static_cast<ImGuiSelectableFlags>(@<可选项标志>), @<尺寸>)
     }
 
     方法 可选项Ex <公开 静态 类型 = 逻辑型 注释 = "创建一个可选择的项目(悬停时会高亮显示,选中后会变成另一种颜色)." 注释 = "本方法创建的选项,单击后可以自动切换选中状态."
@@ -1930,7 +1930,7 @@
     参数 尺寸 <类型 = ImVec2 注释 = "x等于0.0：使用剩余宽度,x大于0.0：使用指定宽度;" 注释 = "y等于0.0: 使用标签文本高度,y大于0.0: 使用指定高度;"
             @默认值 = ImVec2默认值.零值>
     {
-        @ ImGui::Selectable(*PivAny2U{@<标签文本>}, reinterpret_cast<bool*>(&@<是否选中>), static_cast<ImGuiSelectableFlags>(@<可选项标志>), @<尺寸>)
+        @ ImGui::Selectable(PivAny2U{@<标签文本>}.c_str(), reinterpret_cast<bool*>(&@<是否选中>), static_cast<ImGuiSelectableFlags>(@<可选项标志>), @<尺寸>)
     }
 
     # // Multi-selection system for Selectable(), Checkbox(), TreeNode() functions [BETA]
@@ -1948,7 +1948,7 @@
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
     参数 尺寸 <类型 = ImVec2 注释 = "提供列表框的尺寸" @默认值 = ImVec2默认值.零值>
     {
-        @ if (ImGui::BeginListBox(*PivAny2U{@<标签文本>}, @<尺寸>) == true)
+        @ if (ImGui::BeginListBox(PivAny2U{@<标签文本>}.c_str(), @<尺寸>) == true)
     }
 
     方法 列表框 <公开 静态 类型 = 逻辑型 注释 = "创建一个列表框组件" 返回值注释 = "返回是否创建成功" 折叠 @嵌入式方法 = "">
@@ -1960,7 +1960,7 @@
     参数 项目数组 <类型 = IM文本数组类 注释 = "提供所创建列表框的项目文本数组">
     参数 列表框高度 <类型 = 整数 注释 = "提供列表框的高度,以项目数量为单位." 注释 = "比如8指的是8个项目的高度,实际项目数超过本值将显示滚动条." @默认值 = -1>
     {
-        @ ImGui::ListBox(*PivAny2U{@<标签文本>}, &@<现行选中项>, &@dt<IM文本数组类>::ItemGetter, IM_STRARRAY_PTR_AND_SIZE(@<项目数组>.pdata()), @<列表框高度>)
+        @ ImGui::ListBox(PivAny2U{@<标签文本>}.c_str(), &@<现行选中项>, &@dt<IM文本数组类>::ItemGetter, IM_STRARRAY_PTR_AND_SIZE(@<项目数组>.pdata()), @<列表框高度>)
     }
 
     # 组件: 菜单 | Widgets: Menus
@@ -1984,7 +1984,7 @@
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
     参数 是否启用 <类型 = 逻辑型 注释 = "设置当前的子菜单是否可用" @默认值 = 真>
     {
-        @ if (ImGui::BeginMenu(*PivAny2U{@<标签文本>}, static_cast<bool>(@<是否启用>)) == true)
+        @ if (ImGui::BeginMenu(PivAny2U{@<标签文本>}.c_str(), static_cast<bool>(@<是否启用>)) == true)
     }
 
     方法 菜单项 <公开 静态 类型 = 逻辑型 注释 = "在菜单中创建一个菜单项,参数中的快捷键仅用于显示,本方法不会实现对应的快捷键功能." 返回值注释 = "菜单项被单击时返回真" 折叠
@@ -1996,7 +1996,7 @@
     参数 是否选中 <类型 = 逻辑型 注释 = "设置当前的菜单项是否为选中状态" @默认值 = 假>
     参数 是否启用 <类型 = 逻辑型 注释 = "设置当前的菜单项是否可用" @默认值 = 真>
     {
-        @ ImGui::MenuItem(*PivAny2U{@<标签文本>}, PivAny2U{@<快捷键>}.data(), static_cast<bool>(@<是否选中>), static_cast<bool>(@<是否启用>))
+        @ ImGui::MenuItem(PivAny2U{@<标签文本>}.c_str(), PivAny2U{@<快捷键>}.data(), static_cast<bool>(@<是否选中>), static_cast<bool>(@<是否启用>))
     }
 
     方法 菜单项Ex <公开 静态 类型 = 逻辑型 注释 = "在菜单中创建一个菜单项,参数中的快捷键仅用于显示,本方法不会实现对应的快捷键功能." 返回值注释 = "菜单项被单击时返回真" 折叠
@@ -2008,7 +2008,7 @@
     参数 是否选中 <类型 = 逻辑型 注释 = "必须提供一个变量,可以设置和返回当前的菜单项是否为选中状态." @需求类型 = 可写入变量>
     参数 是否启用 <类型 = 逻辑型 注释 = "设置当前的菜单项是否可用" @默认值 = 真>
     {
-        @ ImGui::MenuItem(*PivAny2U{@<标签文本>}, PivAny2U{@<快捷键>}.data(), reinterpret_cast<bool*>(&@<是否选中>), static_cast<bool>(@<是否启用>))
+        @ ImGui::MenuItem(PivAny2U{@<标签文本>}.c_str(), PivAny2U{@<快捷键>}.data(), reinterpret_cast<bool*>(&@<是否选中>), static_cast<bool>(@<是否启用>))
     }
 
     # 工具提示 | Tooltips
@@ -2025,7 +2025,7 @@
             @匹配类型 = 通用型>
     参数 替换数据 <注释 = "用作给格式文本中的格式替换符提供替换数据,格式替换符的数目和数据类型必须与替换数据保持一致." @匹配类型 = 通用基本型 @可扩展 = "" @默认值 = 0>
     {
-        @ ImGui::SetTooltip(*PivAny2U{@<格式文本>}, @<替换数据>)
+        @ ImGui::SetTooltip(PivAny2U{@<格式文本>}.c_str(), @<替换数据>)
     }
 
     方法 创建项目工具提示 <公开 静态 注释 = "创建一个功能齐全的工具提示窗口,可以在子语句体中使用任意项目." 注释 = "跟\"创建工具提示\"不同,只要有项目悬停它就会自动弹出." 折叠 折叠2
@@ -2039,7 +2039,7 @@
             @匹配类型 = 通用型>
     参数 替换数据 <注释 = "用作给格式文本中的格式替换符提供替换数据,格式替换符的数目和数据类型必须与替换数据保持一致." @匹配类型 = 通用基本型 @可扩展 = "" @默认值 = 0>
     {
-        @ ImGui::SetItemTooltip(*PivAny2U{@<格式文本>}, @<替换数据>)
+        @ ImGui::SetItemTooltip(PivAny2U{@<格式文本>}.c_str(), @<替换数据>)
     }
 
     方法 提示文本框 <公开 静态 注释 = "创建一个文本框,鼠标悬停时可以弹出工具提示窗口." 折叠 @嵌入式方法 = "">
@@ -2048,7 +2048,7 @@
             注释 = "也可以使用\"###\"将动态更改内容的标签指向一个固定的元素ID,比如\"你好###ID\"." @匹配类型 = 通用型>
     参数 帮助文本 <注释 = "提供帮助的文本内容;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     {
-        @ ImGui::TextTooltip(*PivAny2U{@<标签文本>}, *PivAny2U{@<帮助文本>})
+        @ ImGui::TextTooltip(PivAny2U{@<标签文本>}.c_str(), PivAny2U{@<帮助文本>}.c_str())
     }
 
     # 弹出项目,模态 | Popups, Modals
@@ -2058,7 +2058,7 @@
     参数 文本ID <注释 = "设置弹出项的唯一文本ID,本ID不会显示在弹出项中;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     参数 窗口标志 <类型 = 整数 注释 = "本标志会转发给当前窗口;" 注释 = "请参考\"IM窗口标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM窗口标志.无>
     {
-        @ if (ImGui::BeginPopup(*PivAny2U{@<文本ID>}, static_cast<ImGuiWindowFlags>(@<窗口标志>)) == true)
+        @ if (ImGui::BeginPopup(PivAny2U{@<文本ID>}.c_str(), static_cast<ImGuiWindowFlags>(@<窗口标志>)) == true)
     }
 
     方法 创建弹出模态窗口 <公开 静态 注释 = "创建一个弹出模态窗口,被打开时才会执行子语句体中的代码,子语体中可以调用\"关闭当前弹出项\"." 注释 = "注: 点击其他位置不会自动关闭模态窗口"
@@ -2068,21 +2068,21 @@
     参数 打开状态 <类型 = 逻辑型类 注释 = "本参数非空将在模态窗口上显示一个关闭按钮,通过按钮关闭后会将本参数的逻辑值设置为假." @默认值 = 空对象>
     参数 窗口标志 <类型 = 整数 注释 = "本标志会转发给当前窗口;" 注释 = "请参考\"IM窗口标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM窗口标志.无>
     {
-        @ if (ImGui::BeginPopupModal(*PivAny2U{@<名称>}, piv::GetBaseDataPtr<bool*>(@<打开状态>), static_cast<ImGuiWindowFlags>(@<窗口标志>)) == true)
+        @ if (ImGui::BeginPopupModal(PivAny2U{@<名称>}.c_str(), piv::GetBaseDataPtr<bool*>(@<打开状态>), static_cast<ImGuiWindowFlags>(@<窗口标志>)) == true)
     }
 
     方法 弹出 <公开 静态 注释 = "弹出指定文本ID的弹出项,请勿在每一帧调用本方法!" 折叠 @嵌入式方法 = "">
     参数 文本ID <注释 = "提供所欲打开弹出项的唯一文本ID;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     参数 弹出标志 <类型 = 整数 注释 = "请参考\"IM弹出标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM弹出标志.无>
     {
-        @ ImGui::OpenPopup(*PivAny2U{@<文本ID>}, static_cast<ImGuiPopupFlags>(@<弹出标志>))
+        @ ImGui::OpenPopup(PivAny2U{@<文本ID>}.c_str(), static_cast<ImGuiPopupFlags>(@<弹出标志>))
     }
 
     方法 单击项目弹出 <公开 静态 注释 = "(右键)单击最后一个项目时,弹出指定文本ID的弹出项." 折叠 @嵌入式方法 = "">
     参数 文本ID <注释 = "提供所欲打开弹出项的唯一文本ID;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     参数 弹出标志 <类型 = 整数 注释 = "请参考\"IM弹出标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM弹出标志.鼠标右键>
     {
-        @ ImGui::OpenPopupOnItemClick(*PivAny2U{@<文本ID>}, static_cast<ImGuiPopupFlags>(@<弹出标志>))
+        @ ImGui::OpenPopupOnItemClick(PivAny2U{@<文本ID>}.c_str(), static_cast<ImGuiPopupFlags>(@<弹出标志>))
     }
 
     方法 关闭当前弹出项 <公开 静态 注释 = "手动关闭当前的弹出项,必须在\"创建弹出菜单/创建弹出模态窗口/单击××弹出菜单\"的子语句体中调用." 折叠 隐藏值属性 = "0"
@@ -2119,7 +2119,7 @@
     参数 文本ID <注释 = "提供所欲检查的弹出项唯一文本ID;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     参数 弹出标志 <类型 = 整数 注释 = "请参考\"IM弹出标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM弹出标志.鼠标右键>
     {
-        @ ImGui::IsPopupOpen(*PivAny2U{@<文本ID>}, static_cast<ImGuiPopupFlags>(@<弹出标志>))
+        @ ImGui::IsPopupOpen(PivAny2U{@<文本ID>}.c_str(), static_cast<ImGuiPopupFlags>(@<弹出标志>))
     }
 
     # 选项卡栏 | Tab Bars, Tabs
@@ -2129,7 +2129,7 @@
     参数 文本ID <注释 = "设置选项卡栏的唯一文本ID,本ID不会显示在界面中;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型 @默认值 = 0>
     参数 标志 <类型 = 整数 注释 = "请参考\"IM选项卡栏标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM选项卡栏标志.无>
     {
-        @ if (ImGui::BeginTabBar(*PivAny2U{@<文本ID>}, static_cast<ImGuiTabBarFlags>(@<标志>)) == true)
+        @ if (ImGui::BeginTabBar(PivAny2U{@<文本ID>}.c_str(), static_cast<ImGuiTabBarFlags>(@<标志>)) == true)
     }
 
     方法 选项卡 <公开 静态 注释 = "创建一个选项卡项目,可以在子语句体中添加组件." 注释 = "注: 只有选项卡被选中时才会执行子语句体中的代码." 折叠 隐藏值属性 = "0"
@@ -2140,7 +2140,7 @@
     参数 打开状态 <类型 = 逻辑型类 注释 = "本参数非空将在选项卡项标题右边显示一个关闭按钮,单击按钮会关闭选项卡并将本参数的逻辑值设置为假." @默认值 = 空对象>
     参数 标志 <类型 = 整数 注释 = "请参考\"IM选项卡项标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM选项卡项标志.无>
     {
-        @ if (ImGui::BeginTabItem(*PivAny2U{@<标签文本>}, piv::GetBaseDataPtr<bool*>(@<打开状态>), static_cast<ImGuiTabItemFlags>(@<标志>)) == true)
+        @ if (ImGui::BeginTabItem(PivAny2U{@<标签文本>}.c_str(), piv::GetBaseDataPtr<bool*>(@<打开状态>), static_cast<ImGuiTabItemFlags>(@<标志>)) == true)
     }
 
     方法 选项卡按钮 <公开 静态 类型 = 逻辑型 注释 = "创建一个行为类似按钮的选项卡项目,本项目不能在选项卡栏中切换选择." 返回值注释 = "按钮被单击时返回真" 折叠 隐藏值属性 = "0"
@@ -2156,7 +2156,7 @@
     方法 置选项卡关闭 <公开 静态 注释 = "通知指定的选项卡已关闭" 折叠 @嵌入式方法 = "">
     参数 标签文本 <注释 = "所欲关闭的选项卡标签;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     {
-        @ ImGui::SetTabItemClosed(*PivAny2U{@<标签文本>})
+        @ ImGui::SetTabItemClosed(PivAny2U{@<标签文本>}.c_str())
     }
 
     # 停靠 | Docking
@@ -2238,7 +2238,7 @@
             @匹配类型 = 通用型>
     参数 替换数据 <注释 = "用作给格式文本中的格式替换符提供替换数据,格式替换符的数目和数据类型必须与替换数据保持一致." @匹配类型 = 通用基本型 @可扩展 = "" @默认值 = 0>
     {
-        @ ImGui::LogText(*PivAny2U{@<格式文本>}, @<替换数据>)
+        @ ImGui::LogText(PivAny2U{@<格式文本>}.c_str(), @<替换数据>)
     }
 
     # 拖放 | Drag and Drop
@@ -2258,7 +2258,7 @@
     参数 数据尺寸 <类型 = 变整数 注释 = "提供数据尺寸">
     参数 执行条件 <类型 = IM执行条件 注释 = "提供本方法的执行条件" @默认值 = IM执行条件.无>
     {
-        @ ImGui::SetDragDropPayload(*PivAny2U{@<类型>}, reinterpret_cast<void*>(@<数据指针>), static_cast<size_t>(@<数据尺寸>), static_cast<ImGuiCond>(@<执行条件>))
+        @ ImGui::SetDragDropPayload(PivAny2U{@<类型>}.c_str(), reinterpret_cast<void*>(@<数据指针>), static_cast<size_t>(@<数据尺寸>), static_cast<ImGuiCond>(@<执行条件>))
     }
 
     方法 拖放目标 <公开 静态 折叠 隐藏值属性 = "0"
@@ -2273,7 +2273,7 @@
             @匹配类型 = 通用型>
     参数 标志 <类型 = 整数 注释 = "请参考\"IM拖放标志\"中的常量和备注,可以用\"连续位或\"组合使用多个标志." @默认值 = IM拖放标志.无>
     {
-        @ ImGui::AcceptDragDropPayload(*PivAny2U{@<类型>},  static_cast<ImGuiDragDropFlags>(@<标志>))
+        @ ImGui::AcceptDragDropPayload(PivAny2U{@<类型>}.c_str(),  static_cast<ImGuiDragDropFlags>(@<标志>))
     }
 
     方法 取拖放有效载荷 <公开 静态 类型 = IM有效载荷指针 注释 = "从任何位置直接查看当前有效有效载荷." 折叠 @嵌入式方法 = "">
@@ -2472,7 +2472,7 @@
     参数 隐藏两个井号后面 <类型 = 逻辑型 注释 = "隐藏两个井号后面的文本" @默认值 = 假>
     参数 换行宽度 <类型 = 小数 注释 = "小于0时表示不换行." @默认值 = -1.0>
     {
-        @ ImGui::CalcTextSize(*PivAny2U{@<文本内容>}, nullptr, static_cast<bool>(@<隐藏两个井号后面>), @<换行宽度>)
+        @ ImGui::CalcTextSize(PivAny2U{@<文本内容>}.c_str(), nullptr, static_cast<bool>(@<隐藏两个井号后面>), @<换行宽度>)
     }
 
     # 颜色实用工具 | Color Utilities
@@ -2725,7 +2725,7 @@
     参数 外边框尺寸 <类型 = ImVec2 @默认值 = ImVec2默认值.零值>
     参数 内宽度 <类型 = 单精度小数 @默认值 = 0.0>
     {
-        @ if (ImGui::BeginTable(*PivAny2U{@<文本ID>}, @<列数>, static_cast<ImGuiTableFlags>(@<表格标志>), @<外边框尺寸>, @<内宽度>) == true)
+        @ if (ImGui::BeginTable(PivAny2U{@<文本ID>}.c_str(), @<列数>, static_cast<ImGuiTableFlags>(@<表格标志>), @<外边框尺寸>, @<内宽度>) == true)
     }
 
     方法 到下一行 <公开 静态 注释 = "加入到新一行的第一个单元格." 折叠 隐藏值属性 = "0" @嵌入式方法 = "parent = \"Table\"">
@@ -2756,7 +2756,7 @@
     参数 初始宽度 <类型 = 单精度小数 注释 = "提供列的初始宽度,单位为像素或权重(依标志而定)" @默认值 = 0.0>
     参数 用户ID <类型 = 整数 注释 = "提供用户自定义的ID值" @默认值 = 0>
     {
-        @ ImGui::TableSetupColumn(*PivAny2U{@<标签文本>}, static_cast<ImGuiTableColumnFlags>(@<表格列标志>), @<初始宽度>, static_cast<ImGuiID>(@<用户ID>))
+        @ ImGui::TableSetupColumn(PivAny2U{@<标签文本>}.c_str(), static_cast<ImGuiTableColumnFlags>(@<表格列标志>), @<初始宽度>, static_cast<ImGuiID>(@<用户ID>))
     }
 
     方法 冻结窗格 <公开 静态 注释 = "锁定指定数量的列和行,使它们在表格滚动时始终可见." 注释 = "注: 只能在\"置列属性\"和\"到下一行\"之间调用." 折叠 隐藏值属性 = "0"
@@ -3035,7 +3035,7 @@
     参数 颜色 <类型 = 整数>
     参数 文本内容 <注释 = "所欲添加的文本内容;" 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;" @匹配类型 = 通用型>
     {
-        @ @<欲操作本对象>->AddText(@<位置>, static_cast<ImU32>(@<颜色>), *PivAny2U{@<文本内容>}, nullptr)
+        @ @<欲操作本对象>->AddText(@<位置>, static_cast<ImU32>(@<颜色>), PivAny2U{@<文本内容>}.c_str(), nullptr)
     }
 
     方法 添加文本Ex <公开 静态 折叠 @嵌入式方法 = "">
@@ -3048,7 +3048,7 @@
     参数 换行宽度 <类型 = 单精度小数 @默认值 = 0.0>
     参数 精细剪切矩形 <类型 = 变整数 注释 = "CPU精细剪切矩形,ImVec4.取变整数地址()" @默认值 = 0>
     {
-        @ @<欲操作本对象>->AddText(@<字体>, @<字体大小>, @<位置>, static_cast<ImU32>(@<颜色>), *PivAny2U{@<文本内容>}, nullptr, @<换行宽度>, reinterpret_cast<const ImVec4*>(@<精细剪切矩形>))
+        @ @<欲操作本对象>->AddText(@<字体>, @<字体大小>, @<位置>, static_cast<ImU32>(@<颜色>), PivAny2U{@<文本内容>}.c_str(), nullptr, @<换行宽度>, reinterpret_cast<const ImVec4*>(@<精细剪切矩形>))
     }
 
     方法 添加三次贝塞尔曲线 <公开 静态 折叠 @嵌入式方法 = "">
@@ -3416,7 +3416,7 @@
     参数 所欲设置的文本 <注释 = "提供所欲设置的成员值,先前的值将被覆盖." 注释 = "支持类型(*表示会进行编码转换):" 注释 = "  标准文本类U、文本视图类U"
             注释 = "  *文本型、*标准文本类W、*文本视图类W" @匹配类型 = 通用型>
     {
-        @ @sn<this>.arr[static_cast<size_t>(@<索引位置>)] = PivAny2Us{@<所欲设置的文本>}.ref()
+        @ @sn<this>.arr[static_cast<size_t>(@<索引位置>)] = PivAny2Us{@<所欲设置的文本>}.str
     }
 
     方法 加入成员 <公开 注释 = "将一个或多个文本值加入到数组尾部" 折叠 @嵌入式方法 = "">
@@ -3437,7 +3437,7 @@
     参数 所欲插入的文本 <注释 = "所欲添加的文本值,支持类型(*表示会进行编码转换):" 注释 = "  标准文本类U、文本视图类U" 注释 = "  *文本型、*标准文本类、*文本视图类"
             @匹配类型 = 通用型>
     {
-        @ arr.emplace(arr.begin() + static_cast<size_t>(@<插入索引位置>), PivAny2Us{@<所欲插入的文本>}.ref());
+        @ arr.emplace(arr.begin() + static_cast<size_t>(@<插入索引位置>), PivAny2Us{@<所欲插入的文本>}.str);
     }
 
     方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖>
@@ -3460,10 +3460,10 @@
     # inline BOOL @an<_IsSelfEqualExtra> (const @sn<current_class>& objCompare) const { return (arr == objCompare.arr); }
     # inline std::vector<std::string> *pdata() { return &arr; }
     # inline void push_back(const std::string &s) { arr.emplace_back(s); }
-    # inline void push_back(const std::wstring &s) { arr.emplace_back(*PivW2U{s}); }
+    # inline void push_back(const std::wstring &s) { arr.emplace_back(PivW2U{s}.str); }
     # inline void push_back(const piv::string_view &s) { arr.emplace_back(s); }
-    # inline void push_back(const piv::wstring_view &s) { arr.emplace_back(*PivW2U{s}); }
-    # inline void push_back(const CVolString &s) { arr.emplace_back(*PivW2U{s}); }
+    # inline void push_back(const piv::wstring_view &s) { arr.emplace_back(PivW2U{s}.str); }
+    # inline void push_back(const CVolString &s) { arr.emplace_back(PivW2U{s}.str); }
     # inline void push_back(const CVolMem &s) { arr.emplace_back((const char *)s.GetPtr(), (size_t)s.GetSize()); }
     # template <typename T>
     # inline void push_backs(T &&s) { push_back(std::forward<T>(s)); }
@@ -3502,7 +3502,7 @@
     参数 字形范围 <类型 = IM字形范围 注释 = "选择字体的字形范围,范围内的字符将栅格化为图集,如果范围过大将消耗更多的内存." 注释 = "但如果有不在范围内字符,将无法正常显示."
             @默认值 = IM字形范围.中文>
     {
-        @ @<欲操作本对象>->AddFontFromFileTTF(*PivAny2U{@<文件名>}, @<像素大小>, nullptr, ImFontAtlas().@pvpt<字形范围>())
+        @ @<欲操作本对象>->AddFontFromFileTTF(PivAny2U{@<文件名>}.c_str(), @<像素大小>, nullptr, ImFontAtlas().@pvpt<字形范围>())
     }
 
     方法 添加内存字体 <公开 静态 类型 = IM字体指针 注释 = "从内存数据添加字体,添加后请勿自行释放字体的内存数据." 返回值注释 = "返回字体指针" 折叠 @嵌入式方法 = "">
@@ -3525,7 +3525,7 @@
     {
         @ ImVector<ImWchar>* out_ranges = new ImVector<ImWchar>;
         @ @<字形范围>.BuildRanges(out_ranges);
-        @ return @<欲操作本对象>->AddFontFromFileTTF(*PivAny2U{@<文件名>}, @<像素大小>, nullptr, out_ranges->Data);
+        @ return @<欲操作本对象>->AddFontFromFileTTF(PivAny2U{@<文件名>}.c_str(), @<像素大小>, nullptr, out_ranges->Data);
     }
 
     方法 添加内存字体Ex <公开 静态 类型 = IM字体指针 注释 = "从内存数据添加字体,添加后请勿自行释放字体的内存数据." 返回值注释 = "返回字体指针" 折叠 @禁止流程检查 = 真>
@@ -3632,7 +3632,7 @@
     参数 所加入文本 <注释 = "支持类型(*表示会进行编码转换):" 注释 = " 标准文本类U、文本视图类U、字节集类(UTF-8编码)" 注释 = " *文本型、*标准文本类、*文本视图类"
             @匹配类型 = 通用型>
     {
-        @ @<欲操作本对象>.AddText(*PivAny2U{@<所加入文本>})
+        @ @<欲操作本对象>.AddText(PivAny2U{@<所加入文本>}.c_str())
     }
 
     方法 加入范围 <公开 静态 注释 = "添加\"IM字形范围\"常量中的字形范围,可以方便添加英文数字等常用文字类型." 折叠 @嵌入式方法 = "">
@@ -3651,7 +3651,7 @@
     }
 }
 
-类 ImVec2 <公开 基础类 = PIV本地值模板 注释 = "ImVec2" 折叠 @文档 = "category = \"辅助类\"" @别名 = "ImVec2" @别名类型 = 本地值类型
+类 ImVec2 <公开 基础类 = PIV本地值模板 注释 = "ImVec2" @文档 = "category = \"辅助类\"" @别名 = "ImVec2" @别名类型 = 本地值类型
         @模板实现类 = "ImVec2">
 {
     变量 x <公开 类型 = 单精度小数 @输出名 = "x" @属性变量 = 真>
@@ -3790,20 +3790,6 @@
     {
         返回 (取格式文本 ("<ImVec2> {x: %f, y: %f}", 欲操作本对象.x, 欲操作本对象.y))
     }
-
-    # @begin
-    # <> <global>
-    # <> <include>
-    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, ImVec2* value)
-    # {
-    #     if (value != nullptr)
-    #         strDebug.AddFormatText(L"<ImVec2> {x: %f, y: %f}", value->x, value->y);
-    #     else
-    #         strDebug.SetText(L"ImVec2: nullptr");
-    # }
-    # <> </include>
-    # <> </global>
-    # @end
 }
 
 类 ImVec2默认值 <公开 注释 = "提供ImVec2的常用默认值" 折叠 @文档 = "category = \"常量类\"">
@@ -3987,20 +3973,6 @@
     {
         返回 (取格式文本 ("<ImVec4> {x: %f, y: %f, z: %f, w: %f}", 欲操作本对象.x, 欲操作本对象.y, 欲操作本对象.z, 欲操作本对象.w))
     }
-
-    # @begin
-    # <> <global>
-    # <> <include>
-    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, ImVec4* value)
-    # {
-    #     if (value != nullptr)
-    #         strDebug.AddFormatText(L"<ImVec4> {x: %f, y: %f, z: %f, w: %f}", value->x, value->y, value->z, value->w);
-    #     else
-    #         strDebug.SetText(L"ImVec4: nullptr");
-    # }
-    # <> </include>
-    # <> </global>
-    # @end
 }
 
 类 ImVec4默认值 <公开 注释 = "提供ImVec4的常用默认值" 折叠 @文档 = "category = \"常量类\"">
@@ -4032,7 +4004,7 @@
     方法 INI文件名 <公开 静态 属性读 类型 = 文本型 注释 = "返回.ini文件的路径(默认为当前工作目录下的\"imgui.ini\")." 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = ImGuiIO类>
     {
-        @ *PivU2Ws{@<欲操作本对象>->IniFilename}
+        @ PivU2Ws{@<欲操作本对象>->IniFilename}.str
     }
 
     方法 INI文件名 <公开 静态 属性写 注释 = "设置.ini文件的路径,设置为空文本可以禁止自动加载和保存窗口设置到ini文件." 折叠>
@@ -4048,7 +4020,7 @@
             注释 = "如果调用\"ImGui.记录到文件\"时未指定文件,则使用这里的默认文件名." 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = ImGuiIO类>
     {
-        @ *PivU2Ws{@<欲操作本对象>->LogFilename}
+        @ PivU2Ws{@<欲操作本对象>->LogFilename}.str
     }
 
     方法 日志文件名 <公开 静态 属性写 注释 = "设置日志文件的路径,如果调用\"ImGui.记录到文件\"时未指定文件,则使用这里的默认文件名." 折叠>
@@ -4523,7 +4495,7 @@
     参数 类型 <注释 = "类型是用户定义的文本,最多32个UTF-8字符,字符\'_\'开头的是ImGui的内部保留类型." 注释 = "建议类型: 标准文本类U、字节集类(UTF-8)、文本型;"
             @匹配类型 = 通用型>
     {
-        @ @<欲操作本对象>->IsDataType(*PivAny2U{@<类型>})
+        @ @<欲操作本对象>->IsDataType(PivAny2U{@<类型>}.c_str())
     }
 
     # ---
@@ -5914,6 +5886,22 @@
 # @begin
 # <> <global>
 # <> <include>
+# static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, ImVec2* value)
+# {
+#     if (value != nullptr)
+#         strDebug.AddFormatText(L"<ImVec2> {x: %f, y: %f}", value->x, value->y);
+#     else
+#         strDebug.SetText(L"ImVec2: nullptr");
+# }
+#
+# static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, ImVec4* value)
+# {
+#     if (value != nullptr)
+#         strDebug.AddFormatText(L"<ImVec4> {x: %f, y: %f, z: %f, w: %f}", value->x, value->y, value->z, value->w);
+#     else
+#         strDebug.SetText(L"ImVec4: nullptr");
+# }
+#
 # template <typename T>
 # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, ImVector<T>* value)
 # {

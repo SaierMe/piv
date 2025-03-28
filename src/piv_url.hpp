@@ -436,11 +436,11 @@ public:
         }
         PIV_ELSE_IF(sizeof(EncodeT) == 3)
         {
-            return *PivU2Ws{reinterpret_cast<const char *>(scheme.data()), scheme.size()};
+            return PivU2Ws{reinterpret_cast<const char *>(scheme.data()), scheme.size()}.str;
         }
         else
         {
-            return *PivA2Ws{reinterpret_cast<const char *>(scheme.data()), scheme.size()};
+            return PivA2Ws{reinterpret_cast<const char *>(scheme.data()), scheme.size()}.str;
         }
     }
 
@@ -462,11 +462,11 @@ public:
         }
         PIV_ELSE_IF(sizeof(EncodeT) == 3)
         {
-            return *PivU2Ws{reinterpret_cast<const char *>(str.data()), str.size()};
+            return PivU2Ws{reinterpret_cast<const char *>(str.data()), str.size()}.str;
         }
         else
         {
-            return *PivA2Ws{reinterpret_cast<const char *>(str.data()), str.size()};
+            return PivA2Ws{reinterpret_cast<const char *>(str.data()), str.size()}.str;
         }
     }
 
@@ -494,11 +494,11 @@ public:
         }
         PIV_ELSE_IF(sizeof(EncodeT) == 3)
         {
-            return *PivU2Ws{reinterpret_cast<const char *>(str.data()), str.size()};
+            return PivU2Ws{reinterpret_cast<const char *>(str.data()), str.size()}.str;
         }
         else
         {
-            return *PivA2Ws{reinterpret_cast<const char *>(str.data()), str.size()};
+            return PivA2Ws{reinterpret_cast<const char *>(str.data()), str.size()}.str;
         }
     }
 
@@ -519,11 +519,11 @@ public:
         }
         PIV_ELSE_IF(sizeof(EncodeT) == 3)
         {
-            return *PivU2Ws{reinterpret_cast<const char *>(host.data()), host.size()};
+            return PivU2Ws{reinterpret_cast<const char *>(host.data()), host.size()}.str;
         }
         else
         {
-            return *PivA2Ws{reinterpret_cast<const char *>(host.data()), host.size()};
+            return PivA2Ws{reinterpret_cast<const char *>(host.data()), host.size()}.str;
         }
     }
 
@@ -539,11 +539,11 @@ public:
         }
         PIV_ELSE_IF(sizeof(EncodeT) == 3)
         {
-            return *PivU2Ws{reinterpret_cast<const char *>(path.data()), path.size()};
+            return PivU2Ws{reinterpret_cast<const char *>(path.data()), path.size()}.str;
         }
         else
         {
-            return *PivA2Ws{reinterpret_cast<const char *>(path.data()), path.size()};
+            return PivA2Ws{reinterpret_cast<const char *>(path.data()), path.size()}.str;
         }
     }
 
@@ -559,11 +559,11 @@ public:
         }
         PIV_ELSE_IF(sizeof(EncodeT) == 3)
         {
-            return *PivU2Ws{reinterpret_cast<const char *>(port.data()), port.size()};
+            return PivU2Ws{reinterpret_cast<const char *>(port.data()), port.size()}.str;
         }
         else
         {
-            return *PivA2Ws{reinterpret_cast<const char *>(port.data()), port.size()};
+            return PivA2Ws{reinterpret_cast<const char *>(port.data()), port.size()}.str;
         }
     }
 
@@ -579,11 +579,11 @@ public:
         }
         PIV_ELSE_IF(sizeof(EncodeT) == 3)
         {
-            return *PivU2Ws{reinterpret_cast<const char *>(query.data()), query.size()};
+            return PivU2Ws{reinterpret_cast<const char *>(query.data()), query.size()}.str;
         }
         else
         {
-            return *PivA2Ws{reinterpret_cast<const char *>(query.data()), query.size()};
+            return PivA2Ws{reinterpret_cast<const char *>(query.data()), query.size()}.str;
         }
     }
 
@@ -599,11 +599,11 @@ public:
         }
         PIV_ELSE_IF(sizeof(EncodeT) == 3)
         {
-            return *PivU2Ws{reinterpret_cast<const char *>(fragment.data()), fragment.size()};
+            return PivU2Ws{reinterpret_cast<const char *>(fragment.data()), fragment.size()}.str;
         }
         else
         {
-            return *PivA2Ws{reinterpret_cast<const char *>(fragment.data()), fragment.size()};
+            return PivA2Ws{reinterpret_cast<const char *>(fragment.data()), fragment.size()}.str;
         }
     }
 
@@ -983,11 +983,11 @@ public:
         }
         PIV_ELSE_IF(sizeof(EncodeT) == 3)
         {
-            return *PivU2Ws{reinterpret_cast<const char *>(form.GetPtr()), static_cast<size_t>(form.GetSize())};
+            return PivU2Ws{reinterpret_cast<const char *>(form.GetPtr()), static_cast<size_t>(form.GetSize())}.str;
         }
         else
         {
-            return *PivA2Ws{reinterpret_cast<const char *>(form.GetPtr()), static_cast<size_t>(form.GetSize())};
+            return PivA2Ws{reinterpret_cast<const char *>(form.GetPtr()), static_cast<size_t>(form.GetSize())}.str;
         }
     }
 
