@@ -47,6 +47,7 @@ public:
     struct ProcessInfo
     {
         bool isWow64 = false;
+        bool needClose = true;
         DWORD PID = 0;
         HANDLE hProcess = NULL;
         std::map<ULONG64, ModuleInfo> ModulesMap;
@@ -60,7 +61,7 @@ public:
         ProcessInfo() {}
         ~ProcessInfo()
         {
-            if (hProcess != NULL)
+            if (needClose && hProcess != NULL)
                 PivNT::data().NtClose(hProcess);
         }
     };
@@ -227,6 +228,24 @@ public:
             NtPiv::CLIENT_ID cid = {reinterpret_cast<HANDLE>(ProInfo->PID), NULL};
             if (NT_SUCCESS(Nt.NtOpenProcess(&ProInfo->hProcess, desired_access, &oa, &cid)) && _get_base_info())
                 return true;
+        }
+        ProInfo.reset(nullptr);
+        return false;
+    }
+
+    // 打开自句柄
+    bool open_handle(HANDLE process, BOOL auto_close = false)
+    {
+        if (Nt.isLoaded() == true)
+        {
+            ProInfo.reset(new ProcessInfo);
+            ProInfo->hProcess = process;
+            if (_get_base_info())
+            {
+                ProInfo->needClose = auto_close;
+                ProInfo->PID = ::GetProcessId(process);
+                return true;
+            }
         }
         ProInfo.reset(nullptr);
         return false;

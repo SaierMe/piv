@@ -354,10 +354,10 @@
         @     }
         @ } else {
         @     BOOL UsedDefaultChar = FALSE;  CHAR DefaultChar{(CHAR)0xFF};
-        @     PivBuffer<CHAR> buffer(len * 3);
+        @     PivBuffer<CHAR, int> buffer(len * 3);
         @     int size = ::WideCharToMultiByte(936, 0, str, len, buffer.GetPtr(), len * 3, &DefaultChar, &UsedDefaultChar);
         @     if (UsedDefaultChar && size > 0) {
-        @         PivBuffer<bool> encode(len); CHAR ch;
+        @         PivBuffer<bool, int> encode(len); CHAR ch;
         @         for (int i = 0,n = 0; i < len; i++) {
         @             ch = buffer[n];
         @             if (ch > 0 && ch < 128) { encode[i] = false;  n++; }
@@ -1415,8 +1415,8 @@
 # ===
 
 类 BASE编解码类 <公开 注释 = "Base91、Base85编解码." 注释 = "源码: https://github.com/r-lyeh-archived/base"
-        注释 = "针对火山对源码进行了大量修改" 折叠 @文档 = "category = \"编码处理\"" @视窗.外部头文件 = "src\\piv_encoding.hpp" @禁止创建对象 = 真
-        @全局类 = 真>
+        注释 = "针对火山对源码进行了大量修改" 折叠 @文档 = "category = \"编码处理\"" "@视窗.外部头文件.全局-111" = "src\\piv_encoding.hpp"
+        @禁止创建对象 = 真 @全局类 = 真>
 {
     方法 字节集到BASE91文本 <公开 静态 类型 = 文本型 注释 = "将字节集数据转换为BASE91编码格式文本." 注释 = "保留ASCII字符为{<>\"}." 折叠 @嵌入式方法 = "">
     参数 所欲编码数据 <类型 = 字节集类>

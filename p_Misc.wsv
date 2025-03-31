@@ -480,7 +480,7 @@
 类 配置文件操作类 <公开 注释 = "  提供简易的ini配置文件读写操作,支持多字节、UTF-8和UTF-16LE编码."
         注释 = "  所有属性写的方法,都必须在\"打开文件\"、\"创建自文件\"、\"创建自字节集\"" 注释 = "之前设置,后续设置无效."
         注释 = "  源码: https://github.com/brofield/simpleini" 折叠 @文档 = "category = \"配置文件.INI\""
-        @视窗.外部头文件 = "src\\SimpleIni.h\r\nsrc\\piv_encoding.hpp">
+        @视窗.外部头文件 = "src\\SimpleIni.h" "@视窗.外部头文件.全局-111" = "src\\piv_encoding.hpp">
 {
     方法 类_初始化 <折叠>
     {
@@ -582,13 +582,13 @@
         @ data().Reset();
         @ if (@<文本编码> == VSET_UTF_8) {
         @     data().SetUnicode(true);
-        @     return data().LoadData(reinterpret_cast<const char*>(@<配置内容>.GetPtr()), @<配置内容>.GetSize());
+        @     return data().LoadData(reinterpret_cast<const char*>(@<配置内容>.GetPtr()), static_cast<size_t>(@<配置内容>.GetSize()));
         @ } else if (@<文本编码> == VSET_UTF_16) {
         @     data().SetUnicode(true);
-        @     return data().LoadData(PivW2U{reinterpret_cast<const wchar_t*>(@<配置内容>.GetPtr()), @<配置内容>.GetSize() / 2}.str);
+        @     return data().LoadData(PivW2U{reinterpret_cast<const wchar_t*>(@<配置内容>.GetPtr()), static_cast<size_t>(@<配置内容>.GetSize() / 2)}.str);
         @ } else {
         @     data().SetUnicode(false);
-        @     return data().LoadData(reinterpret_cast<const char*>(@<配置内容>.GetPtr()), @<配置内容>.GetSize());
+        @     return data().LoadData(reinterpret_cast<const char*>(@<配置内容>.GetPtr()), static_cast<size_t>(@<配置内容>.GetSize()));
         @ }
     }
 
@@ -635,14 +635,15 @@
         @ }
         @ if (m_nType == VSET_UTF_16 || (m_nType == VSET_UNKNOWN && @<文本编码> == VSET_UTF_16)) {
         @     data().SetUnicode(true);
-        @     nRet = static_cast<INT>(data().LoadData(PivW2U{reinterpret_cast<const WCHAR*>(szData + (hasBom ? 2 : 0)), (hasBom ? (nSize - 2) : nSize) / 2}.str));
+        @     nRet = static_cast<INT>(data().LoadData(PivW2U{reinterpret_cast<const WCHAR*>(szData + (hasBom ? 2 : 0)),
+        @                                             static_cast<size_t>((hasBom ? (nSize - 2) : nSize) / 2)}.str));
         @ } else if (m_nType == VSET_UTF_8 || (m_nType == VSET_UNKNOWN && @<文本编码> == VSET_UTF_8)) {
         @     data().SetUnicode(true);
-        @     nRet = static_cast<INT>(data().LoadData(reinterpret_cast<const char*>(szData), nSize));
+        @     nRet = static_cast<INT>(data().LoadData(reinterpret_cast<const char*>(szData), static_cast<size_t>(nSize)));
         @ } else {
         @     m_nType = VSET_MBCS;
         @     data().SetUnicode(false);
-        @     nRet = static_cast<INT>(data().LoadData(reinterpret_cast<const char*>(szData), nSize));
+        @     nRet = static_cast<INT>(data().LoadData(reinterpret_cast<const char*>(szData), static_cast<size_t>(nSize)));
         @ }
         @ delete [] szData;
         @ if (nRet >= 0) {
@@ -684,7 +685,7 @@
         @         CVolMem memUtf8;
         @         std::string szBuffer;
         @         data().Save(szBuffer, false);
-        @         PivA2U utf8str {szBuffer};
+        @         PivA2U utf8str{szBuffer};
         @         utf8str.to_volmem(memUtf8, false);
         @         memUtf8.InsertValue_S_BYTE(0, (S_BYTE)0xBF); memUtf8.InsertValue_S_BYTE(0, (S_BYTE)0xBB); memUtf8.InsertValue_S_BYTE(0, (S_BYTE)0xEF);
         @         return memUtf8.WriteIntoFile(@<文件名>, -1) ? 0 : -3;
@@ -693,10 +694,10 @@
         @     CVolMem memWStr; std::string szBuffer;
         @     data().Save(szBuffer, false);
         @     if (data().IsUnicode()) {
-        @         PivU2W utf16str {szBuffer};
+        @         PivU2W utf16str{szBuffer};
         @         utf16str.to_volmem(memWStr, false);
         @     } else {
-        @         PivA2W utf16str {szBuffer};
+        @         PivA2W utf16str{szBuffer};
         @         utf16str.to_volmem(memWStr, false);
         @     }
         @     memWStr.InsertValue_SHORT(0, (SHORT)0xFEFF);
@@ -706,7 +707,7 @@
         @         CVolMem memMBS;
         @         std::string szBuffer;
         @         data().Save(szBuffer, false);
-        @         PivU2A mbstr {szBuffer};
+        @         PivU2A mbstr{szBuffer};
         @         mbstr.to_volmem(memMBS, false);
         @         return memMBS.WriteIntoFile(@<文件名>, -1) ? 0 : -3;
         @     } else {

@@ -62,8 +62,7 @@ inline void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, T _ptr)
     TCHAR buf[64];
     buf[0] = '0';
     buf[1] = 'x';
-    ToHexStr(sizeof(T) == 8 ? (unsigned long long)_ptr : (unsigned int)_ptr,
-             sizeof(T) * 2, &buf[2], NUM_ELEMENTS_OF(buf) - 2);
+    ToHexStr((unsigned long long)_ptr, sizeof(T) * 2, &buf[2], NUM_ELEMENTS_OF(buf) - 2);
     strDebug.SetText(buf);
 }
 
