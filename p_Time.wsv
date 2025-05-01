@@ -15,7 +15,7 @@
         @ struct tm info;
         @ if (unix < 0) unix = 0;
         @ @<GMT时区> ? ::gmtime_s(&info, &unix) : ::localtime_s(&info, &unix);
-        @ return CVolString().Format(L"%04d-%02d-%02d %02d:%02d:%02d.%09I64d", info.tm_year + 1905, info.tm_mon + 1,
+        @ return CVolString().Format(L"%04d-%02d-%02d %02d:%02d:%02d.%09I64d", info.tm_year + 1900, info.tm_mon + 1,
         @                            info.tm_mday, info.tm_hour, info.tm_min, info.tm_sec, @<纳秒时间戳> % 1000000000);
     }
 
