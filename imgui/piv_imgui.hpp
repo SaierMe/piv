@@ -6,17 +6,6 @@
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
 
-#ifndef STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#endif
-#ifndef STBI_WINDOWS_UTF8
-#define STBI_WINDOWS_UTF8
-#endif
-#ifndef STB_IMAGE_STATIC
-#define STB_IMAGE_STATIC
-#endif
-#include "../src/stb_image.h"
-
 #ifndef IM_ARRAY_AND_SIZE
 #define IM_ARRAY_AND_SIZE(_ARR) (_ARR), ((int)(sizeof(_ARR) / sizeof(*(_ARR))))
 #endif

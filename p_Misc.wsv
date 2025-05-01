@@ -2,14 +2,13 @@
 
 包 火山.PIV基础类 <注释 = "https://github.com/SaierMe/piv" "">
 
-类 ULID类 <公开 基础类 = PIV本地类模板 注释 = "ULID(可排序的唯一标识符);"
+类 ULID类 <公开 基础类 = PIV本地类 注释 = "ULID(可排序的唯一标识符);"
         注释 = "它结合毫秒时间戳和随机数生成32个字节长度的标识符,并通过Base32转换到26个字符的ULID文本."
         注释 = "  1. ULID前6个字节是毫秒时间戳,后10个字节通过std::mt19937算法生成的随机数;"
         注释 = "  2. ULID跟UUID/GUID相比,最大的区别是可以按字典序排序,先比较前面的时间戳," 注释 = "如果时间戳相等则继续比较后面的随机数;"
         注释 = "  3. ULID可以提取出时间戳;" 注释 = "  4. ULID文本无特殊字符,可直接用于URL、JSON、SQL语句..."
         注释 = "https://github.com/suyash/ulid" 折叠 @文档 = "category = \"伪随机数\""
-        @视窗.外部头文件 = "src\\detail\\ulid_struct.hh" @强制依赖 = "PIV对象类" @别名 = "ulid::ULID" @别名类型 = 本地类
-        @模板实现类 = "ULID类">
+        @视窗.外部头文件 = "src\\detail\\ulid_struct.hh" @别名 = "ulid::ULID" @别名类型 = 本地类>
 {
     方法 构造 <公开 静态 类型 = ULID类 注释 = "从现行时间创建一个新的ULID对象" 折叠 @禁止流程检查 = 真>
     {
@@ -39,7 +38,7 @@
     参数 欲操作本对象 <类型 = ULID类>
     参数 ULID字节集 <类型 = 字节集类 注释 = "提供所欲转换的字节集格式的GUID,该字节集应由本类的\"取字节集\"方法返回.">
     {
-        @ if (@<ULID字节集>.GetSize() != sizeof(ulid::ULID))
+        @ if (static_cast<size_t>(@<ULID字节集>.GetSize()) != sizeof(ulid::ULID))
         @     return FALSE;
         @ ulid::UnmarshalBinaryFrom(@<ULID字节集>.GetPtr(), @<欲操作本对象>);
         @ return TRUE;
@@ -68,7 +67,7 @@
     方法 取字节集 <公开 静态 类型 = 字节集类 注释 = "返回本对象中所保存ULID对应的字节集数据" 折叠 @嵌入式方法 = "">
     参数 欲操作本对象 <类型 = ULID类>
     {
-        @ @an<CVolMem>(&@<欲操作本对象>, sizeof(ulid::ULID))
+        @ @an<CVolMem>(&@<欲操作本对象>, static_cast<INT_P>(sizeof(ulid::ULID)))
     }
 
     方法 比较 <公开 静态 类型 = 整数 注释 = "比较两个ULID的字典序大小,返回比较结果." 返回值注释 = "返回-1,表示本ULID小于所比较的ULID;"
@@ -317,7 +316,7 @@
         @ @an<CVolString> szStr;
         @ if (Offset <= 0) return szStr;
         @ wchar_t* pStr = szStr.InitWithChars(@<欲取字符数>, ' ');
-        @ std::uniform_int_distribution<INT> dist(0, Offset);
+        @ std::uniform_int_distribution<size_t> dist(0, Offset);
         @ for (INT i = 0; i < @<欲取字符数>; i++) {
         @     pStr[i] = Buffer[dist(gen)];
         @ }
@@ -392,7 +391,7 @@
         @     L"牟", L"佘", L"佴", L"伯", L"赏", L"南宫", L"墨", L"哈", L"谯", L"笪",
         @     L"年", L"爱", L"阳", L"佟", L"第五", L"言", L"福"
         @ };
-        @ std::uniform_int_distribution<size_t> dist(0, NUM_ELEMENTS_OF(surname) - 1);
+        @ std::uniform_int_distribution<size_t> dist(0, (sizeof(surname) / sizeof(surname[0]) - 1));
         @ return @an<CVolString>(surname[dist(gen)]);
     }
 
@@ -603,20 +602,13 @@
         @ m_szIniFile.Empty(); m_bAutoSave = false;
         @ data().Reset();
         @ INT nRet = 0;
-        @ FILE* fp = NULL;
-        @ if (IsOSFileExist(@<文件名>.GetText()))
-        @     fp = _wfopen(@<文件名>.GetText(), L"rb");
-        @ else
-        @     fp = _wfopen(@<文件名>.GetText(), L"ab+");
+        @ FILE* fp = _wfopen(@<文件名>.GetText(), IsOSFileExist(@<文件名>.GetText()) ? L"rb" : L"ab+");
         @ if (!fp) return -3;
         @ fseek(fp, 0, SEEK_END);
         @ int nSize = ftell(fp);
         @ if (nSize == 0) {
         @     fclose(fp); m_nType = @<文本编码>;
-        @     if (m_nType == VSET_UTF_8 || m_nType == VSET_UTF_16)
-        @         data().SetUnicode(true);
-        @     else
-        @         data().SetUnicode(false);
+        @     data().SetUnicode(m_nType == VSET_UTF_8 || m_nType == VSET_UTF_16);
         @     m_szIniFile = @<文件名>;
         @     m_bAutoSave = (bool)@<自动保存>;
         @     return 0;
@@ -740,7 +732,7 @@
         @ std::string szBuffer;
         @ data().Save(szBuffer, @<添加签名>);
         @ @<是否UTF8编码.值> = data().IsUnicode();
-        @ return @an<CVolMem>(szBuffer.c_str(), szBuffer.size());
+        @ return @an<CVolMem>(szBuffer.c_str(), static_cast<INT_P>(szBuffer.size()));
     }
 
     方法 取所有节名 <公开 注释 = "获取配置数据中所有节的名称" 折叠>
@@ -1011,11 +1003,11 @@
 
 类 快捷方式操作 <公开 注释 = "自己写的快捷方式解析,别问我为什么不用IShellLink对象,我写完才发现有这玩意…"
         注释 = "基本把我电脑上的快捷方式都测试了一遍,如果还遇到不能解析的,可以提交给我." 注释 = "另外,部分快捷方式文件没有目标文件属性、时间等信息是正常的." 折叠
-        @文档 = "category = \"快捷方式\"">
+        @文档 = "category = \"快捷方式\"" @别名 = "//" @别名类型 = 本地类 @类用途 = 访问静态成员>
 {
-    方法 解析 <公开 静态 类型 = 逻辑型 注释 = "解析快捷方式文件中的信息." 返回值注释 = "返回是否成功." 折叠>
-    参数 文件路径 <类型 = 文本型 注释 = "快捷方式文件的文件路径.">
-    参数 快捷方式信息 <类型 = 快捷方式信息类 注释 = "成功返回快捷方式的各项信息.">
+    方法 解析 <公开 静态 类型 = 逻辑型 注释 = "解析快捷方式文件中的信息" 返回值注释 = "返回是否成功" 折叠>
+    参数 文件路径 <类型 = 文本型 注释 = "快捷方式文件的文件路径">
+    参数 快捷方式信息 <类型 = 快捷方式信息类 注释 = "成功返回快捷方式的各项信息">
     {
         变量 数据 <类型 = 字节集类>
         变量 数据长度 <类型 = 整数>

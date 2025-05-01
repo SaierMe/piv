@@ -104,7 +104,9 @@
         "valarray": "cpp",
         "variant": "cpp",
         "crtdbg.h": "c",
-        "resumable": "cpp"
+        "resumable": "cpp",
+        "cinttypes": "cpp",
+        "memory_resource": "cpp"
     },
     "editor.gotoLocation.alternativeDeclarationCommand": "editor.action.revealDefinition",
     "editor.gotoLocation.alternativeDefinitionCommand": "editor.action.revealDefinition",

@@ -14,12 +14,12 @@
             @嵌入式方法 = "req_str_param_text_pointer = true">
     参数 动态库路径 <类型 = 文本型 注释 = "basswasapi.dll的路径">
     {
-        @ BassWasApi::data().Load(@<动态库路径>)
+        @ BassWasApi::instance().Load(@<动态库路径>)
     }
 
     方法 卸载动态库 <公开 静态 注释 = "手动卸载动态库,一般不需要执行本方法." 折叠 @嵌入式方法 = "">
     {
-        @ BassWasApi::data().Free()
+        @ BassWasApi::instance().Free()
     }
 
     方法 取版本 <公开 类型 = 整数 注释 = "获取已加载的BASSWASAPI的版本号"
@@ -259,7 +259,7 @@
             @默认值 = 0>
     {
         @ BassWasApi::Fn().BASS_WASAPI_Init(@<设备号>, static_cast<DWORD>(@<采样率>), static_cast<DWORD>(@<声道>), static_cast<DWORD>(@<标志>),
-        @    @<缓冲长度>, @<周期>, (WASAPIPROC*)WASAPIPROC_PUSH, NULL);
+        @    @<缓冲长度>, @<周期>, (WASAPIPROC*)WASAPIPROC_PUSH, NULL)
     }
 
     方法 释放 <公开 类型 = 逻辑型 注释 = "释放输出输入设备. 退出程序前应该释放设备,但不需要用户手段调用,类析构的时候会自动调用."
@@ -490,12 +490,12 @@
             @嵌入式方法 = "req_str_param_text_pointer = true">
     参数 动态库路径 <类型 = 文本型 注释 = "bassasio.dll的路径">
     {
-        @ BassAsio::data().Load(@<动态库路径>)
+        @ BassAsio::instance().Load(@<动态库路径>)
     }
 
     方法 卸载动态库 <公开 静态 注释 = "手动卸载动态库,一般不需要执行本方法." 折叠 @嵌入式方法 = "">
     {
-        @ BassAsio::data().Free()
+        @ BassAsio::instance().Free()
     }
 
     方法 取版本 <公开 类型 = 整数 注释 = "获取已加载的BASSASIO的版本号,其中高16位为主版本号,低16位为修订版本号." 折叠 @嵌入式方法 = "">
@@ -951,12 +951,12 @@
             @嵌入式方法 = "req_str_param_text_pointer = true">
     参数 动态库路径 <类型 = 文本型 注释 = "bassBassMix::Fn().dll的路径">
     {
-        @ BassMix::data().Load(@<动态库路径>)
+        @ BassMix::instance().Load(@<动态库路径>)
     }
 
     方法 卸载动态库 <公开 静态 注释 = "手动卸载动态库,一般不需要执行本方法." 折叠 @嵌入式方法 = "">
     {
-        @ BassMix::data().Free()
+        @ BassMix::instance().Free()
     }
 
     方法 取版本 <公开 类型 = 整数 注释 = "获取已加载的BASSmix的版本号" 返回值注释 = "返回BASSmix版本,其中高16位为主版本号,低16位为修订版本号;"
@@ -1303,12 +1303,12 @@
             @嵌入式方法 = "req_str_param_text_pointer = true">
     参数 动态库路径 <类型 = 文本型 注释 = "tags.dll的路径">
     {
-        @ BassTags::data().Load(@<动态库路径>)
+        @ BassTags::instance().Load(@<动态库路径>)
     }
 
     方法 卸载动态库 <公开 静态 注释 = "手动卸载动态库,一般不需要执行本方法." 折叠 @嵌入式方法 = "">
     {
-        @ BassTags::data().Free()
+        @ BassTags::instance().Free()
     }
 
     # ---

@@ -131,7 +131,7 @@ public:
     }
 
     // 取创建时间
-    double get_creation_time(const int32_t &time_zoon) const
+    double get_creation_time(int32_t time_zoon) const
     {
         double dtime = 0.0;
         if (hProcess != NULL)
@@ -457,6 +457,30 @@ public:
         return ::VirtualAllocEx(hProcess, address, men_size, allocation_type, protect);
     }
 
+    // 分配邻近内存
+    void *virtual_alloc_near(void *address, size_t men_size, DWORD allocation_type, DWORD protect, int try_times = 1000)
+    {
+        void *ret = ::VirtualAllocEx(hProcess, address, men_size, allocation_type, protect);
+        if (ret == nullptr)
+        {
+            MEMORY_BASIC_INFORMATION mbi{0};
+            if (::VirtualQueryEx(hProcess, address, &mbi, sizeof(mbi)) != 0 && mbi.BaseAddress != nullptr)
+            {
+                size_t base_address = reinterpret_cast<size_t>(mbi.BaseAddress) / 0x10000 * 0x10000;
+                for (int i = 1; i < try_times; i++)
+                {
+                    ret = ::VirtualAllocEx(hProcess, reinterpret_cast<void *>(base_address + i * 0x10000), men_size, allocation_type, protect);
+                    if (nullptr != ret)
+                        break;
+                    ret = ::VirtualAllocEx(hProcess, reinterpret_cast<void *>(base_address - i * 0x10000), men_size, allocation_type, protect);
+                    if (nullptr != ret)
+                        break;
+                }
+            }
+        }
+        return ret;
+    }
+
     // 释放虚拟内存
     BOOL virtual_free(void *address, size_t men_size, DWORD free_type)
     {
@@ -754,11 +778,26 @@ public:
     {
         if (hProcess == NULL)
             return FALSE;
+        DWORD dwNewProtect = PAGE_READWRITE;
+        if (change_protect)
+        {
+            MEMORY_BASIC_INFORMATION info{0};
+            ::VirtualQueryEx(hProcess, write_address, &info, sizeof(MEMORY_BASIC_INFORMATION));
+            if ((info.Protect & PAGE_READWRITE) == PAGE_READWRITE || (info.Protect & PAGE_EXECUTE_READWRITE) == PAGE_EXECUTE_READWRITE ||
+                (info.Protect & PAGE_EXECUTE_WRITECOPY) == PAGE_EXECUTE_WRITECOPY || (info.Protect & PAGE_WRITECOPY) == PAGE_WRITECOPY)
+            {
+                change_protect = FALSE;
+            }
+            else if ((info.Protect & PAGE_EXECUTE) == PAGE_EXECUTE || (info.Protect & PAGE_EXECUTE_READ) == PAGE_EXECUTE_READ)
+            {
+                dwNewProtect = PAGE_EXECUTE_READWRITE;
+            }
+        }
         if (!change_protect)
             return ::WriteProcessMemory(hProcess, write_address, data_address, data_size, NULL);
         BOOL result = FALSE;
         DWORD dwOldProtect = 0;
-        if (::VirtualProtectEx(hProcess, write_address, data_size, PAGE_READWRITE, &dwOldProtect))
+        if (::VirtualProtectEx(hProcess, write_address, data_size, dwNewProtect, &dwOldProtect))
         {
             result = ::WriteProcessMemory(hProcess, write_address, data_address, data_size, NULL);
             ::VirtualProtectEx(hProcess, write_address, data_size, dwOldProtect, &dwOldProtect);
@@ -776,18 +815,7 @@ public:
     template <typename T>
     BOOL write_memory_value(void *write_address, const T &value, BOOL change_protect = TRUE)
     {
-        if (hProcess == NULL)
-            return FALSE;
-        if (!change_protect)
-            return ::WriteProcessMemory(hProcess, write_address, &value, sizeof(T), NULL);
-        BOOL result = FALSE;
-        DWORD dwOldProtect = 0;
-        if (::VirtualProtectEx(hProcess, write_address, sizeof(T), PAGE_READWRITE, &dwOldProtect))
-        {
-            result = ::WriteProcessMemory(hProcess, write_address, &value, sizeof(T), NULL);
-            ::VirtualProtectEx(hProcess, write_address, sizeof(T), dwOldProtect, &dwOldProtect);
-        }
-        return result;
+        return write_memory(write_address, &value, sizeof(T), change_protect);
     }
 
     // 寻找模块特征码
@@ -939,14 +967,7 @@ public:
         if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && write_off < ModuleInfo.SizeOfImage)
         {
             BYTE *write_address = reinterpret_cast<BYTE *>(ModuleInfo.lpBaseOfDll) + write_off;
-            if (!change_protect)
-                return ::WriteProcessMemory(hProcess, write_address, data_address, data_size, NULL);
-            DWORD dwOldProtect = 0;
-            if (::VirtualProtectEx(hProcess, write_address, data_size, PAGE_READWRITE, &dwOldProtect))
-            {
-                result = ::WriteProcessMemory(hProcess, write_address, data_address, data_size, NULL);
-                ::VirtualProtectEx(hProcess, write_address, data_size, dwOldProtect, &dwOldProtect);
-            }
+            return write_memory(write_address, data_address, data_size, change_protect);
         }
         return result;
     }
@@ -961,23 +982,7 @@ public:
     template <typename T>
     BOOL write_module_value(HMODULE hModule, size_t write_off, const T &value, BOOL change_protect = TRUE)
     {
-        if (hProcess == NULL)
-            return FALSE;
-        BOOL result = FALSE;
-        MODULEINFO ModuleInfo{0};
-        if (::GetModuleInformation(hProcess, hModule, &ModuleInfo, sizeof(MODULEINFO)) && write_off < ModuleInfo.SizeOfImage)
-        {
-            BYTE *write_address = reinterpret_cast<BYTE *>(ModuleInfo.lpBaseOfDll) + write_off;
-            if (!change_protect)
-                return ::WriteProcessMemory(hProcess, write_address, &value, sizeof(T), NULL);
-            DWORD dwOldProtect = 0;
-            if (::VirtualProtectEx(hProcess, write_address, sizeof(T), PAGE_READWRITE, &dwOldProtect))
-            {
-                result = ::WriteProcessMemory(hProcess, write_address, &value, sizeof(T), NULL);
-                ::VirtualProtectEx(hProcess, write_address, sizeof(T), dwOldProtect, &dwOldProtect);
-            }
-        }
-        return result;
+        return write_module_memory(hModule, write_off, &value, sizeof(T), change_protect);
     }
 }; // PivProcess
 

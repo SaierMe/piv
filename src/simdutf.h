@@ -1,4 +1,4 @@
-/* auto-generated on 2025-02-02 19:46:22.044538. Do not edit! */
+/* auto-generated on 2025-04-14 21:04:55 -0400. Do not edit! */
 /* begin file include/simdutf.h */
 #ifndef SIMDUTF_H
 #define SIMDUTF_H
@@ -163,9 +163,9 @@
 #elif defined(__aarch64__) || defined(_M_ARM64) || defined(_M_ARM64EC)
   #define SIMDUTF_IS_ARM64 1
 #elif defined(__PPC64__) || defined(_M_PPC64)
-// #define SIMDUTF_IS_PPC64 1
-//  The simdutf library does yet support SIMD acceleration under
-//  POWER processors. Please see https://github.com/lemire/simdutf/issues/51
+  #if defined(__VEC__) && defined(__ALTIVEC__)
+    #define SIMDUTF_IS_PPC64 1
+  #endif
 #elif defined(__s390__)
 // s390 IBM system. Big endian.
 #elif (defined(__riscv) || defined(__riscv__)) && __riscv_xlen == 64
@@ -605,6 +605,14 @@ struct result {
 
   simdutf_really_inline result(error_code err, size_t pos)
       : error{err}, count{pos} {}
+
+  simdutf_really_inline bool is_ok() const {
+    return error == error_code::SUCCESS;
+  }
+
+  simdutf_really_inline bool is_err() const {
+    return error != error_code::SUCCESS;
+  }
 };
 
 struct full_result {
@@ -644,7 +652,7 @@ SIMDUTF_DISABLE_UNDESIRED_WARNINGS
 #define SIMDUTF_SIMDUTF_VERSION_H
 
 /** The version of simdutf being used (major.minor.revision) */
-#define SIMDUTF_VERSION "6.2.0"
+#define SIMDUTF_VERSION "6.5.0"
 
 namespace simdutf {
 enum {
@@ -655,7 +663,7 @@ enum {
   /**
    * The minor version (major.MINOR.revision) of simdutf being used.
    */
-  SIMDUTF_VERSION_MINOR = 2,
+  SIMDUTF_VERSION_MINOR = 5,
   /**
    * The revision (major.minor.REVISION) of simdutf being used.
    */
@@ -744,6 +752,13 @@ struct simdutf_riscv_hwprobe {
   #define SIMDUTF_RISCV_HWPROBE_IMA_V (1 << 2)
   #define SIMDUTF_RISCV_HWPROBE_EXT_ZVBB (1 << 17)
 #endif // SIMDUTF_IS_RISCV64 && defined(__linux__)
+
+#if defined(__loongarch__) && defined(__linux__)
+  #include <sys/auxv.h>
+// bits/hwcap.h
+// #define HWCAP_LOONGARCH_LSX             (1 << 4)
+// #define HWCAP_LOONGARCH_LASX            (1 << 5)
+#endif
 
 namespace simdutf {
 namespace internal {
@@ -963,12 +978,6 @@ static inline uint32_t detect_supported_architectures() {
   return host_isa;
 }
 #elif defined(__loongarch__)
-  #if defined(__linux__)
-    #include <sys/auxv.h>
-  // bits/hwcap.h
-  // #define HWCAP_LOONGARCH_LSX             (1 << 4)
-  // #define HWCAP_LOONGARCH_LASX            (1 << 5)
-  #endif
 
 static inline uint32_t detect_supported_architectures() {
   uint32_t host_isa = instruction_set::DEFAULT;
@@ -1372,7 +1381,74 @@ validate_utf16be_with_errors(std::span<const char16_t> input) noexcept {
   return validate_utf16be_with_errors(input.data(), input.size());
 }
   #endif // SIMDUTF_SPAN
-#endif   // SIMDUTF_FEATURE_UTF16
+
+/**
+ * Fixes an ill-formed UTF-16LE string by replacing mismatched surrogates with
+ * the Unicode replacement character U+FFFD. If input and output points to
+ * different memory areas, the procedure copies string, and it's expected that
+ * output memory is at least as big as the input. It's also possible to set
+ * input equal output, that makes replacements an in-place operation.
+ *
+ * @param input the UTF-16LE string to correct.
+ * @param len the length of the string in number of 2-byte code units
+ * (char16_t).
+ * @param output the output buffer.
+ */
+void to_well_formed_utf16le(const char16_t *input, size_t len,
+                            char16_t *output) noexcept;
+  #if SIMDUTF_SPAN
+simdutf_really_inline void
+to_well_formed_utf16le(std::span<const char16_t> input,
+                       std::span<char16_t> output) noexcept {
+  to_well_formed_utf16le(input.data(), input.size(), output.data());
+}
+  #endif // SIMDUTF_SPAN
+
+/**
+ * Fixes an ill-formed UTF-16BE string by replacing mismatched surrogates with
+ * the Unicode replacement character U+FFFD. If input and output points to
+ * different memory areas, the procedure copies string, and it's expected that
+ * output memory is at least as big as the input. It's also possible to set
+ * input equal output, that makes replacements an in-place operation.
+ *
+ * @param input the UTF-16BE string to correct.
+ * @param len the length of the string in number of 2-byte code units
+ * (char16_t).
+ * @param output the output buffer.
+ */
+void to_well_formed_utf16be(const char16_t *input, size_t len,
+                            char16_t *output) noexcept;
+  #if SIMDUTF_SPAN
+simdutf_really_inline void
+to_well_formed_utf16be(std::span<const char16_t> input,
+                       std::span<char16_t> output) noexcept {
+  to_well_formed_utf16be(input.data(), input.size(), output.data());
+}
+  #endif // SIMDUTF_SPAN
+
+/**
+ * Fixes an ill-formed UTF-16 string by replacing mismatched surrogates with the
+ * Unicode replacement character U+FFFD. If input and output points to different
+ * memory areas, the procedure copies string, and it's expected that output
+ * memory is at least as big as the input. It's also possible to set input equal
+ * output, that makes replacements an in-place operation.
+ *
+ * @param input the UTF-16 string to correct.
+ * @param len the length of the string in number of 2-byte code units
+ * (char16_t).
+ * @param output the output buffer.
+ */
+void to_well_formed_utf16(const char16_t *input, size_t len,
+                          char16_t *output) noexcept;
+  #if SIMDUTF_SPAN
+simdutf_really_inline void
+to_well_formed_utf16(std::span<const char16_t> input,
+                     std::span<char16_t> output) noexcept {
+  to_well_formed_utf16(input.data(), input.size(), output.data());
+}
+  #endif // SIMDUTF_SPAN
+
+#endif // SIMDUTF_FEATURE_UTF16
 
 #if SIMDUTF_FEATURE_UTF32 || SIMDUTF_FEATURE_DETECT_ENCODING
 /**
@@ -3690,6 +3766,9 @@ trim_partial_utf16(std::span<const char16_t> valid_utf16_input) noexcept {
 #endif   // SIMDUTF_FEATURE_UTF16
 
 #if SIMDUTF_FEATURE_BASE64
+  #ifndef SIMDUTF_NEED_TRAILING_ZEROES
+    #define SIMDUTF_NEED_TRAILING_ZEROES 1
+  #endif
 // base64_options are used to specify the base64 encoding options.
 // ASCII spaces are ' ', '\t', '\n', '\r', '\f'
 // garbage characters are characters that are not part of the base64 alphabet
@@ -3954,7 +4033,7 @@ atomic_binary_to_base64(const detail::input_span_of_byte_like auto &input,
  * characters) must be divisible by four.
  *
  * You should call this function with a buffer that is at least
- * maximal_binary_length_from_utf6_base64(input, length) bytes long. If you fail
+ * maximal_binary_length_from_base64(input, length) bytes long. If you fail
  * to provide that much space, the function may cause a buffer overflow.
  *
  * Advanced users may want to taylor how the last chunk is handled. By default,
@@ -4311,6 +4390,34 @@ public:
   simdutf_warn_unused virtual result
   validate_utf16be_with_errors(const char16_t *buf,
                                size_t len) const noexcept = 0;
+  /**
+   * Copies the UTF-16LE string while replacing mismatched surrogates with the
+   * Unicode replacement character U+FFFD. We allow the input and output to be
+   * the same buffer so that the correction is done in-place.
+   *
+   * Overridden by each implementation.
+   *
+   * @param input the UTF-16LE string to correct.
+   * @param len the length of the string in number of 2-byte code units
+   * (char16_t).
+   * @param output the output buffer.
+   */
+  virtual void to_well_formed_utf16le(const char16_t *input, size_t len,
+                                      char16_t *output) const noexcept = 0;
+  /**
+   * Copies the UTF-16BE string while replacing mismatched surrogates with the
+   * Unicode replacement character U+FFFD. We allow the input and output to be
+   * the same buffer so that the correction is done in-place.
+   *
+   * Overridden by each implementation.
+   *
+   * @param input the UTF-16BE string to correct.
+   * @param len the length of the string in number of 2-byte code units
+   * (char16_t).
+   * @param output the output buffer.
+   */
+  virtual void to_well_formed_utf16be(const char16_t *input, size_t len,
+                                      char16_t *output) const noexcept = 0;
 #endif // SIMDUTF_FEATURE_UTF16
 
 #if SIMDUTF_FEATURE_UTF32 || SIMDUTF_FEATURE_DETECT_ENCODING
@@ -5595,9 +5702,8 @@ public:
    * @param length        the length of the base64 input in bytes
    * @return maximal number of binary bytes
    */
-  simdutf_warn_unused virtual size_t
-  maximal_binary_length_from_base64(const char *input,
-                                    size_t length) const noexcept = 0;
+  simdutf_warn_unused size_t maximal_binary_length_from_base64(
+      const char *input, size_t length) const noexcept;
 
   /**
    * Provide the maximal binary length in bytes given the base64 input.
@@ -5610,9 +5716,8 @@ public:
    * @param length        the length of the base64 input in 16-bit units
    * @return maximal number of binary bytes
    */
-  simdutf_warn_unused virtual size_t
-  maximal_binary_length_from_base64(const char16_t *input,
-                                    size_t length) const noexcept = 0;
+  simdutf_warn_unused size_t maximal_binary_length_from_base64(
+      const char16_t *input, size_t length) const noexcept;
 
   /**
    * Convert a base64 input to a binary output.
@@ -5705,7 +5810,7 @@ public:
    * character that is not a valid base64 character (INVALID_BASE64_CHARACTER).
    *
    * You should call this function with a buffer that is at least
-   * maximal_binary_length_from_utf6_base64(input, length) bytes long. If you
+   * maximal_binary_length_from_base64(input, length) bytes long. If you
    * fail to provide that much space, the function may cause a buffer overflow.
    *
    * @param input         the base64 string to process, in ASCII stored as
@@ -5771,9 +5876,8 @@ public:
    * base64_url, is base64_default by default.
    * @return number of base64 bytes
    */
-  simdutf_warn_unused virtual size_t base64_length_from_binary(
-      size_t length,
-      base64_options options = base64_default) const noexcept = 0;
+  simdutf_warn_unused size_t base64_length_from_binary(
+      size_t length, base64_options options = base64_default) const noexcept;
 
   /**
    * Convert a binary input to a base64 output.
@@ -5800,6 +5904,26 @@ public:
   binary_to_base64(const char *input, size_t length, char *output,
                    base64_options options = base64_default) const noexcept = 0;
 #endif // SIMDUTF_FEATURE_BASE64
+
+#ifdef SIMDUTF_INTERNAL_TESTS
+  // This method is exported only in developer mode, its purpose
+  // is to expose some internal test procedures from the given
+  // implementation and then use them through our standard test
+  // framework.
+  //
+  // Regular users should not use it, the tests of the public
+  // API are enough.
+
+  struct TestProcedure {
+    // display name
+    std::string name;
+
+    // procedure should return whether given test pass or not
+    void (*procedure)(const implementation &);
+  };
+
+  virtual std::vector<TestProcedure> internal_tests() const;
+#endif
 
 protected:
   /** @private Construct an implementation with the given name and description.

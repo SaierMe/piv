@@ -385,7 +385,7 @@
     变量 是否编码网址 <公开 类型 = 逻辑型 值 = 假 注释 = "是否自动对网址进行URL编码,默认为假. 请注意不要重复编码." @属性变量 = 真>
     变量 _自动Cookie管理 <类型 = 逻辑型 值 = 真>
     变量 _轮询时间 <类型 = 整数 值 = 50>
-    变量 _任务上限 <类型 = 整数>
+    变量 _任务上限 <类型 = 长整数>
     变量 _会话句柄 <类型 = 变整数>
     变量 _工作数 <类型 = 原子整数类>
     变量 _并发数 <类型 = 原子整数类>
@@ -421,7 +421,7 @@
     方法 启动连接池 <公开 类型 = 逻辑型 注释 = "必须启动连接池才会开始进行网络传输,也可以在投递任务后启动." 返回值注释 = "返回是否成功,重复调用本方法亦会返回真,但不会执行初始化操作."
             折叠>
     参数 工作线程数 <类型 = 整数 注释 = "默认值0表示CPU线程数,最小值为1." @默认值 = 0>
-    参数 最大任务数 <类型 = 整数 注释 = "最大可提交的任务数量,小于等于0为不限制数量;" 注释 = "超过此上限后投递任务会返回失败;" 注释 = "提交任务过多时,任务队列会占用较大的内存."
+    参数 最大任务数 <类型 = 长整数 注释 = "最大可提交的任务数量,小于等于0为不限制数量;" 注释 = "超过此上限后投递任务会返回失败;" 注释 = "提交任务过多时,任务队列会占用较大的内存."
             @默认值 = 0>
     参数 用户代理 <类型 = 文本型 注释 = "即User Agent,简称UA,使服务器能识别客户使用的操作系统及版本、CPU类型、"
             注释 = "浏览器及版本、浏览器渲染引擎、浏览器语言、浏览器插件等." 注释 = "空文本为使用默认UA,空对象为不使用UA(默认不添加这个协议头)." @默认值 = "">
@@ -444,7 +444,7 @@
             _并发数.置值 (取较大值 (工作线程数, 1))
             WinHTTP网络类.置选项_线程数量 (_并发数.取值 ())
             _任务上限 = 最大任务数
-            _任务队列.重置队列 (选择 (_任务上限 > 0, _任务上限, 1024))
+            _任务队列.重置队列 (选择 (_任务上限 > 0, _任务上限, (长整数)1024))
             WinHTTP网络类.置选项_IPv6快速回退 (_会话句柄, 真)  // 在较新系统会优先解析IPV6地址,因为大部分网络无法访问IPV6,必须设置该选项快速回退到IPV4
             WinHTTP网络类.置选项_TCP快速打开 (_会话句柄, 真)
             WinHTTP网络类.置超时时间 (_会话句柄, 5000, 2000, 30000, 30000)
@@ -470,7 +470,7 @@
         返回 (_并发数.取值 ())
     }
 
-    方法 任务上限数 <公开 属性读 类型 = 整数 注释 = "返回最大可提交的任务数量,0为不限制数量." 注释 = "提交任务过多时,任务队列会占用较大的内存,应适度限制." 折叠>
+    方法 任务上限数 <公开 属性读 类型 = 长整数 注释 = "返回最大可提交的任务数量,0为不限制数量." 注释 = "提交任务过多时,任务队列会占用较大的内存,应适度限制." 折叠>
     {
         返回 (_任务上限)
     }
@@ -480,7 +480,7 @@
         返回 (_工作数.取值 ())
     }
 
-    方法 剩余任务数 <公开 属性读 类型 = 整数 注释 = "获取剩余的任务数量" 折叠>
+    方法 剩余任务数 <公开 属性读 类型 = 长整数 注释 = "获取剩余的任务数量" 折叠>
     {
         返回 (_任务队列.取成员数 ())
     }
@@ -615,7 +615,18 @@
         }
         否则
         {
-            _任务队列.尝试入队 (参数指针)
+            如果 (任务上限数 == 0)
+            {
+                _任务队列.入队 (参数指针)
+            }
+            否则
+            {
+                如果 (_任务队列.尝试入队 (参数指针) == 假)
+                {
+                    参数指针.销毁 ()
+                    返回 (假)
+                }
+            }
         }
         返回 (真)
     }
@@ -2060,7 +2071,7 @@
 
 类 WinHTTP网络类 <公开 注释 = "  完整封装了WinHTTP的API,本类仅供给对HTTP协议有足够认识的开发者使用."
         注释 = "  请注意部分方法对Windows版本的要求,如果使用了这些方法,你需要使用版本" 注释 = "足够高的Windows SDK才能编译." 折叠
-        @文档 = "category = \"WinHTTP\"" @禁止创建对象 = 真>
+        @文档 = "category = \"WinHTTP\"" @别名 = "//" @别名类型 = 本地类 @类用途 = 访问静态成员>
 {
     常量 User_Agent <类型 = 文本型
             值 = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.124 Safari/537.36 Edg/102.0.1245.41"
@@ -2068,18 +2079,18 @@
 
     方法 检查平台支持 <公开 静态 类型 = 逻辑型 注释 = "检查当前运行的平台是否支持该版本的WinHTTP." 折叠 @嵌入式方法 = "">
     {
-        @ WinHttpCheckPlatform ()
+        @ WinHttpCheckPlatform()
     }
 
     方法 取最后错误信息 <公开 静态 类型 = 文本型 注释 = "获取最后一次错误的代码和描述信息." 返回值注释 = "成功返回错误信息,失败返回空文本." 折叠 @禁止流程检查 = 真>
     {
-        @ DWORD dwLastError = ::GetLastError ();
+        @ DWORD dwLastError = ::GetLastError();
         @ LPVOID lpvMessageBuffer;
         @ @an<CVolString> ErrorMsg;
-        @ if (::FormatMessageW (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-        @                       NULL, dwLastError, MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&lpvMessageBuffer, 0, NULL)) {
-        @     ErrorMsg.Format (L"错误(%u): %s", dwLastError, (LPWSTR)lpvMessageBuffer);
-        @     ::LocalFree (lpvMessageBuffer);
+        @ if (::FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        @                      NULL, dwLastError, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&lpvMessageBuffer, 0, NULL)) {
+        @     ErrorMsg.Format(L"错误(%u): %s", dwLastError, (LPWSTR)lpvMessageBuffer);
+        @     ::LocalFree(lpvMessageBuffer);
         @ }
         @ return ErrorMsg;
     }
@@ -2096,17 +2107,17 @@
     参数 代理跳过列表 <类型 = 文本型 注释 = "仅在\"代理类型\"为\"命名代理\"时可用,列表内的域名和IP不会通过代理访问;" 注释 = "请提供用分号分隔的主机域名或IP地址,可以使用通配符;"
             注释 = "请勿提供空文本,默认的\"<local>\"为忽略所有不含句点的主机名." @默认值 = "<local>">
     {
-        @ return (INT_P)WinHttpOpen (@<用户代理>.IsNullObject () ? NULL : (@<用户代理>.IsEmpty() ? @<User_Agent>.GetText () : (LPCWSTR)@<用户代理>.GetText ()),
-        @                            (DWORD)@<代理类型>,
-        @                            (DWORD)@<代理类型> == WINHTTP_ACCESS_TYPE_NAMED_PROXY ? (LPCWSTR)@<代理服务器>.GetText () : WINHTTP_NO_PROXY_NAME,
-        @                            (DWORD)@<代理类型> == WINHTTP_ACCESS_TYPE_NAMED_PROXY ? (LPCWSTR)@<代理跳过列表>.GetText () : WINHTTP_NO_PROXY_BYPASS,
-        @                            @<异步模式> ? WINHTTP_FLAG_ASYNC : 0);
+        @ return (INT_P)WinHttpOpen(@<用户代理>.IsNullObject() ? NULL : (@<用户代理>.IsEmpty() ? @<User_Agent>.GetText() : @<用户代理>.GetText()),
+        @                           (DWORD)@<代理类型>,
+        @                           (DWORD)@<代理类型> == WINHTTP_ACCESS_TYPE_NAMED_PROXY ? @<代理服务器>.GetText() : WINHTTP_NO_PROXY_NAME,
+        @                           (DWORD)@<代理类型> == WINHTTP_ACCESS_TYPE_NAMED_PROXY ? @<代理跳过列表>.GetText() : WINHTTP_NO_PROXY_BYPASS,
+        @                           @<异步模式> ? WINHTTP_FLAG_ASYNC : 0);
     }
 
     方法 关闭句柄 <公开 静态 类型 = 逻辑型 注释 = "网络句柄不再使用时必须调用本方法关闭." 折叠 @嵌入式方法 = "">
     参数 网络句柄 <类型 = 变整数 注释 = "可以是连接句柄、请求句柄、会话句柄、解析器句柄.">
     {
-        @ WinHttpCloseHandle ((HINTERNET)@<网络句柄>)
+        @ WinHttpCloseHandle((HINTERNET)@<网络句柄>)
     }
 
     方法 连接服务器 <公开 静态 类型 = 变整数 注释 = "设置HTTP请求的初始目标服务器,并返回连接句柄." 注释 = "使用本方法之前必须先调用\"初始化\"."
@@ -2116,7 +2127,7 @@
     参数 服务器端口 <类型 = 整数 注释 = "可以使用自定义的端口号或以下三个常用数值之一:" 注释 = "  80  使用HTTP服务器的默认端口;"
             注释 = "  443 使用HTTPS服务器的默认端口;" 注释 = "  0   将端口80用于HTTP,将端口443用于HTTPS;" @默认值 = 0>
     {
-        @ (INT_P)WinHttpConnect ((HINTERNET)@<会话句柄>, @<服务器域名>.GetText (), (INTERNET_PORT)@<服务器端口>, 0)
+        @ (INT_P)WinHttpConnect((HINTERNET)@<会话句柄>, @<服务器域名>.GetText(), (INTERNET_PORT)@<服务器端口>, 0)
     }
 
     方法 打开请求 <公开 静态 类型 = 变整数 注释 = "创建请求句柄,并设置请求方式和访问的URL路径." 返回值注释 = "成功返回请求句柄,失败返回0." 折叠 @禁止流程检查 = 真>
@@ -2132,19 +2143,19 @@
     {
         @ HINTERNET hRequest = NULL;
         @ LPCWSTR* ppwszAcceptTypes = WINHTTP_DEFAULT_ACCEPT_TYPES;
-        @ if (@<接受类型>.data ().IsEmpty () == FALSE) {
-        @     DWORD cAcceptTypes = (DWORD)@<接受类型>.data ().GetCount ();
-        @     ppwszAcceptTypes = (LPCWSTR*)malloc (sizeof(LPCWSTR) * (cAcceptTypes + 1));
+        @ if (@<接受类型>.data().IsEmpty() == FALSE) {
+        @     DWORD cAcceptTypes = (DWORD)@<接受类型>.data().GetCount();
+        @     ppwszAcceptTypes = (LPCWSTR*)malloc(sizeof(LPCWSTR) * (cAcceptTypes + 1));
         @     ppwszAcceptTypes[cAcceptTypes] = NULL;
         @     for (DWORD i = 0; i < cAcceptTypes; i++) {
-        @         ppwszAcceptTypes[i] = (LPCWSTR)@<接受类型>.data ().GetAt (i);
+        @         ppwszAcceptTypes[i] = (LPCWSTR)@<接受类型>.data().GetAt(i);
         @     }
         @ }
-        @ hRequest = WinHttpOpenRequest ((HINTERNET)@<连接句柄>, (LPCWSTR)@<请求方式>.GetText (),
-        @                                (LPCWSTR)@<目标路径>.GetText (),
-        @                                @<HTTP版本>.GetTextMaybeNull(),
-        @                                @<来源参考>.IsEmpty () ? WINHTTP_NO_REFERER : (LPCWSTR)@<来源参考>.GetText (),
-        @                                ppwszAcceptTypes, (DWORD)@<请求标志>);
+        @ hRequest = WinHttpOpenRequest((HINTERNET)@<连接句柄>, @<请求方式>.GetText(),
+        @                               @<目标路径>.GetText(),
+        @                               @<HTTP版本>.GetTextMaybeNull(),
+        @                               @<来源参考>.IsEmpty() ? WINHTTP_NO_REFERER : @<来源参考>.GetText(),
+        @                               ppwszAcceptTypes, (DWORD)@<请求标志>);
         @ if (ppwszAcceptTypes) { free (ppwszAcceptTypes); }
         @ return (INT_P)hRequest;
     }
@@ -2156,20 +2167,20 @@
     参数 第一种方案 <类型 = 整数 注释 = "返回服务器支持的第一种身份验证方案." @需求类型 = 可写入变量>
     参数 身份验证目标 <类型 = 整数 注释 = "返回身份验证的目标,0为将凭据传递给服务器(响应状态码为401),1为将凭据传递给代理(响应状态码为407)." @需求类型 = 可写入变量>
     {
-        @ WinHttpQueryAuthSchemes ((HINTERNET)@<请求句柄>, (LPDWORD)&@<身份验证方案>, (LPDWORD)&@<第一种方案>, (LPDWORD)&@<身份验证目标>)
+        @ WinHttpQueryAuthSchemes((HINTERNET)@<请求句柄>, (LPDWORD)&@<身份验证方案>, (LPDWORD)&@<第一种方案>, (LPDWORD)&@<身份验证目标>)
     }
 
     方法 置凭据 <公开 静态 类型 = 逻辑型 注释 = "将所需的凭据数据传递给HTTP服务器." 注释 = "服务器响应状态码401或407时,表示需要进行身份验证,本方法用来提供身份凭据."
-            返回值注释 = "返回是否成功." 折叠 @禁止流程检查 = 真>
+            返回值注释 = "返回是否成功." 折叠 @嵌入式方法 = "">
     参数 请求句柄 <类型 = 变整数 注释 = "请提供调用\"打开请求\"成功时返回的请求句柄.">
     参数 身份验证目标 <类型 = 整数 注释 = "提供身份验证的目标,0为将凭据传递到服务器." 注释 = "1为将凭据传递到代理." @默认值 = 0>
     参数 身份验证方案 <类型 = 整数 注释 = "必须为\"取身份验证方案\"返回的方案类型,请参考\"身份验证方案_WinHTTP\"中的常量.">
     参数 用户名 <类型 = 文本型 注释 = "提供有效的用户名." "">
     参数 密码 <类型 = 文本型 注释 = "提供有效的密码,密码可以为空." @默认值 = 空对象>
     {
-        @ return WinHttpSetCredentials ((HINTERNET)@<请求句柄>, (DWORD)@<身份验证目标>,
-        @                               (DWORD)@<身份验证方案>, (LPCWSTR)@<用户名>.GetText(),
-        @                               @<密码>.GetTextMaybeNull(), NULL);
+        @ WinHttpSetCredentials((HINTERNET)@<请求句柄>, (DWORD)@<身份验证目标>,
+        @                       (DWORD)@<身份验证方案>, @<用户名>.GetText(),
+        @                       @<密码>.GetTextMaybeNull(), NULL);
     }
 
     方法 发送请求 <公开 静态 类型 = 逻辑型 注释 = "将指定的请求发送到HTTP服务器." 注释 = "异步模式下执行成功会响应\"发送请求完成\"回调,接着应调用\"接收响应\"."
@@ -2181,12 +2192,12 @@
             @默认值 = 0>
     参数 上下文 <类型 = 变整数 注释 = "用户自定义的指针值,将伴随请求句柄传递给任意回调方法." @默认值 = 0>
     {
-        @ return WinHttpSendRequest ((HINTERNET)@<请求句柄>,
-        @                            @<附加请求头>.IsEmpty () ? WINHTTP_NO_ADDITIONAL_HEADERS : (LPCWSTR)@<附加请求头>.GetText (),
-        @                            @<附加请求头>.IsEmpty () ? 0 : (DWORD)@<附加请求头>.GetLength (),
-        @                            @<提交数据>.IsEmpty () ? WINHTTP_NO_REQUEST_DATA : (LPVOID)@<提交数据>.GetPtr (),
-        @                            @<提交数据>.IsEmpty () ? 0 : (DWORD)@<提交数据>.GetSize (),
-        @                            (DWORD)@<数据总长度>, (DWORD_PTR)@<上下文>);
+        @ return WinHttpSendRequest((HINTERNET)@<请求句柄>,
+        @                           @<附加请求头>.IsEmpty() ? WINHTTP_NO_ADDITIONAL_HEADERS : @<附加请求头>.GetText(),
+        @                           @<附加请求头>.IsEmpty() ? 0 : (DWORD)@<附加请求头>.GetLength(),
+        @                           @<提交数据>.IsEmpty() ? WINHTTP_NO_REQUEST_DATA : (LPVOID)@<提交数据>.GetPtr(),
+        @                           @<提交数据>.IsEmpty() ? 0 : (DWORD)@<提交数据>.GetSize(),
+        @                           (DWORD)@<数据总长度>, (DWORD_PTR)@<上下文>);
     }
 
     方法 发送数据 <公开 静态 类型 = 逻辑型 注释 = "将请求数据发送给HTTP服务器,在POST、PUT请求发送更多数据时使用."
@@ -2195,24 +2206,24 @@
     参数 数据 <类型 = 字节集类 注释 = "提供所欲发送的数据.">
     参数 写入字节数 <类型 = 整数类 注释 = "成功时返回写入到缓冲区的字节数.异步模式下本参数必须为空对象." @默认值 = 空对象>
     {
-        @ return WinHttpWriteData ((HINTERNET)@<请求句柄>, (LPCVOID)@<数据>.GetPtr (), (DWORD)@<数据>.GetSize (),
-        @                          @<写入字节数>.IsNullObject () ? NULL : (LPDWORD)&@<写入字节数.值>);
+        @ return WinHttpWriteData((HINTERNET)@<请求句柄>, (LPCVOID)@<数据>.GetPtr(), (DWORD)@<数据>.GetSize(),
+        @                         piv::GetBaseDataPtr<LPDWORD>(@<写入字节数>));
     }
 
     方法 接收响应 <公开 静态 类型 = 逻辑型 注释 = "等待接收HTTP服务器的响应头." 注释 = "必须在执行了\"发送请求\"之后才能使用本方法."
             注释 = "异步模式下执行成功会响应\"响应头可用\"回调,接着应调用\"取响应头\"." 返回值注释 = "返回是否成功." 折叠 @嵌入式方法 = "">
     参数 请求句柄 <类型 = 变整数 注释 = "请提供调用\"打开请求\"成功时返回的请求句柄,且使用过\"发送请求\".">
     {
-        @ WinHttpReceiveResponse ((HINTERNET)@<请求句柄>, NULL)
+        @ WinHttpReceiveResponse((HINTERNET)@<请求句柄>, NULL)
     }
 
     方法 取可用数据量 <公开 静态 类型 = 逻辑型 注释 = "  返回可使用\"接收数据\"读取的数据量(以字节为单位)." 注释 = "  本方法不会一次性返回所有的数据量(最多不超过8KB),"
             注释 = "需要配合\"接收数据\"反复调用." 注释 = "  你也可以跳过本方法直接用\"接收数据\"."
-            注释 = "  异步模式下执行成功会响应\"数据可用\"回调,接着应调用\"接收数据\"." 返回值注释 = "返回是否成功." 折叠 @禁止流程检查 = 真>
+            注释 = "  异步模式下执行成功会响应\"数据可用\"回调,接着应调用\"接收数据\"." 返回值注释 = "返回是否成功." 折叠 @嵌入式方法 = "">
     参数 请求句柄 <类型 = 变整数 注释 = "请提供调用\"打开请求\"成功时返回的请求句柄,且使用过\"接收响应\".">
     参数 可用数据量 <类型 = 整数类 注释 = "返回当前可用的数据量(字节). 异步模式时本参数必须为空对象." @默认值 = 空对象>
     {
-        @ return WinHttpQueryDataAvailable ((HINTERNET)@<请求句柄>, @<可用数据量>.IsNullObject () ? NULL : (LPDWORD)&@<可用数据量.值>);
+        @ WinHttpQueryDataAvailable((HINTERNET)@<请求句柄>, piv::GetBaseDataPtr<LPDWORD>(@<可用数据量>))
     }
 
     方法 接收数据 <公开 静态 类型 = 逻辑型 注释 = "读取HTTP服务器发来的数据,需要提前给缓冲区分配内存." 注释 = "异步模式下执行成功会响应\"接收数据完成\"回调."
@@ -2221,19 +2232,19 @@
     参数 缓冲区 <类型 = 字节集类 注释 = "成功时在此缓冲区返回接收的数据,必须提前分配字节集的长度.">
     参数 已接收长度 <类型 = 整数类 注释 = "  返回缓冲区成功接收的字节数. 异步模式时本参数必须为空对象." 注释 = "  如果执行成功时本参数返回0,则表示传输已完成." @默认值 = 空对象>
     {
-        @ return WinHttpReadData ((HINTERNET)@<请求句柄>, (LPVOID)@<缓冲区>.GetPtr (), (DWORD)@<缓冲区>.GetSize (),
-        @                         @<已接收长度>.IsNullObject () ? NULL : (LPDWORD)&@<已接收长度.值>);
+        @ return WinHttpReadData((HINTERNET)@<请求句柄>, (LPVOID)@<缓冲区>.GetPtr(), (DWORD)@<缓冲区>.GetSize(),
+        @                        piv::GetBaseDataPtr<LPDWORD>(@<已接收长度>));
     }
 
     方法 接收数据2 <公开 静态 类型 = 逻辑型 注释 = "跟\"接收数据\"的不同之处是需要提供缓冲区指针,而非字节集." 注释 = "异步模式下执行成功会响应\"接收数据完成\"回调."
-            返回值注释 = "返回是否成功." 折叠 @禁止流程检查 = 真>
+            返回值注释 = "返回是否成功." 折叠 @嵌入式方法 = "">
     参数 请求句柄 <类型 = 变整数 注释 = "请提供调用\"打开请求\"成功时返回的请求句柄,且使用过\"接收响应\".">
     参数 缓冲区指针 <类型 = 变整数 注释 = "成功时在此缓冲区指针返回接收的数据.">
     参数 缓冲区长度 <类型 = 整数 注释 = "提供缓冲区长度">
     参数 已接收长度 <类型 = 整数类 注释 = "  返回缓冲区成功接收的字节数. 异步模式时本参数必须为空对象." 注释 = "  如果执行成功时本参数返回0,则表示传输已完成." @默认值 = 空对象>
     {
-        @ return WinHttpReadData ((HINTERNET)@<请求句柄>, (LPVOID)@<缓冲区指针>, (DWORD)@<缓冲区长度>,
-        @                         @<已接收长度>.IsNullObject () ? NULL : (LPDWORD)&@<已接收长度.值>);
+        @ WinHttpReadData((HINTERNET)@<请求句柄>, (LPVOID)@<缓冲区指针>, (DWORD)@<缓冲区长度>,
+        @                 piv::GetBaseDataPtr<LPDWORD>(@<已接收长度>))
     }
 
     方法 接收数据EX <公开 静态 类型 = 整数 注释 = "读取HTTP服务器发来的数据,需要提前给缓冲区分配内存." 注释 = "异步模式下执行成功会响应\"接收数据完成\"回调."
@@ -2243,22 +2254,22 @@
     参数 已接收长度 <类型 = 整数类 注释 = "返回缓冲区成功接收的字节数. 异步模式时本参数必须为空对象." @默认值 = 空对象>
     参数 填满缓冲区 <类型 = 逻辑型 注释 = "如果为真,在接收完数据或填满缓冲区之前不会结束本函数." @默认值 = 真>
     {
-        @ return (INT)WinHttpReadDataEx ((HINTERNET)@<请求句柄>, (LPVOID)@<缓冲区>.GetPtr (), (DWORD)@<缓冲区>.GetSize (),
-        @                                @<已接收长度>.IsNullObject () ? NULL : (LPDWORD)&@<已接收长度.值>,
-        @                                @<填满缓冲区> ? WINHTTP_READ_DATA_EX_FLAG_FILL_BUFFER : 0, 0, NULL);
+        @ return (INT)WinHttpReadDataEx((HINTERNET)@<请求句柄>, (LPVOID)@<缓冲区>.GetPtr(), (DWORD)@<缓冲区>.GetSize(),
+        @                               piv::GetBaseDataPtr<LPDWORD>(@<已接收长度>),
+        @                               @<填满缓冲区> ? WINHTTP_READ_DATA_EX_FLAG_FILL_BUFFER : 0, 0, NULL);
     }
 
     方法 接收数据EX2 <公开 静态 类型 = 整数 注释 = "跟\"接收数据EX\"的不同之处是需要提供缓冲区指针,而非字节集." 注释 = "异步模式下执行成功会响应\"接收数据完成\"回调."
-            注释 = "本方法此为Windows 10 Version 21H2新增的API,之前的系统不可用." 返回值注释 = "成功返回0,失败返回错误码." 折叠 @禁止流程检查 = 真>
+            注释 = "本方法此为Windows 10 Version 21H2新增的API,之前的系统不可用." 返回值注释 = "成功返回0,失败返回错误码." 折叠 @嵌入式方法 = "">
     参数 请求句柄 <类型 = 变整数 注释 = "请提供调用\"打开请求\"成功时返回的请求句柄,且使用过\"接收响应\".">
     参数 缓冲区指针 <类型 = 变整数 注释 = "成功时在此缓冲区指针返回接收的数据.">
     参数 缓冲区长度 <类型 = 整数 注释 = "提供缓冲区长度">
     参数 已接收长度 <类型 = 整数类 注释 = "返回缓冲区成功接收的字节数. 异步模式时本参数必须为空对象." @默认值 = 空对象>
     参数 填满缓冲区 <类型 = 逻辑型 注释 = "如果为真,在接收完数据或填满缓冲区之前不会结束本函数." @默认值 = 真>
     {
-        @ return (INT)WinHttpReadDataEx ((HINTERNET)@<请求句柄>, (LPVOID)@<缓冲区指针>, (DWORD)@<缓冲区长度>,
-        @                                @<已接收长度>.IsNullObject () ? NULL : (LPDWORD)&@<已接收长度.值>,
-        @                                @<填满缓冲区> ? WINHTTP_READ_DATA_EX_FLAG_FILL_BUFFER : 0, 0, NULL);
+        @ (INT)WinHttpReadDataEx((HINTERNET)@<请求句柄>, (LPVOID)@<缓冲区指针>, (DWORD)@<缓冲区长度>,
+        @                        piv::GetBaseDataPtr<LPDWORD>(@<已接收长度>),
+        @                        @<填满缓冲区> ? WINHTTP_READ_DATA_EX_FLAG_FILL_BUFFER : 0, 0, NULL)
     }
 
     方法 取连接组状态 <公开 静态 类型 = 整数 注释 = "获取WinHTTP连接的当前状态描述." 注释 = "本方法此为Windows 11新增的API,之前的系统不可用."
@@ -2272,26 +2283,26 @@
         @ typedef BOOL(WINAPI* pfn_GUIDFromStringW)(LPCWSTR psz, LPGUID pguid);
         @ PWINHTTP_QUERY_CONNECTION_GROUP_RESULT pResult = NULL;
         @ GUID guid;
-        @ if (@<连接GUID>.GetLength () == 38) {
-        @     pfn_GUIDFromStringW GUIDFromStringW = (pfn_GUIDFromStringW)GetProcAddress (::GetModuleHandleW (L"Shell32.dll"), "GUIDFromStringW");
+        @ if (@<连接GUID>.GetLength() == 38) {
+        @     static pfn_GUIDFromStringW GUIDFromStringW = (pfn_GUIDFromStringW)GetProcAddress(::GetModuleHandleW(L"Shell32.dll"), "GUIDFromStringW");
         @     if (GUIDFromStringW) {
-        @         GUIDFromStringW (@<连接GUID>.GetText (), &guid);
+        @         GUIDFromStringW(@<连接GUID>.GetText(), &guid);
         @     }
         @ }
-        @ DWORD dwRes = WinHttpQueryConnectionGroup ((HINTERNET)@<网络句柄>, @<连接GUID>.IsEmpty () ? NULL : &guid,
+        @ DWORD dwRes = WinHttpQueryConnectionGroup((HINTERNET)@<网络句柄>, @<连接GUID>.IsEmpty() ? NULL : &guid,
         @                                           @<是否HTTPS> ? 0 : WINHTTP_QUERY_CONNECTION_GROUP_FLAG_INSECURE, &pResult);
         @ if (pResult) {
         @     for (ULONG i = 0; i < pResult->cHosts; i++) {
         @         @dt<主机连接组类> hostGroup;
-        @         if (pResult->pHostConnectionGroups[i].pwszHost) hostGroup.pwszHost.SetText (pResult->pHostConnectionGroups[i].pwszHost);
+        @         if (pResult->pHostConnectionGroups[i].pwszHost) hostGroup.pwszHost.SetText(pResult->pHostConnectionGroups[i].pwszHost);
         @         hostGroup.cConnectionGroups = (INT)pResult->pHostConnectionGroups[i].cConnectionGroups;
         @         for (INT n = 0; n < hostGroup.cConnectionGroups; n++) {
-        @             @dt<连接组类> ConnectionGroups (&pResult->pHostConnectionGroups[i].pConnectionGroups[n]);
-        @             hostGroup.pConnectionGroups.Add (ConnectionGroups, NULL);
+        @             @dt<连接组类> ConnectionGroups(&pResult->pHostConnectionGroups[i].pConnectionGroups[n]);
+        @             hostGroup.pConnectionGroups.Add(ConnectionGroups, NULL);
         @         }
-        @         @<返回结果>.Add (hostGroup, NULL);
+        @         @<返回结果>.Add(hostGroup, NULL);
         @     }
-        @     WinHttpFreeQueryConnectionGroupResult (pResult);
+        @     WinHttpFreeQueryConnectionGroupResult(pResult);
         @ }
         @ return dwRes;
     }
@@ -2305,7 +2316,7 @@
             注释 = "  添加单个协议头时无需添加换行符.">
     参数 修改方式 <类型 = 整数 注释 = "请参考\"请求头修改方式_WinHTTP\"中的常量和备注,部分常量可以用\"位或\"组合使用." @默认值 = 请求头修改方式_WinHTTP.仅新建添加>
     {
-        @ return WinHttpAddRequestHeaders ((HINTERNET)@<请求句柄>, (LPCWSTR)@<协议头>.GetText (), (DWORD)@<协议头>.GetLength (), (DWORD)@<修改方式>);
+        @ return WinHttpAddRequestHeaders((HINTERNET)@<请求句柄>, @<协议头>.GetText (), (DWORD)@<协议头>.GetLength(), (DWORD)@<修改方式>);
     }
 
     方法 添加请求头2 <公开 静态 类型 = 逻辑型 注释 = "跟\"添加请求头\"一样,不同的是添加的协议头为文本数组类."
@@ -2315,12 +2326,12 @@
     参数 修改方式 <类型 = 整数 注释 = "请参考\"请求头修改方式_WinHTTP\"中的常量和备注,部分常量可以用\"位或\"组合使用." @默认值 = 请求头修改方式_WinHTTP.仅新建添加>
     {
         @ @an<CVolString> szHeaders;
-        @ for (INT_P npIndex = 0; npIndex < @<协议头数组>.data ().GetCount (); npIndex++) {
-        @     szHeaders.AddText (@<协议头数组>.data ().GetAt (npIndex));
-        @     szHeaders.AddText (L"\r\n");
+        @ for (INT_P npIndex = 0; npIndex < @<协议头数组>.data().GetCount(); npIndex++) {
+        @     szHeaders.AddText(@<协议头数组>.data().GetAt(npIndex));
+        @     szHeaders.AddText(L"\r\n");
         @ }
-        @ szHeaders.TrimRight ();
-        @ return WinHttpAddRequestHeaders ((HINTERNET)@<请求句柄>, (LPCWSTR)szHeaders.GetText (), (DWORD)szHeaders.GetLength (), (DWORD)@<修改方式>);
+        @ szHeaders.TrimRight();
+        @ return WinHttpAddRequestHeaders((HINTERNET)@<请求句柄>, szHeaders.GetText(), (DWORD)szHeaders.GetLength(), (DWORD)@<修改方式>);
     }
 
     方法 添加请求头EX <公开 静态 类型 = 逻辑型 注释 = "使用键值对的方式,添加一个或多个协议头到请求中."
@@ -2352,22 +2363,22 @@
     参数 标头索引 <类型 = 整数类 注释 = "  此参数用于枚举拥有相同名称的多个标头,首索引为0." 注释 = "  执行成功后会在本参数返回下一个标头的索引."
             注释 = "  如果下一个标头不存在,则返回-1." 注释 = "  留空则只取找到的第一个标头,获取所有标头时忽略." @默认值 = 空对象>
     {
-        @ @<响应头>.Empty ();
+        @ @<响应头>.Empty();
         @ DWORD dwSize = 0, dwIndex = (DWORD)@<标头索引.值>;
-        @ WinHttpQueryHeaders ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型>,
-        @                      ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? (LPCWSTR)@<标头名称>.GetText () : WINHTTP_HEADER_NAME_BY_INDEX,
-        @                      WINHTTP_NO_OUTPUT_BUFFER, &dwSize, &dwIndex);
+        @ WinHttpQueryHeaders((HINTERNET)@<请求句柄>, (DWORD)@<标头类型>,
+        @                     ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? @<标头名称>.GetText() : WINHTTP_HEADER_NAME_BY_INDEX,
+        @                     WINHTTP_NO_OUTPUT_BUFFER, &dwSize, &dwIndex);
         @ if (dwSize == 0) {
         @     if (dwIndex > 0 && GetLastError() == ERROR_WINHTTP_HEADER_NOT_FOUND) { @<标头索引.值> = -1; }
         @     return FALSE; }
-        @ LPVOID Buffer = malloc (dwSize);
+        @ LPVOID Buffer = malloc(dwSize);
         @ BOOL bRes;
-        @ bRes = WinHttpQueryHeaders ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型>,
-        @                             ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? (LPCWSTR)@<标头名称>.GetText () : WINHTTP_HEADER_NAME_BY_INDEX,
+        @ bRes = WinHttpQueryHeaders((HINTERNET)@<请求句柄>, (DWORD)@<标头类型>,
+        @                            ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? @<标头名称>.GetText() : WINHTTP_HEADER_NAME_BY_INDEX,
         @                             Buffer, &dwSize, &dwIndex);
         @ if (bRes) {
         @     @<标头索引.值> = (INT)dwIndex;
-        @     @<响应头>.SetText ((const WCHAR*)Buffer);
+        @     @<响应头>.SetText((const WCHAR*)Buffer);
         @ }
         @ free (Buffer);
         @ return bRes;
@@ -2383,19 +2394,19 @@
     参数 标头索引 <类型 = 整数类 注释 = "  此参数用于枚举拥有相同名称的多个标头,首索引为0." 注释 = "  执行成功后会在本参数返回下一个标头的索引."
             注释 = "  如果下一个标头不存在,则返回-1." 注释 = "  留空则只取找到的第一个标头,获取所有标头时忽略." @默认值 = 空对象>
     {
-        @ @<响应头>.Empty ();
+        @ @<响应头>.Empty();
         @ DWORD dwSize = 0, dwIndex = (DWORD)@<标头索引.值>;
-        @ WinHttpQueryHeaders ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_WIRE_ENCODING,
-        @                      ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? (LPCWSTR)@<标头名称>.GetText () : WINHTTP_HEADER_NAME_BY_INDEX,
-        @                      WINHTTP_NO_OUTPUT_BUFFER, &dwSize, &dwIndex);
+        @ WinHttpQueryHeaders((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_WIRE_ENCODING,
+        @                     ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? @<标头名称>.GetText() : WINHTTP_HEADER_NAME_BY_INDEX,
+        @                     WINHTTP_NO_OUTPUT_BUFFER, &dwSize, &dwIndex);
         @ if (dwSize == 0) {
         @     if (dwIndex > 0 && GetLastError() == ERROR_WINHTTP_HEADER_NOT_FOUND) { @<标头索引.值> = -1; }
         @     return FALSE; }
-        @ @<响应头>.Alloc (dwSize, TRUE);
+        @ @<响应头>.Alloc(dwSize, TRUE);
         @ BOOL bRes;
-        @ bRes = WinHttpQueryHeaders ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_WIRE_ENCODING,
-        @                             ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? (LPCWSTR)@<标头名称>.GetText () : WINHTTP_HEADER_NAME_BY_INDEX,
-        @                             (LPVOID)@<响应头>.GetPtr (), &dwSize, &dwIndex);
+        @ bRes = WinHttpQueryHeaders((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_WIRE_ENCODING,
+        @                            ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? @<标头名称>.GetText() : WINHTTP_HEADER_NAME_BY_INDEX,
+        @                            (LPVOID)@<响应头>.GetPtr(), &dwSize, &dwIndex);
         @ if (bRes) { @<标头索引.值> = (INT)dwIndex; }
         @ return bRes;
     }
@@ -2411,14 +2422,14 @@
     {
         @ SYSTEMTIME st;
         @ DWORD dwSize = sizeof(SYSTEMTIME), dwIndex = (DWORD)@<标头索引.值>;
-        @ if (WinHttpQueryHeaders ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_SYSTEMTIME,
-        @                          ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? (LPCWSTR)@<标头名称>.GetText () : WINHTTP_HEADER_NAME_BY_INDEX,
-        @                          &st, &dwSize, &dwIndex)) {
+        @ if (WinHttpQueryHeaders((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_SYSTEMTIME,
+        @                         ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? @<标头名称>.GetText() : WINHTTP_HEADER_NAME_BY_INDEX,
+        @                         &st, &dwSize, &dwIndex)) {
         @     @<标头索引.值> = (INT)dwIndex;
         @     TIME_ZONE_INFORMATION tz { };
-        @     GetTimeZoneInformation (&tz);
+        @     GetTimeZoneInformation(&tz);
         @     struct tm timeinfo { st.wSecond, st.wMinute, st.wHour, st.wDay, st.wMonth - 1, st.wYear - 1900, st.wDayOfWeek, 0, 0 };
-        @     return (INT)mktime (&timeinfo) - tz.Bias * 60;
+        @     return (INT)mktime(&timeinfo) - tz.Bias * 60;
         @ }
         @ if (dwIndex > 0 && GetLastError() == ERROR_WINHTTP_HEADER_NOT_FOUND) { @<标头索引.值> = -1; }
         @ return 0;
@@ -2434,9 +2445,9 @@
     {
         @ INT nRes = 0;
         @ DWORD dwSize = 4, dwIndex = (DWORD)@<标头索引.值>;
-        @ if (WinHttpQueryHeaders ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_NUMBER,
-        @                          ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? (LPCWSTR)@<标头名称>.GetText () : WINHTTP_HEADER_NAME_BY_INDEX,
-        @                          &nRes, &dwSize, &dwIndex)) {
+        @ if (WinHttpQueryHeaders((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_NUMBER,
+        @                         ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? @<标头名称>.GetText() : WINHTTP_HEADER_NAME_BY_INDEX,
+        @                         &nRes, &dwSize, &dwIndex)) {
         @     @<标头索引.值> = (INT)dwIndex;
         @     return nRes;
         @ }
@@ -2455,9 +2466,9 @@
     {
         @ INT64 nRes = 0;
         @ DWORD dwSize = 8, dwIndex = (DWORD)@<标头索引.值>;
-        @ if (WinHttpQueryHeaders ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_NUMBER64,
-        @                          ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? (LPCWSTR)@<标头名称>.GetText () : WINHTTP_HEADER_NAME_BY_INDEX,
-        @                          &nRes, &dwSize, &dwIndex)) {
+        @ if (WinHttpQueryHeaders((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_NUMBER64,
+        @                         ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? @<标头名称>.GetText() : WINHTTP_HEADER_NAME_BY_INDEX,
+        @                         &nRes, &dwSize, &dwIndex)) {
         @     @<标头索引.值> = (INT)dwIndex;
         @     return nRes;
         @ }
@@ -2475,24 +2486,24 @@
     参数 标头索引 <类型 = 整数类 注释 = "  此参数用于枚举拥有相同名称的多个标头,首索引为0." 注释 = "  执行成功后会在本参数返回下一个标头的索引."
             注释 = "  如果下一个标头不存在,则返回-1." 注释 = "  留空则只取找到的第一个标头,获取所有标头时忽略." @默认值 = 空对象>
     {
-        @ @<请求头>.Empty ();
+        @ @<请求头>.Empty();
         @ DWORD dwSize = 0, dwIndex = (DWORD)@<标头索引.值>;
-        @ WinHttpQueryHeaders ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_REQUEST_HEADERS,
-        @                      ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? (LPCWSTR)@<标头名称>.GetText () : WINHTTP_HEADER_NAME_BY_INDEX,
-        @                      WINHTTP_NO_OUTPUT_BUFFER, &dwSize, &dwIndex);
+        @ WinHttpQueryHeaders((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_REQUEST_HEADERS,
+        @                     ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? @<标头名称>.GetText() : WINHTTP_HEADER_NAME_BY_INDEX,
+        @                     WINHTTP_NO_OUTPUT_BUFFER, &dwSize, &dwIndex);
         @ if (dwSize == 0) {
         @     if (dwIndex > 0 && GetLastError() == ERROR_WINHTTP_HEADER_NOT_FOUND) { @<标头索引.值> = -1; }
         @     return FALSE;
         @ }
-        @ LPVOID Buffer = malloc (dwSize);
-        @ BOOL bRes = WinHttpQueryHeaders ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_REQUEST_HEADERS,
-        @                                  ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? (LPCWSTR)@<标头名称>.GetText () : WINHTTP_HEADER_NAME_BY_INDEX,
-        @                                  Buffer, &dwSize, &dwIndex);
+        @ LPVOID Buffer = malloc(dwSize);
+        @ BOOL bRes = WinHttpQueryHeaders((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_REQUEST_HEADERS,
+        @                                 ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? @<标头名称>.GetText() : WINHTTP_HEADER_NAME_BY_INDEX,
+        @                                 Buffer, &dwSize, &dwIndex);
         @ if (bRes) {
         @     @<标头索引.值> = (INT)dwIndex;
-        @     @<请求头>.SetText ((const WCHAR*)Buffer);
+        @     @<请求头>.SetText((const WCHAR*)Buffer);
         @ }
-        @ free (Buffer);
+        @ free(Buffer);
         @ return bRes;
     }
 
@@ -2506,19 +2517,19 @@
     参数 标头索引 <类型 = 整数类 注释 = "  此参数用于枚举拥有相同名称的多个标头,首索引为0." 注释 = "  执行成功后会在本参数返回下一个标头的索引."
             注释 = "  如果下一个标头不存在,则返回-1." 注释 = "  留空则只取找到的第一个标头,获取所有标头时忽略." @默认值 = 空对象>
     {
-        @ @<请求头>.Empty ();
+        @ @<请求头>.Empty();
         @ DWORD dwSize = 0, dwIndex = (DWORD)@<标头索引.值>;
-        @ WinHttpQueryHeaders ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_REQUEST_HEADERS | WINHTTP_QUERY_FLAG_WIRE_ENCODING,
-        @                      ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? (LPCWSTR)@<标头名称>.GetText () : WINHTTP_HEADER_NAME_BY_INDEX,
-        @                      WINHTTP_NO_OUTPUT_BUFFER, &dwSize, &dwIndex);
+        @ WinHttpQueryHeaders((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_REQUEST_HEADERS | WINHTTP_QUERY_FLAG_WIRE_ENCODING,
+        @                     ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? @<标头名称>.GetText() : WINHTTP_HEADER_NAME_BY_INDEX,
+        @                     WINHTTP_NO_OUTPUT_BUFFER, &dwSize, &dwIndex);
         @ if (dwSize == 0) {
         @     if (dwIndex > 0 && GetLastError() == ERROR_WINHTTP_HEADER_NOT_FOUND) { @<标头索引.值> = -1; }
         @     return FALSE;
         @ }
         @ @<请求头>.Alloc (dwSize, TRUE);
-        @ BOOL bRes = WinHttpQueryHeaders ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_REQUEST_HEADERS | WINHTTP_QUERY_FLAG_WIRE_ENCODING,
-        @                                  ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? (LPCWSTR)@<标头名称>.GetText () : WINHTTP_HEADER_NAME_BY_INDEX,
-        @                                  (LPVOID)@<请求头>.GetPtr(), &dwSize, &dwIndex);
+        @ BOOL bRes = WinHttpQueryHeaders((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_REQUEST_HEADERS | WINHTTP_QUERY_FLAG_WIRE_ENCODING,
+        @                                 ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? @<标头名称>.GetText() : WINHTTP_HEADER_NAME_BY_INDEX,
+        @                                 (LPVOID)@<请求头>.GetPtr(), &dwSize, &dwIndex);
         @ if (bRes) { @<标头索引.值> = (INT)dwIndex; }
         @ return bRes;
     }
@@ -2534,14 +2545,14 @@
     {
         @ SYSTEMTIME st;
         @ DWORD dwSize = sizeof(SYSTEMTIME), dwIndex = (DWORD)@<标头索引.值>;
-        @ if (WinHttpQueryHeaders ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_REQUEST_HEADERS | WINHTTP_QUERY_FLAG_SYSTEMTIME,
-        @                          ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? (LPCWSTR)@<标头名称>.GetText () : WINHTTP_HEADER_NAME_BY_INDEX,
-        @                          &st, &dwSize, &dwIndex)) {
+        @ if (WinHttpQueryHeaders((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_REQUEST_HEADERS | WINHTTP_QUERY_FLAG_SYSTEMTIME,
+        @                         ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? @<标头名称>.GetText() : WINHTTP_HEADER_NAME_BY_INDEX,
+        @                         &st, &dwSize, &dwIndex)) {
         @     @<标头索引.值> = (INT)dwIndex;
         @     TIME_ZONE_INFORMATION tz { };
-        @     GetTimeZoneInformation (&tz);
+        @     GetTimeZoneInformation(&tz);
         @     struct tm timeinfo { st.wSecond, st.wMinute, st.wHour, st.wDay, st.wMonth - 1, st.wYear - 1900, st.wDayOfWeek, 0, 0 };
-        @     return (INT)mktime (&timeinfo) - tz.Bias * 60;
+        @     return (INT)mktime(&timeinfo) - tz.Bias * 60;
         @ }
         @ if (dwIndex > 0 && GetLastError() == ERROR_WINHTTP_HEADER_NOT_FOUND) { @<标头索引.值> = -1; }
         @ return 0;
@@ -2557,9 +2568,9 @@
     {
         @ INT nRes = 0;
         @ DWORD dwSize = 4, dwIndex = (DWORD)@<标头索引.值>;
-        @ if (WinHttpQueryHeaders ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_REQUEST_HEADERS | WINHTTP_QUERY_FLAG_NUMBER,
-        @                          ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? (LPCWSTR)@<标头名称>.GetText () : WINHTTP_HEADER_NAME_BY_INDEX,
-        @                          &nRes, &dwSize, &dwIndex)) {
+        @ if (WinHttpQueryHeaders((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_REQUEST_HEADERS | WINHTTP_QUERY_FLAG_NUMBER,
+        @                         ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? @<标头名称>.GetText() : WINHTTP_HEADER_NAME_BY_INDEX,
+        @                         &nRes, &dwSize, &dwIndex)) {
         @     @<标头索引.值> = (INT)dwIndex;
         @     return nRes;
         @ }
@@ -2577,9 +2588,9 @@
     {
         @ INT64 nRes = 0;
         @ DWORD dwSize = 8, dwIndex = (DWORD)@<标头索引.值>;
-        @ if (WinHttpQueryHeaders ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_REQUEST_HEADERS | WINHTTP_QUERY_FLAG_NUMBER64,
-        @                          ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? (LPCWSTR)@<标头名称>.GetText () : WINHTTP_HEADER_NAME_BY_INDEX,
-        @                          &nRes, &dwSize, WINHTTP_NO_HEADER_INDEX)) {
+        @ if (WinHttpQueryHeaders((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_REQUEST_HEADERS | WINHTTP_QUERY_FLAG_NUMBER64,
+        @                         ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? @<标头名称>.GetText() : WINHTTP_HEADER_NAME_BY_INDEX,
+        @                         &nRes, &dwSize, WINHTTP_NO_HEADER_INDEX)) {
         @     @<标头索引.值> = (INT)dwIndex;
         @     return nRes;
         @ }
@@ -2601,29 +2612,29 @@
             注释 = "  如果下一个标头不存在,则返回-1." 注释 = "  留空则只取找到的第一个标头." @默认值 = 空对象>
     参数 代码页 <类型 = 整数 注释 = "用于Unicode转换的编码页,0为系统的默认编码CP_ACP." @默认值 = 0>
     {
-        @ @<响应头键值对>.m_map.clear ();
+        @ @<响应头键值对>.m_map.clear();
         @ DWORD dwSize = 0, dwHeadersCount = 0, dwIndex = (DWORD)@<标头索引.值>;
         @ PWINHTTP_EXTENDED_HEADER pHeaders = NULL;
         @ WINHTTP_HEADER_NAME headrName { };
-        @ if ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) { headrName.pwszName = (PCWSTR)@<标头名称>.GetText (); }
-        @ DWORD dwRes = WinHttpQueryHeadersEx ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型>, 0, (UINT)@<代码页>, &dwIndex,
-        @                                      ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? &headrName : NULL, NULL,
-        @                                       &dwSize, &pHeaders, &dwHeadersCount);
+        @ if ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) { headrName.pwszName = (PCWSTR)@<标头名称>.GetText(); }
+        @ DWORD dwRes = WinHttpQueryHeadersEx((HINTERNET)@<请求句柄>, (DWORD)@<标头类型>, 0, (UINT)@<代码页>, &dwIndex,
+        @                                     ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? &headrName : NULL, NULL,
+        @                                     &dwSize, &pHeaders, &dwHeadersCount);
         @ if (dwSize == 0) {
         @     if (dwRes == ERROR_WINHTTP_HEADER_NOT_FOUND) { @<标头索引.值> = -1; }
         @     return dwRes;
         @ }
         @ PVOID Buffer = malloc (dwSize);
-        @ dwRes = WinHttpQueryHeadersEx ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型>, 0, (UINT)@<代码页>, &dwIndex,
-        @                                ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? &headrName : NULL, Buffer,
-        @                                &dwSize, &pHeaders, &dwHeadersCount);
+        @ dwRes = WinHttpQueryHeadersEx((HINTERNET)@<请求句柄>, (DWORD)@<标头类型>, 0, (UINT)@<代码页>, &dwIndex,
+        @                               ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? &headrName : NULL, Buffer,
+        @                               &dwSize, &pHeaders, &dwHeadersCount);
         @ if (dwRes == 0) {
         @     @<标头索引.值> = (INT)dwIndex;
         @     for (DWORD i = 0; i < dwHeadersCount; i++) {
-        @         @<响应头键值对>.m_map [@an<CVolString> (pHeaders[i].pwszName)] = @an<CVolString> (pHeaders[i].pwszValue);
+        @         @<响应头键值对>.m_map[@an<CVolString>(pHeaders[i].pwszName)] = @an<CVolString>(pHeaders[i].pwszValue);
         @     }
         @ }
-        @ free (Buffer);
+        @ free(Buffer);
         @ return dwRes;
     }
 
@@ -2638,30 +2649,30 @@
     参数 标头索引 <类型 = 整数类 注释 = "  此参数用于枚举拥有相同名称的多个标头,首索引为0." 注释 = "  执行成功后会在本参数返回下一个标头的索引."
             注释 = "  如果下一个标头不存在,则返回-1." 注释 = "  留空则只取找到的第一个标头." @默认值 = 空对象>
     {
-        @ @<响应头键值对>.clear ();
+        @ @<响应头键值对>.clear();
         @ DWORD dwSize = 0, dwHeadersCount = 0, dwIndex = (DWORD)@<标头索引.值>;
         @ PWINHTTP_EXTENDED_HEADER pHeaders = NULL;
         @ WINHTTP_HEADER_NAME headrName { };
         @ @an<CVolMem> memCustm;
-        @ if ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) { headrName.pszName = (PCSTR)GetMbsText (@<标头名称>.GetText (), memCustm, NULL); }
-        @ DWORD dwRes = WinHttpQueryHeadersEx ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_WIRE_ENCODING,
-        @                                      0, 0, &dwIndex,
-        @                                      ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? &headrName : NULL, NULL, &dwSize,
-        @                                      &pHeaders, &dwHeadersCount);
+        @ if ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) { headrName.pszName = (PCSTR)GetMbsText(@<标头名称>.GetText(), memCustm, NULL); }
+        @ DWORD dwRes = WinHttpQueryHeadersEx((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_WIRE_ENCODING,
+        @                                     0, 0, &dwIndex,
+        @                                     ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? &headrName : NULL, NULL, &dwSize,
+        @                                     &pHeaders, &dwHeadersCount);
         @ if (dwSize == 0) {
         @     if (dwRes == ERROR_WINHTTP_HEADER_NOT_FOUND) { @<标头索引.值> = -1; }
         @     return dwRes;
         @ }
-        @ PVOID Buffer = malloc (dwSize);
-        @ dwRes = WinHttpQueryHeadersEx ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_WIRE_ENCODING,
-        @                                0, 0, &dwIndex,
-        @                                ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? &headrName : NULL, Buffer, &dwSize,
-        @                                &pHeaders, &dwHeadersCount);
+        @ PVOID Buffer = malloc(dwSize);
+        @ dwRes = WinHttpQueryHeadersEx((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_WIRE_ENCODING,
+        @                               0, 0, &dwIndex,
+        @                               ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? &headrName : NULL, Buffer, &dwSize,
+        @                               &pHeaders, &dwHeadersCount);
         @ if (dwRes == 0) {
         @     @<标头索引.值> = (INT)dwIndex;
         @     @an<CVolMem> strbuf;
         @     for (DWORD i = 0; i < dwHeadersCount; i++) {
-        @         @<响应头键值对> [@an<CVolString> (GetWideText(pHeaders[i].pszName, strbuf, NULL))] = @an<CVolMem> (pHeaders[i].pszValue, strlen(pHeaders[i].pszValue));
+        @         @<响应头键值对>[@an<CVolString>(GetWideText(pHeaders[i].pszName, strbuf, NULL))] = @an<CVolMem>(pHeaders[i].pszValue, strlen(pHeaders[i].pszValue));
         @     }
         @ }
         @ free (Buffer);
@@ -2680,31 +2691,31 @@
             注释 = "  如果下一个标头不存在,则返回-1." 注释 = "  留空则只取找到的第一个标头." @默认值 = 空对象>
     参数 代码页 <类型 = 整数 注释 = "用于Unicode转换的编码页,0为系统的默认编码CP_ACP." @默认值 = 0>
     {
-        @ @<请求头键值对>.m_map.clear ();
+        @ @<请求头键值对>.m_map.clear();
         @ DWORD dwSize = 0, dwHeadersCount = 0, dwIndex = (DWORD)@<标头索引.值>;
         @ PWINHTTP_EXTENDED_HEADER pHeaders = NULL;
         @ WINHTTP_HEADER_NAME headrName { };
-        @ if ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) { headrName.pwszName = (PCWSTR)@<标头名称>.GetText (); }
-        @ DWORD dwRes = WinHttpQueryHeadersEx ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_REQUEST_HEADERS,
-        @                                      0, (UINT)@<代码页>, &dwIndex,
-        @                                      ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? &headrName : NULL, NULL, &dwSize,
-        @                                      &pHeaders, &dwHeadersCount);
+        @ if ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) { headrName.pwszName = (PCWSTR)@<标头名称>.GetText(); }
+        @ DWORD dwRes = WinHttpQueryHeadersEx((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_REQUEST_HEADERS,
+        @                                     0, (UINT)@<代码页>, &dwIndex,
+        @                                     ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? &headrName : NULL, NULL, &dwSize,
+        @                                     &pHeaders, &dwHeadersCount);
         @ if (dwSize == 0) {
         @     if (dwRes == ERROR_WINHTTP_HEADER_NOT_FOUND) { @<标头索引.值> = -1; }
         @     return dwRes;
         @ }
-        @ PVOID Buffer = malloc (dwSize);
-        @ dwRes = WinHttpQueryHeadersEx ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_REQUEST_HEADERS,
-        @                                0, (UINT)@<代码页>, &dwIndex,
-        @                                ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? &headrName : NULL, Buffer, &dwSize,
-        @                                &pHeaders, &dwHeadersCount);
+        @ PVOID Buffer = malloc(dwSize);
+        @ dwRes = WinHttpQueryHeadersEx((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_REQUEST_HEADERS,
+        @                               0, (UINT)@<代码页>, &dwIndex,
+        @                               ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? &headrName : NULL, Buffer, &dwSize,
+        @                               &pHeaders, &dwHeadersCount);
         @ if (dwRes == 0) {
         @     @<标头索引.值> = (INT)dwIndex;
         @     for (DWORD i = 0; i < dwHeadersCount; i++) {
-        @         @<请求头键值对>.m_map [@an<CVolString> (pHeaders[i].pwszName)] = @an<CVolString> (pHeaders[i].pwszValue);
+        @         @<请求头键值对>.m_map[@an<CVolString>(pHeaders[i].pwszName)] = @an<CVolString>(pHeaders[i].pwszValue);
         @     }
         @ }
-        @ free (Buffer);
+        @ free(Buffer);
         @ return dwRes;
     }
 
@@ -2720,33 +2731,33 @@
     参数 标头索引 <类型 = 整数类 注释 = "  此参数用于枚举拥有相同名称的多个标头,首索引为0." 注释 = "  执行成功后会在本参数返回下一个标头的索引."
             注释 = "  如果下一个标头不存在,则返回-1." 注释 = "  留空则只取找到的第一个标头." @默认值 = 空对象>
     {
-        @ @<请求头键值对>.clear ();
+        @ @<请求头键值对>.clear();
         @ DWORD dwSize = 0, dwHeadersCount = 0, dwIndex = (DWORD)@<标头索引.值>;
         @ PWINHTTP_EXTENDED_HEADER pHeaders = NULL;
         @ WINHTTP_HEADER_NAME headrName { };
         @ @an<CVolMem> memCustm;
-        @ if ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) { headrName.pszName = (PCSTR)GetMbsText (@<标头名称>.GetText (), memCustm, NULL); }
-        @ DWORD dwRes = WinHttpQueryHeadersEx ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_WIRE_ENCODING,
-        @                                      0, 0, &dwIndex,
-        @                                      ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? &headrName : NULL, NULL, &dwSize,
-        @                                      &pHeaders, &dwHeadersCount);
+        @ if ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) { headrName.pszName = (PCSTR)GetMbsText(@<标头名称>.GetText(), memCustm, NULL); }
+        @ DWORD dwRes = WinHttpQueryHeadersEx((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_WIRE_ENCODING,
+        @                                     0, 0, &dwIndex,
+        @                                     ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? &headrName : NULL, NULL, &dwSize,
+        @                                     &pHeaders, &dwHeadersCount);
         @ if (dwSize == 0) {
         @     if (dwRes == ERROR_WINHTTP_HEADER_NOT_FOUND) { @<标头索引.值> = -1; }
         @     return dwRes;
         @ }
         @ PVOID Buffer = malloc (dwSize);
-        @ dwRes = WinHttpQueryHeadersEx ((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_WIRE_ENCODING,
-        @                                0, 0, &dwIndex,
-        @                                ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? &headrName : NULL, Buffer, &dwSize,
-        @                                &pHeaders, &dwHeadersCount);
+        @ dwRes = WinHttpQueryHeadersEx((HINTERNET)@<请求句柄>, (DWORD)@<标头类型> | WINHTTP_QUERY_FLAG_WIRE_ENCODING,
+        @                               0, 0, &dwIndex,
+        @                               ((DWORD)@<标头类型> == WINHTTP_QUERY_CUSTOM) ? &headrName : NULL, Buffer, &dwSize,
+        @                               &pHeaders, &dwHeadersCount);
         @ if (dwRes == 0) {
         @     @<标头索引.值> = (INT)dwIndex;
         @     @an<CVolMem> strbuf;
         @     for (DWORD i = 0; i < dwHeadersCount; i++) {
-        @         @<请求头键值对> [@an<CVolString> (GetWideText(pHeaders[i].pszName, strbuf, NULL))] = @an<CVolMem> (pHeaders[i].pszValue, strlen(pHeaders[i].pszValue));
+        @         @<请求头键值对>[@an<CVolString>(GetWideText(pHeaders[i].pszName, strbuf, NULL))] = @an<CVolMem>(pHeaders[i].pszValue, strlen(pHeaders[i].pszValue));
         @     }
         @ }
-        @ free (Buffer);
+        @ free(Buffer);
         @ return dwRes;
     }
 
@@ -2759,7 +2770,7 @@
     参数 通知标志 <类型 = 回调标志_WinHTTP 注释 = "注意: 函数不检查此参数,只要提供的网络句柄和回调方法正确,就能返回成功."
             注释 = "但如果提供的通知标志不正确,将无法触发对应的回调.">
     {
-        @ (INT_P)WinHttpSetStatusCallback ((HINTERNET)@<网络句柄>, (WINHTTP_STATUS_CALLBACK)&@<回调方法>, (DWORD)@<通知标志>, NULL)
+        @ (INT_P)WinHttpSetStatusCallback((HINTERNET)@<网络句柄>, (WINHTTP_STATUS_CALLBACK)&@<回调方法>, (DWORD)@<通知标志>, NULL)
     }
 
     方法 状态回调模板 <公开 静态 注释 = "\"置状态回调\"中回调方法的模板,请勿直接使用." 折叠>
@@ -2778,7 +2789,7 @@
     参数 发送超时 <类型 = 整数 注释 = "发送请求的超时时间(毫秒),初始值为30秒." @默认值 = 300000>
     参数 接收超时 <类型 = 整数 注释 = "接收服务器响应的超时时间(毫秒),初始值为30秒." @默认值 = 300000>
     {
-        @ WinHttpSetTimeouts ((HINTERNET)@<会话句柄>, @<解析超时>, @<连接超时>, @<发送超时>, @<接收超时>)
+        @ WinHttpSetTimeouts((HINTERNET)@<会话句柄>, @<解析超时>, @<连接超时>, @<发送超时>, @<接收超时>)
     }
 
     方法 取格林威治时间 <公开 静态 类型 = 文本型 注释 = "获取 HTTP version 1.0 规范的GTM时间文本."
@@ -2787,13 +2798,13 @@
     {
         @ SYSTEMTIME sTime;
         @ @an<CVolString> szTimeStr;
-        @ szTimeStr.SetLength (WINHTTP_TIME_FORMAT_BUFSIZE / 2);
+        @ szTimeStr.SetLength(WINHTTP_TIME_FORMAT_BUFSIZE / 2);
         @ if (@<时间戳> == -1) {
-        @     GetSystemTime (&sTime);
+        @     GetSystemTime(&sTime);
         @ } else {
         @     struct tm timeinfo;
         @     time_t timestamp = (time_t)@<时间戳>;
-        @     gmtime_s (&timeinfo, &timestamp);
+        @     gmtime_s(&timeinfo, &timestamp);
         @     sTime.wYear = (WORD)(timeinfo.tm_year + 1900);
         @     sTime.wMonth = (WORD)(timeinfo.tm_mon + 1);
         @     sTime.wDayOfWeek = (WORD)timeinfo.tm_wday;
@@ -2803,7 +2814,7 @@
         @     sTime.wSecond = (WORD)timeinfo.tm_sec;
         @     sTime.wMilliseconds = 0;
         @ }
-        @ if (WinHttpTimeFromSystemTime (&sTime, (LPWSTR)szTimeStr.GetText ()))
+        @ if (WinHttpTimeFromSystemTime(&sTime, (LPWSTR)szTimeStr.GetText()))
         @     return szTimeStr;
         @ return @an<CVolString>(L"");
     }
@@ -2813,11 +2824,11 @@
     参数 GMT时间 <类型 = 文本型 注释 = "必须是\"Thu, 16 Jun 2022 14:20:20 GMT\"这样的时间格式.">
     {
         @ SYSTEMTIME st;
-        @ if (WinHttpTimeToSystemTime ((LPCWSTR)@<GMT时间>.GetText (), &st)) {
+        @ if (WinHttpTimeToSystemTime(@<GMT时间>.GetText(), &st)) {
         @     TIME_ZONE_INFORMATION tz { };
-        @     GetTimeZoneInformation (&tz);
+        @     GetTimeZoneInformation(&tz);
         @     struct tm timeinfo { st.wSecond, st.wMinute, st.wHour, st.wDay, st.wMonth - 1, st.wYear - 1900, st.wDayOfWeek, 0, 0 };
-        @     return (INT)mktime (&timeinfo) - tz.Bias * 60;
+        @     return (INT)mktime(&timeinfo) - tz.Bias * 60;
         @ }
         @ return -1;
     }
@@ -2835,7 +2846,7 @@
             注释 = "部分的编解码结果的缓冲区长度.2048是IE浏览器最大允许的URL路径长度." 注释 = "  如果不进行URL编解码时将本参数设置为0,则表示不拆分URL路径和附加信息."
             @默认值 = 2048>
     {
-        @ @<URL组件>.ResetObject ();
+        @ @<URL组件>.ResetObject();
         @ URL_COMPONENTS urlComp { };
         @ urlComp.dwStructSize      = sizeof (urlComp);
         @ urlComp.dwSchemeLength    = 10;
@@ -2854,8 +2865,8 @@
         @         urlComp.lpszUserName = new WCHAR[256]; urlComp.lpszPassword = new WCHAR[256];
         @     }
         @ }
-        @ BOOL bRes = WinHttpCrackUrl ((LPCWSTR)@<URL>.GetText (), (DWORD)@<URL>.GetLength (), (DWORD)@<URL操作>, &urlComp);
-        @ if (bRes) { @<URL组件>.SetInfo (&urlComp); }
+        @ BOOL bRes = WinHttpCrackUrl(@<URL>.GetText(), (DWORD)@<URL>.GetLength(), (DWORD)@<URL操作>, &urlComp);
+        @ if (bRes) { @<URL组件>.SetInfo(&urlComp); }
         @ if ((DWORD)@<URL操作> == ICU_DECODE || (DWORD)@<URL操作> == ICU_ESCAPE) {
         @     delete urlComp.lpszScheme; delete urlComp.lpszHostName; delete urlComp.lpszUrlPath; delete urlComp.lpszExtraInfo;
         @     if ((DWORD)@<URL操作> != ICU_REJECT_USERPWD) { delete urlComp.lpszUserName; delete urlComp.lpszPassword; }
@@ -2873,10 +2884,10 @@
         @ URL_COMPONENTS urlComp;
         @ DWORD dwUrlLength = (DWORD)@<预分配字符>;
         @ @an<CVolString> szUrl;
-        @ szUrl.SetLength (dwUrlLength);
-        @ if (!WinHttpCreateUrl (@<URL组件>.GetInfo (&urlComp), (DWORD)@<URL操作>, (LPWSTR)szUrl.GetText (), &dwUrlLength))
+        @ szUrl.SetLength(dwUrlLength);
+        @ if (!WinHttpCreateUrl(@<URL组件>.GetInfo(&urlComp), (DWORD)@<URL操作>, (LPWSTR)szUrl.GetText(), &dwUrlLength))
         @     return @an<CVolString>(L"");
-        @ return szUrl.Left (dwUrlLength);
+        @ return szUrl.Left(dwUrlLength);
     }
 
     # 代理 ===
@@ -2888,9 +2899,9 @@
             注释 = "  2 使用DNS尝试在本地计算机域上的已知位置定位代理自动配置文件;" 注释 = "  3 同时使用以上两种方式,优先使用DHCP,若DHCP未发现再用DNS;" @默认值 = 3>
     {
         @ LPWSTR szAutoConfigUrl;
-        @ if (WinHttpDetectAutoProxyConfigUrl ((DWORD)@<自动检测选项>, &szAutoConfigUrl)) {
-        @     @<自动配置URL>.SetText (szAutoConfigUrl);
-        @     GlobalFree (szAutoConfigUrl);
+        @ if (WinHttpDetectAutoProxyConfigUrl((DWORD)@<自动检测选项>, &szAutoConfigUrl)) {
+        @     @<自动配置URL>.SetText(szAutoConfigUrl);
+        @     GlobalFree(szAutoConfigUrl);
         @     return TRUE;
         @ }
         @ return FALSE;
@@ -2902,11 +2913,11 @@
     参数 自动代理选项 <类型 = WinHTTP自动代理选项类 注释 = "指定所欲使用的自动代理选项">
     参数 代理信息 <类型 = WinHTTP代理信息类 注释 = "执行成功在此返回代理的各项信息.">
     {
-        @ @<代理信息>.ResetObject ();
+        @ @<代理信息>.ResetObject();
         @ WINHTTP_PROXY_INFO ProxyInfo;
-        @ if (WinHttpGetProxyForUrl ((HINTERNET)@<会话句柄>, (LPCWSTR)@<URL>.GetText (),
-        @                            &@<自动代理选项>, &ProxyInfo)) {
-        @     @<代理信息>.SetInfo (&ProxyInfo);
+        @ if (WinHttpGetProxyForUrl((HINTERNET)@<会话句柄>, @<URL>.GetText(),
+        @                           &@<自动代理选项>, &ProxyInfo)) {
+        @     @<代理信息>.SetInfo(&ProxyInfo);
         @     return TRUE;
         @ }
         @ return FALSE;
@@ -2915,10 +2926,10 @@
     方法 取默认代理配置 <公开 静态 类型 = 逻辑型 注释 = "从注册表中获取默认的WinHTTP代理配置." 返回值注释 = "返回是否成功." 折叠 @禁止流程检查 = 真>
     参数 代理配置 <类型 = WinHTTP代理信息类 注释 = "成功返回代理配置.">
     {
-        @ @<代理配置>.ResetToNullObject ();
+        @ @<代理配置>.ResetToNullObject();
         @ WINHTTP_PROXY_INFO proxyInfo;
-        @ if (WinHttpGetDefaultProxyConfiguration (&proxyInfo)) {
-        @     @<代理配置>.SetInfo (&proxyInfo);
+        @ if (WinHttpGetDefaultProxyConfiguration(&proxyInfo)) {
+        @     @<代理配置>.SetInfo(&proxyInfo);
         @     return TRUE;
         @ }
         @ return FALSE;
@@ -2929,8 +2940,8 @@
     参数 代理配置 <类型 = WinHTTP代理信息类 注释 = "其中的\"访问类型\"成员只能使用\"命名代理\"或\"默认代理\".">
     {
         @ WINHTTP_PROXY_INFO proxyInfo;
-        @ @<代理配置>.GetInfo (&proxyInfo);
-        @ return WinHttpSetDefaultProxyConfiguration (&proxyInfo);
+        @ @<代理配置>.GetInfo(&proxyInfo);
+        @ return WinHttpSetDefaultProxyConfiguration(&proxyInfo);
     }
 
     方法 取当前用户的IE代理配置 <公开 静态 类型 = 逻辑型 注释 = "获取当前用户的Internet Explorer代理配置." 注释 = "用于未实现代理自动发现协议的网络环境中."
@@ -2941,19 +2952,19 @@
     参数 代理跳过列表 <类型 = 文本型 注释 = "若当前用户的IE代理配置指定为\"使用代理服务器\",成功时将返回代理跳过列表." @默认值 = 空对象>
     {
         @ WINHTTP_CURRENT_USER_IE_PROXY_CONFIG ProxyConfig;
-        @ if (WinHttpGetIEProxyConfigForCurrentUser (&ProxyConfig)) {
+        @ if (WinHttpGetIEProxyConfigForCurrentUser(&ProxyConfig)) {
         @     @<是否自动检测.值> = ProxyConfig.fAutoDetect;
         @     if (ProxyConfig.lpszAutoConfigUrl != NULL) {
-        @         @<自动配置URL>.SetText (ProxyConfig.lpszAutoConfigUrl);
-        @         GlobalFree (ProxyConfig.lpszAutoConfigUrl);
+        @         @<自动配置URL>.SetText(ProxyConfig.lpszAutoConfigUrl);
+        @         GlobalFree(ProxyConfig.lpszAutoConfigUrl);
         @     }
         @     if (ProxyConfig.lpszProxy != NULL) {
-        @         @<代理服务器>.SetText (ProxyConfig.lpszProxy);
-        @         GlobalFree (ProxyConfig.lpszProxy);
+        @         @<代理服务器>.SetText(ProxyConfig.lpszProxy);
+        @         GlobalFree(ProxyConfig.lpszProxy);
         @     }
         @     if (ProxyConfig.lpszProxyBypass != NULL) {
-        @         @<代理跳过列表>.SetText (ProxyConfig.lpszProxyBypass);
-        @         GlobalFree (ProxyConfig.lpszProxyBypass);
+        @         @<代理跳过列表>.SetText(ProxyConfig.lpszProxyBypass);
+        @         GlobalFree(ProxyConfig.lpszProxyBypass);
         @     }
         @     return TRUE;
         @ }
@@ -2967,7 +2978,7 @@
     参数 会话句柄 <类型 = 变整数 注释 = "请提供调用\"初始化\"成功时返回的会话句柄.">
     参数 解析器句柄 <类型 = 变整数 注释 = "请提供变整数变量,新的句柄会返回到此变量中." 注释 = "使用完毕后需要用\"关闭句柄\"关闭此句柄." @需求类型 = 可写入变量>
     {
-        @ (INT)WinHttpCreateProxyResolver ((HINTERNET)@<会话句柄>, (HINTERNET*)&@<解析器句柄>)
+        @ (INT)WinHttpCreateProxyResolver((HINTERNET)@<会话句柄>, (HINTERNET*)&@<解析器句柄>)
     }
 
     方法 从URL获取代理EX <公开 静态 类型 = 逻辑型 注释 = "从指定的URL中获取代理数据,执行成功后请在回调函数中等待通知,然后调用\"取代理结果\"."
@@ -2978,8 +2989,8 @@
     参数 自动代理选项 <类型 = WinHTTP自动代理选项类 注释 = "指定所欲使用的自动代理选项">
     参数 上下文 <类型 = 变整数 注释 = "将传递到完成回调函数中" @默认值 = 0>
     {
-        @ DWORD dwRes = WinHttpGetProxyForUrlEx ((HINTERNET)@<解析器句柄>, (PCWSTR)@<URL>.GetText (),
-        @                                        &@<自动代理选项>, (DWORD_PTR)@<上下文>);
+        @ DWORD dwRes = WinHttpGetProxyForUrlEx((HINTERNET)@<解析器句柄>, @<URL>.GetText(),
+        @                                       &@<自动代理选项>, (DWORD_PTR)@<上下文>);
         @ return (dwRes == ERROR_IO_PENDING);
     }
 
@@ -2988,14 +2999,14 @@
     参数 解析器句柄 <类型 = 变整数 注释 = "请提供由\"创建代理解析器\"返回的句柄.">
     参数 代理结果数组 <类型 = WinHTTP代理结果数组类 注释 = "成功在此参数返回代理结果">
     {
-        @ @<代理结果数组>.RemoveAll ();
+        @ @<代理结果数组>.RemoveAll();
         @ WINHTTP_PROXY_RESULT ProxyResult;
-        @ if (WinHttpGetProxyResult ((HINTERNET)@<解析器句柄>, &ProxyResult) == 0) {
+        @ if (WinHttpGetProxyResult((HINTERNET)@<解析器句柄>, &ProxyResult) == 0) {
         @     for (DWORD i = 0; i < ProxyResult.cEntries; i++) {
         @         @dt<WinHTTP代理结果类> Entrie(ProxyResult.pEntries[i]);
-        @         @<代理结果数组>.Add (Entrie, NULL);
+        @         @<代理结果数组>.Add(Entrie, NULL);
         @     }
-        @     WinHttpFreeProxyResult (&ProxyResult);
+        @     WinHttpFreeProxyResult(&ProxyResult);
         @     return TRUE;
         @ }
         @ return FALSE;
@@ -3006,7 +3017,7 @@
     参数 会话句柄 <类型 = 变整数 注释 = "请提供调用\"初始化\"成功时返回的会话句柄.">
     参数 重置操作 <类型 = 整数 注释 = "请使用\"重置代理_WinHTTP\"中的常量之一或其\"位或\"值." @默认值 = 重置代理_WinHTTP.重置全部>
     {
-        @ (INT)WinHttpResetAutoProxy ((HINTERNET)@<会话句柄>, (DWORD)@<重置操作> | WINHTTP_RESET_OUT_OF_PROC)
+        @ (INT)WinHttpResetAutoProxy((HINTERNET)@<会话句柄>, (DWORD)@<重置操作> | WINHTTP_RESET_OUT_OF_PROC)
     }
 
     # WebSocket ===
@@ -3016,17 +3027,17 @@
             注释 = "本方法此为Windows 8新增的API,之前的系统不可用." 返回值注释 = "返回是否成功." 折叠 @嵌入式方法 = "">
     参数 请求句柄 <类型 = 变整数 注释 = "请提供调用\"打开请求\"成功时返回的请求句柄.">
     {
-        @ WinHttpSetOption ((HINTERNET)@<请求句柄>, 114, NULL, 0) // WINHTTP_OPTION_UPGRADE_TO_WEB_SOCKET
+        @ WinHttpSetOption((HINTERNET)@<请求句柄>, 114, NULL, 0) // WINHTTP_OPTION_UPGRADE_TO_WEB_SOCKET
     }
 
     方法 WebSocket升级完成 <公开 静态 类型 = 变整数 注释 = "完成一次由\"发送请求\"开始的WebSocket握手."
             注释 = "在发送请求之前,必须调用\"升级到WebSocket\"将请求句柄标记为\"WebSocket升级\"."
             注释 = "应检查服务器返回的HTTP状态代码,仅在当状态代码为101时才调用本方法." 注释 = "本方法此为Windows 8新增的API,之前的系统不可用."
-            返回值注释 = "成功返回新的WebSocket句柄,失败返回0." 折叠 @嵌入式方法 = "">
+            返回值注释 = "成功返回新的WebSocket句柄,失败返回0." 折叠 @禁止流程检查 = 真>
     参数 请求句柄 <类型 = 变整数 注释 = "请提供调用\"打开请求\"成功时返回的请求句柄,且使用过\"接收响应\".">
     参数 上下文 <类型 = 变整数 注释 = "用户自定义的指针值,将伴随请求句柄传递给任意回调方法." @默认值 = 0>
     {
-        @ (INT_P)WinHttpWebSocketCompleteUpgrade ((HINTERNET)@<请求句柄>, (DWORD_PTR)@<上下文>)
+        @ return (INT_P)WinHttpWebSocketCompleteUpgrade((HINTERNET)@<请求句柄>, (DWORD_PTR)@<上下文>);
     }
 
     方法 停止WebSocket <公开 静态 类型 = 整数 注释 = "向WebSocket服务器发送一个关闭帧以关闭发送通道,但仍保持打开接收通道."
@@ -3055,15 +3066,15 @@
     参数 关闭状态码 <类型 = 短整数类 注释 = "返回关闭状态码,请参考\"关闭状态码_WinHTTP\"中的常量." @默认值 = 空对象>
     参数 关闭原因 <类型 = 文本型 注释 = "返回关闭的详细原因,不能超过60个字符." @默认值 = 空对象>
     {
-        @ @<关闭原因>.Empty ();
+        @ @<关闭原因>.Empty();
         @ DWORD dwRes, cbReason = 0;
-        @ dwRes = WinHttpWebSocketQueryCloseStatus ((HINTERNET)@<WebSocket句柄>, (USHORT*)&@<关闭状态码.值>,
-        @                                           NULL, 0, &cbReason);
+        @ dwRes = WinHttpWebSocketQueryCloseStatus((HINTERNET)@<WebSocket句柄>, (USHORT*)&@<关闭状态码.值>,
+        @                                          NULL, 0, &cbReason);
         @ if (dwRes == NO_ERROR && cbReason > 0) {
         @     const WCHAR* szReason = new WCHAR[cbReason];
-        @     WinHttpWebSocketQueryCloseStatus ((HINTERNET)@<WebSocket句柄>, (USHORT*)&@<关闭状态码.值>,
-        @                                       (PVOID)szReason, cbReason, &cbReason);
-        @     @<关闭原因>.SetText (szReason);
+        @     WinHttpWebSocketQueryCloseStatus((HINTERNET)@<WebSocket句柄>, (USHORT*)&@<关闭状态码.值>,
+        @                                      (PVOID)szReason, cbReason, &cbReason);
+        @     @<关闭原因>.SetText(szReason);
         @     delete[] szReason;
         @ }
         @ return (INT)dwRes;
@@ -3087,13 +3098,13 @@
     参数 接收数据量 <类型 = 整数类 注释 = "返回接收到的数据量(字节单位),异步模式下必须为空对象." @默认值 = 空对象>
     参数 缓冲区类型 <类型 = 整数类 注释 = "返回缓冲区类型,请参考\"缓冲区类型_WinHTTP\"中的常量值." 注释 = "异步模式下必须为空对象." @默认值 = 空对象>
     {
-        @ @<缓冲区>.Alloc (@<缓冲区大小>, TRUE);
+        @ @<缓冲区>.Alloc(@<缓冲区大小>, TRUE);
         @ DWORD dwRes;
-        @ dwRes = WinHttpWebSocketReceive ((HINTERNET)@<WebSocket句柄>, (PVOID)@<缓冲区>.GetPtr (),
-        @                                  (DWORD)@<缓冲区大小>, @<接收数据量>.IsNullObject() ? NULL : (DWORD*)&@<接收数据量.值>,
-        @                                  @<缓冲区类型>.IsNullObject() ? NULL : (WINHTTP_WEB_SOCKET_BUFFER_TYPE*)&@<缓冲区类型.值>);
+        @ dwRes = WinHttpWebSocketReceive((HINTERNET)@<WebSocket句柄>, (PVOID)@<缓冲区>.GetPtr(),
+        @                                 (DWORD)@<缓冲区大小>, piv::GetBaseDataPtr<LPDWORD>(@<接收数据量>),
+        @                                 @<缓冲区类型>.IsNullObject() ? NULL : (WINHTTP_WEB_SOCKET_BUFFER_TYPE*)&@<缓冲区类型.值>);
         @ if (@<接收数据量.值> < @<缓冲区大小>)
-        @     @<缓冲区>.RemoveToEnd (@<接收数据量.值>);
+        @     @<缓冲区>.RemoveToEnd(@<接收数据量.值>);
         @ return (INT)dwRes;
     }
 
@@ -3103,8 +3114,8 @@
     参数 超时时间 <类型 = 整数 注释 = "默认为100000(毫秒),即10秒.">
     {
         @ DWORD dwOption = (DWORD)@<超时时间>;
-        @ return WinHttpSetOption ((HINTERNET)@<WebSocket句柄>, 115, // WINHTTP_OPTION_WEB_SOCKET_CLOSE_TIMEOUT
-        @                          (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<WebSocket句柄>, 115, // WINHTTP_OPTION_WEB_SOCKET_CLOSE_TIMEOUT
+        @                         (LPVOID)&dwOption, 4);
     }
 
     方法 取WebSocket关闭超时 <公开 静态 类型 = 整数 注释 = "获取等待\"关闭WebSocket\"完成关闭握手的时间." 返回值注释 = "返回超时时间." 折叠 @禁止流程检查 = 真>
@@ -3112,8 +3123,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption = 0, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<WebSocket句柄>, 115, // WINHTTP_OPTION_WEB_SOCKET_CLOSE_TIMEOUT
-        @                                      (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<WebSocket句柄>, 115, // WINHTTP_OPTION_WEB_SOCKET_CLOSE_TIMEOUT
+        @                                     (LPVOID)&dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
@@ -3158,7 +3169,7 @@
     参数 网络句柄 <类型 = 变整数 注释 = "请提供会话句柄或请求句柄.">
     参数 大小 <类型 = 整数 注释 = "单位为字节">
     {
-        @ return WinHttpSetOption ((HINTERNET)@<网络句柄>, 123, &@<大小>, 4); // WINHTTP_OPTION_WEB_SOCKET_SEND_BUFFER_SIZE
+        @ return WinHttpSetOption((HINTERNET)@<网络句柄>, 123, &@<大小>, 4); // WINHTTP_OPTION_WEB_SOCKET_SEND_BUFFER_SIZE
     }
 
     方法 取WebSocket发送缓冲区大小 <公开 静态 类型 = 整数 注释 = "获取在WebSocket连接上使用的发送缓冲区大小."
@@ -3636,12 +3647,12 @@
 
     # 会话句柄专用选项 ---
 
-    方法 置选项_用户代理 <公开 静态 类型 = 逻辑型 注释 = "设置后续请求的用户代理(User-Agent)." 返回值注释 = "返回设置是否成功." @禁止流程检查 = 真>
+    方法 置选项_用户代理 <公开 静态 类型 = 逻辑型 注释 = "设置后续请求的用户代理(User-Agent)." 返回值注释 = "返回设置是否成功." 折叠 @禁止流程检查 = 真>
     参数 会话句柄 <类型 = 变整数 注释 = "请提供调用\"初始化\"成功时返回的会话句柄.">
     参数 用户代理 <类型 = 文本型>
     {
-        @ return WinHttpSetOption ((HINTERNET)@<会话句柄>, 41, // WINHTTP_OPTION_USER_AGENT
-        @                          (LPVOID)@<用户代理>.GetText (), (DWORD)@<用户代理>.GetLength ());
+        @ return WinHttpSetOption((HINTERNET)@<会话句柄>, 41, // WINHTTP_OPTION_USER_AGENT
+        @                         (LPVOID)@<用户代理>.GetText(), (DWORD)@<用户代理>.GetLength());
     }
 
     方法 取选项_用户代理 <公开 静态 类型 = 文本型 注释 = "获取用户代理(User-Agent)." 返回值注释 = "返回用户代理." 折叠 @禁止流程检查 = 真>
@@ -3650,10 +3661,10 @@
     {
         @ DWORD dwLength = 1024 * 2;
         @ WCHAR szUA[1024] { };
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<会话句柄>,
-        @                                      WINHTTP_OPTION_USER_AGENT, (LPVOID)szUA, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<会话句柄>,
+        @                                     WINHTTP_OPTION_USER_AGENT, (LPVOID)szUA, &dwLength);
         @ if (dwLength > 0)
-        @     return @an<CVolString> ((const WCHAR*)szUA);
+        @     return @an<CVolString>((const WCHAR*)szUA);
         @ return @an<CVolString>(L"");
     }
 
@@ -3664,7 +3675,7 @@
     参数 代码页 <类型 = 整数 注释 = "默认为UTF-8(65001).">
     {
         @ DWORD dwOption = (DWORD)@<代码页>;
-        @ return WinHttpSetOption ((HINTERNET)@<会话句柄>, WINHTTP_OPTION_CODEPAGE, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<会话句柄>, WINHTTP_OPTION_CODEPAGE, (LPVOID)&dwOption, 4);
     }
 
     方法 置选项_服务器最大连接数 <公开 静态 类型 = 逻辑型 注释 = "设置每个HTTP服务器允许的最大连接数,默认值为\"无穷大\"." 返回值注释 = "返回设置是否成功." 折叠
@@ -3673,7 +3684,7 @@
     参数 最大连接数 <类型 = 整数 注释 = "最大连接数,设置为0时会自动限制为2.">
     {
         @ DWORD dwOption = (DWORD)@<最大连接数>;
-        @ return WinHttpSetOption ((HINTERNET)@<会话句柄>, WINHTTP_OPTION_MAX_CONNS_PER_SERVER, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<会话句柄>, WINHTTP_OPTION_MAX_CONNS_PER_SERVER, (LPVOID)&dwOption, 4);
     }
 
     方法 取选项_服务器最大连接数 <公开 静态 类型 = 整数 注释 = "设置每个HTTP服务器允许的最大连接数,默认值为\"无穷大\"." 返回值注释 = "返回最大连接数." 折叠
@@ -3682,8 +3693,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<会话句柄>,
-        @                                      WINHTTP_OPTION_MAX_CONNS_PER_SERVER, (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<会话句柄>,
+        @                                     WINHTTP_OPTION_MAX_CONNS_PER_SERVER, (LPVOID)&dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
@@ -3693,7 +3704,7 @@
     参数 最大连接数 <类型 = 整数 注释 = "最大连接数">
     {
         @ DWORD dwOption = (DWORD)@<最大连接数>;
-        @ return WinHttpSetOption ((HINTERNET)@<会话句柄>, WINHTTP_OPTION_MAX_CONNS_PER_1_0_SERVER, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<会话句柄>, WINHTTP_OPTION_MAX_CONNS_PER_1_0_SERVER, (LPVOID)&dwOption, 4);
     }
 
     方法 取选项_旧版服务器最大连接数 <公开 静态 类型 = 整数 注释 = "设置每个HTTP/1.0服务器允许的最大连接数,默认值为\"无穷大\"." 返回值注释 = "返回最大连接数." 折叠
@@ -3702,8 +3713,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<会话句柄>,
-        @                                      WINHTTP_OPTION_MAX_CONNS_PER_1_0_SERVER, (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<会话句柄>,
+        @                                     WINHTTP_OPTION_MAX_CONNS_PER_1_0_SERVER, (LPVOID)&dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
@@ -3715,7 +3726,7 @@
             注释 = "  0x40000000 启用Passport密钥环;">
     {
         @ DWORD dwOption = (DWORD)@<配置>;
-        @ return WinHttpSetOption ((HINTERNET)@<会话句柄>, WINHTTP_OPTION_CONFIGURE_PASSPORT_AUTH, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<会话句柄>, WINHTTP_OPTION_CONFIGURE_PASSPORT_AUTH, (LPVOID)&dwOption, 4);
     }
 
     方法 置选项_安全协议 <公开 静态 类型 = 逻辑型 注释 = "设置启用的安全协议,能使用什么协议跟系统的版本有关,部分系统可以安装补丁支持更高的安全协议."
@@ -3725,7 +3736,7 @@
     参数 协议 <类型 = 整数 注释 = "请使用\"SSL协议_WinHTTP\"中的单个常量,或多个常量的\"位或\"组合值.">
     {
         @ DWORD dwOption = (DWORD)@<协议>;
-        @ return WinHttpSetOption ((HINTERNET)@<会话句柄>, WINHTTP_OPTION_SECURE_PROTOCOLS, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<会话句柄>, WINHTTP_OPTION_SECURE_PROTOCOLS, (LPVOID)&dwOption, 4);
     }
 
     方法 置选项_登出Passport <公开 静态 类型 = 逻辑型 注释 = "在会话句柄上设置注销任何Passport登录的选项." 注释 = "与返回URL相关的所有Cookie将被清除."
@@ -3734,7 +3745,7 @@
     参数 返回URL指针 <类型 = 变整数 注释 = "提供通过\"取选项_Passport返回URL\"获取的URL指针.">
     {
         @ LPVOID pOption = (LPVOID)@<返回URL指针>;
-        @ return WinHttpSetOption ((HINTERNET)@<会话句柄>, WINHTTP_OPTION_PASSPORT_SIGN_OUT, (LPVOID)&pOption, sizeof(LPVOID));
+        @ return WinHttpSetOption((HINTERNET)@<会话句柄>, WINHTTP_OPTION_PASSPORT_SIGN_OUT, (LPVOID)&pOption, sizeof(LPVOID));
     }
 
     方法 置选项_卸载通知事件 <公开 静态 类型 = 逻辑型 注释 = "采用一个事件,该事件将在特定会话的最后一个回调完成时设置." 注释 = "在WinHTTP设置事件之前,无法关闭该事件."
@@ -3743,7 +3754,7 @@
     参数 句柄 <类型 = 变整数>
     {
         @ HINTERNET pOption = (HINTERNET)@<句柄>;
-        @ return WinHttpSetOption ((HINTERNET)@<会话句柄>, WINHTTP_OPTION_UNLOAD_NOTIFY_EVENT, (LPVOID)&bOption, sizeof(HINTERNET));
+        @ return WinHttpSetOption((HINTERNET)@<会话句柄>, WINHTTP_OPTION_UNLOAD_NOTIFY_EVENT, (LPVOID)&bOption, sizeof(HINTERNET));
     }
 
     方法 置选项_非阻塞回调 <公开 静态 类型 = 逻辑型 注释 = "是否确保所有的回调方法都是非阻塞的."
@@ -3753,7 +3764,7 @@
     参数 是否非阻塞 <类型 = 逻辑型 注释 = "默认为假.">
     {
         @ BOOL bOption = @<是否非阻塞>;
-        @ return WinHttpSetOption ((HINTERNET)@<会话句柄>, 111, (LPVOID)&bOption, 4); // WINHTTP_OPTION_ASSURED_NON_BLOCKING_CALLBACKS
+        @ return WinHttpSetOption((HINTERNET)@<会话句柄>, 111, (LPVOID)&bOption, 4); // WINHTTP_OPTION_ASSURED_NON_BLOCKING_CALLBACKS
     }
 
     # 以下有系统版本限制
@@ -3774,7 +3785,7 @@
     参数 是否启用 <类型 = 逻辑型 注释 = "真为禁止安全协议回退">
     {
         @ BOOL bOption = (DWORD)@<是否启用>;
-        @ return WinHttpSetOption ((HINTERNET)@<会话句柄>, 144, (LPVOID)&bOption, 4); // WINHTTP_OPTION_DISABLE_SECURE_PROTOCOL_FALLBACK
+        @ return WinHttpSetOption((HINTERNET)@<会话句柄>, 144, (LPVOID)&bOption, 4); // WINHTTP_OPTION_DISABLE_SECURE_PROTOCOL_FALLBACK
     }
 
     方法 置选项_TCP保持活动 <公开 静态 类型 = 逻辑型 注释 = "设置启用TCP保持活动状态的行为."
@@ -3793,7 +3804,7 @@
         @ keepalive.onoff = (u_long)@<是否保持活动>;
         @ keepalive.keepalivetime = (u_long)@<空闲超时>;
         @ keepalive.keepaliveinterval = (u_long)@<探测间隔>;
-        @ return WinHttpSetOption ((HINTERNET)@<会话句柄>, 152, (LPVOID)&keepalive, sizeof(tcp_keepalive_WinHTTP)); // WINHTTP_OPTION_TCP_KEEPALIVE
+        @ return WinHttpSetOption((HINTERNET)@<会话句柄>, 152, (LPVOID)&keepalive, sizeof(tcp_keepalive_WinHTTP)); // WINHTTP_OPTION_TCP_KEEPALIVE
     }
 
     方法 置选项_TCP快速打开 <公开 静态 类型 = 逻辑型 注释 = "为连接启用TCP快速打开."
@@ -3802,7 +3813,7 @@
     参数 是否启用 <类型 = 逻辑型>
     {
         @ BOOL bOption = @<是否启用>;
-        @ return WinHttpSetOption ((HINTERNET)@<会话句柄>, 153, (LPVOID)&bOption, 4); // WINHTTP_OPTION_TCP_FAST_OPEN
+        @ return WinHttpSetOption((HINTERNET)@<会话句柄>, 153, (LPVOID)&bOption, 4); // WINHTTP_OPTION_TCP_FAST_OPEN
     }
 
     方法 置选项_TLS错误启动 <公开 静态 类型 = 逻辑型 注释 = "为连接启用TLS错误启动."
@@ -3811,7 +3822,7 @@
     参数 是否启用 <类型 = 逻辑型>
     {
         @ BOOL bOption = @<是否启用>;
-        @ return WinHttpSetOption ((HINTERNET)@<会话句柄>, 154, (LPVOID)&bOption, 4); // WINHTTP_OPTION_TLS_FALSE_START
+        @ return WinHttpSetOption((HINTERNET)@<会话句柄>, 154, (LPVOID)&bOption, 4); // WINHTTP_OPTION_TLS_FALSE_START
     }
 
     方法 置选项_TLS协议回退 <公开 静态 类型 = 逻辑型 注释 = "在使用较新的协议版本出现TLS握手失败时,是否允许回退到TLS 1.0"
@@ -3820,7 +3831,7 @@
     参数 是否启用 <类型 = 逻辑型>
     {
         @ BOOL bOption = @<是否启用>;
-        @ return WinHttpSetOption ((HINTERNET)@<会话句柄>, 158, (LPVOID)&bOption, 4); // WINHTTP_OPTION_TLS_PROTOCOL_INSECURE_FALLBACK
+        @ return WinHttpSetOption((HINTERNET)@<会话句柄>, 158, (LPVOID)&bOption, 4); // WINHTTP_OPTION_TLS_PROTOCOL_INSECURE_FALLBACK
     }
 
     方法 置选项_HTTP2客户端证书 <公开 静态 类型 = 逻辑型 注释 = "设置是否允许WinHTTP在使用HTTP/2时使用调用方提供的客户端证书上下文."
@@ -3829,7 +3840,7 @@
     参数 是否启用 <类型 = 逻辑型 注释 = "真为启用">
     {
         @ BOOL bOption = (DWORD)@<是否启用>;
-        @ return WinHttpSetOption ((HINTERNET)@<会话句柄>, 161, (LPVOID)&bOption, 4); // WINHTTP_OPTION_ENABLE_HTTP2_PLUS_CLIENT_CERT
+        @ return WinHttpSetOption((HINTERNET)@<会话句柄>, 161, (LPVOID)&bOption, 4); // WINHTTP_OPTION_ENABLE_HTTP2_PLUS_CLIENT_CERT
     }
 
     方法 置选项_HTTP2保持活动 <公开 静态 类型 = 逻辑型 注释 = "设置WinHTTP使用HTTP/2 PING帧作为保持活动机制."
@@ -3839,7 +3850,7 @@
     参数 超时时间 <类型 = 整数 注释 = "不能小于5000毫秒.">
     {
         @ DWORD dwOption = (DWORD)@<超时时间>;
-        @ return WinHttpSetOption ((HINTERNET)@<会话句柄>, 164, (LPVOID)&dwOption, 4); // WINHTTP_OPTION_HTTP2_KEEPALIVE
+        @ return WinHttpSetOption((HINTERNET)@<会话句柄>, 164, (LPVOID)&dwOption, 4); // WINHTTP_OPTION_HTTP2_KEEPALIVE
     }
 
     方法 置选项_禁止生成证书链 <公开 静态 类型 = 逻辑型 注释 = "设置是否禁用生成服务器证书链."
@@ -3848,7 +3859,7 @@
     参数 是否启用 <类型 = 逻辑型 注释 = "真为禁止生成证书链">
     {
         @ BOOL bOption = (DWORD)@<是否启用>;
-        @ return WinHttpSetOption ((HINTERNET)@<会话句柄>, 171, (LPVOID)&bOption, 4); // WINHTTP_OPTION_DISABLE_CERT_CHAIN_BUILDING
+        @ return WinHttpSetOption((HINTERNET)@<会话句柄>, 171, (LPVOID)&bOption, 4); // WINHTTP_OPTION_DISABLE_CERT_CHAIN_BUILDING
     }
 
     方法 置选项_后台连接数 <公开 静态 类型 = 逻辑型 注释 = "设置会话的并发连接数."
@@ -3858,7 +3869,7 @@
     参数 连接数 <类型 = 整数 注释 = "默认为1.">
     {
         @ DWORD dwOption = (DWORD)@<连接数>;
-        @ return WinHttpSetOption ((HINTERNET)@<会话句柄>, 172, (LPVOID)&dwOption, 4); // WINHTTP_OPTION_BACKGROUND_CONNECTIONS
+        @ return WinHttpSetOption((HINTERNET)@<会话句柄>, 172, (LPVOID)&dwOption, 4); // WINHTTP_OPTION_BACKGROUND_CONNECTIONS
     }
 
     方法 置选项_首选可用连接 <公开 静态 类型 = 逻辑型 注释 = "  默认情况下,当WinHttp发送请求时,如果没有可用的连接来为请求提供服务,WinHTTP将尝试建立新连接,"
@@ -3868,7 +3879,7 @@
     参数 是否启用 <类型 = 逻辑型 注释 = "真为启用">
     {
         @ BOOL bOption = (DWORD)@<是否启用>;
-        @ return WinHttpSetOption ((HINTERNET)@<会话句柄>, 173, (LPVOID)&bOption, 4); // WINHTTP_OPTION_FIRST_AVAILABLE_CONNECTION
+        @ return WinHttpSetOption((HINTERNET)@<会话句柄>, 173, (LPVOID)&bOption, 4); // WINHTTP_OPTION_FIRST_AVAILABLE_CONNECTION
     }
 
     # 请求句柄专用选项 ---
@@ -3878,7 +3889,7 @@
     参数 安全标志 <类型 = 整数 注释 = "请使用\"安全标志_WinHTTP\"中单个常量,或多个常量的\"位或\"组合值.">
     {
         @ DWORD dwOption = (DWORD)@<安全标志>;
-        @ return WinHttpSetOption ((HINTERNET)@<请求句柄>, WINHTTP_OPTION_SECURITY_FLAGS, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<请求句柄>, WINHTTP_OPTION_SECURITY_FLAGS, (LPVOID)&dwOption, 4);
     }
 
     方法 取选项_安全标志 <公开 静态 类型 = 整数 注释 = "获取请求的安全标志." 返回值注释 = "返回安全标志,请参考\"安全标志_WinHTTP\"." 折叠 @禁止流程检查 = 真>
@@ -3886,8 +3897,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<请求句柄>,
-        @                                      WINHTTP_OPTION_SECURITY_FLAGS, (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<请求句柄>,
+        @                                     WINHTTP_OPTION_SECURITY_FLAGS, (LPVOID)&dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
@@ -3895,12 +3906,12 @@
     参数 请求句柄 <类型 = 变整数 注释 = "请提供调用\"打开请求\"成功时返回的请求句柄.">
     参数 安全证书 <类型 = WinHTTP安全证书类 注释 = "成功返回安全证书信息." @默认值 = 空对象>
     {
-        @ @<安全证书>.ResetObject ();
+        @ @<安全证书>.ResetObject();
         @ WINHTTP_CERTIFICATE_INFO certificate { };
         @ DWORD dwLength = sizeof(WINHTTP_CERTIFICATE_INFO);
-        @ if (WinHttpQueryOption ((HINTERNET)@<请求句柄>,
-        @                         WINHTTP_OPTION_SECURITY_CERTIFICATE_STRUCT, (LPVOID)&certificate, &dwLength)) {
-        @     @<安全证书>.SetInfo (&certificate);
+        @ if (WinHttpQueryOption((HINTERNET)@<请求句柄>,
+        @                        WINHTTP_OPTION_SECURITY_CERTIFICATE_STRUCT, (LPVOID)&certificate, &dwLength)) {
+        @     @<安全证书>.SetInfo(&certificate);
         @     return TRUE;
         @ }
         @ return FALSE;
@@ -3913,10 +3924,10 @@
     {
         @ DWORD dwLength = 2083 * 2;
         @ WCHAR szUrl[2083] { };
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<请求句柄>,
-        @                                      WINHTTP_OPTION_URL, (LPVOID)szUrl, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<请求句柄>,
+        @                                     WINHTTP_OPTION_URL, (LPVOID)szUrl, &dwLength);
         @ if (dwLength > 0)
-        @     return @an<CVolString> ((const WCHAR*)szUrl);
+        @     return @an<CVolString>((const WCHAR*)szUrl);
         @ return @an<CVolString>(L"");
     }
 
@@ -3925,7 +3936,7 @@
     参数 禁止功能 <类型 = 整数 注释 = "请使用\"禁止功能标志_WinHTTP\"中单个常量,或多个常量的\"位或\"组合值.">
     {
         @ DWORD dwOption = (DWORD)@<禁止功能>;
-        @ return WinHttpSetOption ((HINTERNET)@<请求句柄>, WINHTTP_OPTION_DISABLE_FEATURE, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<请求句柄>, WINHTTP_OPTION_DISABLE_FEATURE, (LPVOID)&dwOption, 4);
     }
 
     方法 置选项_自动登录策略 <公开 静态 类型 = 逻辑型 注释 = "设置请求的自动登录策略." 返回值注释 = "返回设置是否成功." 折叠 @禁止流程检查 = 真>
@@ -3935,7 +3946,7 @@
             注释 = "若通过\"localhost\"或IP地址指定服务器,则不会生效." @默认值 = 0>
     {
         @ DWORD dwOption = (DWORD)@<自动登录策略>;
-        @ return WinHttpSetOption ((HINTERNET)@<请求句柄>, WINHTTP_OPTION_AUTOLOGON_POLICY, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<请求句柄>, WINHTTP_OPTION_AUTOLOGON_POLICY, (LPVOID)&dwOption, 4);
     }
 
     方法 取选项_安全密钥位数 <公开 静态 类型 = 整数 注释 = "获取加密密钥的密码强度,数字越大表示加密的密码强度越强." 返回值注释 = "返回密钥位数." 折叠 @禁止流程检查 = 真>
@@ -3943,8 +3954,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<请求句柄>,
-        @                                      WINHTTP_OPTION_SECURITY_KEY_BITNESS, (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<请求句柄>,
+        @                                     WINHTTP_OPTION_SECURITY_KEY_BITNESS, (LPVOID)&dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
@@ -3955,10 +3966,10 @@
     {
         @ DWORD dwLength = 2048 * 2;
         @ WCHAR szStr[2048];
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<请求句柄>,
-        @                                      WINHTTP_OPTION_PASSPORT_COBRANDING_TEXT, (LPVOID)szStr, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<请求句柄>,
+        @                                     WINHTTP_OPTION_PASSPORT_COBRANDING_TEXT, (LPVOID)szStr, &dwLength);
         @ if (dwLength > 0)
-        @     return @an<CVolString> (szStr);
+        @     return @an<CVolString>(szStr);
         @ return @an<CVolString>(L"");
     }
 
@@ -3969,10 +3980,10 @@
     {
         @ DWORD dwLength = 2048;
         @ WCHAR szStr[2048];
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<请求句柄>,
-        @                                      WINHTTP_OPTION_PASSPORT_COBRANDING_URL, (LPVOID)szStr, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<请求句柄>,
+        @                                     WINHTTP_OPTION_PASSPORT_COBRANDING_URL, (LPVOID)szStr, &dwLength);
         @ if (dwLength > 0)
-        @     return @an<CVolString> (szStr);
+        @     return @an<CVolString>(szStr);
         @ return @an<CVolString>(L"");
     }
 
@@ -3983,8 +3994,8 @@
     {
         @ DWORD dwLength = sizeof(LPVOID);
         @ LPVOID szUrl = NULL;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<请求句柄>,
-        @                                      WINHTTP_OPTION_PASSPORT_COBRANDING_URL, (LPVOID)&szUrl, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<请求句柄>,
+        @                                     WINHTTP_OPTION_PASSPORT_COBRANDING_URL, (LPVOID)&szUrl, &dwLength);
         @ return szUrl;
     }
 
@@ -3994,7 +4005,7 @@
     参数 标志 <类型 = 整数 注释 = "以下值之一:" 注释 = "  0 删除服务器端口号" 注释 = "  1 包括服务器端口号">
     {
         @ DWORD dwOption = (DWORD)@<标志>;
-        @ return WinHttpSetOption ((HINTERNET)@<请求句柄>, WINHTTP_OPTION_SPN, (LPVOID)&dwOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<请求句柄>, WINHTTP_OPTION_SPN, (LPVOID)&dwOption, 4);
     }
 
     方法 置选项_拒绝含用户密码的URL <公开 静态 类型 = 逻辑型 注释 = "设置是否拒绝包含用户名和密码的URL." 返回值注释 = "返回设置是否成功." 折叠 @禁止流程检查 = 真>
@@ -4002,7 +4013,7 @@
     参数 是否拒绝 <类型 = 逻辑型 注释 = "默认为不拒绝">
     {
         @ BOOL bOption = @<是否拒绝>;
-        @ return WinHttpSetOption ((HINTERNET)@<请求句柄>, WINHTTP_OPTION_REJECT_USERPWD_IN_URL, (LPVOID)&bOption, 4);
+        @ return WinHttpSetOption((HINTERNET)@<请求句柄>, WINHTTP_OPTION_REJECT_USERPWD_IN_URL, (LPVOID)&bOption, 4);
     }
 
     方法 取选项_服务器SPN <公开 静态 类型 = 文本型 注释 = "获取WinHTTP在身份验证期间提供给SSPI的服务器主体名称."
@@ -4026,10 +4037,10 @@
     {
         @ DWORD dwLength = 1024 * 2;
         @ WCHAR szSPN[1024] { };
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<请求句柄>,
-        @                                      WINHTTP_OPTION_PROXY_SPN_USED, (LPVOID)szSPN, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<请求句柄>,
+        @                                     WINHTTP_OPTION_PROXY_SPN_USED, (LPVOID)szSPN, &dwLength);
         @ if (dwLength > 0)
-        @     return @an<CVolString> ((const WCHAR*)szSPN);
+        @     return @an<CVolString>((const WCHAR*)szSPN);
         @ return @an<CVolString>(L"");
     }
 
@@ -4037,8 +4048,8 @@
     参数 请求句柄 <类型 = 变整数 注释 = "请提供调用\"打开请求\"成功时返回的请求句柄.">
     参数 用户名 <类型 = 文本型>
     {
-        @ return WinHttpSetOption ((HINTERNET)@<请求句柄>, WINHTTP_OPTION_USERNAME,
-        @                          (LPVOID)@<用户名>.GetText (), (DWORD)@<用户名>.GetLength ());
+        @ return WinHttpSetOption((HINTERNET)@<请求句柄>, WINHTTP_OPTION_USERNAME,
+        @                         (LPVOID)@<用户名>.GetText(), (DWORD)@<用户名>.GetLength());
     }
 
     方法 取选项_用户名 <公开 静态 类型 = 文本型 注释 = "获取请求句柄上的用户名." 返回值注释 = "返回用户名." 折叠 @禁止流程检查 = 真>
@@ -4047,10 +4058,10 @@
     {
         @ DWORD dwLength = 1024 * 2;
         @ WCHAR szUser[1024] { };
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<请求句柄>,
-        @                                      WINHTTP_OPTION_USERNAME, (LPVOID)szUser, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<请求句柄>,
+        @                                     WINHTTP_OPTION_USERNAME, (LPVOID)szUser, &dwLength);
         @ if (dwLength > 0)
-        @     return @an<CVolString> ((const WCHAR*)szUser);
+        @     return @an<CVolString>((const WCHAR*)szUser);
         @ return @an<CVolString>(L"");
     }
 
@@ -4058,8 +4069,8 @@
     参数 请求句柄 <类型 = 变整数 注释 = "请提供调用\"打开请求\"成功时返回的请求句柄.">
     参数 密码 <类型 = 文本型>
     {
-        @ return WinHttpSetOption ((HINTERNET)@<请求句柄>, WINHTTP_OPTION_PASSWORD,
-        @                          (LPVOID)@<密码>.GetText (), (DWORD)@<密码>.GetLength ());
+        @ return WinHttpSetOption((HINTERNET)@<请求句柄>, WINHTTP_OPTION_PASSWORD,
+        @                         (LPVOID)@<密码>.GetText(), (DWORD)@<密码>.GetLength());
     }
 
     方法 取选项_密码 <公开 静态 类型 = 文本型 注释 = "获取请求句柄上的密码." 返回值注释 = "返回密码." 折叠 @禁止流程检查 = 真>
@@ -4068,10 +4079,10 @@
     {
         @ DWORD dwLength = 1024 * 2;
         @ WCHAR szPassword[1024] { };
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<请求句柄>,
-        @                                      WINHTTP_OPTION_PASSWORD, (LPVOID)szPassword, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<请求句柄>,
+        @                                     WINHTTP_OPTION_PASSWORD, (LPVOID)szPassword, &dwLength);
         @ if (dwLength > 0)
-        @     return @an<CVolString> ((const WCHAR*)szPassword);
+        @     return @an<CVolString>((const WCHAR*)szPassword);
         @ return @an<CVolString>(L"");
     }
 
@@ -4079,8 +4090,8 @@
     参数 请求句柄 <类型 = 变整数 注释 = "请提供调用\"打开请求\"成功时返回的请求句柄.">
     参数 用户名 <类型 = 文本型>
     {
-        @ return WinHttpSetOption ((HINTERNET)@<请求句柄>, WINHTTP_OPTION_PROXY_USERNAME,
-        @                          (LPVOID)@<用户名>.GetText (), (DWORD)@<用户名>.GetLength ());
+        @ return WinHttpSetOption((HINTERNET)@<请求句柄>, WINHTTP_OPTION_PROXY_USERNAME,
+        @                         (LPVOID)@<用户名>.GetText(), (DWORD)@<用户名>.GetLength());
     }
 
     方法 取选项_代理用户名 <公开 静态 类型 = 文本型 注释 = "获取请求句柄上访问代理的用户名." 返回值注释 = "返回用户名." 折叠 @禁止流程检查 = 真>
@@ -4089,10 +4100,10 @@
     {
         @ DWORD dwLength = 1024 * 2;
         @ WCHAR szUser[1024] { };
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<请求句柄>,
-        @                                      WINHTTP_OPTION_PROXY_USERNAME, (LPVOID)szUser, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<请求句柄>,
+        @                                     WINHTTP_OPTION_PROXY_USERNAME, (LPVOID)szUser, &dwLength);
         @ if (dwLength > 0)
-        @     return @an<CVolString> ((const WCHAR*)szUser);
+        @     return @an<CVolString>((const WCHAR*)szUser);
         @ return @an<CVolString>(L"");
     }
 
@@ -4100,8 +4111,8 @@
     参数 请求句柄 <类型 = 变整数 注释 = "请提供调用\"打开请求\"成功时返回的请求句柄.">
     参数 密码 <类型 = 文本型>
     {
-        @ return WinHttpSetOption ((HINTERNET)@<请求句柄>, WINHTTP_OPTION_PROXY_PASSWORD,
-        @                          (LPVOID)@<密码>.GetText (), (DWORD)@<密码>.GetLength ());
+        @ return WinHttpSetOption((HINTERNET)@<请求句柄>, WINHTTP_OPTION_PROXY_PASSWORD,
+        @                         (LPVOID)@<密码>.GetText(), (DWORD)@<密码>.GetLength());
     }
 
     方法 取选项_代理密码 <公开 静态 类型 = 文本型 注释 = "获取请求句柄上访问代理的密码." 返回值注释 = "返回代理密码." 折叠 @禁止流程检查 = 真>
@@ -4110,10 +4121,10 @@
     {
         @ DWORD dwLength = 1024 * 2;
         @ WCHAR szPassword[1024] { };
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<请求句柄>,
-        @                                      WINHTTP_OPTION_PROXY_PASSWORD, (LPVOID)szPassword, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<请求句柄>,
+        @                                     WINHTTP_OPTION_PROXY_PASSWORD, (LPVOID)szPassword, &dwLength);
         @ if (dwLength > 0)
-        @     return @an<CVolString> ((const WCHAR*)szPassword);
+        @     return @an<CVolString>((const WCHAR*)szPassword);
         @ return @an<CVolString>(L"");
     }
 
@@ -4124,12 +4135,12 @@
     参数 请求句柄 <类型 = 变整数 注释 = "请提供调用\"打开请求\"成功时返回的请求句柄.">
     参数 请求次数 <类型 = 长整数数组类 注释 = "返回获取的请求次数统计信息,各成员的含义请使用\"请求次数索引_WinHTTP\"." "">
     {
-        @ @<请求次数>.data ().RemoveAll ();
+        @ @<请求次数>.data ().RemoveAll();
         @ WINHTTP_REQUEST_TIMES times;
         @ DWORD dwLength = sizeof(WINHTTP_REQUEST_TIMES);
-        @ if (WinHttpQueryOption ((HINTERNET)@<请求句柄>, 142, // WINHTTP_OPTION_REQUEST_TIMES
+        @ if (WinHttpQueryOption((HINTERNET)@<请求句柄>, 142, // WINHTTP_OPTION_REQUEST_TIMES
         @                         (LPVOID)&times, &dwLength)) {
-        @     @<请求次数>.data ().Copy ((const INT64*)&times.rgullTimes[0], times.cTimes);
+        @     @<请求次数>.data().Copy((const INT64*)&times.rgullTimes[0], times.cTimes);
         @     return TRUE;
         @ }
         @ return FALSE;
@@ -4140,7 +4151,7 @@
             注释 = "本方法最低系统要求为Windows 10 Version 1903,但在旧系统不会造成崩溃,只会返回假." 返回值注释 = "返回设置是否成功." 折叠 @嵌入式方法 = "">
     参数 请求句柄 <类型 = 变整数 注释 = "请提供调用\"打开请求\"成功时返回的请求句柄.">
     {
-        @ WinHttpSetOption ((HINTERNET)@<请求句柄>, 143, NULL, 0) // WINHTTP_OPTION_EXPIRE_CONNECTION
+        @ WinHttpSetOption((HINTERNET)@<请求句柄>, 143, NULL, 0) // WINHTTP_OPTION_EXPIRE_CONNECTION
     }
 
     方法 取选项_请求状态 <公开 静态 类型 = 逻辑型 注释 = "获取请求句柄返回的请求状态统计信息."
@@ -4148,12 +4159,12 @@
     参数 请求句柄 <类型 = 变整数 注释 = "请提供调用\"打开请求\"成功时返回的请求句柄.">
     参数 请求状态 <类型 = WinHTTP请求状态信息类 注释 = "返回获取的请求状态统计信息." "">
     {
-        @ @<请求状态>.ResetToNullObject ();
+        @ @<请求状态>.ResetToNullObject();
         @ WINHTTP_REQUEST_STATS stats;
         @ DWORD dwLength = sizeof(WINHTTP_REQUEST_STATS);
-        @ if (WinHttpQueryOption ((HINTERNET)@<请求句柄>, 146, // WINHTTP_OPTION_REQUEST_STATS
-        @                         (LPVOID)&stats, &dwLength)) {
-        @     @<请求状态>.SetInfo (&stats);
+        @ if (WinHttpQueryOption((HINTERNET)@<请求句柄>, 146, // WINHTTP_OPTION_REQUEST_STATS
+        @                        (LPVOID)&stats, &dwLength)) {
+        @     @<请求状态>.SetInfo(&stats);
         @     return TRUE;
         @ }
         @ return FALSE;
@@ -4166,8 +4177,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<请求句柄>,
-        @                                      134, (LPVOID)&dwOption, &dwLength); // WINHTTP_OPTION_HTTP_PROTOCOL_USED
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<请求句柄>,
+        @                                     134, (LPVOID)&dwOption, &dwLength); // WINHTTP_OPTION_HTTP_PROTOCOL_USED
         @ return (INT)dwOption;
     }
 
@@ -4176,12 +4187,12 @@
     参数 请求句柄 <类型 = 变整数 注释 = "请提供调用\"打开请求\"成功时返回的请求句柄.">
     参数 安全信息 <类型 = WinHTTP安全信息类 注释 = "成功返回安全证书信息." @默认值 = 空对象>
     {
-        @ @<安全信息>.ResetObject ();
+        @ @<安全信息>.ResetObject();
         @ WINHTTP_SECURITY_INFO security;
         @ DWORD dwLength = sizeof(WINHTTP_SECURITY_INFO);
-        @ if (WinHttpQueryOption ((HINTERNET)@<请求句柄>, 151, // WINHTTP_OPTION_SECURITY_INFO
-        @                         (LPVOID)&security, &dwLength)) {
-        @     @<安全信息>.SetInfo (&security);
+        @ if (WinHttpQueryOption((HINTERNET)@<请求句柄>, 151, // WINHTTP_OPTION_SECURITY_INFO
+        @                        (LPVOID)&security, &dwLength)) {
+        @     @<安全信息>.SetInfo(&security);
         @     return TRUE;
         @ }
         @ return FALSE;
@@ -4193,8 +4204,8 @@
     参数 是否成功 <类型 = 逻辑型类 注释 = "返回获取是否成功,本参数可省略." @默认值 = 空对象>
     {
         @ DWORD dwOption, dwLength = 4;
-        @ @<是否成功.值> = WinHttpQueryOption ((HINTERNET)@<请求句柄>, 159, // WINHTTP_OPTION_STREAM_ERROR_CODE
-        @                                      (LPVOID)&dwOption, &dwLength);
+        @ @<是否成功.值> = WinHttpQueryOption((HINTERNET)@<请求句柄>, 159, // WINHTTP_OPTION_STREAM_ERROR_CODE
+        @                                     (LPVOID)&dwOption, &dwLength);
         @ return (INT)dwOption;
     }
 
@@ -4203,7 +4214,7 @@
     参数 请求句柄 <类型 = 变整数 注释 = "请提供调用\"打开请求\"成功时返回的请求句柄.">
     参数 域名 <类型 = 文本型>
     {
-        @ return WinHttpSetOption ((HINTERNET)@<请求句柄>, 165, (LPVOID)@<域名>.GetText (), (DWORD)@<域名>.GetLength ()); // WINHTTP_OPTION_RESOLUTION_HOSTNAME
+        @ return WinHttpSetOption((HINTERNET)@<请求句柄>, 165, (LPVOID)@<域名>.GetText(), (DWORD)@<域名>.GetLength()); // WINHTTP_OPTION_RESOLUTION_HOSTNAME
     }
 
     方法 置选项_忽略证书吊销 <公开 静态 类型 = 逻辑型 注释 = "设置是否允许安全连接在无法下载证书吊销列表时继续使用安全证书."
@@ -4212,7 +4223,7 @@
     参数 是否允许 <类型 = 逻辑型>
     {
         @ BOOL bOption = @<是否允许>;
-        @ return WinHttpSetOption ((HINTERNET)@<请求句柄>, 155, (LPVOID)&bOption, 4); // WINHTTP_OPTION_IGNORE_CERT_REVOCATION_OFFLINE
+        @ return WinHttpSetOption((HINTERNET)@<请求句柄>, 155, (LPVOID)&bOption, 4); // WINHTTP_OPTION_IGNORE_CERT_REVOCATION_OFFLINE
     }
 
     # 自定义方法 ---

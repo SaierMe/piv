@@ -48,7 +48,7 @@ private:
     piv_yyjson_alc &operator=(piv_yyjson_alc &&) = delete;
 
 public:
-    static piv_yyjson_alc &get_inst()
+    static piv_yyjson_alc &instance()
     {
         static piv_yyjson_alc inst;
 #ifndef MIMALLOC_H
@@ -449,7 +449,7 @@ public:
 
     virtual void GetDumpString(CWString &strDump, INT nMaxDumpSize) override
     {
-        strDump = to_vol_str(0, piv_yyjson_alc::get_inst().pref());
+        strDump = to_vol_str(0, piv_yyjson_alc::instance().pref());
     }
 
     virtual void LoadFromStream(CVolBaseInputStream &stream)
@@ -461,12 +461,12 @@ public:
         stream.read(&len, 4);
         std::unique_ptr<char[]> data{new char[len]};
         if (stream.ReadExact(data.get(), len))
-            parse_doc(data.get(), len, 0, piv_yyjson_alc::get_inst().pref(), nullptr);
+            parse_doc(data.get(), len, 0, piv_yyjson_alc::instance().pref(), nullptr);
     }
 
     virtual void SaveIntoStream(CVolBaseOutputStream &stream)
     {
-        yyjson_alc *alc = piv_yyjson_alc::get_inst().pref();
+        yyjson_alc *alc = piv_yyjson_alc::instance().pref();
         size_t len;
         char *str = yyjson_write_opts(_doc()->doc, 0, alc, &len, nullptr);
         if (str)
@@ -490,7 +490,7 @@ public:
     inline bool parse_doc(const char *dat, size_t len, yyjson_read_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_read_err *err = nullptr)
     {
         _doc()->free_doc();
-        _doc()->doc = yyjson_read_opts((char *)dat, len, flag, alc ? alc : piv_yyjson_alc::get_inst().pref(), err);
+        _doc()->doc = yyjson_read_opts((char *)dat, len, flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
         m_val = _doc()->root();
         return !_doc()->empty();
     }
@@ -499,14 +499,14 @@ public:
     inline bool parse(T &&dat, yyjson_read_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_read_err *err = nullptr)
     {
         PivS2V sv{dat};
-        return parse_doc(sv.data(), sv.size(), flag, alc ? alc : piv_yyjson_alc::get_inst().pref(), err);
+        return parse_doc(sv.data(), sv.size(), flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
     }
 
     bool parse_file(const wchar_t *filename, yyjson_read_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_read_err *err = nullptr)
     {
         _doc()->free_doc();
         FILE *fp = _wfopen(filename, L"rb");
-        _doc()->doc = yyjson_read_fp(fp, flag, alc ? alc : piv_yyjson_alc::get_inst().pref(), err);
+        _doc()->doc = yyjson_read_fp(fp, flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
         m_val = _doc()->root();
         if (fp)
             fclose(fp);
@@ -516,7 +516,7 @@ public:
     bool write_file(const wchar_t *filename, yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_write_err *err = nullptr)
     {
         FILE *fp = _wfopen(filename, L"wb+");
-        bool ret = yyjson_write_fp(fp, _doc()->doc, flag, alc ? alc : piv_yyjson_alc::get_inst().pref(), err);
+        bool ret = yyjson_write_fp(fp, _doc()->doc, flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
         if (fp)
             fclose(fp);
         return ret;
@@ -525,7 +525,7 @@ public:
     CWString write_vol_str(yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_write_err *err = nullptr)
     {
         if (!alc)
-            alc = piv_yyjson_alc::get_inst().pref();
+            alc = piv_yyjson_alc::instance().pref();
         CWString ret;
         char *str = yyjson_write_opts(_doc()->doc, flag, alc, nullptr, err);
         if (str)
@@ -542,7 +542,7 @@ public:
     std::string write_std_str(yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_write_err *err = nullptr)
     {
         if (!alc)
-            alc = piv_yyjson_alc::get_inst().pref();
+            alc = piv_yyjson_alc::instance().pref();
         std::string ret;
         char *str = yyjson_write_opts(_doc()->doc, flag, alc, nullptr, err);
         if (str)
@@ -559,7 +559,7 @@ public:
     CVolMem write_vol_mem(yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_write_err *err = nullptr)
     {
         if (!alc)
-            alc = piv_yyjson_alc::get_inst().pref();
+            alc = piv_yyjson_alc::instance().pref();
         size_t len;
         CVolMem ret;
         char *str = yyjson_write_opts(_doc()->doc, flag, alc, &len, err);
@@ -577,7 +577,7 @@ public:
     CWString to_vol_str(yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr)
     {
         if (!alc)
-            alc = piv_yyjson_alc::get_inst().pref();
+            alc = piv_yyjson_alc::instance().pref();
         CWString ret;
         char *str = yyjson_val_write_opts(m_val, flag, alc, nullptr, nullptr);
         if (str)
@@ -594,7 +594,7 @@ public:
     std::string to_std_str(yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr)
     {
         if (!alc)
-            alc = piv_yyjson_alc::get_inst().pref();
+            alc = piv_yyjson_alc::instance().pref();
         std::string ret;
         char *str = yyjson_val_write_opts(m_val, flag, alc, nullptr, nullptr);
         if (str)
@@ -923,12 +923,12 @@ public:
 
         piv_yyjson_mut_doc()
         {
-            doc = yyjson_mut_doc_new(piv_yyjson_alc::get_inst().pref());
+            doc = yyjson_mut_doc_new(piv_yyjson_alc::instance().pref());
         }
 
         piv_yyjson_mut_doc(const yyjson_alc *alc)
         {
-            doc = yyjson_mut_doc_new(alc ? alc : piv_yyjson_alc::get_inst().pref());
+            doc = yyjson_mut_doc_new(alc ? alc : piv_yyjson_alc::instance().pref());
         }
 
         piv_yyjson_mut_doc(yyjson_mut_doc *rhs)
@@ -953,20 +953,20 @@ public:
         inline yyjson_mut_doc *new_doc(const yyjson_alc *alc = nullptr)
         {
             free_doc();
-            doc = yyjson_mut_doc_new(alc ? alc : piv_yyjson_alc::get_inst().pref());
+            doc = yyjson_mut_doc_new(alc ? alc : piv_yyjson_alc::instance().pref());
             return doc;
         }
 
         inline void copy_doc(yyjson_doc *rhs, const yyjson_alc *alc = nullptr)
         {
             free_doc();
-            doc = yyjson_doc_mut_copy(rhs, alc ? alc : piv_yyjson_alc::get_inst().pref());
+            doc = yyjson_doc_mut_copy(rhs, alc ? alc : piv_yyjson_alc::instance().pref());
         }
 
         inline void copy_doc(yyjson_mut_doc *rhs, const yyjson_alc *alc = nullptr)
         {
             free_doc();
-            doc = yyjson_mut_doc_mut_copy(rhs, alc ? alc : piv_yyjson_alc::get_inst().pref());
+            doc = yyjson_mut_doc_mut_copy(rhs, alc ? alc : piv_yyjson_alc::instance().pref());
         }
 
         inline bool empty() const
@@ -1715,7 +1715,7 @@ public:
 
     virtual void GetDumpString(CWString &strDump, INT nMaxDumpSize) override
     {
-        strDump = to_vol_str(0, piv_yyjson_alc::get_inst().pref());
+        strDump = to_vol_str(0, piv_yyjson_alc::instance().pref());
     }
 
     virtual void LoadFromStream(CVolBaseInputStream &stream)
@@ -1727,12 +1727,12 @@ public:
         stream.read(&len, 4);
         std::unique_ptr<char[]> data{new char[len]};
         if (stream.ReadExact(data.get(), len))
-            parse_doc(data.get(), len, 0, piv_yyjson_alc::get_inst().pref(), nullptr);
+            parse_doc(data.get(), len, 0, piv_yyjson_alc::instance().pref(), nullptr);
     }
 
     virtual void SaveIntoStream(CVolBaseOutputStream &stream)
     {
-        yyjson_alc *alc = piv_yyjson_alc::get_inst().pref();
+        yyjson_alc *alc = piv_yyjson_alc::instance().pref();
         size_t len;
         char *str = yyjson_mut_write_opts(_doc()->doc, 0, alc, &len, nullptr);
         if (str)
@@ -1884,7 +1884,7 @@ public:
     inline bool parse_doc(const char *dat, size_t len, yyjson_read_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_read_err *err = nullptr)
     {
         _doc()->free_doc();
-        yyjson_doc *imut_doc = yyjson_read_opts((char *)dat, len, flag, alc ? alc : piv_yyjson_alc::get_inst().pref(), err);
+        yyjson_doc *imut_doc = yyjson_read_opts((char *)dat, len, flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
         if (imut_doc)
         {
             _doc()->copy_doc(imut_doc, alc);
@@ -1898,14 +1898,14 @@ public:
     inline bool parse(T &&dat, yyjson_read_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_read_err *err = nullptr)
     {
         PivS2V sv{dat};
-        return parse_doc(sv.data(), sv.size(), flag, alc ? alc : piv_yyjson_alc::get_inst().pref(), err);
+        return parse_doc(sv.data(), sv.size(), flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
     }
 
     bool parse_file(const wchar_t *filename, yyjson_read_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_read_err *err = nullptr)
     {
         _doc()->free_doc();
         if (!alc)
-            alc = piv_yyjson_alc::get_inst().pref();
+            alc = piv_yyjson_alc::instance().pref();
         FILE *fp = _wfopen(filename, L"rb");
         yyjson_doc *imut_doc = yyjson_read_fp(fp, flag, alc, err);
         if (imut_doc)
@@ -1922,7 +1922,7 @@ public:
     bool write_file(const wchar_t *filename, yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_write_err *err = nullptr)
     {
         FILE *fp = _wfopen(filename, L"wb+");
-        bool ret = yyjson_mut_write_fp(fp, _doc()->doc, flag, alc ? alc : piv_yyjson_alc::get_inst().pref(), err);
+        bool ret = yyjson_mut_write_fp(fp, _doc()->doc, flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
         if (fp)
             fclose(fp);
         return ret;
@@ -1931,7 +1931,7 @@ public:
     CWString write_vol_str(yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_write_err *err = nullptr)
     {
         if (!alc)
-            alc = piv_yyjson_alc::get_inst().pref();
+            alc = piv_yyjson_alc::instance().pref();
         CWString ret;
         char *str = yyjson_mut_write_opts(_doc()->doc, flag, alc, nullptr, err);
         if (str)
@@ -1948,7 +1948,7 @@ public:
     std::string write_std_str(yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_write_err *err = nullptr)
     {
         if (!alc)
-            alc = piv_yyjson_alc::get_inst().pref();
+            alc = piv_yyjson_alc::instance().pref();
         std::string ret;
         char *str = yyjson_mut_write_opts(_doc()->doc, flag, alc, nullptr, err);
         if (str)
@@ -1965,7 +1965,7 @@ public:
     CVolMem write_vol_mem(yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_write_err *err = nullptr)
     {
         if (!alc)
-            alc = piv_yyjson_alc::get_inst().pref();
+            alc = piv_yyjson_alc::instance().pref();
         size_t len;
         CVolMem ret;
         char *str = yyjson_mut_write_opts(_doc()->doc, flag, alc, &len, err);
@@ -1983,7 +1983,7 @@ public:
     CWString to_vol_str(yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr)
     {
         if (!alc)
-            alc = piv_yyjson_alc::get_inst().pref();
+            alc = piv_yyjson_alc::instance().pref();
         CWString ret;
         char *str = yyjson_mut_val_write_opts(m_val, flag, alc, nullptr, nullptr);
         if (str)
@@ -2000,7 +2000,7 @@ public:
     std::string to_std_str(yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr)
     {
         if (!alc)
-            alc = piv_yyjson_alc::get_inst().pref();
+            alc = piv_yyjson_alc::instance().pref();
         std::string ret;
         char *str = yyjson_mut_val_write_opts(m_val, flag, alc, nullptr, nullptr);
         if (str)
@@ -2038,12 +2038,12 @@ public:
 
     inline piv_yyjson_val to_imut_doc(const yyjson_alc *alc = nullptr)
     {
-        return piv_yyjson_val{yyjson_mut_doc_imut_copy(_doc()->doc, alc ? alc : piv_yyjson_alc::get_inst().pref())};
+        return piv_yyjson_val{yyjson_mut_doc_imut_copy(_doc()->doc, alc ? alc : piv_yyjson_alc::instance().pref())};
     }
 
     inline piv_yyjson_val to_imut_val(const yyjson_alc *alc = nullptr)
     {
-        return piv_yyjson_val{yyjson_mut_val_imut_copy(m_val, alc ? alc : piv_yyjson_alc::get_inst().pref())};
+        return piv_yyjson_val{yyjson_mut_val_imut_copy(m_val, alc ? alc : piv_yyjson_alc::instance().pref())};
     }
 
     inline bool empty() const

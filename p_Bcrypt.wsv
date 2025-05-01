@@ -6,7 +6,7 @@
         注释 = "  - 桌面系统需要Windows Vista及更高版本." 注释 = "  - 服务器系统需要Windows Server 2008及更高版本."
         注释 = "  - 部分加密算法有更高的系统版本要求." @视窗.外部头文件 = "bcrypt.h" @视窗.外部库 = "Bcrypt.lib">
 
-类 CNG加解密 <公开 注释 = "提供密码学的加解密支持" 折叠 @文档 = "category = \"加解密\"" @类用途 = 禁止创建对象>
+类 CNG加解密 <公开 注释 = "提供密码学的加解密支持" 折叠 折叠2 @文档 = "category = \"加解密\"" @别名 = "//" @别名类型 = 本地类 @类用途 = 访问静态成员>
 {
 
     # 对称加解密算法
@@ -2301,7 +2301,7 @@
     参数 密钥派生算法 <类型 = CNG_算法类型 注释 = "请使用\"CNG_算法类型.密钥派生_\"">
     {
         @ typedef NTSTATUS(WINAPI* Typedef_BCryptKeyDerivation)(BCRYPT_KEY_HANDLE, BCryptBufferDesc*, PUCHAR, ULONG, ULONG*, ULONG);
-        @ Typedef_BCryptKeyDerivation API_BCryptKeyDerivation =
+        @ static Typedef_BCryptKeyDerivation API_BCryptKeyDerivation =
         @     (Typedef_BCryptKeyDerivation)::GetProcAddress(::GetModuleHandle (L"Bcrypt.dll"), "BCryptKeyDerivation");
         @ if (!API_BCryptKeyDerivation) {
         @     return CVolMem ();
@@ -2422,7 +2422,7 @@
     参数 迭代次数 <类型 = 长整数 注释 = "哈希算法的计算次数,次数越大,耗时越高." @默认值 = 10000>
     {
         @ typedef NTSTATUS(WINAPI* Typedef_BCryptDeriveKeyPBKDF2)(BCRYPT_ALG_HANDLE, PUCHAR, ULONG, PUCHAR, ULONG, ULONGLONG, PUCHAR, ULONG, ULONG);
-        @ Typedef_BCryptDeriveKeyPBKDF2 API_BCryptDeriveKeyPBKDF2 =
+        @ static Typedef_BCryptDeriveKeyPBKDF2 API_BCryptDeriveKeyPBKDF2 =
         @     (Typedef_BCryptDeriveKeyPBKDF2)::GetProcAddress(::GetModuleHandle (L"Bcrypt.dll"), "BCryptDeriveKeyPBKDF2");
         @ if (!API_BCryptDeriveKeyPBKDF2) {
         @     return CVolMem ();

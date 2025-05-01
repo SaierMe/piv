@@ -1122,7 +1122,7 @@
     # int m_Visible = GLFW_TRUE;
     # // Callback
     # static void glfw_error_callback(int error, const char* description) {
-    #     PIVDEBUG("S", CVolString().Format(L"GLFW Error %d: %s\n", error, PivU2W(description).GetText()).c_str());
+    #     PivDebug(CVolString().Format(L"GLFW Error %d: %s\n", error, PivU2W(description).GetText()));
     # }
     # static void glfw_pos_callback(GLFWwindow* window, int xpos, int ypos) {
     #     reinterpret_cast<@sn<current_class>*>(glfwGetWindowUserPointer(window))->@<位置被改变>(xpos, ypos);

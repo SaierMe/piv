@@ -28,7 +28,7 @@ private:
     void *userdate = nullptr;
 
 public:
-    static PivMMKVEvent &get_inst()
+    static PivMMKVEvent &instance()
     {
         static PivMMKVEvent inst;
         return inst;
@@ -185,6 +185,18 @@ public:
         MMKV::setLogLevel(static_cast<MMKVLogLevel>(level));
     }
 
+    /**
+     * @brief 表是否存在
+     * @param mmapID 表名称
+     * @param relatePath 相对路径
+     * @return
+     */
+    static bool checkExist(const wchar_t *mmapID, const wchar_t *relatePath)
+    {
+        std::wstring _relatePath{relatePath};
+        return MMKV::checkExist(PivW2U{mmapID}, _relatePath.empty() ? nullptr : &_relatePath);
+    }
+
     PivMMKV() {}
     ~PivMMKV()
     {
@@ -231,6 +243,16 @@ public:
             m_MMKV->close();
             m_MMKV = nullptr;
         }
+    }
+
+    /**
+     * @brief 导入
+     * @param src 来源
+     * @return 
+     */
+    inline size_t importFrom(PivMMKV &src)
+    {
+        return m_MMKV ? m_MMKV->importFrom(src.m_MMKV) : 0;
     }
 
     /**

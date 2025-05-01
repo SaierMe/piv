@@ -1,6 +1,6 @@
 <火山程序 类型 = "通常" 版本 = 1 />
 
-包 火山.PIV基础类 <注释 = "  源码: https://github.com/Tencent/MMKV" 注释 = "  版本: v2.1.0 / 2025-02-18"
+包 火山.PIV基础类 <注释 = "  源码: https://github.com/Tencent/MMKV" 注释 = "  版本: v2.2.1 / 2025-04-25"
         注释 = "  MMKV是腾讯开源的一个基于内存映射文件的持久化键值表,底层的" 注释 = "序列化/反序列化使用protobuf实现,性能高,稳定性强."
         注释 = "  从2015年中至今在微信上使用,其性能和稳定性经过了时间的验证." 注释 = "  注意: mmkv从1.3.6起不再支持旧的编译器和XP系统."
         注释 = "  如果编译中出现\"LNK2019 无法解析的外部符号\"等报错,那是因为" 注释 = "你的编译器版本老了(特别是绿色版的编译环境),建议安装VS 2019或"
@@ -86,6 +86,14 @@
         @ PivMMKV::removeStorage(@<表名称>, @<相对路径>)
     }
 
+    方法 表是否存在 <公开 静态 类型 = 逻辑型 注释 = "检查指定名称的MMKV键值表文件是否已经存在." 注释 = "*此静态方法需要以类名调用." 折叠 隐藏值属性 = "0"
+            @嵌入式方法 = "req_str_param_text_pointer = true">
+    参数 表名称 <类型 = 文本型 注释 = "所欲检查的键值表名称(mmapID)">
+    参数 相对路径 <类型 = 文本型 注释 = "表文件所在的路径,如果为空则使用到MMKV的全局\"根目录\"." @默认值 = 空对象>
+    {
+        @ PivMMKV::checkExist(@<表名称>, @<相对路径>)
+    }
+
     # ====
     # 表操作
 
@@ -112,6 +120,13 @@
     参数 本键值表 <类型 = MMKV键值表>
     {
         @ @<本键值表>.close()
+    }
+
+    方法 导入 <公开 静态 类型 = 长整数 注释 = "将另一个表的所有键值表导入到当前表,返回导入的数量." 折叠 @嵌入式方法 = "">
+    参数 本键值表 <类型 = MMKV键值表>
+    参数 欲导入的表 <类型 = MMKV键值表>
+    {
+        @ (INT64)@<本键值表>.importFrom(@<欲导入的表>)
     }
 
     方法 取表名称 <公开 静态 类型 = 文本型 注释 = "获取当前所打开的键值表名称(mmapID)" 折叠 @嵌入式方法 = "">
@@ -526,7 +541,7 @@
 {
     方法 类_初始化 <折叠>
     {
-        @ PivMMKVEvent::get_inst().set(this);
+        @ PivMMKVEvent::instance().set(this);
         @ MMKV::registerLogHandler(&@sn<current_class>::LogHandler);
         @ MMKV::registerContentChangeHandler(&@sn<current_class>::ContentChangeHandler);
         @ MMKV::registerErrorHandler(&@sn<current_class>::ErrorHandler);
@@ -534,7 +549,7 @@
 
     方法 类_清理 <折叠>
     {
-        @ if (PivMMKVEvent::get_inst().get<@sn<current_class>*>() == this)
+        @ if (PivMMKVEvent::instance().get<@sn<current_class>*>() == this)
         @ {
         @     MMKV::unRegisterLogHandler();
         @     MMKV::unRegisterContentChangeHandler();
@@ -569,18 +584,18 @@
     # @begin
     # <> <include>
     # static void ContentChangeHandler(const std::string &mmapID) {
-    #     @sn<current_class>* pthis = PivMMKVEvent::get_inst().get<@sn<current_class>*>();
+    #     @sn<current_class>* pthis = PivMMKVEvent::instance().get<@sn<current_class>*>();
     #     if (pthis)
     #         pthis->@<内容更改>(@an<CVolString>{mmapID.c_str()});
     # }
     # static MMKVRecoverStrategic ErrorHandler(const std::string &mmapID, MMKVErrorType errorType) {
-    #     @sn<current_class>* pthis = PivMMKVEvent::get_inst().get<@sn<current_class>*>();
+    #     @sn<current_class>* pthis = PivMMKVEvent::instance().get<@sn<current_class>*>();
     #     if (pthis)
     #         return static_cast<MMKVRecoverStrategic>(pthis->@<错误处理>(@an<CVolString>{mmapID.c_str()}, static_cast<INT>(errorType)));
     #     return OnErrorDiscard;
     # }
     # static void LogHandler(MMKVLogLevel level, const char *file, int line, const char *function, MMKVLog_t message) {
-    #     @sn<current_class>* pthis = PivMMKVEvent::get_inst().get<@sn<current_class>*>();
+    #     @sn<current_class>* pthis = PivMMKVEvent::instance().get<@sn<current_class>*>();
     #     if (pthis)
     #         pthis->@<日志记录处理>(static_cast<INT>(level), @an<CVolString>(file), line,
     #                                @an<CVolString>(function), @an<CVolString>(message.c_str()));

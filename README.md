@@ -77,20 +77,19 @@
 
 
 
-
 ## 💌 开源项目
 
-- [nlohmann **JSON**](https://github.com/nlohmann/json) `3.11.3` `MIT license`  现代 C++ 的 JSON 库
+- [nlohmann **JSON**](https://github.com/nlohmann/json) `3.12.0` `MIT license`  现代 C++ 的 JSON 库
 - **[fmtlog](https://github.com/MengRao/fmtlog)**  `2.2.1`  `MIT license` 纳秒级精度的高性能异步日志记录库
 - **[{fmt}](https://github.com/fmtlib/fmt)**  `10.2.0`  `MIT license` 格式化文本库，等同 C++20 std::format 的实现 
 - **[md4c](https://github.com/mity/md4c)** `0.4.8`  `MIT license` CommonMark 0.30 规范 + GFM 的 Markdown 解析库
 - **[simpleini](https://github.com/brofield/simpleini)** `4.20` `MIT license` 简易的 INI 配置文件读写库
-- **[simdutf](https://github.com/simdutf/simdutf)** `6.2.0` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
+- **[simdutf](https://github.com/simdutf/simdutf)** `6.5.0` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
 - **[OpenCC](https://github.com/BYVoid/OpenCC)** `1.1.6` `Apache-2.0 license` 中文简繁转换开源项目，支持词汇级别的转换、异体字转换和地区习惯用词转换
 - **[7-zip](https://www.7-zip.org/)** `24.09` `GNU LGPL license` 免费的高压缩率开源压缩软件（采用GNU LGPL协议，只使用它的 dll 文件不会传染）
 - **[bit7z](https://github.com/rikyoz/bit7z)** `4.0.10` `Mozilla Public License v2.0` 7-zip 的封装类
 - **[MinHook](https://github.com/TsudaKageyu/minhook)** `1.3.3` `BSD-2-Clause License` 极简的 x86/x64 API Hook 库
-- **[MMKV](https://github.com/Tencent/MMKV)** `2.1.0` `BSD-3-Clause License` 腾讯开源的高效键值对存储框架
+- **[MMKV](https://github.com/Tencent/MMKV)** `2.2.1` `BSD-3-Clause License` 腾讯开源的高效键值对存储框架
 - **[xxHash](https://github.com/Cyan4973/xxHash)** `8.0.2` `BSD-2-Clause License` 速度接近 RAM 限制的高速散列算法
 - **[Dear ImGui](https://github.com/ocornut/imgui)** `1.91.4-docking` `MIT license` 轻量级的即时渲染界面开发框架
 - **[GLFW](https://www.glfw.org)** `3.3.8` `zlib/libpng license` 跨平台的 OpenGL/Vulkan 桌面应用框架
@@ -98,6 +97,8 @@
 - **[SDL](https://github.com/libsdl-org/SDL)** `2.26.5` `Zlib license` Simple DirectMedia Layer 是一个跨平台的多媒体开发库
 - **[Vulkan SDK](https://vulkan.lunarg.com/sdk/home)** `1.3.246.1` `Apache-2.0` 一个跨平台的2D和3D绘图应用程序接口
 - **[libgo](https://github.com/yyzybb537/libgo)** `3.0` `MIT license` Golang 风格的 C++11 协程库
+- **[yyjson](https://github.com/ibireme/yyjson)** `0.10.0` `MIT license` 最快的JSON库
+- **[Quill](https://github.com/odygrd/quill)** `9.0.2` `MIT license` 低延迟的异步日志库
 
 ※本模块封装的开源项目均采用较宽松的开源协议，如 MIT、BSD、MPLv2 ……
 

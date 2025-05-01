@@ -7,10 +7,11 @@
 # 7-zip: 24.09        2024-11-29  开源协议: GNU LGPL
 # bit7z: v4.0.10      2025-02-23  开源协议: MPL-2.0
 
-类 存档读写类 <公开 基础类 = PIV对象类 注释 = "提供简单易用的压缩和解压命令,只需要调用一个方法即可完成压缩或解压."
-        注释 = "功能没有\"存档解压类\"和\"存档压缩类\"全面,也没有进度反馈,但胜在简单." 折叠 @文档 = "category = \"文件压缩\"" @禁止创建对象 = 真
-        @视窗.外部头文件 = "bit7z\\include\\piv_bit7z.hpp" @视窗.外部库 = "bit7z\\lib\\$(p)\\$(d)\\bit7z_$(crt).lib"
-        @视窗.附属文件 = "bit7z\\lib\\$(p)\\7z.dll" @视窗.需求VS版本 = "15-">
+类 存档读写类 <公开 基础类 = PIV本地类 注释 = "提供简单易用的压缩和解压命令,只需要调用一个方法即可完成压缩或解压."
+        注释 = "功能没有\"存档解压类\"和\"存档压缩类\"全面,也没有进度反馈,但胜在简单." 折叠 @文档 = "category = \"文件压缩\"" @别名 = "//Piv7zLib"
+        @别名类型 = 本地类 @类用途 = 禁止创建对象 @视窗.外部头文件 = "bit7z\\include\\piv_bit7z.hpp"
+        @视窗.外部库 = "bit7z\\lib\\$(p)\\$(d)\\bit7z_$(crt).lib" @视窗.附属文件 = "bit7z\\lib\\$(p)\\7z.dll"
+        @视窗.需求VS版本 = "15-">
 {
     方法 加载动态库 <公开 静态 类型 = 逻辑型 注释 = "程序默认在执行本类库的任意方法时会自动加载与程序文件同位置的\"7z.dll\"文件."
             注释 = "如果你想将\"7z.dll\"放在其他位置或更改dll的名称,请在执行其他方法前调用本方法手动加载." 折叠 隐藏值属性 = "0"
@@ -544,13 +545,13 @@
 
     方法 取压缩包属性表 <公开 类型 = 存档属性表类 注释 = "获取一部分可用的压缩包属性" 折叠 @嵌入式方法 = "">
     {
-        @ @dt<存档属性表类>(@sn<this>.ArchiveProperties())
+        @ @sn<this>.ArchiveProperties()
     }
 
     方法 取压缩包属性 <公开 类型 = 存档属性变体型 注释 = "获取指定名称的压缩包属性" 折叠 @嵌入式方法 = "">
     参数 属性名 <类型 = 存档属性名>
     {
-        @ @dt<存档属性变体型>(@sn<this>.ArchiveProperty(@<属性名>))
+        @ @sn<this>.ArchiveProperty(@<属性名>)
     }
 
     方法 取项目信息表 <公开 类型 = 存档项目信息数组 注释 = "获取所有项目的信息表" 折叠 @嵌入式方法 = "">
@@ -562,7 +563,7 @@
     参数 项目索引 <类型 = 整数 注释 = "所欲取属性的项目索引,索引从0开始.">
     参数 属性名 <类型 = 存档属性名>
     {
-        @ @dt<存档属性变体型>(@sn<this>.ItemProperty(@<项目索引>, @<属性名>))
+        @ @sn<this>.ItemProperty(@<项目索引>, @<属性名>)
     }
 
     方法 取项目数 <公开 类型 = 整数 注释 = "获取压缩包的内容项目数量,1个项目表示1个文件或文件夹." 折叠 @嵌入式方法 = "">
@@ -692,7 +693,7 @@
             折叠 隐藏值属性 = "0" @嵌入式方法 = "parent = \"bit7z_iter, bit7z_riter, bit7z_fiter\"">
     参数 属性名 <类型 = 存档属性名>
     {
-        @ @dt<存档属性变体型>(_bit7z_itr->itemProperty(static_cast<bit7z::BitProperty>(@<属性名>)))
+        @ _bit7z_itr->itemProperty(@<属性名>)
     }
 
     方法 取枚举名称 <公开 类型 = 文本型 注释 = "获取当前所枚举到项目的名称(文件名或文件夹名)."
@@ -937,20 +938,20 @@
         @ SetCompressionLevel(@<新等级>);
     }
 
-    方法 压缩等级 <公开 属性读 类型 = 存档压缩等级 注释 = "返回当前的压缩等级" 折叠 @嵌入式方法 = "">
+    方法 压缩等级 <公开 属性读 类型 = 存档压缩等级 注释 = "返回当前的压缩等级" 折叠 @禁止流程检查 = 真>
     {
-        @ @sn<this>.CompressionLevel()
+        @ return CompressionLevel();
     }
 
     方法 压缩方法 <公开 属性写 注释 = "设置使用的压缩方法,请注意不同压缩格式支持的方法是不同的." 折叠 "">
     参数 新方法 <类型 = 存档压缩方法>
     {
-        @ SetCompressionMethod(static_cast<bit7z::BitCompressionMethod>(@<新方法>));
+        @ SetCompressionMethod(@<新方法>);
     }
 
-    方法 压缩方法 <公开 属性读 类型 = 存档压缩方法 注释 = "返回当前的压缩方法" 折叠 @嵌入式方法 = "">
+    方法 压缩方法 <公开 属性读 类型 = 存档压缩方法 注释 = "返回当前的压缩方法" 折叠 @禁止流程检查 = 真>
     {
-        @ @sn<this>.CompressionMethod()
+        @ return CompressionMethod();
     }
 
     方法 字典大小 <公开 属性写 注释 = "设置压缩使用的字典大小" 折叠 "">
@@ -992,9 +993,9 @@
         @ SetUpdateMode(@<新更新方式>);
     }
 
-    方法 更新方式 <公开 属性读 类型 = 存档更新方式 注释 = "返回当前使用的更新方式" @嵌入式方法 = "">
+    方法 更新方式 <公开 属性读 类型 = 存档更新方式 注释 = "返回当前使用的更新方式" 折叠 @禁止流程检查 = 真>
     {
-        @ @sn<this>.UpdateMode()
+        @ return UpdateMode();
     }
 
     方法 分卷大小 <公开 属性写 注释 = "设置创建分卷压缩文件时的分卷大小(字节),只有压缩为文件时才能分卷." 折叠 "">
@@ -1243,489 +1244,303 @@
 类 存档解压键值类 <公开 基础类 = 通用排序表模板 注释 = "类型为\"文本到字节集排序表\"(std:map)." 注释 = "\"键\"为解压所得的文件路径,\"值\"为对应文件的数据字节集."
         @文档 = "category = \"文件压缩.数据类型\"" @模板实现类 = "文本型, 字节集类">
 
-类 存档属性变体型 <公开 基础类 = 扩展对象类 注释 = "BitPropVariant变体型可以存储压缩包或项目的各种类型属性值."
-        注释 = "执行\"取XXX\"方法时,如果获取的类型与变体类型不同,将会抛出异常." 折叠 @文档 = "category = \"文件压缩.数据类型\"" @强制依赖 = "存档读写类">
+类 存档属性变体型 <公开 注释 = "BitPropVariant变体型可以存储压缩包或项目的各种类型属性值." 注释 = "执行\"取XXX\"方法时,如果获取的类型与变体类型不同,将会抛出异常."
+        折叠 @文档 = "category = \"文件压缩.数据类型\"" @别名 = "bit7z::BitPropVariant" @别名类型 = 本地类 @强制依赖 = "存档读写类">
 {
-    方法 是否为空 <公开 类型 = 逻辑型 注释 = "返回本变体型是否为空" 折叠 @嵌入式方法 = "">
+    方法 是否为空 <公开 静态 类型 = 逻辑型 注释 = "返回本变体型是否为空" 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ (BOOL)@sn<this>.data().isEmpty()
+        @ @<本变体>.isEmpty()
     }
 
-    方法 到文本 <公开 类型 = 文本型 注释 = "将变体型的任意类型属性值转换到文本" 折叠 @嵌入式方法 = "">
+    方法 到文本 <公开 静态 类型 = 文本型 注释 = "将变体型的任意类型属性值转换到文本" 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ @an<CVolString>(@sn<this>.data().toString().c_str())
+        @ @an<CVolString>(@<本变体>.toString().c_str())
     }
 
-    方法 取类型 <公开 类型 = 存档变体类型 注释 = "获取变体型的属性值类型" 折叠 @嵌入式方法 = "">
+    方法 取类型 <公开 静态 类型 = 存档变体类型 注释 = "获取变体型的属性值类型" 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ (@dt<存档变体类型>)@sn<this>.data().type()
+        @ @<本变体>.type()
     }
 
-    方法 清空 <公开 注释 = "清空本变体体中的属性值" 折叠 @嵌入式方法 = "">
+    方法 清空 <公开 静态 注释 = "清空本变体体中的属性值" 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ @sn<this>.data().clear()
+        @ @<本变体>.clear()
     }
 
     # ---
 
-    方法 取逻辑型 <公开 类型 = 逻辑型 注释 = "bool 获取类型为逻辑型的属性值" 折叠 @嵌入式方法 = "">
+    方法 取逻辑型 <公开 静态 类型 = 逻辑型 注释 = "bool 获取类型为逻辑型的属性值" 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ static_cast<BOOL>(@sn<this>.data().getBool())
+        @ @<本变体>.getBool()
     }
 
-    方法 取文本 <公开 类型 = 文本型 注释 = "tstring 获取类型为文本的属性值" 折叠 @嵌入式方法 = "">
+    方法 取文本 <公开 静态 类型 = 文本型 注释 = "tstring 获取类型为文本的属性值" 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ @an<CVolString>(@sn<this>.data().getString().c_str())
+        @ @an<CVolString>(@<本变体>.getString().c_str())
     }
 
-    方法 取无符号字节 <公开 类型 = 短整数 注释 = "uint8_t 获取类型为无符号字节的属性值,返回值向上转换为短整数." 折叠 @嵌入式方法 = "">
+    方法 取无符号字节 <公开 静态 类型 = 无符号字节 注释 = "uint8_t 获取类型为无符号字节的属性值,返回值向上转换为短整数." 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ static_cast<SHORT>(@sn<this>.data().getUInt8())
+        @ @<本变体>.getUInt8()
     }
 
-    方法 取无符号短整数 <公开 类型 = 整数 注释 = "uint16_t 获取类型为无符号短整数的属性值,返回值向上转换为整数." 折叠 @嵌入式方法 = "">
+    方法 取无符号短整数 <公开 静态 类型 = 无符号短整数 注释 = "uint16_t 获取类型为无符号短整数的属性值,返回值向上转换为整数." 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ static_cast<INT>(@sn<this>.data().getUInt16())
+        @ @<本变体>.getUInt16()
     }
 
-    方法 取无符号整数 <公开 类型 = 长整数 注释 = "uint32_t 获取类型为无符号整数的属性值,返回值向上转换为长整数." 折叠 @嵌入式方法 = "">
+    方法 取无符号整数 <公开 静态 类型 = 无符号整数 注释 = "uint32_t 获取类型为无符号整数的属性值,返回值向上转换为长整数." 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ static_cast<INT64>(@sn<this>.data().getUInt32())
+        @ @<本变体>.getUInt32()
     }
 
-    方法 取无符号长整数 <公开 类型 = 长整数 注释 = "uint64_t 获取类型为无符号长整数的属性值,返回值依然为长整数,所以较大的数值会变成负数." 折叠 @嵌入式方法 = "">
+    方法 取无符号长整数 <公开 静态 类型 = 无符号长整数 注释 = "uint64_t 获取类型为无符号长整数的属性值,返回值依然为长整数,所以较大的数值会变成负数." 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ static_cast<INT64>(@sn<this>.data().getUInt64())
+        @ @<本变体>.getUInt64()
     }
 
-    方法 取字节 <公开 类型 = 字节 注释 = "int8_t 获取类型为字节的属性值" 折叠 @嵌入式方法 = "">
+    方法 取字节 <公开 静态 类型 = 字节 注释 = "int8_t 获取类型为字节的属性值" 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ static_cast<S_BYTE>(@sn<this>.data().getInt8())
+        @ @<本变体>.getInt8()
     }
 
-    方法 取短整数 <公开 类型 = 短整数 注释 = "int16_t 获取类型为短整数的属性值" 折叠 @嵌入式方法 = "">
+    方法 取短整数 <公开 静态 类型 = 短整数 注释 = "int16_t 获取类型为短整数的属性值" 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ static_cast<SHORT>(@sn<this>.data().getInt16())
+        @ @<本变体>.getInt16()
     }
 
-    方法 取整数 <公开 类型 = 长整数 注释 = "int32_t 获取类型为整数的属性值" 折叠 @嵌入式方法 = "">
+    方法 取整数 <公开 静态 类型 = 长整数 注释 = "int32_t 获取类型为整数的属性值" 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ static_cast<INT>(@sn<this>.data().getInt32())
+        @ @<本变体>.getInt32()
     }
 
-    方法 取长整数 <公开 类型 = 长整数 注释 = "int64_t 获取类型为长整数的属性值" 折叠 @嵌入式方法 = "">
+    方法 取长整数 <公开 静态 类型 = 长整数 注释 = "int64_t 获取类型为长整数的属性值" 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ static_cast<INT64>(@sn<this>.data().getInt64())
+        @ @<本变体>.getInt64()
     }
 
-    方法 取文件时间 <公开 类型 = 长整数 注释 = "FILETIME 获取类型为FILETIME结构体的属性值" 返回值注释 = "返回自1601年1月1日以来的100纳秒间隔数(UTC)." 折叠
-            @禁止流程检查 = 真>
+    方法 取文件时间 <公开 静态 类型 = 长整数 注释 = "FILETIME 获取类型为FILETIME结构体的属性值" 返回值注释 = "返回自1601年1月1日以来的100纳秒间隔数(UTC)."
+            折叠 @禁止流程检查 = 真>
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ FILETIME ft = data().getFileTime();
+        @ FILETIME ft = @<本变体>.getFileTime();
         @ return (INT64)(ft.dwLowDateTime | (ft.dwHighDateTime << 32));
     }
 
-    方法 取标准时间 <公开 类型 = 标准时间类 注释 = "FILETIME 将FILETIME结构体的属性值转换为std::time_point(标准时间类),返回输出." 折叠 @嵌入式方法 = "">
+    方法 取标准时间 <公开 静态 类型 = 标准时间类 注释 = "FILETIME 将FILETIME结构体的属性值转换为std::time_point(标准时间类),返回输出." 折叠
+            @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ @dt<标准时间类>(@sn<this>.data().getTimePoint())
+        @ @dt<标准时间类>(@<本变体>.getTimePoint())
     }
 
     # ---
 
-    方法 是否为逻辑型 <公开 类型 = 逻辑型 注释 = "bool 返回本变体型是否为逻辑型" 折叠 @嵌入式方法 = "">
+    方法 是否为逻辑型 <公开 静态 类型 = 逻辑型 注释 = "bool 返回本变体型是否为逻辑型" 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ (BOOL)@sn<this>.data().isBool()
+        @ @<本变体>.isBool()
     }
 
-    方法 是否为文本 <公开 类型 = 逻辑型 注释 = "tstring 返回本变体型是否为文本型" 折叠 @嵌入式方法 = "">
+    方法 是否为文本 <公开 静态 类型 = 逻辑型 注释 = "tstring 返回本变体型是否为文本型" 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ (BOOL)@sn<this>.data().isString()
+        @ @<本变体>.isString()
     }
 
-    方法 是否为无符号字节 <公开 类型 = 逻辑型 注释 = "uint8_t 返回本变体型是否为无符号字节" 折叠 @嵌入式方法 = "">
+    方法 是否为无符号字节 <公开 静态 类型 = 逻辑型 注释 = "uint8_t 返回本变体型是否为无符号字节" 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ (BOOL)@sn<this>.data().isUInt8()
+        @ @<本变体>.isUInt8()
     }
 
-    方法 是否为无符号短整数 <公开 类型 = 逻辑型 注释 = "uint16_t 返回本变体型是否为无符号短整数" 折叠 @嵌入式方法 = "">
+    方法 是否为无符号短整数 <公开 静态 类型 = 逻辑型 注释 = "uint16_t 返回本变体型是否为无符号短整数" 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ (BOOL)@sn<this>.data().isUInt16()
+        @ @<本变体>.isUInt16()
     }
 
-    方法 是否为无符号整数 <公开 类型 = 逻辑型 注释 = "uint32_t 返回本变体型是否为无符号整数" 折叠 @嵌入式方法 = "">
+    方法 是否为无符号整数 <公开 静态 类型 = 逻辑型 注释 = "uint32_t 返回本变体型是否为无符号整数" 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ (BOOL)@sn<this>.data().isUInt32()
+        @ @<本变体>.isUInt32()
     }
 
-    方法 是否为无符号长整数 <公开 类型 = 逻辑型 注释 = "uint64_t 返回本变体型是否为无符号长整数" 折叠 @嵌入式方法 = "">
+    方法 是否为无符号长整数 <公开 静态 类型 = 逻辑型 注释 = "uint64_t 返回本变体型是否为无符号长整数" 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ (BOOL)@sn<this>.data().isUInt64()
+        @ @<本变体>.isUInt64()
     }
 
-    方法 是否为字节 <公开 类型 = 逻辑型 注释 = "int8_t 返回本变体型是否为字节" 折叠 @嵌入式方法 = "">
+    方法 是否为字节 <公开 静态 类型 = 逻辑型 注释 = "int8_t 返回本变体型是否为字节" 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ (BOOL)@sn<this>.data().isInt8()
+        @ @<本变体>.isInt8()
     }
 
-    方法 是否为短整数 <公开 类型 = 逻辑型 注释 = "int16_t 返回本变体型是否为短整数" 折叠 @嵌入式方法 = "">
+    方法 是否为短整数 <公开 静态 类型 = 逻辑型 注释 = "int16_t 返回本变体型是否为短整数" 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ (BOOL)@sn<this>.data().isInt16()
+        @ @<本变体>.isInt16()
     }
 
-    方法 是否为整数 <公开 类型 = 逻辑型 注释 = "int32_t 返回本变体型是否为整数" 折叠 @嵌入式方法 = "">
+    方法 是否为整数 <公开 静态 类型 = 逻辑型 注释 = "int32_t 返回本变体型是否为整数" 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ (BOOL)@sn<this>.data().isInt32()
+        @ @<本变体>.isInt32()
     }
 
-    方法 是否为长整数 <公开 类型 = 逻辑型 注释 = "int64_t 返回本变体型是否为长整数" 折叠 @嵌入式方法 = "">
+    方法 是否为长整数 <公开 静态 类型 = 逻辑型 注释 = "int64_t 返回本变体型是否为长整数" 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ (BOOL)@sn<this>.data().isInt64()
+        @ @<本变体>.isInt64()
     }
 
-    方法 是否为时间 <公开 类型 = 逻辑型 注释 = "FILETIME 返回本变体型是否为FILETIME时间." 折叠 @嵌入式方法 = "">
+    方法 是否为时间 <公开 静态 类型 = 逻辑型 注释 = "FILETIME 返回本变体型是否为FILETIME时间." 折叠 @嵌入式方法 = "">
+    参数 本变体 <类型 = 存档属性变体型>
     {
-        @ (BOOL)@sn<this>.data().isFileTime()
-    }
-
-    # ---
-
-    方法 取展示内容 <公开 注释 = "将本对象中的所有数据用文本方式填入到所提供的文本参数中,用作调试或其它场合展示时使用." 折叠 @虚拟方法 = 可覆盖>
-    参数 展示内容 <类型 = 文本型 注释 = "用作填入本对象中所有数据的展示文本">
-    参数 最大展示数据尺寸 <类型 = 整数 注释 = "提供用户所指定的最大允许展示数据尺寸,小于0表示全部展示,等于0表示展示默认尺寸数据.">
-    {
-        加入格式文本 (展示内容, "<存档属性变体型> 类型: %s; 值: %s", 多项选择 ((整数)本对象.取类型 (), "空", "逻辑值", "文本值", "无符号字节", "无符号短整数", "无符号整数", "无符号长整数", "字节值", "短整数值", "整数值", "长整数值", "时间值"), 本对象.到文本 ())
-
+        @ @<本变体>.isFileTime()
     }
 
     # ---
     # @begin
+    # <> <global>
     # <> <include>
-    # private:
-    #     bit7z::BitPropVariant m_PropVar;
-    # public:
-    #     inline_ @sn<current_class>(bit7z::BitPropVariant& PropVar) : @sn<current_class>() { m_PropVar = PropVar; }
-    #     inline_ BOOL @an<_IsSelfEqualExtra>(const @sn<current_class>& objCompare) const { return m_PropVar == objCompare.m_PropVar; }
-    #     inline_ void @an<_CopySelfFromExtra>(const @sn<current_class>& objCopyFrom) { m_PropVar = objCopyFrom.m_PropVar; }
-    #     inline @sn<current_class>& operator=(@sn<current_class>&& rhs) { m_PropVar = std::move(rhs.m_PropVar); return *this; }
-    #     inline_ bit7z::BitPropVariant& data() { return m_PropVar; }
+    # static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, bit7z::BitPropVariant* value)
+    # {
+    #     if (value != nullptr)
+    #     {
+    #         strDebug.AddFormatText(L"<存档属性变体型> 类型: %s; 值: %u",
+    #                                (uint32_t)value->type(), value->toString().c_str());
+    #     }
+    #     else
+    #         strDebug.SetText(L"bit7z::BitPropVariant*: nullptr");
+    # }
     # <> </include>
+    # <> </global>
     # @end
 }
 
-类 存档属性表类 <公开 注释 = "\"存档解压类.取压缩包属性表\"所返回的排序表(std:map)类型." 注释 = "其中关键字为属性名,值为存档属性的变体型." 折叠
-        @文档 = "category = \"文件压缩.数据类型\"" @强制依赖 = "存档读写类">
+类 存档属性表类 <公开 基础类 = 通用排序表模板 注释 = "\"存档解压类.取压缩包属性表\"所返回的排序表(std:map)类型." 注释 = "其中关键字为属性名,值为存档属性的变体型."
+        @文档 = "category = \"文件压缩.数据类型\"" @模板实现类 = "存档属性名, 存档属性变体型" @强制依赖 = "存档读写类">
+
+类 存档项目信息类 <公开 注释 = "\"存档解压类.取项目信息表\"所返回的信息" 折叠 折叠2 @文档 = "category = \"文件压缩.数据类型\""
+        @别名 = "bit7z::BitArchiveItemInfo" @别名类型 = 本地类 @强制依赖 = "存档读写类">
 {
-    方法 取属性 <公开 类型 = 存档属性变体型 注释 = "返回所指定属性名在本哈希表中所对应的变体型值" 折叠 @嵌入式方法 = "">
-    参数 属性名 <类型 = 存档属性名 注释 = "提供所欲取的属性名">
-    {
-        @ @dt<存档属性变体型>(@sn<this>.data() [(bit7z::BitProperty)@<属性名>])
-    }
-
-    方法 取成员数 <公开 类型 = 整数 注释 = "返回本哈希表中已有键值对成员的数目" 折叠 @嵌入式方法 = "">
-    {
-        @ (INT)@sn<this>.data().size()
-    }
-
-    方法 是否存在 <公开 类型 = 逻辑型 注释 = "返回所指定的属性是否已经存在" 折叠 @禁止流程检查 = 真>
-    参数 属性名 <类型 = 存档属性名 注释 = "提供所对应的属性名">
-    {
-        @ return (data().find((bit7z::BitProperty)@<属性名>) != data().end());
-    }
-
-    方法 清空 <公开 注释 = "清除本哈希表中的所有内容" 折叠 @嵌入式方法 = "">
-    {
-        @ @sn<this>.data().clear()
-    }
-
-    方法 是否为空 <公开 类型 = 逻辑型 注释 = "返回本哈希表是否为空" 折叠 @嵌入式方法 = "">
-    {
-        @ (BOOL)@sn<this>.data().empty()
-    }
-
-    方法 枚举循环 <公开 注释 = "  启动一个循环来正向枚举本哈希表中的每一个成员,在循环中可以调用" 注释 = "\"取枚举属性名\"/\"取枚举值\"方法来获取当前所枚举到键值对的关键字及"
-            注释 = "其对应值." 折叠 @嵌入式方法 = "name = mIter\r\nhas_loop_body = true">
-    {
-        @ auto @sn<rand_name0> = &@sn<this>.data();
-        @ for (std::map<bit7z::BitProperty, bit7z::BitPropVariant>::iterator _vmapItr = @sn<rand_name0>->begin(); _vmapItr != @sn<rand_name0>->end(); _vmapItr++)
-    }
-
-    方法 取枚举属性名 <公开 类型 = 存档属性名 注释 = "  只能在本类的\"枚举循环\"语句的子语句体中使用,用作取回当前所枚举到键值对"
-            注释 = "成员的关键字,如果有多层本类或本类继承类的\"枚举循环\"嵌套,本方法将返回最近" 注释 = "层\"枚举循环\"所枚举到键值对成员的关键字." 折叠
-            @嵌入式方法 = "parent = \"mIter\"">
-    {
-        @ (@dt<存档属性名>)_vmapItr->first
-    }
-
-    方法 取枚举值 <公开 类型 = 存档属性变体型 注释 = "  只能在本类的\"枚举循环\"语句的子语句体中使用,用作取回当前所枚举到键值对"
-            注释 = "成员的值,如果有多层本类或本类继承类的\"枚举循环\"嵌套,本方法将返回最近层" 注释 = "\"枚举循环\"所枚举到键值对成员的值." 折叠
-            @嵌入式方法 = "parent = \"mIter\"">
-    {
-        @ @dt<存档属性变体型>(_vmapItr->second)
-    }
-
-    # @begin
-    # <> <include>
-    # private:
-    #     std::map<bit7z::BitProperty, bit7z::BitPropVariant> m_map;
-    # public:
-    #     inline_ @sn<current_class>(std::map<bit7z::BitProperty, bit7z::BitPropVariant>& map) : @sn<current_class>() { m_map = map; }
-    #     inline_ BOOL @an<_IsSelfEqualExtra>(const @sn<current_class>& objCompare) const { return m_map == objCompare.m_map; }
-    #     inline_ void @an<_CopySelfFromExtra>(const @sn<current_class>& objCopyFrom) { m_map = objCopyFrom.m_map; }
-    #     inline @sn<current_class>& operator=(@sn<current_class>&& rhs) { m_map = std::move(rhs.m_map); return *this; }
-    #     inline_ std::map<bit7z::BitProperty, bit7z::BitPropVariant>& data() { return m_map; }
-    # <> </include>
-    # @end
-}
-
-类 存档项目信息数组 <公开 注释 = "\"存档解压类.取项目信息表\"所返回的信息数组类型." 折叠 @文档 = "category = \"文件压缩.数据类型\"" @强制依赖 = "存档读写类">
-{
-    方法 是否为空 <公开 类型 = 逻辑型 注释 = "返回本数组是否为空" 折叠 @嵌入式方法 = "">
-    {
-        @ (BOOL)@sn<this>.data().empty()
-    }
-
-    方法 取成员数 <公开 类型 = 整数 注释 = "返回数组中的成员数目" 折叠 @嵌入式方法 = "">
-    {
-        @ (INT)@sn<this>.data().size()
-    }
 
     # ---
 
-    方法 取成员属性表 <公开 类型 = 存档属性表类 注释 = "获取指定项目含有各种类型的属性表(不完整)" 折叠 @嵌入式方法 = "">
-    参数 索引 <类型 = 整数 注释 = "提供所欲操作成员的索引位置,必须大于等于0且小于数组成员数目.">
+    方法 取属性表 <公开 静态 类型 = 存档属性表类 注释 = "获取指定项目含有各种类型的属性表(不完整)" 折叠 @嵌入式方法 = "">
+    参数 本项目 <类型 = 存档项目信息类>
     {
-        @ @dt<存档属性表类>(@sn<this>.data() [@<索引>].itemProperties())
+        @ @<本项目>.itemProperties()
     }
 
-    方法 取成员属性 <公开 类型 = 存档属性变体型 注释 = "获取指定项目和类型的属性" 返回值注释 = "失败时返回的空变体型." 折叠 @嵌入式方法 = "">
-    参数 索引 <类型 = 整数 注释 = "提供所欲操作成员的索引位置,必须大于等于0且小于数组成员数目.">
+    方法 取属性 <公开 静态 类型 = 存档属性变体型 注释 = "获取指定项目和类型的属性" 返回值注释 = "失败时返回的空变体型." 折叠 @嵌入式方法 = "">
+    参数 本项目 <类型 = 存档项目信息类>
     参数 属性名 <类型 = 存档属性名>
     {
-        @ @dt<存档属性变体型>(@sn<this>.data() [@<索引>].itemProperty((bit7z::BitProperty)@<属性名>))
+        @ @<本项目>.itemProperty(@<属性名>)
     }
 
-    方法 取成员项目索引 <公开 类型 = 整数 注释 = "获取指定项目的索引" 折叠 @嵌入式方法 = "">
-    参数 索引 <类型 = 整数 注释 = "提供所欲操作成员的索引位置,必须大于等于0且小于数组成员数目.">
+    方法 项目索引 <公开 静态 类型 = 整数 注释 = "获取指定项目的索引" 折叠 @嵌入式方法 = "">
+    参数 本项目 <类型 = 存档项目信息类>
     {
-        @ (INT)@sn<this>.data() [@<索引>].index()
+        @ (INT)@<本项目>.index()
     }
 
-    方法 取成员名称 <公开 类型 = 文本型 注释 = "获取指定项目的名称(文件名或文件夹名)" 折叠 @嵌入式方法 = "">
-    参数 索引 <类型 = 整数 注释 = "提供所欲操作成员的索引位置,必须大于等于0且小于数组成员数目.">
+    方法 取名称 <公开 静态 类型 = 文本型 注释 = "获取指定项目的名称(文件名或文件夹名)" 折叠 @嵌入式方法 = "">
+    参数 本项目 <类型 = 存档项目信息类>
     {
-        @ @an<CVolString>(@sn<this>.data() [@<索引>].name().c_str())
+        @ @an<CVolString>(@<本项目>.name().c_str())
     }
 
-    方法 成员是否为目录 <公开 类型 = 逻辑型 注释 = "判断指定项目是否为文件夹" 折叠 @嵌入式方法 = "">
-    参数 索引 <类型 = 整数 注释 = "提供所欲操作成员的索引位置,必须大于等于0且小于数组成员数目.">
+    方法 是否为目录 <公开 静态 类型 = 逻辑型 注释 = "判断指定项目是否为文件夹" 折叠 @嵌入式方法 = "">
+    参数 本项目 <类型 = 存档项目信息类>
     {
-        @ (BOOL)@sn<this>.data() [@<索引>].isDir()
+        @ @<本项目>.isDir()
     }
 
-    方法 成员是否为符号链接 <公开 类型 = 逻辑型 注释 = "判断指定项目是否为符号链接" 折叠 @嵌入式方法 = "">
-    参数 索引 <类型 = 整数 注释 = "提供所欲操作成员的索引位置,必须大于等于0且小于数组成员数目.">
+    方法 是否为符号链接 <公开 静态 类型 = 逻辑型 注释 = "判断指定项目是否为符号链接" 折叠 @嵌入式方法 = "">
+    参数 本项目 <类型 = 存档项目信息类>
     {
-        @ (BOOL)@sn<this>.data() [@<索引>].isSymLink()
+        @ @<本项目>.isSymLink()
     }
 
-    方法 取成员扩展名 <公开 类型 = 文本型 注释 = "获取指定项目的扩展名" 折叠 @嵌入式方法 = "">
-    参数 索引 <类型 = 整数 注释 = "提供所欲操作成员的索引位置,必须大于等于0且小于数组成员数目.">
+    方法 取扩展名 <公开 静态 类型 = 文本型 注释 = "获取指定项目的扩展名" 折叠 @嵌入式方法 = "">
+    参数 本项目 <类型 = 存档项目信息类>
     {
-        @ @an<CVolString>(@sn<this>.data() [@<索引>].extension().c_str())
+        @ @an<CVolString>(@<本项目>.extension().c_str())
     }
 
-    方法 取成员路径 <公开 类型 = 文本型 注释 = "获取指定项目的路径" 折叠 @嵌入式方法 = "">
-    参数 索引 <类型 = 整数 注释 = "提供所欲操作成员的索引位置,必须大于等于0且小于数组成员数目.">
+    方法 取路径 <公开 静态 类型 = 文本型 注释 = "获取指定项目的路径" 折叠 @嵌入式方法 = "">
+    参数 本项目 <类型 = 存档项目信息类>
     {
-        @ @an<CVolString>(@sn<this>.data() [@<索引>].path().c_str())
+        @ @an<CVolString>(@<本项目>.path().c_str())
     }
 
-    方法 取成员项目长度 <公开 类型 = 长整数 注释 = "获取指定项目的未压缩长度" 折叠 @嵌入式方法 = "">
-    参数 索引 <类型 = 整数 注释 = "提供所欲操作成员的索引位置,必须大于等于0且小于数组成员数目.">
+    方法 取项目长度 <公开 静态 类型 = 长整数 注释 = "获取指定项目的未压缩长度" 折叠 @嵌入式方法 = "">
+    参数 本项目 <类型 = 存档项目信息类>
     {
-        @ (INT64)@sn<this>.data() [@<索引>].size()
+        @ (INT64)@<本项目>.size()
     }
 
-    方法 取成员打包长度 <公开 类型 = 长整数 注释 = "获取指定项目压缩后的长度" 折叠 @嵌入式方法 = "">
-    参数 索引 <类型 = 整数 注释 = "提供所欲操作成员的索引位置,必须大于等于0且小于数组成员数目.">
+    方法 取打包长度 <公开 静态 类型 = 长整数 注释 = "获取指定项目压缩后的长度" 折叠 @嵌入式方法 = "">
+    参数 本项目 <类型 = 存档项目信息类>
     {
-        @ (INT64)@sn<this>.data() [@<索引>].packSize()
+        @ (INT64)@<本项目>.packSize()
     }
 
-    方法 取成员创建时间 <公开 类型 = 标准时间类 注释 = "获取指定项目的创建时间" 折叠 @嵌入式方法 = "">
-    参数 索引 <类型 = 整数 注释 = "提供所欲操作成员的索引位置,必须大于等于0且小于数组成员数目.">
+    方法 取创建时间 <公开 静态 类型 = 标准时间类 注释 = "获取指定项目的创建时间" 折叠 @嵌入式方法 = "">
+    参数 本项目 <类型 = 存档项目信息类>
     {
-        @ @dt<标准时间类>(@sn<this>.data() [@<索引>].creationTime())
+        @ @dt<标准时间类>(@<本项目>.creationTime())
     }
 
-    方法 取成员访问时间 <公开 类型 = 标准时间类 注释 = "获取指定项目的最后访问时间" 折叠 @嵌入式方法 = "">
-    参数 索引 <类型 = 整数 注释 = "提供所欲操作成员的索引位置,必须大于等于0且小于数组成员数目.">
+    方法 取访问时间 <公开 静态 类型 = 标准时间类 注释 = "获取指定项目的最后访问时间" 折叠 @嵌入式方法 = "">
+    参数 本项目 <类型 = 存档项目信息类>
     {
-        @ @dt<标准时间类>(@sn<this>.data() [@<索引>].lastAccessTime())
+        @ @dt<标准时间类>(@<本项目>.lastAccessTime())
     }
 
-    方法 取成员修改时间 <公开 类型 = 标准时间类 注释 = "获取指定项目的最后修改时间" 折叠 @嵌入式方法 = "">
-    参数 索引 <类型 = 整数 注释 = "提供所欲操作成员的索引位置,必须大于等于0且小于数组成员数目.">
+    方法 取修改时间 <公开 静态 类型 = 标准时间类 注释 = "获取指定项目的最后修改时间" 折叠 @嵌入式方法 = "">
+    参数 本项目 <类型 = 存档项目信息类>
     {
-        @ @dt<标准时间类>(@sn<this>.data() [@<索引>].lastWriteTime())
+        @ @dt<标准时间类>(@<本项目>.lastWriteTime())
     }
 
-    方法 取成员文件属性 <公开 类型 = 整数 注释 = "获取指定项目的文件属性" 返回值注释 = "返回\"文件属性\"中一个或多个常量的位或值." 折叠 @嵌入式方法 = "">
-    参数 索引 <类型 = 整数 注释 = "提供所欲操作成员的索引位置,必须大于等于0且小于数组成员数目.">
+    方法 取文件属性 <公开 静态 类型 = 整数 注释 = "获取指定项目的文件属性" 返回值注释 = "返回\"文件属性\"中一个或多个常量的位或值." @嵌入式方法 = "">
+    参数 本项目 <类型 = 存档项目信息类>
     {
-        @ (INT)@sn<this>.data() [@<索引>].attributes()
+        @ (INT)@<本项目>.attributes()
     }
 
-    方法 成员是否为加密项目 <公开 类型 = 逻辑型 注释 = "判断当前所枚举到的项目是否为加密压缩." 注释 = "只能在本类的\"枚举循环\"/\"逆向枚举循环\"/\"寻找项目\"的子语句体中使用."
-            返回值注释 = "返回真表示该项目为加密压缩." 折叠 @嵌入式方法 = "">
-    参数 索引 <类型 = 整数 注释 = "提供所欲操作成员的索引位置,必须大于等于0且小于数组成员数目.">
+    方法 是否为加密项目 <公开 静态 类型 = 逻辑型 注释 = "判断当前所枚举到的项目是否为加密压缩."
+            注释 = "只能在本类的\"枚举循环\"/\"逆向枚举循环\"/\"寻找项目\"的子语句体中使用." 返回值注释 = "返回真表示该项目为加密压缩." 折叠 @嵌入式方法 = "">
+    参数 本项目 <类型 = 存档项目信息类>
     {
-        @ (BOOL)@sn<this>.data() [@<索引>].isEncrypted()
+        @ @<本项目>.isEncrypted()
     }
-
-    方法 枚举循环 <公开 注释 = "  启动一个循环来枚举本数组中的每一个成员,在循环中可以调用" 注释 = "\"取枚举索引\"方法来获取当前枚举到成员的索引位置." 折叠
-            @嵌入式方法 = "name = viter\r\nhas_loop_body = true">
-    {
-        @ for (std::size_t container_index = 0; container_index < @sn<this>.data().size(); container_index++)
-    }
-
-    方法 取枚举索引 <公开 类型 = 整数 注释 = "  只能在本类的\"枚举循环\"语句的子语句体中使用,用作取回当前枚举到成员的索引位置,如果有"
-            注释 = "多层本类或本类继承类的\"枚举循环\"嵌套,本方法将返回所处最近层\"枚举循环\"枚举到成员的索" 注释 = "引位置." 折叠 @嵌入式方法 = "parent = \"viter\"">
-    {
-        @ (INT)container_index
-    }
-
-    # @begin
-    # <> <include>
-    # private:
-    #     std::vector<bit7z::BitArchiveItemInfo> m_items;
-    # public:
-    #     inline_ @sn<current_class>(std::vector<bit7z::BitArchiveItemInfo>& items) : @sn<current_class>() { m_items = items; }
-    #     inline_ void @an<_CopySelfFromExtra>(const @sn<current_class>& objCopyFrom) { m_items = objCopyFrom.m_items; }
-    #     inline @sn<current_class>& operator=(@sn<current_class>&& rhs) { m_items = std::move(rhs.m_items); return *this; }
-    #     inline_ std::vector<bit7z::BitArchiveItemInfo>& data() { return m_items; }
-    # <> </include>
-    # @end
 }
+
+类 存档项目信息数组 <公开 基础类 = PIV数组模板 注释 = "\"存档解压类.取项目信息表\"所返回的信息数组类型." 折叠2 @文档 = "category = \"文件压缩.数据类型\""
+        @模板实现类 = "存档项目信息类">
 
 # 常量 ===
-
-类 存档属性名 <公开 注释 = "压缩包或项目的属性名(BitProperty)." 注释 = "部分属性在不同的压缩格式里有不一样的值类型." 折叠
-        @文档 = "category = \"文件压缩.辅助类\"" @常量类 = 整数>
-{
-    常量 无属性 <公开 值 = 0 注释 = "NoProperty">
-    常量 主子文件 <公开 值 = 1 注释 = "MainSubfile |  |">
-    常量 处理项目索引 <公开 值 = 2 注释 = "HandlerItemIndex |  |">
-    常量 路径 <公开 值 = 3 注释 = "Path | 文本型 | 项目">
-    常量 名称 <公开 值 = 4 注释 = "Name | 文本型 | 项目">
-    常量 扩展名 <公开 值 = 5 注释 = "Extension | 文本型 | 项目">
-    常量 是否目录 <公开 值 = 6 注释 = "IsDir | 逻辑型 | 项目">
-    常量 项目大小 <公开 值 = 7 注释 = "Size | 无符号长整数 | 项目">
-    常量 打包大小 <公开 值 = 8 注释 = "PackSize | 无符号长整数 | 项目">
-    常量 文件属性 <公开 值 = 9 注释 = "Attrib | 无符号整数 | 项目">
-    常量 创建时间 <公开 值 = 10 注释 = "CTime | 时间 | 项目">
-    常量 访问时间 <公开 值 = 11 注释 = "ATime | 时间 | 项目">
-    常量 修改时间 <公开 值 = 12 注释 = "MTime | 时间 | 项目">
-    常量 固实 <公开 值 = 13 注释 = "Solid  | 逻辑型 | 压缩包">
-    常量 已注释 <公开 值 = 14 注释 = "Commented |  |">
-    常量 已加密 <公开 值 = 15 注释 = "Encrypted | 逻辑型 | 压缩包/项目">
-    常量 分割前 <公开 值 = 16 注释 = "SplitBefore | 逻辑型 | 项目">
-    常量 分割后 <公开 值 = 17 注释 = "SplitAfter | 逻辑型 | 项目">
-    常量 字典大小 <公开 值 = 18 注释 = "DictionarySize |  |">
-    常量 CRC <公开 值 = 19 注释 = "CRC | 无符号整数 | 项目">
-    常量 类型 <公开 值 = 20 注释 = "Type | 文本型 | 项目">
-    常量 是否Anti <公开 值 = 21 注释 = "IsAnti | 逻辑型 | 项目">
-    常量 压缩方法 <公开 值 = 22 注释 = "Method 文本型 |  |">
-    常量 主机系统 <公开 值 = 23 注释 = "HostOS | 文本型 | 项目">
-    常量 文件系统 <公开 值 = 24 注释 = "FileSystem |  |">
-    常量 用户 <公开 值 = 25 注释 = "User |  |">
-    常量 组 <公开 值 = 26 注释 = "Group |  |">
-    常量 字块 <公开 值 = 27 注释 = "Block | 无符号整数 | 项目">
-    常量 注释 <公开 值 = 28 注释 = "Comment |  |">
-    常量 位置 <公开 值 = 29 注释 = "Position |  |">
-    常量 前缀 <公开 值 = 30 注释 = "Prefix |  |">
-    常量 子目录数量 <公开 值 = 31 注释 = "NumSubDirs |  |">
-    常量 子文件数量 <公开 值 = 32 注释 = "NumSubFiles |  |">
-    常量 解包版本 <公开 值 = 33 注释 = "UnpackVer |  |">
-    常量 分卷 <公开 值 = 34 注释 = "Volume |  |">
-    常量 分卷压缩 <公开 值 = 35 注释 = "IsVolume | 逻辑型 | 压缩包">
-    常量 偏移 <公开 值 = 36 注释 = "Offset | 无符号长整数 | 压缩包">
-    常量 链接 <公开 值 = 37 注释 = "Links |  |">
-    常量 字块数量 <公开 值 = 38 注释 = "NumBlocks | 无符号整数 | 压缩包">
-    常量 分卷数量 <公开 值 = 39 注释 = "NumVolumes | 无符号整数 | 压缩包">
-    常量 时间类型 <公开 值 = 40 注释 = "TimeType | 无符号整数 | 项目">
-    常量 位数64 <公开 值 = 41 注释 = "Bit64 |  |">
-    常量 大端 <公开 值 = 42 注释 = "BigEndian |  |">
-    常量 CPU <公开 值 = 43 注释 = "Cpu |  |">
-    常量 物理大小 <公开 值 = 44 注释 = "PhySize | 无符号长整数 | 压缩包">
-    常量 文件头大小 <公开 值 = 45 注释 = "HeadersSize | 无符号长整数 | 压缩包">
-    常量 校验和 <公开 值 = 46 注释 = "Checksum |  |">
-    常量 字符序列 <公开 值 = 47 注释 = "Characts | 文本型 | 压缩包/项目">
-    常量 VA <公开 值 = 48 注释 = "Va |  |">
-    常量 ID <公开 值 = 49 注释 = "Id |  |">
-    常量 短名称 <公开 值 = 50 注释 = "ShortName |  |">
-    常量 创建应用 <公开 值 = 51 注释 = "CreatorApp |  |">
-    常量 扇区大小 <公开 值 = 52 注释 = "SectorSize |  |">
-    常量 POSIX文件属性 <公开 值 = 53 注释 = "PosixAttrib |  |">
-    常量 符号链接 <公开 值 = 54 注释 = "SymLink |  |">
-    常量 错误 <公开 值 = 55 注释 = "Error |  |">
-    常量 总大小 <公开 值 = 56 注释 = "TotalSize |  |">
-    常量 剩余空间 <公开 值 = 57 注释 = "FreeSpace |  |">
-    常量 簇大小 <公开 值 = 58 注释 = "ClusterSize |  |">
-    常量 卷标名称 <公开 值 = 59 注释 = "VolumeName |  |">
-    常量 本地名称 <公开 值 = 60 注释 = "LocalName |  |">
-    常量 提供程序 <公开 值 = 61 注释 = "Provider |  |">
-    常量 NT安全描述符 <公开 值 = 62 注释 = "NtSecure |  |">
-    常量 是否ALT流 <公开 值 = 63 注释 = "IsAltStream | 逻辑型 | 压缩包">
-    常量 是否AUX <公开 值 = 64 注释 = "IsAux |  |">
-    常量 是否已删除 <公开 值 = 65 注释 = "IsDeleted |  |">
-    常量 是否目录树 <公开 值 = 66 注释 = "IsTree |  |">
-    常量 SAH1 <公开 值 = 67 注释 = "Sha1 |  |">
-    常量 SHA256 <公开 值 = 68 注释 = "Sha256 |  |">
-    常量 错误类型 <公开 值 = 69 注释 = "ErrorType |  |">
-    常量 错误数量 <公开 值 = 70 注释 = "NumErrors |  |">
-    常量 错误标志 <公开 值 = 71 注释 = "ErrorFlags | 无符号整数 | 压缩包">
-    常量 警告标志 <公开 值 = 72 注释 = "WarningFlags |  |">
-    常量 警告 <公开 值 = 73 注释 = "Warning |  |">
-    常量 流数量 <公开 值 = 74 注释 = "NumStreams |  |">
-    常量 ALT流数量 <公开 值 = 75 注释 = "NumAltStreams |  |">
-    常量 ALT流大小 <公开 值 = 76 注释 = "AltStreamsSize |  |">
-    常量 虚拟大小 <公开 值 = 77 注释 = "VirtualSize |  |">
-    常量 解包大小 <公开 值 = 78 注释 = "UnpackSize |  |">
-    常量 总物理大小 <公开 值 = 79 注释 = "TotalPhySize |  |">
-    常量 分卷索引 <公开 值 = 80 注释 = "VolumeIndex | 无符号整数/无符号长整数 | 压缩包/项目">
-    常量 子类型 <公开 值 = 81 注释 = "SubType |  |">
-    常量 短注释 <公开 值 = 82 注释 = "ShortComment |  |">
-    常量 代码页 <公开 值 = 83 注释 = "CodePage |  |">
-    常量 是否非存档类型 <公开 值 = 84 注释 = "IsNotArcType |  |">
-    常量 无法检测物理大小 <公开 值 = 85 注释 = "PhySizeCantBeDetected |  |">
-    常量 是否允许零文件尾 <公开 值 = 86 注释 = "ZerosTailIsAllowed |  |">
-    常量 文件尾大小 <公开 值 = 87 注释 = "TailSize |  |">
-    常量 嵌入存根大小 <公开 值 = 88 注释 = "EmbeddedStubSize |  |">
-    常量 NT重分析 <公开 值 = 89 注释 = "NtReparse |  |">
-    常量 硬链接 <公开 值 = 90 注释 = "HardLink |  |">
-    常量 索引节点 <公开 值 = 91 注释 = "INode |  |">
-    常量 流ID <公开 值 = 92 注释 = "StreamId |  |">
-    常量 只读 <公开 值 = 93 注释 = "ReadOnly |  |">
-    常量 输出名称 <公开 值 = 94 注释 = "OutName |  |">
-    常量 复制链接 <公开 值 = 95 注释 = "CopyLink |  |">
-}
-
-类 存档变体类型 <公开 注释 = "\"存档属性变体型\"的属性值类型(BitPropVariantType)." 折叠 @文档 = "category = \"文件压缩.辅助类\"" @常量类 = 整数>
-{
-    常量 空 <公开 值 = 0 注释 = "Empty">
-    常量 逻辑值 <公开 值 = 1 注释 = "Bool">
-    常量 文本值 <公开 值 = 2 注释 = "String">
-    常量 无符号字节 <公开 值 = 3 注释 = "UInt8">
-    常量 无符号短整数 <公开 值 = 4 注释 = "UInt16">
-    常量 无符号整数 <公开 值 = 5 注释 = "UInt32">
-    常量 无符号长整数 <公开 值 = 6 注释 = "UInt64">
-    常量 字节值 <公开 值 = 7 注释 = "Int8">
-    常量 短整数值 <公开 值 = 8 注释 = "Int16">
-    常量 整数值 <公开 值 = 9 注释 = "Int32">
-    常量 长整数值 <公开 值 = 10 注释 = "Int64">
-    常量 时间值 <公开 值 = 11 注释 = "FileTime">
-}
 
 类 存档格式类型 <公开 注释 = "存档文件使用的压缩格式(BitFormat)." 折叠 @文档 = "category = \"文件压缩.辅助类\"" @常量类 = 字节>
 {
@@ -1860,30 +1675,154 @@
 }
 
 类 存档压缩等级 <公开 注释 = "创建压缩文件时使用的压缩等级(BitCompressionLevel)." 注释 = "注: Wim、Tar格式不支持设置压缩等级,但只是无效果,不会抛出错误." 折叠
-        @文档 = "category = \"文件压缩.辅助类\"" @常量类 = 整数>
+        @文档 = "category = \"文件压缩.辅助类\"" @别名 = "bit7z::BitCompressionLevel" @别名类型 = 本地值类型>
 {
-    常量 仅存储 <公开 值 = 0 注释 = "复制模式(不压缩)" 注释 = "BZip2/GZip/Xz不支持该选项,会抛出异常.">
-    常量 极速压缩 <公开 值 = 1 注释 = "GZip不支持该选项,会抛出异常.">
-    常量 快速压缩 <公开 值 = 3>
-    常量 标准压缩 <公开 值 = 5>
-    常量 最大压缩 <公开 值 = 7>
-    常量 极限压缩 <公开 值 = 9>
+    常量 仅存储 <公开 类型 = 存档压缩等级 值 = @"@bit7z::BitCompressionLevel::None" 注释 = "复制模式(不压缩)"
+            注释 = "BZip2/GZip/Xz不支持该选项,会抛出异常.">
+    常量 极速压缩 <公开 类型 = 存档压缩等级 值 = @"@bit7z::BitCompressionLevel::Fastest" 注释 = "GZip不支持该选项,会抛出异常.">
+    常量 快速压缩 <公开 类型 = 存档压缩等级 值 = @"@bit7z::BitCompressionLevel::Fast">
+    常量 标准压缩 <公开 类型 = 存档压缩等级 值 = @"@bit7z::BitCompressionLevel::Normal">
+    常量 最大压缩 <公开 类型 = 存档压缩等级 值 = @"@bit7z::BitCompressionLevel::Max">
+    常量 极限压缩 <公开 类型 = 存档压缩等级 值 = @"@bit7z::BitCompressionLevel::Ultra">
 }
 
-类 存档压缩方法 <公开 注释 = "创建压缩包时使用的压缩方法(BitCompressionMethod)." 折叠 @文档 = "category = \"文件压缩.辅助类\"" @常量类 = 整数>
+类 存档压缩方法 <公开 注释 = "创建压缩包时使用的压缩方法(BitCompressionMethod)." 折叠 折叠2 @文档 = "category = \"文件压缩.辅助类\""
+        @别名 = "bit7z::BitCompressionMethod" @别名类型 = 本地值类型>
 {
-    常量 仅存储 <公开 值 = 0 注释 = "不压缩,仅打包文件">
-    常量 Deflate <公开 值 = 1>
-    常量 Deflate64 <公开 值 = 2>
-    常量 BZip2 <公开 值 = 3>
-    常量 LZMA <公开 值 = 4>
-    常量 LZMA2 <公开 值 = 5>
-    常量 PPMd <公开 值 = 6>
+    常量 仅存储 <公开 类型 = 存档压缩方法 值 = @"@bit7z::BitCompressionMethod::Copy" 注释 = "不压缩,仅打包文件">
+    常量 Deflate <公开 类型 = 存档压缩方法 值 = @"@bit7z::BitCompressionMethod::Deflate">
+    常量 Deflate64 <公开 类型 = 存档压缩方法 值 = @"@bit7z::BitCompressionMethod::Deflate64">
+    常量 BZip2 <公开 类型 = 存档压缩方法 值 = @"@bit7z::BitCompressionMethod::BZip2">
+    常量 LZMA <公开 类型 = 存档压缩方法 值 = @"@bit7z::BitCompressionMethod::Lzma">
+    常量 LZMA2 <公开 类型 = 存档压缩方法 值 = @"@bit7z::BitCompressionMethod::Lzma2">
+    常量 PPMd <公开 类型 = 存档压缩方法 值 = @"@bit7z::BitCompressionMethod::Ppmd">
 }
 
-类 存档更新方式 <公开 注释 = "添加文件到压缩包时,如何处理已经存在的文件(UpdateMode)." 折叠 @文档 = "category = \"文件压缩.辅助类\"" @常量类 = 整数>
+类 存档更新方式 <公开 注释 = "添加文件到压缩包时,如何处理已经存在的文件(UpdateMode)." 折叠 折叠2 @文档 = "category = \"文件压缩.辅助类\""
+        @别名 = "bit7z::UpdateMode" @别名类型 = 本地值类型>
 {
-    常量 无 <公开 值 = 0 注释 = "None 不能添加文件到现有的压缩包中,程序将抛出异常.">
-    常量 添加并更新文件 <公开 值 = 1 注释 = "Append 将新文件添加到目标压缩包中,重复的文件不进行替换.">
-    常量 添加并替换文件 <公开 值 = 2 注释 = "Update 将新文件添加到目标压缩包中,并覆盖替换重复的文件.">
+    常量 无 <公开 类型 = 存档更新方式 值 = @"@bit7z::UpdateMode::None" 注释 = "None 不能添加文件到现有的压缩包中,程序将抛出异常.">
+    常量 添加并更新文件 <公开 类型 = 存档更新方式 值 = @"@bit7z::UpdateMode::Append" 注释 = "Append 将新文件添加到目标压缩包中,重复的文件不进行替换.">
+    常量 添加并替换文件 <公开 类型 = 存档更新方式 值 = @"@bit7z::UpdateMode::Update" 注释 = "Update 将新文件添加到目标压缩包中,并覆盖替换重复的文件.">
+}
+
+类 存档属性名 <公开 注释 = "压缩包或项目的属性名(BitProperty)." 注释 = "部分属性在不同的压缩格式里有不一样的值类型." 折叠
+        @文档 = "category = \"文件压缩.辅助类\"" @别名 = "bit7z::BitProperty" @别名类型 = 本地值类型>
+{
+    常量 无属性 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::NoProperty" 注释 = "NoProperty">
+    常量 主子文件 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::MainSubfile" 注释 = "MainSubfile |  |">
+    常量 处理项目索引 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::HandlerItemIndex" 注释 = "HandlerItemIndex |  |">
+    常量 路径 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Path" 注释 = "Path | 文本型 | 项目">
+    常量 名称 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Name" 注释 = "Name | 文本型 | 项目">
+    常量 扩展名 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Extension" 注释 = "Extension | 文本型 | 项目">
+    常量 是否目录 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::IsDir" 注释 = "IsDir | 逻辑型 | 项目">
+    常量 项目大小 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Size" 注释 = "Size | 无符号长整数 | 项目">
+    常量 打包大小 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::PackSize" 注释 = "PackSize | 无符号长整数 | 项目">
+    常量 文件属性 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Attrib" 注释 = "Attrib | 无符号整数 | 项目">
+    常量 创建时间 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::CTime" 注释 = "CTime | 时间 | 项目">
+    常量 访问时间 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::ATime" 注释 = "ATime | 时间 | 项目">
+    常量 修改时间 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::MTime" 注释 = "MTime | 时间 | 项目">
+    常量 固实 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Solid" 注释 = "Solid  | 逻辑型 | 压缩包">
+    常量 已注释 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Commented" 注释 = "Commented |  |">
+    常量 已加密 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Encrypted" 注释 = "Encrypted | 逻辑型 | 压缩包/项目">
+    常量 分割前 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::SplitBefore" 注释 = "SplitBefore | 逻辑型 | 项目">
+    常量 分割后 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::SplitAfter" 注释 = "SplitAfter | 逻辑型 | 项目">
+    常量 字典大小 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::DictionarySize" 注释 = "DictionarySize |  |">
+    常量 CRC <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::CRC" 注释 = "CRC | 无符号整数 | 项目">
+    常量 类型 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Type" 注释 = "Type | 文本型 | 项目">
+    常量 是否Anti <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::IsAnti" 注释 = "IsAnti | 逻辑型 | 项目">
+    常量 压缩方法 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Method" 注释 = "Method 文本型 |  |">
+    常量 主机系统 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::HostOS" 注释 = "HostOS | 文本型 | 项目">
+    常量 文件系统 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::FileSystem" 注释 = "FileSystem |  |">
+    常量 用户 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::User" 注释 = "User |  |">
+    常量 组 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Group" 注释 = "Group |  |">
+    常量 字块 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Block" 注释 = "Block | 无符号整数 | 项目">
+    常量 注释 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Comment" 注释 = "Comment |  |">
+    常量 位置 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Position" 注释 = "Position |  |">
+    常量 前缀 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Prefix" 注释 = "Prefix |  |">
+    常量 子目录数量 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::NumSubDirs" 注释 = "NumSubDirs |  |">
+    常量 子文件数量 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::NumSubFiles" 注释 = "NumSubFiles |  |">
+    常量 解包版本 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::UnpackVer" 注释 = "UnpackVer |  |">
+    常量 分卷 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Volume" 注释 = "Volume |  |">
+    常量 分卷压缩 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::IsVolume" 注释 = "IsVolume | 逻辑型 | 压缩包">
+    常量 偏移 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Offset" 注释 = "Offset | 无符号长整数 | 压缩包">
+    常量 链接 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Links" 注释 = "Links |  |">
+    常量 字块数量 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::NumBlocks" 注释 = "NumBlocks | 无符号整数 | 压缩包">
+    常量 分卷数量 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::NumVolumes" 注释 = "NumVolumes | 无符号整数 | 压缩包">
+    常量 时间类型 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::TimeType" 注释 = "TimeType | 无符号整数 | 项目">
+    常量 位数64 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Bit64" 注释 = "Bit64 |  |">
+    常量 大端 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::BigEndian" 注释 = "BigEndian |  |">
+    常量 CPU <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Cpu" 注释 = "Cpu |  |">
+    常量 物理大小 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::PhySize" 注释 = "PhySize | 无符号长整数 | 压缩包">
+    常量 文件头大小 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::HeadersSize" 注释 = "HeadersSize | 无符号长整数 | 压缩包">
+    常量 校验和 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Checksum" 注释 = "Checksum |  |">
+    常量 字符序列 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Characts" 注释 = "Characts | 文本型 | 压缩包/项目">
+    常量 VA <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Va" 注释 = "Va |  |">
+    常量 ID <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Id" 注释 = "Id |  |">
+    常量 短名称 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::ShortName" 注释 = "ShortName |  |">
+    常量 创建应用 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::CreatorApp" 注释 = "CreatorApp |  |">
+    常量 扇区大小 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::SectorSize" 注释 = "SectorSize |  |">
+    常量 POSIX文件属性 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::PosixAttrib" 注释 = "PosixAttrib |  |">
+    常量 符号链接 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::SymLink" 注释 = "SymLink |  |">
+    常量 错误 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Error" 注释 = "Error |  |">
+    常量 总大小 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::TotalSize" 注释 = "TotalSize |  |">
+    常量 剩余空间 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::FreeSpace" 注释 = "FreeSpace |  |">
+    常量 簇大小 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::ClusterSize" 注释 = "ClusterSize |  |">
+    常量 卷标名称 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::VolumeName" 注释 = "VolumeName |  |">
+    常量 本地名称 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::LocalName" 注释 = "LocalName |  |">
+    常量 提供程序 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Provider" 注释 = "Provider |  |">
+    常量 NT安全描述符 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::NtSecure" 注释 = "NtSecure |  |">
+    常量 是否ALT流 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::IsAltStream" 注释 = "IsAltStream | 逻辑型 | 压缩包">
+    常量 是否AUX <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::IsAux" 注释 = "IsAux |  |">
+    常量 是否已删除 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::IsDeleted" 注释 = "IsDeleted |  |">
+    常量 是否目录树 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::IsTree" 注释 = "IsTree |  |">
+    常量 SAH1 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Sha1" 注释 = "Sha1 |  |">
+    常量 SHA256 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Sha256" 注释 = "Sha256 |  |">
+    常量 错误类型 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::ErrorType" 注释 = "ErrorType |  |">
+    常量 错误数量 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::NumErrors" 注释 = "NumErrors |  |">
+    常量 错误标志 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::ErrorFlags" 注释 = "ErrorFlags | 无符号整数 | 压缩包">
+    常量 警告标志 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::WarningFlags" 注释 = "WarningFlags |  |">
+    常量 警告 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::Warning" 注释 = "Warning |  |">
+    常量 流数量 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::NumStreams" 注释 = "NumStreams |  |">
+    常量 ALT流数量 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::NumAltStreams" 注释 = "NumAltStreams |  |">
+    常量 ALT流大小 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::AltStreamsSize" 注释 = "AltStreamsSize |  |">
+    常量 虚拟大小 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::VirtualSize" 注释 = "VirtualSize |  |">
+    常量 解包大小 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::UnpackSize" 注释 = "UnpackSize |  |">
+    常量 总物理大小 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::TotalPhySize" 注释 = "TotalPhySize |  |">
+    常量 分卷索引 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::VolumeIndex"
+            注释 = "VolumeIndex | 无符号整数/无符号长整数 | 压缩包/项目">
+    常量 子类型 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::SubType" 注释 = "SubType |  |">
+    常量 短注释 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::ShortComment" 注释 = "ShortComment |  |">
+    常量 代码页 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::CodePage" 注释 = "CodePage |  |">
+    常量 是否非存档类型 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::IsNotArcType" 注释 = "IsNotArcType |  |">
+    常量 无法检测物理大小 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::PhySizeCantBeDetected"
+            注释 = "PhySizeCantBeDetected |  |">
+    常量 是否允许零文件尾 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::ZerosTailIsAllowed"
+            注释 = "ZerosTailIsAllowed |  |">
+    常量 文件尾大小 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::TailSize" 注释 = "TailSize |  |">
+    常量 嵌入存根大小 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::EmbeddedStubSize" 注释 = "EmbeddedStubSize |  |">
+    常量 NT重分析 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::NtReparse" 注释 = "NtReparse |  |">
+    常量 硬链接 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::HardLink" 注释 = "HardLink |  |">
+    常量 索引节点 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::INode" 注释 = "INode |  |">
+    常量 流ID <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::StreamId" 注释 = "StreamId |  |">
+    常量 只读 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::ReadOnly" 注释 = "ReadOnly |  |">
+    常量 输出名称 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::OutName" 注释 = "OutName |  |">
+    常量 复制链接 <公开 类型 = 存档属性名 值 = @"@bit7z::BitProperty::CopyLink" 注释 = "CopyLink |  |">
+}
+
+类 存档变体类型 <公开 注释 = "\"存档属性变体型\"的属性值类型(BitPropVariantType)." 折叠 折叠2 @文档 = "category = \"文件压缩.辅助类\""
+        @别名 = "bit7z::BitPropVariantType" @别名类型 = 本地值类型>
+{
+    常量 空 <公开 类型 = 存档变体类型 值 = @"@bit7z::BitPropVariantType::Empty" 注释 = "Empty">
+    常量 逻辑值 <公开 类型 = 存档变体类型 值 = @"@bit7z::BitPropVariantType::Bool" 注释 = "Bool">
+    常量 文本值 <公开 类型 = 存档变体类型 值 = @"@bit7z::BitPropVariantType::String" 注释 = "String">
+    常量 无符号字节 <公开 类型 = 存档变体类型 值 = @"@bit7z::BitPropVariantType::UInt8" 注释 = "UInt8">
+    常量 无符号短整数 <公开 类型 = 存档变体类型 值 = @"@bit7z::BitPropVariantType::UInt16" 注释 = "UInt16">
+    常量 无符号整数 <公开 类型 = 存档变体类型 值 = @"@bit7z::BitPropVariantType::UInt32" 注释 = "UInt32">
+    常量 无符号长整数 <公开 类型 = 存档变体类型 值 = @"@bit7z::BitPropVariantType::UInt64" 注释 = "UInt64">
+    常量 字节值 <公开 类型 = 存档变体类型 值 = @"@bit7z::BitPropVariantType::Int8" 注释 = "Int8">
+    常量 短整数值 <公开 类型 = 存档变体类型 值 = @"@bit7z::BitPropVariantType::Int16" 注释 = "Int16">
+    常量 整数值 <公开 类型 = 存档变体类型 值 = @"@bit7z::BitPropVariantType::Int32" 注释 = "Int32">
+    常量 长整数值 <公开 类型 = 存档变体类型 值 = @"@bit7z::BitPropVariantType::Int64" 注释 = "Int64">
+    常量 时间值 <公开 类型 = 存档变体类型 值 = @"@bit7z::BitPropVariantType::FileTime" 注释 = "FileTime">
 }

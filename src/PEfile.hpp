@@ -39,7 +39,7 @@ protected:
         {
             if (pPeBase != nullptr && bIsLoaded == false && bIsWriteable == true)
             {
-                PivNT::data().NtFreeVirtualMemory(NULL, &pPeBase, NULL, MEM_RELEASE);
+                PivNT::instance().NtFreeVirtualMemory(NULL, &pPeBase, NULL, MEM_RELEASE);
             }
         }
     };
@@ -81,7 +81,7 @@ protected:
     std::unique_ptr<PEFILE_INFO> m_PE;
     std::vector<HMODULE> m_vecHmodule;
     INT m_Error = 0;
-    PivNT &Nt = PivNT::data();
+    PivNT &Nt = PivNT::instance();
 
 public:
     PivPeFile() {}

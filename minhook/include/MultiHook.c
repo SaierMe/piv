@@ -70,7 +70,7 @@ typedef struct _MEMORY_BLOCK
 //-------------------------------------------------------------------------
 
 // First element of the memory block list.
-PMEMORY_BLOCK g_pMemoryBlocks;
+static PMEMORY_BLOCK g_pMemoryBlocks;
 
 //-------------------------------------------------------------------------
 VOID InitializeBuffer(VOID)
@@ -1327,18 +1327,18 @@ typedef struct _HOOK_ENTRY
 //-------------------------------------------------------------------------
 
 // Mutex. If not NULL, this library is initialized.
-HANDLE g_hMutex = NULL;
+static HANDLE g_hMutex = NULL;
 
 // Private heap handle.
-HANDLE g_hHeap;
+static HANDLE g_hHeap;
 
 // Thread freeze related variables.
-MH_THREAD_FREEZE_METHOD g_threadFreezeMethod = MH_FREEZE_METHOD_ORIGINAL;
+static MH_THREAD_FREEZE_METHOD g_threadFreezeMethod = MH_FREEZE_METHOD_ORIGINAL;
 
-NtGetNextThread_t NtGetNextThread;
+static NtGetNextThread_t pNtGetNextThread;
 
 // Hook entries.
-struct
+static struct
 {
     PHOOK_ENTRY pItems;     // Data heap
     UINT        capacity;   // Size of allocated data heap, items
@@ -1571,7 +1571,7 @@ static BOOL EnumerateAndSuspendThreadsFast(PFROZEN_THREADS pThreads)
     while (1)
     {
         HANDLE hNextThread;
-        NTSTATUS status = NtGetNextThread(GetCurrentProcess(), hThread, THREAD_ACCESS, 0, 0, &hNextThread);
+        NTSTATUS status = pNtGetNextThread(GetCurrentProcess(), hThread, THREAD_ACCESS, 0, 0, &hNextThread);
         if (bClosePrevThread)
             CloseHandle(hThread);
 
@@ -1953,13 +1953,13 @@ MH_STATUS WINAPI MH_SetThreadFreezeMethod(MH_THREAD_FREEZE_METHOD method)
     if (WaitForSingleObject(g_hMutex, INFINITE) != WAIT_OBJECT_0)
         return MH_ERROR_MUTEX_FAILURE;
 
-    if (method == MH_FREEZE_METHOD_FAST_UNDOCUMENTED && !NtGetNextThread)
+    if (method == MH_FREEZE_METHOD_FAST_UNDOCUMENTED && !pNtGetNextThread)
     {
         HMODULE hNtdll = GetModuleHandle(L"ntdll.dll");
         if (hNtdll)
-            NtGetNextThread = (NtGetNextThread_t)GetProcAddress(hNtdll, "NtGetNextThread");
+            pNtGetNextThread = (NtGetNextThread_t)GetProcAddress(hNtdll, "NtGetNextThread");
 
-        if (!NtGetNextThread)
+        if (!pNtGetNextThread)
         {
             // Fall back to the original method.
             method = MH_FREEZE_METHOD_ORIGINAL;

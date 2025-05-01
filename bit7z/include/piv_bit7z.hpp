@@ -374,7 +374,7 @@ public:
      * @param update_mode 更新方式
      * @return
      */
-    static bool CompressPaths(const CMStringArray &paths, const bit7z::tstring &out_file, const bit7z::tstring &password, const bit7z::BitInOutFormat &format, int32_t level, int32_t update_mode)
+    static bool CompressPaths(const CMStringArray &paths, const bit7z::tstring &out_file, const bit7z::tstring &password, const bit7z::BitInOutFormat &format, bit7z::BitCompressionLevel level, bit7z::UpdateMode update_mode)
     {
         if (paths.IsEmpty())
         {
@@ -390,8 +390,8 @@ public:
             }
             bit7z::BitFileCompressor Compressor{Piv7zLib::data().Get(), format};
             Compressor.setPassword(password);
-            Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
-            Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
+            Compressor.setCompressionLevel(level);
+            Compressor.setUpdateMode(update_mode);
             Compressor.compress(in_paths, out_file);
             SetError(L"OK");
             return true;
@@ -413,7 +413,8 @@ public:
      * @param update_mode 更新方式
      * @return
      */
-    static bool CompressPaths(const std::map<bit7z::tstring, bit7z::tstring> &in_paths, const bit7z::tstring &out_file, const bit7z::tstring &password, const bit7z::BitInOutFormat &format, int32_t level, int32_t update_mode)
+    static bool CompressPaths(const std::map<bit7z::tstring, bit7z::tstring> &in_paths, const bit7z::tstring &out_file, const bit7z::tstring &password, const bit7z::BitInOutFormat &format,
+                              bit7z::BitCompressionLevel level, bit7z::UpdateMode update_mode)
     {
         if (in_paths.empty())
         {
@@ -424,8 +425,8 @@ public:
         {
             bit7z::BitFileCompressor Compressor{Piv7zLib::data().Get(), format};
             Compressor.setPassword(password);
-            Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
-            Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
+            Compressor.setCompressionLevel(level);
+            Compressor.setUpdateMode(update_mode);
             Compressor.compress(in_paths, out_file);
             SetError(L"OK");
             return true;
@@ -436,7 +437,8 @@ public:
             return false;
         }
     }
-    static bool CompressPaths(const std::map<CWString, CWString> &path_pair, const bit7z::tstring &out_file, const bit7z::tstring &password, const bit7z::BitInOutFormat &format, int32_t level, int32_t update_mode)
+    static bool CompressPaths(const std::map<CWString, CWString> &path_pair, const bit7z::tstring &out_file, const bit7z::tstring &password, const bit7z::BitInOutFormat &format,
+                              bit7z::BitCompressionLevel level, bit7z::UpdateMode update_mode)
     {
         if (path_pair.empty())
         {
@@ -461,7 +463,8 @@ public:
      * @param update_mode 更新方式
      * @return
      */
-    static bool CompressFiles(const std::vector<bit7z::tstring> &in_paths, const bit7z::tstring &out_file, const bit7z::tstring &password, const bit7z::BitInOutFormat &format, int32_t level, int32_t update_mode)
+    static bool CompressFiles(const std::vector<bit7z::tstring> &in_paths, const bit7z::tstring &out_file, const bit7z::tstring &password, const bit7z::BitInOutFormat &format,
+                              bit7z::BitCompressionLevel level, bit7z::UpdateMode update_mode)
     {
         if (in_paths.empty())
         {
@@ -472,8 +475,8 @@ public:
         {
             bit7z::BitFileCompressor Compressor{Piv7zLib::data().Get(), format};
             Compressor.setPassword(password);
-            Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
-            Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
+            Compressor.setCompressionLevel(level);
+            Compressor.setUpdateMode(update_mode);
             Compressor.compress(in_paths, out_file);
             SetError(L"OK");
             return true;
@@ -484,7 +487,8 @@ public:
             return false;
         }
     }
-    static bool CompressFiles(const CMStringArray &paths, const bit7z::tstring &out_file, const bit7z::tstring &password, const bit7z::BitInOutFormat &format, int32_t level, int32_t update_mode)
+    static bool CompressFiles(const CMStringArray &paths, const bit7z::tstring &out_file, const bit7z::tstring &password, const bit7z::BitInOutFormat &format,
+                              bit7z::BitCompressionLevel level, bit7z::UpdateMode update_mode)
     {
         if (paths.IsEmpty())
         {
@@ -511,14 +515,15 @@ public:
      * @param update_mode 更新方式
      * @return
      */
-    static bool CompressFiles(const bit7z::tstring &in_dir, const bit7z::tstring &out_file, const bit7z::tstring &filter, bool recursive, const bit7z::tstring &password, const bit7z::BitInOutFormat &format, int32_t level, int32_t update_mode)
+    static bool CompressFiles(const bit7z::tstring &in_dir, const bit7z::tstring &out_file, const bit7z::tstring &filter, bool recursive, const bit7z::tstring &password,
+                              const bit7z::BitInOutFormat &format, bit7z::BitCompressionLevel level, bit7z::UpdateMode update_mode)
     {
         try
         {
             bit7z::BitFileCompressor Compressor{Piv7zLib::data().Get(), format};
             Compressor.setPassword(password);
-            Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
-            Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
+            Compressor.setCompressionLevel(level);
+            Compressor.setUpdateMode(update_mode);
             Compressor.compressFiles(in_dir, out_file, recursive, filter);
             SetError(L"OK");
             return true;
@@ -540,14 +545,15 @@ public:
      * @param update_mode 更新方式
      * @return
      */
-    static bool CompressDirectory(const bit7z::tstring &in_dir, const bit7z::tstring &out_file, const bit7z::tstring &password, const bit7z::BitInOutFormat &format, int32_t level, int32_t update_mode)
+    static bool CompressDirectory(const bit7z::tstring &in_dir, const bit7z::tstring &out_file, const bit7z::tstring &password, const bit7z::BitInOutFormat &format,
+                                  bit7z::BitCompressionLevel level, bit7z::UpdateMode update_mode)
     {
         try
         {
             bit7z::BitFileCompressor Compressor{Piv7zLib::data().Get(), format};
             Compressor.setPassword(password);
-            Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
-            Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
+            Compressor.setCompressionLevel(level);
+            Compressor.setUpdateMode(update_mode);
             Compressor.compressDirectory(in_dir, out_file);
             SetError(L"OK");
             return true;
@@ -569,14 +575,15 @@ public:
      * @param update_mode 更新方式
      * @return
      */
-    static bool CompressDirectoryContents(const bit7z::tstring &in_dir, const bit7z::tstring &out_file, const bit7z::tstring &filter, bool recursive, const bit7z::tstring &password, const bit7z::BitInOutFormat &format, int32_t level, int32_t update_mode)
+    static bool CompressDirectoryContents(const bit7z::tstring &in_dir, const bit7z::tstring &out_file, const bit7z::tstring &filter, bool recursive, const bit7z::tstring &password,
+        const bit7z::BitInOutFormat &format, bit7z::BitCompressionLevel level, bit7z::UpdateMode update_mode)
     {
         try
         {
             bit7z::BitFileCompressor Compressor{Piv7zLib::data().Get(), format};
             Compressor.setPassword(password);
-            Compressor.setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
-            Compressor.setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
+            Compressor.setCompressionLevel(level);
+            Compressor.setUpdateMode(update_mode);
             Compressor.compressDirectoryContents(in_dir, out_file, recursive, filter);
             SetError(L"OK");
             return true;
@@ -1614,10 +1621,10 @@ public:
      * @brief (设置/获取)压缩等级
      * @param level 新等级
      */
-    inline void SetCompressionLevel(int32_t level)
+    inline void SetCompressionLevel(bit7z::BitCompressionLevel level)
     {
         if (m_archive)
-            m_archive->setCompressionLevel(static_cast<bit7z::BitCompressionLevel>(level));
+            m_archive->setCompressionLevel(level);
     }
     inline int32_t CompressionLevel() const
     {
@@ -1684,14 +1691,14 @@ public:
      * @brief (设置/获取)更新方式
      * @param mode 新更新方式
      */
-    inline void SetUpdateMode(int32_t mode)
+    inline void SetUpdateMode(bit7z::UpdateMode mode)
     {
         if (m_archive)
-            m_archive->setUpdateMode(static_cast<bit7z::UpdateMode>(mode));
+            m_archive->setUpdateMode(mode);
     }
-    inline int32_t UpdateMode() const
+    inline bit7z::UpdateMode UpdateMode() const
     {
-        return m_archive ? static_cast<int32_t>(m_archive->updateMode()) : 0;
+        return m_archive ? m_archive->updateMode() : bit7z::UpdateMode::None;
     }
 
     /**
@@ -2337,7 +2344,7 @@ public:
      * @brief 取压缩包属性表
      * @return
      */
-    inline std::map<bit7z::BitProperty, bit7z::BitPropVariant> &ArchiveProperties() const
+    inline std::map<bit7z::BitProperty, bit7z::BitPropVariant> ArchiveProperties() const
     {
         return m_archive ? m_archive->archiveProperties() : std::map<bit7z::BitProperty, bit7z::BitPropVariant>{};
     }
@@ -2347,16 +2354,16 @@ public:
      * @param property
      * @return
      */
-    inline bit7z::BitPropVariant &ArchiveProperty(int32_t property) const
+    inline bit7z::BitPropVariant ArchiveProperty(bit7z::BitProperty property) const
     {
-        return m_archive ? m_archive->archiveProperty(static_cast<bit7z::BitProperty>(property)) : bit7z::BitPropVariant{};
+        return m_archive ? m_archive->archiveProperty(property) : bit7z::BitPropVariant{};
     }
 
     /**
      * @brief 取项目信息表
      * @return
      */
-    inline std::vector<bit7z::BitArchiveItemInfo> &Items()
+    inline std::vector<bit7z::BitArchiveItemInfo> Items()
     {
         return m_archive ? m_archive->items() : std::vector<bit7z::BitArchiveItemInfo>{};
     }
@@ -2367,9 +2374,9 @@ public:
      * @param property 属性名
      * @return
      */
-    inline bit7z::BitPropVariant &ItemProperty(int32_t idx, int32_t property) const
+    inline bit7z::BitPropVariant ItemProperty(int32_t idx, bit7z::BitProperty property) const
     {
-        return m_archive ? m_archive->itemProperty(static_cast<uint32_t>(idx), static_cast<bit7z::BitProperty>(property)) : bit7z::BitPropVariant{};
+        return m_archive ? m_archive->itemProperty(static_cast<uint32_t>(idx), property) : bit7z::BitPropVariant{};
     }
 
     /**
@@ -2700,13 +2707,13 @@ public:
      * @param password 压缩密码
      * @return
      */
-    bool OpenFile(const bit7z::tstring &in_file, bool feedback, const bit7z::BitInOutFormat &format, int32_t update_mode, const bit7z::tstring &password)
+    bool OpenFile(const bit7z::tstring &in_file, bool feedback, const bit7z::BitInOutFormat &format, bit7z::UpdateMode update_mode, const bit7z::tstring &password)
     {
         CloseArchive();
         try
         {
             m_archive.reset(new bit7z::BitArchiveEditor{Piv7zLib::data().Get(), in_file, format, password});
-            m_archive->setUpdateMode(static_cast<bit7z::UpdateMode>(update_mode));
+            m_archive->setUpdateMode(update_mode);
             EnableFeeback(feedback);
             SetError(L"OK");
             return true;

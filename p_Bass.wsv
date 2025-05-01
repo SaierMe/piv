@@ -15,12 +15,12 @@
             @嵌入式方法 = "req_str_param_text_pointer = true">
     参数 动态库路径 <类型 = 文本型 注释 = "bass.dll的路径">
     {
-        @ BassDll::data().Load(@<动态库路径>)
+        @ BassDll::instance().Load(@<动态库路径>)
     }
 
     方法 卸载动态库 <公开 静态 注释 = "手动卸载动态库,一般不需要执行本方法." 折叠 @嵌入式方法 = "">
     {
-        @ BassDll::data().Free()
+        @ BassDll::instance().Free()
     }
 
     方法 类_清理 <折叠>
@@ -1315,7 +1315,7 @@
         @     @<电平数据>.data().InitCount (2, TRUE);
         @ } else {
         @     BASS_CHANNELINFO ci;
-        @     BASS_ChannelGetInfo (@<通道句柄>, &ci);
+        @     BassDll::Fn().BASS_ChannelGetInfo(@<通道句柄>, &ci);
         @     @<电平数据>.data().InitCount(ci.chans, TRUE);
         @ }
         @ return BassDll::Fn().BASS_ChannelGetLevelEx(static_cast<DWORD>(@<通道句柄>), @<电平数据>.data().GetData(), @<数据长度>, flags);
@@ -2383,7 +2383,7 @@
     常量 BASS_TAG_MUSIC_SAMPLE <公开 类型 = 整数 值 = @BASS_TAG_MUSIC_SAMPLE 注释 = "MOD 样本名称(ANSI),需要 + 样本编号(从0开始)">
 }
 
-类 BASS_音频标志 <公开 注释 = "在打开/创建流、样本、MOD音乐、录制中使用的标志." 折叠 @文档 = "category = \"常量\"">
+类 BASS_音频标志 <公开 注释 = "在打开/创建流、样本、MOD音乐、录制中使用的标志." @文档 = "category = \"常量\"">
 {
     常量 BASS_SAMPLE_8BITS <公开 类型 = 整数 值 = @BASS_SAMPLE_8BITS
             注释 = "使用8位解析度. 如果未指定此标志或BASS_SAMPLE_FLOAT标志，样本数据将为16位.">

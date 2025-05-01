@@ -184,6 +184,19 @@
         @ reinterpret_cast<ptrdiff_t>(@sn<this>.virtual_alloc(reinterpret_cast<void*>(@<内存地址>), static_cast<size_t>(@<分配大小>), static_cast<DWORD>(@<分配类型>), static_cast<DWORD>(@<保护类型>)))
     }
 
+    方法 分配邻近内存 <公开 类型 = 变整数 注释 = "(64位专用)在指定的内存地址上申请虚拟内存,如果该地址不可用,将以64K的粒度在该地址附近尝试申请内存."
+            注释 = "如果尝试了指定的次数仍分配失败,则返回0." 折叠 @嵌入式方法 = "">
+    参数 内存地址 <注释 = "指定分配的目标地址,该地址必须是未初始化的;" 注释 = "一般请置为0,由系统自带分配地址." @匹配类型 = 通用整数型>
+    参数 分配大小 <注释 = "所欲分配的内存区域大小(字节单位)." @匹配类型 = 通用整数型>
+    参数 分配类型 <类型 = 整数 注释 = "请提供\"内存操作类型\"的一个常量或多个常量的位或值;" 注释 = "默认值为(MEM_COMMIT | MEM_RESERVE)."
+            @默认值 = 12288>
+    参数 保护类型 <类型 = 整数 注释 = "请提供\"内存页面保护属性\"的一个常量或多个常量的位或值." @默认值 = 内存页面保护属性.可执行_读写>
+    参数 重试次数 <类型 = 整数 注释 = "分配失败后的重试次数,每次重试都会在当前地址的基础上递增和递减64K各申请一次." @默认值 = 1000>
+    {
+        @ reinterpret_cast<ptrdiff_t>(@sn<this>.virtual_alloc_near(reinterpret_cast<void*>(@<内存地址>), static_cast<size_t>(@<分配大小>),
+        @     static_cast<DWORD>(@<分配类型>), static_cast<DWORD>(@<保护类型>), @<重试次数>))
+    }
+
     方法 释放虚拟内存 <公开 类型 = 逻辑型 注释 = "释放、取消提交虚拟地址空间内的内存区域." 返回值注释 = "返回是否成功" 折叠 @嵌入式方法 = "">
     参数 内存地址 <注释 = "所欲释放内存区域的起始地址;" 注释 = "如果\"释放类型\"为\"释放内存/MEM_RELEASE\",则本参数必须是保留区域时"
             注释 = "由\"分配虚拟内存/VirtualAllocEx\"返回的基址." @匹配类型 = 通用整数型>
@@ -844,6 +857,19 @@
         @ reinterpret_cast<int64_t>(@sn<this>.virtual_alloc(reinterpret_cast<PVOID64>(@<内存地址>), static_cast<uint64_t>(@<分配大小>), static_cast<DWORD>(@<分配类型>), static_cast<DWORD>(@<保护类型>)))
     }
 
+    方法 分配邻近内存 <公开 类型 = 变整数 注释 = "(64位专用)在指定的内存地址上申请虚拟内存,如果该地址不可用,将以64K的粒度在该地址附近尝试申请内存."
+            注释 = "如果尝试了指定的次数仍分配失败,则返回0." 折叠 @嵌入式方法 = "">
+    参数 内存地址 <注释 = "指定分配的目标地址,该地址必须是未初始化的;" 注释 = "一般请置为0,由系统自带分配地址." @匹配类型 = 通用整数型>
+    参数 分配大小 <注释 = "所欲分配的内存区域大小(字节单位)." @匹配类型 = 通用整数型>
+    参数 分配类型 <类型 = 整数 注释 = "请提供\"内存操作类型\"的一个常量或多个常量的位或值;" 注释 = "默认值为(MEM_COMMIT | MEM_RESERVE)."
+            @默认值 = 12288>
+    参数 保护类型 <类型 = 整数 注释 = "请提供\"内存页面保护属性\"的一个常量或多个常量的位或值." @默认值 = 内存页面保护属性.可执行_读写>
+    参数 重试次数 <类型 = 整数 注释 = "分配失败后的重试次数,每次重试都会在当前地址的基础上递增和递减64K各申请一次." @默认值 = 1000>
+    {
+        @ reinterpret_cast<int64_t>(@sn<this>.virtual_alloc_near(reinterpret_cast<PVOID64>(@<内存地址>), static_cast<uint64_t>(@<分配大小>),
+        @     static_cast<DWORD>(@<分配类型>), static_cast<DWORD>(@<保护类型>), @<重试次数>))
+    }
+
     方法 释放虚拟内存 <公开 类型 = 逻辑型 注释 = "释放、取消提交虚拟地址空间内的内存区域." 注释 = "注: 不支持从32位程序释放64位进程的虚拟内存!" 返回值注释 = "返回是否成功" 折叠
             @嵌入式方法 = "">
     参数 内存地址 <注释 = "所欲释放内存区域的起始地址;" 注释 = "如果\"释放类型\"为\"释放内存/MEM_RELEASE\",则本参数必须是保留区域时"
@@ -1290,7 +1316,7 @@
     }
 }
 
-类 进程辅助类 <公开 注释 = "进程相关的一些辅助方法" 折叠 @文档 = "category = \"进程操作\"" @禁止创建对象 = 真>
+类 进程辅助类 <公开 注释 = "进程相关的一些辅助方法" 折叠 折叠2 @文档 = "category = \"进程操作\"" @别名 = "//" @别名类型 = 本地类 @类用途 = 访问静态成员>
 {
     方法 取物理内存尺寸 <公开 静态 类型 = 长整数 注释 = "获取系统安装的物理内存大小(单位为KB),该尺寸直接从SMBIOS中获取," 注释 = "必定大于等于系统可使用的内存量." 折叠
             @禁止流程检查 = 真>
@@ -1382,7 +1408,7 @@
     参数 原来的权限状态 <类型 = 逻辑型类 注释 = "返回该权限之前的状态(打开或关闭)" @默认值 = 空对象>
     {
         @ typedef DWORD(WINAPI * NT_RtlAdjustPrivilege)(ULONG Privilege, BOOLEAN Enable, BOOLEAN CurrentThread, PBOOLEAN Enabled);
-        @ NT_RtlAdjustPrivilege pfn = reinterpret_cast<NT_RtlAdjustPrivilege>(::GetProcAddress(::GetModuleHandle(L"Ntdll.dll"), "RtlAdjustPrivilege"));
+        @ static NT_RtlAdjustPrivilege pfn = reinterpret_cast<NT_RtlAdjustPrivilege>(::GetProcAddress(::GetModuleHandle(L"Ntdll.dll"), "RtlAdjustPrivilege"));
         @ if (pfn) {
         @     return static_cast<INT>(pfn(static_cast<ULONG>(@<权限ID>), static_cast<BOOLEAN>(@<启用权限>), static_cast<BOOLEAN>(@<是否仅当前线程>), reinterpret_cast<PBOOLEAN>(&@<原来的权限状态.值>)));
         @ }
@@ -1414,7 +1440,7 @@
             注释 = "  3 当前进程永久启用DEP,并禁用DEP-ATL thunk emulation;">
     {
         @ typedef BOOL(WINAPI * Typedef_SetProcessDEPPolicy)(DWORD);
-        @ Typedef_SetProcessDEPPolicy pfn = reinterpret_cast<Typedef_SetProcessDEPPolicy>(::GetProcAddress(::GetModuleHandleW(L"Kernel32.dll"), "SetProcessDEPPolicy"));
+        @ static Typedef_SetProcessDEPPolicy pfn = reinterpret_cast<Typedef_SetProcessDEPPolicy>(::GetProcAddress(::GetModuleHandleW(L"Kernel32.dll"), "SetProcessDEPPolicy"));
         @ if (pfn) {
         @     return pfn(static_cast<DWORD>(@<DEP设置>));
         @ }
@@ -1546,7 +1572,7 @@
     {
         @ BOOL bIsWow64 = FALSE;
         @ typedef BOOL(WINAPI* Typedef_IsWow64Process)(HANDLE, PBOOL);
-        @ Typedef_IsWow64Process API_IsWow64Process =
+        @ static Typedef_IsWow64Process API_IsWow64Process =
         @         (Typedef_IsWow64Process)::GetProcAddress (::GetModuleHandle (L"Kernel32.dll"), "IsWow64Process");
         @ if (API_IsWow64Process)
         @     API_IsWow64Process (::GetCurrentProcess (), &bIsWow64);
@@ -1662,8 +1688,8 @@
     }
 }
 
-类 快照辅助类 <公开 注释 = "通过Toolhelp API获取进程、模块和线程的运行状况." 折叠 @文档 = "category = \"进程操作\""
-        @视窗.外部头文件 = "tlhelp32.h" @禁止创建对象 = 真>
+类 快照辅助类 <公开 注释 = "通过Toolhelp API获取进程、模块和线程的运行状况." 折叠 折叠2 @文档 = "category = \"进程操作\""
+        @视窗.外部头文件 = "tlhelp32.h" @别名 = "//" @别名类型 = 本地类 @类用途 = 访问静态成员>
 {
     方法 枚举进程信息 <公开 静态 类型 = 整数 注释 = "通过系统快照获取当前所有进程的基本信息(ID、名称等)." 返回值注释 = "成功返回进程数量,失败返回0." 折叠 @禁止流程检查 = 真>
     参数 进程信息数组 <类型 = 进程快照数组类 注释 = "获取的进程信息保存在此数组中">
@@ -2551,8 +2577,8 @@
     }
 }
 
-类 进程快照类 <公开 基础类 = PIV结构模板 注释 = "系统快照中的有效进程信息" @文档 = "category = \"进程操作.辅助类\"" @别名 = "PROCESSENTRY32W"
-        @模板实现类 = "进程快照类" @强制依赖 = "快照辅助类">
+类 进程快照类 <公开 基础类 = PIV结构模板 注释 = "系统快照中的有效进程信息" 折叠 @文档 = "category = \"进程操作.辅助类\""
+        @别名 = "PROCESSENTRY32W" @模板实现类 = "进程快照类" @强制依赖 = "快照辅助类">
 {
     变量 dwSize <公开 类型 = 整数 @输出名 = "dwSize">
     变量 进程ID <公开 类型 = 整数 注释 = "此进程的ID" @输出名 = "th32ProcessID">

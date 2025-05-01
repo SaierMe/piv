@@ -1609,7 +1609,7 @@ public:
     PIV_BASS_FUNC_VAR(BASS_FXSetPriority)
     PIV_BASS_FUNC_VAR(BASS_FXReset)
 
-    static BassDll &data()
+    static BassDll &instance()
     {
         static BassDll inst;
         return inst;
@@ -1617,7 +1617,7 @@ public:
 
     static BassDll &Fn()
     {
-        if (!BassDll::data().Load())
+        if (!BassDll::instance().Load())
         {
             HWND hParentWnd = NULL;
 #ifdef _AFX
@@ -1632,7 +1632,7 @@ public:
             ::MessageBoxW(hParentWnd, L"未能加载 bass.dll，即将退出应用程序!", L"错误", MB_OK | MB_ICONERROR | MB_SYSTEMMODAL | MB_TASKMODAL);
             exit(0);
         }
-        return BassDll::data();
+        return BassDll::instance();
     }
 
     inline BOOL Load(const wchar_t *dll = L"bass.dll")
@@ -1844,7 +1844,7 @@ public:
     PIV_BASS_FUNC_VAR(BASS_Split_StreamResetEx)
     PIV_BASS_FUNC_VAR(BASS_Split_StreamGetAvailable)
 
-    static BassMix &data()
+    static BassMix &instance()
     {
         static BassMix inst;
         return inst;
@@ -1852,7 +1852,7 @@ public:
 
     static BassMix &Fn()
     {
-        if (!BassMix::data().Load())
+        if (!BassMix::instance().Load())
         {
             HWND hParentWnd = NULL;
 #ifdef _AFX
@@ -1867,14 +1867,14 @@ public:
             ::MessageBoxW(hParentWnd, L"未能加载 bassmix.dll，即将退出应用程序!", L"错误", MB_OK | MB_ICONERROR | MB_SYSTEMMODAL | MB_TASKMODAL);
             exit(0);
         }
-        return BassMix::data();
+        return BassMix::instance();
     }
 
     inline BOOL Load(const wchar_t *dll = L"bassmix.dll")
     {
         if (m_isLoad)
             return TRUE;
-        BassDll::data().Load();
+        BassDll::instance().Load();
         m_hmodule = ::LoadLibraryW(dll);
         if (m_hmodule == NULL)
             return FALSE;
@@ -1991,7 +1991,7 @@ public:
     PIV_BASS_FUNC_VAR(BASS_WASAPI_GetLevel)
     PIV_BASS_FUNC_VAR(BASS_WASAPI_GetLevelEx)
 
-    static BassWasApi &data()
+    static BassWasApi &instance()
     {
         static BassWasApi inst;
         return inst;
@@ -1999,7 +1999,7 @@ public:
 
     static BassWasApi &Fn()
     {
-        if (!BassWasApi::data().Load())
+        if (!BassWasApi::instance().Load())
         {
             HWND hParentWnd = NULL;
 #ifdef _AFX
@@ -2014,14 +2014,14 @@ public:
             ::MessageBoxW(hParentWnd, L"未能加载 basswasapi.dll，即将退出应用程序!", L"错误", MB_OK | MB_ICONERROR | MB_SYSTEMMODAL | MB_TASKMODAL);
             exit(0);
         }
-        return BassWasApi::data();
+        return BassWasApi::instance();
     }
 
     inline BOOL Load(const wchar_t *dll = L"basswasapi.dll")
     {
         if (m_isLoad)
             return TRUE;
-        if (!BassDll::data().Load())
+        if (!BassDll::instance().Load())
             return FALSE;
         m_hmodule = ::LoadLibraryW(dll);
         if (m_hmodule == NULL)
@@ -2097,7 +2097,7 @@ public:
     PIV_BASS_FUNC_VAR(TAGS_ReadEx)
     PIV_BASS_FUNC_VAR(TAGS_GetLastErrorDesc)
 
-    static BassTags &data()
+    static BassTags &instance()
     {
         static BassTags inst;
         return inst;
@@ -2105,7 +2105,7 @@ public:
 
     static BassTags &Fn()
     {
-        if (!BassTags::data().Load())
+        if (!BassTags::instance().Load())
         {
             HWND hParentWnd = NULL;
 #ifdef _AFX
@@ -2120,14 +2120,14 @@ public:
             ::MessageBoxW(hParentWnd, L"未能加载 tags.dll，即将退出应用程序!", L"错误", MB_OK | MB_ICONERROR | MB_SYSTEMMODAL | MB_TASKMODAL);
             exit(0);
         }
-        return BassTags::data();
+        return BassTags::instance();
     }
 
     inline BOOL Load(const wchar_t *dll = L"tags.dll")
     {
         if (m_isLoad)
             return TRUE;
-        if (!BassDll::data().Load())
+        if (!BassDll::instance().Load())
             return FALSE;
         m_hmodule = ::LoadLibraryW(dll);
         if (m_hmodule == NULL)
@@ -2254,7 +2254,7 @@ public:
     PIV_BASS_FUNC_VAR(BASS_ASIO_ChannelGetVolume)
     PIV_BASS_FUNC_VAR(BASS_ASIO_ChannelGetLevel)
 
-    static BassAsio &data()
+    static BassAsio &instance()
     {
         static BassAsio inst;
         return inst;
@@ -2262,7 +2262,7 @@ public:
 
     static BassAsio &Fn()
     {
-        if (!BassAsio::data().Load())
+        if (!BassAsio::instance().Load())
         {
             HWND hParentWnd = NULL;
 #ifdef _AFX
@@ -2277,14 +2277,14 @@ public:
             ::MessageBoxW(hParentWnd, L"未能加载 bassasio.dll，即将退出应用程序!", L"错误", MB_OK | MB_ICONERROR | MB_SYSTEMMODAL | MB_TASKMODAL);
             exit(0);
         }
-        return BassAsio::data();
+        return BassAsio::instance();
     }
 
     inline BOOL Load(const wchar_t *dll = L"bassasio.dll")
     {
         if (m_isLoad)
             return TRUE;
-        if (!BassDll::data().Load())
+        if (!BassDll::instance().Load())
             return FALSE;
         m_hmodule = ::LoadLibraryW(dll);
         if (m_hmodule == NULL)

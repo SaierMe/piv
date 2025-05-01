@@ -178,7 +178,7 @@
 
 # 渲染器
 
-类 IM_DX9渲染器 <公开 注释 = "基于DirectX9的渲染器后端,兼容Windows XP以上系统." 折叠 折叠2 @文档 = "category = \"渲染器\""
+类 IM_DX9渲染器 <公开 注释 = "基于DirectX9的渲染器后端,兼容Windows XP以上系统." 折叠2 @文档 = "category = \"渲染器\""
         @视窗.外部头文件 = "<backends/imgui_impl_dx9.h>\r\n<d3d9.h>"
         @视窗.外部源文件 = "imgui\\backends\\imgui_impl_dx9.cpp" @视窗.外部库 = "d3d9.lib">
 {
@@ -229,7 +229,7 @@
 
     # 纹理图片 ---
 
-    方法 加载图片文件 <公开 类型 = 逻辑型 注释 = "从指定的图片文件加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 折叠2 @禁止流程检查 = 真
+    方法 加载图片文件 <公开 类型 = 逻辑型 注释 = "从指定的图片文件加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠2 @禁止流程检查 = 真
             @视窗.外部头文件 = "FrameWork\\d3dx9\\include\\d3dx9tex.h"
             @视窗.外部库.debug = "FrameWork\\d3dx9\\Lib\\$(p)\\d3dx9d.lib"
             @视窗.外部库.release = "FrameWork\\d3dx9\\Lib\\$(p)\\d3dx9.lib"
@@ -248,8 +248,8 @@
         @ return TRUE;
     }
 
-    方法 加载图片资源 <公开 类型 = 逻辑型 注释 = "将程序文件中的图片资源加载到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 折叠2
-            @禁止流程检查 = 真 @视窗.外部头文件 = "FrameWork\\d3dx9\\include\\d3dx9tex.h"
+    方法 加载图片资源 <公开 类型 = 逻辑型 注释 = "将程序文件中的图片资源加载到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠2 @禁止流程检查 = 真
+            @视窗.外部头文件 = "FrameWork\\d3dx9\\include\\d3dx9tex.h"
             @视窗.外部库.debug = "FrameWork\\d3dx9\\Lib\\$(p)\\d3dx9d.lib"
             @视窗.外部库.release = "FrameWork\\d3dx9\\Lib\\$(p)\\d3dx9.lib">
     参数 图片资源 <类型 = 视窗文件资源 注释 = "支持格式: 支持格式: .bmp、.dds、.dib、.hdr、.jpg、.pfm、.png、.ppm 和 .tga">
@@ -266,8 +266,8 @@
         @ return TRUE;
     }
 
-    方法 加载图片字节集 <公开 类型 = 逻辑型 注释 = "从指定的图片字节集加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠 折叠2
-            @禁止流程检查 = 真 @视窗.外部头文件 = "FrameWork\\d3dx9\\include\\d3dx9tex.h"
+    方法 加载图片字节集 <公开 类型 = 逻辑型 注释 = "从指定的图片字节集加载纹理到渲染器中,不再使用时请调用\"释放纹理\"." 返回值注释 = "返回是否加载成功" 折叠2 @禁止流程检查 = 真
+            @视窗.外部头文件 = "FrameWork\\d3dx9\\include\\d3dx9tex.h"
             @视窗.外部库.debug = "FrameWork\\d3dx9\\Lib\\$(p)\\d3dx9d.lib"
             @视窗.外部库.release = "FrameWork\\d3dx9\\Lib\\$(p)\\d3dx9.lib">
     参数 图片数据 <类型 = 字节集类 注释 = "支持格式: 支持格式: .bmp、.dds、.dib、.hdr、.jpg、.pfm、.png、.ppm 和 .tga">
@@ -284,7 +284,7 @@
         @ return TRUE;
     }
 
-    方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID." 折叠>
+    方法 释放纹理 <公开 注释 = "释放图片纹理和对应的内存,之后不能再使用这个纹理ID.">
     参数 图片信息 <类型 = IM图片信息类 注释 = "提供由\"本对象.加载图片××\"返回的图片信息,释放后会清空信息.">
     {
         如果 (图片信息.纹理ID != 0)
@@ -395,10 +395,11 @@
     }
 }
 
-类 IM_DX10渲染器 <公开 注释 = "基于DirectX10的渲染器后端,兼容Windows Vista以上系统." 折叠 折叠2 @文档 = "category = \"渲染器\""
+类 IM_DX10渲染器 <公开 注释 = "基于DirectX10的渲染器后端,兼容Windows Vista以上系统." 折叠 @文档 = "category = \"渲染器\""
         @视窗.外部头文件 = "<backends/imgui_impl_dx10.h>\r\n<d3d10_1.h>\r\n<d3d10.h>"
         @视窗.外部源文件 = "imgui\\backends\\imgui_impl_dx10.cpp"
-        @视窗.外部库 = "d3d10.lib\r\nd3dcompiler.lib\r\ndxgi.lib">
+        @视窗.外部库 = "d3d10.lib\r\nd3dcompiler.lib\r\ndxgi.lib" @视窗.外部头文件 = "stb\\piv_image.h"
+        @视窗.外部源文件 = "stb\\piv_image.cpp">
 {
 
     # @begin
@@ -452,17 +453,14 @@
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
         @ if (!m_pd3dDevice) return FALSE;
-        @ FILE* file = _wfopen(@<文件名>.GetText(), L"rb");
-        @ if (!file) return FALSE;
-        @ int image_width = 0, image_height = 0;
-        @ unsigned char* image_data = stbi_load_from_file(file, &image_width, &image_height, nullptr, 4);
-        @ fclose(file);
+        @ PivImage image;
+        @ unsigned char* image_data = image.load(@<文件名>.GetText(), 4);
         @ if (!image_data) return FALSE;
         // Create texture
         @ D3D10_TEXTURE2D_DESC desc;
         @ ZeroMemory(&desc, sizeof(desc));
-        @ desc.Width = image_width;
-        @ desc.Height = image_height;
+        @ desc.Width = image.x;
+        @ desc.Height = image.y;
         @ desc.MipLevels = 1;
         @ desc.ArraySize = 1;
         @ desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -483,10 +481,9 @@
         @ ID3D10ShaderResourceView* out_srv;
         @ m_pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, &out_srv);
         @ pTexture->Release();
-        @ @<图片信息.宽度> = image_width;
-        @ @<图片信息.高度> = image_height;
+        @ @<图片信息.宽度> = image.x;
+        @ @<图片信息.高度> = image.y;
         @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(out_srv);
-        @ stbi_image_free(image_data);
         @ return TRUE;
     }
 
@@ -499,15 +496,14 @@
         @ if (!hSrc) return FALSE;
         @ HGLOBAL resdata = ::LoadResource(hModule, hSrc);
         @ if (!resdata) return FALSE;
-        @ int image_width = 0, image_height = 0;
-        @ unsigned char* image_data = stbi_load_from_memory((unsigned char*)::LockResource(resdata), static_cast<int>(::SizeofResource(hModule, hSrc)),
-        @                                                   &image_width, &image_height, nullptr, 4);
+        @ PivImage image;
+        @ unsigned char* image_data = image.load((unsigned char*)::LockResource(resdata), static_cast<int>(::SizeofResource(hModule, hSrc)), 4);
         @ if (!image_data) return FALSE;
         // Create texture
         @ D3D10_TEXTURE2D_DESC desc;
         @ ZeroMemory(&desc, sizeof(desc));
-        @ desc.Width = image_width;
-        @ desc.Height = image_height;
+        @ desc.Width = image.x;
+        @ desc.Height = image.y;
         @ desc.MipLevels = 1;
         @ desc.ArraySize = 1;
         @ desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -528,10 +524,9 @@
         @ ID3D10ShaderResourceView* out_srv;
         @ m_pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, &out_srv);
         @ pTexture->Release();
-        @ @<图片信息.宽度> = image_width;
-        @ @<图片信息.高度> = image_height;
+        @ @<图片信息.宽度> = image.x;
+        @ @<图片信息.高度> = image.y;
         @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(out_srv);
-        @ stbi_image_free(image_data);
         @ return TRUE;
     }
 
@@ -539,14 +534,14 @@
     参数 图片数据 <类型 = 字节集类 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
-        @ int image_width = 0, image_height = 0;
-        @ unsigned char* image_data = stbi_load_from_memory(@<图片数据>.GetPtr(), static_cast<int>(@<图片数据>.GetSize()), &image_width, &image_height, nullptr, 4);
+        @ PivImage image;
+        @ unsigned char* image_data = image.load(@<图片数据>.GetPtr(), static_cast<int>(@<图片数据>.GetSize()), 4);
         @ if (!image_data) return FALSE;
         // Create texture
         @ D3D10_TEXTURE2D_DESC desc;
         @ ZeroMemory(&desc, sizeof(desc));
-        @ desc.Width = image_width;
-        @ desc.Height = image_height;
+        @ desc.Width = image.x;
+        @ desc.Height = image.y;
         @ desc.MipLevels = 1;
         @ desc.ArraySize = 1;
         @ desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -567,10 +562,9 @@
         @ ID3D10ShaderResourceView* out_srv;
         @ m_pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, &out_srv);
         @ pTexture->Release();
-        @ @<图片信息.宽度> = image_width;
-        @ @<图片信息.高度> = image_height;
+        @ @<图片信息.宽度> = image.x;
+        @ @<图片信息.高度> = image.y;
         @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(out_srv);
-        @ stbi_image_free(image_data);
         @ return TRUE;
     }
 
@@ -690,10 +684,11 @@
     }
 }
 
-类 IM_DX11渲染器 <公开 注释 = "基于DirectX11的渲染器后端,兼容Windows 7及以上系统." 折叠 折叠2 @文档 = "category = \"渲染器\""
+类 IM_DX11渲染器 <公开 注释 = "基于DirectX11的渲染器后端,兼容Windows 7及以上系统." 折叠 @文档 = "category = \"渲染器\""
         @视窗.外部头文件 = "<backends/imgui_impl_dx11.h>\r\n<d3d11.h>"
         @视窗.外部源文件 = "imgui\\backends\\imgui_impl_dx11.cpp"
-        @视窗.外部库 = "d3d11.lib\r\nd3dcompiler.lib\r\ndxgi.lib">
+        @视窗.外部库 = "d3d11.lib\r\nd3dcompiler.lib\r\ndxgi.lib" @视窗.外部头文件 = "stb\\piv_image.h"
+        @视窗.外部源文件 = "stb\\piv_image.cpp">
 {
 
     # @begin
@@ -748,17 +743,14 @@
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
         @ if (!m_pd3dDevice) return FALSE;
-        @ FILE* file = _wfopen(@<文件名>.GetText(), L"rb");
-        @ if (!file) return FALSE;
-        @ int image_width = 0, image_height = 0;
-        @ unsigned char* image_data = stbi_load_from_file(file, &image_width, &image_height, nullptr, 4);
-        @ fclose(file);
+        @ PivImage image;
+        @ unsigned char* image_data = image.load(@<文件名>.GetText(), 4);
         @ if (!image_data) return FALSE;
         // Create texture
         @ D3D11_TEXTURE2D_DESC desc;
         @ ZeroMemory(&desc, sizeof(desc));
-        @ desc.Width = image_width;
-        @ desc.Height = image_height;
+        @ desc.Width = image.x;
+        @ desc.Height = image.y;
         @ desc.MipLevels = 1;
         @ desc.ArraySize = 1;
         @ desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -779,10 +771,9 @@
         @ ID3D11ShaderResourceView* out_srv;
         @ m_pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, &out_srv);
         @ pTexture->Release();
-        @ @<图片信息.宽度> = image_width;
-        @ @<图片信息.高度> = image_height;
+        @ @<图片信息.宽度> = image.x;
+        @ @<图片信息.高度> = image.y;
         @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(out_srv);
-        @ stbi_image_free(image_data);
         @ return TRUE;
     }
 
@@ -795,15 +786,14 @@
         @ if (!hSrc) return FALSE;
         @ HGLOBAL resdata = ::LoadResource(hModule, hSrc);
         @ if (!resdata) return FALSE;
-        @ int image_width = 0, image_height = 0;
-        @ unsigned char* image_data = stbi_load_from_memory(reinterpret_cast<unsigned char*>(::LockResource(resdata)), static_cast<int>(::SizeofResource(hModule, hSrc)),
-        @                                                   &image_width, &image_height, nullptr, 4);
+        @ PivImage image;
+        @ unsigned char* image_data = image.load(reinterpret_cast<unsigned char*>(::LockResource(resdata)), static_cast<int>(::SizeofResource(hModule, hSrc)), 4);
         @ if (!image_data) return FALSE;
         // Create texture
         @ D3D11_TEXTURE2D_DESC desc;
         @ ZeroMemory(&desc, sizeof(desc));
-        @ desc.Width = image_width;
-        @ desc.Height = image_height;
+        @ desc.Width = image.x;
+        @ desc.Height = image.y;
         @ desc.MipLevels = 1;
         @ desc.ArraySize = 1;
         @ desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -824,10 +814,9 @@
         @ ID3D11ShaderResourceView* out_srv;
         @ m_pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, &out_srv);
         @ pTexture->Release();
-        @ @<图片信息.宽度> = image_width;
-        @ @<图片信息.高度> = image_height;
+        @ @<图片信息.宽度> = image.x;
+        @ @<图片信息.高度> = image.y;
         @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(out_srv);
-        @ stbi_image_free(image_data);
         @ return TRUE;
     }
 
@@ -835,14 +824,14 @@
     参数 图片数据 <类型 = 字节集类 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
-        @ int image_width = 0, image_height = 0;
-        @ unsigned char* image_data = stbi_load_from_memory(@<图片数据>.GetPtr(), static_cast<int>(@<图片数据>.GetSize()), &image_width, &image_height, nullptr, 4);
+        @ PivImage image;
+        @ unsigned char* image_data = image.load(@<图片数据>.GetPtr(), static_cast<int>(@<图片数据>.GetSize()), 4);
         @ if (!image_data) return FALSE;
         // Create texture
         @ D3D11_TEXTURE2D_DESC desc;
         @ ZeroMemory(&desc, sizeof(desc));
-        @ desc.Width = image_width;
-        @ desc.Height = image_height;
+        @ desc.Width = image.x;
+        @ desc.Height = image.y;
         @ desc.MipLevels = 1;
         @ desc.ArraySize = 1;
         @ desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -863,10 +852,9 @@
         @ ID3D11ShaderResourceView* out_srv;
         @ m_pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, &out_srv);
         @ pTexture->Release();
-        @ @<图片信息.宽度> = image_width;
-        @ @<图片信息.高度> = image_height;
+        @ @<图片信息.宽度> = image.x;
+        @ @<图片信息.高度> = image.y;
         @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(out_srv);
-        @ stbi_image_free(image_data);
         @ return TRUE;
     }
 
@@ -993,7 +981,8 @@
 类 IM_DX12渲染器 <公开 注释 = "基于DirectX12的渲染器后端,兼容Windows 10及以上系统." 折叠 折叠2 @文档 = "category = \"渲染器\""
         @视窗.外部头文件 = "<backends/imgui_impl_dx12.h>\r\n<d3d12.h>\r\n<dxgi1_4.h>"
         @视窗.外部源文件 = "imgui\\backends\\imgui_impl_dx12.cpp"
-        @视窗.外部库 = "d3d12.lib\r\nd3dcompiler.lib\r\ndxgi.lib" @视窗.预定义宏 = "ImTextureID=ImU64">
+        @视窗.外部库 = "d3d12.lib\r\nd3dcompiler.lib\r\ndxgi.lib" @视窗.预定义宏 = "ImTextureID=ImU64"
+        @视窗.外部头文件 = "stb\\piv_image.h" @视窗.外部源文件 = "stb\\piv_image.cpp">
 {
 
     # @begin
@@ -1069,11 +1058,11 @@
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
         @ if (!m_pd3dDevice) return FALSE;
-        @ FILE* file = _wfopen(@<文件名>.GetText(), L"rb");
-        @ if (!file) return FALSE;
-        @ unsigned char* image_data = stbi_load_from_file(file, &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
-        @ fclose(file);
+        @ PivImage image;
+        @ unsigned char* image_data = image.load(@<文件名>.GetText(), 4);
         @ if (!image_data) return FALSE;
+        @ @<图片信息.宽度> = image.x;
+        @ @<图片信息.高度> = image.y;
         @ ID3D12Resource* my_texture = NULL;
         @ UINT handle_increment = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
         @ descriptor_index++;
@@ -1100,8 +1089,11 @@
         @ if (!resdata) return FALSE;
         @ unsigned char* data = reinterpret_cast<unsigned char*>(::LockResource(resdata));
         @ int len = static_cast<int>(::SizeofResource(hModule, hSrc));
-        @ unsigned char* image_data = stbi_load_from_memory(data, len, &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
+        @ PivImage image;
+        @ unsigned char* image_data = image.load(data, len, 4);
         @ if (!image_data) return FALSE;
+        @ @<图片信息.宽度> = image.x;
+        @ @<图片信息.高度> = image.y;
         @ ID3D12Resource* my_texture = NULL;
         @ UINT handle_increment = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
         @ descriptor_index++;
@@ -1121,8 +1113,11 @@
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
         @ if (!m_pd3dDevice) return FALSE;
-        @ unsigned char* image_data = stbi_load_from_memory(@<图片数据>.GetPtr(), static_cast<int>(@<图片数据>.GetSize()), &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
+        @ PivImage image;
+        @ unsigned char* image_data = image.load(@<图片数据>.GetPtr(), static_cast<int>(@<图片数据>.GetSize()), 4);
         @ if (!image_data) return FALSE;
+        @ @<图片信息.宽度> = image.x;
+        @ @<图片信息.高度> = image.y;
         @ ID3D12Resource* my_texture = NULL;
         @ UINT handle_increment = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
         @ descriptor_index++;
@@ -1294,7 +1289,6 @@
         @ m_pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, srv_cpu_handle);
         // Return results
         @ *out_tex_resource = pTexture;
-        @ stbi_image_free(image_data);
     }
 
     # Win32 ---
@@ -1529,9 +1523,10 @@
     }
 }
 
-类 IM_OpenGL渲染器 <公开 注释 = "基于现代OpenGL的渲染器后端,支持桌面OpenGL版本: 2.x 3.x 4.x" 折叠 折叠2 @文档 = "category = \"渲染器\""
+类 IM_OpenGL渲染器 <公开 注释 = "基于现代OpenGL的渲染器后端,支持桌面OpenGL版本: 2.x 3.x 4.x" 折叠 @文档 = "category = \"渲染器\""
         @视窗.外部头文件 = "<backends/imgui_impl_opengl3.h>\r\nglad\\glad.h"
-        @视窗.外部源文件 = "imgui\\backends\\imgui_impl_opengl3.cpp\r\nFrameWork\\glad\\glad.c">
+        @视窗.外部源文件 = "imgui\\backends\\imgui_impl_opengl3.cpp\r\nFrameWork\\glad\\glad.c"
+        @视窗.外部头文件 = "stb\\piv_image.h" @视窗.外部源文件 = "stb\\piv_image.cpp">
 {
 
     # @begin
@@ -1637,11 +1632,8 @@
     参数 文件名 <类型 = 文本型 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
-        @ FILE* file = _wfopen(@<文件名>.GetText(), L"rb");
-        @ if (!file) return FALSE;
-        @ int image_width = 0, image_height = 0;
-        @ unsigned char* image_data = stbi_load_from_file(file, &image_width, &image_height, nullptr, 4);
-        @ fclose(file);
+        @ PivImage image;
+        @ unsigned char* image_data = image.load(@<文件名>.GetText(), 4);
         @ if (!image_data) return FALSE;
         @ GLuint image_texture;
         @ glGenTextures(1, &image_texture);
@@ -1655,11 +1647,10 @@
         @ #if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
         @     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
         @ #endif
-        @ glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
-        @ stbi_image_free(image_data);
+        @ glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.x, image.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
         @ @<图片信息.纹理ID> = static_cast<INT64>(image_texture);
-        @ @<图片信息.宽度> = image_width;
-        @ @<图片信息.高度> = image_height;
+        @ @<图片信息.宽度> = image.x;
+        @ @<图片信息.高度> = image.y;
         @ return TRUE;
     }
 
@@ -1674,8 +1665,8 @@
         @ if (!resdata) return FALSE;
         @ unsigned char* data = reinterpret_cast<unsigned char*>(::LockResource(resdata));
         @ int len = static_cast<int>(::SizeofResource(hModule, hSrc));
-        @ int image_width = 0, image_height = 0;
-        @ unsigned char* image_data = stbi_load_from_memory(data, len, &image_width, &image_height, nullptr, 4);
+        @ PivImage image;
+        @ unsigned char* image_data = image.load(data, len, 4);
         @ if (!image_data) return FALSE;
         @ GLuint image_texture;
         @ glGenTextures(1, &image_texture);
@@ -1689,11 +1680,10 @@
         @ #if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
         @     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
         @ #endif
-        @ glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
-        @ stbi_image_free(image_data);
+        @ glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.x, image.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
         @ @<图片信息.纹理ID> = static_cast<INT64>(image_texture);
-        @ @<图片信息.宽度> = image_width;
-        @ @<图片信息.高度> = image_height;
+        @ @<图片信息.宽度> = image.x;
+        @ @<图片信息.高度> = image.y;
         @ return TRUE;
     }
 
@@ -1701,8 +1691,8 @@
     参数 图片数据 <类型 = 字节集类 注释 = "支持格式: jpg,jpeg,png,bmp,psd,tga,gif,hdr,pic,pnm">
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
-        @ int image_width = 0, image_height = 0;
-        @ unsigned char* image_data = stbi_load_from_memory(@<图片数据>.GetPtr(), static_cast<int>(@<图片数据>.GetSize()), &image_width, &image_height, nullptr, 4);
+        @ PivImage image;
+        @ unsigned char* image_data = image.load(@<图片数据>.GetPtr(), static_cast<int>(@<图片数据>.GetSize()), 4);
         @ if (!image_data) return FALSE;
         @ GLuint image_texture;
         @ glGenTextures(1, &image_texture);
@@ -1716,11 +1706,10 @@
         @ #if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
         @ glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
         @ #endif
-        @ glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
-        @ stbi_image_free(image_data);
+        @ glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.x, image.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
         @ @<图片信息.纹理ID> = static_cast<INT64>(image_texture);
-        @ @<图片信息.宽度> = image_width;
-        @ @<图片信息.高度> = image_height;
+        @ @<图片信息.宽度> = image.x;
+        @ @<图片信息.高度> = image.y;
         @ return TRUE;
     }
 
@@ -1876,7 +1865,8 @@
 类 IM_Vulkan渲染器 <公开 注释 = "基于Vulkan的渲染器后端,Vulkan是OpenGL的下一代GPU API,目的就是取代OpenGL." 折叠 折叠2
         @文档 = "category = \"渲染器\"" @视窗.预定义宏 = "ImTextureID=ImU64\r\nGLFW_INCLUDE_VULKAN"
         @视窗.外部头文件 = "<backends/imgui_impl_vulkan.h>" @视窗.外部源文件 = "imgui\\backends\\imgui_impl_vulkan.cpp"
-        @视窗.外部库 = "FrameWork\\vulkan\\$(p)\\vulkan-1.lib" @视窗.附属文件 = "FrameWork\\vulkan\\$(p)\\vulkan-1.dll">
+        @视窗.外部库 = "FrameWork\\vulkan\\$(p)\\vulkan-1.lib" @视窗.附属文件 = "FrameWork\\vulkan\\$(p)\\vulkan-1.dll"
+        @视窗.外部头文件 = "stb\\piv_image.h" @视窗.外部源文件 = "stb\\piv_image.cpp">
 {
     方法 渲染器类型 <公开 属性读 类型 = 整数 注释 = "返回渲染器类型(固定返回2,表示Vulkan渲染器)" 折叠>
     {
@@ -2215,15 +2205,15 @@
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
         @ if (g_Device == VK_NULL_HANDLE) return FALSE;
-        @ FILE* file = _wfopen(@<文件名>.GetText(), L"rb");
-        @ if (!file) return FALSE;
-        @ unsigned char* image_data = stbi_load_from_file(file, &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
-        @ fclose(file);
+        @ PivImage image;
+        @ unsigned char* image_data = image.load(@<文件名>.GetText(), 4);
+        @ @<图片信息.宽度> = image.x;
+        @ @<图片信息.高度> = image.y;
         @ if (!image_data) return FALSE;
         @ MyTextureData* tex_data = new MyTextureData{};
         @ @<图片信息._内部数据> = reinterpret_cast<INT_P>(tex_data);
-        @ tex_data->Width = @<图片信息.宽度>;
-        @ tex_data->Height = @<图片信息.高度>;
+        @ tex_data->Width = image.x;
+        @ tex_data->Height = image.y;
         @ tex_data->Channels = 4;
         @ @<_加载图片>(image_data, tex_data);
         @ @<图片信息.纹理ID> = reinterpret_cast<INT64>(tex_data->DS);
@@ -2243,8 +2233,11 @@
         @ if (!resdata) return FALSE;
         @ unsigned char* data = reinterpret_cast<unsigned char*>(::LockResource(resdata));
         @ int len = static_cast<int>(::SizeofResource(hModule, hSrc));
-        @ unsigned char* image_data = stbi_load_from_memory(data, len, &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
+        @ PivImage image;
+        @ unsigned char* image_data = image.load(data, len, 4);
         @ if (!image_data) return FALSE;
+        @ @<图片信息.宽度> = image.x;
+        @ @<图片信息.高度> = image.y;
         @ MyTextureData* tex_data = new MyTextureData{};
         @ tex_data->Width = @<图片信息.宽度>;
         @ tex_data->Height = @<图片信息.高度>;
@@ -2261,8 +2254,11 @@
     参数 图片信息 <类型 = IM图片信息类 注释 = "成功在此返回图片的信息">
     {
         @ if (g_Device == VK_NULL_HANDLE) return FALSE;
-        @ unsigned char* image_data = stbi_load_from_memory(@<图片数据>.GetPtr(), static_cast<int>(@<图片数据>.GetSize()), &@<图片信息.宽度>, &@<图片信息.高度>, nullptr, 4);
+        @ PivImage image;
+        @ unsigned char* image_data = image.load(@<图片数据>.GetPtr(), static_cast<int>(@<图片数据>.GetSize()), 4);
         @ if (!image_data) return FALSE;
+        @ @<图片信息.宽度> = image.x;
+        @ @<图片信息.高度> = image.y;
         @ MyTextureData* tex_data = new MyTextureData{};
         @ @<图片信息._内部数据> = reinterpret_cast<INT_P>(tex_data);
         @ tex_data->Width = @<图片信息.宽度>;
@@ -2391,8 +2387,6 @@
         @     check_vk_result(err);
         @     vkUnmapMemory(g_Device, tex_data->UploadBufferMemory);
         @ }
-        // Release image memory using stb
-        @ stbi_image_free(image_data);
         // Create a command buffer that will perform following steps when hit in the command queue.
         // TODO: this works in the example, but may need input if this is an acceptable way to access the pool/create the command buffer.
         @ VkCommandPool command_pool = m_MainWindowData.Frames[m_MainWindowData.FrameIndex].CommandPool;

@@ -424,7 +424,7 @@ public:
     NtPiv::pGetProcessMemoryInfo GetProcessMemoryInfo = nullptr;
     NtPiv::pGetProcessImageFileNameW GetProcessImageFileNameW = nullptr;
 
-    static PivNT &data()
+    static PivNT &instance()
     {
         static PivNT Nt;
         if (Nt._isLoaded == false)

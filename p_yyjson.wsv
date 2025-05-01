@@ -1,7 +1,7 @@
 <火山程序 类型 = "通常" 版本 = 1 />
 
 包 火山.PIV基础类 <注释 = "yyjson --最快的C语言JSON库--" 注释 = "https://github.com/ibireme/yyjson"
-        注释 = "版本: 0.10.0 (2025-02-12)" @视窗.外部头文件 = "src\\yyjson\\piv_yyjson.hpp"
+        注释 = "版本: 0.10.0 (2025-04-21)" @视窗.外部头文件 = "src\\yyjson\\piv_yyjson.hpp"
         @视窗.外部源文件 = "src\\yyjson\\yyjson.c">
 
 # 本yyjson库特色:
@@ -37,89 +37,89 @@
     参数 当前对象 <类型 = YYJSON只读值>
     参数 JSON数据 <注释 = "所欲解析的JSON文本数据,支持类型(带*号表示会转换编码):" 注释 = " 标准文本类U、文本视图类U、字节集类(UTF-8编码)"
             注释 = " *文本型、*标准文本类W、*文本视图类W" @匹配类型 = 通用型>
-    参数 解析标志位 <类型 = 整数 注释 = "为\"YYJSON解析选项\"常量的位或组合值" @默认值 = YYJSON解析选项.默认>
+    参数 解析标志位 <类型 = YYJSON解析选项 注释 = "为\"YYJSON解析选项\"常量的位或组合值" @默认值 = YYJSON解析选项.默认>
     参数 内存分配器 <类型 = YYJSON分配器 注释 = "提供JSON文档的内存分配器" @默认值 = YYJSON分配器.偏好设置>
     参数 错误信息 <类型 = YYJSON解析错误 注释 = "若提供非空指针,可在解析失败时返回错误信息." @默认值 = YYJSON解析错误.空指针>
     {
-        @ @<当前对象>.parse(@<JSON数据>, static_cast<yyjson_read_flag>(@<解析标志位>), @<内存分配器>, @<错误信息>)
+        @ @<当前对象>.parse(@<JSON数据>, @<解析标志位>, @<内存分配器>, @<错误信息>)
     }
 
     方法 解析内存 <公开 静态 类型 = 逻辑型 注释 = "解析内存中的JSON文档数据,返回是否解析成功." 折叠 @嵌入式方法 = "">
     参数 当前对象 <类型 = YYJSON只读值>
-    参数 JSON数据指针 <类型 = 变整数 注释 = "所欲解析的JSON数据地址,其内容必须为UTF-8编码的文本数据">
-    参数 JSON数据长度 <类型 = 整数 注释 = "JSON数据的字节长度">
-    参数 解析标志位 <类型 = 整数 注释 = "为\"YYJSON解析选项\"常量的位或组合值" @默认值 = YYJSON解析选项.默认>
+    参数 JSON数据指针 <注释 = "所欲解析的JSON数据地址,其内容必须为UTF-8编码的文本数据" @匹配类型 = 通用数值型>
+    参数 JSON数据长度 <注释 = "JSON数据的字节长度" @匹配类型 = 通用数值型>
+    参数 解析标志位 <类型 = YYJSON解析选项 注释 = "为\"YYJSON解析选项\"常量的位或组合值" @默认值 = YYJSON解析选项.默认>
     参数 内存分配器 <类型 = YYJSON分配器 注释 = "提供JSON文档的内存分配器" @默认值 = YYJSON分配器.偏好设置>
     参数 错误信息 <类型 = YYJSON解析错误 注释 = "若提供非空指针,可在解析失败时返回错误信息." @默认值 = YYJSON解析错误.空指针>
     {
-        @ @<当前对象>.parse_doc(reinterpret_cast<const char*>(@<JSON数据指针>), static_cast<size_t>(@<JSON数据长度>), static_cast<yyjson_read_flag>(@<解析标志位>), @<内存分配器>, @<错误信息>)
+        @ @<当前对象>.parse_doc(reinterpret_cast<const char*>(@<JSON数据指针>), static_cast<size_t>(@<JSON数据长度>), @<解析标志位>, @<内存分配器>, @<错误信息>)
     }
 
     方法 解析文件 <公开 静态 类型 = 逻辑型 注释 = "解析指定路径的UTF-8编码JSON文件,返回是否解析成功." 折叠 @嵌入式方法 = "">
     参数 当前对象 <类型 = YYJSON只读值>
     参数 文件路径 <类型 = 文本型 注释 = "提供JSON文件的完整路径">
-    参数 解析标志位 <类型 = 整数 注释 = "为\"YYJSON解析选项\"常量的位或组合值" @默认值 = YYJSON解析选项.默认>
+    参数 解析标志位 <类型 = YYJSON解析选项 注释 = "为\"YYJSON解析选项\"常量的位或组合值" @默认值 = YYJSON解析选项.默认>
     参数 内存分配器 <类型 = YYJSON分配器 注释 = "提供JSON文档的内存分配器" @默认值 = YYJSON分配器.偏好设置>
     参数 错误信息 <类型 = YYJSON解析错误 注释 = "若提供非空指针,可在解析失败时返回错误信息." @默认值 = YYJSON解析错误.空指针>
     {
-        @ @<当前对象>.parse_file(@<文件路径>.GetText(), static_cast<yyjson_read_flag>(@<解析标志位>), @<内存分配器>, @<错误信息>)
+        @ @<当前对象>.parse_file(@<文件路径>.GetText(), @<解析标志位>, @<内存分配器>, @<错误信息>)
     }
 
     # 序列化JSON文档 ---
 
     方法 到可读文本 <公开 静态 类型 = 文本型 注释 = "将JSON文档序列化为字符串,并转换到文本型." 折叠 @嵌入式方法 = "">
     参数 当前对象 <类型 = YYJSON只读值>
-    参数 序列化标志位 <类型 = 整数 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
+    参数 序列化标志位 <类型 = YYJSON序列化选项 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
     参数 内存分配器 <类型 = YYJSON分配器 注释 = "提供JSON序列化时使用的内存分配器" @默认值 = YYJSON分配器.偏好设置>
     参数 错误信息 <类型 = YYJSON序列化错误 注释 = "若提供非空指针,可在序列化失败时返回错误信息." @默认值 = YYJSON序列化错误.空指针>
     {
-        @ @<当前对象>.write_vol_str(static_cast<yyjson_write_flag>(@<序列化标志位>), @<内存分配器>, @<错误信息>)
+        @ @<当前对象>.write_vol_str(@<序列化标志位>, @<内存分配器>, @<错误信息>)
     }
 
     方法 到可读标准文本 <公开 静态 类型 = 标准文本类U 注释 = "将JSON文档序列化为字符串,返回到标准文本类U." 折叠 @嵌入式方法 = "">
     参数 当前对象 <类型 = YYJSON只读值>
-    参数 序列化标志位 <类型 = 整数 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
+    参数 序列化标志位 <类型 = YYJSON序列化选项 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
     参数 内存分配器 <类型 = YYJSON分配器 注释 = "提供JSON序列化时使用的内存分配器" @默认值 = YYJSON分配器.偏好设置>
     参数 错误信息 <类型 = YYJSON序列化错误 注释 = "若提供非空指针,可在序列化失败时返回错误信息." @默认值 = YYJSON序列化错误.空指针>
     {
-        @ @<当前对象>.write_std_str(static_cast<yyjson_write_flag>(@<序列化标志位>), @<内存分配器>, @<错误信息>)
+        @ @<当前对象>.write_std_str(@<序列化标志位>, @<内存分配器>, @<错误信息>)
     }
 
     方法 到字节集 <公开 静态 类型 = 字节集类 注释 = "将JSON文档序列化为字符串,返回到字节集类(UTF-8编码)." 折叠 @嵌入式方法 = "">
     参数 当前对象 <类型 = YYJSON只读值>
-    参数 序列化标志位 <类型 = 整数 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
+    参数 序列化标志位 <类型 = YYJSON序列化选项 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
     参数 内存分配器 <类型 = YYJSON分配器 注释 = "提供JSON序列化时使用的内存分配器" @默认值 = YYJSON分配器.偏好设置>
     参数 错误信息 <类型 = YYJSON序列化错误 注释 = "若提供非空指针,可在序列化失败时返回错误信息." @默认值 = YYJSON序列化错误.空指针>
     {
-        @ @<当前对象>.write_vol_mem(static_cast<yyjson_write_flag>(@<序列化标志位>), @<内存分配器>, @<错误信息>)
+        @ @<当前对象>.write_vol_mem(@<序列化标志位>, @<内存分配器>, @<错误信息>)
     }
 
     方法 写出文件 <公开 静态 类型 = 逻辑型 注释 = "将整个JSON文档写出到文件(UTF-8编码),返回是否成功." 折叠 @嵌入式方法 = "">
     参数 当前对象 <类型 = YYJSON只读值>
     参数 文件名称 <类型 = 文本型 注释 = "请提供完整的文件路径,路径的中间目录必须已经存在;" 注释 = "如果文件不存在将自动创建,文件已存在则覆盖原先的数据.">
-    参数 序列化标志位 <类型 = 整数 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
+    参数 序列化标志位 <类型 = YYJSON序列化选项 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
     参数 内存分配器 <类型 = YYJSON分配器 注释 = "提供JSON序列化时使用的内存分配器" @默认值 = YYJSON分配器.偏好设置>
     参数 错误信息 <类型 = YYJSON序列化错误 注释 = "若提供非空指针,可在序列化失败时返回错误信息." @默认值 = YYJSON序列化错误.空指针>
     {
-        @ @<当前对象>.write_file(@<文件名称>.GetText(), static_cast<yyjson_write_flag>(@<序列化标志位>), @<内存分配器>, @<错误信息>)
+        @ @<当前对象>.write_file(@<文件名称>.GetText(), @<序列化标志位>, @<内存分配器>, @<错误信息>)
     }
 
     # 序列化JSON值 ---
 
     方法 到文本 <公开 静态 类型 = 文本型 注释 = "将当前JSON值序列化为字符串,并转换到文本型." 折叠 @嵌入式方法 = "">
     参数 当前对象 <类型 = YYJSON只读值>
-    参数 序列化标志位 <类型 = 整数 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
+    参数 序列化标志位 <类型 = YYJSON序列化选项 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
     参数 内存分配器 <类型 = YYJSON分配器 注释 = "提供JSON序列化时使用的内存分配器" @默认值 = YYJSON分配器.偏好设置>
     {
-        @ @<当前对象>.to_vol_str(static_cast<yyjson_write_flag>(@<序列化标志位>), @<内存分配器>)
+        @ @<当前对象>.to_vol_str(@<序列化标志位>, @<内存分配器>)
     }
 
     方法 到标准文本 <公开 静态 类型 = 标准文本类U 注释 = "将当前JSON值序列化为字符串,返回到标准文本类U." 折叠 @嵌入式方法 = "">
     参数 当前对象 <类型 = YYJSON只读值>
-    参数 序列化标志位 <类型 = 整数 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
+    参数 序列化标志位 <类型 = YYJSON序列化选项 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
     参数 内存分配器 <类型 = YYJSON分配器 注释 = "提供JSON序列化时使用的内存分配器" @默认值 = YYJSON分配器.偏好设置>
     {
-        @ @<当前对象>.to_std_str(static_cast<yyjson_write_flag>(@<序列化标志位>), @<内存分配器>)
+        @ @<当前对象>.to_std_str(@<序列化标志位>, @<内存分配器>)
     }
 
     # JSON文档属性 ---
@@ -607,32 +607,32 @@
     参数 当前对象 <类型 = YYJSON值>
     参数 JSON数据 <注释 = "所欲解析的JSON文本数据,支持类型(带*号表示会转换编码):" 注释 = " 标准文本类U、文本视图类U、字节集类(UTF-8编码)"
             注释 = " *文本型、*标准文本类W、*文本视图类W" @匹配类型 = 通用型>
-    参数 解析标志位 <类型 = 整数 注释 = "为\"YYJSON解析选项\"常量的位或组合值" @默认值 = YYJSON解析选项.默认>
+    参数 解析标志位 <类型 = YYJSON解析选项 注释 = "为\"YYJSON解析选项\"常量的位或组合值" @默认值 = YYJSON解析选项.默认>
     参数 内存分配器 <类型 = YYJSON分配器 注释 = "提供JSON文档的内存分配器" @默认值 = YYJSON分配器.偏好设置>
     参数 错误信息 <类型 = YYJSON解析错误 注释 = "若提供非空指针,可在解析失败时返回错误信息." @默认值 = YYJSON解析错误.空指针>
     {
-        @ @<当前对象>.parse(@<JSON数据>, static_cast<yyjson_read_flag>(@<解析标志位>), @<内存分配器>, @<错误信息>)
+        @ @<当前对象>.parse(@<JSON数据>, @<解析标志位>, @<内存分配器>, @<错误信息>)
     }
 
     方法 解析内存 <公开 静态 类型 = 逻辑型 注释 = "解析内存中的JSON文档数据,返回是否解析成功." 折叠 @嵌入式方法 = "">
     参数 当前对象 <类型 = YYJSON值>
-    参数 JSON数据指针 <类型 = 变整数 注释 = "所欲解析的JSON数据地址,其内容必须为UTF-8编码的文本数据">
-    参数 JSON数据长度 <类型 = 整数 注释 = "JSON数据的字节长度">
-    参数 解析标志位 <类型 = 整数 注释 = "为\"YYJSON解析选项\"常量的位或组合值" @默认值 = YYJSON解析选项.默认>
+    参数 JSON数据指针 <注释 = "所欲解析的JSON数据地址,其内容必须为UTF-8编码的文本数据" @匹配类型 = 通用数值型>
+    参数 JSON数据长度 <注释 = "JSON数据的字节长度" @匹配类型 = 通用数值型>
+    参数 解析标志位 <类型 = YYJSON解析选项 注释 = "为\"YYJSON解析选项\"常量的位或组合值" @默认值 = YYJSON解析选项.默认>
     参数 内存分配器 <类型 = YYJSON分配器 注释 = "提供JSON文档的内存分配器" @默认值 = YYJSON分配器.偏好设置>
     参数 错误信息 <类型 = YYJSON解析错误 注释 = "若提供非空指针,可在解析失败时返回错误信息." @默认值 = YYJSON解析错误.空指针>
     {
-        @ @<当前对象>.parse_doc(reinterpret_cast<const char*>(@<JSON数据指针>), static_cast<size_t>(@<JSON数据长度>), static_cast<yyjson_read_flag>(@<解析标志位>), @<内存分配器>, @<错误信息>)
+        @ @<当前对象>.parse_doc(reinterpret_cast<const char*>(@<JSON数据指针>), static_cast<size_t>(@<JSON数据长度>), @<解析标志位>, @<内存分配器>, @<错误信息>)
     }
 
     方法 解析文件 <公开 静态 类型 = 逻辑型 注释 = "解析指定路径的UTF-8编码JSON文件,返回是否解析成功." 折叠 @嵌入式方法 = "">
     参数 当前对象 <类型 = YYJSON值>
     参数 文件路径 <类型 = 文本型 注释 = "JSON文件的完整路径">
-    参数 解析标志位 <类型 = 整数 注释 = "为\"YYJSON解析选项\"常量的位或组合值" @默认值 = YYJSON解析选项.默认>
+    参数 解析标志位 <类型 = YYJSON解析选项 注释 = "为\"YYJSON解析选项\"常量的位或组合值" @默认值 = YYJSON解析选项.默认>
     参数 内存分配器 <类型 = YYJSON分配器 注释 = "提供JSON文档的内存分配器" @默认值 = YYJSON分配器.偏好设置>
     参数 错误信息 <类型 = YYJSON解析错误 注释 = "若提供非空指针,可在解析失败时返回错误信息." @默认值 = YYJSON解析错误.空指针>
     {
-        @ @<当前对象>.parse_file(@<文件路径>.GetText(), static_cast<yyjson_read_flag>(@<解析标志位>), @<内存分配器>, @<错误信息>)
+        @ @<当前对象>.parse_file(@<文件路径>.GetText(), @<解析标志位>, @<内存分配器>, @<错误信息>)
     }
 
     方法 复制 <公开 静态 类型 = YYJSON值 注释 = "将另一个JSON值深拷贝到当前对象,然后返回当前对象自身." 注释 = "注: 当前对象将释放原先数据的所有权." 折叠
@@ -647,57 +647,57 @@
 
     方法 到可读文本 <公开 静态 类型 = 文本型 注释 = "将整个JSON文档序列化为字符串,并转换到文本型." 折叠 @嵌入式方法 = "">
     参数 当前对象 <类型 = YYJSON值>
-    参数 序列化标志位 <类型 = 整数 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
+    参数 序列化标志位 <类型 = YYJSON序列化选项 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
     参数 内存分配器 <类型 = YYJSON分配器 注释 = "提供JSON序列化时使用的内存分配器" @默认值 = YYJSON分配器.偏好设置>
     参数 错误信息 <类型 = YYJSON序列化错误 注释 = "若提供非空指针,可在序列化失败时返回错误信息." @默认值 = YYJSON序列化错误.空指针>
     {
-        @ @<当前对象>.write_vol_str(static_cast<yyjson_write_flag>(@<序列化标志位>), @<内存分配器>, @<错误信息>)
+        @ @<当前对象>.write_vol_str(@<序列化标志位>, @<内存分配器>, @<错误信息>)
     }
 
     方法 到可读标准文本 <公开 静态 类型 = 标准文本类U 注释 = "将整个JSON文档序列化为字符串,返回到标准文本类U." 折叠 @嵌入式方法 = "">
     参数 当前对象 <类型 = YYJSON值>
-    参数 序列化标志位 <类型 = 整数 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
+    参数 序列化标志位 <类型 = YYJSON序列化选项 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
     参数 内存分配器 <类型 = YYJSON分配器 注释 = "提供JSON序列化时使用的内存分配器" @默认值 = YYJSON分配器.偏好设置>
     参数 错误信息 <类型 = YYJSON序列化错误 注释 = "若提供非空指针,可在序列化失败时返回错误信息." @默认值 = YYJSON序列化错误.空指针>
     {
-        @ @<当前对象>.write_std_str(static_cast<yyjson_write_flag>(@<序列化标志位>), @<内存分配器>, @<错误信息>)
+        @ @<当前对象>.write_std_str(@<序列化标志位>, @<内存分配器>, @<错误信息>)
     }
 
     方法 到字节集 <公开 静态 类型 = 字节集类 注释 = "将整个JSON文档序列化为字符串,返回到字节集类(UTF-8编码)." 折叠 @嵌入式方法 = "">
     参数 当前对象 <类型 = YYJSON值>
-    参数 序列化标志位 <类型 = 整数 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
+    参数 序列化标志位 <类型 = YYJSON序列化选项 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
     参数 内存分配器 <类型 = YYJSON分配器 注释 = "提供JSON序列化时使用的内存分配器" @默认值 = YYJSON分配器.偏好设置>
     参数 错误信息 <类型 = YYJSON序列化错误 注释 = "若提供非空指针,可在序列化失败时返回错误信息." @默认值 = YYJSON序列化错误.空指针>
     {
-        @ @<当前对象>.write_vol_mem(static_cast<yyjson_write_flag>(@<序列化标志位>), @<内存分配器>, @<错误信息>)
+        @ @<当前对象>.write_vol_mem(@<序列化标志位>, @<内存分配器>, @<错误信息>)
     }
 
     方法 写出文件 <公开 静态 类型 = 逻辑型 注释 = "将整个JSON文档写出到文件(UTF-8编码),返回是否成功." 折叠 @嵌入式方法 = "">
     参数 当前对象 <类型 = YYJSON值>
     参数 文件名称 <类型 = 文本型 注释 = "请提供完整的文件路径,路径的中间目录必须已经存在;" 注释 = "如果文件不存在将自动创建,文件已存在则覆盖原先的数据.">
-    参数 序列化标志位 <类型 = 整数 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
+    参数 序列化标志位 <类型 = YYJSON序列化选项 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
     参数 内存分配器 <类型 = YYJSON分配器 注释 = "提供JSON序列化时使用的内存分配器" @默认值 = YYJSON分配器.偏好设置>
     参数 错误信息 <类型 = YYJSON序列化错误 注释 = "若提供非空指针,可在序列化失败时返回错误信息." @默认值 = YYJSON序列化错误.空指针>
     {
-        @ @<当前对象>.write_file(@<文件名称>.GetText(), static_cast<yyjson_write_flag>(@<序列化标志位>), @<内存分配器>, @<错误信息>)
+        @ @<当前对象>.write_file(@<文件名称>.GetText(), @<序列化标志位>, @<内存分配器>, @<错误信息>)
     }
 
     # 序列化JSON值 ---
 
     方法 到文本 <公开 静态 类型 = 文本型 注释 = "将当前JSON值序列化为字符串,并转换到文本型." 折叠 @嵌入式方法 = "">
     参数 当前对象 <类型 = YYJSON值>
-    参数 序列化标志位 <类型 = 整数 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
+    参数 序列化标志位 <类型 = YYJSON序列化选项 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
     参数 内存分配器 <类型 = YYJSON分配器 注释 = "提供JSON序列化时使用的内存分配器" @默认值 = YYJSON分配器.偏好设置>
     {
-        @ @<当前对象>.to_vol_str(static_cast<yyjson_write_flag>(@<序列化标志位>), @<内存分配器>)
+        @ @<当前对象>.to_vol_str(@<序列化标志位>, @<内存分配器>)
     }
 
     方法 到标准文本 <公开 静态 类型 = 标准文本类U 注释 = "将当前JSON值序列化为字符串,返回到标准文本类U." 折叠 @嵌入式方法 = "">
     参数 当前对象 <类型 = YYJSON值>
-    参数 序列化标志位 <类型 = 整数 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
+    参数 序列化标志位 <类型 = YYJSON序列化选项 注释 = "为\"YYJSON序列化选项\"常量的位或组合值" @默认值 = YYJSON序列化选项.默认>
     参数 内存分配器 <类型 = YYJSON分配器 注释 = "提供JSON序列化时使用的内存分配器" @默认值 = YYJSON分配器.偏好设置>
     {
-        @ @<当前对象>.to_std_str(static_cast<yyjson_write_flag>(@<序列化标志位>), @<内存分配器>)
+        @ @<当前对象>.to_std_str(@<序列化标志位>, @<内存分配器>)
     }
 
     # 转换 ---
@@ -1501,11 +1501,11 @@
     常量 偏好设置 <公开 类型 = YYJSON分配器 值 = @nullptr
             注释 = "等于空指针,表示使用全局的偏好设置,默认为\"火山内存池\"或\"mimalloc\"(配置了mimalloc模块后);"
             注释 = "偏好设置可以通过\"YYJSON分配器.置偏好设置()\"方法修改.">
-    常量 默认 <公开 类型 = YYJSON分配器 值 = @"@piv_yyjson_alc::get_inst().def_alc()"
+    常量 默认 <公开 类型 = YYJSON分配器 值 = @"@piv_yyjson_alc::instance().def_alc()"
             注释 = "[线程安全]表示使用C的标准函数(malloc/realloc/free)分配内存.">
-    常量 火山内存池 <公开 类型 = YYJSON分配器 值 = @"@piv_yyjson_alc::get_inst().vol_alc()"
+    常量 火山内存池 <公开 类型 = YYJSON分配器 值 = @"@piv_yyjson_alc::instance().vol_alc()"
             注释 = "[线程安全]使用火山内部的全局内存池来分配内存;" 注释 = "火山的字节集类、文本型、数组类都使用了这个内存池,速度比C的标准函数快.">
-    常量 mimalloc <公开 类型 = YYJSON分配器 值 = @"@piv_yyjson_alc::get_inst().mi_alc()"
+    常量 mimalloc <公开 类型 = YYJSON分配器 值 = @"@piv_yyjson_alc::instance().mi_alc()"
             注释 = "[线程安全]使用微软的mimalloc高性能分配内存;" 注释 = "需要配合官方的\"高性能内存分配类\",或其他的的第三方mimalloc模块,否则将返回空指针(等于使用偏好设置).">
 
     # 全局设置 ---
@@ -1515,7 +1515,7 @@
             注释 = "* 不应将\"动态内存池\"和\"固定内存池\"等非线程安全的分配器设置为偏好设置." 折叠 @嵌入式方法 = "">
     参数 偏好分配器 <类型 = YYJSON分配器 注释 = "欲设置为偏好设置的分配器">
     {
-        @ piv_yyjson_alc::get_inst().set_pref(@<偏好分配器>)
+        @ piv_yyjson_alc::instance().set_pref(@<偏好分配器>)
     }
 
     # 动态内存池 ---
@@ -1542,9 +1542,8 @@
     参数 缓冲区长度 <类型 = 变整数 "">
     {
         @ yyjson_alc* alc = new yyjson_alc{0};
-        @ if (yyjson_alc_pool_init(alc, @<缓冲区指针>, static_cast<size_t>(缓冲区长度))) {
+        @ if (yyjson_alc_pool_init(alc, @<缓冲区指针>, static_cast<size_t>(缓冲区长度)))
         @     return alc;
-        @ }
         @ delete alc;
         @ return nullptr;
     }
@@ -1631,26 +1630,23 @@
 
     # ---
 
-    方法 错误代码 <公开 静态 属性读 类型 = YYJSON解析错误码 注释 = "返回错误代码,请参考\"YYJSON解析错误码\"的常量值."
-            注释 = "* 返回-1表示本指针未创建,无法获取解析错误." 折叠 @禁止流程检查 = 真>
+    方法 错误代码 <公开 静态 属性读 类型 = YYJSON解析错误码 注释 = "返回错误代码,请参考\"YYJSON解析错误码\"的常量值." 注释 = "注意: 使用本方法前必须确保指针不为空!"
+            折叠 @禁止流程检查 = 真>
     参数 本指针 <类型 = YYJSON解析错误>
     {
-        @ return @<本指针> != nullptr ? (INT)@<本指针>->code : -1;
+        @ return @<本指针>->code;
     }
 
-    方法 错误信息 <公开 静态 属性读 类型 = 文本型 注释 = "返回具体的错误信息,空文本表示解析成功." 折叠 @禁止流程检查 = 真>
+    方法 错误信息 <公开 静态 属性读 类型 = 文本型 注释 = "返回具体的错误信息,空文本表示解析成功." 注释 = "注意: 使用本方法前必须确保指针不为空!" 折叠 @禁止流程检查 = 真>
     参数 本指针 <类型 = YYJSON解析错误>
     {
-        @ if (!@<本指针>)
-        @     return _CT2(L"本指针为空,无法获取错误信息.");
         @ return @<本指针>->msg != nullptr ? @an<CVolString>{@<本指针>->msg} : _CT2(L"");
     }
 
-    方法 错误位置 <公开 静态 属性读 类型 = 整数 注释 = "输入数据的错误位置(以字节为单位),返回0表示成功." 注释 = "* 返回-1表示本指针未创建,无法获取解析错误." 折叠
-            @禁止流程检查 = 真>
+    方法 错误位置 <公开 静态 属性读 类型 = 整数 注释 = "输入数据的错误位置(以字节为单位),返回0表示成功." 注释 = "注意: 使用本方法前必须确保指针不为空!" 折叠 @嵌入式方法 = "">
     参数 本指针 <类型 = YYJSON解析错误>
     {
-        @ @<本指针> != nullptr ? (INT)@<本指针>->pos : -1
+        @ (INT)@<本指针>->pos
     }
 
     # @begin
@@ -1697,18 +1693,16 @@
 
     # ---
 
-    方法 错误代码 <公开 静态 属性读 类型 = YYJSON序列化错误码 注释 = "返回错误代码,请参考\"YYJSON序列化错误码\"的常量值."
-            注释 = "* 返回-1表示本指针未创建,无法获取错误." 折叠 @禁止流程检查 = 真>
+    方法 错误代码 <公开 静态 属性读 类型 = YYJSON序列化错误码 注释 = "返回错误代码,请参考\"YYJSON序列化错误码\"的常量值." 注释 = "注意: 使用本方法前必须确保指针不为空!"
+            折叠 @禁止流程检查 = 真>
     参数 本指针 <类型 = YYJSON序列化错误>
     {
-        @ return @<本指针> != nullptr ? (INT)@<本指针>->code : -1;
+        @ return @<本指针>->code;
     }
 
-    方法 错误信息 <公开 静态 属性读 类型 = 文本型 注释 = "返回具体的错误信息,空文本表示解析成功." 折叠 @禁止流程检查 = 真>
+    方法 错误信息 <公开 静态 属性读 类型 = 文本型 注释 = "返回具体的错误信息,空文本表示解析成功." 注释 = "注意: 使用本方法前必须确保指针不为空!" 折叠 @禁止流程检查 = 真>
     参数 本指针 <类型 = YYJSON序列化错误>
     {
-        @ if (!@<本指针>)
-        @     return _CT2(L"本指针为空,无法获取错误信息.");
         @ return @<本指针>->msg != nullptr ? @an<CVolString>{@<本指针>->msg} : _CT2(L"");
     }
 
@@ -1756,26 +1750,23 @@
 
     # ---
 
-    方法 错误代码 <公开 静态 属性读 类型 = YYJSON路径错误码 注释 = "返回错误代码,请参考\"YYJSON路径错误码\"的常量值." 注释 = "* 返回-1表示本指针未创建,无法获取错误."
+    方法 错误代码 <公开 静态 属性读 类型 = YYJSON路径错误码 注释 = "返回错误代码,请参考\"YYJSON路径错误码\"的常量值." 注释 = "注意: 使用本方法前必须确保指针不为空!"
             折叠 @禁止流程检查 = 真>
     参数 本指针 <类型 = YYJSON路径错误>
     {
-        @ return @<本指针> != nullptr ? (INT)@<本指针>->code : -1;
+        @ return @<本指针>->code;
     }
 
-    方法 错误信息 <公开 静态 属性读 类型 = 文本型 注释 = "返回具体的错误信息,空文本表示成功." 折叠 @禁止流程检查 = 真>
+    方法 错误信息 <公开 静态 属性读 类型 = 文本型 注释 = "返回具体的错误信息,空文本表示成功." 注释 = "注意: 使用本方法前必须确保指针不为空!" 折叠 @禁止流程检查 = 真>
     参数 本指针 <类型 = YYJSON路径错误>
     {
-        @ if (!@<本指针>)
-        @     return _CT2(L"本指针为空,无法获取错误信息.");
         @ return @<本指针>->msg != nullptr ? @an<CVolString>{@<本指针>->msg} : _CT2(L"");
     }
 
-    方法 错误位置 <公开 静态 属性读 类型 = 整数 注释 = "输入数据的错误位置(以字节为单位),返回0表示成功." 注释 = "* 返回-1表示本指针未创建,无法获取错误." 折叠
-            @禁止流程检查 = 真>
+    方法 错误位置 <公开 静态 属性读 类型 = 整数 注释 = "输入数据的错误位置(以字节为单位),返回0表示成功." 注释 = "注意: 使用本方法前必须确保指针不为空!" 折叠 @禁止流程检查 = 真>
     参数 本指针 <类型 = YYJSON路径错误>
     {
-        @ return @<本指针> != nullptr ? (INT)@<本指针>->pos : -1;
+        @ return (INT)@<本指针>->pos;
     }
 
     # @begin
@@ -1822,31 +1813,25 @@
 
     # ---
 
-    方法 容器 <公开 静态 属性读 类型 = YYJSON值 注释 = "路径目标值的父容器,应为一个JSON对象或JSON数组." 折叠 @禁止流程检查 = 真>
+    方法 容器 <公开 静态 属性读 类型 = YYJSON值 注释 = "路径目标值的父容器,应为一个JSON对象或JSON数组." 注释 = "注意: 使用本方法前必须确保指针不为空!" 折叠
+            @禁止流程检查 = 真>
     参数 本指针 <类型 = YYJSON路径上下文>
     {
-        @ if (@<本指针>)
-        @     return @dt<YYJSON值>{@<本指针>->doc, @<本指针>->ptr.ctn};
-        @ else
-        @     return @dt<YYJSON值>();
+        @ return @dt<YYJSON值>{@<本指针>->doc, @<本指针>->ptr.ctn};
     }
 
-    方法 上一值 <公开 静态 属性读 类型 = YYJSON值 注释 = "路径目标值的上一个同级成员值,可能是数组中的一个成员,或对象中的一个键名." 折叠 @禁止流程检查 = 真>
+    方法 上一值 <公开 静态 属性读 类型 = YYJSON值 注释 = "路径目标值的上一个同级成员值,可能是数组中的一个成员,或对象中的一个键名." 注释 = "注意: 使用本方法前必须确保指针不为空!"
+            折叠 @禁止流程检查 = 真>
     参数 本指针 <类型 = YYJSON路径上下文>
     {
-        @ if (@<本指针>)
-        @     return @dt<YYJSON值>{@<本指针>->doc, @<本指针>->ptr.pre};
-        @ else
-        @     return @dt<YYJSON值>();
+        @ return @dt<YYJSON值>{@<本指针>->doc, @<本指针>->ptr.pre};
     }
 
-    方法 旧值 <公开 静态 属性读 类型 = YYJSON值 注释 = "如果修改过路径目标值,可以在这里访问之前的旧值." 折叠 @禁止流程检查 = 真>
+    方法 旧值 <公开 静态 属性读 类型 = YYJSON值 注释 = "如果修改过路径目标值,可以在这里访问之前的旧值." 注释 = "注意: 使用本方法前必须确保指针不为空!" 折叠
+            @禁止流程检查 = 真>
     参数 本指针 <类型 = YYJSON路径上下文>
     {
-        @ if (@<本指针>)
-        @     return @dt<YYJSON值>{@<本指针>->doc, @<本指针>->ptr.old};
-        @ else
-        @     return @dt<YYJSON值>();
+        @ return @dt<YYJSON值>{@<本指针>->doc, @<本指针>->ptr.old};
     }
 
     # ---
@@ -1912,31 +1897,29 @@
 
     # ---
 
-    方法 错误代码 <公开 静态 属性读 类型 = YYJSON补丁错误码 注释 = "返回错误代码,请参考\"YYJSON补丁错误码\"的常量值." 注释 = "* 返回-1表示本指针未创建,无法获取错误."
+    方法 错误代码 <公开 静态 属性读 类型 = YYJSON补丁错误码 注释 = "返回错误代码,请参考\"YYJSON补丁错误码\"的常量值." 注释 = "注意: 使用本方法前必须确保指针不为空!"
             折叠 @禁止流程检查 = 真>
     参数 本指针 <类型 = YYJSON补丁错误>
     {
-        @ return @<本指针> != nullptr ? (INT)@<本指针>->code : -1;
+        @ return @<本指针>->code;
     }
 
-    方法 错误索引 <公开 静态 属性读 类型 = 整数 注释 = "补丁操作失败的数组索引,返回0表示成功." 注释 = "* 返回-1表示本指针未创建,无法获取错误." 折叠 @禁止流程检查 = 真>
+    方法 错误索引 <公开 静态 属性读 类型 = 整数 注释 = "补丁操作失败的数组索引,返回0表示成功." 注释 = "注意: 使用本方法前必须确保指针不为空!" 折叠 @禁止流程检查 = 真>
     参数 本指针 <类型 = YYJSON补丁错误>
     {
-        @ return @<本指针> != nullptr ? (INT)@<本指针>->idx : -1;
+        @ return (INT)@<本指针>->idx;
     }
 
-    方法 错误信息 <公开 静态 属性读 类型 = 文本型 注释 = "返回具体的错误信息,空文本表示操作成功." 折叠 @禁止流程检查 = 真>
+    方法 错误信息 <公开 静态 属性读 类型 = 文本型 注释 = "返回具体的错误信息,空文本表示操作成功." 注释 = "注意: 使用本方法前必须确保指针不为空!" 折叠 @禁止流程检查 = 真>
     参数 本指针 <类型 = YYJSON补丁错误>
     {
-        @ if (!@<本指针>)
-        @     return _CT2(L"本指针为空,无法获取错误信息.");
         @ return @<本指针>->msg != nullptr ? @an<CVolString>{@<本指针>->msg} : _CT2(L"");
     }
 
-    方法 路径错误 <公开 静态 属性读 类型 = YYJSON路径错误 注释 = "返回JSON路径错误" 折叠 @禁止流程检查 = 真>
+    方法 路径错误 <公开 静态 属性读 类型 = YYJSON路径错误 注释 = "返回JSON路径错误" 注释 = "注意: 使用本方法前必须确保指针不为空!" 折叠 @禁止流程检查 = 真>
     参数 本指针 <类型 = YYJSON补丁错误>
     {
-        @ return @<本指针> != nullptr ? &@<本指针>->ptr : nullptr;
+        @ return &@<本指针>->ptr;
     }
 }
 
@@ -1965,98 +1948,108 @@
     常量 无需转义 <公开 类型 = 无符号字节 值 = @YYJSON_SUBTYPE_NOESC 注释 = "表示该文本在序列化时不需要转义">
 }
 
-类 YYJSON解析选项 <公开 注释 = "提供解析JSON文档时的选项" 折叠 隐藏值属性 = "0" @文档 = "category = \"JSON支持.YYJSON.常量\""
-        @类用途 = 禁止创建对象>
+类 YYJSON解析选项 <公开 注释 = "提供解析JSON文档时的选项" 折叠 折叠2 @文档 = "category = \"JSON支持.YYJSON.常量\""
+        @别名 = "yyjson_read_flag" @别名类型 = 本地整数基本类型 @有效值范围 = "0, 0xFFFFFFFF">
 {
-    常量 默认 <公开 类型 = 整数 值 = @YYJSON_READ_NOFLAG 注释 = "默认选项(RFC 8259兼容)" 注释 = " - 将正整数读取为无符号长整数"
+    常量 默认 <公开 类型 = YYJSON解析选项 值 = @YYJSON_READ_NOFLAG 注释 = "默认选项(RFC 8259兼容)" 注释 = " - 将正整数读取为无符号长整数"
             注释 = " - 将负整数读取为有符号长整数" 注释 = " - 以最接近的值舍入模式将浮点数读取为双精度小数" 注释 = " - 将不能适配为整数的值读取为双精度小数"
             注释 = " - 遇到无穷大的小数时报错" 注释 = " - 文本包含无效的UTF-8字符或BOM时报错" 注释 = " - 遇到尾随逗号、注释、inf和nan字面量时报错">
-    常量 原位解析 <公开 类型 = 整数 值 = @YYJSON_READ_INSITU 注释 = "不复制数据,直接使用原数据内存(注意: 原数据将被修改)."
+    常量 原位解析 <公开 类型 = YYJSON解析选项 值 = @YYJSON_READ_INSITU 注释 = "不复制数据,直接使用原数据内存(注意: 原数据将被修改)."
             注释 = "此选项允许解析器修改和使用输入数据来存储文本值,可以略微提高读取速度." 注释 = "调用者应在释放JSON文档之前保留输入数据." 注释 = "使用此选项,输入数据必须至少填充4个字节.">
-    常量 完成后停止 <公开 类型 = 整数 值 = @YYJSON_READ_STOP_WHEN_DONE 注释 = "如果JSON文档后面还有其他内容,请在解析完成后停止,而不是发出错误."
+    常量 完成后停止 <公开 类型 = YYJSON解析选项 值 = @YYJSON_READ_STOP_WHEN_DONE 注释 = "如果JSON文档后面还有其他内容,请在解析完成后停止,而不是发出错误."
             注释 = "此选项可用于解析较大数据中的一小块JSON.">
-    常量 允许尾随逗号 <公开 类型 = 整数 值 = @YYJSON_READ_ALLOW_TRAILING_COMMAS 注释 = "允许在对象和数组末尾使用单个尾随逗号(非标准)."
+    常量 允许尾随逗号 <公开 类型 = YYJSON解析选项 值 = @YYJSON_READ_ALLOW_TRAILING_COMMAS 注释 = "允许在对象和数组末尾使用单个尾随逗号(非标准)."
             注释 = "例如: [1,2,3,] 和 {\"a\":1,\"b\":2,}">
-    常量 允许注释 <公开 类型 = 整数 值 = @YYJSON_READ_ALLOW_COMMENTS 注释 = "允许JSON文档中存在有C语言风格的单行注释和多行注释(非标准).">
-    常量 允许特殊值 <公开 类型 = 整数 值 = @YYJSON_READ_ALLOW_INF_AND_NAN 注释 = "允许 nan/inf 数字或不区分大小写的文字(非标准).">
-    常量 读取数字为原始值 <公开 类型 = 整数 值 = @YYJSON_READ_NUMBER_AS_RAW 注释 = "将所有数字读取为原始文本值">
-    常量 允许无效Unicode <公开 类型 = 整数 值 = @YYJSON_READ_ALLOW_INVALID_UNICODE 注释 = "解析字符串值时允许读取无效的Unicode.">
-    常量 读取大数为原始值 <公开 类型 = 整数 值 = @YYJSON_READ_BIGNUM_AS_RAW 注释 = "将大数读取为原始文本值">
+    常量 允许注释 <公开 类型 = YYJSON解析选项 值 = @YYJSON_READ_ALLOW_COMMENTS 注释 = "允许JSON文档中存在有C语言风格的单行注释和多行注释(非标准).">
+    常量 允许特殊值 <公开 类型 = YYJSON解析选项 值 = @YYJSON_READ_ALLOW_INF_AND_NAN 注释 = "允许 nan/inf 数字或不区分大小写的文字(非标准).">
+    常量 读取数字为原始值 <公开 类型 = YYJSON解析选项 值 = @YYJSON_READ_NUMBER_AS_RAW 注释 = "将所有数字读取为原始文本值">
+    常量 允许无效Unicode <公开 类型 = YYJSON解析选项 值 = @YYJSON_READ_ALLOW_INVALID_UNICODE 注释 = "解析字符串值时允许读取无效的Unicode.">
+    常量 读取大数为原始值 <公开 类型 = YYJSON解析选项 值 = @YYJSON_READ_BIGNUM_AS_RAW 注释 = "将大数读取为原始文本值">
+    常量 跳过BOM <公开 类型 = YYJSON解析选项 值 = @YYJSON_READ_ALLOW_BOM 注释 = "允许存在UTF-8 BOM签名,并在解析前跳过它(非标准).">
 }
 
-类 YYJSON序列化选项 <公开 注释 = "提供序列化JSON值时的选项" 折叠 隐藏值属性 = "0" @文档 = "category = \"JSON支持.YYJSON.常量\""
-        @类用途 = 禁止创建对象>
+类 YYJSON序列化选项 <公开 注释 = "提供序列化JSON值时的选项" 折叠 折叠2 @文档 = "category = \"JSON支持.YYJSON.常量\""
+        @别名 = "yyjson_write_flag" @别名类型 = 本地整数基本类型 @有效值范围 = "0, 0xFFFFFFFF">
 {
-    常量 默认 <公开 类型 = 整数 值 = @YYJSON_WRITE_NOFLAG 注释 = "默认选项:" 注释 = " - 以最小占用输出JSON"
+    常量 默认 <公开 类型 = YYJSON序列化选项 值 = @YYJSON_WRITE_NOFLAG 注释 = "默认选项:" 注释 = " - 以最小占用输出JSON"
             注释 = " - 遇到 inf/nan 数字时报错" 注释 = " - 遇到无效的UTF-8字符时报错" 注释 = " - 不转义Unicode字符和斜杠">
-    常量 缩进 <公开 类型 = 整数 值 = @YYJSON_WRITE_PRETTY 注释 = "以4个空格符号缩进方式输出内容">
-    常量 转义Unicode <公开 类型 = 整数 值 = @YYJSON_WRITE_ESCAPE_UNICODE 注释 = "将Unicode字符转义为\'uXXXX\',仅输出ASCII码.">
-    常量 转义斜杠 <公开 类型 = 整数 值 = @YYJSON_WRITE_ESCAPE_SLASHES 注释 = "将\'/\'转义为\'\\/\'">
-    常量 允许特殊值 <公开 类型 = 整数 值 = @YYJSON_WRITE_ALLOW_INF_AND_NAN
+    常量 缩进 <公开 类型 = YYJSON序列化选项 值 = @YYJSON_WRITE_PRETTY 注释 = "以4个空格符号缩进方式输出内容">
+    常量 转义Unicode <公开 类型 = YYJSON序列化选项 值 = @YYJSON_WRITE_ESCAPE_UNICODE
+            注释 = "将Unicode字符转义为\'uXXXX\',仅输出ASCII码.">
+    常量 转义斜杠 <公开 类型 = YYJSON序列化选项 值 = @YYJSON_WRITE_ESCAPE_SLASHES 注释 = "将\'/\'转义为\'\\/\'">
+    常量 允许特殊值 <公开 类型 = YYJSON序列化选项 值 = @YYJSON_WRITE_ALLOW_INF_AND_NAN
             注释 = "将 inf/nan 数字输出为\"Infinity\"和\"NaN\"字面(非标准)">
-    常量 输出特殊值为空值 <公开 类型 = 整数 值 = @YYJSON_WRITE_INF_AND_NAN_AS_NULL 注释 = "将 inf/nan 数字输出为null字面">
-    常量 允许无效Unicode <公开 类型 = 整数 值 = @YYJSON_WRITE_ALLOW_INVALID_UNICODE 注释 = "在编码文本值时允许无效的Unicode字符(非标准)."
-            注释 = "将按字节复制无效的Unicode字符." 注释 = "如果同时设置了\"转义Unicode\",所有的无效字符将转义为\'U+FFFD\'(替代字符).">
-    常量 缩进两个空格 <公开 类型 = 整数 值 = @YYJSON_WRITE_PRETTY_TWO_SPACES 注释 = "以2个空格符号缩进方式输出内容">
-    常量 末尾换行 <公开 类型 = 整数 值 = @YYJSON_WRITE_NEWLINE_AT_END 注释 = "在JSON的末尾添加一个\'\\n\'换行符">
+    常量 输出特殊值为空值 <公开 类型 = YYJSON序列化选项 值 = @YYJSON_WRITE_INF_AND_NAN_AS_NULL 注释 = "将 inf/nan 数字输出为null字面">
+    常量 允许无效Unicode <公开 类型 = YYJSON序列化选项 值 = @YYJSON_WRITE_ALLOW_INVALID_UNICODE
+            注释 = "在编码文本值时允许无效的Unicode字符(非标准)." 注释 = "将按字节复制无效的Unicode字符."
+            注释 = "如果同时设置了\"转义Unicode\",所有的无效字符将转义为\'U+FFFD\'(替代字符).">
+    常量 缩进两个空格 <公开 类型 = YYJSON序列化选项 值 = @YYJSON_WRITE_PRETTY_TWO_SPACES 注释 = "以2个空格符号缩进方式输出内容">
+    常量 末尾换行 <公开 类型 = YYJSON序列化选项 值 = @YYJSON_WRITE_NEWLINE_AT_END 注释 = "在JSON的末尾添加一个\'\\n\'换行符">
 }
 
-类 YYJSON解析错误码 <公开 注释 = "\"YYJSON解析错误\"中的\"错误代码\"" 折叠 隐藏值属性 = "0"
-        @文档 = "category = \"JSON支持.YYJSON.常量\"" @常量类 = 整数>
+类 YYJSON解析错误码 <公开 注释 = "\"YYJSON解析错误\"中的\"错误代码\"" 折叠 折叠2 隐藏值属性 = "0"
+        @文档 = "category = \"JSON支持.YYJSON.常量\"" @别名 = "yyjson_read_code" @别名类型 = 本地整数基本类型
+        @有效值范围 = "0, 0xFFFFFFFF">
 {
-    常量 成功 <公开 值 = @YYJSON_READ_SUCCESS 注释 = "0 执行成功,没有错误.">
-    常量 无效的参数 <公开 值 = @YYJSON_READ_ERROR_INVALID_PARAMETER 注释 = "1 提供的参数无效,例如输入文本为空指针或长度为0.">
-    常量 内存分配失败 <公开 值 = @YYJSON_READ_ERROR_MEMORY_ALLOCATION 注释 = "2 内存分配失败">
-    常量 内容为空 <公开 值 = @YYJSON_READ_ERROR_EMPTY_CONTENT 注释 = "3 输入的JSON文本为空">
-    常量 意外内容 <公开 值 = @YYJSON_READ_ERROR_UNEXPECTED_CONTENT 注释 = "4 文本后面存在意外的内容,例如 `[123]abc`">
-    常量 意外结尾 <公开 值 = @YYJSON_READ_ERROR_UNEXPECTED_END 注释 = "5 存在意外的结尾,例如 `[123`">
-    常量 意外字符 <公开 值 = @YYJSON_READ_ERROR_UNEXPECTED_CHARACTER 注释 = "6 文档中出现了意外字符,比如 `[abc]`">
-    常量 无效的JSON结构 <公开 值 = @YYJSON_READ_ERROR_JSON_STRUCTURE 注释 = "7 无效的JSON结构,例如 `[1,]`">
-    常量 无效的注释 <公开 值 = @YYJSON_READ_ERROR_INVALID_COMMENT 注释 = "8 无效的注释,例如未封闭的多行注释.">
-    常量 无效的数值 <公开 值 = @YYJSON_READ_ERROR_INVALID_NUMBER 注释 = "9 存在无效的数值,例如 `123.e12`, `000`">
-    常量 无效的文本 <公开 值 = @YYJSON_READ_ERROR_INVALID_STRING 注释 = "10 无效的字符串,例如文本中有无效的转义字符.">
-    常量 无效的字面 <公开 值 = @YYJSON_READ_ERROR_LITERAL 注释 = "11 无效的JSON字面量,例如 `true` 写错成 `truu`">
-    常量 无法打开文件 <公开 值 = @YYJSON_READ_ERROR_FILE_OPEN 注释 = "12 无法打开文件">
-    常量 无法读入文件 <公开 值 = @YYJSON_READ_ERROR_FILE_READ 注释 = "13 无法读入文件">
+    常量 成功 <公开 类型 = YYJSON解析错误码 值 = @YYJSON_READ_SUCCESS 注释 = "0 执行成功,没有错误.">
+    常量 无效的参数 <公开 类型 = YYJSON解析错误码 值 = @YYJSON_READ_ERROR_INVALID_PARAMETER
+            注释 = "1 提供的参数无效,例如输入文本为空指针或长度为0.">
+    常量 内存分配失败 <公开 类型 = YYJSON解析错误码 值 = @YYJSON_READ_ERROR_MEMORY_ALLOCATION 注释 = "2 内存分配失败">
+    常量 内容为空 <公开 类型 = YYJSON解析错误码 值 = @YYJSON_READ_ERROR_EMPTY_CONTENT 注释 = "3 输入的JSON文本为空">
+    常量 意外内容 <公开 类型 = YYJSON解析错误码 值 = @YYJSON_READ_ERROR_UNEXPECTED_CONTENT
+            注释 = "4 文本后面存在意外的内容,例如 `[123]abc`">
+    常量 意外结尾 <公开 类型 = YYJSON解析错误码 值 = @YYJSON_READ_ERROR_UNEXPECTED_END 注释 = "5 存在意外的结尾,例如 `[123`">
+    常量 意外字符 <公开 类型 = YYJSON解析错误码 值 = @YYJSON_READ_ERROR_UNEXPECTED_CHARACTER 注释 = "6 文档中出现了意外字符,比如 `[abc]`">
+    常量 无效的JSON结构 <公开 类型 = YYJSON解析错误码 值 = @YYJSON_READ_ERROR_JSON_STRUCTURE 注释 = "7 无效的JSON结构,例如 `[1,]`">
+    常量 无效的注释 <公开 类型 = YYJSON解析错误码 值 = @YYJSON_READ_ERROR_INVALID_COMMENT 注释 = "8 无效的注释,例如未封闭的多行注释.">
+    常量 无效的数值 <公开 类型 = YYJSON解析错误码 值 = @YYJSON_READ_ERROR_INVALID_NUMBER
+            注释 = "9 存在无效的数值,例如 `123.e12`, `000`">
+    常量 无效的文本 <公开 类型 = YYJSON解析错误码 值 = @YYJSON_READ_ERROR_INVALID_STRING 注释 = "10 无效的字符串,例如文本中有无效的转义字符.">
+    常量 无效的字面 <公开 类型 = YYJSON解析错误码 值 = @YYJSON_READ_ERROR_LITERAL 注释 = "11 无效的JSON字面量,例如 `true` 写错成 `truu`">
+    常量 无法打开文件 <公开 类型 = YYJSON解析错误码 值 = @YYJSON_READ_ERROR_FILE_OPEN 注释 = "12 无法打开文件">
+    常量 无法读入文件 <公开 类型 = YYJSON解析错误码 值 = @YYJSON_READ_ERROR_FILE_READ 注释 = "13 无法读入文件">
 }
 
-类 YYJSON序列化错误码 <公开 注释 = "\"YYJSON序列化错误\"中的\"错误代码\"" 折叠 隐藏值属性 = "0"
-        @文档 = "category = \"JSON支持.YYJSON.常量\"" @常量类 = 整数>
+类 YYJSON序列化错误码 <公开 注释 = "\"YYJSON序列化错误\"中的\"错误代码\"" 折叠 折叠2 隐藏值属性 = "0"
+        @文档 = "category = \"JSON支持.YYJSON.常量\"" @别名 = "yyjson_write_code" @别名类型 = 本地整数基本类型
+        @有效值范围 = "0, 0xFFFFFFFF">
 {
-    常量 成功 <公开 值 = @YYJSON_WRITE_SUCCESS 注释 = "0 执行成功,没有错误.">
-    常量 无效的参数 <公开 值 = @YYJSON_WRITE_ERROR_INVALID_PARAMETER 注释 = "1 提供的参数无效,例如JSON文档为空指针.">
-    常量 内存分配失败 <公开 值 = @YYJSON_WRITE_ERROR_MEMORY_ALLOCATION 注释 = "2 内存分配失败">
-    常量 无效的值类型 <公开 值 = @YYJSON_WRITE_ERROR_INVALID_VALUE_TYPE 注释 = "3 JSON文档的值类型无效">
-    常量 出现特殊值 <公开 值 = @YYJSON_WRITE_ERROR_NAN_OR_INF 注释 = "4 存在非数或无穷数等特殊值">
-    常量 无法打开文件 <公开 值 = @YYJSON_WRITE_ERROR_FILE_OPEN 注释 = "5 无法打开文件">
-    常量 无法写出文件 <公开 值 = @YYJSON_WRITE_ERROR_FILE_WRITE 注释 = "6 无法写出文件">
-    常量 无效的文本 <公开 值 = @YYJSON_WRITE_ERROR_INVALID_STRING 注释 = "7 字符串中有无效的Unicode码">
+    常量 成功 <公开 类型 = YYJSON序列化错误码 值 = @YYJSON_WRITE_SUCCESS 注释 = "0 执行成功,没有错误.">
+    常量 无效的参数 <公开 类型 = YYJSON序列化错误码 值 = @YYJSON_WRITE_ERROR_INVALID_PARAMETER 注释 = "1 提供的参数无效,例如JSON文档为空指针.">
+    常量 内存分配失败 <公开 类型 = YYJSON序列化错误码 值 = @YYJSON_WRITE_ERROR_MEMORY_ALLOCATION 注释 = "2 内存分配失败">
+    常量 无效的值类型 <公开 类型 = YYJSON序列化错误码 值 = @YYJSON_WRITE_ERROR_INVALID_VALUE_TYPE 注释 = "3 JSON文档的值类型无效">
+    常量 出现特殊值 <公开 类型 = YYJSON序列化错误码 值 = @YYJSON_WRITE_ERROR_NAN_OR_INF 注释 = "4 存在非数或无穷数等特殊值">
+    常量 无法打开文件 <公开 类型 = YYJSON序列化错误码 值 = @YYJSON_WRITE_ERROR_FILE_OPEN 注释 = "5 无法打开文件">
+    常量 无法写出文件 <公开 类型 = YYJSON序列化错误码 值 = @YYJSON_WRITE_ERROR_FILE_WRITE 注释 = "6 无法写出文件">
+    常量 无效的文本 <公开 类型 = YYJSON序列化错误码 值 = @YYJSON_WRITE_ERROR_INVALID_STRING 注释 = "7 字符串中有无效的Unicode码">
 }
 
-类 YYJSON路径错误码 <公开 注释 = "\"YYJSON路径错误\"中的\"错误代码\"" 折叠 隐藏值属性 = "0"
-        @文档 = "category = \"JSON支持.YYJSON.常量\"" @常量类 = 整数>
+类 YYJSON路径错误码 <公开 注释 = "\"YYJSON路径错误\"中的\"错误代码\"" 折叠 折叠2 隐藏值属性 = "0"
+        @文档 = "category = \"JSON支持.YYJSON.常量\"" @别名 = "yyjson_ptr_code" @别名类型 = 本地整数基本类型
+        @有效值范围 = "0, 0xFFFFFFFF">
 {
-    常量 成功 <公开 值 = @YYJSON_WRITE_SUCCESS 注释 = "0 执行成功,没有错误.">
-    常量 无效的参数 <公开 值 = @YYJSON_WRITE_ERROR_INVALID_PARAMETER 注释 = "1 提供的参数无效,例如JSON文档为空指针.">
-    常量 内存分配失败 <公开 值 = @YYJSON_WRITE_ERROR_MEMORY_ALLOCATION 注释 = "2 内存分配失败">
-    常量 无效的值类型 <公开 值 = @YYJSON_WRITE_ERROR_INVALID_VALUE_TYPE 注释 = "3 JSON文档的值类型无效">
-    常量 出现特殊值 <公开 值 = @YYJSON_WRITE_ERROR_NAN_OR_INF 注释 = "4 存在非数或无穷数等特殊值">
-    常量 无法打开文件 <公开 值 = @YYJSON_WRITE_ERROR_FILE_OPEN 注释 = "5 无法打开文件">
-    常量 无法写出文件 <公开 值 = @YYJSON_WRITE_ERROR_FILE_WRITE 注释 = "6 无法写出文件">
-    常量 无效的文本 <公开 值 = @YYJSON_WRITE_ERROR_INVALID_STRING 注释 = "7 字符串中有无效的Unicode码">
+    常量 成功 <公开 类型 = YYJSON路径错误码 值 = @YYJSON_PTR_ERR_NONE 注释 = "0 执行成功,没有错误.">
+    常量 无效的参数 <公开 类型 = YYJSON路径错误码 值 = @YYJSON_PTR_ERR_PARAMETER 注释 = "1 提供的参数无效,例如JSON文档为空指针.">
+    常量 语法错误 <公开 类型 = YYJSON路径错误码 值 = @YYJSON_PTR_ERR_SYNTAX 注释 = "2 JSON路径语法错误,如无效转义.">
+    常量 解析失败 <公开 类型 = YYJSON路径错误码 值 = @YYJSON_PTR_ERR_RESOLVE 注释 = "3 JSON路径解析失败,例如索引超出范围、找不到键名.">
+    常量 根节点为空 <公开 类型 = YYJSON路径错误码 值 = @YYJSON_PTR_ERR_NULL_ROOT 注释 = "4 文档的根节点为NULL,但它是函数调用所必需的.">
+    常量 无法设置根节点 <公开 类型 = YYJSON路径错误码 值 = @YYJSON_PTR_ERR_SET_ROOT 注释 = "5 无法设置根节点,因为目标不是JSON文档.">
+    常量 内存分配失败 <公开 类型 = YYJSON路径错误码 值 = @YYJSON_PTR_ERR_MEMORY_ALLOCATION 注释 = "6 内存分配失败,无法创建新值.">
 }
 
-类 YYJSON补丁错误码 <公开 注释 = "\"YYJSON补丁错误\"中的\"错误代码\"" 折叠 隐藏值属性 = "0"
-        @文档 = "category = \"JSON支持.YYJSON.常量\"" @常量类 = 整数>
+类 YYJSON补丁错误码 <公开 注释 = "\"YYJSON补丁错误\"中的\"错误代码\"" 折叠 折叠2 隐藏值属性 = "0"
+        @文档 = "category = \"JSON支持.YYJSON.常量\"" @别名 = "yyjson_patch_code" @别名类型 = 本地整数基本类型
+        @有效值范围 = "0, 0xFFFFFFFF">
 {
-    常量 成功 <公开 值 = @YYJSON_PATCH_SUCCESS 注释 = "0 执行成功,没有错误.">
-    常量 无效的参数 <公开 值 = @YYJSON_PATCH_ERROR_INVALID_PARAMETER 注释 = "1 提供的参数无效,例如空JSON文档或非数组补丁.">
-    常量 内存分配失败 <公开 值 = @YYJSON_PATCH_ERROR_MEMORY_ALLOCATION 注释 = "2 内存分配失败">
-    常量 无效的操作 <公开 值 = @YYJSON_PATCH_ERROR_INVALID_OPERATION 注释 = "3 JSON补丁操作的不是对象类型">
-    常量 丢失键名 <公开 值 = @YYJSON_PATCH_ERROR_MISSING_KEY 注释 = "4 JSON补丁操作缺少了必需的键名">
-    常量 无效的成员 <公开 值 = @YYJSON_PATCH_ERROR_INVALID_MEMBER 注释 = "5 JSON补丁操作的成员无效">
-    常量 不相等 <公开 值 = @YYJSON_PATCH_ERROR_EQUAL 注释 = "6 JSON补丁操作的测试结果不相等">
-    常量 路径错误 <公开 值 = @YYJSON_PATCH_ERROR_POINTER 注释 = "7 JSON补丁操作中遇到JSON路径错误">
+    常量 成功 <公开 类型 = YYJSON补丁错误码 值 = @YYJSON_PATCH_SUCCESS 注释 = "0 执行成功,没有错误.">
+    常量 无效的参数 <公开 类型 = YYJSON补丁错误码 值 = @YYJSON_PATCH_ERROR_INVALID_PARAMETER
+            注释 = "1 提供的参数无效,例如空JSON文档或非数组补丁.">
+    常量 内存分配失败 <公开 类型 = YYJSON补丁错误码 值 = @YYJSON_PATCH_ERROR_MEMORY_ALLOCATION 注释 = "2 内存分配失败">
+    常量 无效的操作 <公开 类型 = YYJSON补丁错误码 值 = @YYJSON_PATCH_ERROR_INVALID_OPERATION 注释 = "3 JSON补丁操作的不是对象类型">
+    常量 丢失键名 <公开 类型 = YYJSON补丁错误码 值 = @YYJSON_PATCH_ERROR_MISSING_KEY 注释 = "4 JSON补丁操作缺少了必需的键名">
+    常量 无效的成员 <公开 类型 = YYJSON补丁错误码 值 = @YYJSON_PATCH_ERROR_INVALID_MEMBER 注释 = "5 JSON补丁操作的成员无效">
+    常量 不相等 <公开 类型 = YYJSON补丁错误码 值 = @YYJSON_PATCH_ERROR_EQUAL 注释 = "6 JSON补丁操作的测试结果不相等">
+    常量 路径错误 <公开 类型 = YYJSON补丁错误码 值 = @YYJSON_PATCH_ERROR_POINTER 注释 = "7 JSON补丁操作中遇到JSON路径错误">
 
     #
 }
