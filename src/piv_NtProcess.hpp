@@ -827,15 +827,11 @@ public:
      */
     inline int32_t modify_memory_protect(void *address, size_t mem_size, DWORD new_protect) noexcept
     {
-        if (ProInfo)
+        if (ProInfo && !ProInfo->isWow64)
         {
-            DWORD OldProtect;
-            if (::VirtualProtectEx(ProInfo->hProcess, address, mem_size, new_protect, &OldProtect))
-                return static_cast<int32_t>(OldProtect);
-            /*
+            ULONG OldProtect;
             if (NT_SUCCESS(Nt.NtProtectVirtualMemory(ProInfo->hProcess, &address, reinterpret_cast<PSIZE_T>(&mem_size), new_protect, &OldProtect)))
                 return static_cast<int32_t>(OldProtect);
-            */
         }
         return -1;
     }
@@ -1154,10 +1150,12 @@ public:
                 if (!change_protect)
                     return NT_SUCCESS(Nt.NtWriteVirtualMemory(ProInfo->hProcess, reinterpret_cast<PVOID>(write_address), data_address, data_size, NULL));
                 DWORD dwOldProtect = 0;
-                if (NT_SUCCESS(Nt.NtProtectVirtualMemory(ProInfo->hProcess, reinterpret_cast<PVOID *>(&write_address), reinterpret_cast<PSIZE_T>(&data_size), dwNewProtect, &dwOldProtect)))
+                VOID *BaseAddress = reinterpret_cast<VOID *>(write_address);
+                SIZE_T RegionSize = static_cast<SIZE_T>(data_size);
+                if (NT_SUCCESS(Nt.NtProtectVirtualMemory(ProInfo->hProcess, &BaseAddress, &RegionSize, dwNewProtect, &dwOldProtect)))
                 {
                     result = NT_SUCCESS(Nt.NtWriteVirtualMemory(ProInfo->hProcess, reinterpret_cast<PVOID>(write_address), data_address, data_size, NULL));
-                    Nt.NtProtectVirtualMemory(ProInfo->hProcess, reinterpret_cast<PVOID *>(&write_address), reinterpret_cast<PSIZE_T>(&data_size), dwOldProtect, &dwOldProtect);
+                    Nt.NtProtectVirtualMemory(ProInfo->hProcess, &BaseAddress, &RegionSize, dwOldProtect, &dwOldProtect);
                 }
             }
         }
