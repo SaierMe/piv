@@ -3065,7 +3065,7 @@ public:
  *                    false: 检查const char*是否为有效的UTF-8编码,不符合将当作ANSI编码进行转换;
  * @tparam code_page ANSI编码的代码页;
  */
-template <bool valid_utf8 = true, uint32_t code_page = CP_ACP>
+template <bool valid_utf8, uint32_t code_page = CP_ACP>
 class PivAny2U
 {
 private:
@@ -3297,7 +3297,7 @@ public:
  *                    false: 检查const char*是否为有效的UTF-8编码,不符合将当作ANSI编码进行转换;
  * @tparam code_page ANSI编码的代码页;
  */
-template <bool valid_utf8 = true, uint32_t code_page = CP_ACP>
+template <bool valid_utf8, uint32_t code_page = CP_ACP>
 class PivAny2Us
 {
 public:
@@ -3501,7 +3501,7 @@ public:
  *                    false: 检查const char*是否为有效的UTF-8编码,不符合将当作ANSI编码进行转换;
  * @tparam code_page ANSI编码的代码页;
  */
-template <bool valid_utf8 = true, uint32_t code_page = CP_ACP>
+template <bool valid_utf8, uint32_t code_page = CP_ACP>
 class PivAny2W
 {
 private:
@@ -3726,7 +3726,7 @@ public:
  *                    false: 检查const char*是否为有效的UTF-8编码,不符合将当作ANSI编码进行转换;
  * @tparam code_page ANSI编码的代码页;
  */
-template <class StringT = std::wstring, bool valid_utf8 = true, uint32_t code_page = CP_ACP, typename Enable = std::enable_if<std::is_same<StringT, std::wstring>::value || std::is_same<StringT, CVolString>::value>::type>
+template <class StringT, bool valid_utf8, uint32_t code_page = CP_ACP, typename Enable = std::enable_if<std::is_same<StringT, std::wstring>::value || std::is_same<StringT, CVolString>::value>::type>
 class PivAny2Ws
 {
 public:

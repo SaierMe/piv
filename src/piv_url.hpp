@@ -345,7 +345,7 @@ public:
      */
     inline CWString GetScheme() const
     {
-        return PivAny2Ws<CWString>{scheme}.str;
+        return PivAny2Ws<CWString, true>{scheme}.str;
     }
 
     /**
@@ -389,7 +389,7 @@ public:
      */
     inline CWString GetHost() const
     {
-        return PivAny2Ws<CWString>{host}.str;
+        return PivAny2Ws<CWString, true>{host}.str;
     }
 
     /**
@@ -398,7 +398,7 @@ public:
      */
     inline CWString GetPath() const
     {
-        return PivAny2Ws<CWString>{path}.str;
+        return PivAny2Ws<CWString, true>{path}.str;
     }
 
     /**
@@ -407,7 +407,7 @@ public:
      */
     inline CWString GetPort() const
     {
-        return PivAny2Ws<CWString>{port}.str;
+        return PivAny2Ws<CWString, true>{port}.str;
     }
 
     /**
@@ -416,7 +416,7 @@ public:
      */
     inline CWString GetQuery() const
     {
-        return PivAny2Ws<CWString>{query}.str;
+        return PivAny2Ws<CWString, true>{query}.str;
     }
 
     /**
@@ -425,7 +425,7 @@ public:
      */
     inline CWString GetFragment() const
     {
-        return PivAny2Ws<CWString>{fragment}.str;
+        return PivAny2Ws<CWString, true>{fragment}.str;
     }
 
     /**

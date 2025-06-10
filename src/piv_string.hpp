@@ -171,13 +171,13 @@ trim_right(T&& str)
 {
     if (!str.empty())
     {
-        size_t count = 0;
-        for (auto it = str.rbegin(); it != str.rend(); it++, count++)
+        size_t idx = str.size(), count = 0;
+        for (auto it = str.rbegin(); it != str.rend(); it++, count++, idx--)
         {
             if (static_cast<uint16_t>(*it) > ' ')
                 break;
         }
-        str.erase(count);
+        str.erase(idx, count);
     }
     return std::forward<T>(str);
 }
@@ -188,13 +188,13 @@ trim_right(T&& str)
 {
     if (!str.empty())
     {
-        size_t count = 0;
-        for (auto it = str.rbegin(); it != str.rend(); it++, count++)
+        size_t idx = str.size(), count = 0;
+        for (auto it = str.rbegin(); it != str.rend(); it++, count++, idx--)
         {
             if (static_cast<uint16_t>(*it) > ' ')
                 break;
         }
-        str.erase(count);
+        str.erase(idx, count);
     }
     return std::forward<T>(str);
 }
