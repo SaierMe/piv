@@ -5,48 +5,6 @@
 类 系统辅助类 <公开 注释 = "一些未分类的全局辅助方法" 折叠 折叠2 @文档 = "category = \"系统操作\"" @别名 = "//" @别名类型 = 本地类 @类用途 = 访问静态成员
         @全局类 = 真>
 {
-    方法 跳转到 <公开 静态 注释 = "goto操作符的封装,需要配合\"置跳转标号\"使用." 折叠 @嵌入式方法 = "">
-    参数 语句标号 <类型 = 文本型 注释 = "  请提供由\"置跳转标号\"设置过标号." 注释 = "  只能填入用\"\"包围的字符串字面量,不能使用文本变量." @需求类型 = 立即数或常量>
-    {
-        @ goto @pvpt<语句标号>
-    }
-
-    方法 置跳转标号 <公开 静态 注释 = "设置语句标号,用设置\"跳转到\"(goto)的目标位置." 折叠 @嵌入式方法 = "no_end_sem = true">
-    参数 语句标号 <类型 = 文本型 注释 = "只能填入用\"\"包围的字符串字面量,不能使用文本变量." @需求类型 = 立即数或常量>
-    {
-        @ @pvpt<语句标号>:
-    }
-
-    方法 取全局单例 <公开 静态 注释 = "  获取指定类型对象类的唯一性全局实例." 注释 = "  如果该类型的全局对象尚不存在,则自动创建一个新对象并记录到系统数组中返回,否则直接"
-            注释 = "返回在系统数组中的已有全局类对象." 注释 = "  本方法支持在多线程环境中运行. 当用户程序退出时,系统将自动释放所有已有的全局对象."
-            注释 = "  注: 与系统的\"取全局对象\"相比,本方法不需要做类型转换,直接返回你需要的对象类型." 折叠 @嵌入式方法 = "" @视窗.返回参考 = 真>
-    参数 所欲获取对象类型 <类型 = 对象类 注释 = "提供所欲获取全局对象的类型" @需求类型 = 数据类型 @返回值类型 = 0>
-    {
-        @ dynamic_cast<@<所欲获取对象类型>&>(g_objVolApp.GetRefGlobalObject(VOL_RUNTIME_CLASS(@<所欲获取对象类型>)))
-    }
-
-    方法 构造对象 <公开 静态 注释 = "创建并返回一个所指定类型的新对象." 返回值注释 = "所返回对象的类型跟提供的数据类型一致,无需转换类型." 折叠 @嵌入式方法 = "">
-    参数 所欲创建对象的类型 <注释 = "提供所欲创建对象的数据类型" @需求类型 = 数据类型 @匹配类型 = 通用类 @返回值类型 = 0>
-    {
-        @ @<所欲创建对象的类型> ()
-    }
-
-    方法 带参构造对象 <公开 静态 注释 = "使用提供的参数创建并返回一个所指定类型的新对象." 注释 = "注意: 只能对拥有带参构造函数的类使用,由于火山语法的限制,"
-            注释 = "也不支持C++类和指针等参数." 返回值注释 = "所返回对象的类型跟提供的数据类型一致,无需转换类型." 折叠 @嵌入式方法 = "">
-    参数 所欲创建对象的类型 <注释 = "提供所欲创建对象的数据类型" @需求类型 = 数据类型 @匹配类型 = 通用类 @返回值类型 = 0>
-    参数 参数列表 <注释 = "提供类的构造参数" @匹配类型 = 通用型 @可扩展 = "">
-    {
-        @ @<所欲创建对象的类型> (@<参数列表>)
-    }
-
-    方法 取变量类型名称 <公开 静态 类型 = 文本型 注释 = "返回指定变量的C++类型名称" 折叠 @视窗.外部头文件 = "<typeinfo>" @嵌入式方法 = "">
-    参数 变量 <注释 = "所欲取类型名称的变量" @匹配类型 = 通用型>
-    {
-        @ @an<CVolString>(typeid(@<变量>).name())
-    }
-
-    #
-
     方法 取执行文件路径 <公开 静态 类型 = 文本型 注释 = "返回当前被执行程序文件的完整路径(带文件名)." 折叠 @禁止流程检查 = 真>
     {
         @ TCHAR buf [MAX_PATH + 1] { 0 };
@@ -644,7 +602,8 @@
         @ ofn.lStructSize = sizeof(OPENFILENAMEW);
         @ ofn.hwndOwner = @<父窗口句柄> ? reinterpret_cast<HWND>(@<父窗口句柄>) : NULL;
         @ @an<CVolMem> szFilter;
-        @ if (@<过滤器>.IsEmpty()) {
+        @ if (@<过滤器>.IsEmpty())
+        @ {
         @     ofn.lpstrFilter = NULL;
         @ } else {
         @     szFilter.AddTextValue(@<过滤器>, TRUE);
@@ -667,7 +626,8 @@
         @ if (@<创建时提示>) ofn.Flags |= OFN_CREATEPROMPT;
         @ if (@<禁止解析快捷方式>) ofn.Flags |= OFN_NODEREFERENCELINKS;
         @ if (@<不改变目录>) ofn.Flags |= OFN_NOCHANGEDIR;
-        @ if (::GetOpenFileNameW(&ofn)) {
+        @ if (::GetOpenFileNameW(&ofn))
+        @ {
         @     @<文件名>.SetText(ofn.lpstrFile);
         @     return TRUE;
         @ }
@@ -692,7 +652,8 @@
         @ ofn.lStructSize = sizeof(OPENFILENAMEW);
         @ ofn.hwndOwner = @<父窗口句柄> ? reinterpret_cast<HWND>(@<父窗口句柄>) : NULL;
         @ @an<CVolMem> szFilter;
-        @ if (@<过滤器>.IsEmpty()) {
+        @ if (@<过滤器>.IsEmpty())
+        @ {
         @     ofn.lpstrFilter = NULL;
         @ } else {
         @     szFilter.AddTextValue(@<过滤器>, TRUE);
@@ -708,11 +669,13 @@
         @ ofn.nFilterIndex = static_cast<DWORD>(@<初始过滤器>);
         @ ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_ALLOWMULTISELECT | OFN_NODEREFERENCELINKS;
         @ if (@<不改变目录>) ofn.Flags |= OFN_NOCHANGEDIR;
-        @ if (::GetOpenFileNameW(&ofn)) {
+        @ if (::GetOpenFileNameW(&ofn))
+        @ {
         @     @an<CVolString> szPath {ofn.lpstrFile, ofn.nFileOffset};
         @     szPath.CheckAddPathChar();
         @     WCHAR* p = ofn.lpstrFile + ofn.nFileOffset; // 把指针移到第一个文件
-        @     while (*p) {
+        @     while (*p)
+        @     {
         @         @an<CVolString> szFileName;
         @         szFileName.AddText(szPath);
         @         szFileName.AddText(p);
@@ -742,7 +705,8 @@
         @ ofn.lStructSize = sizeof(OPENFILENAMEW);
         @ ofn.hwndOwner = @<父窗口句柄> ? reinterpret_cast<HWND>(@<父窗口句柄>) : NULL;
         @ @an<CVolMem> szFilter;
-        @ if (@<过滤器>.IsEmpty()) {
+        @ if (@<过滤器>.IsEmpty())
+        @ {
         @     ofn.lpstrFilter = NULL;
         @ } else {
         @     szFilter.AddTextValue(@<过滤器>, TRUE);
@@ -764,7 +728,8 @@
         @ ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
         @ if (@<文件覆盖提示>) ofn.Flags |= OFN_OVERWRITEPROMPT;
         @ if (@<不改变目录>) ofn.Flags |= OFN_NOCHANGEDIR;
-        @ if (::GetSaveFileNameW(&ofn)) {
+        @ if (::GetSaveFileNameW(&ofn))
+        @ {
         @     @<文件名>.SetText(ofn.lpstrFile);
         @     return TRUE;
         @ }
@@ -790,19 +755,22 @@
         @ if (!@<按钮标题>.IsNullObject())
         @     hr = pfd->SetOkButtonLabel(@<按钮标题>.GetText());
         @ hr = pfd->Show((HWND)@<父窗口句柄>);
-        @ if (FAILED(hr)) {
+        @ if (FAILED(hr))
+        @ {
         @     pfd->Release();
         @     return folderPath;
         @ }
         @ IShellItem* psi = nullptr;
         @ hr = pfd->GetResult(&psi);
-        @ if (FAILED(hr)) {
+        @ if (FAILED(hr))
+        @ {
         @     pfd->Release();
         @     return folderPath;
         @ }
         @ PWSTR pszFolderPath = nullptr;
         @ hr = psi->GetDisplayName(SIGDN_FILESYSPATH, &pszFolderPath);
-        @ if (SUCCEEDED(hr)) {
+        @ if (SUCCEEDED(hr))
+        @ {
         @     folderPath.SetText(pszFolderPath);
         @     CoTaskMemFree(pszFolderPath);
         @ }
@@ -824,14 +792,18 @@
     #     (pChangeWindowMessageFilterEx)::GetProcAddress(::GetModuleHandle(L"User32.dll"), "ChangeWindowMessageFilterEx");
     # static LRESULT CALLBACK SubClassProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
     # <> </include>
-    # LRESULT CALLBACK @sn<current_class>::SubClassProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+    # LRESULT CALLBACK @sn<current_class>::SubClassProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+    # {
     #     @sn<current_class>* pThis = reinterpret_cast<@sn<current_class>*>(uIdSubclass);
-    #     if (pThis != NULL) {
-    #         if (uMsg == WM_DROPFILES) {
+    #     if (pThis != NULL)
+    #     {
+    #         if (uMsg == WM_DROPFILES)
+    #         {
     #             @dt<文本数组类> saryFileNames;
     #             WCHAR szFileName[MAX_PATH] = {'\0'};
     #             UINT uFileNum = ::DragQueryFileW((HDROP)wParam, 0xFFFFFFFF, NULL, 0);
-    #             for (UINT i = 0; i < uFileNum; ++i) {
+    #             for (UINT i = 0; i < uFileNum; ++i)
+    #             {
     #                 ::DragQueryFileW((HDROP)wParam, i, szFileName, MAX_PATH);
     #                 saryFileNames.data().Add(szFileName);
     #             }
@@ -893,13 +865,13 @@
     # @begin
     # <> <include>
     # static BOOL CALLBACK nEnumFontFamExProc(LPLOGFONTW lplf, LPTEXTMETRIC lptm, DWORD iType, LPARAM lpData);
-    # static BOOL CALLBACK eEnumFontFamExProc(LPLOGFONTW lplf, LPTEXTMETRIC lptm, DWORD iType, LPARAM lpData) {
-    #     if (((@sn<current_class>*)lpData)->@<字体回调>(@an<CVolString>(lplf->lfFaceName), (INT)iType) == 0)
-    #         return TRUE;
-    #     return FALSE;
+    # static BOOL CALLBACK eEnumFontFamExProc(LPLOGFONTW lplf, LPTEXTMETRIC lptm, DWORD iType, LPARAM lpData)
+    # {
+    #     return ((@sn<current_class>*)lpData)->@<字体回调>(@an<CVolString>(lplf->lfFaceName), (INT)iType) == 0;
     # }
     # <> </include>
-    # BOOL CALLBACK @sn<current_class>::nEnumFontFamExProc(LPLOGFONTW lplf, LPTEXTMETRIC lptm, DWORD iType, LPARAM lpData) {
+    # BOOL CALLBACK @sn<current_class>::nEnumFontFamExProc(LPLOGFONTW lplf, LPTEXTMETRIC lptm, DWORD iType, LPARAM lpData)
+    # {
     #     (*(@dt<文本数组类>*)lpData).data().Add(lplf->lfFaceName);
     #     return TRUE;
     # }
@@ -1017,7 +989,7 @@
             @禁止流程检查 = 真 "">
     参数 刷新时间 <类型 = 整数 注释 = "读取屏幕信息的间隔" @默认值 = 200>
     {
-        @ if (m_hProcess) { return FALSE; } // 避免重复启动CMD
+        @ if (m_hProcess) return FALSE; // 避免重复启动CMD
         @ // 设定管道的安全属性
         @ m_bRunning = FALSE;
         @ SECURITY_ATTRIBUTES sa { 0 };
@@ -1047,13 +1019,13 @@
         @ if (!::CreateProcessW(strShellPath, NULL, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi))
         @     goto Fail;
         @ m_hProcess = pi.hProcess; // 保存进程句柄
-        @ if (pi.hThread) { ::CloseHandle(pi.hThread); } // 因为后续不需要使用,先关闭命令行的线程句柄
+        @ if (pi.hThread) ::CloseHandle(pi.hThread); // 因为后续不需要使用,先关闭命令行的线程句柄
         @ m_dwTime = (DWORD)@<刷新时间>; // 读取屏显文本的时间间隔
         @ m_hEvent = ::CreateEventW(0, FALSE, FALSE, NULL); // 该事件用来通知回调函数退出
         @ ::ResetEvent(m_hEvent);
         @ // 创建回调线程
         @ m_hThread = ::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)&@<读屏显>, this, 0, NULL);
-        @ if (m_hThread == NULL) { goto Fail; }
+        @ if (m_hThread == NULL) goto Fail;
         @ m_ProcessId = pi.dwProcessId;
         @ ::SetConsoleCtrlHandler(NULL, TRUE);
         @ return TRUE;
@@ -1086,9 +1058,7 @@
         @         if (::ReadFile(pThis->m_hReadPipeHandle, ReadData.Alloc(TotalBytesAvail, TRUE), TotalBytesAvail, &BytesRead, NULL))
         @         {
         @             if (ReadData.Get_S_BYTE(BytesRead - 1) == '>')
-        @             {
         @                 pThis->m_bRunning = FALSE;
-        @             }
         @             pThis->@<收到输出信息> (ReadData);
         @         }
         @     }
@@ -1133,7 +1103,7 @@
     方法 关闭命令行 <公开 注释 = "关闭命令行提示符" 折叠 @禁止流程检查 = 真>
     {
         终止命令 ()
-        @ if (m_hEvent) { ::SetEvent(m_hEvent); } // 发信号让回调函数退出线程
+        @ if (m_hEvent) ::SetEvent(m_hEvent); // 发信号让回调函数退出线程
         @ if (m_hThread)
         @ {   // 等待回调线程结束,然后关闭句柄
         @     ::WaitForSingleObject(m_hThread, INFINITE);
@@ -1143,9 +1113,7 @@
         @ if (m_hProcess)
         @ {   // 等待1秒,如果命令行还没结束,就强制结束进程
         @     if (::WaitForSingleObject(m_hThread, 1000) == WAIT_TIMEOUT)
-        @     {
         @         ::TerminateProcess(m_hProcess, 0);
-        @     }
         @     ::CloseHandle(m_hProcess); m_hProcess = NULL;
         @ }
         @ m_bRunning = FALSE;
@@ -1199,7 +1167,8 @@
             注释 = " 如果该卷有多个卷GUID路径,则只返回装载管理器缓存中的第一个路径.">
     {
         @ TCHAR szVolumeName[50];
-        @ if (::GetVolumeNameForVolumeMountPointW(@<卷装载路径>.GetText(), szVolumeName, 50)) {
+        @ if (::GetVolumeNameForVolumeMountPointW(@<卷装载路径>.GetText(), szVolumeName, 50))
+        @ {
         @     @<卷GUID>.SetText(szVolumeName);
         @     return TRUE;
         @ }
@@ -1297,49 +1266,50 @@
     参数 文件名 <类型 = 文本型 注释 = "包含完整路径的文件名">
     参数 版本信息 <类型 = 程序版本信息类>
     {
-        @ @<版本信息>.ResetToNullObject ();
-        @ DWORD bufSize = ::GetFileVersionInfoSizeW (@<文件名>.GetText (), 0);
+        @ @<版本信息>.ResetToNullObject();
+        @ DWORD bufSize = ::GetFileVersionInfoSizeW(@<文件名>.GetText(), 0);
         @ if (!bufSize) return FALSE;
         @ @an<CVolMem> buffer;
-        @ buffer.Alloc (bufSize, TRUE);
-        @ if (::GetFileVersionInfoW (@<文件名>.GetText (), 0, bufSize, buffer.GetPtr ()) == 0)
+        @ buffer.Alloc(bufSize, TRUE);
+        @ if (::GetFileVersionInfoW(@<文件名>.GetText(), 0, bufSize, buffer.GetPtr()) == 0)
         @     return FALSE;
-        @ struct LANGANDCODEPAGE {
+        @ struct LANGANDCODEPAGE
+        @ {
         @     WORD wLanguage;
         @     WORD wCodePage;
         @ } *lpTranslate;
         @ UINT cbTranslate, data_len;
-        @ if (::VerQueryValueW (buffer.GetPtr (), L"\\VarFileInfo\\Translation", (LPVOID*)&lpTranslate, &cbTranslate))
+        @ if (::VerQueryValueW(buffer.GetPtr(), L"\\VarFileInfo\\Translation", (LPVOID*)&lpTranslate, &cbTranslate))
         @ {
         @     for (UINT i = 0; i < (cbTranslate / sizeof (struct LANGANDCODEPAGE)); i++)
         @     {
         @         WCHAR SubBlock[MAX_PATH] { '\0' };
         @         const WCHAR* szText = nullptr;
-        @         if (::VerLanguageNameW (lpTranslate[i].wLanguage, SubBlock, MAX_PATH)) @<版本信息.语言>.SetText (SubBlock);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\Comments", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.注释>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\CompanyName", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.公司名称>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\FileDescription", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.文件说明>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\FileVersion", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.文件版本>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\InternalName", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.内部名称>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\LegalCopyright", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.版权>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\LegalTrademarks", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.法律商标>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\OriginalFilename", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.原始文件名>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\ProductName", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.产品名称>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\ProductVersion", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.产品版本>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\PrivateBuild", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.私有版本>.SetText (szText);
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\SpecialBuild", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.特殊版本>.SetText (szText);
+        @         if (::VerLanguageNameW(lpTranslate[i].wLanguage, SubBlock, MAX_PATH)) @<版本信息.语言>.SetText(SubBlock);
+        @         wsprintf(SubBlock, L"\\StringFileInfo\\%04x%04x\\Comments", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW(buffer.GetPtr(), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.注释>.SetText(szText);
+        @         wsprintf(SubBlock, L"\\StringFileInfo\\%04x%04x\\CompanyName", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW(buffer.GetPtr(), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.公司名称>.SetText(szText);
+        @         wsprintf(SubBlock, L"\\StringFileInfo\\%04x%04x\\FileDescription", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW(buffer.GetPtr(), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.文件说明>.SetText(szText);
+        @         wsprintf(SubBlock, L"\\StringFileInfo\\%04x%04x\\FileVersion", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW(buffer.GetPtr(), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.文件版本>.SetText(szText);
+        @         wsprintf(SubBlock, L"\\StringFileInfo\\%04x%04x\\InternalName", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW(buffer.GetPtr(), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.内部名称>.SetText(szText);
+        @         wsprintf(SubBlock, L"\\StringFileInfo\\%04x%04x\\LegalCopyright", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW(buffer.GetPtr(), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.版权>.SetText(szText);
+        @         wsprintf(SubBlock, L"\\StringFileInfo\\%04x%04x\\LegalTrademarks", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW(buffer.GetPtr(), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.法律商标>.SetText(szText);
+        @         wsprintf(SubBlock, L"\\StringFileInfo\\%04x%04x\\OriginalFilename", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW(buffer.GetPtr(), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.原始文件名>.SetText(szText);
+        @         wsprintf(SubBlock, L"\\StringFileInfo\\%04x%04x\\ProductName", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW(buffer.GetPtr(), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.产品名称>.SetText(szText);
+        @         wsprintf(SubBlock, L"\\StringFileInfo\\%04x%04x\\ProductVersion", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW(buffer.GetPtr(), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.产品版本>.SetText(szText);
+        @         wsprintf(SubBlock, L"\\StringFileInfo\\%04x%04x\\PrivateBuild", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW(buffer.GetPtr(), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.私有版本>.SetText(szText);
+        @         wsprintf(SubBlock, L"\\StringFileInfo\\%04x%04x\\SpecialBuild", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW(buffer.GetPtr(), SubBlock, (LPVOID*)&szText, &data_len)) @<版本信息.特殊版本>.SetText(szText);
         @         break; // 跳出循环,只取第一个语言
         @     }
         @     return TRUE;
@@ -1351,27 +1321,28 @@
             返回值注释 = "成功返回文件版本(等同火山程序的\"版本名称\"属性)" 折叠 @禁止流程检查 = 真>
     参数 文件名 <类型 = 文本型 注释 = "包含完整路径的文件名">
     {
-        @ DWORD bufSize = ::GetFileVersionInfoSizeW (@<文件名>.GetText (), 0);
+        @ DWORD bufSize = ::GetFileVersionInfoSizeW(@<文件名>.GetText(), 0);
         @ @an<CVolString> szFileVersion;
         @ if (!bufSize) return szFileVersion;
         @ @an<CVolMem> buffer;
-        @ buffer.Alloc (bufSize, TRUE);
-        @ if (::GetFileVersionInfoW (@<文件名>.GetText(), 0, bufSize, buffer.GetPtr ()) == 0)
+        @ buffer.Alloc(bufSize, TRUE);
+        @ if (::GetFileVersionInfoW(@<文件名>.GetText(), 0, bufSize, buffer.GetPtr()) == 0)
         @     return szFileVersion;
-        @ struct LANGANDCODEPAGE {
+        @ struct LANGANDCODEPAGE
+        @ {
         @     WORD wLanguage;
         @     WORD wCodePage;
         @ } *lpTranslate;
         @ UINT cbTranslate, data_len;
-        @ if (::VerQueryValueW (buffer.GetPtr (), L"\\VarFileInfo\\Translation", (LPVOID*)&lpTranslate, &cbTranslate))
+        @ if (::VerQueryValueW(buffer.GetPtr(), L"\\VarFileInfo\\Translation", (LPVOID*)&lpTranslate, &cbTranslate))
         @ {
         @     for (UINT i = 0; i < (cbTranslate / sizeof (struct LANGANDCODEPAGE)); i++)
         @     {
         @         WCHAR SubBlock[MAX_PATH] { 0 };
         @         const WCHAR* szText = nullptr;
-        @         wsprintf (SubBlock, L"\\StringFileInfo\\%04x%04x\\FileVersion", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
-        @         if (::VerQueryValueW (buffer.GetPtr (), SubBlock, (LPVOID*)&szText, &data_len))
-        @             szFileVersion.SetText (szText);
+        @         wsprintf(SubBlock, L"\\StringFileInfo\\%04x%04x\\FileVersion", lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+        @         if (::VerQueryValueW(buffer.GetPtr(), SubBlock, (LPVOID*)&szText, &data_len))
+        @             szFileVersion.SetText(szText);
         @         break; // 跳出循环,只取第一个语言
         @     }
         @ }
@@ -1383,18 +1354,18 @@
     参数 文件名 <类型 = 文本型 注释 = "包含完整路径的文件名">
     参数 返回版本格式文本 <类型 = 文本型 注释 = "在本参数中返回类似\"1.1.0.0\"格式的文本版本号,更适合于展示." @默认值 = 空对象>
     {
-        @ DWORD bufSize = ::GetFileVersionInfoSizeW (@<文件名>.GetText (), 0);
+        @ DWORD bufSize = ::GetFileVersionInfoSizeW(@<文件名>.GetText(), 0);
         @ if (!bufSize) return -1;
         @ @an<CVolMem> buffer;
-        @ buffer.Alloc (bufSize, TRUE);
-        @ if (::GetFileVersionInfoW (@<文件名>.GetText(), 0, bufSize, buffer.GetPtr ()) == 0)
+        @ buffer.Alloc(bufSize, TRUE);
+        @ if (::GetFileVersionInfoW(@<文件名>.GetText(), 0, bufSize, buffer.GetPtr()) == 0)
         @     return -1;
         @ VS_FIXEDFILEINFO* pFileInfo = nullptr;
         @ UINT cbFileInfo;
-        @ if (::VerQueryValueW (buffer.GetPtr (), L"\\", (LPVOID*)&pFileInfo, &cbFileInfo))
+        @ if (::VerQueryValueW(buffer.GetPtr (), L"\\", (LPVOID*)&pFileInfo, &cbFileInfo))
         @ {
         @     if (!@<返回版本格式文本>.IsNullObject())
-        @         @<返回版本格式文本>.Format (L"%d.%d.%d.%d", HIWORD(pFileInfo->dwFileVersionMS), LOWORD((DWORD)pFileInfo->dwFileVersionMS), HIWORD(pFileInfo->dwFileVersionLS), LOWORD((DWORD)pFileInfo->dwFileVersionLS));
+        @         @<返回版本格式文本>.Format(L"%d.%d.%d.%d", HIWORD(pFileInfo->dwFileVersionMS), LOWORD((DWORD)pFileInfo->dwFileVersionMS), HIWORD(pFileInfo->dwFileVersionLS), LOWORD((DWORD)pFileInfo->dwFileVersionLS));
         @     return (INT64)(pFileInfo->dwFileVersionMS | ((UINT64)pFileInfo->dwFileVersionLS << 32));
         @ }
         @ return -1;
@@ -1405,18 +1376,18 @@
     参数 文件名 <类型 = 文本型 注释 = "包含完整路径的文件名">
     参数 返回版本格式文本 <类型 = 文本型 注释 = "在本参数中返回类似\"1.1.0.0\"格式的文本版本号,更适合于展示." @默认值 = 空对象>
     {
-        @ DWORD bufSize = ::GetFileVersionInfoSizeW (@<文件名>.GetText (), 0);
+        @ DWORD bufSize = ::GetFileVersionInfoSizeW(@<文件名>.GetText(), 0);
         @ if (!bufSize) return -1;
         @ @an<CVolMem> buffer;
-        @ buffer.Alloc (bufSize, TRUE);
-        @ if (::GetFileVersionInfoW (@<文件名>.GetText(), 0, bufSize, buffer.GetPtr ()) == 0)
+        @ buffer.Alloc(bufSize, TRUE);
+        @ if (::GetFileVersionInfoW(@<文件名>.GetText(), 0, bufSize, buffer.GetPtr()) == 0)
         @     return -1;
         @ VS_FIXEDFILEINFO* pFileInfo = nullptr;
         @ UINT cbFileInfo;
-        @ if (::VerQueryValueW (buffer.GetPtr (), L"\\", (LPVOID*)&pFileInfo, &cbFileInfo))
+        @ if (::VerQueryValueW(buffer.GetPtr (), L"\\", (LPVOID*)&pFileInfo, &cbFileInfo))
         @ {
         @     if (!@<返回版本格式文本>.IsNullObject())
-        @         @<返回版本格式文本>.Format (L"%d.%d.%d.%d", HIWORD(pFileInfo->dwProductVersionMS), LOWORD((DWORD)pFileInfo->dwProductVersionMS), HIWORD(pFileInfo->dwProductVersionLS), LOWORD((DWORD)pFileInfo->dwProductVersionLS));
+        @         @<返回版本格式文本>.Format(L"%d.%d.%d.%d", HIWORD(pFileInfo->dwProductVersionMS), LOWORD((DWORD)pFileInfo->dwProductVersionMS), HIWORD(pFileInfo->dwProductVersionLS), LOWORD((DWORD)pFileInfo->dwProductVersionLS));
         @     return (INT64)(pFileInfo->dwProductVersionMS | ((UINT64)pFileInfo->dwProductVersionLS << 32));
         @ }
         @ return -1;
@@ -1508,7 +1479,8 @@
         @ WCHAR szBuffer[MAX_PATH + 1] {0};
         @ DWORD dwBufLen = ::GetLogicalDriveStringsW(MAX_PATH, szBuffer);
         @ if (dwBufLen == 0) return 0;
-        @ for (DWORD i = 0; i < dwBufLen; i += 4) {
+        @ for (DWORD i = 0; i < dwBufLen; i += 4)
+        @ {
         @     if (@<仅枚举本地磁盘> == TRUE && ::GetDriveTypeW(szBuffer + i) != DRIVE_FIXED)
         @         continue;
         @     @<盘符数组>.data().Add(szBuffer[i]);
@@ -1519,7 +1491,7 @@
     # ---
 
     方法 开始监视 <公开 类型 = 逻辑型 注释 = "开始监视某个本地磁盘中所有文件和目录的更改:" 注释 = " 1. 指定的盘符必须为NTFS文件格式,且不能为网络驱动器;"
-            注释 = " 2. 程序必须以管理员身份运行;" 注释 = " 3. 可以重复调用本方法监视不同的盘符;" 折叠 @禁止流程检查 = 真>
+            注释 = " 2. 程序必须以管理员身份运行;" 注释 = " 3. 可以重复调用本方法以监视不同的盘符;" 折叠 @禁止流程检查 = 真>
     参数 盘符 <类型 = 字符 注释 = "提供本地磁盘的盘符(不区分大小写),请以单引号输入,如: \'C\'">
     参数 监视目录组 <类型 = 文本数组类 注释 = "可以将监视范围限定在所提供的一或多个目录中,请确保提供的目录已经存在." 注释 = "默认的空数组表示监视整个本地磁盘;"
             注释 = "注意: 本参数有效时,内部会维护一个包含文件夹主从关系的键值表,会占用较大内存." @默认值 = 空对象>
@@ -1531,7 +1503,8 @@
         @ auto it = m_map.find(@<盘符>);
         @ if (it == m_map.end())
         @     it = m_map.emplace(@<盘符>, new PivUsnMonitor{}).first;
-        @ if (!it->second->Start(@<盘符>, @<监视目录组>.data(), @<延迟时间>, @<路径获取方式>)) {
+        @ if (!it->second->Start(@<盘符>, @<监视目录组>.data(), @<延迟时间>, @<路径获取方式>))
+        @ {
         @     m_map.erase(@<盘符>);
         @     return FALSE;
         @ }
@@ -1549,10 +1522,11 @@
 
     方法 停止监视 <公开 类型 = 逻辑型 注释 = "停止监视某个本地磁盘,返回是否实际停止了监视." 注释 = "注: 类析构时会自动停止监视所有盘符." 折叠 @禁止流程检查 = 真>
     参数 盘符 <类型 = 字符 注释 = "提供本地磁盘的盘符(不区分大小写),请以单引号输入,如: \'C\'">
-    参数 删除USN日志 <类型 = 逻辑型 注释 = "是否删除(禁用)USN日志,删除操作是全局的,会影响其他使用了USN日志的软件." @默认值 = 假>
+    参数 删除USN日志 <类型 = 逻辑型 注释 = "是否删除(禁用)USN日志;" 注释 = "注意: 删除操作是全局的,会影响其他使用了USN日志的软件." @默认值 = 假>
     {
         @ auto it = m_map.find(@<盘符>);
-        @ if (it != m_map.end()) {
+        @ if (it != m_map.end())
+        @ {
         @     it->second->Stop(@<删除USN日志>);
         @     m_map.erase(it);
         @     return TRUE;
@@ -1560,7 +1534,7 @@
         @ return FALSE;
     }
 
-    方法 全部停止 <公开 注释 = "停止所有正在运行的监视." 注释 = "注: 类析构时会自动停止监视所有盘符." 折叠 @嵌入式方法 = "">
+    方法 全部停止 <公开 注释 = "停止所有正在运行的监视,本方法会阻塞当前线程直到全部停止." 注释 = "注: 类析构时会自动停止监视所有盘符." 折叠 @嵌入式方法 = "">
     {
         @ @sn<this>.m_map.clear()
     }
@@ -1569,7 +1543,8 @@
     参数 盘符数组 <类型 = 字符数组类 注释 = "返回所有正在监视的盘符">
     {
         @ @<盘符数组>.data().RemoveAll();
-        @ for (auto& it = m_map.begin(); it != m_map.end(); it++) {
+        @ for (auto& it = m_map.begin(); it != m_map.end(); it++)
+        @ {
         @     @<盘符数组>.data().Add(it->first);
         @ }
         @ return (INT)@<盘符数组>.data().GetCount();
@@ -1623,7 +1598,7 @@
     参数 属性值 <类型 = 整数 注释 = "文件或目录的属性值,为\"文件属性\"常量的组合值;" 注释 = "可用\"位与\"计算来判断是否具有某个属性;"
             注释 = "如: 为子目录 = 位与 (属性值, 文件属性.子目录) != 0">
 
-    方法 文件被移动 <公开 定义事件 类型 = 整数 注释 = "监视到某个文件或目录被移动到同盘的另一个位置" 注释 = "注: 移动到其他盘是触发\"文件被删除\"事件.">
+    方法 文件被移动 <公开 定义事件 类型 = 整数 注释 = "监视到某个文件或目录被移动到同盘的另一个位置" 注释 = "注: 移动到其他盘是触发\"文件被删除\"事件." 折叠>
     参数 盘符 <类型 = 字符 注释 = "当前监视的盘符">
     参数 旧名称 <类型 = 文本型 注释 = "文件移动前的旧名称">
     参数 新名称 <类型 = 文本型 注释 = "文件移动后的新名称">
@@ -1695,239 +1670,285 @@
 
 # 文件操作 ---
 
-类 文件读写类EX <公开 注释 = "用作支持读写所指定名称的文件" 折叠 @文档 = "category = \"文件操作\"" @视窗.外部头文件 = "src\\piv_file.hpp"
-        @视窗.后缀文本 = "public PivFile">
+类 文件读写类EX <公开 注释 = "用作支持读写所指定名称的文件" 折叠 折叠2 @文档 = "category = \"文件操作\"" @视窗.外部头文件 = "src\\piv_file.hpp"
+        @别名 = "PivFile" @别名类型 = 本地类>
 {
-    方法 打开文件 <公开 类型 = 逻辑型 注释 = "打开所指定的文件,以对文件进行读写操作,返回是否打开成功." 注释 = "先前被打开的文件将被自动关闭." 折叠 @嵌入式方法 = "">
+    变量 自动关闭文件 <公开 类型 = 逻辑型 注释 = "是否在类析构时自动关闭文件,\"打开文件\"时默认为真,\"打开句柄\"默认为假." @输出名 = "AutoClose">
+    变量 文件句柄 <公开 类型 = PIV.类型.通用句柄 注释 = "文件句柄(HANDLE),未打开文件时为\"无效值\"." @输出名 = "hFile">
+
+    方法 打开文件 <公开 静态 类型 = 逻辑型 注释 = "打开所指定的文件,以对文件进行读写操作,返回是否打开成功." 注释 = "先前被打开的文件将被自动关闭." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     参数 欲打开的文件名称 <类型 = 文本型>
     参数 访问权限 <类型 = 文件访问权限 注释 = "提供\"映射文件访问权限\"常量,设置文件的访问权限" @默认值 = 文件访问权限.读写>
     参数 共享模式 <类型 = 文件共享模式 注释 = "指定限制其它进程操作此文件的方式" @默认值 = 文件共享模式.禁止写>
     参数 创建方式 <类型 = 文件创建方式 注释 = "提供\"映射文件创建方式\"常量,设置是打开一个已经存在的文件还是创建一个新文件." @默认值 = 文件创建方式.打开或创建>
     {
-        @ @sn<this>.Open(@<欲打开的文件名称>.GetText(), (DWORD)@<访问权限>, (DWORD)@<共享模式>, (DWORD)@<创建方式>)
+        @ @<当前对象>.Open(@<欲打开的文件名称>.GetText(), (DWORD)@<访问权限>, (DWORD)@<共享模式>, (DWORD)@<创建方式>)
     }
 
-    方法 关闭文件 <公开 折叠 @嵌入式方法 = "">
+    方法 打开句柄 <公开 静态 类型 = 逻辑型 注释 = "打开所指定的文件句柄,以对文件进行读写操作,返回是否打开成功." 注释 = "先前被打开的文件将被自动关闭." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
+    参数 欲打开的文件句柄 <注释 = "提供所欲打开的外部文件句柄" @匹配类型 = 通用整数型>
     {
-        @ @sn<this>.Close()
+        @ @<当前对象>.Open((HANDLE)@<欲打开的文件句柄>)
     }
 
-    方法 是否已打开 <公开 类型 = 逻辑型 注释 = "返回是否已经打开了文件" 折叠 @嵌入式方法 = "">
+    方法 关闭文件 <公开 静态 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     {
-        @ @sn<this>.IsOpen()
+        @ @<当前对象>.Close()
     }
 
-    方法 交换 <公开 注释 = "将本对象的内容跟另一个对象交换,即交换当前打开的文件." 折叠 @嵌入式方法 = "">
+    方法 是否已打开 <公开 静态 类型 = 逻辑型 注释 = "返回是否已经打开了文件" 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
+    {
+        @ @<当前对象>.IsOpen()
+    }
+
+    方法 交换 <公开 静态 注释 = "将本对象的内容跟另一个对象交换,即交换当前打开的文件." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     参数 所欲交换的对象 <类型 = 文件读写类EX>
     {
-        @ @sn<this>.Swap(@<所欲交换的对象>)
+        @ @<当前对象>.Swap(@<所欲交换的对象>)
     }
 
-    方法 取文件句柄 <公开 类型 = 变整数 注释 = "如果当前已经打开了文件,返回其句柄值,否则返回-1." 折叠 @嵌入式方法 = "">
+    方法 取文件句柄 <公开 静态 类型 = 变整数 注释 = "如果当前已经打开了文件,返回其句柄值,否则返回-1." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     {
-        @ (INT_P)@sn<this>.GetFileHandle()
+        @ (INT_P)@<当前对象>.GetFileHandle()
     }
 
-    方法 取文件长度 <公开 类型 = 长整数 注释 = "返回当前被打开文件的长度,单位为字节." 注释 = "如果当前尚未打开文件或失败,将返回-1." 折叠 @嵌入式方法 = "">
+    方法 取文件长度 <公开 静态 类型 = 长整数 注释 = "返回当前被打开文件的长度,单位为字节." 注释 = "如果当前尚未打开文件或失败,将返回-1." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     {
-        @ @sn<this>.GetSize()
+        @ @<当前对象>.GetSize()
     }
 
-    方法 置文件长度 <公开 类型 = 逻辑型 注释 = "设置当前被打开文件的长度,返回是否成功." 注释 = "注: 设置成功后会移动到文件末尾." 折叠 @嵌入式方法 = "">
+    方法 置文件长度 <公开 静态 类型 = 逻辑型 注释 = "设置当前被打开文件的长度,返回是否成功." 注释 = "注: 设置成功后会移动到文件末尾." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     参数 欲设置的长度 <类型 = 长整数 注释 = "新长度大于现有长度的区域将以0字节填充;" 注释 = "新长度小于现有长度则截断文件.">
     {
-        @ @sn<this>.SetFileSize(@<欲设置的长度>)
+        @ @<当前对象>.SetFileSize(@<欲设置的长度>)
     }
 
-    方法 刷新文件 <公开 类型 = 逻辑型 注释 = "刷新当前被打开文件的缓冲区并将所有缓冲数据写入文件." 注释 = "注: 文件的写出操作,会先将数据写入磁盘的缓冲区,缓冲区满后才实际写入到磁盘文件."
-            注释 = "执行本方法可以立即将修改保存到磁盘,以降低在程序崩溃或电源故障时丢失数据的风险." 折叠 @嵌入式方法 = "">
+    方法 刷新文件 <公开 静态 类型 = 逻辑型 注释 = "刷新当前被打开文件的缓冲区并将所有缓冲数据写入文件."
+            注释 = "注: 文件的写出操作,会先将数据写入磁盘的缓冲区,缓冲区满后才实际写入到磁盘文件." 注释 = "执行本方法可以立即将修改保存到磁盘,以降低在程序崩溃或电源故障时丢失数据的风险." 折叠
+            @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     {
-        @ @sn<this>.Flush()
+        @ @<当前对象>.Flush()
     }
 
-    方法 锁住文件 <公开 类型 = 逻辑型 注释 = "在有若干个进程访问同一个文件的环境中,使用本方法可以拒绝其它进程" 注释 = "对被打开文件中的某个区域进行读写访问." 折叠 @嵌入式方法 = "">
+    方法 锁住文件 <公开 静态 类型 = 逻辑型 注释 = "在有若干个进程访问同一个文件的环境中,使用本方法可以拒绝其它进程" 注释 = "对被打开文件中的某个区域进行读写访问." 折叠
+            @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     参数 欲加锁数据的偏移位置 <类型 = 长整数 注释 = "指定欲加锁区域在文件中的偏移位置">
     参数 欲加锁数据的尺寸 <类型 = 长整数 注释 = "指定欲加锁区域的尺寸,单位字节.">
     参数 加锁重试时间 <类型 = 整数 注释 = "本参数指定加锁失败后反复进行重试的毫秒数.为0表示一旦失败立即返回;" 注释 = "为-1则反复进行重试直到加锁成功为止(将阻塞当前线程)."
             @默认值 = 0>
     {
-        @ @sn<this>.Lock(@<欲加锁数据的偏移位置>, @<欲加锁数据的尺寸>, @<加锁重试时间>)
+        @ @<当前对象>.Lock(@<欲加锁数据的偏移位置>, @<欲加锁数据的尺寸>, @<加锁重试时间>)
     }
 
-    方法 解锁文件 <公开 类型 = 逻辑型 注释 = "解除由\"锁住文件\"命令对文件所进行的锁定,返回是否成功."
+    方法 解锁文件 <公开 静态 类型 = 逻辑型 注释 = "解除由\"锁住文件\"命令对文件所进行的锁定,返回是否成功."
             注释 = "注意: 本方法调用时所提供的参数值必须与调用\"锁住文件\"方法时所提供的参数值完全一致." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     参数 欲解锁数据的偏移位置 <类型 = 长整数 注释 = "指定欲解锁区域在文件中的偏移位置">
     参数 欲解锁数据的尺寸 <类型 = 长整数 注释 = "指定欲解锁区域的尺寸,单位字节.">
     {
-        @ @sn<this>.Unlock(@<欲解锁数据的偏移位置>, @<欲解锁数据的尺寸>)
+        @ @<当前对象>.Unlock(@<欲解锁数据的偏移位置>, @<欲解锁数据的尺寸>)
     }
 
-    方法 取读写位置 <公开 类型 = 长整数 注释 = "返回当前被打开文件的当前读/写位置,位置值从0开始." 注释 = "如果当前尚未打开文件或失败,将返回-1." 折叠 @嵌入式方法 = "">
+    方法 取读写位置 <公开 静态 类型 = 长整数 注释 = "返回当前被打开文件的当前读/写位置,位置值从0开始." 注释 = "如果当前尚未打开文件或失败,将返回-1." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     {
-        @ @sn<this>.GetCurrentPos()
+        @ @<当前对象>.GetCurrentPos()
     }
 
-    方法 移动读写位置 <公开 类型 = 逻辑型 注释 = "设置下一次读或写操作的位置,返回是否成功." 注释 = "注: 读写位置可以大于物理文件尺寸,使用\"置文件尾\"可以截断或扩展文件大小." 折叠
-            @嵌入式方法 = "">
+    方法 移动读写位置 <公开 静态 类型 = 逻辑型 注释 = "设置下一次读或写操作的位置,返回是否成功." 注释 = "注: 读写位置可以大于物理文件尺寸,使用\"置文件尾\"可以截断或扩展文件大小."
+            折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     参数 基准移动位置 <类型 = 文件基准位置 注释 = "指定从文件中开始移动的基准位置" @默认值 = 文件基准位置.文件首>
-    参数 移动距离 <类型 = 长整数 注释 = "指定相对于起始移动位置的移动尺寸,单位字节.">
+    参数 移动距离 <注释 = "指定相对于起始移动位置的移动尺寸,单位字节." @匹配类型 = 通用整数型>
     {
-        @ @sn<this>.SetCurrentPos(@<移动距离>, (DWORD)@<基准移动位置>)
+        @ @<当前对象>.SetCurrentPos(@<移动距离>, (DWORD)@<基准移动位置>)
     }
 
-    方法 移到文件首 <公开 类型 = 逻辑型 注释 = "设置下一次读或写操作的位置到文件首部,返回是否成功." 折叠 @嵌入式方法 = "">
+    方法 移到文件首 <公开 静态 类型 = 逻辑型 注释 = "设置下一次读或写操作的位置到文件首部,返回是否成功." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     {
-        @ @sn<this>.SetCurrentPos(0, FILE_BEGIN)
+        @ @<当前对象>.SetCurrentPos(0, FILE_BEGIN)
     }
 
-    方法 移到文件尾 <公开 类型 = 逻辑型 注释 = "设置下一次读或写操作的位置到文件尾部,返回是否成功." 折叠 @嵌入式方法 = "">
+    方法 移到文件尾 <公开 静态 类型 = 逻辑型 注释 = "设置下一次读或写操作的位置到文件尾部,返回是否成功." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     {
-        @ @sn<this>.SetCurrentPos(0, FILE_END)
+        @ @<当前对象>.SetCurrentPos(0, FILE_END)
     }
 
-    方法 置文件尾 <公开 类型 = 逻辑型 注释 = "将文件的当前读写位置设置为文件末尾(即物理文件大小),可用于截断或扩展文件大小." 折叠 @嵌入式方法 = "">
+    方法 置文件尾 <公开 静态 类型 = 逻辑型 注释 = "将文件的当前读写位置设置为文件末尾(即物理文件大小),可用于截断或扩展文件大小." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     {
-        @ @sn<this>.SetEof()
+        @ @<当前对象>.SetEof()
     }
 
-    方法 是否在文件尾 <公开 类型 = 逻辑型 注释 = "返回当前读写位置是否已经处于文件数据的尾部" 折叠 @嵌入式方法 = "">
+    方法 是否在文件尾 <公开 静态 类型 = 逻辑型 注释 = "返回当前读写位置是否已经处于文件数据的尾部" 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     参数 是否为判断文本已读完 <类型 = 逻辑型 注释 = "如果本参数值为真,且下一即将读入的字符值为\'\\0\'或26(文本结束标志),"
             注释 = "或者当前读写位置已处于文件数据的尾部,方法将返回真" @默认值 = 假>
     参数 是否为Unicode文本 <类型 = 逻辑型 注释 = "指定文本文件的编码类型是否为UTF-16;" 注释 = "如果是UTF-8或多字节编码,请设置为假." @默认值 = 真>
     {
-        @ @sn<this>.IsEof(@<是否为判断文本已读完>, @<是否为Unicode文本>)
+        @ @<当前对象>.IsEof(@<是否为判断文本已读完>, @<是否为Unicode文本>)
     }
 
     # 读写操作 --
 
-    方法 读 <公开 注释 = "从文件的当前读写位置读入指定的基本类型数据并返回." 注释 = "如果读入失败,将自动将当前文件读写位置移到文件尾部." 折叠 @嵌入式方法 = "">
+    方法 读 <公开 静态 注释 = "从文件的当前读写位置读入指定的基本类型数据并返回." 注释 = "如果读入失败,将自动将当前文件读写位置移到文件尾部." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     参数 欲获取的数据类型 <注释 = "提供所欲读入的基本数据类型" @需求类型 = 数据类型 @匹配类型 = 通用非文本基本型 @返回值类型 = 0>
     参数 缺省值 <注释 = "如果读入失败,则返回此处的值" @匹配类型 = 等于前参数值类型>
     {
-        @ @sn<this>.Get<@<欲获取的数据类型>>(@<缺省值>)
+        @ @<当前对象>.Get<@<欲获取的数据类型>>(@<缺省值>)
     }
 
-    方法 读字符 <公开 类型 = 整数 注释 = "获取文件当前读写位置的字符值(char),如果读到文本尾部则返回-1." 注释 = "注意: 请确保当前的数据是UTF-8或本地多字节编码文本."
+    方法 读字符 <公开 静态 类型 = 整数 注释 = "获取文件当前读写位置的字符值(char),如果读到文本尾部则返回-1." 注释 = "注意: 请确保当前的数据是UTF-8或本地多字节编码文本."
             注释 = "如果读入失败,将自动将当前文件读写位置移到文件尾部." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     {
-        @ @sn<this>.GetChar()
+        @ @<当前对象>.GetChar()
     }
 
-    方法 读宽字符 <公开 类型 = 整数 注释 = "获取文件当前读写位置的宽字符值(wchar_t),如果读到文本尾部则返回-1." 注释 = "注意: 请确保当前的数据是UTF-16LE编码文本."
+    方法 读宽字符 <公开 静态 类型 = 整数 注释 = "获取文件当前读写位置的宽字符值(wchar_t),如果读到文本尾部则返回-1." 注释 = "注意: 请确保当前的数据是UTF-16LE编码文本."
             注释 = "如果读入失败,会将当前的读写位置移到尾部." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     {
-        @ @sn<this>.GetWchar()
+        @ @<当前对象>.GetWchar()
     }
 
-    方法 读入数据 <公开 类型 = 整数 注释 = "从文件的当前读写位置读入基本类型数值,返回实际读入的字节数." 注释 = "如果读入失败,将自动将当前文件读写位置移到文件尾部."
+    方法 读入数据 <公开 静态 类型 = 整数 注释 = "从文件的当前读写位置读入基本类型数值,返回实际读入的字节数." 注释 = "如果读入失败,将自动将当前文件读写位置移到文件尾部."
             返回值注释 = "返回实际读入的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     参数 所读入数据的变量 <注释 = "提供所欲返回的基本类型值变量(不能提供立即数)" @需求类型 = 可写入变量 @匹配类型 = 通用非文本基本型>
     {
-        @ @sn<this>.Read<@pdt<所读入数据的变量>>(@<所读入数据的变量>)
+        @ @<当前对象>.Read<@pdt<所读入数据的变量>>(@<所读入数据的变量>)
     }
 
-    方法 写出数据 <公开 类型 = 整数 注释 = "将所指定数据写出到文件中当前读写位置,返回实际写出的字节数." 返回值注释 = "返回实际写出的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    方法 写出数据 <公开 静态 类型 = 整数 注释 = "将所指定数据写出到文件中当前读写位置,返回实际写出的字节数." 返回值注释 = "返回实际写出的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     参数 所欲写出的数据 <注释 = "提供所欲写入的基本数值." 注释 = "如欲明确指定其数据类型,可以使用强制类型转换操作符." @匹配类型 = 通用非文本基本型>
     {
-        @ @sn<this>.Write<@pdt<所欲写出的数据>>(@<所欲写出的数据>)
+        @ @<当前对象>.Write<@pdt<所欲写出的数据>>(@<所欲写出的数据>)
     }
 
-    方法 读入文本 <公开 类型 = 长整数 注释 = "从文件的当前读写位置读取一段文本数据,返回实际读入的字节长度."
+    方法 读入文本 <公开 静态 类型 = 长整数 注释 = "从文件的当前读写位置读取一段文本数据,返回实际读入的字节长度."
             注释 = "如果该数据中存在字符值0或26(文本结束标志),将仅返回该字符之前的数据(后续读写将跳过该字符)." 注释 = "如果读入失败,将自动将当前文件读写位置移到文件尾部."
             返回值注释 = "返回实际读入的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     参数 存放读入文本的变量 <类型 = 文本型 注释 = "读入的文本数据将存放在此参数中">
     参数 欲读入的最多字符数 <类型 = 长整数 注释 = "指定欲读入文本数据的最多字符数目." 注释 = "如果为-1,则读入当前读写位置后的所有文本." @默认值 = -1>
     参数 文本编码 <类型 = 文本编码类型 注释 = "指定文本的编码类型" @默认值 = 文本编码类型.UTF16>
     {
-        @ @sn<this>.ReadTextWithEncode(@<存放读入文本的变量>, @<欲读入的最多字符数>, @<文本编码>)
+        @ @<当前对象>.ReadTextWithEncode(@<存放读入文本的变量>, @<欲读入的最多字符数>, @<文本编码>)
     }
 
-    方法 读入一行 <公开 类型 = 长整数 注释 = "从文件的当前读写位置读取一行文本数据,行末的换行符将被抛弃." 注释 = "如果读入失败,将自动将当前文件读写位置移到文件尾部."
+    方法 读入一行 <公开 静态 类型 = 长整数 注释 = "从文件的当前读写位置读取一行文本数据,行末的换行符将被抛弃." 注释 = "如果读入失败,将自动将当前文件读写位置移到文件尾部."
             注释 = "注意: 未自动跳过空行,如果返回值<=2且文本为空,则可能是读到空行了." 返回值注释 = "返回实际读入的字节数(包括被抛弃的换行符),失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     参数 存放读入文本的变量 <类型 = 文本型 注释 = "读入的文本数据将存放在此参数中">
     参数 文本编码 <类型 = 文本编码类型 注释 = "指定文本的编码类型" @默认值 = 文本编码类型.UTF16>
     {
-        @ @sn<this>.ReadLineWithEncode(@<存放读入文本的变量>, @<文本编码>)
+        @ @<当前对象>.ReadLineWithEncode(@<存放读入文本的变量>, @<文本编码>)
     }
 
-    方法 写出文本 <公开 类型 = 长整数 注释 = "写出一段指定编码的文本数据到文件中当前读写位置处,返回实际写出的字节数." 返回值注释 = "返回实际写出的字节数,失败返回0." 折叠
+    方法 写出文本 <公开 静态 类型 = 长整数 注释 = "写出一段指定编码的文本数据到文件中当前读写位置处,返回实际写出的字节数." 返回值注释 = "返回实际写出的字节数,失败返回0." 折叠
             @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     参数 所欲写出的文本 <类型 = 文本型 注释 = "所欲写出的文本数据">
     参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定是否在所写出文本后添加写出一个\'\\0\'字符" 注释 = "注意: 请勿在纯文本文件中写出结束零字符!" @默认值 = 假>
     参数 文本编码 <类型 = 文本编码类型 注释 = "指定文本的编码类型" @默认值 = 文本编码类型.UTF16>
     {
-        @ @sn<this>.WriteText(@<所欲写出的文本>.GetText(), @<是否包括结束零字符>, @<文本编码>)
+        @ @<当前对象>.WriteText(@<所欲写出的文本>.GetText(), @<是否包括结束零字符>, @<文本编码>)
     }
 
-    方法 写文本行 <公开 类型 = 长整数 注释 = "写出一段指定编码的文本数据并附加\"\\r\\n\"换行符到文件中当前读写位置处," 注释 = "返回实际写出的字节数."
+    方法 写文本行 <公开 静态 类型 = 长整数 注释 = "写出一段指定编码的文本数据并附加\"\\r\\n\"换行符到文件中当前读写位置处," 注释 = "返回实际写出的字节数."
             返回值注释 = "返回实际写出的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     参数 所欲写出的文本 <类型 = 文本型 注释 = "所欲写出的文本数据">
     参数 文本编码 <类型 = 文本编码类型 注释 = "指定文本的编码类型" @默认值 = 文本编码类型.UTF16>
     {
-        @ @sn<this>.WriteLine(@<所欲写出的文本>.GetText(), @<文本编码>)
+        @ @<当前对象>.WriteLine(@<所欲写出的文本>.GetText(), @<文本编码>)
     }
 
-    方法 读入字节集 <公开 类型 = 长整数 注释 = "从文件中当前读写位置读取一段字节集数据,返回实际读入的字节数." 注释 = "如果读入失败,将自动将当前文件读写位置移到文件尾部."
+    方法 读入字节集 <公开 静态 类型 = 长整数 注释 = "从文件中当前读写位置读取一段字节集数据,返回实际读入的字节数." 注释 = "如果读入失败,将自动将当前文件读写位置移到文件尾部."
             返回值注释 = "返回实际读入的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     参数 存放数据的字节集 <类型 = 字节集类>
-    参数 欲读入数据的尺寸 <类型 = 变整数 注释 = "所欲从文件中读入的数据长度,单位为字节." 注释 = "如果读取中途到达了文件尾部,将只读取部分长度.">
+    参数 欲读入数据的尺寸 <注释 = "所欲从文件中读入的数据长度,单位为字节." 注释 = "如果读取中途到达了文件尾部,将只读取部分长度." @匹配类型 = 通用整数型>
     {
-        @ @sn<this>.ReadVolMem(@<存放数据的字节集>, @<欲读入数据的尺寸>)
+        @ @<当前对象>.ReadVolMem(@<存放数据的字节集>, (DWORD)@<欲读入数据的尺寸>)
     }
 
-    方法 写出字节集 <公开 类型 = 长整数 注释 = "写出一个字节集数据到文件中当前读写位置处,返回实际写出的字节长度." 注释 = "如果写入后的尺寸超过了文件尾部,将自动扩展文件的尺寸."
+    方法 写出字节集 <公开 静态 类型 = 长整数 注释 = "写出一个字节集数据到文件中当前读写位置处,返回实际写出的字节长度." 注释 = "如果写入后的尺寸超过了文件尾部,将自动扩展文件的尺寸."
             返回值注释 = "返回实际写出的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     参数 欲写出的字节集数据 <类型 = 字节集类>
     {
-        @ @sn<this>.WriteVolMem(@<欲写出的字节集数据>)
+        @ @<当前对象>.WriteVolMem(@<欲写出的字节集数据>)
     }
 
-    方法 读指针数据 <公开 类型 = 长整数 注释 = "从文件中当前读写位置读出一段数据到指定的指针中,并返回实际读入的字节数." 注释 = "如果读入失败,将自动将当前文件读写位置移到文件尾部."
+    方法 读指针数据 <公开 静态 类型 = 长整数 注释 = "从文件中当前读写位置读出一段数据到指定的指针中,并返回实际读入的字节数." 注释 = "如果读入失败,将自动将当前文件读写位置移到文件尾部."
             返回值注释 = "返回实际读入的字节数,失败返回0." 折叠 @嵌入式方法 = "">
-    参数 数据指针 <类型 = 变整数 注释 = "提供一个内存地址,用于存放从文件中读入的数据." 注释 = "该指针必须分配了足够的内存空间(大于等于\"数据尺寸\"的长度).">
-    参数 数据尺寸 <类型 = 长整数 注释 = "所欲从文件中读入的数据长度,单位为字节." 注释 = "如果到达了文件尾部,将只读取部分长度.">
+    参数 当前对象 <类型 = 文件读写类EX>
+    参数 数据指针 <注释 = "提供一个内存地址,用于存放从文件中读入的数据." 注释 = "该指针必须分配了足够的内存空间(大于等于\"数据尺寸\"的长度)." @匹配类型 = 通用整数型>
+    参数 数据尺寸 <注释 = "所欲从文件中读入的数据长度,单位为字节." 注释 = "如果到达了文件尾部,将只读取部分长度." @匹配类型 = 通用整数型>
     {
-        @ @sn<this>.ReadData((void *)@<数据指针>, @<数据尺寸>)
+        @ @<当前对象>.ReadData((void *)@<数据指针>, (DWORD)@<数据尺寸>)
     }
 
-    方法 写指针数据 <公开 类型 = 长整数 注释 = "写出一段指针数据到文件中当前读写位置处,返回实际写出的字节数." 返回值注释 = "返回实际写出的字节数,失败返回0." 折叠 @嵌入式方法 = "">
-    参数 数据指针 <类型 = 变整数 注释 = "欲写出数据的指针">
-    参数 数据尺寸 <类型 = 长整数 注释 = "欲写出的数据尺寸,如果写出后的尺寸超过了文件尾部,将自动扩展文件的尺寸.">
+    方法 写指针数据 <公开 静态 类型 = 长整数 注释 = "写出一段指针数据到文件中当前读写位置处,返回实际写出的字节数." 返回值注释 = "返回实际写出的字节数,失败返回0." 折叠
+            @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
+    参数 数据指针 <注释 = "欲写出数据的指针" @匹配类型 = 通用整数型>
+    参数 数据尺寸 <注释 = "欲写出的数据尺寸,如果写出后的尺寸超过了文件尾部,将自动扩展文件的尺寸." @匹配类型 = 通用整数型>
     {
-        @ @sn<this>.WriteData((const void*)@<数据指针>, @<数据尺寸>)
+        @ @<当前对象>.WriteData((const void*)@<数据指针>, (DWORD)@<数据尺寸>)
     }
 
-    方法 读入数组数据 <公开 类型 = 长整数 注释 = "从文件中当前读写位置读取并返回指定类型的数组数据,返回实际读入的字节数." 注释 = "如果读入失败,将自动将当前文件读写位置移到文件尾部."
+    方法 读入数组数据 <公开 静态 类型 = 长整数 注释 = "从文件中当前读写位置读取并返回指定类型的数组数据,返回实际读入的字节数." 注释 = "如果读入失败,将自动将当前文件读写位置移到文件尾部."
             返回值注释 = "返回实际读入的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     参数 所读入数据的存储变量 <注释 = "所读入数据将存放到此数组变量中;" 注释 = "所读入数据的尺寸将由此变量的存储空间尺寸决定." @需求类型 = 可写入变量 @匹配类型 = 通用非文本基本型数组>
     {
-        @ @sn<this>.ReadData(_VOL_GET_ARY_VAR_ADR_AND_SIZE(@<所读入数据的存储变量>))
+        @ @<当前对象>.ReadData(_VOL_GET_ARY_VAR_ADR_AND_SIZE(@<所读入数据的存储变量>))
     }
 
-    方法 写出数组数据 <公开 类型 = 长整数 注释 = "将所指定数组数据写出到文件中当前读写位置,返回实际写出的字节数." 返回值注释 = "返回实际写出的字节数,失败返回0." 折叠
+    方法 写出数组数据 <公开 静态 类型 = 长整数 注释 = "将所指定数组数据写出到文件中当前读写位置,返回实际写出的字节数." 返回值注释 = "返回实际写出的字节数,失败返回0." 折叠
             @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     参数 所欲写出的数组 <注释 = "所写出数据的尺寸将由此数组变量的存储空间尺寸决定" @匹配类型 = 通用非文本基本型数组>
     {
-        @ @sn<this>.WriteData(_VOL_GET_ARY_VAR_ADR_AND_SIZE(@<所欲写出的数组>))
+        @ @<当前对象>.WriteData(_VOL_GET_ARY_VAR_ADR_AND_SIZE(@<所欲写出的数组>))
     }
 
-    方法 删除数据 <公开 类型 = 逻辑型 注释 = "删除已打开文件中的部分数据,返回是否成功." 注释 = "注意: 本方法效率不高,成功删除部分数据后会改变文件的实际大小." 折叠
+    方法 删除数据 <公开 静态 类型 = 逻辑型 注释 = "删除已打开文件中的部分数据,返回是否成功." 注释 = "注意: 本方法效率不高,成功删除部分数据后会改变文件的实际大小." 折叠
             @嵌入式方法 = "">
+    参数 当前对象 <类型 = 文件读写类EX>
     参数 起始位置 <类型 = 长整数 注释 = "提供所欲删除数据的起始位置偏移,从0开始." 注释 = "-1表示从当前的读写位置开始删除." @默认值 = -1>
     参数 删除长度 <类型 = 长整数 注释 = "所欲删除的长度,必须大于0.">
     {
-        @ @sn<this>.RemoveData(@<起始位置>, @<删除长度>)
+        @ @<当前对象>.RemoveData(@<起始位置>, @<删除长度>)
     }
 }
 
-类 内存映射文件类EX <公开 注释 = "本类提供内存映射文件创建/读/写操作的支持,相比核心库的增强了功能." 注释 = "注意: 本类的\"尾部\"等同于文件的EOF,即最后一个可读写地址的后面."
-        注释 = "由于映射内存不能像磁盘文件那样扩展长度,所以到达尾部后将无法继续写入数据." 折叠 @文档 = "category = \"文件操作\""
-        @视窗.外部头文件 = "src\\piv_file.hpp" @视窗.后缀文本 = "public PivFileMapping">
+类 内存映射文件类EX <公开 注释 = "本类提供内存映射文件创建/读/写操作的支持,相比核心库的支持了像文件流一样的顺序读写能力."
+        注释 = "注意: 本类的\"尾部\"等同于文件的EOF,即最后一个可读写地址的后面." 注释 = "由于映射内存不能像磁盘文件那样扩展长度,所以到达尾部后将无法继续写入数据." 折叠
+        @文档 = "category = \"文件操作\"" @视窗.外部头文件 = "src\\piv_file.hpp" @别名 = "PivFileMapping" @别名类型 = 本地类>
 {
 
     # 创建/关闭 ---
 
-    方法 创建映射文件 <公开 类型 = 逻辑型 注释 = "从提供的文件路径创建内存映射文件" 返回值注释 = "执行成功返回真,否则返回假." 折叠 @嵌入式方法 = "">
+    方法 创建映射文件 <公开 静态 类型 = 逻辑型 注释 = "从提供的文件路径创建内存映射文件" 返回值注释 = "执行成功返回真,否则返回假." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     参数 文件名称 <类型 = 文本型 注释 = "欲创建内存映射文件的文件全路径名称." 注释 = "如果不创建真实的磁盘文件,只映射在内存中,则可以留空." @默认值 = 空对象>
     参数 访问权限 <类型 = 文件访问权限 注释 = "提供\"映射文件访问权限\"常量,设置文件的访问权限" @默认值 = 文件访问权限.读写>
     参数 共享模式 <类型 = 文件共享模式 注释 = "指定限制其它进程操作此文件的方式" @默认值 = 文件共享模式.禁止写>
@@ -1937,238 +1958,467 @@
     参数 内存页保护 <类型 = 整数 注释 = "提供内存映射文件的页面保护属性,指定文件映射到内存后是否允许读和写." @默认值 = 内存页面保护属性.读写>
     参数 内存映射名称 <类型 = 文本型 注释 = "创建内存映射文件的名称,其它进程可以通过该名称打开内存映射文件.该参数可以为空,表示创建一个没有名称的内存映射文件." @默认值 = 空对象>
     {
-        @ @sn<this>.Create(@<文件名称>.GetText(), (DWORD)@<访问权限>, (DWORD)@<共享模式>, (DWORD)@<创建方式>, @<映射尺寸>, (DWORD)@<内存页保护>, @<内存映射名称>.GetTextMaybeNull())
+        @ @<当前对象>.Create(@<文件名称>.GetText(), (DWORD)@<访问权限>, (DWORD)@<共享模式>, (DWORD)@<创建方式>, @<映射尺寸>, (DWORD)@<内存页保护>, @<内存映射名称>.GetTextMaybeNull())
     }
 
-    方法 创建自文件句柄 <公开 类型 = 逻辑型 注释 = "从文件句柄创建内存映射文件" 返回值注释 = "执行成功返回真,否则返回假." 折叠 @嵌入式方法 = "">
-    参数 文件句柄 <类型 = 变整数 注释 = "提供一个外部打开的文件句柄,本对象不会关闭该句柄." "">
+    方法 创建自文件句柄 <公开 静态 类型 = 逻辑型 注释 = "从文件句柄创建内存映射文件" 返回值注释 = "执行成功返回真,否则返回假." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
+    参数 文件句柄 <注释 = "提供一个外部打开的文件句柄,本对象不会关闭该句柄." @匹配类型 = 通用整数型>
     参数 映射尺寸 <类型 = 长整数 注释 = "欲创建内存映射文件的文件大小." 注释 = "如果是打开一个已经存在的文件,可以指定该值为0,表示创建的内存映射文件大小和文件本身大小是一致的."
             @默认值 = 0>
     参数 内存页保护 <类型 = 整数 注释 = "提供内存映射文件的页面保护属性,指定文件映射到内存后是否允许读和写." @默认值 = 内存页面保护属性.读写>
     参数 内存映射名称 <类型 = 文本型 注释 = "创建内存映射文件的名称,其它进程可以通过该名称打开内存映射文件.该参数可以为空,表示创建一个没有名称的内存映射文件." @默认值 = 空对象>
     {
-        @ @sn<this>.Create((HANDLE)@<文件句柄>, @<映射尺寸>, (DWORD)@<内存页保护>, @<内存映射名称>.GetTextMaybeNull())
+        @ @<当前对象>.Create((HANDLE)@<文件句柄>, @<映射尺寸>, (DWORD)@<内存页保护>, @<内存映射名称>.GetTextMaybeNull())
     }
 
-    方法 创建映射内存 <公开 类型 = 逻辑型 注释 = "创建一个不关联实际磁盘文件,只映射到内存的内存映射文件." 返回值注释 = "执行成功返回真,否则返回假." 折叠 @嵌入式方法 = "">
+    方法 创建映射内存 <公开 静态 类型 = 逻辑型 注释 = "创建一个不关联实际磁盘文件,只映射到内存的内存映射文件." 返回值注释 = "执行成功返回真,否则返回假." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     参数 映射尺寸 <类型 = 长整数 注释 = "欲创建内存映射文件的文件大小,默认4096字节(4K).如果是打开一个已经存在的文件,可以指定该值为0,表示创建的内存映射文件大小和文件本身大小是一致的."
             @默认值 = 4096>
     参数 内存页保护 <类型 = 整数 注释 = "提供内存映射文件的页面保护属性,指定文件映射到内存后是否允许读和写." @默认值 = 内存页面保护属性.读写>
     参数 内存映射名称 <类型 = 文本型 注释 = "创建内存映射文件的名称,其它进程可以通过该名称打开内存映射文件.该参数可以为空,表示创建一个没有名称的内存映射文件." @默认值 = 空对象>
     {
-        @ @sn<this>.Create(@<映射尺寸>, (DWORD)@<内存页保护>, @<内存映射名称>.GetTextMaybeNull())
+        @ @<当前对象>.Create(@<映射尺寸>, (DWORD)@<内存页保护>, @<内存映射名称>.GetTextMaybeNull())
     }
 
-    方法 打开映射文件 <公开 类型 = 逻辑型 注释 = "打开一个其他进程创建的内存映射文件" 返回值注释 = "执行成功返回真,否则返回假." 折叠 @嵌入式方法 = "">
+    方法 打开映射文件 <公开 静态 类型 = 逻辑型 注释 = "打开一个其他进程创建的内存映射文件" 返回值注释 = "执行成功返回真,否则返回假." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     参数 内存映射名称 <类型 = 文本型 注释 = "其他进程创建的内存映射文件名称."
             注释 = "名称可以具有\"Global\\\"或\"Local\\\"前缀,以显式打开全局命名空间或会话命名空间中的对象.">
     参数 访问权限 <类型 = 整数 注释 = "提供内存映射文件的访问权限,能使用哪些权限由创建内存映射文件时的参数决定." @默认值 = 映射文件访问权限.读写>
     {
-        @ @sn<this>.Open(@<内存映射名称>.GetText(), (DWORD)@<访问权限>)
+        @ @<当前对象>.Open(@<内存映射名称>.GetText(), (DWORD)@<访问权限>)
     }
 
-    方法 关闭映射文件 <公开 注释 = "关闭并释放已经创建或打开的内存映射文件,关闭后先前所取得的已映射内存指针不可再使用." 折叠 @嵌入式方法 = "">
+    方法 关闭映射文件 <公开 静态 注释 = "关闭并释放已经创建或打开的内存映射文件,关闭后先前所取得的已映射内存指针不可再使用." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     {
-        @ @sn<this>.Close()
+        @ @<当前对象>.Close()
     }
 
-    方法 是否已打开 <公开 类型 = 逻辑型 注释 = "返回是否已经创建或打开了内存映射文件" 折叠 @嵌入式方法 = "">
+    方法 是否已打开 <公开 静态 类型 = 逻辑型 注释 = "返回是否已经创建或打开了内存映射文件" 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     {
-        @ @sn<this>.IsOpen()
+        @ @<当前对象>.IsOpen()
     }
 
-    方法 交换 <公开 注释 = "将本对象的内容跟另一个对象交换,即交换当前创建的内存映射文件." 折叠 @嵌入式方法 = "">
+    方法 交换 <公开 静态 注释 = "将本对象的内容跟另一个对象交换,即交换当前创建的内存映射文件." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     参数 所欲交换的对象 <类型 = 内存映射文件类EX>
     {
-        @ @sn<this>.Swap(@<所欲交换的对象>)
+        @ @<当前对象>.Swap(@<所欲交换的对象>)
     }
 
-    方法 取文件句柄 <公开 类型 = 变整数 注释 = "返回所映射磁盘文件的文件句柄,句柄无效时返回-1." 注释 = "注意: \"创建映射内存\"不会产生有效的文件句柄." 折叠 @嵌入式方法 = "">
+    方法 取文件句柄 <公开 静态 类型 = 变整数 注释 = "返回所映射磁盘文件的文件句柄,句柄无效时返回-1." 注释 = "注意: \"创建映射内存\"不会产生有效的文件句柄." 折叠
+            @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     {
-        @ (INT_P)@sn<this>.GetFileHandle()
+        @ (INT_P)@<当前对象>.GetFileHandle()
     }
 
     # 映射内存 ---
 
-    方法 映射到内存 <公开 类型 = 逻辑型 注释 = "将一个创建完毕或已打开的内存映射文件的全部或一部分映射到进程的内存空间中." 注释 = "注意: 必须成功执行本方法后,才能进行后续的读写操作!"
-            返回值注释 = "执行成功返回真,否则返回假." 折叠 @嵌入式方法 = "">
-    参数 起始位置 <类型 = 长整数 注释 = "映射到内存的文件起始位置.注意该值一定要是系统分配内存的分配粒度." 注释 = "如Windows的分配粒度是64k(即0x10000),"
-            注释 = "所以该值一定要是64k的倍数,否则会执行出错,起始位置的值从0开始." @默认值 = 0>
-    参数 映射尺寸 <类型 = 长整数 注释 = "映射到内存的字节数量,该值等于0代表从起始位置开始文件其余部分全部映射到内存." @默认值 = 0>
+    方法 映射到内存 <公开 静态 类型 = 逻辑型 注释 = "将一个创建完毕或已打开的内存映射文件的全部或一部分映射到进程的内存空间中."
+            注释 = "注意: 必须成功执行本方法后,才能进行后续的读写操作!" 返回值注释 = "执行成功返回真,否则返回假." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
+    参数 起始位置 <注释 = "映射到内存的文件起始位置.注意该值一定要是系统分配内存的分配粒度." 注释 = "如Windows的分配粒度是64k(即0x10000),"
+            注释 = "所以该值一定要是64k的倍数,否则会执行出错,起始位置的值从0开始." @默认值 = 0 @匹配类型 = 通用整数型>
+    参数 映射尺寸 <注释 = "映射到内存的字节数量,该值等于0代表从起始位置开始文件其余部分全部映射到内存." @默认值 = 0 @匹配类型 = 通用整数型>
     参数 访问权限 <类型 = 整数 注释 = "提供内存映射文件的访问权限,能使用哪些权限由创建内存映射文件时的参数决定." @默认值 = 映射文件访问权限.读写>
     {
-        @ @sn<this>.MapToMemory(@<起始位置>, @<映射尺寸>, (DWORD)@<访问权限>)
+        @ @<当前对象>.MapToMemory((uint64_t)@<起始位置>, (SIZE_T)@<映射尺寸>, (DWORD)@<访问权限>)
     }
 
-    方法 解除映射 <公开 类型 = 逻辑型 注释 = "\"映射到内存\"方法的反操作,将已经映射到内存的文件解除映射."
+    方法 解除映射 <公开 静态 类型 = 逻辑型 注释 = "\"映射到内存\"方法的反操作,将已经映射到内存的文件解除映射."
             注释 = "注意: 解除映射后先前所获取的数据指针不能再使用,也不能再进行读写操作." 返回值注释 = "执行成功返回真,否则返回假." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     {
-        @ @sn<this>.UnMapToMemory()
+        @ @<当前对象>.UnMapToMemory()
     }
 
-    方法 刷新映射文件 <公开 类型 = 逻辑型 注释 = "将已映射内存中的数据真实写入到对应磁盘文件(调用\"创建映射文件\"方法时指定)中."
+    方法 刷新映射文件 <公开 静态 类型 = 逻辑型 注释 = "将已映射内存中的数据真实写入到对应磁盘文件(调用\"创建映射文件\"方法时指定)中."
             注释 = "注: 映射视图的内存页修改,可能会先在内存中缓存,待共享计数归零才延后写入到磁盘中." 注释 = "执行本方法可以立即将修改保存到磁盘,以降低在程序崩溃或电源故障时丢失数据的风险."
             返回值注释 = "执行成功返回真,否则返回假." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     {
-        @ @sn<this>.FlushView(0)
+        @ @<当前对象>.FlushView(0)
     }
 
     # 读写操作 ---
 
-    方法 读 <公开 注释 = "从已映射内存中读入指定的基本类型数据并返回." 注释 = "如果读入失败,会将当前的读写位置移到尾部." 折叠 @嵌入式方法 = "">
+    方法 读 <公开 静态 注释 = "从已映射内存中读入指定的基本类型数据并返回." 注释 = "注: 如果读入失败,会将当前的读写位置移到尾部." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     参数 欲获取的数据类型 <注释 = "提供所欲读入的基本数据类型" @需求类型 = 数据类型 @匹配类型 = 通用非文本基本型 @返回值类型 = 0>
-    参数 缺省值 <注释 = "如果读入失败,则返回此处的值" @匹配类型 = 等于前参数值类型>
+    参数 缺省值 <注释 = "如果读入失败,则返回此处的值" @匹配类型 = 匹配前参数值类型>
     {
-        @ @sn<this>.Get<@<欲获取的数据类型>>(@<缺省值>)
+        @ @<当前对象>.Get<@<欲获取的数据类型>>(@<缺省值>)
     }
 
-    方法 读字符 <公开 类型 = 整数 注释 = "返回当前读写位置的字符值(char),如果读到文本尾部则返回-1." 注释 = "注意: 请确保当前的数据是UTF-8或本地多字节编码文本."
-            注释 = "如果读入失败,会将当前的读写位置移到尾部." 折叠 @嵌入式方法 = "">
+    方法 读字符 <公开 静态 类型 = 整数 注释 = "返回当前读写位置的字符值(char),如果读到文本尾部则返回-1." 注释 = "注: 如果读入失败,会将当前的读写位置移到尾部." 折叠
+            @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     {
-        @ @sn<this>.GetChar()
+        @ @<当前对象>.GetChar()
     }
 
-    方法 读宽字符 <公开 类型 = 整数 注释 = "返回当前读写位置的宽字符值(wchar_t),如果读到文本尾部则返回-1." 注释 = "注意: 请确保当前的数据是UTF-16LE编码文本."
-            注释 = "如果读入失败,会将当前的读写位置移到尾部." 折叠 @嵌入式方法 = "">
+    方法 读宽字符 <公开 静态 类型 = 整数 注释 = "返回当前读写位置的宽字符值(wchar_t),如果读到文本尾部则返回-1." 注释 = "注: 如果读入失败,会将当前的读写位置移到尾部." 折叠
+            @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     {
-        @ @sn<this>.GetWchar()
+        @ @<当前对象>.GetWchar()
     }
 
-    方法 读入字节集 <公开 类型 = 变整数 注释 = "从已映射内存中读入数据,返回实际读入的字节数." 返回值注释 = "返回实际读入的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    方法 读字节集 <公开 静态 类型 = 变整数 注释 = "从已映射内存中读入数据,返回实际读入的字节数." 返回值注释 = "返回实际读入的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     参数 存放数据的字节集 <类型 = 字节集类 注释 = "提供字节集变量,存放从内存映射文件中读出的数据,作为方法的返回值.">
     参数 读取长度 <类型 = 变整数 注释 = "从已映射内存中读入数据的长度,单位为字节." 注释 = "如果已映射内存的剩余空间不足,将只读取部分长度.">
     {
-        @ @sn<this>.ReadVolMem(@<存放数据的字节集>, @<读取长度>)
+        @ @<当前对象>.ReadVolMem(@<存放数据的字节集>, @<读取长度>)
     }
 
-    方法 写出字节集 <公开 类型 = 变整数 注释 = "向已映射内存中写出数据,返回实际写出的字节数." 返回值注释 = "返回实际写出的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    方法 写字节集 <公开 静态 类型 = 变整数 注释 = "向已映射内存中写出数据,返回实际写出的字节数." 返回值注释 = "返回实际写出的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     参数 欲写出的字节集 <类型 = 字节集类 注释 = "欲写出的数据,如果数据长度超过已映射内存的边界,将只能写出部分数据.">
     {
-        @ @sn<this>.WriteVolMem(@<欲写出的字节集>)
+        @ @<当前对象>.WriteVolMem(@<欲写出的字节集>)
     }
 
-    方法 读入数据 <公开 类型 = 整数 注释 = "从已映射内存中读出基本类型数值,返回实际读入的字节数." 注释 = "如果读入失败,会将当前的读写位置移到尾部."
+    方法 读数据 <公开 静态 类型 = 整数 注释 = "从已映射内存中读出基本类型数值,返回实际读入的字节数." 注释 = "注: 如果读入失败,会将当前的读写位置移到尾部."
             返回值注释 = "返回实际读入的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     参数 所读入数据的变量 <注释 = "提供所欲返回的基本类型值变量(不能提供立即数)" @需求类型 = 可写入变量 @匹配类型 = 通用非文本基本型>
     {
-        @ @sn<this>.Read<@pdt<所读入数据的变量>>(@<所读入数据的变量>)
+        @ @<当前对象>.Read<@pdt<所读入数据的变量>>(@<所读入数据的变量>)
     }
 
-    方法 写出数据 <公开 类型 = 整数 注释 = "向已映射内存中写出基本类型数值,返回实际写出的字节数." 注释 = "写出失败不会移动读写位置." 返回值注释 = "返回实际写出的字节数,失败返回0."
-            折叠 @嵌入式方法 = "">
+    方法 写数据 <公开 静态 类型 = 整数 注释 = "向已映射内存中写出基本类型数值,返回实际写出的字节数." 注释 = "注: 写出失败不会移动读写位置."
+            返回值注释 = "返回实际写出的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     参数 所欲写出的数据 <注释 = "提供所欲写出的基本数值." 注释 = "如欲明确指定其数据类型,可以使用强制类型转换操作符." @匹配类型 = 通用非文本基本型>
     {
-        @ @sn<this>.Write<@pdt<所欲写出的数据>>(@<所欲写出的数据>)
+        @ @<当前对象>.Write<@pdt<所欲写出的数据>>(@<所欲写出的数据>)
     }
 
-    方法 读入文本 <公开 类型 = 长整数 注释 = "从当前读写位置读取一段文本数据,返回实际读入的字节长度."
-            注释 = "如果该数据中存在字符值0或26(文本结束标志),将仅返回该字符之前的数据(后续读写将跳过该字符)." 注释 = "如果读入失败,将返回并0且自动将当前读写位置移到尾部(EOF)."
+    方法 读文本 <公开 静态 类型 = 长整数 注释 = "从当前读写位置读取一段文本数据,返回实际读入的字节长度."
+            注释 = "如果该数据中存在字符值0或26(文本结束标志),将仅返回该字符之前的数据(后续读写将跳过该字符)." 注释 = "注: 如果读入失败,将返回并0且自动将当前读写位置移到尾部(EOF)."
             返回值注释 = "返回实际读入的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     参数 存放读入文本的变量 <类型 = 文本型 注释 = "读入的文本数据将存放在此参数中">
     参数 欲读入的最多字符数 <类型 = 长整数 注释 = "指定欲读入文本数据的最多字符数目." 注释 = "如果为-1,则读入当前读写位置后的所有文本." @默认值 = -1>
     参数 文本编码 <类型 = 文本编码类型 注释 = "指定文本的编码类型" @默认值 = 文本编码类型.UTF16>
     {
-        @ @sn<this>.ReadTextWithEncode(@<存放读入文本的变量>, @<欲读入的最多字符数>, @<文本编码>)
+        @ @<当前对象>.ReadTextWithEncode(@<存放读入文本的变量>, @<欲读入的最多字符数>, @<文本编码>)
     }
 
-    方法 读入一行 <公开 类型 = 长整数 注释 = "从当前读写位置读取一行文本数据,行末的换行符将被抛弃." 注释 = "如果读入失败,将返回并0且自动将当前读写位置移到尾部(EOF)."
+    方法 读文本行 <公开 静态 类型 = 长整数 注释 = "从当前读写位置读取一行文本数据,行末的换行符将被抛弃." 注释 = "注: 如果读入失败,将返回并0且自动将当前读写位置移到尾部(EOF)."
             返回值注释 = "返回实际读入的字节数(包括被抛弃的换行符),失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     参数 存放读入文本的变量 <类型 = 文本型 注释 = "读入的文本数据将存放在此参数中">
     参数 文本编码 <类型 = 文本编码类型 注释 = "指定文本的编码类型" @默认值 = 文本编码类型.UTF16>
     {
-        @ @sn<this>.ReadLineWithEncode(@<存放读入文本的变量>, @<文本编码>)
+        @ @<当前对象>.ReadLineWithEncode(@<存放读入文本的变量>, @<文本编码>)
     }
 
-    方法 写出文本 <公开 类型 = 长整数 注释 = "写出一段指定编码的文本数据到已映射内存的当前读写位置处,返回实际写出的字节数." 注释 = "如果已映射内存的剩余空间不足,将只写出部分文本."
-            返回值注释 = "返回实际写出的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    方法 写文本 <公开 静态 类型 = 长整数 注释 = "写出一段指定编码的文本数据到已映射内存的当前读写位置处,返回实际写出的字节数."
+            注释 = "注: 如果已映射内存的剩余空间不足,将只写出部分文本." 返回值注释 = "返回实际写出的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     参数 所欲写出的文本 <类型 = 文本型 注释 = "所欲写出的文本数据">
     参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定是否在所写出文本后添加写出一个\'\\0\'字符" 注释 = "注意: 请勿在纯文本文件中写出结束零字符!" @默认值 = 假>
     参数 文本编码 <类型 = 文本编码类型 注释 = "指定文本的编码类型" @默认值 = 文本编码类型.UTF16>
     {
-        @ (INT_P)@sn<this>.WriteText(@<所欲写出的文本>.GetText(), @<是否包括结束零字符>, @<文本编码>)
+        @ (INT_P)@<当前对象>.WriteText(@<所欲写出的文本>.GetText(), @<是否包括结束零字符>, @<文本编码>)
     }
 
-    方法 写文本行 <公开 类型 = 长整数 注释 = "写出指定编码的文本数据并附加\"\\r\\n\"换行符到已映射内存的当前读写位置处,返回实际写出的字节数."
-            注释 = "如果已映射内存的剩余空间不足,将只写出部分文本." 返回值注释 = "返回实际写出的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    方法 写文本行 <公开 静态 类型 = 长整数 注释 = "写出指定编码的文本数据并附加\"\\r\\n\"换行符到已映射内存的当前读写位置处,返回实际写出的字节数."
+            注释 = "注: 如果已映射内存的剩余空间不足,将只写出部分文本." 返回值注释 = "返回实际写出的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     参数 所欲写出的文本 <类型 = 文本型 注释 = "所欲写出的文本数据">
     参数 文本编码 <类型 = 文本编码类型 注释 = "指定文本的编码类型" @默认值 = 文本编码类型.UTF16>
     {
-        @ @sn<this>.WriteLine(@<所欲写出的文本>.GetText(), @<文本编码>)
+        @ @<当前对象>.WriteLine(@<所欲写出的文本>.GetText(), @<文本编码>)
     }
 
-    方法 读指针数据 <公开 类型 = 长整数 注释 = "从已映射内存中读入一段数据到指定的指针中,返回实际读入的字节数." 返回值注释 = "返回实际读入的字节数,失败返回0." 折叠
+    方法 读内存 <公开 静态 类型 = 长整数 注释 = "从已映射内存中读入一段数据到指定的指针中,返回实际读入的字节数." 返回值注释 = "返回实际读入的字节数,失败返回0." 折叠
             @嵌入式方法 = "">
-    参数 数据指针 <类型 = 变整数 注释 = "提供一个内存地址,用于存放从内存映射文件中读入的数据." 注释 = "该指针必须分配了足够的内存空间(大于等于\"数据尺寸\"的长度).">
-    参数 数据尺寸 <类型 = 长整数 注释 = "从已映射内存中读入数据的长度,单位为字节." 注释 = "如果已映射内存的剩余空间不足,将只读取部分长度.">
+    参数 当前对象 <类型 = 内存映射文件类EX>
+    参数 数据指针 <注释 = "提供一个内存地址,用于存放从内存映射文件中读入的数据." 注释 = "该指针必须分配了足够的内存空间(大于等于\"数据尺寸\"的长度)." @匹配类型 = 通用整数型>
+    参数 数据尺寸 <注释 = "从已映射内存中读入数据的长度,单位为字节." 注释 = "如果已映射内存的剩余空间不足,将只读取部分长度." @匹配类型 = 通用整数型>
     {
-        @ @sn<this>.ReadData((void *)@<数据指针>, @<数据尺寸>)
+        @ @<当前对象>.ReadData((void *)@<数据指针>, (size_t)@<数据尺寸>)
     }
 
-    方法 写指针数据 <公开 类型 = 长整数 注释 = "向已映射内存中写出一段数据,返回实际写出的字节数." 返回值注释 = "返回实际写出的字节数,失败返回0." 折叠 @嵌入式方法 = "">
-    参数 数据指针 <类型 = 变整数 注释 = "欲写出数据的指针">
-    参数 数据尺寸 <类型 = 长整数 注释 = "欲写出的数据的尺寸." 注释 = "如果长度超过已映射内存的剩余空间,将只写出部分数据.">
+    方法 写内存 <公开 静态 类型 = 长整数 注释 = "向已映射内存中写出一段数据,返回实际写出的字节数." 返回值注释 = "返回实际写出的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
+    参数 数据指针 <注释 = "欲写出数据的指针" @匹配类型 = 通用整数型>
+    参数 数据尺寸 <注释 = "欲写出的数据的尺寸." 注释 = "如果长度超过已映射内存的剩余空间,将只写出部分数据." @匹配类型 = 通用整数型>
     {
-        @ @sn<this>.WriteData((void*)@<数据指针>, @<数据尺寸>)
+        @ @<当前对象>.WriteData((void*)@<数据指针>, (size_t)@<数据尺寸>)
     }
 
-    方法 删除数据 <公开 类型 = 逻辑型 注释 = "删除已映射内存中的部分数据,删除成功后,会按删除长度将已映射内存的尾部数据清零." 返回值注释 = "返回是否成功" 折叠 @嵌入式方法 = "">
+    方法 删除数据 <公开 静态 类型 = 逻辑型 注释 = "删除已映射内存中的部分数据,删除成功后,会按删除长度将已映射内存的尾部数据清零." 返回值注释 = "返回是否成功" 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     参数 起始位置 <类型 = 长整数 注释 = "从已映射内存中删除的数据的起始位置偏移,从0开始." 注释 = "-1表示从当前的读写位置开始删除." @默认值 = -1>
     参数 删除长度 <类型 = 长整数 注释 = "所欲删除的长度,必须大于0." 注释 = "如果删除的范围超过了已映射内存的边界,将删除失败.">
     {
-        @ @sn<this>.RemoveData(@<起始位置>, @<删除长度>)
+        @ @<当前对象>.RemoveData(@<起始位置>, @<删除长度>)
     }
 
     # 读写位置/尺寸 ---
 
-    方法 取读写位置 <公开 类型 = 长整数 注释 = "返回已映射内存的当前读/写位置,有效范围为0到映射内存长度," 注释 = "执行读写操作将移动读写位置."
-            注释 = "如果当前尚未映射到内存或失败,将返回-1." 折叠 @嵌入式方法 = "">
+    方法 取读写位置 <公开 静态 类型 = 长整数 注释 = "返回已映射内存的当前读/写位置,有效范围为0到映射内存长度," 注释 = "执行读写操作将移动读写位置."
+            返回值注释 = "如果当前尚未映射到内存或失败,将返回-1." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     {
-        @ @sn<this>.GetCurrentPos()
+        @ @<当前对象>.GetCurrentPos()
     }
 
-    方法 移动读写位置 <公开 类型 = 逻辑型 注释 = "设置下一次读或写操作的位置,返回是否成功." 折叠 @嵌入式方法 = "">
+    方法 移动读写位置 <公开 静态 类型 = 逻辑型 注释 = "设置下一次读或写操作的位置,返回是否成功." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     参数 基准移动位置 <类型 = 文件基准位置 注释 = "指定从文件中开始移动的基准位置" @默认值 = 文件基准位置.文件首>
-    参数 移动距离 <类型 = 长整数 注释 = "指定相对于起始移动位置的移动尺寸,单位字节.">
+    参数 移动距离 <注释 = "指定相对于起始移动位置的移动尺寸,单位字节." @匹配类型 = 通用整数型>
     {
-        @ @sn<this>.SetCurrentPos(@<移动距离>, (DWORD)@<基准移动位置>)
+        @ @<当前对象>.SetCurrentPos(@<移动距离>, (DWORD)@<基准移动位置>)
     }
 
-    方法 移到首部 <公开 类型 = 逻辑型 注释 = "设置下一次读或写操作的位置到映射内存首部,返回是否成功." 折叠 @嵌入式方法 = "">
+    方法 移到首部 <公开 静态 类型 = 逻辑型 注释 = "设置下一次读或写操作的位置到映射内存首部,返回是否成功." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     {
-        @ @sn<this>.SetCurrentPos(0, FILE_BEGIN)
+        @ @<当前对象>.SetCurrentPos(0, FILE_BEGIN)
     }
 
-    方法 移到尾部 <公开 类型 = 逻辑型 注释 = "设置下一次读或写操作的位置到映射内存尾部,返回是否成功." 注释 = "注: 这里的尾部等同于EOF,即读写位置等于映射长度." 折叠
+    方法 移到尾部 <公开 静态 类型 = 逻辑型 注释 = "设置下一次读或写操作的位置到映射内存尾部,返回是否成功." 注释 = "注: 这里的尾部等同于EOF,即读写位置等于映射长度." 折叠
             @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     {
-        @ @sn<this>.SetCurrentPos(0, FILE_END)
+        @ @<当前对象>.SetCurrentPos(0, FILE_END)
     }
 
-    方法 是否在尾部 <公开 类型 = 逻辑型 注释 = "返回当前读写位置是否已经处于映射内存尾部(EOF)." 折叠 @嵌入式方法 = "">
+    方法 是否在尾部 <公开 静态 类型 = 逻辑型 注释 = "返回当前读写位置是否已经处于映射内存尾部(EOF)." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     {
-        @ @sn<this>.IsEof()
+        @ @<当前对象>.IsEof()
     }
 
-    方法 取数据指针 <公开 类型 = 变整数 注释 = "取得已映射内存的地址,用于后续对其进行内存修改和复制操作." 注释 = "注: 本方法不会移动读写位置."
+    方法 取数据指针 <公开 静态 类型 = 变整数 注释 = "取得已映射内存的地址,用于后续对其进行内存修改和复制操作." 注释 = "注: 本方法不会移动读写位置."
             返回值注释 = "执行成功返回数据地址指针,否则返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     参数 读写位置 <类型 = 长整数 注释 = "从已映射内存中读出的数据的起始位置偏移,从0开始." 注释 = "默认为首地址,-1表示当前的读写位置." @默认值 = 0>
     {
-        @ (INT_P)@sn<this>.GetPtr(@<读写位置>)
+        @ (INT_P)@<当前对象>.GetPtr(@<读写位置>)
     }
 
-    方法 取文件长度 <公开 类型 = 长整数 注释 = "返回当前被打开磁盘文件的长度,单位为字节." 注释 = "如果当前尚未打开磁盘文件或失败,将返回-1." 折叠 @嵌入式方法 = "">
+    方法 取文件长度 <公开 静态 类型 = 长整数 注释 = "返回当前被打开磁盘文件的长度,单位为字节." 返回值注释 = "如果当前尚未打开磁盘文件或失败,将返回-1." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     {
-        @ @sn<this>.GetSize()
+        @ @<当前对象>.GetSize()
     }
 
-    方法 取映射长度 <公开 类型 = 长整数 注释 = "返回内存映射文件被映射到内存空间的尺寸,单位为字节." 折叠 @嵌入式方法 = "">
+    方法 取映射长度 <公开 静态 类型 = 长整数 注释 = "返回内存映射文件被映射到内存空间的尺寸,单位为字节." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     {
-        @ @sn<this>.GetViewSize()
+        @ @<当前对象>.GetViewSize()
     }
 
-    方法 取内存页长度 <公开 类型 = 长整数 注释 = "返回内存映射文件被映射到内存空间的页面尺寸,单位为字节." 注释 = "该值必定是4096的倍数." 折叠 @嵌入式方法 = "">
+    方法 取内存页长度 <公开 静态 类型 = 长整数 注释 = "返回内存映射文件被映射到内存空间的页面尺寸,单位为字节." 注释 = "该值必定是4096的倍数." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存映射文件类EX>
     {
-        @ @sn<this>.GetMapSize()
+        @ @<当前对象>.GetMapSize()
+    }
+}
+
+类 内存流读写类 <公开 注释 = "提供内存流的读写操作支持,本类不会拷贝内存数据." 折叠 折叠2 @文档 = "category = \"文件操作\""
+        @视窗.外部头文件 = "src\\piv_file.hpp" @别名 = "PivMemStream" @别名类型 = 本地类>
+{
+    方法 打开数据 <公开 静态 类型 = 逻辑型 注释 = "打开一段内存数据,之后可以顺序读写数据的内容." 注释 = "本类不会拷贝数据,请保证数据的生命周期." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    参数 数据地址 <注释 = "所欲打开的内存数据地址,请保证其生命周期." @匹配类型 = 通用整数型>
+    参数 数据尺寸 <注释 = "内存数据的字节长度" @匹配类型 = 通用整数型>
+    {
+        @ @<当前对象>.open((void *)@<数据地址>, (int64_t)@<数据尺寸>)
+    }
+
+    方法 打开资源 <公开 静态 类型 = 逻辑型 注释 = "打开一个视窗文件资源,直接读取资源里的内容." 注释 = "注意: 资源具有全程序生命周期,但只读,请勿使用本类的\"写\"命令." 折叠
+            @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    参数 资源ID <类型 = 视窗文件资源 注释 = "所欲打开的文件资源">
+    {
+        @ @<当前对象>.open((WORD)@<资源ID>)
+    }
+
+    # 读写操作 ---
+
+    方法 读 <公开 静态 注释 = "从内存数据中读入指定的基本类型值并返回." 注释 = "注: 如果读入失败,会将当前的读写位置移到尾部." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    参数 欲获取的数据类型 <注释 = "提供所欲读入的基本数据类型" @需求类型 = 数据类型 @匹配类型 = 通用非文本基本型 @返回值类型 = 0>
+    参数 缺省值 <注释 = "如果读入失败,则返回此处的值" @匹配类型 = 匹配前参数值类型>
+    {
+        @ @<当前对象>.Get<@<欲获取的数据类型>>(@<缺省值>)
+    }
+
+    方法 读字符 <公开 静态 类型 = 整数 注释 = "返回当前读写位置的字符值(char),如果读到文本尾部则返回-1." 注释 = "注: 如果读入失败,会将当前的读写位置移到尾部." 折叠
+            @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    {
+        @ @<当前对象>.GetChar()
+    }
+
+    方法 读宽字符 <公开 静态 类型 = 整数 注释 = "返回当前读写位置的宽字符值(wchar_t),如果读到文本尾部则返回-1." 注释 = "注: 如果读入失败,会将当前的读写位置移到尾部." 折叠
+            @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    {
+        @ @<当前对象>.GetWchar()
+    }
+
+    方法 读字节集 <公开 静态 类型 = 变整数 注释 = "从内存中读入数据到字节集,返回实际读入的字节数." 返回值注释 = "返回实际读入的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    参数 存放数据的字节集 <类型 = 字节集类 注释 = "提供字节集变量,存放读出的数据,作为方法的返回值.">
+    参数 读取长度 <类型 = 变整数 注释 = "读入数据的长度,单位为字节." 注释 = "如果的剩余空间不足,将只读取部分长度.">
+    {
+        @ @<当前对象>.ReadVolMem(@<存放数据的字节集>, @<读取长度>)
+    }
+
+    方法 写字节集 <公开 静态 类型 = 变整数 注释 = "向内存数据中写出数据,返回实际写出的字节数." 返回值注释 = "返回实际写出的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    参数 欲写出的字节集 <类型 = 字节集类 注释 = "欲写出的数据,如果数据长度超过内存数据长度,将只能写出部分数据.">
+    {
+        @ @<当前对象>.WriteVolMem(@<欲写出的字节集>)
+    }
+
+    方法 读数据 <公开 静态 类型 = 整数 注释 = "从内存中读出基本类型数值,返回实际读入的字节数." 注释 = "注: 如果读入失败,会将当前的读写位置移到尾部."
+            返回值注释 = "返回实际读入的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    参数 所读入数据的变量 <注释 = "提供所欲返回的基本类型值变量(不能提供立即数)" @需求类型 = 可写入变量 @匹配类型 = 通用非文本基本型>
+    {
+        @ @<当前对象>.Read<@pdt<所读入数据的变量>>(@<所读入数据的变量>)
+    }
+
+    方法 写数据 <公开 静态 类型 = 整数 注释 = "向内存写出基本类型数值,返回实际写出的字节数." 注释 = "注: 写出失败不会移动读写位置."
+            返回值注释 = "返回实际写出的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    参数 所欲写出的数据 <注释 = "提供所欲写出的基本数值." 注释 = "如欲明确指定其数据类型,可以使用强制类型转换操作符." @匹配类型 = 通用非文本基本型>
+    {
+        @ @<当前对象>.Write<@pdt<所欲写出的数据>>(@<所欲写出的数据>)
+    }
+
+    方法 读文本 <公开 静态 类型 = 长整数 注释 = "从当前读写位置读取一段文本数据,返回实际读入的字节长度."
+            注释 = "如果该数据中存在字符值0或26(文本结束标志),将仅返回该字符之前的数据(后续读写将跳过该字符)." 注释 = "如果读入失败,将返回并0且自动将当前读写位置移到尾部(EOF)."
+            返回值注释 = "返回实际读入的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    参数 存放读入文本的变量 <类型 = 文本型 注释 = "读入的文本数据将存放在此参数中">
+    参数 欲读入的最多字符数 <类型 = 长整数 注释 = "指定欲读入文本数据的最多字符数目." 注释 = "如果为-1,则读入当前读写位置后的所有文本." @默认值 = -1>
+    参数 文本编码 <类型 = 文本编码类型 注释 = "指定文本的编码类型" @默认值 = 文本编码类型.UTF16>
+    {
+        @ @<当前对象>.ReadTextWithEncode(@<存放读入文本的变量>, @<欲读入的最多字符数>, @<文本编码>)
+    }
+
+    方法 读文本行 <公开 静态 类型 = 长整数 注释 = "从当前读写位置读取一行文本数据,行末的换行符将被抛弃." 注释 = "如果读入失败,将返回并0且自动将当前读写位置移到尾部(EOF)."
+            返回值注释 = "返回实际读入的字节数(包括被抛弃的换行符),失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    参数 存放读入文本的变量 <类型 = 文本型 注释 = "读入的文本数据将存放在此参数中">
+    参数 文本编码 <类型 = 文本编码类型 注释 = "指定文本的编码类型" @默认值 = 文本编码类型.UTF16>
+    {
+        @ @<当前对象>.ReadLineWithEncode(@<存放读入文本的变量>, @<文本编码>)
+    }
+
+    方法 写文本 <公开 静态 类型 = 长整数 注释 = "写出一段指定编码的文本数据到内存的当前读写位置处,返回实际写出的字节数." 注释 = "如果内存的剩余空间不足,将只写出部分文本."
+            返回值注释 = "返回实际写出的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    参数 所欲写出的文本 <类型 = 文本型 注释 = "所欲写出的文本数据">
+    参数 是否包括结束零字符 <类型 = 逻辑型 注释 = "指定是否在所写出文本后添加写出一个\'\\0\'字符" 注释 = "注意: 请勿在纯文本文件中写出结束零字符!" @默认值 = 假>
+    参数 文本编码 <类型 = 文本编码类型 注释 = "指定文本的编码类型" @默认值 = 文本编码类型.UTF16>
+    {
+        @ (INT_P)@<当前对象>.WriteText(@<所欲写出的文本>.GetText(), @<是否包括结束零字符>, @<文本编码>)
+    }
+
+    方法 写文本行 <公开 静态 类型 = 长整数 注释 = "写出指定编码的文本数据并附加\"\\r\\n\"换行符到内存的当前读写位置处,返回实际写出的字节数."
+            注释 = "如果内存的剩余空间不足,将只写出部分文本." 返回值注释 = "返回实际写出的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    参数 所欲写出的文本 <类型 = 文本型 注释 = "所欲写出的文本数据">
+    参数 文本编码 <类型 = 文本编码类型 注释 = "指定文本的编码类型" @默认值 = 文本编码类型.UTF16>
+    {
+        @ @<当前对象>.WriteLine(@<所欲写出的文本>.GetText(), @<文本编码>)
+    }
+
+    方法 读内存 <公开 静态 类型 = 长整数 注释 = "从内存中读入一段数据到指定的指针中,返回实际读入的字节数." 返回值注释 = "返回实际读入的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    参数 欲保存到的内存地址 <注释 = "提供一个内存地址,用于存放从内存映射文件中读入的数据." 注释 = "该指针必须分配了足够的内存空间(大于等于\"数据尺寸\"的长度)." @匹配类型 = 通用整数型>
+    参数 欲读入数据尺寸 <注释 = "从已映射内存中读入数据的长度,单位为字节." 注释 = "如果已映射内存的剩余空间不足,将只读取部分长度." @匹配类型 = 通用整数型>
+    {
+        @ @<当前对象>.ReadData((void *)@<欲保存到的内存地址>, (size_t)@<欲读入数据尺寸>)
+    }
+
+    方法 写内存 <公开 静态 类型 = 长整数 注释 = "向内存写出一段数据,返回实际写出的字节数." 返回值注释 = "返回实际写出的字节数,失败返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    参数 欲写出的数据指针 <注释 = "欲写出数据的指针" @匹配类型 = 通用整数型>
+    参数 欲写出数据尺寸 <注释 = "欲写出的数据的尺寸" 注释 = "如果长度超过内存的剩余空间,将只写出部分数据." @匹配类型 = 通用整数型>
+    {
+        @ @<当前对象>.WriteData((void*)@<欲写出的数据指针>, (size_t)@<欲写出数据尺寸>)
+    }
+
+    方法 删除数据 <公开 静态 类型 = 逻辑型 注释 = "删除内存中的部分数据,删除成功后,会按删除长度将尾部的数据清零." 返回值注释 = "返回是否成功" 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    参数 起始位置 <类型 = 长整数 注释 = "从内存中删除的数据的起始位置偏移,从0开始." 注释 = "-1表示从当前的读写位置开始删除." @默认值 = -1>
+    参数 删除长度 <类型 = 长整数 注释 = "所欲删除的长度,必须大于0." 注释 = "如果删除的范围超过了内存的边界,将删除失败.">
+    {
+        @ @<当前对象>.RemoveData(@<起始位置>, @<删除长度>)
+    }
+
+    # 读写位置/尺寸 ---
+
+    方法 取读写位置 <公开 静态 类型 = 长整数 注释 = "返回内存的当前读/写位置,有效范围为0到内存数据长度," 注释 = "注: 执行读写操作将移动读写位置."
+            注释 = "如果当前尚未打开内存或失败,将返回-1." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    {
+        @ @<当前对象>.GetCurrentPos()
+    }
+
+    方法 移动读写位置 <公开 静态 类型 = 逻辑型 注释 = "设置下一次读或写操作的位置,返回是否成功." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    参数 基准移动位置 <类型 = 文件基准位置 注释 = "指定从文件中开始移动的基准位置" @默认值 = 文件基准位置.文件首>
+    参数 移动距离 <注释 = "指定相对于起始移动位置的移动尺寸,单位字节." @匹配类型 = 通用整数型>
+    {
+        @ @<当前对象>.SetCurrentPos(@<移动距离>, (DWORD)@<基准移动位置>)
+    }
+
+    方法 移到首部 <公开 静态 类型 = 逻辑型 注释 = "设置下一次读或写操作的位置到内存首部,返回是否成功." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    {
+        @ @<当前对象>.SetCurrentPos(0, FILE_BEGIN)
+    }
+
+    方法 移到尾部 <公开 静态 类型 = 逻辑型 注释 = "设置下一次读或写操作的位置到内存尾部,返回是否成功." 注释 = "注: 这里的尾部等同于EOF,即读写位置等于内存数据长度." 折叠
+            @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    {
+        @ @<当前对象>.SetCurrentPos(0, FILE_END)
+    }
+
+    方法 是否在尾部 <公开 静态 类型 = 逻辑型 注释 = "返回当前读写位置是否已经处于内存尾部(EOF)." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    {
+        @ @<当前对象>.IsEof()
+    }
+
+    方法 取数据指针 <公开 静态 类型 = 变整数 注释 = "取得内存数据的地址,用于后续对其进行内存修改和复制操作." 注释 = "注: 本方法不会移动读写位置."
+            返回值注释 = "执行成功返回数据地址指针,否则返回0." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    参数 读写位置 <类型 = 长整数 注释 = "从内存中读出的数据的起始位置偏移,从0开始." 注释 = "默认为首地址,-1表示当前的读写位置." @默认值 = 0>
+    {
+        @ (INT_P)@<当前对象>.GetPtr(@<读写位置>)
+    }
+
+    方法 取当前指针 <公开 静态 类型 = 变整数 注释 = "取得内存数据当前读写位置的指针." 注释 = "注: 本方法不会移动读写位置." 返回值注释 = "执行成功返回数据地址指针,否则返回0."
+            折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    {
+        @ (INT_P)@<当前对象>.GetPtr(-1)
+    }
+
+    方法 取长度 <公开 静态 类型 = 长整数 注释 = "返回内存数据的尺寸,单位为字节." 折叠 @嵌入式方法 = "">
+    参数 当前对象 <类型 = 内存流读写类>
+    {
+        @ @<当前对象>.GetViewSize()
     }
 }
 

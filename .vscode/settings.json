@@ -106,7 +106,9 @@
         "crtdbg.h": "c",
         "resumable": "cpp",
         "cinttypes": "cpp",
-        "memory_resource": "cpp"
+        "memory_resource": "cpp",
+        "*.rh": "cpp",
+        "string.h": "c"
     },
     "editor.gotoLocation.alternativeDeclarationCommand": "editor.action.revealDefinition",
     "editor.gotoLocation.alternativeDefinitionCommand": "editor.action.revealDefinition",
@@ -118,5 +120,6 @@
         "other": "on",
         "comments": "off",
         "strings": "on"
-    }
+    },
+    "C_Cpp.vcFormat.space.pointerReferenceAlignment": "right"
 }

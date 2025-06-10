@@ -442,14 +442,14 @@
 
     # @begin
     # <> <include>
-    # static void FnLogCb (int64_t ns, fmtlog::LogLevel level, fmt::basic_string_view<FMTLOG_CHAR> location, size_t basePos,
-    #                      fmt::basic_string_view<FMTLOG_CHAR> threadName, fmt::basic_string_view<FMTLOG_CHAR> msg, size_t bodyPos, size_t logFilePos, void* userData)
+    # static void FnLogCb(int64_t ns, fmtlog::LogLevel level, fmt::basic_string_view<FMTLOG_CHAR> location, size_t basePos,
+    #                     fmt::basic_string_view<FMTLOG_CHAR> threadName, fmt::basic_string_view<FMTLOG_CHAR> msg, size_t bodyPos, size_t logFilePos, void* userData)
     # {
     #     ((@sn<current_class>*)userData)->@<日志内容>(ns, static_cast<S_BYTE>(level),
     #         @an<CVolString>(location.data(), location.size()), @an<CVolString>(threadName.data(), threadName.size()),
     #         @an<CVolString>(msg.data(), msg.size()), @an<CVolString>(msg.data() + bodyPos), static_cast<INT_P>(logFilePos));
     # }
-    # static void FnLogQFullCb (void* userData)
+    # static void FnLogQFullCb(void* userData)
     # {
     #     ((@sn<current_class>*)userData)->@<日志队列已满>();
     # }
@@ -459,7 +459,7 @@
 
 # Quill ====
 
-类 Quill日志类 <公开 注释 = "Quill日志记录器 v9.0.2 2025-04-19" 注释 = "程序可以存在多个日志记录器,一个文件也可以被多个记录器写入;"
+类 Quill日志类 <公开 注释 = "Quill日志记录器 v10.0.0" 注释 = "程序可以存在多个日志记录器,一个文件也可以被多个记录器写入;"
         注释 = "记录器以\"记录器名称\"为唯一标识,如果名称已经存在,则开启现有的记录器." 注释 = "注意: 记录器的开启和关闭非线程安全,请勿在多个线程中同时执行,其他命令是线程安全的." 折叠
         @文档 = "category = \"日志记录.Quill\"" @视窗.外部头文件 = "src\\piv_quill.hpp" @视窗.头文件搜寻目录 = "src">
 {
@@ -572,6 +572,14 @@
         @ }
     }
 
+    方法 立即刷新频率 <公开 属性写 注释 = "根据消息计数设置日志记录的刷新间隔." 注释 = "注意: 设置为1可以确保每条日志消息都同步写入到文件,"
+            注释 = "但会显著影响程序性能,应该仅在调试时使用." 折叠>
+    参数 刷新频率 <类型 = 整数 注释 = "指定每隔多少条消息执行一次立即刷新;" 注释 = "默认为0(禁用立即刷新).">
+    {
+        @ if (logger)
+        @     logger->set_immediate_flush(static_cast<uint32_t>(@<刷新频率>));
+    }
+
     方法 日志级别 <公开 属性写 注释 = "设置当前日志记录器的级别,低于该级别的日志将不会被处理." 注释 = "注意: 需要在\"开启记录器\"之后设置." 折叠>
     参数 日志级别 <类型 = Quill日志级别 注释 = "默认为信息级别(4)">
     {
@@ -595,16 +603,16 @@
 
     # 普通日志 ---
 
-    方法 加入日志 <公开 注释 = "将指定级别的日志内容推送到日志队列中." 注释 = "注: 本方法以较小的开销提供了灵活的日志级别选择," 注释 = "但更推荐使用其他方法进行零成本的日志级别记录."
-            折叠 @嵌入式方法 = "">
+    方法 加入日志 <公开 注释 = "将指定级别的日志内容推送到日志队列中." 注释 = "注: 本方法支持灵活的日志级别和运行期日志格式,但相比其他方法会增加一定的开销." 折叠 @嵌入式方法 = "">
     参数 日志级别 <类型 = Quill日志级别 注释 = "如果提供的日志级别低于当前的日志过滤级别,这条日志将被丢弃;" 注释 = "">
-    参数 日志格式 <类型 = 文本型 注释 = "提供日志格式,前面会自动加上日志头,支持std::format的格式化文本;" 注释 = "格式替换符为\"{}\",例如: \"你好，{}。\""
-            注释 = "具体的格式要求请参考\"取标准格式文本\"的参数备注." 注释 = "※本参数只能填双引号写的字面量或常量,不能填文本型变量." @需求类型 = 立即数或常量>
+    参数 日志格式 <注释 = "提供日志格式,前面会自动加上日志头,支持std::format的格式化文本;" 注释 = "格式替换符为\"{}\",例如: \"你好，{}。\""
+            注释 = "具体的格式要求请参考\"取标准格式文本\"的参数备注." 注释 = "支持的文本类型: 文本型、标准文本类、文本视图类、文本指针、字节集类(UTF-8)" @匹配类型 = 通用型>
     参数 替换数据 <注释 = "本参数可空可扩展;" 注释 = "如果\"日志格式\"为格式文本,本参数用于给格式文本中的格式替换符提供替换数据;"
             注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
     {
-        @ PIV_DYNAMIC_LOG(QUILL_FILE_U8(@sn<current_source_file>, @sn<current_source_line>), QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
-        @     @sn<this>.logger, nullptr, @<日志级别>, u8@sn<quot>@pvpt<日志格式>@sn<quot>, @<替换数据>)
+        @ QUILL_LOG_RUNTIME_METADATA_HYBRID(@sn<this>.logger, @<日志级别>, QUILL_U8(@sn<current_source_file>), atoi(@sn<current_source_line>),
+        @     QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
+        @     nullptr, PivAny2U<true>(@<日志格式>).c_str(), @<替换数据>)
     }
 
     方法 加入跟踪日志_L3 <公开 注释 = "将L3跟踪级别的日志消息推送到日志队列中" 折叠 @嵌入式方法 = "">
@@ -614,7 +622,7 @@
             注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
     {
         @ QUILL_LOG_TRACE_L3(QUILL_FILE_U8(@sn<current_source_file>, @sn<current_source_line>), QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
-        @     @sn<this>.logger, nullptr, u8@sn<quot>@pvpt<日志格式>@sn<quot>, @<替换数据>)
+        @     @sn<this>.logger, nullptr, PIV_STR_U8(R@sn<quot>_.(@pvpt<日志格式>)_.@sn<quot>), @<替换数据>)
     }
 
     方法 加入跟踪日志_L2 <公开 注释 = "将L2跟踪级别的日志消息推送到日志队列中" 折叠 @嵌入式方法 = "">
@@ -624,7 +632,7 @@
             注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
     {
         @ QUILL_LOG_TRACE_L2(QUILL_FILE_U8(@sn<current_source_file>, @sn<current_source_line>), QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
-        @     @sn<this>.logger, nullptr, u8@sn<quot>@pvpt<日志格式>@sn<quot>, @<替换数据>)
+        @     @sn<this>.logger, nullptr, PIV_STR_U8(R@sn<quot>_.(@pvpt<日志格式>)_.@sn<quot>), @<替换数据>)
     }
 
     方法 加入跟踪日志_L1 <公开 注释 = "将L1跟踪级别的日志消息推送到日志队列中" 折叠 @嵌入式方法 = "">
@@ -634,7 +642,7 @@
             注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
     {
         @ QUILL_LOG_TRACE_L1(QUILL_FILE_U8(@sn<current_source_file>, @sn<current_source_line>), QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
-        @     @sn<this>.logger, nullptr, u8@sn<quot>@pvpt<日志格式>@sn<quot>, @<替换数据>)
+        @     @sn<this>.logger, nullptr, PIV_STR_U8(R@sn<quot>_.(@pvpt<日志格式>)_.@sn<quot>), @<替换数据>)
     }
 
     方法 加入调试日志 <公开 注释 = "将调试级别的日志消息推送到日志队列中" 折叠 @嵌入式方法 = "">
@@ -644,7 +652,7 @@
             注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
     {
         @ QUILL_LOG_DEBUG(QUILL_FILE_U8(@sn<current_source_file>, @sn<current_source_line>), QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
-        @     @sn<this>.logger, nullptr, u8@sn<quot>@pvpt<日志格式>@sn<quot>, @<替换数据>)
+        @     @sn<this>.logger, nullptr, PIV_STR_U8(R@sn<quot>_.(@pvpt<日志格式>)_.@sn<quot>), @<替换数据>)
     }
 
     方法 加入信息日志 <公开 注释 = "将信息级别的日志消息推送到日志队列中" 折叠 @嵌入式方法 = "">
@@ -654,7 +662,7 @@
             注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
     {
         @ QUILL_LOG_INFO(QUILL_FILE_U8(@sn<current_source_file>, @sn<current_source_line>), QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
-        @     @sn<this>.logger, nullptr, u8@sn<quot>@pvpt<日志格式>@sn<quot>, @<替换数据>)
+        @     @sn<this>.logger, nullptr, PIV_STR_U8(R@sn<quot>_.(@pvpt<日志格式>)_.@sn<quot>), @<替换数据>)
     }
 
     方法 加入通知日志 <公开 注释 = "将通知级别的日志消息推送到日志队列中" 折叠 @嵌入式方法 = "">
@@ -664,7 +672,7 @@
             注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
     {
         @ QUILL_LOG_NOTICE(QUILL_FILE_U8(@sn<current_source_file>, @sn<current_source_line>), QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
-        @     @sn<this>.logger, nullptr, u8@sn<quot>@pvpt<日志格式>@sn<quot>, @<替换数据>)
+        @     @sn<this>.logger, nullptr, PIV_STR_U8(R@sn<quot>_.(@pvpt<日志格式>)_.@sn<quot>), @<替换数据>)
     }
 
     方法 加入警告日志 <公开 注释 = "将警告级别的日志消息推送到日志队列中" 折叠 @嵌入式方法 = "">
@@ -674,7 +682,7 @@
             注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
     {
         @ QUILL_LOG_WARNING(QUILL_FILE_U8(@sn<current_source_file>, @sn<current_source_line>), QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
-        @     @sn<this>.logger, nullptr, u8@sn<quot>@pvpt<日志格式>@sn<quot>, @<替换数据>)
+        @     @sn<this>.logger, nullptr, PIV_STR_U8(R@sn<quot>_.(@pvpt<日志格式>)_.@sn<quot>), @<替换数据>)
     }
 
     方法 加入错误日志 <公开 注释 = "将错误级别的日志消息推送到日志队列中" 折叠 @嵌入式方法 = "">
@@ -684,7 +692,7 @@
             注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
     {
         @ QUILL_LOG_ERROR(QUILL_FILE_U8(@sn<current_source_file>, @sn<current_source_line>), QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
-        @     @sn<this>.logger, nullptr, u8@sn<quot>@pvpt<日志格式>@sn<quot>, @<替换数据>)
+        @     @sn<this>.logger, nullptr, PIV_STR_U8(R@sn<quot>_.(@pvpt<日志格式>)_.@sn<quot>), @<替换数据>)
     }
 
     方法 加入致命日志 <公开 注释 = "将致命错误级别的日志消息推送到日志队列中" 折叠 @嵌入式方法 = "">
@@ -694,7 +702,21 @@
             注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
     {
         @ QUILL_LOG_CRITICAL(QUILL_FILE_U8(@sn<current_source_file>, @sn<current_source_line>), QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
-        @     @sn<this>.logger, nullptr, u8@sn<quot>@pvpt<日志格式>@sn<quot>, @<替换数据>)
+        @     @sn<this>.logger, nullptr, PIV_STR_U8(R@sn<quot>_.(@pvpt<日志格式>)_.@sn<quot>), @<替换数据>)
+    }
+
+    方法 加入来源日志 <公开 注释 = "将指定来源和级别的日志内容推送到日志队列中." 注释 = "注: 本方法用于从其他日志库转发日志,但开销较大." 折叠 @嵌入式方法 = "">
+    参数 源文件名 <注释 = "当前日志所处源文件的名称,支持通用文本数据" @匹配类型 = 通用型>
+    参数 源行号 <类型 = 整数 注释 = "当前日志在所处源文件中的行号位置" @默认值 = 0>
+    参数 源方法名 <注释 = "当前日志所处方法的名称,支持通用文本数据" @匹配类型 = 通用型>
+    参数 日志级别 <类型 = Quill日志级别 注释 = "如果提供的日志级别低于当前的日志过滤级别,这条日志将被丢弃;" 注释 = "">
+    参数 日志格式 <注释 = "提供日志格式,前面会自动加上日志头,支持std::format的格式化文本;" 注释 = "格式替换符为\"{}\",例如: \"你好，{}。\""
+            注释 = "具体的格式要求请参考\"取标准格式文本\"的参数备注." 注释 = "支持的文本类型: 文本型、标准文本类、文本视图类、文本指针、字节集类(UTF-8)" @匹配类型 = 通用型>
+    参数 替换数据 <注释 = "本参数可空可扩展;" 注释 = "如果\"日志格式\"为格式文本,本参数用于给格式文本中的格式替换符提供替换数据;"
+            注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
+    {
+        @ QUILL_LOG_RUNTIME_METADATA_DEEP(@sn<this>.logger, @<日志级别>, PivAny2U<true>(@<源文件名>).c_str(), @<源行号>, PivAny2U<true>(@<源方法名>).c_str(),
+        @     nullptr, PivAny2U<true>(@<日志格式>).c_str(), @<替换数据>)
     }
 
     # 回溯日志 ---
@@ -722,7 +744,7 @@
             注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
     {
         @ QUILL_LOG_BACKTRACE(QUILL_FILE_U8(@sn<current_source_file>, @sn<current_source_line>), QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
-        @     @sn<this>.logger, nullptr, u8@sn<quot>@pvpt<日志格式>@sn<quot>, @<替换数据>)
+        @     @sn<this>.logger, nullptr, PIV_STR_U8(R@sn<quot>_.(@pvpt<日志格式>)_.@sn<quot>), @<替换数据>)
     }
 
     # 最小间隔日志 ---
@@ -736,7 +758,7 @@
             注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
     {
         @ QUILL_LOG_TRACE_L3_LIMIT(QUILL_FILE_U8(@sn<current_source_file>, @sn<current_source_line>), QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
-        @     @<最小间隔>, @sn<this>.logger, nullptr, u8@sn<quot>@pvpt<日志格式>@sn<quot>, @<替换数据>)
+        @     @<最小间隔>, @sn<this>.logger, nullptr, PIV_STR_U8(R@sn<quot>_.(@pvpt<日志格式>)_.@sn<quot>), @<替换数据>)
     }
 
     方法 加入跟踪日志_L2_间隔 <公开 注释 = "将L2跟踪级别的日志消息推送到日志队列中,仅在调试版程序中输出." 注释 = " 1. 用于限制日志的记录频率,低于最小间隔的日志将被丢弃;"
@@ -748,7 +770,7 @@
             注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
     {
         @ QUILL_LOG_TRACE_L2_LIMIT(QUILL_FILE_U8(@sn<current_source_file>, @sn<current_source_line>), QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
-        @     @<最小间隔>, @sn<this>.logger, nullptr, u8@sn<quot>@pvpt<日志格式>@sn<quot>, @<替换数据>)
+        @     @<最小间隔>, @sn<this>.logger, nullptr, PIV_STR_U8(R@sn<quot>_.(@pvpt<日志格式>)_.@sn<quot>), @<替换数据>)
     }
 
     方法 加入跟踪日志_L1_间隔 <公开 注释 = "将L1跟踪级别的日志消息推送到日志队列中,仅在调试版程序中输出." 注释 = " 1. 用于限制日志的记录频率,低于最小间隔的日志将被丢弃;"
@@ -760,7 +782,7 @@
             注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
     {
         @ QUILL_LOG_TRACE_L1_LIMIT(QUILL_FILE_U8(@sn<current_source_file>, @sn<current_source_line>), QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
-        @     @<最小间隔>, @sn<this>.logger, nullptr, u8@sn<quot>@pvpt<日志格式>@sn<quot>, @<替换数据>)
+        @     @<最小间隔>, @sn<this>.logger, nullptr, PIV_STR_U8(R@sn<quot>_.(@pvpt<日志格式>)_.@sn<quot>), @<替换数据>)
     }
 
     方法 加入调试日志_间隔 <公开 注释 = "将调试级别的日志消息推送到日志队列中." 注释 = " 1. 用于限制日志的记录频率,低于最小间隔的日志将被丢弃;"
@@ -772,7 +794,7 @@
             注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
     {
         @ QUILL_LOG_DEBUG_LIMIT(QUILL_FILE_U8(@sn<current_source_file>, @sn<current_source_line>), QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
-        @     @<最小间隔>, @sn<this>.logger, nullptr, u8@sn<quot>@pvpt<日志格式>@sn<quot>, @<替换数据>)
+        @     @<最小间隔>, @sn<this>.logger, nullptr, PIV_STR_U8(R@sn<quot>_.(@pvpt<日志格式>)_.@sn<quot>), @<替换数据>)
     }
 
     方法 加入信息日志_间隔 <公开 注释 = "将信息级别的日志消息推送到日志队列中." 注释 = " 1. 用于限制日志的记录频率,低于最小间隔的日志将被丢弃;"
@@ -784,7 +806,7 @@
             注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
     {
         @ QUILL_LOG_INFO_LIMIT(QUILL_FILE_U8(@sn<current_source_file>, @sn<current_source_line>), QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
-        @     @<最小间隔>, @sn<this>.logger, nullptr, u8@sn<quot>@pvpt<日志格式>@sn<quot>, @<替换数据>)
+        @     @<最小间隔>, @sn<this>.logger, nullptr, PIV_STR_U8(R@sn<quot>_.(@pvpt<日志格式>)_.@sn<quot>), @<替换数据>)
     }
 
     方法 加入通知日志_间隔 <公开 注释 = "将通知级别的日志消息推送到日志队列中." 注释 = " 1. 用于限制日志的记录频率,低于最小间隔的日志将被丢弃;"
@@ -796,7 +818,7 @@
             注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
     {
         @ QUILL_LOG_NOTICE_LIMIT(QUILL_FILE_U8(@sn<current_source_file>, @sn<current_source_line>), QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
-        @     @<最小间隔>, @sn<this>.logger, nullptr, u8@sn<quot>@pvpt<日志格式>@sn<quot>, @<替换数据>)
+        @     @<最小间隔>, @sn<this>.logger, nullptr, PIV_STR_U8(R@sn<quot>_.(@pvpt<日志格式>)_.@sn<quot>), @<替换数据>)
     }
 
     方法 加入警告日志_间隔 <公开 注释 = "将警告级别的日志消息推送到日志队列中." 注释 = " 1. 用于限制日志的记录频率,低于最小间隔的日志将被丢弃;"
@@ -808,7 +830,7 @@
             注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
     {
         @ QUILL_LOG_WARNING_LIMIT(QUILL_FILE_U8(@sn<current_source_file>, @sn<current_source_line>), QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
-        @     @<最小间隔>, @sn<this>.logger, nullptr, u8@sn<quot>@pvpt<日志格式>@sn<quot>, @<替换数据>)
+        @     @<最小间隔>, @sn<this>.logger, nullptr, PIV_STR_U8(R@sn<quot>_.(@pvpt<日志格式>)_.@sn<quot>), @<替换数据>)
     }
 
     方法 加入错误日志_间隔 <公开 注释 = "将错误级别的日志消息推送到日志队列中." 注释 = " 1. 用于限制日志的记录频率,低于最小间隔的日志将被丢弃;"
@@ -820,7 +842,7 @@
             注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
     {
         @ QUILL_LOG_ERROR_LIMIT(QUILL_FILE_U8(@sn<current_source_file>, @sn<current_source_line>), QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
-        @     @<最小间隔>, @sn<this>.logger, nullptr, u8@sn<quot>@pvpt<日志格式>@sn<quot>, @<替换数据>)
+        @     @<最小间隔>, @sn<this>.logger, nullptr, PIV_STR_U8(R@sn<quot>_.(@pvpt<日志格式>)_.@sn<quot>), @<替换数据>)
     }
 
     方法 加入致命日志_间隔 <公开 注释 = "将致命错误级别的日志消息推送到日志队列中." 注释 = " 1. 用于限制日志的记录频率,低于最小间隔的日志将被丢弃;"
@@ -832,7 +854,7 @@
             注释 = "支持类型: 通用数值型、文本型、STL类型(string/vector等)" @匹配类型 = 通用型 @可扩展 = "" @默认值 = 0>
     {
         @ QUILL_LOG_CRITICAL_LIMIT(QUILL_FILE_U8(@sn<current_source_file>, @sn<current_source_line>), QUILL_FUNC_U8(@sn<current_source_class>, @sn<current_source_method>),
-        @     @<最小间隔>, @sn<this>.logger, nullptr, u8@sn<quot>@pvpt<日志格式>@sn<quot>, @<替换数据>)
+        @     @<最小间隔>, @sn<this>.logger, nullptr, PIV_STR_U8(R@sn<quot>_.(@pvpt<日志格式>)_.@sn<quot>), @<替换数据>)
     }
 
     # ---
@@ -879,7 +901,7 @@
         @ quill::Backend::is_running()
     }
 
-    方法 取线程ID <公开 静态 类型 = 无符号整数 注释 = "返回后端线程的ID" 折叠 @嵌入式方法 = "">
+    方法 取线程ID <公开 静态 类型 = uint32_t 注释 = "返回后端线程的ID" 折叠 @嵌入式方法 = "">
     {
         @ quill::Backend::get_thread_id()
     }
@@ -921,20 +943,20 @@
     变量 线程名称 <公开 类型 = 标准文本类U 注释 = "后端线程的名称,默认为\"QuillBackend\"" 折叠2 @属性变量 = 真 @输出名 = "thread_name">
     变量 空闲时让出线程 <公开 类型 = 逻辑型 注释 = "让后端线程在没有工作时让出线程的调度." 注释 = "默认为假,此选项仅在\"休眠时间\"为0时生效." @属性变量 = 真
             @输出名 = "enable_yield_when_idle">
-    变量 中转事件初始缓存容量 <公开 类型 = 无符号整数 注释 = "设置的容量必须为2的幂,默认为128(单位为项目,而非字节)."
+    变量 中转事件初始缓存容量 <公开 类型 = uint32_t 注释 = "设置的容量必须为2的幂,默认为128(单位为项目,而非字节)."
             注释 = "后端从前端队列中弹出所有日志消息,将其作为中转事件缓存在本地环形缓冲队列中." 注释 = "中转事件不限制缓存的大小,但从本初始容量开始,一直重分配到\"中转事件软上限\"."
             注释 = "后端将为每个前端线程使用单独的中转事件缓存." @属性变量 = 真 @输出名 = "transit_event_buffer_initial_capacity">
-    变量 中转事件软上限 <公开 类型 = PIV.类型.无符号变整型 注释 = "表示从所有前端线程接收到的消息上限,默认为4096个项目."
+    变量 中转事件软上限 <公开 类型 = PIV.类型.size_t 注释 = "表示从所有前端线程接收到的消息上限,默认为4096个项目."
             注释 = "- 后端优先从所有热点线程的前端队列读取消息,并将其临时缓存." 注释 = "- 如果前端线程持续向队列压入消息(例如在循环里进行日志记录),将无法处理任何日志."
             注释 = "- 因此,当达到软上限时,后端工作线程将尝试批量处理一批缓存的中转事件." 注释 = "- 前端队列在每次迭代时都会清空,因此实际弹出的消息可能比当前软上限大得多." @属性变量 = 真
             @输出名 = "transit_events_soft_limit">
-    变量 中转事件硬上限 <公开 类型 = PIV.类型.无符号变整型 注释 = "默认为32768." 注释 = "这是后端事件缓冲区的最大上限,到达上限后,后端将停止读取前端队列,直到缓冲区有可用的空间."
+    变量 中转事件硬上限 <公开 类型 = PIV.类型.size_t 注释 = "默认为32768." 注释 = "这是后端事件缓冲区的最大上限,到达上限后,后端将停止读取前端队列,直到缓冲区有可用的空间."
             @属性变量 = 真 @输出名 = "transit_events_hard_limit">
     变量 退出前等待队列归零 <公开 类型 = 逻辑型 注释 = "默认为真." 注释 = "启用此选项后,当应用程序正在终止时,后端工作线程将不会立即退出,直到所有前端队列都处理完毕." @属性变量 = 真
             @输出名 = "wait_for_queues_to_empty_before_exit">
     变量 CPU亲和性 <公开 类型 = 无符号短整数 注释 = "可以将后端工作线程绑定到特定的CPU核心上运行." 注释 = "默认为不绑定." @属性变量 = 真
             @输出名 = "cpu_affinity">
-    变量 日志级别描述 <公开 类型 = 标准文本定长数组U 注释 = "数组成员数固定为12." @输出名 = "log_level_descriptions">
+    变量 日志级别描述 <公开 类型 = 标准文本定长数组U 注释 = "数组成员数固定为11." @输出名 = "log_level_descriptions">
     变量 日志级别短码 <公开 类型 = 标准文本定长数组U 注释 = "用于标识日志级别的短代号(1到2个字母),数组成员数固定为12." @输出名 = "log_level_short_codes">
     变量 检查后端单例 <公开 类型 = 逻辑型 注释 = "默认为真.启用运行时检查,以检测后端单例类是否存在多个实例."
             注释 = "程序混合在共享库和静态库使用Quill时,可能会存在多个后端单例类的实例," 注释 = "这会导致多个后端工作线程同时运行,从而导致程序异常或崩溃." @属性变量 = 真
@@ -1061,9 +1083,13 @@
             注释 = "  %j : 每年的第几天   |  %W : 每年的第几周" 注释 = "  %H : 小时(24小时制) |  %I : 小时(12小时制)"
             注释 = "  %M : 分钟           |  %p : 12小时制的AM/PM" 注释 = "  %S : 秒钟           |  %z : 时区" @属性变量 = 真
             @输出名 = "timestamp_pattern">
+    变量 源路径剔除前缀 <公开 类型 = 标准文本类U 注释 = "用于删除源文件路径中的指定路径前缀,空文本时显示完整路径." @属性变量 = 真
+            @输出名 = "source_location_path_strip_prefix">
     变量 时间戳时区 <公开 类型 = Quill时区 注释 = "时间戳使用的时区,默认是系统本地时区." @属性变量 = 真 @输出名 = "timestamp_timezone">
     变量 添加元数据到多行日志 <公开 类型 = 逻辑型 注释 = "是否在多行日志的每一行前加上元数据,默认为假." @属性变量 = 真
             @输出名 = "add_metadata_to_multi_line_logs">
+    变量 删除源文件的相对路径 <公开 类型 = 逻辑型 注释 = "是否删除源文件路径的相对路径部分." 注释 = "如果为真,像\"../\"这样的相对路径部分将会被删除,简化源文件路径显示."
+            @属性变量 = 真 @输出名 = "source_location_remove_relative_paths">
 }
 
 类 Quill文件选项 <公开 注释 = "Quill文件接收器的选项" 折叠 折叠2 @文档 = "category = \"日志记录.Quill.辅助类\""
@@ -1193,12 +1219,12 @@
 
     方法 最大备份文件数 <公开 静态 属性写 注释 = "轮替后最多保留多少个日志文件" 折叠>
     参数 当前选项 <类型 = Quill轮替文件选项>
-    参数 文件数 <类型 = 无符号整数 注释 = "默认为无符号整数的最大值(4294967295).">
+    参数 文件数 <类型 = uint32_t 注释 = "默认为无符号整数的最大值(4294967295).">
     {
         @ @<当前选项>.set_max_backup_files(@<文件数>);
     }
 
-    方法 最大备份文件数 <公开 静态 属性读 类型 = 无符号整数 注释 = "轮替后最多保留多少个日志文件" 返回值注释 = "默认为无符号整数的最大值(4294967295)." 折叠
+    方法 最大备份文件数 <公开 静态 属性读 类型 = uint32_t 注释 = "轮替后最多保留多少个日志文件" 返回值注释 = "默认为无符号整数的最大值(4294967295)." 折叠
             @禁止流程检查 = 真>
     参数 当前选项 <类型 = Quill轮替文件选项>
     {
@@ -1235,14 +1261,14 @@
 
     方法 小时轮替间隔 <公开 静态 属性写 注释 = "设置日志文件每隔多少小时进行轮替." 注释 = "注: \"每日/每小时/每分钟\"轮替只能生效其中一个,以最后设置的为准." 折叠>
     参数 当前选项 <类型 = Quill轮替文件选项>
-    参数 间隔 <类型 = 无符号整数 注释 = "必须提供大于0的值">
+    参数 间隔 <类型 = uint32_t 注释 = "必须提供大于0的值">
     {
         @ @<当前选项>.set_rotation_frequency_and_interval('H', @<间隔>);
     }
 
     方法 分钟轮替间隔 <公开 静态 属性写 注释 = "设置日志文件每隔多少分钟进行轮替." 注释 = "注: \"每日/每小时/每分钟\"轮替只能生效其中一个,以最后设置的为准." 折叠>
     参数 当前选项 <类型 = Quill轮替文件选项>
-    参数 间隔 <类型 = 无符号整数 注释 = "必须提供大于0的值">
+    参数 间隔 <类型 = uint32_t 注释 = "必须提供大于0的值">
     {
         @ @<当前选项>.set_rotation_frequency_and_interval('M', @<间隔>);
     }
@@ -1268,8 +1294,8 @@
         @ return @<当前选项>.rotation_frequency();
     }
 
-    方法 轮替间隔 <公开 静态 属性读 类型 = 无符号整数 注释 = "返回日志文件的轮替时间间隔." 注释 = "返回非0值表示当前\"轮替频率\"为每小时或每分钟." 返回值注释 = "默认为0" 折叠
-            @禁止流程检查 = 真>
+    方法 轮替间隔 <公开 静态 属性读 类型 = uint32_t 注释 = "返回日志文件的轮替时间间隔." 注释 = "返回非0值表示当前\"轮替频率\"为每小时或每分钟." 返回值注释 = "默认为0"
+            折叠 @禁止流程检查 = 真>
     参数 当前选项 <类型 = Quill轮替文件选项>
     {
         @ return @<当前选项>.rotation_interval();

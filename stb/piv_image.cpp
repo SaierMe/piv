@@ -11,35 +11,36 @@ PivImage::PivImage()
 
 PivImage::~PivImage()
 {
-   close();
+    close();
 }
 
 void PivImage::close()
 {
-   if (data)
-   {
-      stbi_image_free(data);
-      data = nullptr;
-      x = 0;
-      y = 0;
-      channels = 0;
-   }
+    if (data)
+    {
+        stbi_image_free(data);
+        data = nullptr;
+        x = 0;
+        y = 0;
+        channels = 0;
+    }
 }
 
-unsigned char *PivImage::load(const wchar_t *filename, int desired_channels)
+unsigned char* PivImage::load(const wchar_t* filename, int desired_channels)
 {
-   close();
-   FILE *file = _wfopen(filename, L"rb");
-   if (!file)
-      return false;
-   data = stbi_load_from_file(file, &x, &y, &channels, desired_channels);
-   fclose(file);
-   return data;
+    close();
+    FILE* file = nullptr;
+    _wfopen_s(&file, filename, L"rb");
+    if (!file)
+        return false;
+    data = stbi_load_from_file(file, &x, &y, &channels, desired_channels);
+    fclose(file);
+    return data;
 }
 
-unsigned char *PivImage::load(unsigned char *buffer, int len, int desired_channels)
+unsigned char* PivImage::load(unsigned char* buffer, int len, int desired_channels)
 {
-   close();
-   data = stbi_load_from_memory(buffer, len, &x, &y, &channels, desired_channels);
-   return data;
+    close();
+    data = stbi_load_from_memory(buffer, len, &x, &y, &channels, desired_channels);
+    return data;
 }

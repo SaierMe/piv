@@ -92,6 +92,33 @@
 
 ※我经常修改现有的代码，比如修正bug、优化效率、规范格式、修订备注等……如果功能和用法没有改变，一般不会写在更新日志里，所以每次更新改动的地方其实还是有不少的。
 
+### 📅 2025/06/10
+
+1. ImGui 升级到 1.91.9b-docking：
+   - 新增 SDL3 窗口框架并重修了现有的框架；
+   - 增加「帧速率」属性，可以切换垂直同步和自定义帧速率（精度极差，只建议60fps以下）；
+   - Win32 窗口增加对 Vulkan 渲染器的支持；
+   - 升级了 GLFW、SDL2 库的版本；
+2. 完善「Markdown解析」；
+3. 新增「内存流读写类」，用于顺序读写内存数据（类似文件流读写）；
+4. 新增「PIV随机数」，提供更简易的免实例化的取随机数方法；
+5. 新增「PIV时间类」，提供一些全局的高效时间操作函数；
+6. 新增一个分类「基本语法辅助」，里面都是全局方法；
+7. 「进程操作类」和「NT进程操作类」增加读写文本的方法；
+8. 重构「表单构造类」，移除「表单构造类U」和「表单构造类A」；
+9. 重构「URL地址解析类」和「表单解析类」；
+10. 优化PIV数组模板和相关实现类，如标准文本数组类的加入成员支持通用型；
+11. 修正「文件读写类EX」和「内存映射文件类EX」（自己用了才发现一堆 BUG）；
+12. 修正「VMProtect.解密文本」的封装；
+13. 修正「CNG加解密类.解密\_AES\_GCM」；
+14. PivJSON的解析方法略有修改，如遇到错误请修改你的代码；
+15. 其他库版本更新：yyjson、nlohmann json、Quill、simdutf；
+16. 其他优化和修正；
+
+### 📅 2025/05/03
+
+1. 修正「提交到主线程」不在主线程运行的BUG（本月更新导致的）；
+
 ### 📅 2025/05/02
 
 1. 修正「NT进程操作类」写内存的错误；
@@ -664,21 +691,22 @@
 - **[{fmt}](https://github.com/fmtlib/fmt)**  `10.2.0`  `MIT license` 格式化文本库，等同 C++20 std::format 的实现 
 - **[md4c](https://github.com/mity/md4c)** `0.4.8`  `MIT license` CommonMark 0.30 规范 + GFM 的 Markdown 解析库
 - **[simpleini](https://github.com/brofield/simpleini)** `4.20` `MIT license` 简易的 INI 配置文件读写库
-- **[simdutf](https://github.com/simdutf/simdutf)** `7.0.0` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
+- **[simdutf](https://github.com/simdutf/simdutf)** `7.3.0` ` Apache-2.0, MIT license`  使用 SIMD 指令集加速，每秒数十亿字符的Unicode编码验证和转换库
 - **[OpenCC](https://github.com/BYVoid/OpenCC)** `1.1.6` `Apache-2.0 license` 中文简繁转换开源项目，支持词汇级别的转换、异体字转换和地区习惯用词转换
 - **[7-zip](https://www.7-zip.org/)** `24.09` `GNU LGPL license` 免费的高压缩率开源压缩软件（采用GNU LGPL协议，只使用它的 dll 文件不会传染）
 - **[bit7z](https://github.com/rikyoz/bit7z)** `4.0.10` `Mozilla Public License v2.0` 7-zip 的封装类
 - **[MinHook](https://github.com/TsudaKageyu/minhook)** `1.3.3` `BSD-2-Clause License` 极简的 x86/x64 API Hook 库
 - **[MMKV](https://github.com/Tencent/MMKV)** `2.2.1` `BSD-3-Clause License` 腾讯开源的高效键值对存储框架
 - **[xxHash](https://github.com/Cyan4973/xxHash)** `8.0.2` `BSD-2-Clause License` 速度接近 RAM 限制的高速散列算法
-- **[Dear ImGui](https://github.com/ocornut/imgui)** `1.91.4-docking` `MIT license` 轻量级的即时渲染界面开发框架
-- **[GLFW](https://www.glfw.org)** `3.3.8` `zlib/libpng license` 跨平台的 OpenGL/Vulkan 桌面应用框架
+- **[Dear ImGui](https://github.com/ocornut/imgui)** `1.91.9b-docking` `MIT license` 轻量级的即时渲染界面开发框架
+- **[GLFW](https://www.glfw.org)** `3.4.0` `zlib/libpng license` 跨平台的 OpenGL/Vulkan 桌面应用框架
 - **[glad](https://github.com/Dav1dde/glad)** `2023-04-04` `MIT License` 多语言的Vulkan/GL/GLES/EGL/GLX/WGL加载程序生成器
-- **[SDL](https://github.com/libsdl-org/SDL)** `2.26.5` `Zlib license` Simple DirectMedia Layer 是一个跨平台的多媒体开发库
+- **[SDL2](https://github.com/libsdl-org/SDL)** `2.32.8` `Zlib license` Simple DirectMedia Layer 是一个跨平台的多媒体开发库
+- **[SDL3](https://github.com/libsdl-org/SDL)** `3.2.16` `Zlib license` Simple DirectMedia Layer 是一个跨平台的多媒体开发库
 - **[Vulkan SDK](https://vulkan.lunarg.com/sdk/home)** `1.3.246.1` `Apache-2.0` 一个跨平台的2D和3D绘图应用程序接口
 - **[libgo](https://github.com/yyzybb537/libgo)** `3.0` `MIT license` Golang 风格的 C++11 协程库
-- **[yyjson](https://github.com/ibireme/yyjson)** `0.10.0` `MIT license` 最快的JSON库
-- **[Quill](https://github.com/odygrd/quill)** `9.0.2` `MIT license` 低延迟的异步日志库
+- **[yyjson](https://github.com/ibireme/yyjson)** `0.11.1` `MIT license` 最快的JSON库
+- **[Quill](https://github.com/odygrd/quill)** `10.0.0` `MIT license` 低延迟的异步日志库
 
 ※本模块封装的开源项目均采用较宽松的开源协议，如 MIT、BSD、MPLv2 ……
 

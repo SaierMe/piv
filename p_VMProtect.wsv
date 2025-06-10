@@ -2,7 +2,7 @@
 
 包 火山.VMProtect <注释 = "VMProtect 3.7.2" 注释 = "https://vmpsoft.com" 注释 = "封装: Xelloss">
 
-类 VMProtect <公开 注释 = "封装了VMProtect SDK的函数" 折叠 @文档 = "category = \"VMProtect加密\"" @禁止创建对象 = 真
+类 VMProtect <公开 注释 = "封装了VMProtect SDK的函数" 折叠 折叠2 @文档 = "category = \"VMProtect加密\"" @禁止创建对象 = 真
         @视窗.外部头文件 = "VMProtect\\include\\VMProtectSDK.h" @视窗.外部库.x64 = "VMProtect\\lib\\VMProtectSDK64.lib"
         @视窗.外部库.win32 = "VMProtect\\lib\\VMProtectSDK32.lib"
         @视窗.附属文件.x64 = "VMProtect\\lib\\VMProtectSDK64.dll"
@@ -12,7 +12,7 @@
     # 加密/Protection
 
     方法 保护 <公开 静态 注释 = "  标记保护的范围(VMProtectBegin),流程线内的子语句体都将被保护," 注释 = "无需调用VMProtectEnd结束保护."
-            注释 = "  具体的保护模式需要在VMProtect程序中设置." 折叠
+            注释 = "  具体的保护模式需要在VMProtect程序中设置." 折叠 隐藏值属性 = "0"
             @嵌入式方法 = "has_body = true\r\nbody_header = \"@none\"\r\nbody_tail = \"VMProtectEnd ();\"">
     参数 标记名称 <类型 = 文本型 注释 = "只能使用字面文本或常量,不能为变量.">
     {
@@ -20,7 +20,7 @@
     }
 
     方法 虚拟化保护 <公开 静态 注释 = "  标记虚拟化保护的范围(VMProtectBeginVirtualization),"
-            注释 = "流程线内的子语句体都将被保护,无需调用VMProtectEnd结束保护." 折叠
+            注释 = "流程线内的子语句体都将被保护,无需调用VMProtectEnd结束保护." 折叠 隐藏值属性 = "0"
             @嵌入式方法 = "has_body = true\r\nbody_header = \"@none\"\r\nbody_tail = \"VMProtectEnd ();\"">
     参数 标记名称 <类型 = 文本型 注释 = "只能使用字面文本或常量,不能为变量.">
     {
@@ -28,7 +28,7 @@
     }
 
     方法 虚拟化保护_锁定序列号 <公开 静态 注释 = "  标记虚拟化保护的范围并锁定到序列号(VMProtectBeginVirtualizationLockByKey),"
-            注释 = "流程线内的子语句体都将被保护,无需调用VMProtectEnd结束保护." 折叠
+            注释 = "流程线内的子语句体都将被保护,无需调用VMProtectEnd结束保护." 折叠 隐藏值属性 = "0"
             @嵌入式方法 = "has_body = true\r\nbody_header = \"@none\"\r\nbody_tail = \"VMProtectEnd ();\"">
     参数 标记名称 <类型 = 文本型 注释 = "只能使用字面文本或常量,不能为变量.">
     {
@@ -36,21 +36,22 @@
     }
 
     方法 变异保护 <公开 静态 注释 = "  标记变异保护的范围(VMProtectBeginMutation),流程线内的子语句体" 注释 = "都将被保护,无需调用VMProtectEnd结束保护."
-            折叠 @嵌入式方法 = "has_body = true\r\nbody_header = \"@none\"\r\nbody_tail = \"VMProtectEnd ();\"">
+            折叠 隐藏值属性 = "0"
+            @嵌入式方法 = "has_body = true\r\nbody_header = \"@none\"\r\nbody_tail = \"VMProtectEnd ();\"">
     参数 标记名称 <类型 = 文本型 注释 = "只能使用字面文本或常量,不能为变量.">
     {
         @ VMProtectBeginMutation(@sn<quot>@pvpt<标记名称>@sn<quot>);
     }
 
     方法 超级保护 <公开 静态 注释 = "  标记超级保护的范围(VMProtectBeginUltra),流程线内的子语句体" 注释 = "都将被保护,无需调用VMProtectEnd结束保护." 折叠
-            @嵌入式方法 = "has_body = true\r\nbody_header = \"@none\"\r\nbody_tail = \"VMProtectEnd ();\"">
+            隐藏值属性 = "0" @嵌入式方法 = "has_body = true\r\nbody_header = \"@none\"\r\nbody_tail = \"VMProtectEnd ();\"">
     参数 标记名称 <类型 = 文本型 注释 = "只能使用字面文本或常量,不能为变量.">
     {
         @ VMProtectBeginUltra(@sn<quot>@pvpt<标记名称>@sn<quot>);
     }
 
     方法 超级保护_锁定序列号 <公开 静态 注释 = "  标记超级保护的范围并锁定到序列号(VMProtectBeginUltraLockByKey),"
-            注释 = "流程线内的子语句体都将被保护,无需调用VMProtectEnd结束保护." 折叠
+            注释 = "流程线内的子语句体都将被保护,无需调用VMProtectEnd结束保护." 折叠 隐藏值属性 = "0"
             @嵌入式方法 = "has_body = true\r\nbody_header = \"@none\"\r\nbody_tail = \"VMProtectEnd ();\"">
     参数 标记名称 <类型 = 文本型 注释 = "只能使用字面文本或常量,不能为变量.">
     {
@@ -122,35 +123,49 @@
         @ (BOOL)VMProtectIsValidImageCRC()
     }
 
-    方法 解密文本A <公开 静态 类型 = 字节集类 注释 = "  VMProtectDecryptStringA函数用于解密ANSI文本常量值,实际上这更像"
-            注释 = "是加密文本,加密后无法反编译出明文,但运行时仍可以在内存中搜索到." 注释 = "  使用后,必须将其添加到VMProtect的\"需保护的进程\"中." 折叠 @禁止流程检查 = 真>
-    参数 字符串 <类型 = 字节集类>
+    方法 解密文本A <公开 静态 类型 = PIV.类型.字符串指针 注释 = "  VMProtectDecryptStringA函数用于解密ANSI文本常量值,实际上这更像"
+            注释 = "是加密文本,加密后无法反编译出明文." 注释 = "  使用后,必须将其添加到VMProtect的\"需保护的进程\"中." 折叠 @嵌入式方法 = "">
+    参数 文本字面量 <类型 = 文本型>
     {
-        @ const char * ret = VMProtectDecryptStringA((const char *)@<字符串>.GetPtr());
-        @ return @an<CVolMem>(ret, strlen(ret) + 1);
+        @ VMProtectDecryptStringA(R@sn<quot>_.(@pvpt<文本字面量>)_.@sn<quot>)
     }
 
-    方法 解密文本W <公开 静态 类型 = 文本型 注释 = "  VMProtectDecryptStringW函数用于解密Unicode文本常量值,实际上这更像"
-            注释 = "是加密文本,加密后无法反编译出明文,但运行时仍可以在内存中搜索到." 注释 = "  使用后,必须将其添加到VMProtect的\"需保护的进程\"中." 折叠 @嵌入式方法 = "">
-    参数 字符串 <类型 = 文本型>
+    方法 解密文本U <公开 静态 类型 = PIV.类型.字符串指针 注释 = "  VMProtectDecryptStringW函数用于解密UTF-8文本常量值,实际上这更像"
+            注释 = "是加密文本,加密后无法反编译出明文." 注释 = "  使用后,必须将其添加到VMProtect的\"需保护的进程\"中." 折叠 @嵌入式方法 = "">
+    参数 文本字面量 <类型 = 文本型 注释 = "只支持填入用\"\"包围的字符串字面量">
     {
-        @ @an<CVolString>(VMProtectDecryptStringW((const VMP_WCHAR *)@<字符串>.GetText()))
+        @ VMProtectDecryptStringA(u8R@sn<quot>_.(@pvpt<文本字面量>)_.@sn<quot>)
+    }
+
+    方法 解密文本W <公开 静态 类型 = PIV.类型.宽字符串指针 注释 = "  VMProtectDecryptStringW函数用于解密Unicode文本常量值,实际上这更像"
+            注释 = "是加密文本,加密后无法反编译出明文." 注释 = "  使用后,必须将其添加到VMProtect的\"需保护的进程\"中." 折叠 @嵌入式方法 = "">
+    参数 文本字面量 <类型 = 文本型 注释 = "只支持填入用\"\"包围的字符串字面量">
+    {
+        @ VMProtectDecryptStringW(LR@sn<quot>_.(@pvpt<文本字面量>)_.@sn<quot>)
     }
 
     方法 释放文本A <公开 静态 类型 = 逻辑型 注释 = "  VMProtectFreeString函数释放为\"解密文本A\"分配的动态内存,一般没必要"
             注释 = "释放内存,但如果要释放,必须使用此函数." 注释 = "  如果不释放之前解密的文本,并使用相同的参数重复调用\"解密文本A\",并不" 注释 = "会分配额外的内存." 折叠
             @嵌入式方法 = "">
-    参数 字符串 <类型 = 字节集类>
+    参数 文本指针 <注释 = "只支持填入用\"\"包围的字符串字面量" @匹配类型 = 通用整数型>
     {
-        @ (BOOL)VMProtectFreeString((const void *)@<字符串>.GetPtr())
+        @ VMProtectFreeString((const void *)@<文本指针>)
+    }
+
+    方法 释放文本U <公开 静态 类型 = 逻辑型 注释 = "  VMProtectFreeString函数释放为\"解密文本U\"分配的动态内存,一般没必要"
+            注释 = "释放内存,但如果要释放,必须使用此函数." 注释 = "  如果不释放之前解密的文本,并使用相同的参数重复调用\"解密文本U\",并不" 注释 = "会分配额外的内存." 折叠
+            @嵌入式方法 = "">
+    参数 文本指针 <注释 = "只支持填入用\"\"包围的字符串字面量" @匹配类型 = 通用整数型>
+    {
+        @ VMProtectFreeString((const void *)@<文本指针>)
     }
 
     方法 释放文本W <公开 静态 类型 = 逻辑型 注释 = "  VMProtectFreeString函数释放为\"解密文本W\"分配的动态内存,一般没必要"
             注释 = "释放内存,但如果要释放,必须使用此函数." 注释 = "  如果不释放之前解密的文本,并使用相同的参数重复调用\"解密文本W\",并不" 注释 = "会分配额外的内存." 折叠
             @嵌入式方法 = "">
-    参数 字符串 <类型 = 文本型>
+    参数 文本指针 <@匹配类型 = 通用整数型>
     {
-        @ (BOOL)VMProtectFreeString((const void *)@<字符串>.GetText())
+        @ VMProtectFreeString((const void *)@<文本指针>)
     }
 
     # 许可证/licensing
@@ -245,7 +260,7 @@
 
     方法 取离线解绑代码 <公开 静态 类型 = 整数 注释 = "  使用序列号离线解绑许可证(VMProtectGetOfflineDeactivationString),"
             注释 = "需要在服务器上部署Web License Manager(另行购买)." 注释 = "  成功执行本功能后,需要用户将返回的解绑代码提交到离线激活网页中,"
-            注释 = "服务器端接收后会释放激活次数." 返回值注释 = "成功返回0,失败返回其他数值,具体请参考\"VMProtect激活结果\"." @禁止流程检查 = 真>
+            注释 = "服务器端接收后会释放激活次数." 返回值注释 = "成功返回0,失败返回其他数值,具体请参考\"VMProtect激活结果\"." 折叠 @禁止流程检查 = 真>
     参数 序列号 <类型 = 文本型 注释 = "此序列号由服务器在激活成功后返回">
     参数 离线解绑代码 <类型 = 文本型 注释 = "成功在此返回解绑代码,之后在激活网页上提交">
     {
@@ -261,18 +276,18 @@
     }
 }
 
-类 VMProtect全局辅助类 <公开 注释 = "一些常用的VMProtect全局方法" 折叠 @文档 = "category = \"VMProtect加密\"" @全局类 = 真
+类 VMProtect全局辅助类 <公开 注释 = "一些常用的VMProtect全局方法" 折叠 折叠2 @文档 = "category = \"VMProtect加密\"" @全局类 = 真
         @强制依赖 = "VMProtect">
 {
     方法 VMP保护 <公开 静态 注释 = "  标记VMP保护的范围,具体的保护模式在VMProtect程序中设置(VMProtectBegin),"
-            注释 = "流程线内的子语句体都将被保护,尾部无需调用VMProtectEnd." 注释 = "  默认标记为\"类名::方法名, 行号\",不可修改." 折叠
+            注释 = "流程线内的子语句体都将被保护,尾部无需调用VMProtectEnd." 注释 = "  默认标记为\"类名::方法名, 行号\",不可修改." 折叠 隐藏值属性 = "0"
             @嵌入式方法 = "has_body = true\r\nbody_header = \"@none\"\r\nbody_tail = \"VMProtectEnd ();\"">
     {
         @ VMProtectBegin(@sn<current_source_class>"::"@sn<current_source_method>", "@sn<current_source_line>);
     }
 
     方法 VMP虚拟化保护 <公开 静态 注释 = "  标记虚拟化保护的范围(VMProtectBeginVirtualization),流程线内的子语句体"
-            注释 = "都将被保护,尾部无需调用VMProtectEnd." 注释 = "  默认标记为\"类名::方法名, 行号\",不可修改." 折叠
+            注释 = "都将被保护,尾部无需调用VMProtectEnd." 注释 = "  默认标记为\"类名::方法名, 行号\",不可修改." 折叠 隐藏值属性 = "0"
             @嵌入式方法 = "has_body = true\r\nbody_header = \"@none\"\r\nbody_tail = \"VMProtectEnd ();\"">
     参数 锁定到序列号 <类型 = 逻辑型 注释 = "  默认为假,为真时改为调用VMProtectBeginUltraLockByKey," 注释 = "受保护的代码需要验证序列号才能使用."
             @默认值 = 假>
@@ -281,14 +296,14 @@
     }
 
     方法 VMP变异保护 <公开 静态 注释 = "  标记变异保护的范围(VMProtectBeginMutation),流程线内的子语句体都将被" 注释 = "保护,尾部无需调用VMProtectEnd."
-            注释 = "  默认标记为\"类名::方法名, 行号\",不可修改." 折叠
+            注释 = "  默认标记为\"类名::方法名, 行号\",不可修改." 折叠 隐藏值属性 = "0"
             @嵌入式方法 = "has_body = true\r\nbody_header = \"@none\"\r\nbody_tail = \"VMProtectEnd ();\"">
     {
         @ VMProtectBeginMutation(@sn<current_source_class>"::"@sn<current_source_method>", "@sn<current_source_line>);
     }
 
     方法 VMP超级保护 <公开 静态 注释 = "  标记超级保护的范围(VMProtectBeginUltra),流程线内的子语句体都将被保护," 注释 = "尾部无需调用VMProtectEnd."
-            注释 = "  默认标记为\"类名::方法名, 行号\",不可修改." 折叠
+            注释 = "  默认标记为\"类名::方法名, 行号\",不可修改." 折叠 隐藏值属性 = "0"
             @嵌入式方法 = "has_body = true\r\nbody_header = \"@none\"\r\nbody_tail = \"VMProtectEnd ();\"">
     参数 锁定到序列号 <类型 = 逻辑型 注释 = "    默认为假,为真时改为调用VMProtectBeginUltraLockByKey," 注释 = "受保护的代码需要验证序列号才能使用."
             @默认值 = 假>
@@ -403,7 +418,7 @@
     # @end
 }
 
-类 VMProtect序列号数据 <公开 基础类 = PIV结构模板 注释 = "VMProtectSerialNumberData为\"取序列号数据\"返回的结构类" 折叠
+类 VMProtect序列号数据 <公开 基础类 = PIV结构模板 注释 = "VMProtectSerialNumberData为\"取序列号数据\"返回的结构类" 折叠 折叠2
         @文档 = "category = \"VMProtect加密.辅助类\"" @别名 = "VMProtectSerialNumberData" @模板实现类 = "VMProtect序列号数据"
         @强制依赖 = "VMProtect">
 {
@@ -451,7 +466,7 @@
     # @end
 }
 
-类 VMProtect序列号数据类 <公开 基础类 = PIV结构模板 注释 = "\"取序列号数据2\"返回的火山对象类" 折叠
+类 VMProtect序列号数据类 <公开 基础类 = PIV结构模板 注释 = "\"取序列号数据2\"返回的火山对象类" 折叠 折叠2
         @文档 = "category = \"VMProtect加密.辅助类\"" @别名 = "VMProtectSerialNumberData" @模板实现类 = "VMProtect序列号数据类"
         @强制依赖 = "VMProtect">
 {
@@ -777,12 +792,12 @@
         {
             序列号信息.标志 = 位或 (序列号信息.标志, VMProtectSerialNumberFlags.有机器码)
             硬件ID = 文本到多字节 (机器码, 真)
-            序列号信息.HWID = (PIV.类型.字符串指针)硬件ID.取字节集指针 ()
+            序列号信息.HWID = (PIV.类型.字符指针)硬件ID.取字节集指针 ()
         }
         如果 (用户数据.字节集是否为空 () == 假 && 用户数据.取字节集长度 () <= 255)
         {
             序列号信息.标志 = 位或 (序列号信息.标志, VMProtectSerialNumberFlags.有用户数据)
-            序列号信息.用户数据长度 = (PIV.类型.无符号变整型)用户数据.取字节集长度 ()
+            序列号信息.用户数据长度 = (PIV.类型.size_t)用户数据.取字节集长度 ()
             序列号信息.用户数据 = (PIV.类型.字节集指针)用户数据.取字节集指针 ()
         }
         返回 (生成序列号2 (序列号, 序列号信息))
@@ -832,7 +847,7 @@
     参数 月 <类型 = 整数>
     参数 日 <类型 = 整数>
     {
-        @ MAKEDATE (@<年>, @<月>, @<日>)
+        @ MAKEDATE(@<年>, @<月>, @<日>)
     }
 
     方法 VMP_取文本中间 <类型 = 文本型 注释 = "取出两段文本中间的内容" 折叠 "">
@@ -963,12 +978,12 @@
 {
     变量 algorithm <公开 类型 = 整数 注释 = "ALGORITHM_RSA = 0," 注释 = "ALGORITHM_PADDING = 0xFFFFFFFF"
             @输出名 = "algorithm">
-    变量 nBits <公开 类型 = PIV.类型.无符号变整型 @输出名 = "nBits">
-    变量 nPrivateSize <公开 类型 = PIV.类型.无符号变整型 @输出名 = "nPrivateSize">
+    变量 nBits <公开 类型 = PIV.类型.size_t @输出名 = "nBits">
+    变量 nPrivateSize <公开 类型 = PIV.类型.size_t @输出名 = "nPrivateSize">
     变量 pPrivate <公开 类型 = PIV.类型.字节集指针 @输出名 = "pPrivate">
-    变量 nModulusSize <公开 类型 = PIV.类型.无符号变整型 @输出名 = "nModulusSize">
+    变量 nModulusSize <公开 类型 = PIV.类型.size_t @输出名 = "nModulusSize">
     变量 pModulus <公开 类型 = PIV.类型.字节集指针 @输出名 = "pModulus">
-    变量 nProductCodeSize <公开 类型 = PIV.类型.无符号变整型 @输出名 = "nProductCodeSize">
+    变量 nProductCodeSize <公开 类型 = PIV.类型.size_t @输出名 = "nProductCodeSize">
     变量 pProductCode <公开 类型 = PIV.类型.字节集指针 @输出名 = "pProductCode">
 
     # @begin
@@ -999,8 +1014,8 @@
     变量 更新期限 <公开 类型 = 无符号整数 注释 = "免费更新的期限,程序在此日期前编译的,可以免费使用." @输出名 = "dwMaxBuildDate">
     变量 运行时限 <公开 类型 = 无符号字节 注释 = "从程序运行时开始计算,超过此参数(以分钟为单位)的时间后,将不再允许使用程序;"
             注释 = "注意: VMProtect本身未实现到时限提示或退出程序的功能,需要你自己编程实现," 注释 = "这里只是在序列号里提供了这个状态." @输出名 = "nRunningTimeLimit">
-    变量 HWID <公开 类型 = PIV.类型.字符串指针 注释 = "硬件ID的ANSI文本指针" @输出名 = "pHardwareID">
-    变量 用户数据长度 <公开 类型 = PIV.类型.无符号变整型 注释 = "用户数据已使用的字节数,最大255字节." @输出名 = "nUserDataLength">
+    变量 HWID <公开 类型 = PIV.类型.字符指针 注释 = "硬件ID的ANSI文本指针" @输出名 = "pHardwareID">
+    变量 用户数据长度 <公开 类型 = PIV.类型.size_t 注释 = "用户数据已使用的字节数,最大255字节." @输出名 = "nUserDataLength">
     变量 用户数据 <公开 类型 = PIV.类型.字节集指针 注释 = "用户数据的字节集指针,实际占用尺寸以\"用户数据长度\"为准." @输出名 = "pUserData">
 
     # @begin

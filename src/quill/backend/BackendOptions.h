@@ -109,10 +109,11 @@ struct BackendOptions
    * next iteration. The timestamp check is performed with microsecond precision.
    *
    * Example scenario:
-   * 1. Frontend thread takes a timestamp, then sleeps before pushing to the queue.
+   * 1. Frontend thread takes a timestamp at the very start of logging, then becomes delayed
+   *    (preempted, blocked, processing slowly, etc.) before pushing to the queue.
    * 2. Backend thread takes timestamp `now()` and subtracts the grace period, reads queues up to
    *    the adjusted `now()`, and writes the logs.
-   * 3. Frontend thread wakes up and pushes to the queue.
+   * 3. Frontend thread wakes up and pushes the message with its already-recorded timestamp to the queue.
    * 4. Backend thread reads and writes the delayed timestamp, resulting in an out-of-order log.
    *
    * Setting this option to a non-zero value causes a minor delay in reading the messages from the
@@ -221,9 +222,9 @@ struct BackendOptions
    * The indices correspond to LogLevel enum values defined elsewhere in the codebase.
    * These names provide human-readable identifiers for each log level.
    */
-  std::array<std::string, 12> log_level_descriptions = {
+  std::array<std::string, 11> log_level_descriptions = {
     "TRACE_L3", "TRACE_L2", "TRACE_L1", "DEBUG",     "INFO", "NOTICE",
-    "WARNING",  "ERROR",    "CRITICAL", "BACKTRACE", "NONE", "DYNAMIC"};
+    "WARNING",  "ERROR",    "CRITICAL", "BACKTRACE", "NONE"};
 
   /**
    * @brief Short codes or identifiers for each log level.
@@ -231,8 +232,8 @@ struct BackendOptions
    * Provides short codes representing each log level for compact identification and usage.
    * The indices correspond to LogLevel enum values defined elsewhere in the codebase.
    */
-  std::array<std::string, 12> log_level_short_codes = {"T3", "T2", "T1", "D",  "I", "N",
-                                                       "W",  "E",  "C",  "BT", "_", "DN"};
+  std::array<std::string, 11> log_level_short_codes = {"T3", "T2", "T1", "D",  "I", "N",
+                                                       "W",  "E",  "C",  "BT", "_"};
 
   /**
    * Enables a runtime check to detect multiple instances of the backend singleton.

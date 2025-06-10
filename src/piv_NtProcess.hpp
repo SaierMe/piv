@@ -31,7 +31,7 @@ public:
 
         ModuleInfo() {}
         ~ModuleInfo() {}
-        ModuleInfo(ULONG64 dll_base, ULONG64 entry_point, ULONG size_of_image, const wchar_t *dll_name, USHORT base_dllname_len)
+        ModuleInfo(ULONG64 dll_base, ULONG64 entry_point, ULONG size_of_image, const wchar_t* dll_name, USHORT base_dllname_len)
         {
             lpBaseOfDll = dll_base;
             EntryPoint = entry_point;
@@ -67,9 +67,9 @@ public:
     };
 
 private:
-    std::unique_ptr<ProcessInfo> ProInfo = nullptr;
+    std::unique_ptr<ProcessInfo> m_process = nullptr;
     const uint32_t BLOCKMAXSIZE = 409600;
-    PivNT &Nt = PivNT::instance();
+    PivNT& Nt = PivNT::instance();
 
 private:
     /**
@@ -77,27 +77,27 @@ private:
      */
     bool _get_base_info()
     {
-        if (!ProInfo)
+        if (!m_process)
             return false;
         if (is_wow64(TRUE) == TRUE && is_wow64(FALSE) == FALSE)
         {
-            ProInfo->isWow64 = true;
+            m_process->isWow64 = true;
             NtPiv::PROCESS_BASIC_INFORMATION64 pbi{0};
-            if (NT_SUCCESS(Nt.NtWow64QueryInformationProcess64(ProInfo->hProcess, ProcessBasicInformation, &pbi, sizeof(pbi), NULL)))
+            if (NT_SUCCESS(Nt.NtWow64QueryInformationProcess64(m_process->hProcess, ProcessBasicInformation, &pbi, sizeof(pbi), NULL)))
             {
                 NtPiv::PEB64 peb{0};
                 NtPiv::RTL_USER_PROCESS_PARAMETERS64 Parameters{0};
                 if (read_memory(&peb, reinterpret_cast<PVOID64>(pbi.PebBaseAddress), sizeof(peb)) &&
                     read_memory(&Parameters, reinterpret_cast<PVOID64>(peb.ProcessParameters), sizeof(Parameters)))
                 {
-                    ProInfo->ImageBaseAddress = peb.ImageBaseAddress;
-                    ProInfo->Ldr = peb.Ldr;
-                    ProInfo->ProcessHeap = peb.ProcessHeap;
-                    ProInfo->ProcessParameters = peb.ProcessParameters;
-                    ProInfo->Environment.Buffer = Parameters.Environment;
-                    ProInfo->Environment.Length = static_cast<USHORT>(Parameters.EnvironmentSize);
-                    ProInfo->CommandLine = Parameters.CommandLine;
-                    // if (ProInfo->ImageBaseAddress != 0 && ProInfo->Ldr != 0)
+                    m_process->ImageBaseAddress = peb.ImageBaseAddress;
+                    m_process->Ldr = peb.Ldr;
+                    m_process->ProcessHeap = peb.ProcessHeap;
+                    m_process->ProcessParameters = peb.ProcessParameters;
+                    m_process->Environment.Buffer = Parameters.Environment;
+                    m_process->Environment.Length = static_cast<USHORT>(Parameters.EnvironmentSize);
+                    m_process->CommandLine = Parameters.CommandLine;
+                    // if (m_process->ImageBaseAddress != 0 && m_process->Ldr != 0)
                     //    return true;
                 }
             }
@@ -105,22 +105,22 @@ private:
         else
         {
             NtPiv::PROCESS_BASIC_INFORMATION pbi{0};
-            if (NT_SUCCESS(Nt.NtQueryInformationProcess(ProInfo->hProcess, ProcessBasicInformation, &pbi, sizeof(pbi), NULL)))
+            if (NT_SUCCESS(Nt.NtQueryInformationProcess(m_process->hProcess, ProcessBasicInformation, &pbi, sizeof(pbi), NULL)))
             {
                 NtPiv::PEB peb{0};
                 NtPiv::RTL_USER_PROCESS_PARAMETERS_T<SIZE_T> Parameters{0};
                 if (read_memory(&peb, reinterpret_cast<PVOID64>(pbi.PebBaseAddress), sizeof(peb)) &&
                     read_memory(&Parameters, reinterpret_cast<PVOID64>(peb.ProcessParameters), sizeof(Parameters)))
                 {
-                    ProInfo->ImageBaseAddress = peb.ImageBaseAddress;
-                    ProInfo->Ldr = peb.Ldr;
-                    ProInfo->ProcessHeap = peb.ProcessHeap;
-                    ProInfo->ProcessParameters = peb.ProcessParameters;
-                    ProInfo->Environment.Buffer = Parameters.Environment;
-                    ProInfo->Environment.Length = static_cast<USHORT>(Parameters.EnvironmentSize);
-                    ProInfo->CommandLine.Buffer = Parameters.CommandLine.Buffer;
-                    ProInfo->CommandLine.Length = Parameters.CommandLine.Length;
-                    // if (ProInfo->ImageBaseAddress != 0 && ProInfo->Ldr != 0)
+                    m_process->ImageBaseAddress = peb.ImageBaseAddress;
+                    m_process->Ldr = peb.Ldr;
+                    m_process->ProcessHeap = peb.ProcessHeap;
+                    m_process->ProcessParameters = peb.ProcessParameters;
+                    m_process->Environment.Buffer = Parameters.Environment;
+                    m_process->Environment.Length = static_cast<USHORT>(Parameters.EnvironmentSize);
+                    m_process->CommandLine.Buffer = Parameters.CommandLine.Buffer;
+                    m_process->CommandLine.Length = Parameters.CommandLine.Length;
+                    // if (m_process->ImageBaseAddress != 0 && m_process->Ldr != 0)
                     //    return true;
                 }
             }
@@ -161,14 +161,14 @@ private:
      * @param RegionSize 返回区域大小
      * @return 返回是否成功
      */
-    bool _query_virtual_memory(PVOID64 BaseAddress, ULONGLONG *RegionSize, bool *check_mem = nullptr, DWORD protect = 0, DWORD mem_type = 0)
+    bool _query_virtual_memory(PVOID64 BaseAddress, ULONGLONG* RegionSize, bool* check_mem = nullptr, DWORD protect = 0, DWORD mem_type = 0)
     {
-        if (!ProInfo)
+        if (!m_process)
             return false;
-        if (ProInfo->isWow64 && Nt.NtWow64QueryVirtualMemory64)
+        if (m_process->isWow64 && Nt.NtWow64QueryVirtualMemory64)
         {
             MEMORY_BASIC_INFORMATION64 mbi{0};
-            if (NT_SUCCESS(Nt.NtWow64QueryVirtualMemory64(ProInfo->hProcess, BaseAddress, NtPiv::MemoryBasicInformation, &mbi, sizeof(mbi), NULL)))
+            if (NT_SUCCESS(Nt.NtWow64QueryVirtualMemory64(m_process->hProcess, BaseAddress, NtPiv::MemoryBasicInformation, &mbi, sizeof(mbi), NULL)))
             {
                 *RegionSize = mbi.RegionSize;
                 if (check_mem)
@@ -184,7 +184,7 @@ private:
         else
         {
             MEMORY_BASIC_INFORMATION mbi{0};
-            if (NT_SUCCESS(Nt.NtQueryVirtualMemory(ProInfo->hProcess, reinterpret_cast<PVOID>(BaseAddress), NtPiv::MemoryBasicInformation, &mbi, sizeof(mbi), NULL)))
+            if (NT_SUCCESS(Nt.NtQueryVirtualMemory(m_process->hProcess, reinterpret_cast<PVOID>(BaseAddress), NtPiv::MemoryBasicInformation, &mbi, sizeof(mbi), NULL)))
             {
                 *RegionSize = mbi.RegionSize;
                 if (check_mem)
@@ -202,18 +202,18 @@ private:
 
     DWORD _query_protect(PVOID64 BaseAddress)
     {
-        if (!ProInfo)
+        if (!m_process)
             return 0;
-        if (ProInfo->isWow64 && Nt.NtWow64QueryVirtualMemory64)
+        if (m_process->isWow64 && Nt.NtWow64QueryVirtualMemory64)
         {
             MEMORY_BASIC_INFORMATION64 mbi{0};
-            if (NT_SUCCESS(Nt.NtWow64QueryVirtualMemory64(ProInfo->hProcess, BaseAddress, NtPiv::MemoryBasicInformation, &mbi, sizeof(mbi), NULL)))
+            if (NT_SUCCESS(Nt.NtWow64QueryVirtualMemory64(m_process->hProcess, BaseAddress, NtPiv::MemoryBasicInformation, &mbi, sizeof(mbi), NULL)))
                 return mbi.Protect;
         }
         else
         {
             MEMORY_BASIC_INFORMATION mbi{0};
-            if (NT_SUCCESS(Nt.NtQueryVirtualMemory(ProInfo->hProcess, reinterpret_cast<PVOID>(BaseAddress), NtPiv::MemoryBasicInformation, &mbi, sizeof(mbi), NULL)))
+            if (NT_SUCCESS(Nt.NtQueryVirtualMemory(m_process->hProcess, reinterpret_cast<PVOID>(BaseAddress), NtPiv::MemoryBasicInformation, &mbi, sizeof(mbi), NULL)))
                 return mbi.Protect;
         }
         return 0;
@@ -221,18 +221,18 @@ private:
 
     ULONGLONG _query_base_address(PVOID64 BaseAddress)
     {
-        if (!ProInfo)
+        if (!m_process)
             return 0;
-        if (ProInfo->isWow64 && Nt.NtWow64QueryVirtualMemory64)
+        if (m_process->isWow64 && Nt.NtWow64QueryVirtualMemory64)
         {
             MEMORY_BASIC_INFORMATION64 mbi{0};
-            if (NT_SUCCESS(Nt.NtWow64QueryVirtualMemory64(ProInfo->hProcess, BaseAddress, NtPiv::MemoryBasicInformation, &mbi, sizeof(mbi), NULL)))
+            if (NT_SUCCESS(Nt.NtWow64QueryVirtualMemory64(m_process->hProcess, BaseAddress, NtPiv::MemoryBasicInformation, &mbi, sizeof(mbi), NULL)))
                 return mbi.BaseAddress;
         }
         else
         {
             MEMORY_BASIC_INFORMATION mbi{0};
-            if (NT_SUCCESS(Nt.NtQueryVirtualMemory(ProInfo->hProcess, reinterpret_cast<PVOID>(BaseAddress), NtPiv::MemoryBasicInformation, &mbi, sizeof(mbi), NULL)))
+            if (NT_SUCCESS(Nt.NtQueryVirtualMemory(m_process->hProcess, reinterpret_cast<PVOID>(BaseAddress), NtPiv::MemoryBasicInformation, &mbi, sizeof(mbi), NULL)))
                 return reinterpret_cast<ULONGLONG>(mbi.BaseAddress);
         }
         return 0;
@@ -260,14 +260,14 @@ public:
         {
             if (enable_debug)
                 _enable_debug_privilege();
-            ProInfo.reset(new ProcessInfo);
-            ProInfo->PID = process_id ? process_id : ::GetCurrentProcessId();
+            m_process.reset(new ProcessInfo);
+            m_process->PID = process_id ? process_id : ::GetCurrentProcessId();
             OBJECT_ATTRIBUTES oa{sizeof(OBJECT_ATTRIBUTES), NULL, NULL, 0, NULL, NULL};
-            NtPiv::CLIENT_ID cid = {reinterpret_cast<HANDLE>(ProInfo->PID), NULL};
-            if (NT_SUCCESS(Nt.NtOpenProcess(&ProInfo->hProcess, desired_access, &oa, &cid)) && _get_base_info())
+            NtPiv::CLIENT_ID cid = {reinterpret_cast<HANDLE>(m_process->PID), NULL};
+            if (NT_SUCCESS(Nt.NtOpenProcess(&m_process->hProcess, desired_access, &oa, &cid)) && _get_base_info())
                 return true;
         }
-        ProInfo.reset(nullptr);
+        m_process.reset(nullptr);
         return false;
     }
 
@@ -276,16 +276,16 @@ public:
     {
         if (Nt.isLoaded() == true)
         {
-            ProInfo.reset(new ProcessInfo);
-            ProInfo->hProcess = process;
+            m_process.reset(new ProcessInfo);
+            m_process->hProcess = process;
             if (_get_base_info())
             {
-                ProInfo->needClose = auto_close;
-                ProInfo->PID = ::GetProcessId(process);
+                m_process->needClose = auto_close;
+                m_process->PID = ::GetProcessId(process);
                 return true;
             }
         }
-        ProInfo.reset(nullptr);
+        m_process.reset(nullptr);
         return false;
     }
 
@@ -294,15 +294,15 @@ public:
      */
     inline void close_process() noexcept
     {
-        ProInfo.reset(nullptr);
+        m_process.reset(nullptr);
     }
 
     /**
      * @brief 取模块信息排序表
      */
-    inline std::map<ULONG64, ModuleInfo> &modules_map()
+    inline std::map<ULONG64, ModuleInfo>& modules_map()
     {
-        return ProInfo->ModulesMap;
+        return m_process->ModulesMap;
     }
 
     /**
@@ -310,7 +310,7 @@ public:
      */
     inline HANDLE get_process_handle() const noexcept
     {
-        return ProInfo ? ProInfo->hProcess : nullptr;
+        return m_process ? m_process->hProcess : nullptr;
     }
 
     /**
@@ -318,7 +318,7 @@ public:
      */
     inline DWORD get_process_id() const noexcept
     {
-        return ProInfo ? ProInfo->PID : 0;
+        return m_process ? m_process->PID : 0;
     }
 
     /**
@@ -327,8 +327,8 @@ public:
     inline DWORD get_handle_count() const noexcept
     {
         DWORD dwHandleCount = 0;
-        if (ProInfo)
-            ::GetProcessHandleCount(ProInfo->hProcess, &dwHandleCount);
+        if (m_process)
+            ::GetProcessHandleCount(m_process->hProcess, &dwHandleCount);
         return dwHandleCount;
     }
 
@@ -337,7 +337,7 @@ public:
      */
     inline ULONG64 get_base_address() const noexcept
     {
-        return ProInfo ? ProInfo->ImageBaseAddress : 0;
+        return m_process ? m_process->ImageBaseAddress : 0;
     }
 
     /**
@@ -347,7 +347,7 @@ public:
     double get_creation_time(int32_t time_zoon = 2147483647) const noexcept
     {
         double dtime = 0.0;
-        if (ProInfo)
+        if (m_process)
         {
             if (time_zoon == 2147483647)
             {
@@ -356,7 +356,7 @@ public:
                 time_zoon = tz.Bias;
             }
             FILETIME CreationTime, ExitTime, KernelTime, UserTime;
-            if (::GetProcessTimes(ProInfo->hProcess, &CreationTime, &ExitTime, &KernelTime, &UserTime))
+            if (::GetProcessTimes(m_process->hProcess, &CreationTime, &ExitTime, &KernelTime, &UserTime))
             {
                 SYSTEMTIME st;
                 ::FileTimeToSystemTime(&CreationTime, &st);
@@ -372,11 +372,11 @@ public:
      * @param 内存使用情况
      * @return 返回是否成功
      */
-    inline BOOL get_memory_info(VOID *pMemCounters, size_t cb) const noexcept
+    inline BOOL get_memory_info(VOID* pMemCounters, size_t cb) const noexcept
     {
-        if (ProInfo && Nt.loadPsapi())
+        if (m_process && Nt.loadPsapi())
         {
-            return Nt.GetProcessMemoryInfo(ProInfo->hProcess, pMemCounters, static_cast<DWORD>(cb));
+            return Nt.GetProcessMemoryInfo(m_process->hProcess, pMemCounters, static_cast<DWORD>(cb));
         }
         return FALSE;
     }
@@ -386,7 +386,7 @@ public:
      */
     inline DWORD get_priority_class() const noexcept
     {
-        return ProInfo ? ::GetPriorityClass(ProInfo->hProcess) : 0;
+        return m_process ? ::GetPriorityClass(m_process->hProcess) : 0;
     }
 
     /**
@@ -396,7 +396,7 @@ public:
      */
     inline BOOL set_priority_class(DWORD priority) const noexcept
     {
-        return ProInfo ? ::SetPriorityClass(ProInfo->hProcess, priority) : FALSE;
+        return m_process ? ::SetPriorityClass(m_process->hProcess, priority) : FALSE;
     }
 
     /**
@@ -405,12 +405,12 @@ public:
      * @param is_permanet 返回是否固定
      * @return 是否成功
      */
-    inline BOOL get_dep_policy(DWORD &flags, BOOL &is_permanet) const noexcept
+    inline BOOL get_dep_policy(DWORD& flags, BOOL& is_permanet) const noexcept
     {
         flags = 0;
         is_permanet = FALSE;
-        if (ProInfo && Nt.GetProcessDEPPolicy)
-            return Nt.GetProcessDEPPolicy(ProInfo->hProcess, &flags, &is_permanet);
+        if (m_process && Nt.GetProcessDEPPolicy)
+            return Nt.GetProcessDEPPolicy(m_process->hProcess, &flags, &is_permanet);
         return FALSE;
     }
 
@@ -428,9 +428,9 @@ public:
             {
                 Nt.IsWow64Process(::GetCurrentProcess(), &result);
             }
-            else if (ProInfo)
+            else if (m_process)
             {
-                Nt.IsWow64Process(ProInfo->hProcess, &result);
+                Nt.IsWow64Process(m_process->hProcess, &result);
             }
         }
         return result;
@@ -441,11 +441,11 @@ public:
      */
     inline CVolString get_commandline() noexcept
     {
-        if (ProInfo && ProInfo->CommandLine.Buffer != 0 && ProInfo->CommandLine.Length != 0)
+        if (m_process && m_process->CommandLine.Buffer != 0 && m_process->CommandLine.Length != 0)
         {
             CVolString result;
-            result.SetLength(ProInfo->CommandLine.Length / 2);
-            if (read_memory(const_cast<wchar_t *>(result.GetText()), reinterpret_cast<PVOID64>(ProInfo->CommandLine.Buffer), ProInfo->CommandLine.Length))
+            result.SetLength(m_process->CommandLine.Length / 2);
+            if (read_memory(const_cast<wchar_t*>(result.GetText()), reinterpret_cast<PVOID64>(m_process->CommandLine.Buffer), m_process->CommandLine.Length))
                 return result;
         }
         return CWString(L"");
@@ -456,19 +456,19 @@ public:
      * @param env_array 环境变量数组
      * @return 返回变量数量
      */
-    int32_t get_environment(CMStringArray &env_array) noexcept
+    int32_t get_environment(CMStringArray& env_array) noexcept
     {
         env_array.RemoveAll();
-        if (ProInfo && ProInfo->Environment.Buffer != NULL)
+        if (m_process && m_process->Environment.Buffer != NULL)
         {
-            std::unique_ptr<BYTE[]> env(new BYTE[ProInfo->Environment.Length + 2]{0});
-            if (read_memory(env.get(), reinterpret_cast<PVOID64>(ProInfo->Environment.Buffer), ProInfo->Environment.Length))
+            std::unique_ptr<BYTE[]> env(new BYTE[m_process->Environment.Length + 2]{0});
+            if (read_memory(env.get(), reinterpret_cast<PVOID64>(m_process->Environment.Buffer), m_process->Environment.Length))
             {
-                BYTE *szEnv = env.get();
+                BYTE* szEnv = env.get();
                 while (szEnv != NULL)
                 {
-                    env_array.Add(reinterpret_cast<const WCHAR *>(szEnv));
-                    while (*reinterpret_cast<WCHAR *>(szEnv) != '\0')
+                    env_array.Add(reinterpret_cast<const WCHAR*>(szEnv));
+                    while (*reinterpret_cast<WCHAR*>(szEnv) != '\0')
                         szEnv += 2;
                     szEnv += 2;
                     if (*szEnv == '\0')
@@ -484,13 +484,13 @@ public:
      * @param module_name 模块名称
      * @param force_flush 是否重新枚举模块
      */
-    ULONG64 get_module_handle(const CVolString &module_name, BOOL force_flush = FALSE) noexcept
+    ULONG64 get_module_handle(const CVolString& module_name, BOOL force_flush = FALSE) noexcept
     {
-        if (ProInfo && enum_modules(static_cast<bool>(force_flush)) > 0)
+        if (m_process && enum_modules(static_cast<bool>(force_flush)) > 0)
         {
             if (module_name.IsEmpty())
-                return ProInfo->ImageBaseAddress;
-            for (auto &it = ProInfo->ModulesMap.begin(); it != ProInfo->ModulesMap.end(); it++)
+                return m_process->ImageBaseAddress;
+            for (auto& it = m_process->ModulesMap.begin(); it != m_process->ModulesMap.end(); it++)
             {
                 if (it->second.FullDllName.SearchText(module_name.GetText(), -1, TRUE, TRUE) != -1)
                     return it->first;
@@ -505,12 +505,12 @@ public:
      */
     inline ULONG64 get_module_base(ULONG64 hModule) noexcept
     {
-        if (ProInfo && enum_modules() > 0)
+        if (m_process && enum_modules() > 0)
         {
             if (hModule == 0)
-                return ProInfo->ImageBaseAddress;
-            auto &it = ProInfo->ModulesMap.find(hModule);
-            if (it != ProInfo->ModulesMap.end())
+                return m_process->ImageBaseAddress;
+            auto& it = m_process->ModulesMap.find(hModule);
+            if (it != m_process->ModulesMap.end())
                 return it->second.lpBaseOfDll;
         }
         return 0;
@@ -522,25 +522,25 @@ public:
      */
     int32_t enum_modules(bool force_flush = false) noexcept
     {
-        if (!ProInfo && ProInfo->Ldr == 0)
+        if (!m_process && m_process->Ldr == 0)
             return 0;
-        if (!force_flush && ProInfo->ModulesMap.size() > 0)
-            return static_cast<int32_t>(ProInfo->ModulesMap.size());
-        ProInfo->ModulesMap.clear();
-        if (ProInfo->isWow64)
+        if (!force_flush && m_process->ModulesMap.size() > 0)
+            return static_cast<int32_t>(m_process->ModulesMap.size());
+        m_process->ModulesMap.clear();
+        if (m_process->isWow64)
         {
             LIST_ENTRY64 ModuleList = {0};
             NtPiv::LDR_DATA_TABLE_ENTRY_T<ULONG64> CurrentModule = {0};
             wchar_t ModPath[MAX_PATH];
-            if (read_memory(&ModuleList, PIV_PTR_FORWARD(PVOID64, ProInfo->Ldr, offsetof(NtPiv::PEB_LDR_DATA_T<ULONG64>, InLoadOrderModuleList)), sizeof(ModuleList)) &&
+            if (read_memory(&ModuleList, PIV_PTR_FORWARD(PVOID64, m_process->Ldr, offsetof(NtPiv::PEB_LDR_DATA_T<ULONG64>, InLoadOrderModuleList)), sizeof(ModuleList)) &&
                 read_memory(&CurrentModule, reinterpret_cast<PVOID64>(ModuleList.Flink), sizeof(CurrentModule)))
             {
                 while (CurrentModule.InLoadOrderLinks.Flink != ModuleList.Flink)
                 {
                     if (read_memory(ModPath, reinterpret_cast<PVOID64>(CurrentModule.FullDllName.Buffer), sizeof(ModPath)))
-                        ProInfo->ModulesMap.emplace(std::piecewise_construct, std::forward_as_tuple(CurrentModule.DllBase),
-                                                    std::forward_as_tuple(CurrentModule.DllBase, CurrentModule.EntryPoint, CurrentModule.SizeOfImage,
-                                                                          ModPath, CurrentModule.BaseDllName.Length / 2));
+                        m_process->ModulesMap.emplace(std::piecewise_construct, std::forward_as_tuple(CurrentModule.DllBase),
+                                                      std::forward_as_tuple(CurrentModule.DllBase, CurrentModule.EntryPoint, CurrentModule.SizeOfImage,
+                                                                            ModPath, CurrentModule.BaseDllName.Length / 2));
                     if (!read_memory(&CurrentModule, reinterpret_cast<PVOID64>(CurrentModule.InLoadOrderLinks.Flink), sizeof(CurrentModule)))
                         break;
                 }
@@ -551,21 +551,21 @@ public:
             NtPiv::LIST_ENTRY_T<SIZE_T> ModuleList = {0};
             NtPiv::LDR_DATA_TABLE_ENTRY_T<SIZE_T> CurrentModule = {0};
             wchar_t ModPath[MAX_PATH];
-            if (read_memory(&ModuleList, PIV_PTR_FORWARD(PVOID64, ProInfo->Ldr, offsetof(NtPiv::PEB_LDR_DATA_T<SIZE_T>, InLoadOrderModuleList)), sizeof(ModuleList)) &&
+            if (read_memory(&ModuleList, PIV_PTR_FORWARD(PVOID64, m_process->Ldr, offsetof(NtPiv::PEB_LDR_DATA_T<SIZE_T>, InLoadOrderModuleList)), sizeof(ModuleList)) &&
                 read_memory(&CurrentModule, reinterpret_cast<PVOID64>(ModuleList.Flink), sizeof(CurrentModule)))
             {
                 while (CurrentModule.InLoadOrderLinks.Flink != ModuleList.Flink)
                 {
                     if (read_memory(ModPath, reinterpret_cast<PVOID64>(CurrentModule.FullDllName.Buffer), sizeof(ModPath)))
-                        ProInfo->ModulesMap.emplace(std::piecewise_construct, std::forward_as_tuple(CurrentModule.DllBase),
-                                                    std::forward_as_tuple(CurrentModule.DllBase, CurrentModule.EntryPoint, CurrentModule.SizeOfImage,
-                                                                          ModPath, CurrentModule.BaseDllName.Length / 2));
+                        m_process->ModulesMap.emplace(std::piecewise_construct, std::forward_as_tuple(CurrentModule.DllBase),
+                                                      std::forward_as_tuple(CurrentModule.DllBase, CurrentModule.EntryPoint, CurrentModule.SizeOfImage,
+                                                                            ModPath, CurrentModule.BaseDllName.Length / 2));
                     if (!read_memory(&CurrentModule, reinterpret_cast<PVOID64>(CurrentModule.InLoadOrderLinks.Flink), sizeof(CurrentModule)))
                         break;
                 }
             }
         }
-        return static_cast<int32_t>(ProInfo->ModulesMap.size());
+        return static_cast<int32_t>(m_process->ModulesMap.size());
     }
 
     /**
@@ -573,12 +573,12 @@ public:
      * @param module_array 模块句柄数组
      * @return 返回模块数量
      */
-    inline int32_t enum_modules(CMArray<INT64> &module_array) noexcept
+    inline int32_t enum_modules(CMArray<INT64>& module_array) noexcept
     {
         module_array.RemoveAll();
-        if (ProInfo && enum_modules(TRUE) > 0)
+        if (m_process && enum_modules(TRUE) > 0)
         {
-            for (auto &it = ProInfo->ModulesMap.cbegin(); it != ProInfo->ModulesMap.cend(); it++)
+            for (auto& it = m_process->ModulesMap.cbegin(); it != m_process->ModulesMap.cend(); it++)
                 module_array.Add(static_cast<INT64>(it->first));
         }
         return static_cast<int32_t>(module_array.GetCount());
@@ -591,13 +591,13 @@ public:
      * @param is_fullpath 是否完整路径
      * @return 返回模块数量
      */
-    int32_t enum_modules(CMArray<INT64> &module_array, CMStringArray &name_array, BOOL is_fullpath) noexcept
+    int32_t enum_modules(CMArray<INT64>& module_array, CMStringArray& name_array, BOOL is_fullpath) noexcept
     {
         module_array.RemoveAll();
         name_array.RemoveAll();
-        if (ProInfo && enum_modules(TRUE) > 0)
+        if (m_process && enum_modules(TRUE) > 0)
         {
-            for (auto &it = ProInfo->ModulesMap.begin(); it != ProInfo->ModulesMap.end(); it++)
+            for (auto& it = m_process->ModulesMap.begin(); it != m_process->ModulesMap.end(); it++)
             {
                 module_array.Add(static_cast<INT64>(it->first));
                 if (is_fullpath)
@@ -615,14 +615,14 @@ public:
      * @param module_info 返回模块信息
      * @return 返回模块数量
      */
-    bool get_module_info(ULONG64 hModule, ModuleInfo &module_info) noexcept
+    bool get_module_info(ULONG64 hModule, ModuleInfo& module_info) noexcept
     {
-        if (ProInfo && enum_modules() > 0)
+        if (m_process && enum_modules() > 0)
         {
             if (hModule == 0)
-                hModule = ProInfo->ImageBaseAddress;
-            auto &it = ProInfo->ModulesMap.find(hModule);
-            if (it != ProInfo->ModulesMap.end())
+                hModule = m_process->ImageBaseAddress;
+            auto& it = m_process->ModulesMap.find(hModule);
+            if (it != m_process->ModulesMap.end())
             {
                 module_info = it->second;
                 return true;
@@ -637,12 +637,12 @@ public:
      */
     inline CVolString get_module_name(ULONG64 hModule) noexcept
     {
-        if (ProInfo && enum_modules() > 0)
+        if (m_process && enum_modules() > 0)
         {
             if (hModule == 0)
-                hModule = ProInfo->ImageBaseAddress;
-            auto &it = ProInfo->ModulesMap.find(hModule);
-            if (it != ProInfo->ModulesMap.end())
+                hModule = m_process->ImageBaseAddress;
+            auto& it = m_process->ModulesMap.find(hModule);
+            if (it != m_process->ModulesMap.end())
                 return it->second.FullDllName.Right(it->second.BaseDllNameLen);
         }
         return CWString(L"");
@@ -654,12 +654,12 @@ public:
      */
     inline CVolString get_module_filename(ULONG64 hModule) noexcept
     {
-        if (ProInfo && enum_modules() > 0)
+        if (m_process && enum_modules() > 0)
         {
             if (hModule == 0)
-                hModule = ProInfo->ImageBaseAddress;
-            auto &it = ProInfo->ModulesMap.find(hModule);
-            if (it != ProInfo->ModulesMap.end())
+                hModule = m_process->ImageBaseAddress;
+            auto& it = m_process->ModulesMap.find(hModule);
+            if (it != m_process->ModulesMap.end())
                 return it->second.FullDllName;
         }
         return CWString(L"");
@@ -671,12 +671,12 @@ public:
      */
     inline CVolString get_module_path(ULONG64 hModule) noexcept
     {
-        if (ProInfo && enum_modules() > 0)
+        if (m_process && enum_modules() > 0)
         {
             if (hModule == 0)
-                hModule = ProInfo->ImageBaseAddress;
-            auto &it = ProInfo->ModulesMap.find(hModule);
-            if (it != ProInfo->ModulesMap.end())
+                hModule = m_process->ImageBaseAddress;
+            auto& it = m_process->ModulesMap.find(hModule);
+            if (it != m_process->ModulesMap.end())
                 return it->second.FullDllName.Left(it->second.FullDllName.GetLength() - it->second.BaseDllNameLen);
         }
         return CWString(L"");
@@ -688,18 +688,18 @@ public:
      */
     inline CVolString get_mapped_filename(PVOID64 vmem_address) noexcept
     {
-        if (ProInfo)
+        if (m_process)
         {
-            if (ProInfo->isWow64 && Nt.NtWow64QueryVirtualMemory64)
+            if (m_process->isWow64 && Nt.NtWow64QueryVirtualMemory64)
             {
                 NtPiv::MEMORY_MAPPED_FILE_NAME_INFORMATION<ULONG64> mapFileName{0};
-                if (NT_SUCCESS(Nt.NtWow64QueryVirtualMemory64(ProInfo->hProcess, vmem_address, NtPiv::MemoryMappedFilenameInformation, &mapFileName, sizeof(mapFileName), NULL)))
+                if (NT_SUCCESS(Nt.NtWow64QueryVirtualMemory64(m_process->hProcess, vmem_address, NtPiv::MemoryMappedFilenameInformation, &mapFileName, sizeof(mapFileName), NULL)))
                     return CVolString(mapFileName.Buffer);
             }
             else
             {
                 NtPiv::MEMORY_MAPPED_FILE_NAME_INFORMATION<PWSTR> mapFileName{0};
-                if (NT_SUCCESS(Nt.NtQueryVirtualMemory(ProInfo->hProcess, reinterpret_cast<PVOID>(vmem_address), NtPiv::MemoryMappedFilenameInformation, &mapFileName, sizeof(mapFileName), NULL)))
+                if (NT_SUCCESS(Nt.NtQueryVirtualMemory(m_process->hProcess, reinterpret_cast<PVOID>(vmem_address), NtPiv::MemoryMappedFilenameInformation, &mapFileName, sizeof(mapFileName), NULL)))
                     return CVolString(mapFileName.Buffer);
             }
         }
@@ -711,11 +711,11 @@ public:
      */
     inline CVolString get_image_filename() noexcept
     {
-        if (ProInfo && Nt.loadPsapi())
+        if (m_process && Nt.loadPsapi())
         {
             CVolString ImageFilename;
             ImageFilename.m_mem.Alloc(1026, TRUE);
-            if (Nt.GetProcessImageFileNameW(ProInfo->hProcess, const_cast<wchar_t *>(ImageFilename.GetText()), 512) > 0)
+            if (Nt.GetProcessImageFileNameW(m_process->hProcess, const_cast<wchar_t*>(ImageFilename.GetText()), 512) > 0)
                 return ImageFilename;
         }
         return CWString(L"");
@@ -728,15 +728,15 @@ public:
      * @param is_wait 是否等待
      * @return
      */
-    inline bool create_remote_thread(void *func_ptr, void *parm_ptr, BOOL is_wait) noexcept
+    inline bool create_remote_thread(void* func_ptr, void* parm_ptr, BOOL is_wait) noexcept
     {
-        if (ProInfo)
+        if (m_process)
         {
             HANDLE hThread = NULL;
             if (Nt.NtCreateThreadEx)
-                Nt.NtCreateThreadEx(&hThread, 0x1FFFFF, NULL, ProInfo->hProcess, func_ptr, parm_ptr, 0, 0, 0, 0, NULL);
+                Nt.NtCreateThreadEx(&hThread, 0x1FFFFF, NULL, m_process->hProcess, func_ptr, parm_ptr, 0, 0, 0, 0, NULL);
             else
-                hThread = ::CreateRemoteThread(ProInfo->hProcess, NULL, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(func_ptr),
+                hThread = ::CreateRemoteThread(m_process->hProcess, NULL, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(func_ptr),
                                                parm_ptr, 0, NULL);
             if (hThread != NULL)
             {
@@ -759,13 +759,13 @@ public:
      */
     inline PVOID64 virtual_alloc(PVOID64 address, uint64_t men_size, DWORD allocation_type, DWORD protect) noexcept
     {
-        if (ProInfo)
+        if (m_process)
         {
             NTSTATUS status;
-            if (ProInfo->isWow64 && Nt.NtWow64AllocateVirtualMemory64)
-                status = Nt.NtWow64AllocateVirtualMemory64(ProInfo->hProcess, &address, 0, &men_size, allocation_type, protect);
+            if (m_process->isWow64 && Nt.NtWow64AllocateVirtualMemory64)
+                status = Nt.NtWow64AllocateVirtualMemory64(m_process->hProcess, &address, 0, &men_size, allocation_type, protect);
             else
-                status = Nt.NtAllocateVirtualMemory(ProInfo->hProcess, reinterpret_cast<PVOID *>(&address), 0, reinterpret_cast<PSIZE_T>(&men_size), allocation_type, protect);
+                status = Nt.NtAllocateVirtualMemory(m_process->hProcess, reinterpret_cast<PVOID*>(&address), 0, reinterpret_cast<PSIZE_T>(&men_size), allocation_type, protect);
             if (NT_SUCCESS(status))
                 return address;
         }
@@ -811,10 +811,10 @@ public:
      * @param free_type 释放类型
      * @return 是否成功
      */
-    inline bool virtual_free(void *address, size_t men_size, DWORD free_type) noexcept
+    inline bool virtual_free(void* address, size_t men_size, DWORD free_type) noexcept
     {
-        if (ProInfo)
-            return NT_SUCCESS(Nt.NtFreeVirtualMemory(ProInfo->hProcess, &address, reinterpret_cast<PSIZE_T>(&men_size), free_type));
+        if (m_process)
+            return NT_SUCCESS(Nt.NtFreeVirtualMemory(m_process->hProcess, &address, reinterpret_cast<PSIZE_T>(&men_size), free_type));
         return false;
     }
 
@@ -825,12 +825,12 @@ public:
      * @param new_protect 新的内存保护属性
      * @return 是否成功
      */
-    inline int32_t modify_memory_protect(void *address, size_t mem_size, DWORD new_protect) noexcept
+    inline int32_t modify_memory_protect(void* address, size_t mem_size, DWORD new_protect) noexcept
     {
-        if (ProInfo && !ProInfo->isWow64)
+        if (m_process && !m_process->isWow64)
         {
             ULONG OldProtect;
-            if (NT_SUCCESS(Nt.NtProtectVirtualMemory(ProInfo->hProcess, &address, reinterpret_cast<PSIZE_T>(&mem_size), new_protect, &OldProtect)))
+            if (NT_SUCCESS(Nt.NtProtectVirtualMemory(m_process->hProcess, &address, reinterpret_cast<PSIZE_T>(&mem_size), new_protect, &OldProtect)))
                 return static_cast<int32_t>(OldProtect);
         }
         return -1;
@@ -845,22 +845,22 @@ public:
      * @param max_count 选择返回地址的数量
      * @return 返回找到的内存地址数量
      */
-    int32_t find_signatures(const wchar_t *signatures, CMArray<INT64> &address_array, PVOID64 start_ptr, PVOID64 end_ptr, DWORD protect = 0, DWORD mem_type = 0, ptrdiff_t max_count = PTRDIFF_MAX) noexcept
+    int32_t find_signatures(const wchar_t* signatures, CMArray<INT64>& address_array, PVOID64 start_ptr, PVOID64 end_ptr, DWORD protect = 0, DWORD mem_type = 0, ptrdiff_t max_count = PTRDIFF_MAX) noexcept
     {
         address_array.RemoveAll();
-        if (!ProInfo || enum_modules() == 0)
+        if (!m_process || enum_modules() == 0)
             return 0;
-        // PVOID64 StartAddress = (std::min)((std::max)(reinterpret_cast<PVOID64>(ProInfo->ModulesMap.begin()->first), start_ptr),
-        //                                   reinterpret_cast<PVOID64>(ProInfo->ModulesMap.rbegin()->first));
+        // PVOID64 StartAddress = (std::min)((std::max)(reinterpret_cast<PVOID64>(m_process->ModulesMap.begin()->first), start_ptr),
+        //                                   reinterpret_cast<PVOID64>(m_process->ModulesMap.rbegin()->first));
         PVOID64 StartAddress = start_ptr;
-        PVOID64 EndAddress = (end_ptr == 0) ? reinterpret_cast<PVOID64>(ProInfo->ModulesMap.rbegin()->first) : (std::max)(StartAddress, end_ptr);
+        PVOID64 EndAddress = (end_ptr == 0) ? reinterpret_cast<PVOID64>(m_process->ModulesMap.rbegin()->first) : (std::max)(StartAddress, end_ptr);
         ULONGLONG RegionSize = 0;
         // 特征码转字节数组
         CWString SignatureStr{signatures};
         SignatureStr.Replace(L" ", L"");
         if (SignatureStr.GetLength() % 2 != 0)
             return 0;
-        wchar_t *SignatureCode = const_cast<wchar_t *>(SignatureStr.GetText());
+        wchar_t* SignatureCode = const_cast<wchar_t*>(SignatureStr.GetText());
         size_t SignatureLength = static_cast<size_t>(SignatureStr.GetLength()) / 2;
         std::unique_ptr<WORD[]> BytesetSequence(new WORD[SignatureLength]);
         // 将十六进制特征码转为十进制
@@ -966,9 +966,9 @@ public:
      * @param end_ptr 结束地址
      * @return 返回找到的内存地址
      */
-    inline INT64 find_signatures(const wchar_t *signatures, PVOID64 start_ptr, PVOID64 end_ptr, DWORD protect = 0, DWORD mem_type = 0) noexcept
+    inline INT64 find_signatures(const wchar_t* signatures, PVOID64 start_ptr, PVOID64 end_ptr, DWORD protect = 0, DWORD mem_type = 0) noexcept
     {
-        if (ProInfo)
+        if (m_process)
         {
             CMArray<INT64> address_array;
             if (find_signatures(signatures, address_array, start_ptr, end_ptr, protect, mem_type, 1) > 0)
@@ -986,15 +986,15 @@ public:
      * @param max_count 选择返回地址的数量
      * @return 返回找到的内存地址数量
      */
-    int32_t find_memory(const CVolMem &mem_data, CMArray<INT64> &address_array, PVOID64 start_ptr, PVOID64 end_ptr, DWORD protect = 0, DWORD mem_type = 0, ptrdiff_t max_count = PTRDIFF_MAX) noexcept
+    int32_t find_memory(const CVolMem& mem_data, CMArray<INT64>& address_array, PVOID64 start_ptr, PVOID64 end_ptr, DWORD protect = 0, DWORD mem_type = 0, ptrdiff_t max_count = PTRDIFF_MAX) noexcept
     {
         address_array.RemoveAll();
-        if (!ProInfo || enum_modules() == 0)
+        if (!m_process || enum_modules() == 0)
             return 0;
-        // PVOID64 StartAddress = (std::min)((std::max)(reinterpret_cast<PVOID64>(ProInfo->ModulesMap.begin()->first), start_ptr),
-        //                                   reinterpret_cast<PVOID64>(ProInfo->ModulesMap.rbegin()->first));
+        // PVOID64 StartAddress = (std::min)((std::max)(reinterpret_cast<PVOID64>(m_process->ModulesMap.begin()->first), start_ptr),
+        //                                   reinterpret_cast<PVOID64>(m_process->ModulesMap.rbegin()->first));
         PVOID64 StartAddress = start_ptr;
-        PVOID64 EndAddress = (end_ptr == 0) ? reinterpret_cast<PVOID64>(ProInfo->ModulesMap.rbegin()->first) : (std::max)(StartAddress, end_ptr);
+        PVOID64 EndAddress = (end_ptr == 0) ? reinterpret_cast<PVOID64>(m_process->ModulesMap.rbegin()->first) : (std::max)(StartAddress, end_ptr);
         ULONGLONG RegionSize = 0;
         CVolMem MemoryData;
         MemoryData.Alloc(BLOCKMAXSIZE, TRUE);
@@ -1044,9 +1044,9 @@ public:
      * @param end_ptr 结束地址
      * @return 返回找到的内存地址
      */
-    inline INT64 find_memory(const CVolMem &mem_data, PVOID64 start_ptr, PVOID64 end_ptr, DWORD protect = 0, DWORD mem_type = 0) noexcept
+    inline INT64 find_memory(const CVolMem& mem_data, PVOID64 start_ptr, PVOID64 end_ptr, DWORD protect = 0, DWORD mem_type = 0) noexcept
     {
-        if (ProInfo)
+        if (m_process)
         {
             CMArray<INT64> address_array;
             if (find_memory(mem_data, address_array, start_ptr, end_ptr, protect, mem_type, 1) > 0)
@@ -1062,14 +1062,14 @@ public:
      * @param read_size 所欲读取的长度
      * @return 返回是否成功
      */
-    inline bool read_memory(void *write_address, PVOID64 read_address, uint64_t read_size) noexcept
+    inline bool read_memory(void* write_address, PVOID64 read_address, uint64_t read_size) noexcept
     {
-        if (ProInfo)
+        if (m_process)
         {
-            if (ProInfo->isWow64 && Nt.NtWow64ReadVirtualMemory64)
-                return NT_SUCCESS(Nt.NtWow64ReadVirtualMemory64(ProInfo->hProcess, read_address, write_address, read_size, NULL));
+            if (m_process->isWow64 && Nt.NtWow64ReadVirtualMemory64)
+                return NT_SUCCESS(Nt.NtWow64ReadVirtualMemory64(m_process->hProcess, read_address, write_address, read_size, NULL));
             else
-                return NT_SUCCESS(Nt.NtReadVirtualMemory(ProInfo->hProcess, reinterpret_cast<void *>(read_address), write_address, static_cast<SIZE_T>(read_size), NULL));
+                return NT_SUCCESS(Nt.NtReadVirtualMemory(m_process->hProcess, reinterpret_cast<void*>(read_address), write_address, static_cast<SIZE_T>(read_size), NULL));
         }
         return false;
     }
@@ -1082,7 +1082,7 @@ public:
      */
     inline CVolMem read_memory(PVOID64 read_address, uint64_t read_size) noexcept
     {
-        if (ProInfo)
+        if (m_process)
         {
             CVolMem MemoryData;
             MemoryData.Alloc(static_cast<INT_P>(read_size), TRUE);
@@ -1092,8 +1092,89 @@ public:
         return CVolMem();
     }
 
+    /**
+     * @brief 读内存多字节
+     * @param read_address 所欲读取的地址
+     * @return 返回读取的字节集
+     */
+    inline CVolMem read_memory_char(PVOID64 read_address) noexcept
+    {
+        CVolMem MemoryData;
+        if (m_process)
+        {
+            std::unique_ptr<char[]> buffer{new char[1024]};
+            ULONGLONG RegionSize = 0;
+            if (_query_virtual_memory(read_address, &RegionSize, nullptr, 0, 0))
+            {
+                size_t i = 0;
+                while (RegionSize >= 1024)
+                {
+                    if (read_memory(buffer.get(), PIV_PTR_FORWARD(PVOID64, read_address, 1024 * i), 1024))
+                    {
+                        for (size_t n = 0; n < 1024; n++)
+                        {
+                            if (buffer[n] == '\0')
+                            {
+                                MemoryData.Append(buffer.get(), n);
+                                return MemoryData;
+                            }
+                        }
+                    }
+                    MemoryData.Append(buffer.get(), 1024);
+                    RegionSize -= 1024;
+                    i++;
+                }
+            }
+        }
+        return MemoryData;
+    }
+
+    /**
+     * @brief 读内存文本
+     * @param read_address 所欲读取的地址
+     * @return 返回读取的文本
+     */
+    inline CVolString read_memory_wchar(PVOID64 read_address) noexcept
+    {
+        CVolString MemoryData;
+        if (m_process)
+        {
+            std::unique_ptr<wchar_t[]> buffer{new wchar_t[512]};
+            ULONGLONG RegionSize = 0;
+            if (_query_virtual_memory(read_address, &RegionSize, nullptr, 0, 0))
+            {
+                size_t i = 0;
+                while (RegionSize >= 1024)
+                {
+                    if (read_memory(buffer.get(), PIV_PTR_FORWARD(PVOID64, read_address, 1024 * i), 1024))
+                    {
+                        for (size_t n = 0; n < 512; n++)
+                        {
+                            if (buffer[n] == '\0')
+                            {
+                                MemoryData.AddText(buffer.get(), n);
+                                return MemoryData;
+                            }
+                        }
+                    }
+                    MemoryData.AddText(buffer.get(), 512);
+                    RegionSize -= 1024;
+                    i++;
+                }
+            }
+        }
+        return MemoryData;
+    }
+
+    /**
+     * @brief 读内存值
+     * @tparam T 值类型
+     * @param read_address 所欲读取的地址
+     * @param value 返回所读取的值
+     * @return 是否成功
+     */
     template <typename T>
-    inline BOOL read_memory_num(PVOID64 read_address, T &value) noexcept
+    inline BOOL read_memory_num(PVOID64 read_address, T& value) noexcept
     {
         return read_memory(&value, read_address, sizeof(T));
     }
@@ -1119,17 +1200,17 @@ public:
      * @param data_size 所欲写入的长度
      * @return 是否写入成功
      */
-    inline bool write_memory(PVOID64 write_address, const void *data_address, size_t data_size, BOOL change_protect = TRUE) noexcept
+    inline bool write_memory(PVOID64 write_address, const void* data_address, size_t data_size, BOOL change_protect = TRUE) noexcept
     {
         bool result = false;
-        if (ProInfo)
+        if (m_process)
         {
-            if (ProInfo->isWow64 && Nt.NtWow64WriteVirtualMemory64)
+            if (m_process->isWow64 && Nt.NtWow64WriteVirtualMemory64)
             {
                 DWORD Protect = _query_protect(write_address);
                 if ((Protect & PAGE_READWRITE) == PAGE_READWRITE || (Protect & PAGE_EXECUTE_READWRITE) == PAGE_EXECUTE_READWRITE ||
                     (Protect & PAGE_EXECUTE_WRITECOPY) == PAGE_EXECUTE_WRITECOPY || (Protect & PAGE_WRITECOPY) == PAGE_WRITECOPY)
-                    result = NT_SUCCESS(Nt.NtWow64WriteVirtualMemory64(ProInfo->hProcess, write_address, data_address, data_size, NULL));
+                    result = NT_SUCCESS(Nt.NtWow64WriteVirtualMemory64(m_process->hProcess, write_address, data_address, data_size, NULL));
             }
             else
             {
@@ -1148,14 +1229,14 @@ public:
                     }
                 }
                 if (!change_protect)
-                    return NT_SUCCESS(Nt.NtWriteVirtualMemory(ProInfo->hProcess, reinterpret_cast<PVOID>(write_address), data_address, data_size, NULL));
+                    return NT_SUCCESS(Nt.NtWriteVirtualMemory(m_process->hProcess, reinterpret_cast<PVOID>(write_address), data_address, data_size, NULL));
                 DWORD dwOldProtect = 0;
-                VOID *BaseAddress = reinterpret_cast<VOID *>(write_address);
+                VOID* BaseAddress = reinterpret_cast<VOID*>(write_address);
                 SIZE_T RegionSize = static_cast<SIZE_T>(data_size);
-                if (NT_SUCCESS(Nt.NtProtectVirtualMemory(ProInfo->hProcess, &BaseAddress, &RegionSize, dwNewProtect, &dwOldProtect)))
+                if (NT_SUCCESS(Nt.NtProtectVirtualMemory(m_process->hProcess, &BaseAddress, &RegionSize, dwNewProtect, &dwOldProtect)))
                 {
-                    result = NT_SUCCESS(Nt.NtWriteVirtualMemory(ProInfo->hProcess, reinterpret_cast<PVOID>(write_address), data_address, data_size, NULL));
-                    Nt.NtProtectVirtualMemory(ProInfo->hProcess, &BaseAddress, &RegionSize, dwOldProtect, &dwOldProtect);
+                    result = NT_SUCCESS(Nt.NtWriteVirtualMemory(m_process->hProcess, reinterpret_cast<PVOID>(write_address), data_address, data_size, NULL));
+                    Nt.NtProtectVirtualMemory(m_process->hProcess, &BaseAddress, &RegionSize, dwOldProtect, &dwOldProtect);
                 }
             }
         }
@@ -1168,9 +1249,25 @@ public:
      * @param data 所欲写入的字节集
      * @return 是否写入成功
      */
-    inline bool write_memory(PVOID64 write_address, const CVolMem &data, BOOL change_protect = TRUE) noexcept
+    inline bool write_memory(PVOID64 write_address, const CVolMem& data, BOOL change_protect = TRUE) noexcept
     {
         return write_memory(write_address, data.GetPtr(), static_cast<size_t>(data.GetSize()), change_protect);
+    }
+
+    /**
+     * @brief 写内存文本
+     * @param write_address 所欲写入的地址
+     * @param text 所欲写入的文本
+     * @return 是否写入成功
+     */
+    inline bool write_memory(PVOID64 write_address, const wchar_t* text, BOOL change_protect = TRUE) noexcept
+    {
+        return write_memory(write_address, text, (wcslen(text) + 1) * 2, change_protect);
+    }
+
+    inline bool write_memory(PVOID64 write_address, const char* text, BOOL change_protect = TRUE) noexcept
+    {
+        return write_memory(write_address, text, strlen(text) + 1, change_protect);
     }
 
     /**
@@ -1194,14 +1291,14 @@ public:
      * @param end_off 结束偏移地址
      * @return 返回找到的虚拟内存地址
      */
-    inline INT64 find_module_signatures(ULONG64 hModule, const wchar_t *signatures, size_t start_off, size_t end_off, DWORD protect = 0, DWORD mem_type = 0) noexcept
+    inline INT64 find_module_signatures(ULONG64 hModule, const wchar_t* signatures, size_t start_off, size_t end_off, DWORD protect = 0, DWORD mem_type = 0) noexcept
     {
-        if (ProInfo && enum_modules() > 0)
+        if (m_process && enum_modules() > 0)
         {
             if (hModule == 0)
-                hModule = ProInfo->ImageBaseAddress;
-            auto &it = ProInfo->ModulesMap.find(hModule);
-            if (it != ProInfo->ModulesMap.end() && start_off < it->second.SizeOfImage && end_off < it->second.SizeOfImage)
+                hModule = m_process->ImageBaseAddress;
+            auto& it = m_process->ModulesMap.find(hModule);
+            if (it != m_process->ModulesMap.end() && start_off < it->second.SizeOfImage && end_off < it->second.SizeOfImage)
                 return find_signatures(signatures, PIV_PTR_FORWARD(PVOID64, it->first, start_off),
                                        PIV_PTR_FORWARD(PVOID64, it->first, end_off ? end_off : it->second.SizeOfImage), protect, mem_type);
         }
@@ -1217,14 +1314,14 @@ public:
      * @param end_off 结束偏移地址
      * @return 返回找到的虚拟内存地址数量
      */
-    inline int32_t find_module_signatures(ULONG64 hModule, const wchar_t *signatures, CMArray<INT64> &address_array, size_t start_off, size_t end_off, DWORD protect = 0, DWORD mem_type = 0) noexcept
+    inline int32_t find_module_signatures(ULONG64 hModule, const wchar_t* signatures, CMArray<INT64>& address_array, size_t start_off, size_t end_off, DWORD protect = 0, DWORD mem_type = 0) noexcept
     {
-        if (ProInfo && enum_modules() > 0)
+        if (m_process && enum_modules() > 0)
         {
             if (hModule == 0)
-                hModule = ProInfo->ImageBaseAddress;
-            auto &it = ProInfo->ModulesMap.find(hModule);
-            if (it != ProInfo->ModulesMap.end() && start_off < it->second.SizeOfImage && end_off < it->second.SizeOfImage)
+                hModule = m_process->ImageBaseAddress;
+            auto& it = m_process->ModulesMap.find(hModule);
+            if (it != m_process->ModulesMap.end() && start_off < it->second.SizeOfImage && end_off < it->second.SizeOfImage)
                 return find_signatures(signatures, address_array, PIV_PTR_FORWARD(PVOID64, it->first, start_off),
                                        PIV_PTR_FORWARD(PVOID64, it->first, end_off ? end_off : it->second.SizeOfImage), protect, mem_type);
         }
@@ -1239,12 +1336,12 @@ public:
      * @param end_off 结束偏移地址
      * @return 返回找到的虚拟内存地址
      */
-    inline INT64 find_module_memory(ULONG64 hModule, const CVolMem &mem_data, size_t start_off, size_t end_off, DWORD protect = 0, DWORD mem_type = 0) noexcept
+    inline INT64 find_module_memory(ULONG64 hModule, const CVolMem& mem_data, size_t start_off, size_t end_off, DWORD protect = 0, DWORD mem_type = 0) noexcept
     {
-        if (ProInfo && enum_modules() > 0)
+        if (m_process && enum_modules() > 0)
         {
-            auto &it = ProInfo->ModulesMap.find(hModule);
-            if (it != ProInfo->ModulesMap.end() && start_off < it->second.SizeOfImage && end_off < it->second.SizeOfImage)
+            auto& it = m_process->ModulesMap.find(hModule);
+            if (it != m_process->ModulesMap.end() && start_off < it->second.SizeOfImage && end_off < it->second.SizeOfImage)
                 return find_memory(mem_data, PIV_PTR_FORWARD(PVOID64, it->first, start_off),
                                    PIV_PTR_FORWARD(PVOID64, it->first, end_off ? end_off : it->second.SizeOfImage), protect, mem_type);
         }
@@ -1260,14 +1357,14 @@ public:
      * @param end_off 结束偏移地址
      * @return 返回找到的虚拟内存地址数量
      */
-    inline int32_t find_module_memory(ULONG64 hModule, const CVolMem &mem_data, CMArray<INT64> &address_array, size_t start_off, size_t end_off, DWORD protect = 0, DWORD mem_type = 0) noexcept
+    inline int32_t find_module_memory(ULONG64 hModule, const CVolMem& mem_data, CMArray<INT64>& address_array, size_t start_off, size_t end_off, DWORD protect = 0, DWORD mem_type = 0) noexcept
     {
-        if (ProInfo && enum_modules() > 0)
+        if (m_process && enum_modules() > 0)
         {
             if (hModule == 0)
-                hModule = ProInfo->ImageBaseAddress;
-            auto &it = ProInfo->ModulesMap.find(hModule);
-            if (it != ProInfo->ModulesMap.end() && start_off < it->second.SizeOfImage && end_off < it->second.SizeOfImage)
+                hModule = m_process->ImageBaseAddress;
+            auto& it = m_process->ModulesMap.find(hModule);
+            if (it != m_process->ModulesMap.end() && start_off < it->second.SizeOfImage && end_off < it->second.SizeOfImage)
                 return find_memory(mem_data, address_array, PIV_PTR_FORWARD(PVOID64, it->first, start_off),
                                    PIV_PTR_FORWARD(PVOID64, it->first, end_off ? end_off : it->second.SizeOfImage), protect, mem_type);
         }
@@ -1282,21 +1379,21 @@ public:
      * @param read_size 所欲读取的长度
      * @return 是否读取成功
      */
-    inline bool read_module_memory(ULONG64 hModule, void *write_address, size_t read_off, size_t read_size) noexcept
+    inline bool read_module_memory(ULONG64 hModule, void* write_address, size_t read_off, size_t read_size) noexcept
     {
-        if (ProInfo && enum_modules() > 0)
+        if (m_process && enum_modules() > 0)
         {
             if (hModule == 0)
-                hModule = ProInfo->ImageBaseAddress;
-            auto &it = ProInfo->ModulesMap.find(hModule);
-            if (it != ProInfo->ModulesMap.end() && read_off < it->second.SizeOfImage)
+                hModule = m_process->ImageBaseAddress;
+            auto& it = m_process->ModulesMap.find(hModule);
+            if (it != m_process->ModulesMap.end() && read_off < it->second.SizeOfImage)
                 return read_memory(write_address, PIV_PTR_FORWARD(PVOID64, it->first, read_off), read_size);
         }
         return false;
     }
 
     /**
-     * @brief 读内存字节集
+     * @brief 读模块字节集
      * @param hModule 模块句柄
      * @param read_off 所欲读取的偏移地址
      * @param read_size 所欲读取的长度
@@ -1304,15 +1401,53 @@ public:
      */
     inline CVolMem read_module_memory(ULONG64 hModule, size_t read_off, size_t read_size) noexcept
     {
-        if (ProInfo && enum_modules() > 0)
+        if (m_process && enum_modules() > 0)
         {
             if (hModule == 0)
-                hModule = ProInfo->ImageBaseAddress;
-            auto &it = ProInfo->ModulesMap.find(hModule);
-            if (it != ProInfo->ModulesMap.end() && read_off < it->second.SizeOfImage)
+                hModule = m_process->ImageBaseAddress;
+            auto& it = m_process->ModulesMap.find(hModule);
+            if (it != m_process->ModulesMap.end() && read_off < it->second.SizeOfImage)
                 return read_memory(PIV_PTR_FORWARD(PVOID64, it->first, read_off), read_size);
         }
         return CVolMem();
+    }
+
+    /**
+     * @brief 读模块多字节
+     * @param hModule 模块句柄
+     * @param read_off 所欲读取的偏移地址
+     * @return 是否读取的字节集
+     */
+    inline CVolMem read_module_char(ULONG64 hModule, size_t read_off) noexcept
+    {
+        if (m_process && enum_modules() > 0)
+        {
+            if (hModule == 0)
+                hModule = m_process->ImageBaseAddress;
+            auto& it = m_process->ModulesMap.find(hModule);
+            if (it != m_process->ModulesMap.end() && read_off < it->second.SizeOfImage)
+                return read_memory_char(PIV_PTR_FORWARD(PVOID64, it->first, read_off));
+        }
+        return CVolMem();
+    }
+
+    /**
+     * @brief 读模块文本
+     * @param hModule 模块句柄
+     * @param read_off 所欲读取的偏移地址
+     * @return 是否读取的字节集
+     */
+    inline CVolString read_module_wchar(ULONG64 hModule, size_t read_off) noexcept
+    {
+        if (m_process && enum_modules() > 0)
+        {
+            if (hModule == 0)
+                hModule = m_process->ImageBaseAddress;
+            auto& it = m_process->ModulesMap.find(hModule);
+            if (it != m_process->ModulesMap.end() && read_off < it->second.SizeOfImage)
+                return read_memory_wchar(PIV_PTR_FORWARD(PVOID64, it->first, read_off));
+        }
+        return CVolString();
     }
 
     /**
@@ -1323,14 +1458,14 @@ public:
      * @return 返回读取的值
      */
     template <typename T>
-    inline bool read_module_num(ULONG64 hModule, T &value, size_t read_off) noexcept
+    inline bool read_module_num(ULONG64 hModule, T& value, size_t read_off) noexcept
     {
-        if (ProInfo && enum_modules() > 0)
+        if (m_process && enum_modules() > 0)
         {
             if (hModule == 0)
                 hModule = ImageBaseAddress;
-            auto &it = ProInfo->ModulesMap.find(hModule);
-            if (it != ProInfo->ModulesMap.end() && read_off < it->second.SizeOfImage)
+            auto& it = m_process->ModulesMap.find(hModule);
+            if (it != m_process->ModulesMap.end() && read_off < it->second.SizeOfImage)
                 return read_memory(&value, PIV_PTR_FORWARD(PVOID64, it->first, read_off), sizeof(T));
         }
         return false;
@@ -1347,12 +1482,12 @@ public:
     inline R read_module_value(ULONG64 hModule, size_t read_off) noexcept
     {
         R value;
-        if (ProInfo && enum_modules() > 0)
+        if (m_process && enum_modules() > 0)
         {
             if (hModule == 0)
                 hModule = ImageBaseAddress;
-            auto &it = ProInfo->ModulesMap.find(hModule);
-            if (it != ProInfo->ModulesMap.end() && read_off < it->second.SizeOfImage)
+            auto& it = m_process->ModulesMap.find(hModule);
+            if (it != m_process->ModulesMap.end() && read_off < it->second.SizeOfImage)
                 return read_memory(&value, PIV_PTR_FORWARD(PVOID64, it->first, read_off), sizeof(R));
         }
         return value;
@@ -1366,14 +1501,14 @@ public:
      * @param data_size 所欲写入的长度
      * @return 是否写入成功
      */
-    inline bool write_module_memory(ULONG64 hModule, size_t write_off, const void *data_address, size_t data_size, BOOL change_protect = TRUE) noexcept
+    inline bool write_module_memory(ULONG64 hModule, size_t write_off, const void* data_address, size_t data_size, BOOL change_protect = TRUE) noexcept
     {
-        if (ProInfo && enum_modules() > 0)
+        if (m_process && enum_modules() > 0)
         {
             if (hModule == 0)
-                hModule = ProInfo->ImageBaseAddress;
-            auto &it = ProInfo->ModulesMap.find(hModule);
-            if (it != ProInfo->ModulesMap.end() && write_off < it->second.SizeOfImage)
+                hModule = m_process->ImageBaseAddress;
+            auto& it = m_process->ModulesMap.find(hModule);
+            if (it != m_process->ModulesMap.end() && write_off < it->second.SizeOfImage)
                 return write_memory(PIV_PTR_FORWARD(PVOID64, it->first, write_off), data_address, data_size, change_protect);
         }
         return false;
@@ -1386,15 +1521,48 @@ public:
      * @param data 所欲写入的字节集
      * @return 是否写入成功
      */
-    inline bool write_module_memory(ULONG64 hModule, size_t write_off, const CVolMem &data, BOOL change_protect = TRUE) noexcept
+    inline bool write_module_memory(ULONG64 hModule, size_t write_off, const CVolMem& data, BOOL change_protect = TRUE) noexcept
     {
-        if (ProInfo && enum_modules() > 0)
+        if (m_process && enum_modules() > 0)
         {
             if (hModule == 0)
-                hModule = ProInfo->ImageBaseAddress;
-            auto &it = ProInfo->ModulesMap.find(hModule);
-            if (it != ProInfo->ModulesMap.end() && write_off < it->second.SizeOfImage)
+                hModule = m_process->ImageBaseAddress;
+            auto& it = m_process->ModulesMap.find(hModule);
+            if (it != m_process->ModulesMap.end() && write_off < it->second.SizeOfImage)
                 return write_memory(PIV_PTR_FORWARD(PVOID64, it->first, write_off), data, change_protect);
+        }
+        return false;
+    }
+
+    /**
+     * @brief 写模块文本
+     * @param hModule 模块句柄
+     * @param write_off 所欲写入的偏移地址
+     * @param text 所欲写入的文本
+     * @return 是否写入成功
+     */
+    inline bool write_module_memory(ULONG64 hModule, size_t write_off, const wchar_t* text, BOOL change_protect = TRUE) noexcept
+    {
+        if (m_process && enum_modules() > 0)
+        {
+            if (hModule == 0)
+                hModule = m_process->ImageBaseAddress;
+            auto& it = m_process->ModulesMap.find(hModule);
+            if (it != m_process->ModulesMap.end() && write_off < it->second.SizeOfImage)
+                return write_memory(PIV_PTR_FORWARD(PVOID64, it->first, write_off), text, (wcslen(text) + 1) * 2, change_protect);
+        }
+        return false;
+    }
+
+    inline bool write_module_memory(ULONG64 hModule, size_t write_off, const char* text, BOOL change_protect = TRUE) noexcept
+    {
+        if (m_process && enum_modules() > 0)
+        {
+            if (hModule == 0)
+                hModule = m_process->ImageBaseAddress;
+            auto& it = m_process->ModulesMap.find(hModule);
+            if (it != m_process->ModulesMap.end() && write_off < it->second.SizeOfImage)
+                return write_memory(PIV_PTR_FORWARD(PVOID64, it->first, write_off), text, strlen(text) + 1, change_protect);
         }
         return false;
     }
@@ -1410,12 +1578,12 @@ public:
     template <typename T>
     inline bool write_module_value(ULONG64 hModule, size_t write_off, T value, BOOL change_protect = TRUE) noexcept
     {
-        if (ProInfo && enum_modules() > 0)
+        if (m_process && enum_modules() > 0)
         {
             if (hModule == 0)
-                hModule = ProInfo->ImageBaseAddress;
-            auto &it = ProInfo->ModulesMap.find(hModule);
-            if (it != ProInfo->ModulesMap.end() && write_off < it->second.SizeOfImage)
+                hModule = m_process->ImageBaseAddress;
+            auto& it = m_process->ModulesMap.find(hModule);
+            if (it != m_process->ModulesMap.end() && write_off < it->second.SizeOfImage)
                 return write_memory(PIV_PTR_FORWARD(PVOID64, it->first, write_off), &value, sizeof(T), change_protect);
         }
         return false;

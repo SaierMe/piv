@@ -1,0 +1,81 @@
+doc_format_version = 1
+name = ImGui
+property.settings.active_project_name = Win32窗口
+
+root_filter
+{
+    child_filter
+    {
+        filter1
+        {
+            child_filter
+            {
+                filter1
+                {
+                    build_order = 0
+                    project_file_name = "GLFW窗口\\GLFW窗口.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter2
+                {
+                    build_order = 0
+                    project_file_name = "Win32窗口\\Win32窗口.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter3
+                {
+                    build_order = 0
+                    project_file_name = "SDL2窗口\\SDL2窗口.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter4
+                {
+                    build_order = 0
+                    project_file_name = "SDL3窗口\\SDL3窗口.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter5
+                {
+                    build_order = 0
+                    project_file_name = "WTL窗口\\WTL窗口.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                num_child_filters = 5
+            }
+
+            name = 演示窗口
+        }
+
+        filter2
+        {
+            child_filter
+            {
+                filter1
+                {
+                    build_order = 0
+                    project_file_name = "隐藏主窗口\\隐藏主窗口.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                num_child_filters = 1
+            }
+
+            name = 杂项
+        }
+
+        num_child_filters = 2
+    }
+
+    name = root
+}

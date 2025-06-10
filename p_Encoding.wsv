@@ -67,6 +67,26 @@
         返回 (二进制文本)
     }
 
+    方法 整数到文本 <公开 静态 类型 = 文本型 注释 = "将整数值转换到十进制文本" 折叠 @禁止流程检查 = 真>
+    参数 整数值 <类型 = 长整数 注释 = "所欲转换的数值">
+    参数 保留位数 <类型 = 整数 注释 = "所返回数值文本的最小长度(包括负号,最大值为20)," 注释 = "不足位将在前面补零;" @默认值 = 0>
+    {
+        @ bool negative = @<整数值> < 0;
+        @ @<整数值> = abs(@<整数值>);
+        @ WCHAR buf[21];  buf[20] = '\0';
+        @ WCHAR* str = &buf[20];
+        @ do {
+        @     *(--str) = @<整数值> % 10 + '0';
+        @     @<整数值> /= 10;
+        @ } while (@<整数值>);
+        @ if (@<保留位数> > 0) {
+        @     int count = (@<保留位数> > 20 ? 20 : @<保留位数>) - (&buf[20] - str) - negative;
+        @     while (count) { *(--str) = '0'; count--; }
+        @ }
+        @ if (negative) *(--str) = '-';
+        @ return @an<CVolString>(str);
+    }
+
     方法 验证文本编码 <公开 静态 类型 = 逻辑型 注释 = "验证提供的Unicode文本是否符合指定代码页的文本编码,能判断转换到目标编码后是否会出现乱码."
             注释 = "返回真表示能完整转换到目标编码." 折叠 @禁止流程检查 = 真>
     参数 欲验证的文本 <类型 = 文本型 注释 = "提供所欲验证的UTF-16LE编码文本">
@@ -76,6 +96,28 @@
         @ BOOL UsedDefaultChar = FALSE;
         @ ::WideCharToMultiByte((UINT)@<代码页>, 0, @<欲验证的文本>.GetText(), -1, NULL, 0, NULL, &UsedDefaultChar);
         @ return !UsedDefaultChar;
+    }
+
+    方法 指定编码到文本 <公开 静态 类型 = 文本型 注释 = "将指定编码的文件数据转换为UTF-16LE文本" 折叠 @禁止流程检查 = 真>
+    参数 文本数据 <类型 = 字节集类>
+    参数 文本编码 <类型 = 整数 注释 = "0为系统语言,请参考\"代码页\"中的常量." @默认值 = 0>
+    {
+        @ int utf16len = ::MultiByteToWideChar((UINT)@<文本编码>, 0, (const char*)@<文本数据>.GetPtr(), (int)@<文本数据>.GetSize(), NULL, 0);
+        @ CVolString utf16str;
+        @ utf16str.SetLength(utf16len);
+        @ ::MultiByteToWideChar((UINT)@<文本编码>, 0, (const char*)@<文本数据>.GetPtr(), (int)@<文本数据>.GetSize(), (wchar_t*)utf16str.GetText(), utf16len);
+        @ return utf16str;
+    }
+
+    方法 文本到指定编码 <公开 静态 类型 = 字节集类 注释 = "将UTF-16LE文本转换为指定编码的文件数据" 折叠 @禁止流程检查 = 真>
+    参数 文本数据 <类型 = 文本型>
+    参数 目标编码 <类型 = 整数 注释 = "0为系统语言,请参考\"代码页\"中的常量." @默认值 = 0>
+    {
+        @ int mbslen = ::WideCharToMultiByte((UINT)@<目标编码>, 0, @<文本数据>.GetText(), -1, NULL, 0, NULL, NULL);
+        @ CVolMem mbsstr;
+        @ mbsstr.Alloc(mbslen, TRUE);
+        @ ::WideCharToMultiByte((UINT)@<目标编码>, 0, @<文本数据>.GetText(), -1, (char*)mbsstr.GetPtr(), mbslen, NULL, NULL);
+        @ return mbsstr;
     }
 }
 
@@ -482,6 +524,30 @@
     # }
     # <> </include>
     # @end
+}
+
+类 代码页 <公开 折叠>
+{
+
+    # https://learn.microsoft.com/zh-cn/windows/win32/intl/code-page-identifiers
+    # https://blog.csdn.net/sxzlc/article/details/106203495
+    # https://blog.csdn.net/sxzlc/article/details/106270405
+
+    常量 ANSI <公开 类型 = 整数 值 = 0 注释 = "CP_ACP 系统默认的Windows ANSI代码页">
+    常量 OEM <公开 类型 = 整数 值 = 1 注释 = "CP_OEMCP">
+    常量 Macintosh <公开 类型 = 整数 值 = 2 注释 = "CP_MACCP">
+    常量 线程代码页 <公开 类型 = 整数 值 = 3 注释 = "CP_THREAD_ACP 当前线程的ANSI代码页">
+    常量 符号 <公开 类型 = 整数 值 = 43 注释 = "CP_SYMBOL 符号代码页">
+    常量 UTF7 <公开 类型 = 整数 值 = 65000 注释 = "CP_UTF7 Unicode(UTF-7)">
+    常量 UTF8 <公开 类型 = 整数 值 = 65001 注释 = "CP_UTF8 Unicode(UTF-8)">
+    常量 ""
+    常量 日文 <公开 类型 = 整数 值 = 932 注释 = "日文 Shift-JIS">
+    常量 简体中文 <公开 类型 = 整数 值 = 936 注释 = "简体中文 GBK">
+    常量 韩文 <公开 类型 = 整数 值 = 949>
+    常量 繁体中文 <公开 类型 = 整数 值 = 950 注释 = "繁体中文 Big5">
+    常量 ""
+    常量 GB2312 <公开 类型 = 整数 值 = 20936 注释 = "简体中文 GB2312（仅收录6763个汉字）">
+    常量 GB18030 <公开 类型 = 整数 值 = 54936 注释 = "简体中文 GB18030（单字最大4字节,共收录87887个汉字）">
 }
 
 类 位集合 <公开 注释 = "  位集合(std::bitset)表示一个N位的固定大小序列.可以用逻辑运算符" 注释 = "操作位集合,并将它与文本和整数互相转换."

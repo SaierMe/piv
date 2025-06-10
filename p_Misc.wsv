@@ -113,6 +113,61 @@
 
 # 随机数 ===
 
+类 PIV随机数 <公开 注释 = "简易的无需实例化的std::mt19937伪随机数生成器,线程安全." 折叠 折叠2 @文档 = "category = \"伪随机数\""
+        @视窗.外部头文件 = "<random>" @别名 = "//" @别名类型 = 本地类>
+{
+    方法 重置种子 <公开 静态 注释 = "为随机数引擎重新初始化一个种子值,不同的种子值将导致" 注释 = "后续的取随机数系列方法返回不同的随机数系列值."
+            注释 = "注意: 本类的种子值全程序有效(包括线程)." 折叠 @嵌入式方法 = "">
+    {
+        @ PivRandom::instance().ReSeed()
+    }
+
+    方法 取随机整数 <公开 静态 注释 = "产生在一个范围内均匀分布的型伪随机整数" 返回值注释 = "返回产生的随机数,类型与参数\"最小值\"相同." 折叠 @嵌入式方法 = "">
+    参数 最小值 <注释 = "指定取值范围的最小值,可使用\"数值范围\"中的常量." @匹配类型 = 通用整数型 @返回值类型 = 0>
+    参数 最大值 <注释 = "指定取值范围的最大值,必须大于等于最小值,可使用\"数值范围\"中的常量." @匹配类型 = 匹配前参数值类型>
+    {
+        @ PivRandom::instance().GenInt(@<最小值>, @<最大值>)
+    }
+
+    方法 取随机小数 <公开 静态 类型 = 小数 注释 = "产生在一个范围内均匀分布的伪随机小数" 返回值注释 = "返回产生的随机小数." 折叠 @嵌入式方法 = "">
+    参数 最小值 <类型 = 小数 注释 = "指定取值范围的最小值">
+    参数 最大值 <类型 = 小数 注释 = "指定取值范围的最大值,必须大于等于最小值">
+    {
+        @ PivRandom::instance().GenReal(@<最小值>, @<最大值>)
+    }
+
+    # @begin
+    # <> <global>
+    # <> <include>
+    # class PivRandom
+    # {
+    # private:
+    #     std::random_device rd;
+    #     std::mt19937 gen{rd()};
+    #     PivRandom() {}
+    # public:
+    #     static PivRandom& instance() {
+    #         static PivRandom inst;
+    #         return inst;
+    #     }
+    #     inline void ReSeed() {
+    #         gen.seed(rd());
+    #     }
+    #     template <typename T>
+    #     inline T GenInt(const T min_value, const T max_value) {
+    #         std::uniform_int_distribution<T> dist(min_value, max_value);
+    #         return dist(gen);
+    #     }
+    #     inline double GenReal(double min_value, double max_value) {
+    #         std::uniform_real_distribution<double> dist(min_value, max_value);
+    #         return dist(gen);
+    #     }
+    # };
+    # <> </include>
+    # <> </global>
+    # @end
+}
+
 类 标准随机数模板类 <公开 注释 = "封装了<std::random>的基本操作" 注释 = "请勿直接使用本类" 折叠 @文档 = "category = \"伪随机数\""
         @视窗.外部头文件 = "<random>" @模板基础类 = 真>
 {
@@ -602,7 +657,8 @@
         @ m_szIniFile.Empty(); m_bAutoSave = false;
         @ data().Reset();
         @ INT nRet = 0;
-        @ FILE* fp = _wfopen(@<文件名>.GetText(), IsOSFileExist(@<文件名>.GetText()) ? L"rb" : L"ab+");
+        @ FILE* fp;
+        @ _wfopen_s(&fp, @<文件名>.GetText(), IsOSFileExist(@<文件名>.GetText()) ? L"rb" : L"ab+");
         @ if (!fp) return -3;
         @ fseek(fp, 0, SEEK_END);
         @ int nSize = ftell(fp);

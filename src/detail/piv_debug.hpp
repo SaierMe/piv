@@ -11,7 +11,7 @@
 #define _PIV_DEBUG_TRACE_HPP
 
 #ifndef __VOL_BASE_H__
-#include <sys/base/libs/win_base/vol_base.h>
+    #include <sys/base/libs/win_base/vol_base.h>
 #endif
 
 #include <type_traits>
@@ -43,8 +43,8 @@ static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, T* value)
 */
 
 // 输出指针值
-template <typename T, typename std::enable_if<std::is_pointer<T>::value>::type * = nullptr>
-inline void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, T _ptr)
+template <typename T, typename std::enable_if<std::is_pointer<T>::value>::type* = nullptr>
+inline void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, T _ptr)
 {
     TCHAR buf[64];
     buf[0] = '0';
@@ -54,16 +54,16 @@ inline void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, T _ptr)
 }
 
 template <typename T>
-inline void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, const T *ptr)
+inline void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, const T* ptr)
 {
-    PivDumpStr(strDebug, nMaxDumpSize, const_cast<T *>(ptr));
+    PivDumpStr(strDebug, nMaxDumpSize, const_cast<T*>(ptr));
 }
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(_PIV_DUMP_ENABLE)
 
 // 输出元素信息
 template <typename T>
-T PivDumpElementsInfo(CVolString &strDebug, INT nMaxDumpSize, const TCHAR *strName, const T nCount)
+T PivDumpElementsInfo(CVolString& strDebug, INT nMaxDumpSize, const TCHAR* strName, const T nCount)
 {
     T nDumpedCount = static_cast<T>(nMaxDumpSize <= 0 ? 64 : nMaxDumpSize);
     nDumpedCount = static_cast<T>(nDumpedCount < nCount ? nDumpedCount : nCount);
@@ -75,8 +75,8 @@ T PivDumpElementsInfo(CVolString &strDebug, INT nMaxDumpSize, const TCHAR *strNa
 }
 
 // 基本类型数组
-template <typename T, unsigned N, typename std::enable_if<std::is_fundamental<T>::value>::type * = nullptr>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, T (&_array)[N])
+template <typename T, unsigned N, typename std::enable_if<std::is_fundamental<T>::value>::type* = nullptr>
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, T (&_array)[N])
 {
     strDebug.AddChar('{');
     for (unsigned i = 0; i < N; i++)
@@ -89,8 +89,8 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, T (&_array)[N])
 }
 
 // 指针、对象数组
-template <typename T, unsigned N, typename std::enable_if<std::is_compound<T>::value>::type * = nullptr>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, T (&_array)[N])
+template <typename T, unsigned N, typename std::enable_if<std::is_compound<T>::value>::type* = nullptr>
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, T (&_array)[N])
 {
     unsigned nDumpSize = PivDumpElementsInfo(strDebug, nMaxDumpSize, L"基本数组", N);
     for (unsigned i = 0; i < nDumpSize; i++)
@@ -104,7 +104,7 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, T (&_array)[N])
 
 // 文本型数组
 template <unsigned N>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, CVolString (&_array)[N])
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, CVolString (&_array)[N])
 {
     unsigned nDumpSize = PivDumpElementsInfo(strDebug, nMaxDumpSize, L"文本数组", N);
     for (unsigned i = 0; i < nDumpSize; i++)
@@ -115,17 +115,17 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, CVolString (&_array)[N])
 }
 
 // 类引用转换到类指针
-template <typename T, typename std::enable_if<std::is_class<typename std::decay<T>::type>::value>::type * = nullptr>
-inline void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, T &obj)
+template <typename T, typename std::enable_if<std::is_class<typename std::decay<T>::type>::value>::type* = nullptr>
+inline void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, T& obj)
 {
     if (std::is_base_of<CVolObject, std::remove_reference<T>::type>::value)
-        PivDumpStr(strDebug, nMaxDumpSize, (CVolObject *)&obj);
+        PivDumpStr(strDebug, nMaxDumpSize, (CVolObject*)&obj);
     else
         PivDumpStr(strDebug, nMaxDumpSize, &obj);
 }
 
 // 火山类调用GetDumpString输出
-inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, CVolObject *obj)
+inline static void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, CVolObject* obj)
 {
     if (obj != nullptr)
     {
@@ -139,128 +139,128 @@ inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, CVolObject
     }
 }
 
-inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSiz, const wchar_t *value)
+inline static void PivDumpStr(CVolString& strDebug, INT nMaxDumpSiz, const wchar_t* value)
 {
     strDebug.SetText(value);
 }
 
-inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSiz, wchar_t *value)
+inline static void PivDumpStr(CVolString& strDebug, INT nMaxDumpSiz, wchar_t* value)
 {
     strDebug.SetText(value);
 }
 
-inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSiz, const char *value)
+inline static void PivDumpStr(CVolString& strDebug, INT nMaxDumpSiz, const char* value)
 {
-#ifdef _PIV_ENCODING_HPP
-    strDebug.SetText(PivAny2W{value}.c_str());
-#else
+    #ifdef _PIV_ENCODING_HPP
+    strDebug.SetText(PivAny2W<false>{value}.c_str());
+    #else
     strDebug.SetText(value);
-#endif
+    #endif
 }
 
-inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSiz, char *value)
+inline static void PivDumpStr(CVolString& strDebug, INT nMaxDumpSiz, char* value)
 {
-#ifdef _PIV_ENCODING_HPP
-    strDebug.SetText(PivAny2W{value}.c_str());
-#else
+    #ifdef _PIV_ENCODING_HPP
+    strDebug.SetText(PivAny2W<false>{value}.c_str());
+    #else
     strDebug.SetText(value);
-#endif
+    #endif
 }
 
-inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSiz, wchar_t value)
+inline static void PivDumpStr(CVolString& strDebug, INT nMaxDumpSiz, wchar_t value)
 {
     strDebug.AddChar(value);
 }
 
-inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSiz, char value)
+inline static void PivDumpStr(CVolString& strDebug, INT nMaxDumpSiz, char value)
 {
     strDebug.AddChar(value);
 }
 
-inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSiz, bool value)
+inline static void PivDumpStr(CVolString& strDebug, INT nMaxDumpSiz, bool value)
 {
     strDebug.AddText(value ? L"true" : L"false");
 }
 
-inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSiz, signed char value)
+inline static void PivDumpStr(CVolString& strDebug, INT nMaxDumpSiz, signed char value)
 {
     strDebug.AddIntText(value);
 }
 
-inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSiz, unsigned char value)
+inline static void PivDumpStr(CVolString& strDebug, INT nMaxDumpSiz, unsigned char value)
 {
     strDebug.AddIntText(value);
 }
 
-inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSiz, short value)
+inline static void PivDumpStr(CVolString& strDebug, INT nMaxDumpSiz, short value)
 {
     strDebug.AddIntText(value);
 }
 
-inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSiz, unsigned short value)
+inline static void PivDumpStr(CVolString& strDebug, INT nMaxDumpSiz, unsigned short value)
 {
     strDebug.AddIntText(value);
 }
 
-inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSiz, int value)
+inline static void PivDumpStr(CVolString& strDebug, INT nMaxDumpSiz, int value)
 {
     strDebug.AddIntText(value);
 }
 
-inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSiz, unsigned int value)
+inline static void PivDumpStr(CVolString& strDebug, INT nMaxDumpSiz, unsigned int value)
 {
     strDebug.AddDWordText(value);
 }
 
-inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSiz, long value)
+inline static void PivDumpStr(CVolString& strDebug, INT nMaxDumpSiz, long value)
 {
     strDebug.AddIntText((int)value);
 }
 
-inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSiz, unsigned long value)
+inline static void PivDumpStr(CVolString& strDebug, INT nMaxDumpSiz, unsigned long value)
 {
     strDebug.AddDWordText(value);
 }
 
-inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSiz, long long value)
+inline static void PivDumpStr(CVolString& strDebug, INT nMaxDumpSiz, long long value)
 {
     strDebug.AddInt64Text(value);
 }
 
-inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSiz, unsigned long long value)
+inline static void PivDumpStr(CVolString& strDebug, INT nMaxDumpSiz, unsigned long long value)
 {
     strDebug.AddUInt64Text(value);
 }
 
-inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSiz, float value)
+inline static void PivDumpStr(CVolString& strDebug, INT nMaxDumpSiz, float value)
 {
     strDebug.AddFloatText(value);
 }
 
-inline static void PivDumpStr(CVolString &strDebug, INT nMaxDumpSiz, double value)
+inline static void PivDumpStr(CVolString& strDebug, INT nMaxDumpSiz, double value)
 {
     strDebug.AddDoubleText(value);
 }
 
-#include <string>
+    #include <string>
 template <class CharT, class Traits = std::char_traits<CharT>, class Allocator = std::allocator<CharT>>
-inline void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::basic_string<CharT, Traits, Allocator> *str)
+inline void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::basic_string<CharT, Traits, Allocator>* str)
 {
     if (str != nullptr)
     {
-#ifdef _PIV_ENCODING_HPP
-        strDebug.SetText(PivAny2W{*str}.c_str());
-#else
+    #ifdef _PIV_ENCODING_HPP
+        strDebug.SetText(PivAny2W<false>{*str}.c_str());
+    #else
         strDebug.SetText(str->c_str());
-#endif
+    #endif
     }
     else
         strDebug.SetText(L"std::basic_string: nullptr");
 }
 
-#include <vector>
+    #include <vector>
 template <class T, class Allocator = std::allocator<T>>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::vector<T, Allocator> *_array)
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::vector<T, Allocator>* _array)
 {
     if (_array != nullptr)
     {
@@ -276,9 +276,9 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::vector<T, Allocator
         strDebug.SetText(L"std::vector: nullptr");
 }
 
-#include <array>
+    #include <array>
 template <class T, std::size_t N>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::array<T, N> *_array)
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::array<T, N>* _array)
 {
     if (_array != nullptr)
     {
@@ -294,11 +294,11 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::array<T, N> *_array
         strDebug.SetText(L"std::array: nullptr");
 }
 
-#include <valarray>
+    #include <valarray>
 template <class T>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::valarray<T> *_array)
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::valarray<T>* _array)
 {
-    if (value == nullptr)
+    if (_array == nullptr)
     {
         strDebug.SetText(L"std::valarray: nullptr");
     }
@@ -314,9 +314,9 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::valarray<T> *_array
     }
 }
 
-#include <utility>
+    #include <utility>
 template <class T1, class T2>
-inline void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::pair<T1, T2> *_pair)
+inline void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::pair<T1, T2>* _pair)
 {
     if (_pair != nullptr)
     {
@@ -329,15 +329,15 @@ inline void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::pair<T1, T2>
         strDebug.SetText(L"std::pair: nullptr");
 }
 
-#include <map>
+    #include <map>
 template <class Key, class T, class Compare = std::less<Key>, class Allocator = std::allocator<std::pair<const Key, T>>>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::map<Key, T, Compare, Allocator> *_map)
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::map<Key, T, Compare, Allocator>* _map)
 {
     if (_map != nullptr)
     {
         strDebug.AddFormatText(L"<排序表/map> 总共 %d 个成员:", _map->size());
         int32_t i = 0;
-        for (auto &it = _map->begin(); it != _map->end(); it++, i++)
+        for (auto& it = _map->begin(); it != _map->end(); it++, i++)
         {
             CVolString keyBuf, valBuf;
             PivDumpStr(keyBuf, nMaxDumpSize, it->first);
@@ -350,13 +350,13 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::map<Key, T, Compare
 }
 
 template <class Key, class T, class Compare = std::less<Key>, class Allocator = std::allocator<std::pair<const Key, T>>>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::multimap<Key, T, Compare, Allocator> *_map)
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::multimap<Key, T, Compare, Allocator>* _map)
 {
     if (_map != nullptr)
     {
         strDebug.AddFormatText(L"<多值排序表/multimap> 总共 %d 个成员:", _map->size());
         int32_t i = 0;
-        for (auto &it = _map->begin(); it != _map->end(); it++, i++)
+        for (auto& it = _map->begin(); it != _map->end(); it++, i++)
         {
             CVolString keyBuf, valBuf;
             PivDumpStr(keyBuf, nMaxDumpSize, it->first);
@@ -368,9 +368,9 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::multimap<Key, T, Co
         strDebug.SetText(L"std::multimap: nullptr");
 }
 
-#include <set>
+    #include <set>
 template <class Key, class Compare = std::less<Key>, class Allocator = std::allocator<Key>>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::set<Key, Compare, Allocator> *_set)
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::set<Key, Compare, Allocator>* _set)
 {
     if (_set != nullptr)
     {
@@ -388,7 +388,7 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::set<Key, Compare, A
 }
 
 template <class Key, class Compare = std::less<Key>, class Allocator = std::allocator<Key>>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::multiset<Key, Compare, Allocator> *_set)
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::multiset<Key, Compare, Allocator>* _set)
 {
     if (_set != nullptr)
     {
@@ -405,15 +405,15 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::multiset<Key, Compa
         strDebug.SetText(L"std::multiset: nullptr");
 }
 
-#include <unordered_map>
+    #include <unordered_map>
 template <class Key, class T, class Hash = std::hash<Key>, class KeyEqual = std::equal_to<Key>, class Allocator = std::allocator<std::pair<const Key, T>>>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::unordered_map<Key, T, Hash, KeyEqual, Allocator> *_map)
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::unordered_map<Key, T, Hash, KeyEqual, Allocator>* _map)
 {
     if (_map != nullptr)
     {
         strDebug.AddFormatText(L"<哈希表/unordered_map> 总共 %d 个成员:", _map->size());
         int32_t i = 0;
-        for (auto &it = _map->begin(); it != _map->end(); it++, i++)
+        for (auto& it = _map->begin(); it != _map->end(); it++, i++)
         {
             CVolString keyBuf, valBuf;
             PivDumpStr(keyBuf, nMaxDumpSize, it->first);
@@ -426,13 +426,13 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::unordered_map<Key, 
 }
 
 template <class Key, class T, class Hash = std::hash<Key>, class KeyEqual = std::equal_to<Key>, class Allocator = std::allocator<std::pair<const Key, T>>>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::unordered_multimap<Key, T, Hash, KeyEqual, Allocator> *_map)
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::unordered_multimap<Key, T, Hash, KeyEqual, Allocator>* _map)
 {
     if (_map != nullptr)
     {
         strDebug.AddFormatText(L"<多值哈希表/unordered_multimap> 总共 %d 个成员:", _map->size());
         int32_t i = 0;
-        for (auto &it = _map->begin(); it != _map->end(); it++, i++)
+        for (auto& it = _map->begin(); it != _map->end(); it++, i++)
         {
             CVolString keyBuf, valBuf;
             PivDumpStr(keyBuf, nMaxDumpSize, it->first);
@@ -444,9 +444,9 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::unordered_multimap<
         strDebug.SetText(L"std::unordered_multimap: nullptr");
 }
 
-#include <unordered_set>
+    #include <unordered_set>
 template <class Key, class Hash = std::hash<Key>, class KeyEqual = std::equal_to<Key>, class Allocator = std::allocator<Key>>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::unordered_set<Key, Hash, KeyEqual, Allocator> *_set)
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::unordered_set<Key, Hash, KeyEqual, Allocator>* _set)
 {
     if (_set != nullptr)
     {
@@ -464,7 +464,7 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::unordered_set<Key, 
 }
 
 template <class Key, class Hash = std::hash<Key>, class KeyEqual = std::equal_to<Key>, class Allocator = std::allocator<Key>>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::unordered_multiset<Key, Hash, KeyEqual, Allocator> *_set)
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::unordered_multiset<Key, Hash, KeyEqual, Allocator>* _set)
 {
     if (_set != nullptr)
     {
@@ -481,9 +481,9 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::unordered_multiset<
         strDebug.SetText(L"std::unordered_multiset: nullptr");
 }
 
-#include <queue>
+    #include <queue>
 template <class T, class Container = std::deque<T>>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::queue<T, Container> *_queue)
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::queue<T, Container>* _queue)
 {
     if (_queue != nullptr)
     {
@@ -503,7 +503,7 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::queue<T, Container>
 }
 
 template <class T, class Container = std::vector<T>, class Compare = std::less<typename Container::value_type>>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::priority_queue<T, Container, Compare> *_queue)
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::priority_queue<T, Container, Compare>* _queue)
 {
     if (_queue == nullptr)
     {
@@ -523,9 +523,9 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::priority_queue<T, C
     }
 }
 
-#include <deque>
+    #include <deque>
 template <class T, class Allocator = std::allocator<T>>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::deque<T, Allocator> *_queue)
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::deque<T, Allocator>* _queue)
 {
     if (_queue != nullptr)
     {
@@ -542,9 +542,9 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::deque<T, Allocator>
         strDebug.SetText(L"std::deque: nullptr");
 }
 
-#include <list>
+    #include <list>
 template <class T, class Allocator = std::allocator<T>>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::list<T, Allocator> *_list)
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::list<T, Allocator>* _list)
 {
     if (_list != nullptr)
     {
@@ -561,9 +561,9 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::list<T, Allocator> 
         strDebug.SetText(L"std::list: nullptr");
 }
 
-#include <forward_list>
+    #include <forward_list>
 template <class T, class Allocator = std::allocator<T>>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::forward_list<T, Allocator> *_list)
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::forward_list<T, Allocator>* _list)
 {
     if (_list != nullptr)
     {
@@ -580,9 +580,9 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::forward_list<T, All
         strDebug.SetText(L"std::forward_list: nullptr");
 }
 
-#include <stack>
+    #include <stack>
 template <class T, class Container = std::deque<T>>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::stack<T, Container> *_stack)
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::stack<T, Container>* _stack)
 {
     if (_stack != nullptr)
     {
@@ -601,9 +601,9 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::stack<T, Container>
         strDebug.SetText(L"std::stack: nullptr");
 }
 
-#include <bitset>
+    #include <bitset>
 template <std::size_t N>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::bitset<N> *_bitset)
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::bitset<N>* _bitset)
 {
     if (_bitset != nullptr)
         PivDumpStr(strDebug, nMaxDumpSize, _bitset->to_string<wchar_t>().c_str());
@@ -611,9 +611,9 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::bitset<N> *_bitset)
         strDebug.SetText(L"std::bitset: nullptr");
 }
 
-#include <memory>
+    #include <memory>
 template <class T, class Deleter = std::default_delete<T>>
-inline void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::unique_ptr<T, Deleter> *_ptr)
+inline void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::unique_ptr<T, Deleter>* _ptr)
 {
     if (_ptr != nullptr && _ptr->get() != nullptr)
         PivDumpStr(strDebug, nMaxDumpSize, _ptr->get());
@@ -622,7 +622,7 @@ inline void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::unique_ptr<T
 }
 
 template <class T, class Deleter = std::default_delete<T>>
-inline void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::unique_ptr<T[], Deleter> *_ptr)
+inline void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::unique_ptr<T[], Deleter>* _ptr)
 {
     if (_ptr != nullptr && _ptr->get() != nullptr)
         PivDumpStr(strDebug, nMaxDumpSize, _ptr->get());
@@ -631,7 +631,7 @@ inline void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::unique_ptr<T
 }
 
 template <class T>
-inline void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::shared_ptr<T> *_ptr)
+inline void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::shared_ptr<T>* _ptr)
 {
     if (_ptr != nullptr && _ptr->get() != nullptr)
         PivDumpStr(strDebug, nMaxDumpSize, _ptr->get());
@@ -640,7 +640,7 @@ inline void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::shared_ptr<T
 }
 
 template <class T>
-inline void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::weak_ptr<T> *_ptr)
+inline void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::weak_ptr<T>* _ptr)
 {
     if (_ptr != nullptr && !_ptr->expired())
         PivDumpStr(strDebug, nMaxDumpSize, _ptr->lock().get());
@@ -648,9 +648,9 @@ inline void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::weak_ptr<T> 
         strDebug.SetText(L"nullptr");
 }
 
-#include <tuple>
+    #include <tuple>
 template <typename... T>
-inline void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::tuple<T...> *value)
+inline void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::tuple<T...>* value)
 {
     if (value == nullptr)
         strDebug.SetText(L"std::tuple: nullptr");
@@ -658,26 +658,26 @@ inline void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::tuple<T...> 
         strDebug.AddFormatText(L"<元组(tuple)> 总共 %d 个成员.", std::tuple_size<decltype(*value)>::value);
 }
 
-#if defined(_MSVC_LANG) && (_MSVC_LANG >= 201703L) // C++17
-#include <string_view>
+    #if defined(_MSVC_LANG) && (_MSVC_LANG >= 201703L) // C++17
+        #include <string_view>
 template <class CharT, class Traits = std::char_traits<CharT>>
-inline void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::basic_string_view<CharT, Traits> *sv)
+inline void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::basic_string_view<CharT, Traits>* sv)
 {
     if (sv != nullptr)
     {
-#ifdef _PIV_ENCODING_HPP
-        strDebug.SetText(PivAny2W{*sv}.c_str());
-#else
+        #ifdef _PIV_ENCODING_HPP
+        strDebug.SetText(PivAny2W<false>{*sv}.c_str());
+        #else
         strDebug.SetText(sv->data(), sv->size());
-#endif
+        #endif
     }
     else
         strDebug.SetText(L"std::basic_string_view: nullptr");
 }
 
-#include <variant>
+        #include <variant>
 template <typename... T>
-void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::variant<T...> *value)
+void PivDumpStr(CVolString& strDebug, INT nMaxDumpSize, std::variant<T...>* value)
 {
     if (value == nullptr)
     {
@@ -686,7 +686,7 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::variant<T...> *valu
     else
     {
         strDebug.AddFormatText(L"<变体(variant)> 当前类型: %d", value->index());
-        std::visit([&strDebug, nMaxDumpSize](auto &&arg)
+        std::visit([&strDebug, nMaxDumpSize](auto&& arg)
                    {
             CVolString strBuf;
             PivDumpStr(strBuf, nMaxDumpSize, arg);
@@ -694,9 +694,9 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::variant<T...> *valu
     }
 }
 
-#endif // C++17
+    #endif // C++17
 
-#endif // _DEBUG
+#endif // _DEBUG && _PIV_DUMP_ENABLE
 
 /**
  * @brief 取调试文本
@@ -707,7 +707,7 @@ void PivDumpStr(CVolString &strDebug, INT nMaxDumpSize, std::variant<T...> *valu
  * @return 文本指针
  */
 template <class T>
-inline const wchar_t *PivGetDumpStr(T &&value, int npNumLeaderSpaces = 0, CVolString &strDebug = CVolString{})
+inline const wchar_t* PivGetDumpStr(T&& value, int npNumLeaderSpaces = 0, CVolString& strDebug = CVolString{})
 {
     PivDumpStr(strDebug, 0, std::forward<T>(value));
     if (npNumLeaderSpaces > 0)
@@ -716,7 +716,7 @@ inline const wchar_t *PivGetDumpStr(T &&value, int npNumLeaderSpaces = 0, CVolSt
 }
 
 template <typename T, unsigned N> // 基本数组专用
-inline const wchar_t *PivGetDumpStr(T (&_array)[N], int npNumLeaderSpaces = 0, CVolString &strDebug = CVolString{})
+inline const wchar_t* PivGetDumpStr(T (&_array)[N], int npNumLeaderSpaces = 0, CVolString& strDebug = CVolString{})
 {
     PivDumpStr(strDebug, 0, _array);
     if (npNumLeaderSpaces > 0)
@@ -738,14 +738,14 @@ inline const wchar_t *PivGetDumpStr(T (&_array)[N], int npNumLeaderSpaces = 0, C
  * @return
  */
 template <typename = void>
-inline const TCHAR *PivAddDebugDumpString(const BOOL blpStringFormatText, const INT nMaxDumpSize, INT_P npParamTypeIndex, const TCHAR *szParamTypes, CVolString &strDebug)
+inline const TCHAR* PivAddDebugDumpString(const BOOL blpStringFormatText, const INT nMaxDumpSize, INT_P npParamTypeIndex, const TCHAR* szParamTypes, CVolString& strDebug)
 {
     return strDebug.GetText();
 }
 
 // 指针
-template <typename T, typename std::enable_if<std::is_pointer<T>::value>::type * = nullptr>
-const TCHAR *PivAddDebugDumpString(const BOOL blpStringFormatText, const INT nMaxDumpSize, INT_P npParamTypeIndex, const TCHAR *szParamTypes, CVolString &strDebug, T value)
+template <typename T, typename std::enable_if<std::is_pointer<T>::value>::type* = nullptr>
+const TCHAR* PivAddDebugDumpString(const BOOL blpStringFormatText, const INT nMaxDumpSize, INT_P npParamTypeIndex, const TCHAR* szParamTypes, CVolString& strDebug, T value)
 {
     if (value == nullptr)
     {
@@ -761,16 +761,16 @@ const TCHAR *PivAddDebugDumpString(const BOOL blpStringFormatText, const INT nMa
             if (blpStringFormatText)
             {
                 CVolString str;
-                strDebug.AddText(MakeStringFromPlainText((const TCHAR *)value, &str, TRUE));
+                strDebug.AddText(MakeStringFromPlainText((const TCHAR*)value, &str, TRUE));
             }
             else
-                strDebug.AddText((const TCHAR *)value);
+                strDebug.AddText((const TCHAR*)value);
             break;
         }
         case _C_VOL_CLASS:
         {
             CVolString strBuf;
-            ((CVolObject *)value)->GetDumpString(strBuf, nMaxDumpSize);
+            ((CVolObject*)value)->GetDumpString(strBuf, nMaxDumpSize);
             strDebug.AddText(strBuf);
             break;
         }
@@ -791,7 +791,7 @@ const TCHAR *PivAddDebugDumpString(const BOOL blpStringFormatText, const INT nMa
 
 // 基本数组
 template <typename T, unsigned N>
-const TCHAR *PivAddDebugDumpString(const BOOL blpStringFormatText, const INT nMaxDumpSize, INT_P npParamTypeIndex, const TCHAR *szParamTypes, CVolString &strDebug, T (&_array)[N])
+const TCHAR* PivAddDebugDumpString(const BOOL blpStringFormatText, const INT nMaxDumpSize, INT_P npParamTypeIndex, const TCHAR* szParamTypes, CVolString& strDebug, T (&_array)[N])
 {
     CVolString strBuf;
     PivDumpStr(strBuf, nMaxDumpSize, _array);
@@ -800,8 +800,8 @@ const TCHAR *PivAddDebugDumpString(const BOOL blpStringFormatText, const INT nMa
 }
 
 // 整数和浮点数
-template <typename T, typename std::enable_if<std::is_arithmetic<T>::value>::type * = nullptr>
-const TCHAR *PivAddDebugDumpString(const BOOL blpStringFormatText, const INT nMaxDumpSize, INT_P npParamTypeIndex, const TCHAR *szParamTypes, CVolString &strDebug, T value)
+template <typename T, typename std::enable_if<std::is_arithmetic<T>::value>::type* = nullptr>
+const TCHAR* PivAddDebugDumpString(const BOOL blpStringFormatText, const INT nMaxDumpSize, INT_P npParamTypeIndex, const TCHAR* szParamTypes, CVolString& strDebug, T value)
 {
     if (szParamTypes != nullptr && szParamTypes[npParamTypeIndex] == _C_VOL_BOOL)
     {
@@ -817,12 +817,12 @@ const TCHAR *PivAddDebugDumpString(const BOOL blpStringFormatText, const INT nMa
 }
 
 // 类和结构体
-template <typename T, typename std::enable_if<std::is_class<typename std::decay<T>::type>::value>::type * = nullptr>
-const TCHAR *PivAddDebugDumpString(const BOOL blpStringFormatText, const INT nMaxDumpSize, INT_P npParamTypeIndex, const TCHAR *szParamTypes, CVolString &strDebug, T &&value)
+template <typename T, typename std::enable_if<std::is_class<typename std::decay<T>::type>::value>::type* = nullptr>
+const TCHAR* PivAddDebugDumpString(const BOOL blpStringFormatText, const INT nMaxDumpSize, INT_P npParamTypeIndex, const TCHAR* szParamTypes, CVolString& strDebug, T&& value)
 {
     CVolString strBuf;
     if (std::is_base_of<CVolObject, std::remove_reference<T>::type>::value)
-        PivDumpStr(strBuf, nMaxDumpSize, (CVolObject *)&value);
+        PivDumpStr(strBuf, nMaxDumpSize, (CVolObject*)&value);
     else
         PivDumpStr(strBuf, nMaxDumpSize, &value);
     strDebug.AddText(strBuf);
@@ -830,15 +830,15 @@ const TCHAR *PivAddDebugDumpString(const BOOL blpStringFormatText, const INT nMa
 }
 
 // 枚举
-template <typename T, typename std::enable_if<std::is_enum<T>::value>::type * = nullptr>
-const TCHAR *PivAddDebugDumpString(const BOOL blpStringFormatText, const INT nMaxDumpSize, INT_P npParamTypeIndex, const TCHAR *szParamTypes, CVolString &strDebug, T value)
+template <typename T, typename std::enable_if<std::is_enum<T>::value>::type* = nullptr>
+const TCHAR* PivAddDebugDumpString(const BOOL blpStringFormatText, const INT nMaxDumpSize, INT_P npParamTypeIndex, const TCHAR* szParamTypes, CVolString& strDebug, T value)
 {
     strDebug.AddIntText((int)value);
     return strDebug.GetText();
 }
 
 template <typename T, typename... Args>
-const TCHAR *PivAddDebugDumpString(const BOOL blpStringFormatText, const INT nMaxDumpSize, INT_P npParamTypeIndex, const TCHAR *szParamTypes, CVolString &strDebug, T &&value, Args &&...args)
+const TCHAR* PivAddDebugDumpString(const BOOL blpStringFormatText, const INT nMaxDumpSize, INT_P npParamTypeIndex, const TCHAR* szParamTypes, CVolString& strDebug, T&& value, Args&&... args)
 {
     PivAddDebugDumpString(blpStringFormatText, nMaxDumpSize, npParamTypeIndex, szParamTypes, strDebug, std::forward<T>(value));
     strDebug.AddText(_T (", "));
@@ -857,7 +857,7 @@ const TCHAR *PivAddDebugDumpString(const BOOL blpStringFormatText, const INT nMa
  * @return
  */
 template <typename... Args>
-CVolString &PivGetDebugDumpString(const BOOL blpStringFormatText, const INT nMaxDumpSize, INT_P npParamTypeIndex, const TCHAR *szParamTypes, CVolString *pstrDebug, Args &&...args)
+CVolString& PivGetDebugDumpString(const BOOL blpStringFormatText, const INT nMaxDumpSize, INT_P npParamTypeIndex, const TCHAR* szParamTypes, CVolString* pstrDebug, Args&&... args)
 {
     ASSERT(pstrDebug != NULL);
     pstrDebug->Empty();
@@ -877,7 +877,7 @@ CVolString &PivGetDebugDumpString(const BOOL blpStringFormatText, const INT nMax
  * @param ...args 欲输出数据(可变参数)
  */
 template <typename... Args>
-void PivDebugTrace(const BOOL blpStringFormatText, const INT nMaxDumpSize, const INT_P npFirstExtendParamTypeIndex, const TCHAR *szParamTypes, Args &&...args)
+void PivDebugTrace(const BOOL blpStringFormatText, const INT nMaxDumpSize, const INT_P npFirstExtendParamTypeIndex, const TCHAR* szParamTypes, Args&&... args)
 {
 #ifdef _DEBUG
     CVolString strDebug(_T_VOL_DEBUG_OUT_STRING_LEADER);
@@ -906,8 +906,8 @@ void PivDebugTrace(const BOOL blpStringFormatText, const INT nMaxDumpSize, const
  * @param ...args 欲输出数据(可变参数)
  */
 template <typename... Args>
-void PivDebugTraceWithSourcePos(const TCHAR *szSourceFileName, const TCHAR *szLineNumber, const BOOL blpStringFormatText,
-                                const INT nMaxDumpSize, const INT_P npFirstExtendParamTypeIndex, const TCHAR *szParamTypes, Args &&...args)
+void PivDebugTraceWithSourcePos(const TCHAR* szSourceFileName, const TCHAR* szLineNumber, const BOOL blpStringFormatText,
+                                const INT nMaxDumpSize, const INT_P npFirstExtendParamTypeIndex, const TCHAR* szParamTypes, Args&&... args)
 {
 #ifdef _DEBUG
     CVolString strDebug(_T_VOL_DEBUG_OUT_STRING_LEADER);
@@ -919,9 +919,9 @@ void PivDebugTraceWithSourcePos(const TCHAR *szSourceFileName, const TCHAR *szLi
     }
     PivAddDebugDumpString(blpStringFormatText, nMaxDumpSize, 0, szParamTypes, strDebug, std::forward<Args>(args)...);
     if (strDebug.GetLength() > 0x3FFF)
-        DEBUG_PRINT(strDebug.Left(0x3FFF).GetText());
+        OutputDebugStringW(strDebug.Left(0x3FFF).GetText());
     else
-        DEBUG_PRINT(strDebug.GetText());
+        OutputDebugStringW(strDebug.GetText());
 #endif
 }
 
@@ -931,19 +931,19 @@ void PivDebugTraceWithSourcePos(const TCHAR *szSourceFileName, const TCHAR *szLi
  * @param ...args 欲输出数据(可变参数)
  */
 template <typename... Args>
-void PivDebug(Args &&...args)
+void PivDebug(Args&&... args)
 {
 #ifdef _DEBUG
     CVolString strDebug(_T_VOL_DEBUG_OUT_STRING_LEADER);
     PivAddDebugDumpString(FALSE, 0, 0, nullptr, strDebug, std::forward<Args>(args)...);
     if (strDebug.GetLength() > 0x3FFF)
     {
-        DEBUG_PRINT(strDebug.Left(0x3FFF).GetText());
+        OutputDebugStringW(strDebug.Left(0x3FFF).GetText());
     }
     else
     {
         strDebug.AddText(_T ("\r\n"));
-        DEBUG_PRINT(strDebug.GetText());
+        OutputDebugStringW(strDebug.GetText());
     }
 #endif
 }

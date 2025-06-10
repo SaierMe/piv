@@ -33,20 +33,25 @@
         @ // 设置算法属性
         @ Status = ::BCryptSetProperty((BCRYPT_HANDLE)phAlgorithm, L"ChainingMode",
         @                              (PUCHAR)@<密码链接模式>.GetText(), (ULONG)@<密码链接模式>.GetLength() * 2 + 2, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
+        @ if (!BCRYPT_SUCCESS(Status))
+        @ {
         @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @     return CVolMem();
         @ }
-        @ if (@<算法类型> == @<CNG_算法类型.对称加密_RC2>) { // RC2 设置密码位数
+        @ if (@<算法类型> == @<CNG_算法类型.对称加密_RC2>) // RC2 设置密码位数
+        @ {
         @     Status = ::BCryptSetProperty((BCRYPT_HANDLE)phAlgorithm, L"EffectiveKeyLength", (PUCHAR)&@<密钥位>, 4, 0);
-        @     if (!BCRYPT_SUCCESS(Status)) {
+        @     if (!BCRYPT_SUCCESS(Status))
+        @     {
         @         ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @         return CVolMem();
         @     }
         @ }
-        @ if (@<密码链接模式> == @<CNG_链接模式.CFB>) { // CFB 模式时设置位数(只支持8位和128位,1/8)
+        @ if (@<密码链接模式> == @<CNG_链接模式.CFB>) // CFB 模式时设置位数(只支持8位和128位,1/8)
+        @ {
         @     Status = ::BCryptSetProperty((BCRYPT_HANDLE)phAlgorithm, L"MessageBlockLength", (PUCHAR)&@<预留参数1>, 4, 0);
-        @     if (!BCRYPT_SUCCESS(Status)) {
+        @     if (!BCRYPT_SUCCESS(Status))
+        @     {
         @         ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @         return CVolMem();
         @     }
@@ -54,7 +59,8 @@
         // 获取块大小
         @ DWORD dwBlockLen, dwPropertySize;
         @ Status = ::BCryptGetProperty((BCRYPT_HANDLE)phAlgorithm, L"BlockLength", (PUCHAR)&dwBlockLen, 4, &dwPropertySize, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
+        @ if (!BCRYPT_SUCCESS(Status))
+        @ {
         @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @     return CVolMem();
         @ }
@@ -71,15 +77,17 @@
         @ else
         @     Key.AddSpace(@<密钥位> / 8 - @<密钥>.GetSize(), TRUE);
         @ Status = ::BCryptGenerateSymmetricKey(phAlgorithm, &phKey, NULL, 0, (PUCHAR)Key.GetPtr(), (ULONG)Key.GetSize(), 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
+        @ if (!BCRYPT_SUCCESS(Status))
+        @ {
         @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @     return CVolMem();
         @ }
         @ @an<CVolMem> OutputData;
         @ DWORD dwDataLen; // 返回的数据长度
         @ ULONG dwFlag = (@<填充方式> < 0) ? 0 : (ULONG)@<填充方式>;
-        @ if (@<类型> == 1) {
-        // 加密
+        @ if (@<类型> == 1)
+        @ {
+        @     // 加密
         @     // 处理数据对齐
         @     @an<CVolMem> InputData = @<数据>; // 欲加密的数据
         @     if (@<填充方式> == @<CNG_填充方式.对称_零填充>) // 用零字节填充,对齐数据
@@ -87,7 +95,8 @@
         @     // 获取加密后的长度
         @     Status = ::BCryptEncrypt(phKey, (PUCHAR)InputData.GetPtr(), (ULONG)InputData.GetSize(), NULL,
         @                              NULL, 0, OutputData.GetPtr(), NULL, &dwDataLen, dwFlag);
-        @     if (!BCRYPT_SUCCESS(Status)) {
+        @     if (!BCRYPT_SUCCESS(Status))
+        @     {
         @         ::BCryptDestroyKey(phKey);
         @         ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @         return CVolMem();
@@ -98,7 +107,7 @@
         @                               (@<初始向量>.IsNullObject()) ? NULL : (PUCHAR)IV.GetPtr(), (@<初始向量>.IsNullObject()) ? 0 : (ULONG)IV.GetSize(),
         @                               (PUCHAR)OutputData.GetPtr(), dwDataLen, &dwDataLen, dwFlag);
         @ } else {
-        // 解密
+        @     // 解密
         @     // 获取解密后的长度
         @     Status = ::BCryptDecrypt(phKey, (PUCHAR)@<数据>.GetPtr(), (ULONG)@<数据>.GetSize(), NULL,
         @                              NULL, 0, (PUCHAR)OutputData.GetPtr(), NULL, &dwDataLen, dwFlag);
@@ -115,9 +124,8 @@
         @ }
         @ ::BCryptDestroyKey(phKey);
         @ ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
+        @ if (!BCRYPT_SUCCESS(Status))
         @     return CVolMem(); // 失败返回原数据
-        @ }
         @ OutputData.RemoveToEnd(dwDataLen);
         @ return OutputData;
     }
@@ -140,27 +148,29 @@
         @ NTSTATUS Status;
         @ @<类型> = @<类型> < 1 ? 1 : (@<类型> > 2 ? 2 : @<类型>);
         @ Status = ::BCryptOpenAlgorithmProvider(&phAlgorithm, @<算法类型>.GetText(), NULL, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
+        @ if (!BCRYPT_SUCCESS(Status))
         @     return CVolMem();
-        @ }
-        @ // 设置算法属性
+        // 设置算法属性
         @ Status = ::BCryptSetProperty((BCRYPT_HANDLE)phAlgorithm, L"ChainingMode",
         @                              (PUCHAR)@<密码链接模式>.GetText(), (ULONG)@<密码链接模式>.GetLength() * 2 + 2, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
+        @ if (!BCRYPT_SUCCESS(Status))
+        @ {
         @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @     return CVolMem();
         @ }
         // 获取块大小
         @ DWORD dwBlockLen, dwPropertySize;
         @ Status = ::BCryptGetProperty((BCRYPT_HANDLE)phAlgorithm, L"BlockLength", (PUCHAR)&dwBlockLen, 4, &dwPropertySize, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
+        @ if (!BCRYPT_SUCCESS(Status))
+        @ {
         @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @     return CVolMem();
         @ }
         @ // 获取属性(GCM)
         @ BCRYPT_AUTH_TAG_LENGTHS_STRUCT authTagLen;
         @ Status = ::BCryptGetProperty((BCRYPT_HANDLE)phAlgorithm, L"AuthTagLength", (PUCHAR)&authTagLen, sizeof(authTagLen), &dwPropertySize, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
+        @ if (!BCRYPT_SUCCESS(Status))
+        @ {
         @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @     return CVolMem();
         @ }
@@ -177,12 +187,13 @@
         @ else
         @     Key.AddSpace(@<密钥位> / 8 - @<密钥>.GetSize() , TRUE);
         @ Status = ::BCryptGenerateSymmetricKey(phAlgorithm, &phKey, NULL, 0, (PUCHAR)Key.GetPtr(), (ULONG)Key.GetSize(), 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
+        @ if (!BCRYPT_SUCCESS(Status))
+        @ {
         @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @     return CVolMem();
         @ }
         @ @an<CVolMem> OutputData;
-        @ DWORD dwDataLen; // 返回的数据长度
+        @ DWORD dwDataLen = 0, dwWiteLen = 0;
         @ BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO authInfo;
         @ // 自动授权结构体
         @ BCRYPT_INIT_AUTH_MODE_INFO(authInfo);
@@ -193,8 +204,9 @@
         @ authInfo.pbTag = (PUCHAR)Tag.GetPtr();
         @ authInfo.cbTag = (ULONG)Tag.GetSize();
         @ ULONG dwFlag = (@<填充方式> < 0) ? 0 : (ULONG)@<填充方式>;
-        @ if (@<类型> == 1) {
-        // 加密
+        @ if (@<类型> == 1)
+        @ {
+        @     // 加密
         @     // 处理数据对齐
         @     @an<CVolMem> InputData = @<数据>; // 欲加密的数据
         @     if (@<填充方式> == @<CNG_填充方式.对称_零填充>) // 用零字节填充,对齐数据
@@ -203,7 +215,8 @@
         @     Status = ::BCryptEncrypt(phKey, (PUCHAR)InputData.GetPtr(), (ULONG)InputData.GetSize(), &authInfo,
         @                              (@<初始向量>.IsNullObject()) ? NULL : (PUCHAR)IV.GetPtr(), (@<初始向量>.IsNullObject()) ? 0 : (ULONG)IV.GetSize(),
         @                              (PUCHAR)OutputData.GetPtr(), 0, &dwDataLen, dwFlag);
-        @     if (!BCRYPT_SUCCESS(Status)) {
+        @     if (!BCRYPT_SUCCESS(Status))
+        @     {
         @         ::BCryptDestroyKey(phKey);
         @         ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @         return CVolMem();
@@ -213,8 +226,8 @@
         @     Status = ::BCryptEncrypt(phKey, (PUCHAR)InputData.GetPtr(), (ULONG)InputData.GetSize(), &authInfo,
         @                              (@<初始向量>.IsNullObject()) ? NULL : (PUCHAR)IV.GetPtr(), (@<初始向量>.IsNullObject()) ? 0 : (ULONG)IV.GetSize(),
         @                              (PUCHAR)OutputData.GetPtr(), dwDataLen, &dwDataLen, dwFlag);
-        @ } else // 解密
-        @ {
+        @ } else {
+        @     // 解密
         @     DWORD HalfSize = (DWORD)@<数据>.GetSize() / 2;
         @     OutputData.Alloc(@<数据>.GetSize(), TRUE);
         @     @an<CVolMem> macContext;
@@ -225,23 +238,25 @@
         @     // 第一次解密,每次一半
         @     Status = ::BCryptDecrypt(phKey, (PUCHAR)@<数据>.GetPtr(), HalfSize, &authInfo,
         @                              (@<初始向量>.IsNullObject()) ? NULL : (PUCHAR)IV.GetPtr(), (@<初始向量>.IsNullObject()) ? 0 : (ULONG)IV.GetSize(),
-        @                              (PUCHAR)OutputData.GetPtr(), HalfSize, &dwDataLen, dwFlag);
-        @     if (!BCRYPT_SUCCESS(Status)) {
+        @                              (PUCHAR)OutputData.GetPtr(), HalfSize, &dwWiteLen, dwFlag);
+        @     if (!BCRYPT_SUCCESS(Status))
+        @     {
         @         ::BCryptDestroyKey(phKey);
         @         ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @         return CVolMem();
         @     }
+        @     dwDataLen += dwWiteLen;
         @     // 第二次解密,每次一半
         @     Status = ::BCryptDecrypt(phKey, (PUCHAR)@<数据>.GetPtr() + HalfSize, HalfSize,
         @                              (@<密码链接模式> == @<CNG_链接模式.GCM>)? &authInfo : NULL,
         @                              (@<初始向量>.IsNullObject()) ? NULL : (PUCHAR)IV.GetPtr(), (@<初始向量>.IsNullObject()) ? 0 : (ULONG)IV.GetSize(),
-        @                              (PUCHAR)OutputData.GetPtr() + HalfSize, HalfSize, &dwDataLen, dwFlag);
+        @                              (PUCHAR)OutputData.GetPtr() + HalfSize, HalfSize, &dwWiteLen, dwFlag);
+        @     dwDataLen += dwWiteLen;
         @ }
         @ ::BCryptDestroyKey(phKey);
         @ ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
+        @ if (!BCRYPT_SUCCESS(Status))
         @     return CVolMem(); // 失败返回原数据
-        @ }
         @ OutputData.RemoveToEnd(dwDataLen);
         @ return OutputData;
     }
@@ -1040,32 +1055,34 @@
         @ BCRYPT_ALG_HANDLE phAlgorithm;
         @ BCRYPT_HASH_HANDLE phHash;
         @ NTSTATUS Status;
-        @ if (@<密码>.IsNullObject()) { // 无密码 Hash
+        @ if (@<密码>.IsNullObject()) // 无密码 Hash
+        @ {
         @     Status = ::BCryptOpenAlgorithmProvider(&phAlgorithm, @<算法类型>.GetText(), NULL, 0);
-        @     if (!BCRYPT_SUCCESS(Status)) {
+        @     if (!BCRYPT_SUCCESS(Status))
         @         return CVolMem();
-        @     }
         @     Status = ::BCryptCreateHash(phAlgorithm, &phHash, NULL, NULL, NULL, 0, 0);
         @ } else { // 加密 Hash
         @     Status = ::BCryptOpenAlgorithmProvider(&phAlgorithm, @<算法类型>.GetText(), NULL, BCRYPT_ALG_HANDLE_HMAC_FLAG);
-        @     if (!BCRYPT_SUCCESS(Status)) {
+        @     if (!BCRYPT_SUCCESS(Status))
         @         return CVolMem();
-        @     }
         @     Status = ::BCryptCreateHash(phAlgorithm, &phHash, NULL, NULL, (PUCHAR)@<密码>.GetPtr(), (ULONG)@<密码>.GetSize(), 0);
         @ }
-        @ if (!BCRYPT_SUCCESS(Status)) {
+        @ if (!BCRYPT_SUCCESS(Status))
+        @ {
         @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @     return CVolMem();
         @ }
         @ Status = ::BCryptHashData(phHash, (PUCHAR)@<数据>.GetPtr(), (ULONG)@<数据>.GetSize(), 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
+        @ if (!BCRYPT_SUCCESS(Status))
+        @ {
         @     ::BCryptDestroyHash(phHash);
         @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @     return CVolMem();
         @ }
         @ DWORD dwHashDigLen, dwPropertySize;
         @ Status = ::BCryptGetProperty(phAlgorithm, BCRYPT_HASH_LENGTH, (PUCHAR)&dwHashDigLen, 4, &dwPropertySize, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
+        @ if (!BCRYPT_SUCCESS(Status))
+        @ {
         @     ::BCryptDestroyHash(phHash);
         @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @     return CVolMem();
@@ -1074,9 +1091,8 @@
         @ Status = ::BCryptFinishHash (phHash, (PUCHAR)HashData.GetPtr(), (ULONG)HashData.GetSize(), 0);
         @ ::BCryptDestroyHash(phHash);
         @ ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
+        @ if (!BCRYPT_SUCCESS(Status))
         @     return CVolMem();
-        @ }
         @ return HashData;
     }
 
@@ -1327,32 +1343,36 @@
         @ BCRYPT_KEY_HANDLE phKey;
         @ NTSTATUS Status;
         @ Status = ::BCryptOpenAlgorithmProvider(&phAlgorithm, @<算法类型>.GetText(), NULL, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
+        @ if (!BCRYPT_SUCCESS(Status))
         @     return CVolMem();
-        @ }
         @ const WCHAR* keyType = @<密钥类型>.GetText();
-        @ if (@<算法类型>.compare(BCRYPT_RSA_ALGORITHM, TRUE) == 0) {
-        @     switch (reinterpret_cast<BCRYPT_RSAKEY_BLOB*>(@<密钥>.GetPtr())->Magic) {
-        @         case BCRYPT_RSAPUBLIC_MAGIC : keyType = BCRYPT_RSAPUBLIC_BLOB; break;
-        @         case BCRYPT_RSAPRIVATE_MAGIC : keyType = BCRYPT_RSAPRIVATE_BLOB; break;
-        @         case BCRYPT_RSAFULLPRIVATE_MAGIC : keyType = BCRYPT_RSAFULLPRIVATE_BLOB; break;
+        @ if (@<算法类型>.compare(BCRYPT_RSA_ALGORITHM, TRUE) == 0)
+        @ {
+        @     switch (reinterpret_cast<BCRYPT_RSAKEY_BLOB*>(@<密钥>.GetPtr())->Magic)
+        @     {
+        @     case BCRYPT_RSAPUBLIC_MAGIC : keyType = BCRYPT_RSAPUBLIC_BLOB; break;
+        @     case BCRYPT_RSAPRIVATE_MAGIC : keyType = BCRYPT_RSAPRIVATE_BLOB; break;
+        @     case BCRYPT_RSAFULLPRIVATE_MAGIC : keyType = BCRYPT_RSAFULLPRIVATE_BLOB; break;
         @     }
         @ }
         // 导入密钥
         @ Status = ::BCryptImportKeyPair(phAlgorithm, NULL, keyType, &phKey, (PUCHAR)@<密钥>.GetPtr(),
         @                                (ULONG)@<密钥>.GetSize(), BCRYPT_NO_KEY_VALIDATION);
-        @ if (!BCRYPT_SUCCESS(Status)) {
+        @ if (!BCRYPT_SUCCESS(Status))
+        @ {
         @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @     return CVolMem();
         @ }
         @ @an<CVolMem> OutputData;
         @ DWORD dwDataLen; // 返回的数据长度
-        @ if (@<类型> == 1) {
-        // 加密
+        @ if (@<类型> == 1)
+        @ {
+        @     // 加密
         @     // 获取加密后的长度
         @     Status = ::BCryptEncrypt(phKey, (PUCHAR)@<数据>.GetPtr(), (ULONG)@<数据>.GetSize(), NULL,
         @                              NULL, 0, NULL, 0, &dwDataLen, (ULONG)@<填充方式>);
-        @     if (!BCRYPT_SUCCESS(Status)) {
+        @     if (!BCRYPT_SUCCESS(Status))
+        @     {
         @         ::BCryptDestroyKey(phKey);
         @         ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @         return CVolMem();
@@ -1362,11 +1382,12 @@
         @     Status = ::BCryptEncrypt(phKey, (PUCHAR)@<数据>.GetPtr(), (ULONG)@<数据>.GetSize(), NULL,
         @                              NULL, 0, (PUCHAR)OutputData.GetPtr(), dwDataLen, &dwDataLen, (ULONG)@<填充方式>);
         @ } else {
-        // 解密
+        @     // 解密
         @     // 获取解密后的长度
         @     Status = ::BCryptDecrypt(phKey, (PUCHAR)@<数据>.GetPtr(), (ULONG)@<数据>.GetSize(), NULL,
         @                              NULL, 0, NULL, 0, &dwDataLen, (ULONG)@<填充方式>);
-        @     if (!BCRYPT_SUCCESS(Status)) {
+        @     if (!BCRYPT_SUCCESS(Status))
+        @     {
         @         ::BCryptDestroyKey(phKey);
         @         ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
         @         return CVolMem();
@@ -1378,9 +1399,8 @@
         @ }
         @ ::BCryptDestroyKey(phKey);
         @ ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
+        @ if (!BCRYPT_SUCCESS(Status))
         @     return CVolMem(); // 失败返回原数据
-        @ }
         @ OutputData.RemoveToEnd(dwDataLen);
         @ return OutputData;
     }
@@ -1994,47 +2014,48 @@
         变量 数据摘要 <类型 = 字节集类>
         // 计算数据哈希值
         数据摘要 = 取数据Hash (数据, 摘要算法)
-        @ if (@<数据摘要>.IsNullObject () == TRUE) {
-        @     return CVolMem ();
-        @ }
+        @ if (@<数据摘要>.IsNullObject ())
+        @     return CVolMem();
         @ BCRYPT_ALG_HANDLE phAlgorithm;
         @ BCRYPT_KEY_HANDLE phKey;
         @ NTSTATUS Status;
         // 打开数字签名算法句柄
-        @ Status = ::BCryptOpenAlgorithmProvider (&phAlgorithm, (LPCWSTR)@<签名算法>.GetText (), NULL, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
+        @ Status = ::BCryptOpenAlgorithmProvider(&phAlgorithm, @<签名算法>.GetText(), NULL, 0);
+        @ if (!BCRYPT_SUCCESS(Status))
         @     return CVolMem ();
-        @ }
         // 导入私钥
-        @ Status = ::BCryptImportKeyPair (phAlgorithm, NULL, (LPCWSTR)@<私钥类型>.GetText (), &phKey,
-        @                                 (PUCHAR)@<私钥数据>.GetPtr (), (ULONG)@<私钥数据>.GetSize (), BCRYPT_NO_KEY_VALIDATION);
-        @ if (!BCRYPT_SUCCESS(Status)) {
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @     return CVolMem ();
+        @ Status = ::BCryptImportKeyPair(phAlgorithm, NULL, @<私钥类型>.GetText(), &phKey,
+        @                                (PUCHAR)@<私钥数据>.GetPtr(), (ULONG)@<私钥数据>.GetSize(), BCRYPT_NO_KEY_VALIDATION);
+        @ if (!BCRYPT_SUCCESS(Status))
+        @ {
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @     return CVolMem();
         @ }
         // 哈希值签名
         @ ULONG SignatureLen;
-        @ Status = ::BCryptSignHash (phKey, NULL, (PUCHAR)@<数据摘要>.GetPtr (), (ULONG)@<数据摘要>.GetSize (),
-        @                            NULL, 0, &SignatureLen, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) { // 获取签名长度失败
-        @     ::BCryptDestroyKey (phKey);
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @     return CVolMem ();
+        @ Status = ::BCryptSignHash(phKey, NULL, (PUCHAR)@<数据摘要>.GetPtr(), (ULONG)@<数据摘要>.GetSize(),
+        @                           NULL, 0, &SignatureLen, 0);
+        @ if (!BCRYPT_SUCCESS(Status)) // 获取签名长度失败
+        @ {
+        @     ::BCryptDestroyKey(phKey);
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @     return CVolMem();
         @ }
         @ @an<CVolMem> SignatureBlob;
-        @ SignatureBlob.Alloc (SignatureLen, TRUE);
+        @ SignatureBlob.Alloc(SignatureLen, TRUE);
         @ ULONG ResultLen;
-        @ Status = ::BCryptSignHash (phKey, NULL, (PUCHAR)@<数据摘要>.GetPtr (), (ULONG)@<数据摘要>.GetSize (),
-        @                            (PUCHAR)SignatureBlob.GetPtr(), SignatureLen, &ResultLen, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) { // 获取签名数据失败
-        @     ::BCryptDestroyKey (phKey);
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @     return CVolMem ();
+        @ Status = ::BCryptSignHash(phKey, NULL, (PUCHAR)@<数据摘要>.GetPtr(), (ULONG)@<数据摘要>.GetSize(),
+        @                           (PUCHAR)SignatureBlob.GetPtr(), SignatureLen, &ResultLen, 0);
+        @ if (!BCRYPT_SUCCESS(Status))
+        @ { // 获取签名数据失败
+        @     ::BCryptDestroyKey(phKey);
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @     return CVolMem();
         @ }
         // 清理句柄
-        @ ::BCryptDestroyKey (phKey);
-        @ ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @ SignatureBlob.RemoveToEnd (ResultLen);
+        @ ::BCryptDestroyKey(phKey);
+        @ ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @ SignatureBlob.RemoveToEnd(ResultLen);
         @ return SignatureBlob;
     }
 
@@ -2302,34 +2323,32 @@
     {
         @ typedef NTSTATUS(WINAPI* Typedef_BCryptKeyDerivation)(BCRYPT_KEY_HANDLE, BCryptBufferDesc*, PUCHAR, ULONG, ULONG*, ULONG);
         @ static Typedef_BCryptKeyDerivation API_BCryptKeyDerivation =
-        @     (Typedef_BCryptKeyDerivation)::GetProcAddress(::GetModuleHandle (L"Bcrypt.dll"), "BCryptKeyDerivation");
-        @ if (!API_BCryptKeyDerivation) {
-        @     return CVolMem ();
-        @ }
+        @     (Typedef_BCryptKeyDerivation)::GetProcAddress(::GetModuleHandle(L"Bcrypt.dll"), "BCryptKeyDerivation");
+        @ if (!API_BCryptKeyDerivation)
+        @     return CVolMem();
         @ BCRYPT_ALG_HANDLE phAlgorithm;
         @ BCRYPT_KEY_HANDLE phKey;
         @ NTSTATUS Status;
-        @ Status = ::BCryptOpenAlgorithmProvider (&phAlgorithm, (LPCWSTR)@<密钥派生算法>.GetText (), NULL, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
-        @     return CVolMem ();
-        @ }
-        @ Status = ::BCryptGenerateSymmetricKey (phAlgorithm, &phKey, NULL, 0, (PUCHAR)@<密钥>.GetPtr (), (ULONG)@<密钥>.GetSize (), 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
-        @     ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @     return CVolMem ();
+        @ Status = ::BCryptOpenAlgorithmProvider(&phAlgorithm, @<密钥派生算法>.GetText(), NULL, 0);
+        @ if (!BCRYPT_SUCCESS(Status))
+        @     return CVolMem();
+        @ Status = ::BCryptGenerateSymmetricKey(phAlgorithm, &phKey, NULL, 0, (PUCHAR)@<密钥>.GetPtr(), (ULONG)@<密钥>.GetSize(), 0);
+        @ if (!BCRYPT_SUCCESS(Status))
+        @ {
+        @     ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @     return CVolMem();
         @ }
         @ @an<CVolMem> DerivedKey;
         @ ULONG ResultLen;
-        @ DerivedKey.Alloc (@<派生密钥长度>, TRUE);
-        @ Status = API_BCryptKeyDerivation (phKey, (BCryptBufferDesc*)@<参数列表>,
-        @                                   (PUCHAR)DerivedKey.GetPtr (), (ULONG)DerivedKey.GetSize (),
-        @                                   (ULONG*)&ResultLen, 0);
-        @ ::BCryptDestroyKey (phKey);
-        @ ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
-        @     return CVolMem ();
-        @ }
-        @ DerivedKey.RemoveToEnd (ResultLen);
+        @ DerivedKey.Alloc(@<派生密钥长度>, TRUE);
+        @ Status = API_BCryptKeyDerivation(phKey, (BCryptBufferDesc*)@<参数列表>,
+        @                                  (PUCHAR)DerivedKey.GetPtr(), (ULONG)DerivedKey.GetSize(),
+        @                                  (ULONG*)&ResultLen, 0);
+        @ ::BCryptDestroyKey(phKey);
+        @ ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @ if (!BCRYPT_SUCCESS(Status))
+        @     return CVolMem();
+        @ DerivedKey.RemoveToEnd(ResultLen);
         @ return DerivedKey;
     }
 
@@ -2345,15 +2364,17 @@
         @ BCryptBuffer SP800108ParamBuffer[]=
         @ {
         @     {
-        @         (ULONG)@<标签>.GetSize(), 0xD, (PVOID)@<标签>.GetPtr (),
-        @     }, {
-        @         (ULONG)@<上下文>.GetSize(), 0xE, (PVOID)@<上下文>.GetPtr (),
-        @     }, {
-        @         sizeof(@<哈希算法>), KDF_HASH_ALGORITHM, (PVOID)@<哈希算法>.GetText (),
+        @         (ULONG)@<标签>.GetSize(), 0xD, (PVOID)@<标签>.GetPtr(),
+        @     },
+        @     {
+        @         (ULONG)@<上下文>.GetSize(), 0xE, (PVOID)@<上下文>.GetPtr(),
+        @     },
+        @     {
+        @         sizeof(@<哈希算法>), KDF_HASH_ALGORITHM, (PVOID)@<哈希算法>.GetText(),
         @     }
         @ };
         @ BCryptBufferDesc ParamList[] { BCRYPTBUFFER_VERSION, 3, SP800108ParamBuffer };
-        @ return @<密钥派生函数> (@<密钥>, (INT_P)&ParamList, @<派生密钥长度>, @<CNG_算法类型.密钥派生_SP800108>);
+        @ return @<密钥派生函数>(@<密钥>, (INT_P)&ParamList, @<派生密钥长度>, @<CNG_算法类型.密钥派生_SP800108>);
     }
 
     方法 密钥派生_SP800_56A <公开 静态 类型 = 字节集类 注释 = "使用SP800-56A密钥派生算法从哈希值中派生密钥."
@@ -2372,15 +2393,20 @@
         @ {
         @     {
         @         sizeof(@<哈希算法>), KDF_HASH_ALGORITHM, (PVOID)@<哈希算法>.GetText (), // KDF_HASH_ALGORITHM
-        @     }, {
+        @     },
+        @     {
         @         (ULONG)@<AlgorithmID>.GetSize(), 0x8, (PVOID)@<AlgorithmID>.GetPtr (), // KDF_ALGORITHMID
-        @     }, {
+        @     },
+        @     {
         @         (ULONG)@<PartyUInfo>.GetSize(), 0x9, (PVOID)@<PartyUInfo>.GetPtr (), // KDF_PARTYUINFO
-        @     }, {
+        @     },
+        @     {
         @         (ULONG)@<PartyVInfo>.GetSize(), 0xA, (PVOID)@<PartyVInfo>.GetPtr (), // KDF_PARTYVINFO
-        @     }, {
+        @     },
+        @     {
         @         (ULONG)@<SuppPubInfo>.GetSize(), 0xB, (PVOID)@<SuppPubInfo>.GetPtr (), // KDF_SUPPPUBINFO,可选
-        @     }, {
+        @     },
+        @     {
         @         (ULONG)@<SuppPrivInfo>.GetSize(), 0xC, (PVOID)@<SuppPrivInfo>.GetPtr (), // KDF_SUPPPRIVINFO,可选
         @     }
         @ };
@@ -2388,7 +2414,7 @@
         @ if (@<SuppPubInfo>.GetSize() > 0) dwNum++;
         @ if (@<SuppPrivInfo>.GetSize() > 0) dwNum++;
         @ BCryptBufferDesc ParamList[] {BCRYPTBUFFER_VERSION, dwNum, SP80056AParamBuffer};
-        @ return @<密钥派生函数> (@<密钥>, (INT_P)&ParamList, @<派生密钥长度>, @<CNG_算法类型.密钥派生_SP800_56A>);
+        @ return @<密钥派生函数>(@<密钥>, (INT_P)&ParamList, @<派生密钥长度>, @<CNG_算法类型.密钥派生_SP800_56A>);
     }
 
     方法 密钥派生_PBKDF2 <公开 静态 类型 = 字节集类 注释 = "使用PBKDF2密钥派生算法从哈希值中派生密钥." 注释 = "密钥派生函数(KDF)使用伪随机函数从主密钥派生一个或多个密钥."
@@ -2403,14 +2429,16 @@
         @ {
         @     {
         @         sizeof(@<哈希算法>), KDF_HASH_ALGORITHM, (PVOID)@<哈希算法>.GetText (),
-        @     }, {
+        @     },
+        @     {
         @         sizeof(@<迭代次数>), 0x10, (PVOID)&@<迭代次数>,
-        @     }, {
+        @     },
+        @     {
         @         (ULONG)@<盐>.GetSize (), 0xF, (PVOID)@<盐>.GetPtr (),
         @     }
         @ };
         @ BCryptBufferDesc ParamList[] { BCRYPTBUFFER_VERSION, (@<盐>.GetSize() > 0) ? 3 : 2, PBKDF2ParamBuffer };
-        @ return @<密钥派生函数> (@<密钥>, (INT_P)&ParamList, @<派生密钥长度>, @<CNG_算法类型.密钥派生_PBKDF2>);
+        @ return @<密钥派生函数>(@<密钥>, (INT_P)&ParamList, @<派生密钥长度>, @<CNG_算法类型.密钥派生_PBKDF2>);
     }
 
     方法 密钥派生_PBKDF2_2 <公开 静态 类型 = 字节集类 注释 = "结果跟\"密钥派生_PBKDF2\"一样,只是使用的API和方法不一样." 注释 = "速度稍慢一些."
@@ -2424,25 +2452,21 @@
         @ typedef NTSTATUS(WINAPI* Typedef_BCryptDeriveKeyPBKDF2)(BCRYPT_ALG_HANDLE, PUCHAR, ULONG, PUCHAR, ULONG, ULONGLONG, PUCHAR, ULONG, ULONG);
         @ static Typedef_BCryptDeriveKeyPBKDF2 API_BCryptDeriveKeyPBKDF2 =
         @     (Typedef_BCryptDeriveKeyPBKDF2)::GetProcAddress(::GetModuleHandle (L"Bcrypt.dll"), "BCryptDeriveKeyPBKDF2");
-        @ if (!API_BCryptDeriveKeyPBKDF2) {
+        @ if (!API_BCryptDeriveKeyPBKDF2)
         @     return CVolMem ();
-        @ }
         @ BCRYPT_ALG_HANDLE phAlgorithm;
         @ NTSTATUS Status;
-        @ Status = ::BCryptOpenAlgorithmProvider (&phAlgorithm, (LPCWSTR)@<哈希算法>.GetText (), NULL, BCRYPT_ALG_HANDLE_HMAC_FLAG);
-        @ if (!BCRYPT_SUCCESS(Status)) {
-        @     return CVolMem ();
-        @ }
+        @ Status = ::BCryptOpenAlgorithmProvider(&phAlgorithm, @<哈希算法>.GetText(), NULL, BCRYPT_ALG_HANDLE_HMAC_FLAG);
+        @ if (!BCRYPT_SUCCESS(Status))
+        @     return CVolMem();
         @ @an<CVolMem> DerivedKey;
         @ DerivedKey.Alloc (@<派生密钥长度>, TRUE);
-        @ Status = API_BCryptDeriveKeyPBKDF2 (phAlgorithm,
-        @                      (PUCHAR)@<密钥>.GetPtr (), (ULONG)@<密钥>.GetSize (),
-        @                      (PUCHAR)@<盐>.GetPtr (), (ULONG)@<盐>.GetSize (),
-        @                      (ULONGLONG)@<迭代次数>, (PUCHAR)DerivedKey.GetPtr (), (ULONG)@<派生密钥长度>, 0);
-        @ ::BCryptCloseAlgorithmProvider (phAlgorithm, 0);
-        @ if (!BCRYPT_SUCCESS(Status)) {
-        @     return CVolMem ();
-        @ }
+        @ Status = API_BCryptDeriveKeyPBKDF2(phAlgorithm, (PUCHAR)@<密钥>.GetPtr(), (ULONG)@<密钥>.GetSize(),
+        @                                    (PUCHAR)@<盐>.GetPtr(), (ULONG)@<盐>.GetSize(),
+        @                                    (ULONGLONG)@<迭代次数>, (PUCHAR)DerivedKey.GetPtr(), (ULONG)@<派生密钥长度>, 0);
+        @ ::BCryptCloseAlgorithmProvider(phAlgorithm, 0);
+        @ if (!BCRYPT_SUCCESS(Status))
+        @     return CVolMem();
         @ return DerivedKey;
     }
 
@@ -2456,11 +2480,11 @@
         @ BCryptBuffer CAPIParamBuffer[]=
         @ {
         @     {
-        @         sizeof(@<哈希算法>), KDF_HASH_ALGORITHM, (PVOID)@<哈希算法>.GetText (),
+        @         sizeof(@<哈希算法>), KDF_HASH_ALGORITHM, (PVOID)@<哈希算法>.GetText(),
         @     }
         @ };
         @ BCryptBufferDesc ParamList[] { BCRYPTBUFFER_VERSION, 1, CAPIParamBuffer };
-        @ return @<密钥派生函数> (@<密钥>, (INT_P)&ParamList, @<派生密钥长度>, @<CNG_算法类型.密钥派生_CAPI>);
+        @ return @<密钥派生函数>(@<密钥>, (INT_P)&ParamList, @<派生密钥长度>, @<CNG_算法类型.密钥派生_CAPI>);
     }
 
     方法 密钥派生_TLS1_1 <公开 静态 类型 = 字节集类 注释 = "使用TLS1_1密钥派生算法从哈希值中派生密钥." 注释 = "密钥派生函数(KDF)使用伪随机函数从主密钥派生一个或多个密钥."
@@ -2475,13 +2499,13 @@
         @ BCryptBuffer TLS1_1ParamBuffer[] =
         @ {
         @     {
-        @         (ULONG)@<PRF_LABEL>.GetSize (), KDF_TLS_PRF_LABEL, (PVOID)@<PRF_LABEL>.GetPtr (),
+        @         (ULONG)@<PRF_LABEL>.GetSize(), KDF_TLS_PRF_LABEL, (PVOID)@<PRF_LABEL>.GetPtr(),
         @     }, {
-        @         (ULONG)@<PRF种子>.GetSize (), KDF_TLS_PRF_SEED, (PVOID)@<PRF种子>.GetPtr (),
+        @         (ULONG)@<PRF种子>.GetSize(), KDF_TLS_PRF_SEED, (PVOID)@<PRF种子>.GetPtr(),
         @     }
         @ };
         @ BCryptBufferDesc ParamList[] { BCRYPTBUFFER_VERSION, 2, TLS1_1ParamBuffer };
-        @ return @<密钥派生函数> (@<密钥>, (INT_P)&ParamList, @<派生密钥长度>, @<CNG_算法类型.密钥派生_TLS1_1>);
+        @ return @<密钥派生函数>(@<密钥>, (INT_P)&ParamList, @<派生密钥长度>, @<CNG_算法类型.密钥派生_TLS1_1>);
     }
 
     方法 密钥派生_TLS1_2 <公开 静态 类型 = 字节集类 注释 = "使用TLS1_2密钥派生算法从哈希值中派生密钥." 注释 = "密钥派生函数(KDF)使用伪随机函数从主密钥派生一个或多个密钥."
@@ -2497,15 +2521,17 @@
         @ BCryptBuffer TLS1_2ParamBuffer[] =
         @ {
         @     {
-        @         sizeof(@<哈希算法>), KDF_HASH_ALGORITHM, (PVOID)@<哈希算法>.GetText (),
-        @     }, {
-        @         (ULONG)@<PRF_LABEL>.GetSize (), KDF_TLS_PRF_LABEL, (PVOID)@<PRF_LABEL>.GetPtr (),
-        @     }, {
-        @         (ULONG)@<PRF种子>.GetSize (), KDF_TLS_PRF_SEED, (PVOID)@<PRF种子>.GetPtr (),
+        @         sizeof(@<哈希算法>), KDF_HASH_ALGORITHM, (PVOID)@<哈希算法>.GetText(),
+        @     },
+        @     {
+        @         (ULONG)@<PRF_LABEL>.GetSize(), KDF_TLS_PRF_LABEL, (PVOID)@<PRF_LABEL>.GetPtr(),
+        @     },
+        @     {
+        @         (ULONG)@<PRF种子>.GetSize(), KDF_TLS_PRF_SEED, (PVOID)@<PRF种子>.GetPtr(),
         @     }
         @ };
         @ BCryptBufferDesc ParamList[] { BCRYPTBUFFER_VERSION, 3, TLS1_2ParamBuffer };
-        @ return @<密钥派生函数> (@<密钥>, (INT_P)&ParamList, @<派生密钥长度>, @<CNG_算法类型.密钥派生_TLS1_2>);
+        @ return @<密钥派生函数>(@<密钥>, (INT_P)&ParamList, @<派生密钥长度>, @<CNG_算法类型.密钥派生_TLS1_2>);
     }
 
     方法 "//密钥派生_HKDF" <公开 静态 类型 = 字节集类 注释 = "!!!不起作用,需要修复!!!" 注释 = "(挖坑: 找不到资料,不知道怎样实现)"
@@ -2519,11 +2545,11 @@
         @ BCryptBuffer PBKDF2ParamBuffer[] =
         @ {
         @     {
-        @         (ULONG)@<HKDF信息>.GetSize (), 0x14, (PVOID)@<HKDF信息>.GetPtr (),
+        @         (ULONG)@<HKDF信息>.GetSize(), 0x14, (PVOID)@<HKDF信息>.GetPtr(),
         @     }
         @ };
         @ BCryptBufferDesc ParamList[] { BCRYPTBUFFER_VERSION, 1, PBKDF2ParamBuffer };
-        @ return @<密钥派生函数> (@<密钥>, (INT_P)&ParamList, @<派生密钥长度>, @<CNG_算法类型.密钥派生_HKDF>);
+        @ return @<密钥派生函数>(@<密钥>, (INT_P)&ParamList, @<派生密钥长度>, @<CNG_算法类型.密钥派生_HKDF>);
     }
 }
 

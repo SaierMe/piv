@@ -1,0 +1,76 @@
+doc_format_version = 1
+project_identifier = "wutao.vproject.pc.win.1"
+
+root_filter
+{
+    child_filter
+    {
+        filter1
+        {
+            child_filter
+            {
+                filter1
+                {
+                    collapsed = true
+                    files.num_files = 16
+                    group_file_name = "*plugins\\vprj_win\\classlib\\sys\\base\\base.vgrp"
+                    name = 视窗基本类
+                }
+
+                filter2
+                {
+                    collapsed = true
+                    files.num_files = 3
+                    group_file_name = "*plugins\\vprj_win\\classlib\\sys\\wtl_ui_base\\wtl_ui_base.vgrp"
+                    name = WTL界面基本类
+                }
+
+                filter3
+                {
+                    collapsed = true
+                    files.num_files = 1
+                    group_file_name = "*plugins\\vprj_win\\classlib\\sys\\wtl_control_ext1\\wtl_control_ext1.vgrp"
+                    name = WTL扩展界面支持类库1
+                }
+
+                filter4
+                {
+                    collapsed = true
+                    files.num_files = 30
+                    group_file_name = "*plugins\\vprj_win\\classlib\\user\\piv\\piv_base.vgrp"
+                    name = PIV基础类
+                }
+
+                num_child_filters = 4
+            }
+
+            collapsed = true
+            name = 模块
+        }
+
+        num_child_filters = 1
+    }
+
+    collapsed = true
+
+    files
+    {
+        file1.file_name = "src\\main.wsv"
+        num_files = 1
+    }
+
+    name = 播放器_WASAPI
+    type = project
+}
+
+settings
+{
+    project
+    {
+        app_desc = 支持WASAPI独占模式的播放器样例
+        app_name = 播放器
+        author_name = Xelloss
+        legal_copy_right = "© Piv.Ink All Rights Reserved."
+        version_name = "1.0.0.0"
+    }
+}

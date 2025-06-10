@@ -1,0 +1,341 @@
+doc_format_version = 1
+name = PIV模块例程
+property.settings.active_project_name = Quill日志
+
+root_filter
+{
+    child_filter
+    {
+        filter1
+        {
+            child_filter
+            {
+                filter1
+                {
+                    build_order = 0
+                    project_file_name = "talebook下载器\\talebook下载器.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                num_child_filters = 1
+            }
+
+            collapsed = true
+            name = 网络传输
+        }
+
+        filter10
+        {
+            build_order = 0
+            project_file_name = "文件解压缩\\文件解压缩.vprj"
+            projects_dependent
+            type = project
+        }
+
+        filter11
+        {
+            build_order = 0
+            project_file_name = "HOOK\\HOOK.vprj"
+            projects_dependent
+            type = project
+        }
+
+        filter12
+        {
+            build_order = 0
+            project_file_name = "正则匹配\\正则匹配.vprj"
+            projects_dependent
+            type = project
+        }
+
+        filter13
+        {
+            build_order = 0
+            project_file_name = "YYJSON\\YYJSON.vprj"
+            projects_dependent
+            type = project
+        }
+
+        filter2
+        {
+            child_filter
+            {
+                filter1
+                {
+                    build_order = 0
+                    project_file_name = "VMProtect示例\\VMProtect示例.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter2
+                {
+                    build_order = 0
+                    project_file_name = "VMProtect在线激活\\VMProtect在线激活.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter3
+                {
+                    build_order = 0
+                    project_file_name = "VMP注册机\\VMP注册机.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                num_child_filters = 3
+            }
+
+            collapsed = true
+            name = VMProtect
+        }
+
+        filter3
+        {
+            child_filter
+            {
+                filter1
+                {
+                    build_order = 0
+                    project_file_name = "播放器\\播放器.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter2
+                {
+                    build_order = 0
+                    project_file_name = "播放器2\\播放器2.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter3
+                {
+                    build_order = 0
+                    project_file_name = "录音机\\录音机.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                num_child_filters = 3
+            }
+
+            collapsed = true
+            name = BASS音频库
+        }
+
+        filter4
+        {
+            child_filter
+            {
+                filter1
+                {
+                    build_order = 0
+                    project_file_name = "内存DLL\\内存DLL.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter2
+                {
+                    build_order = 0
+                    project_file_name = "测试DLL\\测试DLL.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                num_child_filters = 2
+            }
+
+            collapsed = true
+            name = 内存注入
+        }
+
+        filter5
+        {
+            child_filter
+            {
+                filter1
+                {
+                    build_order = 0
+                    project_file_name = "线程池测试\\线程池测试.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter2
+                {
+                    build_order = 0
+                    project_file_name = "线程池对象\\线程池对象.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter3
+                {
+                    build_order = 0
+                    project_file_name = "线程操作\\线程操作.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                num_child_filters = 3
+            }
+
+            collapsed = true
+            name = 多线程
+        }
+
+        filter6
+        {
+            child_filter
+            {
+                filter1
+                {
+                    build_order = 0
+                    project_file_name = "协程\\协程.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                num_child_filters = 1
+            }
+
+            collapsed = true
+            name = 协程
+        }
+
+        filter7
+        {
+            child_filter
+            {
+                filter1
+                {
+                    build_order = 0
+                    project_file_name = "枚举系统字体\\枚举系统字体.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter10
+                {
+                    build_order = 0
+                    project_file_name = "磁盘监视\\磁盘监视.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter2
+                {
+                    build_order = 0
+                    project_file_name = "发送输入\\发送输入.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter3
+                {
+                    build_order = 0
+                    project_file_name = "时钟队列\\时钟队列.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter4
+                {
+                    build_order = 0
+                    project_file_name = "快捷方式解析\\快捷方式解析.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter5
+                {
+                    build_order = 0
+                    project_file_name = "剪贴板操作\\剪贴板操作.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter6
+                {
+                    build_order = 0
+                    project_file_name = "CMD管道测试\\CMD管道测试.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter7
+                {
+                    build_order = 0
+                    project_file_name = "度盘秒传链接生成器\\度盘秒传链接生成器.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter8
+                {
+                    build_order = 0
+                    project_file_name = "数组扩展\\数组扩展.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter9
+                {
+                    build_order = 0
+                    project_file_name = "配置文件\\配置文件.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                num_child_filters = 10
+            }
+
+            collapsed = true
+            name = 杂项
+        }
+
+        filter8
+        {
+            child_filter
+            {
+                filter1
+                {
+                    build_order = 0
+                    project_file_name = "格式日志类\\格式日志类.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                filter2
+                {
+                    build_order = 0
+                    project_file_name = "Quill日志\\Quill日志.vprj"
+                    projects_dependent
+                    type = project
+                }
+
+                num_child_filters = 2
+            }
+
+            collapsed = true
+            name = 日志记录
+        }
+
+        filter9
+        {
+            build_order = 0
+            project_file_name = "PE查看器\\PE查看器.vprj"
+            projects_dependent
+            type = project
+        }
+
+        num_child_filters = 13
+    }
+
+    name = root
+}

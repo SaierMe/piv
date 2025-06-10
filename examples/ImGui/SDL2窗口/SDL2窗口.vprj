@@ -1,0 +1,58 @@
+doc_format_version = 1
+project_identifier = "wutao.vproject.pc.win.1"
+
+root_filter
+{
+    child_filter
+    {
+        filter1
+        {
+            child_filter
+            {
+                filter1
+                {
+                    collapsed = true
+                    files.num_files = 16
+                    group_file_name = "*plugins\\vprj_win\\classlib\\sys\\base\\base.vgrp"
+                    name = 视窗基本类
+                }
+
+                filter2
+                {
+                    collapsed = true
+                    files.num_files = 30
+                    group_file_name = "*plugins\\vprj_win\\classlib\\user\\piv\\piv_base.vgrp"
+                    name = PIV基础类
+                }
+
+                num_child_filters = 2
+            }
+
+            collapsed = true
+            name = 模块
+        }
+
+        num_child_filters = 1
+    }
+
+    files
+    {
+        file1.file_name = "src\\main.wsv"
+        num_files = 1
+    }
+
+    name = SDL2窗口
+    type = project
+}
+
+settings
+{
+    project
+    {
+        app_name = ImGui演示窗口
+        author_name = Xelloss
+        auto_support_high_dpi = true
+        legal_copy_right = "© Piv.Ink All Rights Reserved."
+        version_name = "1.0.0.0"
+    }
+}

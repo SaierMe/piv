@@ -1,0 +1,53 @@
+doc_format_version = 1
+project_identifier = "wutao.vproject.pc.win.1"
+
+root_filter
+{
+    child_filter
+    {
+        filter1
+        {
+            child_filter
+            {
+                filter1
+                {
+                    collapsed = true
+                    files.num_files = 16
+                    group_file_name = "*plugins\\vprj_win\\classlib\\sys\\base\\base.vgrp"
+                    name = 视窗基本类
+                }
+
+                num_child_filters = 1
+            }
+
+            collapsed = true
+            name = 模块
+        }
+
+        num_child_filters = 1
+    }
+
+    collapsed = true
+
+    files
+    {
+        file1.file_name = "src\\main.wsv"
+        num_files = 1
+    }
+
+    name = 测试DLL
+    type = project
+}
+
+settings
+{
+    project
+    {
+        app_desc = 例子测试用DLL
+        app_name = 测试DLL
+        author_name = Xelloss
+        legal_copy_right = "© Piv.Ink All Rights Reserved."
+        result_type = 1
+        version_name = "1.0.0.0"
+    }
+}

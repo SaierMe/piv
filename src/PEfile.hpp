@@ -20,19 +20,19 @@ class PivPeFile
 protected:
     struct PEFILE_INFO
     {
-        bool bIs64Pe = false;                // 是否64位PE
-        bool bIsMemAlign = false;            // 是否内存对齐
-        bool bIsLoaded = false;              // 是否已加载运行
-        bool bIsWriteable = false;           // PE是否可写
-        void *pPeBase = nullptr;             // PE数据的基址
-        DWORD dwSectionCount = 0;            // 节区数量
-        size_t cbPeSize = 0;                 // PE数据的当前尺寸
+        bool bIs64Pe = false;      // 是否64位PE
+        bool bIsMemAlign = false;  // 是否内存对齐
+        bool bIsLoaded = false;    // 是否已加载运行
+        bool bIsWriteable = false; // PE是否可写
+        void* pPeBase = nullptr;   // PE数据的基址
+        DWORD dwSectionCount = 0;  // 节区数量
+        size_t cbPeSize = 0;       // PE数据的当前尺寸
         PIMAGE_DOS_HEADER pDosHeader = nullptr;
         PIMAGE_NT_HEADERS32 pNtHeader = nullptr;
         PIMAGE_SECTION_HEADER pSection = nullptr;
         PIMAGE_EXPORT_DIRECTORY pExport = nullptr;
         PIMAGE_IMPORT_DESCRIPTOR pImport = nullptr;
-        PivFileMapping FileMap; //内存映射文件
+        PivFileMapping FileMap; // 内存映射文件
 
         PEFILE_INFO() {}
         ~PEFILE_INFO()
@@ -43,7 +43,7 @@ protected:
             }
         }
     };
-    const WCHAR *szErrorsMessage[31]{
+    const WCHAR* szErrorsMessage[31]{
         L"错误(0): 操作成功完成。",
         L"错误(1): 打开文件失败，可能是目标文件被其他程序占用。",
         L"错误(2): 创建内存映射文件失败。",
@@ -78,10 +78,10 @@ protected:
     };
 
     // 成员变量
-    std::unique_ptr<PEFILE_INFO> m_PE;
-    std::vector<HMODULE> m_vecHmodule;
-    INT m_Error = 0;
-    PivNT &Nt = PivNT::instance();
+    std::unique_ptr<PEFILE_INFO> m_pe;
+    std::vector<HMODULE> m_hmodule_arr;
+    INT m_error = 0;
+    PivNT& Nt = PivNT::instance();
 
 public:
     PivPeFile() {}
@@ -95,16 +95,16 @@ public:
      */
     INT GetErrorCode() const
     {
-        return m_Error;
+        return m_error;
     }
 
     /**
      * @brief 取最后错误信息
      * @return
      */
-    const WCHAR *GetErrorMessage() const
+    const WCHAR* GetErrorMessage() const
     {
-        return szErrorsMessage[m_Error];
+        return szErrorsMessage[m_error];
     }
 
     /**
@@ -112,30 +112,30 @@ public:
      * @param szFileName
      * @return
      */
-    BOOL OpenPeFile(const WCHAR *szFileName)
+    BOOL OpenPeFile(const WCHAR* szFileName)
     {
-        m_PE.reset(new PEFILE_INFO);
-        if (FALSE == m_PE->FileMap.Create(szFileName,GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, 0, PAGE_READONLY, nullptr))
+        m_pe.reset(new PEFILE_INFO);
+        if (FALSE == m_pe->FileMap.Create(szFileName, GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, 0, PAGE_READONLY, nullptr))
         {
-            m_Error = 1;
+            m_error = 1;
             goto _PIVPE_FAIL_;
         }
-        if (FALSE == m_PE->FileMap.MapToMemory(0, 0, FILE_MAP_READ))
+        if (FALSE == m_pe->FileMap.MapToMemory(0, 0, FILE_MAP_READ))
         {
-            m_Error = 3;
+            m_error = 3;
             goto _PIVPE_FAIL_;
         }
-        m_PE->pPeBase = m_PE->FileMap.GetPtr<void>(0);
-        m_PE->cbPeSize = m_PE->FileMap.GetViewSize();
-        m_PE->bIsMemAlign = false;
+        m_pe->pPeBase = m_pe->FileMap.GetPtr<void>(0);
+        m_pe->cbPeSize = m_pe->FileMap.GetViewSize();
+        m_pe->bIsMemAlign = false;
         if (CheckHeaders())
         {
-            m_PE->bIsMemAlign = false;
-            m_PE->bIsLoaded = false;
+            m_pe->bIsMemAlign = false;
+            m_pe->bIsLoaded = false;
             return TRUE;
         }
     _PIVPE_FAIL_:
-        m_PE.reset(nullptr);
+        m_pe.reset(nullptr);
         return FALSE;
     }
 
@@ -147,21 +147,21 @@ public:
      * @param bIsLoaded
      * @return
      */
-    BOOL OpenPeData(void *lpPeAddress, size_t dwPeDataSize, bool bIsMemAlign = false, bool bIsLoaded = false)
+    BOOL OpenPeData(void* lpPeAddress, size_t dwPeDataSize, bool bIsMemAlign = false, bool bIsLoaded = false)
     {
-        if (lpPeAddress == (void *)0x400000 || lpPeAddress == (void *)0x140000000 || lpPeAddress == (void *)0x10000000 || lpPeAddress == (void *)0x180000000)
+        if (lpPeAddress == (void*)0x400000 || lpPeAddress == (void*)0x140000000 || lpPeAddress == (void*)0x10000000 || lpPeAddress == (void*)0x180000000)
         { // 如果模块基址被隐藏了,说明PE文件已经被加壳
-            m_Error = 29;
+            m_error = 29;
             return FALSE;
         }
-        m_PE.reset(new PEFILE_INFO);
-        m_PE->pPeBase = lpPeAddress;
-        m_PE->cbPeSize = dwPeDataSize;
-        m_PE->bIsMemAlign = bIsMemAlign;
-        m_PE->bIsLoaded = bIsLoaded;
+        m_pe.reset(new PEFILE_INFO);
+        m_pe->pPeBase = lpPeAddress;
+        m_pe->cbPeSize = dwPeDataSize;
+        m_pe->bIsMemAlign = bIsMemAlign;
+        m_pe->bIsLoaded = bIsLoaded;
         if (CheckHeaders())
             return TRUE;
-        m_PE.reset(nullptr);
+        m_pe.reset(nullptr);
         return FALSE;
     }
 
@@ -170,7 +170,7 @@ public:
      */
     void ClosePeData()
     {
-        m_PE.reset(nullptr);
+        m_pe.reset(nullptr);
     }
 
     /**
@@ -178,35 +178,35 @@ public:
      * @param bCloseSrc
      * @return
      */
-    VOID *CopyToNewMem(BOOL bCloseSrc)
+    VOID* CopyToNewMem(BOOL bCloseSrc)
     {
-        if (!m_PE)
+        if (!m_pe)
         {
-            m_Error = 9;
+            m_error = 9;
             return 0;
         }
-        VOID *pMemAddress = CopyToMem();
+        VOID* pMemAddress = CopyToMem();
         if (pMemAddress == nullptr)
         {
             return 0;
         }
         if (bCloseSrc)
         {
-            size_t dwPeSize = m_PE->cbPeSize;
-            bool bIsMemAlign = m_PE->bIsMemAlign;
-            bool bIsLoaded = m_PE->bIsLoaded;
-            m_PE.reset(new PEFILE_INFO);
-            m_PE->pPeBase = pMemAddress;
-            m_PE->cbPeSize = dwPeSize;
-            m_PE->bIsMemAlign = bIsMemAlign;
-            m_PE->bIsLoaded = bIsLoaded;
+            size_t dwPeSize = m_pe->cbPeSize;
+            bool bIsMemAlign = m_pe->bIsMemAlign;
+            bool bIsLoaded = m_pe->bIsLoaded;
+            m_pe.reset(new PEFILE_INFO);
+            m_pe->pPeBase = pMemAddress;
+            m_pe->cbPeSize = dwPeSize;
+            m_pe->bIsMemAlign = bIsMemAlign;
+            m_pe->bIsLoaded = bIsLoaded;
             if (!CheckHeaders())
             {
-                m_PE.reset(nullptr);
+                m_pe.reset(nullptr);
                 return 0;
             }
         }
-        m_Error = 0;
+        m_error = 0;
         return pMemAddress;
     }
 
@@ -216,9 +216,9 @@ public:
      * @param bRepairPe
      * @return
      */
-    BOOL SavePeDatas(const WCHAR *szFileName, BOOL bRepairPe)
+    BOOL SavePeDatas(const WCHAR* szFileName, BOOL bRepairPe)
     {
-        void *pMemoryAddress = CopyToNewMem(FALSE);
+        void* pMemoryAddress = CopyToNewMem(FALSE);
         if (pMemoryAddress == nullptr)
         {
             return FALSE;
@@ -235,10 +235,11 @@ public:
         }
         else
         {
-            dwWriteSize = m_PE->cbPeSize;
+            dwWriteSize = m_pe->cbPeSize;
         }
         bool bRes = false;
-        FILE *out = _wfopen(szFileName, L"wb");
+        FILE* out = NULL;
+        _wfopen_s(&out, szFileName, L"wb");
         if (out != NULL)
         {
             bRes = (fwrite(pMemoryAddress, 1, dwWriteSize, out) == dwWriteSize);
@@ -250,12 +251,12 @@ public:
         }
         if (bRes)
         {
-            m_Error = 0;
+            m_error = 0;
             return TRUE;
         }
         else
         {
-            m_Error = 28;
+            m_error = 28;
             return FALSE;
         }
     }
@@ -266,9 +267,9 @@ public:
      * @brief 取PE数据指针
      * @return
      */
-    const void *GetBaseAddress() const
+    const void* GetBaseAddress() const
     {
-        return m_PE ? m_PE->pPeBase : 0;
+        return m_pe ? m_pe->pPeBase : 0;
     }
 
     /**
@@ -277,28 +278,28 @@ public:
      */
     DWORD CalcTotalImageSize()
     {
-        if (m_PE == nullptr)
+        if (m_pe == nullptr)
         {
-            m_Error = 9;
+            m_error = 9;
             return 0;
         }
-        if (m_PE->pPeBase == nullptr)
+        if (m_pe->pPeBase == nullptr)
         {
-            m_Error = 10;
+            m_error = 10;
             return 0;
         }
         DWORD dwImageSize = 0;
-        DWORD dwAlignment = m_PE->bIs64Pe ? reinterpret_cast<PIMAGE_NT_HEADERS64>(m_PE->pNtHeader)->OptionalHeader.SectionAlignment
-                                          : m_PE->pNtHeader->OptionalHeader.SectionAlignment;
-        dwImageSize = (m_PE->bIs64Pe ? reinterpret_cast<PIMAGE_NT_HEADERS64>(m_PE->pNtHeader)->OptionalHeader.SizeOfHeaders
-                                     : m_PE->pNtHeader->OptionalHeader.SizeOfHeaders + dwAlignment - 1) /
-                      dwAlignment * dwAlignment;
-        for (DWORD i = 0; i < m_PE->dwSectionCount; i++)
+        DWORD dwAlignment = m_pe->bIs64Pe ? reinterpret_cast<PIMAGE_NT_HEADERS64>(m_pe->pNtHeader)->OptionalHeader.SectionAlignment
+                                          : m_pe->pNtHeader->OptionalHeader.SectionAlignment;
+        dwImageSize = (m_pe->bIs64Pe ? reinterpret_cast<PIMAGE_NT_HEADERS64>(m_pe->pNtHeader)->OptionalHeader.SizeOfHeaders
+                                     : m_pe->pNtHeader->OptionalHeader.SizeOfHeaders + dwAlignment - 1) /
+            dwAlignment * dwAlignment;
+        for (DWORD i = 0; i < m_pe->dwSectionCount; i++)
         {
-            DWORD dwCodeSize = m_PE->pSection[i].Misc.VirtualSize;
-            DWORD dwLoadSize = m_PE->pSection[i].SizeOfRawData;
+            DWORD dwCodeSize = m_pe->pSection[i].Misc.VirtualSize;
+            DWORD dwLoadSize = m_pe->pSection[i].SizeOfRawData;
             DWORD dwMaxSize = (dwLoadSize > dwCodeSize) ? (dwLoadSize) : (dwCodeSize);
-            DWORD dwSectionSize = (m_PE->pSection[i].VirtualAddress + dwMaxSize + dwAlignment - 1) / dwAlignment * dwAlignment;
+            DWORD dwSectionSize = (m_pe->pSection[i].VirtualAddress + dwMaxSize + dwAlignment - 1) / dwAlignment * dwAlignment;
             if (dwImageSize < dwSectionSize)
                 dwImageSize = dwSectionSize;
         }
@@ -311,13 +312,13 @@ public:
      */
     DWORD CalcPeFileSize()
     {
-        if (m_PE == nullptr)
+        if (m_pe == nullptr)
         {
-            m_Error = 9;
+            m_error = 9;
             return 0;
         }
-        m_Error = 0;
-        return m_PE->pSection[m_PE->dwSectionCount - 1].SizeOfRawData + m_PE->pSection[m_PE->dwSectionCount - 1].PointerToRawData;
+        m_error = 0;
+        return m_pe->pSection[m_pe->dwSectionCount - 1].SizeOfRawData + m_pe->pSection[m_pe->dwSectionCount - 1].PointerToRawData;
     }
 
     /**
@@ -326,7 +327,7 @@ public:
      */
     size_t GetDataSize() const
     {
-        return m_PE ? m_PE->cbPeSize : 0;
+        return m_pe ? m_pe->cbPeSize : 0;
     }
 
     /**
@@ -335,10 +336,10 @@ public:
      */
     DWORD GetEntryPoint()
     {
-        if (m_PE)
-            return m_PE->bIs64Pe ? reinterpret_cast<PIMAGE_NT_HEADERS64>(m_PE->pNtHeader)->OptionalHeader.AddressOfEntryPoint
-                                 : m_PE->pNtHeader->OptionalHeader.AddressOfEntryPoint;
-        m_Error = 9;
+        if (m_pe)
+            return m_pe->bIs64Pe ? reinterpret_cast<PIMAGE_NT_HEADERS64>(m_pe->pNtHeader)->OptionalHeader.AddressOfEntryPoint
+                                 : m_pe->pNtHeader->OptionalHeader.AddressOfEntryPoint;
+        m_error = 9;
         return 0;
     }
 
@@ -348,22 +349,22 @@ public:
      */
     BOOL IsDllData()
     {
-        if (m_PE == nullptr)
+        if (m_pe == nullptr)
         {
-            m_Error = 9;
+            m_error = 9;
             return FALSE;
         }
-        if ((m_PE->pNtHeader->FileHeader.Characteristics & IMAGE_FILE_DLL) == 0)
+        if ((m_pe->pNtHeader->FileHeader.Characteristics & IMAGE_FILE_DLL) == 0)
         {
-            m_Error = 11;
+            m_error = 11;
             return FALSE;
         }
-        if ((m_PE->pNtHeader->FileHeader.Characteristics & IMAGE_FILE_EXECUTABLE_IMAGE) == 0)
+        if ((m_pe->pNtHeader->FileHeader.Characteristics & IMAGE_FILE_EXECUTABLE_IMAGE) == 0)
         {
-            m_Error = 12;
+            m_error = 12;
             return FALSE;
         }
-        m_Error = 0;
+        m_error = 0;
         return TRUE;
     }
 
@@ -373,22 +374,22 @@ public:
      */
     BOOL IsExeData()
     {
-        if (m_PE == nullptr)
+        if (m_pe == nullptr)
         {
-            m_Error = 9;
+            m_error = 9;
             return FALSE;
         }
-        if ((m_PE->pNtHeader->FileHeader.Characteristics & IMAGE_FILE_DLL) == IMAGE_FILE_DLL)
+        if ((m_pe->pNtHeader->FileHeader.Characteristics & IMAGE_FILE_DLL) == IMAGE_FILE_DLL)
         {
-            m_Error = 30;
+            m_error = 30;
             return FALSE;
         }
-        if ((m_PE->pNtHeader->FileHeader.Characteristics & IMAGE_FILE_EXECUTABLE_IMAGE) == 0)
+        if ((m_pe->pNtHeader->FileHeader.Characteristics & IMAGE_FILE_EXECUTABLE_IMAGE) == 0)
         {
-            m_Error = 12;
+            m_error = 12;
             return FALSE;
         }
-        m_Error = 0;
+        m_error = 0;
         return TRUE;
     }
 
@@ -398,7 +399,7 @@ public:
      */
     BOOL IsWriteable() const
     {
-        return m_PE ? m_PE->bIsWriteable : FALSE;
+        return m_pe ? m_pe->bIsWriteable : FALSE;
     }
 
     /**
@@ -408,29 +409,29 @@ public:
      */
     DWORD Rva2Foa(DWORD dwRVA)
     {
-        if (m_PE == nullptr)
+        if (m_pe == nullptr)
         {
-            m_Error = 9;
+            m_error = 9;
             return FALSE;
         }
-        if (m_PE->pPeBase == nullptr)
+        if (m_pe->pPeBase == nullptr)
         {
-            m_Error = 10;
+            m_error = 10;
             return FALSE;
         }
         DWORD dwDiffer = 0;
-        DWORD dwAlignment = m_PE->bIs64Pe ? reinterpret_cast<PIMAGE_NT_HEADERS64>(m_PE->pNtHeader)->OptionalHeader.SectionAlignment
-                                          : m_PE->pNtHeader->OptionalHeader.SectionAlignment;
-        for (DWORD i = 0; i < m_PE->dwSectionCount; i++)
+        DWORD dwAlignment = m_pe->bIs64Pe ? reinterpret_cast<PIMAGE_NT_HEADERS64>(m_pe->pNtHeader)->OptionalHeader.SectionAlignment
+                                          : m_pe->pNtHeader->OptionalHeader.SectionAlignment;
+        for (DWORD i = 0; i < m_pe->dwSectionCount; i++)
         {
-            DWORD dwBlockCount = m_PE->pSection[i].SizeOfRawData / dwAlignment;
-            dwBlockCount += m_PE->pSection[i].SizeOfRawData % dwAlignment ? 1 : 0;
-            DWORD dwBeginVA = m_PE->pSection[i].VirtualAddress;
-            DWORD dwEndVA = m_PE->pSection[i].VirtualAddress + dwBlockCount * dwAlignment;
+            DWORD dwBlockCount = m_pe->pSection[i].SizeOfRawData / dwAlignment;
+            dwBlockCount += m_pe->pSection[i].SizeOfRawData % dwAlignment ? 1 : 0;
+            DWORD dwBeginVA = m_pe->pSection[i].VirtualAddress;
+            DWORD dwEndVA = m_pe->pSection[i].VirtualAddress + dwBlockCount * dwAlignment;
             if (dwRVA >= dwBeginVA && dwRVA < dwEndVA)
             {
                 dwDiffer = dwRVA - dwBeginVA;
-                return m_PE->pSection[i].PointerToRawData + dwDiffer;
+                return m_pe->pSection[i].PointerToRawData + dwDiffer;
             }
             else if (dwRVA < dwBeginVA)
             {
@@ -447,25 +448,25 @@ public:
      */
     DWORD Foa2Rva(DWORD dwFoa)
     {
-        if (m_PE == nullptr)
+        if (m_pe == nullptr)
         {
-            m_Error = 9;
+            m_error = 9;
             return FALSE;
         }
-        if (m_PE->pPeBase == nullptr)
+        if (m_pe->pPeBase == nullptr)
         {
-            m_Error = 10;
+            m_error = 10;
             return FALSE;
         }
         DWORD dwVPK = 0;
-        for (DWORD i = 0; i < m_PE->dwSectionCount; i++)
+        for (DWORD i = 0; i < m_pe->dwSectionCount; i++)
         {
-            DWORD dwBeginVA = m_PE->pSection[i].PointerToRawData;
-            DWORD dwEndVA = m_PE->pSection[i].PointerToRawData + m_PE->pSection[i].SizeOfRawData;
+            DWORD dwBeginVA = m_pe->pSection[i].PointerToRawData;
+            DWORD dwEndVA = m_pe->pSection[i].PointerToRawData + m_pe->pSection[i].SizeOfRawData;
             // 如果dwFoa在某个区段中
             if (dwFoa >= dwBeginVA && dwFoa < dwEndVA)
             {
-                dwVPK = m_PE->pSection[i].VirtualAddress - dwBeginVA;
+                dwVPK = m_pe->pSection[i].VirtualAddress - dwBeginVA;
                 return dwFoa + dwVPK;
             }
             else if (dwFoa < dwBeginVA) // 在文件头中直接返回
@@ -482,63 +483,63 @@ public:
      */
     BOOL MemLoadPE()
     {
-        if (m_PE == nullptr)
+        if (m_pe == nullptr)
         {
-            m_Error = 9;
+            m_error = 9;
             return FALSE;
         }
-        if (m_PE->bIsLoaded == TRUE)
+        if (m_pe->bIsLoaded == TRUE)
         {
-            m_Error = 22;
+            m_error = 22;
             return TRUE;
         }
         // 验证DLL和程序的位数是否一致
 #ifdef _WIN64
-        if (m_PE->bIs64Pe == FALSE)
+        if (m_pe->bIs64Pe == FALSE)
         {
-            m_Error = 8;
+            m_error = 8;
             return FALSE;
         }
 #else
-        if (m_PE->bIs64Pe == TRUE)
+        if (m_pe->bIs64Pe == TRUE)
         {
-            m_Error = 8;
+            m_error = 8;
             return FALSE;
         }
 #endif
-        if ((m_PE->pNtHeader->FileHeader.Characteristics & IMAGE_FILE_EXECUTABLE_IMAGE) == 0)
+        if ((m_pe->pNtHeader->FileHeader.Characteristics & IMAGE_FILE_EXECUTABLE_IMAGE) == 0)
         {
-            m_Error = 12;
+            m_error = 12;
             return FALSE;
         }
-        if (m_PE->bIsWriteable == FALSE)
+        if (m_pe->bIsWriteable == FALSE)
         {
             if (CopyToMem() == 0)
             {
                 return FALSE;
             }
         }
-        if (m_PE->bIsMemAlign == FALSE)
+        if (m_pe->bIsMemAlign == FALSE)
         {
             if (AlignPeDatas() == FALSE)
             {
                 return FALSE;
             }
         }
-        if (m_PE->bIsLoaded == FALSE)
+        if (m_pe->bIsLoaded == FALSE)
         {
             if (GetDataDirectoryRva(IMAGE_DIRECTORY_ENTRY_BASERELOC) > 0 && GetDataDirectorySize(IMAGE_DIRECTORY_ENTRY_BASERELOC) > 0)
             {
                 RebuildRelocation();
             }
-            m_vecHmodule.clear();
-            if (RebuildImport(&m_vecHmodule) == FALSE)
+            m_hmodule_arr.clear();
+            if (RebuildImport(&m_hmodule_arr) == FALSE)
             {
                 return FALSE;
             }
         }
-        m_PE->bIsLoaded = TRUE;
-        m_Error = 0;
+        m_pe->bIsLoaded = TRUE;
+        m_error = 0;
         return TRUE;
     }
 
@@ -550,7 +551,7 @@ public:
      */
     const PIMAGE_DOS_HEADER GetDosHeader() const
     {
-        return m_PE ? m_PE->pDosHeader : nullptr;
+        return m_pe ? m_pe->pDosHeader : nullptr;
     }
 
     /**
@@ -559,7 +560,7 @@ public:
      */
     DWORD GetDosEntryPoint() const
     {
-        return m_PE ? static_cast<DWORD>(m_PE->pDosHeader->e_cs + m_PE->pDosHeader->e_cparhdr) * 0x10UL + m_PE->pDosHeader->e_ip : 0;
+        return m_pe ? static_cast<DWORD>(m_pe->pDosHeader->e_cs + m_pe->pDosHeader->e_cparhdr) * 0x10UL + m_pe->pDosHeader->e_ip : 0;
     }
 
     // 以下函数用于IMAGE_NT_SIGNATURE
@@ -570,7 +571,7 @@ public:
      */
     const PIMAGE_NT_HEADERS32 GetNtHeader() const
     {
-        return m_PE ? m_PE->pNtHeader : nullptr;
+        return m_pe ? m_pe->pNtHeader : nullptr;
     }
 
     /**
@@ -579,7 +580,7 @@ public:
      */
     BOOL Is64Pe() const
     {
-        return m_PE ? m_PE->bIs64Pe : FALSE;
+        return m_pe ? m_pe->bIs64Pe : FALSE;
     }
 
     /**
@@ -588,9 +589,9 @@ public:
      */
     ULONGLONG GetImageBase()
     {
-        if (m_PE)
-            return m_PE->bIs64Pe ? reinterpret_cast<PIMAGE_NT_HEADERS64>(m_PE->pNtHeader)->OptionalHeader.ImageBase : m_PE->pNtHeader->OptionalHeader.ImageBase;
-        m_Error = 9;
+        if (m_pe)
+            return m_pe->bIs64Pe ? reinterpret_cast<PIMAGE_NT_HEADERS64>(m_pe->pNtHeader)->OptionalHeader.ImageBase : m_pe->pNtHeader->OptionalHeader.ImageBase;
+        m_error = 9;
         return 0;
     }
 
@@ -601,14 +602,14 @@ public:
      */
     const PIMAGE_SECTION_HEADER GetSectionHeader(PDWORD dwSectionCount)
     {
-        if (m_PE)
+        if (m_pe)
         {
-            *dwSectionCount = m_PE->dwSectionCount;
-            m_Error = 0;
-            return m_PE->pSection;
+            *dwSectionCount = m_pe->dwSectionCount;
+            m_error = 0;
+            return m_pe->pSection;
         }
         *dwSectionCount = 0;
-        m_Error = 9;
+        m_error = 9;
         return nullptr;
     }
 
@@ -618,7 +619,7 @@ public:
      */
     const PIMAGE_EXPORT_DIRECTORY GetExportHeader() const
     {
-        return m_PE ? m_PE->pExport : nullptr;
+        return m_pe ? m_pe->pExport : nullptr;
     }
 
     /**
@@ -627,7 +628,7 @@ public:
      */
     const PIMAGE_IMPORT_DESCRIPTOR GetImportDescriptor() const
     {
-        return m_PE ? m_PE->pImport : nullptr;
+        return m_pe ? m_pe->pImport : nullptr;
     }
 
     /**
@@ -637,21 +638,21 @@ public:
      */
     DWORD GetDataDirectoryRva(DWORD dwIndex)
     {
-        if (m_PE == nullptr)
+        if (m_pe == nullptr)
         {
-            m_Error = 9;
+            m_error = 9;
             return 0;
         }
-        PIMAGE_DATA_DIRECTORY pIDD = m_PE->bIs64Pe ? reinterpret_cast<IMAGE_NT_HEADERS64 *>(m_PE->pNtHeader)->OptionalHeader.DataDirectory
-                                                   : m_PE->pNtHeader->OptionalHeader.DataDirectory;
+        PIMAGE_DATA_DIRECTORY pIDD = m_pe->bIs64Pe ? reinterpret_cast<IMAGE_NT_HEADERS64*>(m_pe->pNtHeader)->OptionalHeader.DataDirectory
+                                                   : m_pe->pNtHeader->OptionalHeader.DataDirectory;
         if (dwIndex >= 0 && dwIndex <= 15)
         {
-            m_Error = 0;
+            m_error = 0;
             return pIDD ? pIDD[dwIndex].VirtualAddress : 0;
         }
         else
         {
-            m_Error = 13;
+            m_error = 13;
             return 0;
         }
     }
@@ -663,21 +664,21 @@ public:
      */
     DWORD GetDataDirectorySize(DWORD dwIndex)
     {
-        if (m_PE == nullptr)
+        if (m_pe == nullptr)
         {
-            m_Error = 9;
+            m_error = 9;
             return 0;
         }
-        PIMAGE_DATA_DIRECTORY pIDD = m_PE->bIs64Pe ? reinterpret_cast<IMAGE_NT_HEADERS64 *>(m_PE->pNtHeader)->OptionalHeader.DataDirectory
-                                                   : m_PE->pNtHeader->OptionalHeader.DataDirectory;
+        PIMAGE_DATA_DIRECTORY pIDD = m_pe->bIs64Pe ? reinterpret_cast<IMAGE_NT_HEADERS64*>(m_pe->pNtHeader)->OptionalHeader.DataDirectory
+                                                   : m_pe->pNtHeader->OptionalHeader.DataDirectory;
         if (dwIndex >= 0 && dwIndex <= 15)
         {
-            m_Error = 0;
+            m_error = 0;
             return pIDD ? pIDD[dwIndex].Size : 0;
         }
         else
         {
-            m_Error = 13;
+            m_error = 13;
             return 0;
         }
     }
@@ -692,39 +693,39 @@ public:
      * @param vecFunName
      * @return
      */
-    DWORD GetExportInfo(CVolString *szModuleName, std::vector<DWORD> *vecFunOrdinal, std::vector<DWORD> *vecFunAddress, std::vector<CVolString> *vecFunName)
+    DWORD GetExportInfo(CVolString* szModuleName, std::vector<DWORD>* vecFunOrdinal, std::vector<DWORD>* vecFunAddress, std::vector<CVolString>* vecFunName)
     {
-        if (m_PE == nullptr)
+        if (m_pe == nullptr)
         {
-            m_Error = 9;
+            m_error = 9;
             return 0;
         }
-        if (m_PE->pExport == nullptr)
+        if (m_pe->pExport == nullptr)
         {
-            m_Error = 14;
+            m_error = 14;
             return 0;
         }
-        if (m_PE->pExport->NumberOfFunctions == 0)
+        if (m_pe->pExport->NumberOfFunctions == 0)
         {
-            m_Error = 15;
+            m_error = 15;
             return 0;
         }
-        szModuleName->SetText(PivA2Ws{PIV_PTR_FORWARD(const CHAR *, m_PE->pPeBase, GetRealAddress(m_PE->pExport->Name))}.c_str());
-        DWORD *pFunctions = PIV_PTR_FORWARD(DWORD *, m_PE->pPeBase, GetRealAddress(m_PE->pExport->AddressOfFunctions));
-        DWORD *pNames = PIV_PTR_FORWARD(DWORD *, m_PE->pPeBase, GetRealAddress(m_PE->pExport->AddressOfNames));
-        WORD *pOrdinals = PIV_PTR_FORWARD(WORD *, m_PE->pPeBase, GetRealAddress(m_PE->pExport->AddressOfNameOrdinals));
-        for (DWORD i = 0; i < m_PE->pExport->NumberOfFunctions; i++)
+        szModuleName->SetText(PivA2Ws{PIV_PTR_FORWARD(const CHAR*, m_pe->pPeBase, GetRealAddress(m_pe->pExport->Name))}.c_str());
+        DWORD* pFunctions = PIV_PTR_FORWARD(DWORD*, m_pe->pPeBase, GetRealAddress(m_pe->pExport->AddressOfFunctions));
+        DWORD* pNames = PIV_PTR_FORWARD(DWORD*, m_pe->pPeBase, GetRealAddress(m_pe->pExport->AddressOfNames));
+        WORD* pOrdinals = PIV_PTR_FORWARD(WORD*, m_pe->pPeBase, GetRealAddress(m_pe->pExport->AddressOfNameOrdinals));
+        for (DWORD i = 0; i < m_pe->pExport->NumberOfFunctions; i++)
         {
             vecFunAddress->push_back(pFunctions[i]);
-            vecFunOrdinal->push_back(i + m_PE->pExport->Base);
+            vecFunOrdinal->push_back(i + m_pe->pExport->Base);
             vecFunName->push_back(CVolString(L""));
         }
-        for (DWORD i = 0; i < m_PE->pExport->NumberOfNames; i++)
+        for (DWORD i = 0; i < m_pe->pExport->NumberOfNames; i++)
         {
-            vecFunName->at(i).SetText(PivA2Ws{PIV_PTR_FORWARD(const CHAR *, m_PE->pPeBase, GetRealAddress(pNames[i]))}.c_str());
+            vecFunName->at(i).SetText(PivA2Ws{PIV_PTR_FORWARD(const CHAR*, m_pe->pPeBase, GetRealAddress(pNames[i]))}.c_str());
         }
-        m_Error = 0;
-        return m_PE->pExport->NumberOfFunctions;
+        m_error = 0;
+        return m_pe->pExport->NumberOfFunctions;
     }
 
     /**
@@ -735,27 +736,27 @@ public:
      * @param vecFunName
      * @return
      */
-    DWORD GetImportInfo(std::vector<CVolString> *vecModuleName, std::vector<std::vector<DWORD>> *vecFunOrdinal,
-                        std::vector<std::vector<ULONGLONG>> *vecFunAddress, std::vector<std::vector<CVolString>> *vecFunName)
+    DWORD GetImportInfo(std::vector<CVolString>* vecModuleName, std::vector<std::vector<DWORD>>* vecFunOrdinal,
+                        std::vector<std::vector<ULONGLONG>>* vecFunAddress, std::vector<std::vector<CVolString>>* vecFunName)
     {
-        if (m_PE == nullptr)
+        if (m_pe == nullptr)
         {
-            m_Error = 9;
+            m_error = 9;
             return 0;
         }
-        PIMAGE_IMPORT_DESCRIPTOR pImport = m_PE->pImport;
+        PIMAGE_IMPORT_DESCRIPTOR pImport = m_pe->pImport;
         DWORD dwThunkSize = GetThunkSize();
         if (dwThunkSize == 0)
         {
-            m_Error = 17;
+            m_error = 17;
             return 0;
         }
         DWORD dwDiff = dwThunkSize == 4 ? 1 : 2;
         while (pImport->Name) // 历遍导入表
         {
-            vecModuleName->emplace_back(PivA2Ws{PIV_PTR_FORWARD(const CHAR *, m_PE->pPeBase, GetRealAddress(pImport->Name))}.c_str());
-            PDWORD dwINT_Thunk = PIV_PTR_FORWARD(PDWORD, m_PE->pPeBase, GetRealAddress(pImport->OriginalFirstThunk));
-            PDWORD dwIAT_Thunk = PIV_PTR_FORWARD(PDWORD, m_PE->pPeBase, GetRealAddress(pImport->FirstThunk));
+            vecModuleName->emplace_back(PivA2Ws{PIV_PTR_FORWARD(const CHAR*, m_pe->pPeBase, GetRealAddress(pImport->Name))}.c_str());
+            PDWORD dwINT_Thunk = PIV_PTR_FORWARD(PDWORD, m_pe->pPeBase, GetRealAddress(pImport->OriginalFirstThunk));
+            PDWORD dwIAT_Thunk = PIV_PTR_FORWARD(PDWORD, m_pe->pPeBase, GetRealAddress(pImport->FirstThunk));
             PDWORD dwThunk = pImport->OriginalFirstThunk ? dwINT_Thunk : dwIAT_Thunk;
             std::vector<DWORD> vecOrdinal;
             std::vector<ULONGLONG> vecAddress;
@@ -769,22 +770,22 @@ public:
                 CVolString szName;
                 PIMAGE_IMPORT_BY_NAME pByName = nullptr;
                 if (pImport->TimeDateStamp) // 如果已经绑定了导入表,FirstThunk指向的地址被替换为真实的函数地址(VA)
-                    llAddress = m_PE->bIs64Pe ? reinterpret_cast<PIMAGE_THUNK_DATA64>(pIAT_Thunk)->u1.Function : pIAT_Thunk->u1.Function;
-                if (m_PE->bIsLoaded == FALSE) // PE未运行时,FirstThunk指向函数序号和名称
+                    llAddress = m_pe->bIs64Pe ? reinterpret_cast<PIMAGE_THUNK_DATA64>(pIAT_Thunk)->u1.Function : pIAT_Thunk->u1.Function;
+                if (m_pe->bIsLoaded == FALSE) // PE未运行时,FirstThunk指向函数序号和名称
                 {
                     if (dwDiff == 2)
                     {
                         if (IMAGE_SNAP_BY_ORDINAL64(reinterpret_cast<PIMAGE_THUNK_DATA64>(pIAT_Thunk)->u1.Ordinal))
                             dwOrdinal = IMAGE_ORDINAL64(reinterpret_cast<PIMAGE_THUNK_DATA64>(pIAT_Thunk)->u1.Ordinal);
                         else
-                            pByName = PIV_PTR_FORWARD(PIMAGE_IMPORT_BY_NAME, m_PE->pPeBase, GetRealAddress(static_cast<DWORD>(pIAT_Thunk->u1.AddressOfData)));
+                            pByName = PIV_PTR_FORWARD(PIMAGE_IMPORT_BY_NAME, m_pe->pPeBase, GetRealAddress(static_cast<DWORD>(pIAT_Thunk->u1.AddressOfData)));
                     }
                     else
                     {
                         if (IMAGE_SNAP_BY_ORDINAL32(pIAT_Thunk->u1.Ordinal))
                             dwOrdinal = IMAGE_ORDINAL32(pIAT_Thunk->u1.Ordinal);
                         else
-                            pByName = PIV_PTR_FORWARD(PIMAGE_IMPORT_BY_NAME, m_PE->pPeBase, GetRealAddress(static_cast<DWORD>(pIAT_Thunk->u1.AddressOfData)));
+                            pByName = PIV_PTR_FORWARD(PIMAGE_IMPORT_BY_NAME, m_pe->pPeBase, GetRealAddress(static_cast<DWORD>(pIAT_Thunk->u1.AddressOfData)));
                     }
                     if (pByName)
                     {
@@ -794,7 +795,7 @@ public:
                 }
                 else // PE运行时,FirstThunk指向的地址被替换为真实的函数地址(VA)
                 {
-                    llAddress = m_PE->bIs64Pe ? reinterpret_cast<PIMAGE_THUNK_DATA64>(pIAT_Thunk)->u1.Function : pIAT_Thunk->u1.Function;
+                    llAddress = m_pe->bIs64Pe ? reinterpret_cast<PIMAGE_THUNK_DATA64>(pIAT_Thunk)->u1.Function : pIAT_Thunk->u1.Function;
                     if (pImport->OriginalFirstThunk) // 如果原始桥有效,取函数序号和名称
                     {
                         if (dwDiff == 2)
@@ -802,14 +803,14 @@ public:
                             if (IMAGE_SNAP_BY_ORDINAL64(reinterpret_cast<PIMAGE_THUNK_DATA64>(pINT_Thunk)->u1.Ordinal))
                                 dwOrdinal = IMAGE_ORDINAL64(reinterpret_cast<PIMAGE_THUNK_DATA64>(pINT_Thunk)->u1.Ordinal);
                             else
-                                pByName = PIV_PTR_FORWARD(PIMAGE_IMPORT_BY_NAME, m_PE->pPeBase, GetRealAddress(static_cast<DWORD>(pINT_Thunk->u1.AddressOfData)));
+                                pByName = PIV_PTR_FORWARD(PIMAGE_IMPORT_BY_NAME, m_pe->pPeBase, GetRealAddress(static_cast<DWORD>(pINT_Thunk->u1.AddressOfData)));
                         }
                         else
                         {
                             if (IMAGE_SNAP_BY_ORDINAL32(pINT_Thunk->u1.Ordinal))
                                 dwOrdinal = IMAGE_ORDINAL32(pINT_Thunk->u1.Ordinal);
                             else
-                                pByName = PIV_PTR_FORWARD(PIMAGE_IMPORT_BY_NAME, m_PE->pPeBase, GetRealAddress(static_cast<DWORD>(pINT_Thunk->u1.AddressOfData)));
+                                pByName = PIV_PTR_FORWARD(PIMAGE_IMPORT_BY_NAME, m_pe->pPeBase, GetRealAddress(static_cast<DWORD>(pINT_Thunk->u1.AddressOfData)));
                         }
                         if (pByName)
                         {
@@ -830,7 +831,7 @@ public:
             vecFunName->push_back(vecName);
             pImport++;
         }
-        m_Error = 0;
+        m_error = 0;
         return (DWORD)vecModuleName->size();
     }
 
@@ -842,24 +843,24 @@ protected:
      * @brief 将当前的PE数据原样复制到新内存,申请的内存大小为PE的映像尺寸
      * @return
      */
-    VOID *CopyToMem()
+    VOID* CopyToMem()
     {
         SIZE_T dwImageSize = CalcTotalImageSize();
         if (dwImageSize == 0)
         {
-            m_Error = 18;
+            m_error = 18;
             return 0;
         }
-        void *pMemoryAddress = nullptr;
+        void* pMemoryAddress = nullptr;
         Nt.NtAllocateVirtualMemory(NULL, &pMemoryAddress, 0, &dwImageSize, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
         if (pMemoryAddress == nullptr)
         {
-            m_Error = 19;
+            m_error = 19;
             return 0;
         }
-        memcpy(pMemoryAddress, m_PE->pPeBase, m_PE->cbPeSize);
-        m_PE->bIsWriteable = TRUE;
-        m_Error = 0;
+        memcpy(pMemoryAddress, m_pe->pPeBase, m_pe->cbPeSize);
+        m_pe->bIsWriteable = TRUE;
+        m_error = 0;
         return pMemoryAddress;
     }
 
@@ -872,32 +873,32 @@ protected:
         SIZE_T dwImageSize = CalcTotalImageSize();
         if (dwImageSize == 0)
         {
-            m_Error = 18;
+            m_error = 18;
             return FALSE;
         }
-        void *pMemoryAddress = nullptr;
+        void* pMemoryAddress = nullptr;
         Nt.NtAllocateVirtualMemory(NULL, &pMemoryAddress, 0, &dwImageSize, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
         if (pMemoryAddress == nullptr)
         {
-            m_Error = 19;
+            m_error = 19;
             return FALSE;
         }
-        DWORD cbHeaders = m_PE->bIs64Pe ? reinterpret_cast<PIMAGE_NT_HEADERS64>(m_PE->pNtHeader)->OptionalHeader.SizeOfHeaders
-                                        : m_PE->pNtHeader->OptionalHeader.SizeOfHeaders;
-        memcpy(pMemoryAddress, m_PE->pPeBase, cbHeaders);
-        for (DWORD i = 0; i < m_PE->dwSectionCount; ++i)
+        DWORD cbHeaders = m_pe->bIs64Pe ? reinterpret_cast<PIMAGE_NT_HEADERS64>(m_pe->pNtHeader)->OptionalHeader.SizeOfHeaders
+                                        : m_pe->pNtHeader->OptionalHeader.SizeOfHeaders;
+        memcpy(pMemoryAddress, m_pe->pPeBase, cbHeaders);
+        for (DWORD i = 0; i < m_pe->dwSectionCount; ++i)
         {
-            if (m_PE->pSection[i].VirtualAddress == 0 || m_PE->pSection[i].SizeOfRawData == 0)
+            if (m_pe->pSection[i].VirtualAddress == 0 || m_pe->pSection[i].SizeOfRawData == 0)
                 continue;
-            void *pSectionAddress = PIV_PTR_FORWARD(void *, pMemoryAddress, m_PE->pSection[i].VirtualAddress);
+            void* pSectionAddress = PIV_PTR_FORWARD(void*, pMemoryAddress, m_pe->pSection[i].VirtualAddress);
             memcpy(pSectionAddress,
-                   PIV_PTR_FORWARD(void *, m_PE->pPeBase, m_PE->pSection[i].PointerToRawData), m_PE->pSection[i].SizeOfRawData);
+                   PIV_PTR_FORWARD(void*, m_pe->pPeBase, m_pe->pSection[i].PointerToRawData), m_pe->pSection[i].SizeOfRawData);
         }
         // 重定位基址和获取各种PE头的地址
-        m_PE->bIsMemAlign = TRUE;
-        m_PE->pPeBase = pMemoryAddress;
-        m_PE->cbPeSize = dwImageSize;
-        m_PE->bIsWriteable = TRUE;
+        m_pe->bIsMemAlign = TRUE;
+        m_pe->pPeBase = pMemoryAddress;
+        m_pe->cbPeSize = dwImageSize;
+        m_pe->bIsWriteable = TRUE;
         return (CheckHeaders());
     }
 
@@ -907,23 +908,23 @@ protected:
      */
     DWORD GetThunkSize()
     {
-        if (m_PE->bIs64Pe)
+        if (m_pe->bIs64Pe)
         {
             return 8;
         } // 64位PE肯定是8位长度.
         DWORD dwSize = 0;
         // 因为可能存在单桥结构,所以只读取FirstThunk
-        if ((m_PE->pImport + 1)->Name) // 导入表有大于1个模块
+        if ((m_pe->pImport + 1)->Name) // 导入表有大于1个模块
         {
-            PDWORD pSecondThunk = PIV_PTR_FORWARD(PDWORD, m_PE->pPeBase, GetRealAddress((m_PE->pImport + 1)->FirstThunk));
+            PDWORD pSecondThunk = PIV_PTR_FORWARD(PDWORD, m_pe->pPeBase, GetRealAddress((m_pe->pImport + 1)->FirstThunk));
             dwSize = *(pSecondThunk - 2) ? 4 : 8;
         }
         else // 导入表只有1个模块
         {
-            PDWORD pSecondDword = PIV_PTR_FORWARD(PDWORD, m_PE->pPeBase, GetRealAddress(m_PE->pImport->FirstThunk));
+            PDWORD pSecondDword = PIV_PTR_FORWARD(PDWORD, m_pe->pPeBase, GetRealAddress(m_pe->pImport->FirstThunk));
             dwSize = *pSecondDword ? 4 : 8;
         }
-        m_Error = 0;
+        m_error = 0;
         return dwSize;
     }
 
@@ -934,10 +935,10 @@ protected:
     BOOL RebuildRelocation()
     {
         PIMAGE_BASE_RELOCATION pRelocation = PIV_PTR_FORWARD(PIMAGE_BASE_RELOCATION,
-                                                             m_PE->pPeBase, GetDataDirectoryRva(IMAGE_DIRECTORY_ENTRY_BASERELOC));
+                                                             m_pe->pPeBase, GetDataDirectoryRva(IMAGE_DIRECTORY_ENTRY_BASERELOC));
         while ((pRelocation->VirtualAddress + pRelocation->SizeOfBlock) != 0)
         {
-            WORD *pLocData = PIV_PTR_FORWARD(WORD *, pRelocation, sizeof(IMAGE_BASE_RELOCATION));
+            WORD* pLocData = PIV_PTR_FORWARD(WORD*, pRelocation, sizeof(IMAGE_BASE_RELOCATION));
             DWORD nNumberOfReloc = (pRelocation->SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION)) / sizeof(WORD);
             for (DWORD i = 0; i < nNumberOfReloc; i++)
             {
@@ -947,10 +948,10 @@ protected:
                 {
                     // 64位dll重定位,IMAGE_REL_BASED_DIR64
                     // 对于IA-64的可执行文件,重定位似乎总是IMAGE_REL_BASED_DIR64类型的
-                    if (m_PE->bIs64Pe)
+                    if (m_pe->bIs64Pe)
                     {
-                        ULONGLONG *pAddress = PIV_PTR_FORWARD(ULONGLONG *, m_PE->pPeBase, pRelocation->VirtualAddress + (pLocData[i] & 0x0FFF));
-                        ULONGLONG ullDelta = reinterpret_cast<ULONGLONG>(m_PE->pPeBase) - reinterpret_cast<PIMAGE_NT_HEADERS64>(m_PE->pNtHeader)->OptionalHeader.ImageBase;
+                        ULONGLONG* pAddress = PIV_PTR_FORWARD(ULONGLONG*, m_pe->pPeBase, pRelocation->VirtualAddress + (pLocData[i] & 0x0FFF));
+                        ULONGLONG ullDelta = reinterpret_cast<ULONGLONG>(m_pe->pPeBase) - reinterpret_cast<PIMAGE_NT_HEADERS64>(m_pe->pNtHeader)->OptionalHeader.ImageBase;
                         *pAddress += ullDelta;
                     }
                 }
@@ -958,21 +959,21 @@ protected:
                 {
                     // 32位dll重定位,IMAGE_REL_BASED_HIGHLOW
                     // 对于x86的可执行文件,所有的基址重定位都是IMAGE_REL_BASED_HIGHLOW类型的
-                    if (m_PE->bIs64Pe == FALSE)
+                    if (m_pe->bIs64Pe == FALSE)
                     {
-                        DWORD *pAddress = PIV_PTR_FORWARD(DWORD *, m_PE->pPeBase, pRelocation->VirtualAddress + (pLocData[i] & 0x0FFF));
-                        DWORD dwDelta = PIV_PTR_BACKWARD(DWORD, m_PE->pPeBase, m_PE->pNtHeader->OptionalHeader.ImageBase);
+                        DWORD* pAddress = PIV_PTR_FORWARD(DWORD*, m_pe->pPeBase, pRelocation->VirtualAddress + (pLocData[i] & 0x0FFF));
+                        DWORD dwDelta = PIV_PTR_BACKWARD(DWORD, m_pe->pPeBase, m_pe->pNtHeader->OptionalHeader.ImageBase);
                         *pAddress += dwDelta;
                     }
                 }
             }
             pRelocation = (PIMAGE_BASE_RELOCATION)((PBYTE)pRelocation + pRelocation->SizeOfBlock);
         }
-        if (m_PE->bIs64Pe)
-            reinterpret_cast<PIMAGE_NT_HEADERS64>(m_PE->pNtHeader)->OptionalHeader.ImageBase = reinterpret_cast<ULONGLONG>(m_PE->pPeBase);
+        if (m_pe->bIs64Pe)
+            reinterpret_cast<PIMAGE_NT_HEADERS64>(m_pe->pNtHeader)->OptionalHeader.ImageBase = reinterpret_cast<ULONGLONG>(m_pe->pPeBase);
         else
-            m_PE->pNtHeader->OptionalHeader.ImageBase = static_cast<DWORD>(reinterpret_cast<size_t>(m_PE->pPeBase));
-        m_Error = 0;
+            m_pe->pNtHeader->OptionalHeader.ImageBase = static_cast<DWORD>(reinterpret_cast<size_t>(m_pe->pPeBase));
+        m_error = 0;
         return TRUE;
     }
 
@@ -981,18 +982,18 @@ protected:
      * @param vecHmodule
      * @return
      */
-    BOOL RebuildImport(std::vector<HMODULE> *vecHmodule)
+    BOOL RebuildImport(std::vector<HMODULE>* vecHmodule)
     {
-        PIMAGE_IMPORT_DESCRIPTOR pImport = m_PE->pImport;
-        if (m_PE->pImport == nullptr)
+        PIMAGE_IMPORT_DESCRIPTOR pImport = m_pe->pImport;
+        if (m_pe->pImport == nullptr)
         {
-            m_Error = 16;
+            m_error = 16;
             return 0;
         }
         DWORD dwThunkSize = GetThunkSize();
         if (dwThunkSize == 0)
         {
-            m_Error = 17;
+            m_error = 17;
             return FALSE;
         }
         DWORD dwDiff = dwThunkSize == 4 ? 1 : 2;
@@ -1002,8 +1003,8 @@ protected:
         CVolMem buffer;
         while (pImport->Name != 0)
         {
-            PDWORD pRealThunk = PIV_PTR_FORWARD(PDWORD, m_PE->pPeBase, pImport->FirstThunk);
-            Nt.RtlInitUnicodeString(&ModuleFileName, PivA2Ws{PIV_PTR_FORWARD(LPCSTR, m_PE->pPeBase, pImport->Name)}.c_str());
+            PDWORD pRealThunk = PIV_PTR_FORWARD(PDWORD, m_pe->pPeBase, pImport->FirstThunk);
+            Nt.RtlInitUnicodeString(&ModuleFileName, PivA2Ws{PIV_PTR_FORWARD(LPCSTR, m_pe->pPeBase, pImport->Name)}.c_str());
             if (NT_SUCCESS(Nt.LdrLoadDll(NULL, 0, &ModuleFileName, &hModule)))
             {
                 vecHmodule->push_back(hModule);
@@ -1015,14 +1016,14 @@ protected:
                     Nt.LdrUnloadDll(vecHmodule->at(i));
                 }
                 vecHmodule->clear();
-                m_Error = 20;
+                m_error = 20;
                 return FALSE;
             }
             while (*pRealThunk != 0)
             {
                 if (pImport->TimeDateStamp) // 导入表已经被绑定
                     break;
-                VOID *lpFunction = nullptr;
+                VOID* lpFunction = nullptr;
                 PIMAGE_THUNK_DATA pRealIAT = reinterpret_cast<PIMAGE_THUNK_DATA>(pRealThunk);
                 if (pRealIAT->u1.Ordinal & IMAGE_ORDINAL_FLAG)
                 {
@@ -1031,7 +1032,7 @@ protected:
                 else
                 {
                     PIMAGE_IMPORT_BY_NAME pByName = PIV_PTR_FORWARD(PIMAGE_IMPORT_BY_NAME,
-                                                                    m_PE->pPeBase, pRealIAT->u1.AddressOfData);
+                                                                    m_pe->pPeBase, pRealIAT->u1.AddressOfData);
                     Nt.RtlInitAnsiString(&FunctionName, pByName->Name);
                     Nt.LdrGetProcedureAddress(hModule, &FunctionName, pByName->Hint, &lpFunction);
                 }
@@ -1046,14 +1047,14 @@ protected:
                         Nt.LdrUnloadDll(vecHmodule->at(i));
                     }
                     vecHmodule->clear();
-                    m_Error = 21;
+                    m_error = 21;
                     return FALSE;
                 }
                 pRealThunk = pRealThunk + dwDiff;
             }
             pImport = PIV_PTR_FORWARD(PIMAGE_IMPORT_DESCRIPTOR, pImport, sizeof(IMAGE_IMPORT_DESCRIPTOR));
         }
-        m_Error = 0;
+        m_error = 0;
         return TRUE;
     }
 
@@ -1064,16 +1065,16 @@ public:
      * @param pMemAddress
      * @return
      */
-    BOOL RepairToPeFile(void *pMemAddress)
+    BOOL RepairToPeFile(void* pMemAddress)
     {
-        if (m_PE == nullptr)
+        if (m_pe == nullptr)
         {
-            m_Error = 9;
+            m_error = 9;
             return FALSE;
         }
-        if (m_PE->bIsLoaded == FALSE)
+        if (m_pe->bIsLoaded == FALSE)
         {
-            m_Error = 27;
+            m_error = 27;
             return FALSE;
         }
         if (RepairImport(pMemAddress) == FALSE)
@@ -1089,7 +1090,7 @@ public:
         {
             return FALSE;
         }
-        m_Error = 0;
+        m_error = 0;
         return TRUE;
     }
 
@@ -1099,18 +1100,18 @@ protected:
      * @param pMemAddress
      * @return
      */
-    BOOL RepairImport(void *pMemAddress)
+    BOOL RepairImport(void* pMemAddress)
     {
-        PIMAGE_IMPORT_DESCRIPTOR pImport = m_PE->pImport;
-        if (m_PE->pImport == nullptr)
+        PIMAGE_IMPORT_DESCRIPTOR pImport = m_pe->pImport;
+        if (m_pe->pImport == nullptr)
         {
-            m_Error = 16;
+            m_error = 16;
             return FALSE;
         }
         DWORD dwThunkSize = GetThunkSize();
         if (dwThunkSize == 0)
         {
-            m_Error = 17;
+            m_error = 17;
             return FALSE;
         }
         DWORD dwDiff = dwThunkSize == 4 ? 1 : 2;
@@ -1128,14 +1129,14 @@ protected:
                 }
                 else if (dwDiff == 2)
                 {
-                    *(UINT64 *)pRealThunk = *(UINT64 *)pOriginalThunk;
+                    *(UINT64*)pRealThunk = *(UINT64*)pOriginalThunk;
                 }
                 pRealThunk = pRealThunk + dwDiff;
                 pOriginalThunk = pOriginalThunk + dwDiff;
             }
             pImport = PIV_PTR_FORWARD(PIMAGE_IMPORT_DESCRIPTOR, pImport, sizeof(IMAGE_IMPORT_DESCRIPTOR));
         }
-        m_Error = 0;
+        m_error = 0;
         return TRUE;
     }
 
@@ -1144,39 +1145,39 @@ protected:
      * @param pMemAddress
      * @return
      */
-    BOOL RepairRelocation(void *pMemAddress)
+    BOOL RepairRelocation(void* pMemAddress)
     {
         PIMAGE_BASE_RELOCATION pRelocation = PIV_PTR_FORWARD(PIMAGE_BASE_RELOCATION,
-                                                             m_PE->pPeBase, GetDataDirectoryRva(IMAGE_DIRECTORY_ENTRY_BASERELOC));
+                                                             m_pe->pPeBase, GetDataDirectoryRva(IMAGE_DIRECTORY_ENTRY_BASERELOC));
 
         PIMAGE_DOS_HEADER pDosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(pMemAddress);
         if (pDosHeader->e_magic != IMAGE_DOS_SIGNATURE)
         {
-            m_Error = 4;
+            m_error = 4;
             return FALSE;
         }
         PIMAGE_NT_HEADERS32 pNtHeader = PIV_PTR_FORWARD(PIMAGE_NT_HEADERS32, pMemAddress, pDosHeader->e_lfanew);
-        if (m_PE->bIs64Pe)
+        if (m_pe->bIs64Pe)
             ((PIMAGE_NT_HEADERS64)pNtHeader)->OptionalHeader.ImageBase = IsDllData() ? 0x0000000180000000 : 0x0000000140000000;
         else
             pNtHeader->OptionalHeader.ImageBase = IsDllData() ? 0x10000000 : 0x400000;
         while ((pRelocation->VirtualAddress + pRelocation->SizeOfBlock) != 0)
         {
-            WORD *pLocData = PIV_PTR_FORWARD(WORD *, pRelocation, sizeof(IMAGE_BASE_RELOCATION));
+            WORD* pLocData = PIV_PTR_FORWARD(WORD*, pRelocation, sizeof(IMAGE_BASE_RELOCATION));
             DWORD nNumberOfReloc = (pRelocation->SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION)) / sizeof(WORD);
             for (DWORD i = 0; i < nNumberOfReloc; i++)
             {
                 // 每个WORD由两部分组成,高4位指出了重定位的类型,WINNT.H中的一系列IMAGE_REL_BASED_xxx定义了重定位类型的取值
                 // 低12位是相对于VirtualAddress域的偏移,指出了必须进行重定位的位置
-                if (m_PE->bIs64Pe)
+                if (m_pe->bIs64Pe)
                 {
                     if (pLocData[i] >> 12 == IMAGE_REL_BASED_DIR64)
                     {
                         // 64位dll重定位,IMAGE_REL_BASED_DIR64
                         // 对于IA-64的可执行文件,重定位似乎总是IMAGE_REL_BASED_DIR64类型的
-                        ULONGLONG *pAddress = PIV_PTR_FORWARD(ULONGLONG *, pMemAddress, pRelocation->VirtualAddress + (pLocData[i] & 0x0FFF));
-                        ULONGLONG ullDelta = *pAddress - reinterpret_cast<ULONGLONG>(m_PE->pPeBase) + reinterpret_cast<PIMAGE_NT_HEADERS64>(pNtHeader)->OptionalHeader.ImageBase;
-                        *(ULONGLONG *)pAddress = ullDelta;
+                        ULONGLONG* pAddress = PIV_PTR_FORWARD(ULONGLONG*, pMemAddress, pRelocation->VirtualAddress + (pLocData[i] & 0x0FFF));
+                        ULONGLONG ullDelta = *pAddress - reinterpret_cast<ULONGLONG>(m_pe->pPeBase) + reinterpret_cast<PIMAGE_NT_HEADERS64>(pNtHeader)->OptionalHeader.ImageBase;
+                        *(ULONGLONG*)pAddress = ullDelta;
                     }
                 }
                 else
@@ -1185,15 +1186,15 @@ protected:
                     {
                         // 32位dll重定位,IMAGE_REL_BASED_HIGHLOW
                         // 对于x86的可执行文件,所有的基址重定位都是IMAGE_REL_BASED_HIGHLOW类型的
-                        DWORD *pAddress = PIV_PTR_FORWARD(DWORD *, pMemAddress, pRelocation->VirtualAddress + (pLocData[i] & 0x0FFF));
-                        DWORD dwDelta = *pAddress - static_cast<DWORD>(reinterpret_cast<size_t>(m_PE->pPeBase)) + pNtHeader->OptionalHeader.ImageBase;
-                        *(DWORD *)pAddress = dwDelta;
+                        DWORD* pAddress = PIV_PTR_FORWARD(DWORD*, pMemAddress, pRelocation->VirtualAddress + (pLocData[i] & 0x0FFF));
+                        DWORD dwDelta = *pAddress - static_cast<DWORD>(reinterpret_cast<size_t>(m_pe->pPeBase)) + pNtHeader->OptionalHeader.ImageBase;
+                        *(DWORD*)pAddress = dwDelta;
                     }
                 }
             }
             pRelocation = PIV_PTR_FORWARD(PIMAGE_BASE_RELOCATION, pRelocation, pRelocation->SizeOfBlock);
         }
-        m_Error = 0;
+        m_error = 0;
         return TRUE;
     }
 
@@ -1202,16 +1203,16 @@ protected:
      * @param pMemAddress
      * @return
      */
-    BOOL DeAlignPeDatas(void *pMemAddress)
+    BOOL DeAlignPeDatas(void* pMemAddress)
     {
-        for (DWORD i = 0; i < m_PE->dwSectionCount; ++i)
+        for (DWORD i = 0; i < m_pe->dwSectionCount; ++i)
         {
-            if (m_PE->pSection[i].VirtualAddress == 0 || m_PE->pSection[i].SizeOfRawData == 0)
+            if (m_pe->pSection[i].VirtualAddress == 0 || m_pe->pSection[i].SizeOfRawData == 0)
                 continue;
-            void *pSectionAddress = PIV_PTR_FORWARD(void *, pMemAddress, m_PE->pSection[i].VirtualAddress);
-            memcpy(PIV_PTR_FORWARD(void *, pMemAddress, m_PE->pSection[i].PointerToRawData), pSectionAddress, m_PE->pSection[i].SizeOfRawData);
+            void* pSectionAddress = PIV_PTR_FORWARD(void*, pMemAddress, m_pe->pSection[i].VirtualAddress);
+            memcpy(PIV_PTR_FORWARD(void*, pMemAddress, m_pe->pSection[i].PointerToRawData), pSectionAddress, m_pe->pSection[i].SizeOfRawData);
         }
-        m_Error = 0;
+        m_error = 0;
         return TRUE;
     }
 
@@ -1224,7 +1225,7 @@ protected:
      */
     DWORD GetRealAddress(DWORD dwAddress)
     {
-        return m_PE->bIsMemAlign ? dwAddress : Rva2Foa(dwAddress);
+        return m_pe->bIsMemAlign ? dwAddress : Rva2Foa(dwAddress);
     }
 
     /**
@@ -1233,49 +1234,49 @@ protected:
      */
     BOOL CheckHeaders()
     {
-        m_PE->pDosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(m_PE->pPeBase);
-        if (m_PE->pDosHeader->e_magic != IMAGE_DOS_SIGNATURE)
+        m_pe->pDosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(m_pe->pPeBase);
+        if (m_pe->pDosHeader->e_magic != IMAGE_DOS_SIGNATURE)
         {
-            m_Error = 4;
+            m_error = 4;
             return FALSE;
         }
-        m_PE->pNtHeader = PIV_PTR_FORWARD(PIMAGE_NT_HEADERS32, m_PE->pPeBase, m_PE->pDosHeader->e_lfanew);
-        if (m_PE->pNtHeader->Signature != IMAGE_NT_SIGNATURE)
+        m_pe->pNtHeader = PIV_PTR_FORWARD(PIMAGE_NT_HEADERS32, m_pe->pPeBase, m_pe->pDosHeader->e_lfanew);
+        if (m_pe->pNtHeader->Signature != IMAGE_NT_SIGNATURE)
         {
-            m_Error = 5;
+            m_error = 5;
             return FALSE;
         }
-        WORD Machine = m_PE->pNtHeader->FileHeader.Machine;
+        WORD Machine = m_pe->pNtHeader->FileHeader.Machine;
         if (Machine == IMAGE_FILE_MACHINE_AMD64 || Machine == IMAGE_FILE_MACHINE_IA64)
         {
-            if (reinterpret_cast<PIMAGE_NT_HEADERS64>(m_PE->pNtHeader)->OptionalHeader.Magic != IMAGE_NT_OPTIONAL_HDR64_MAGIC)
+            if (reinterpret_cast<PIMAGE_NT_HEADERS64>(m_pe->pNtHeader)->OptionalHeader.Magic != IMAGE_NT_OPTIONAL_HDR64_MAGIC)
             {
-                m_Error = 6;
+                m_error = 6;
                 return FALSE;
             }
-            m_PE->bIs64Pe = TRUE;
+            m_pe->bIs64Pe = TRUE;
         }
         else if (Machine == IMAGE_FILE_MACHINE_I386)
         {
-            if (m_PE->pNtHeader->OptionalHeader.Magic != IMAGE_NT_OPTIONAL_HDR32_MAGIC)
+            if (m_pe->pNtHeader->OptionalHeader.Magic != IMAGE_NT_OPTIONAL_HDR32_MAGIC)
             {
-                m_Error = 6;
+                m_error = 6;
                 return FALSE;
             }
-            m_PE->bIs64Pe = FALSE;
+            m_pe->bIs64Pe = FALSE;
         }
         else
         {
-            m_Error = 7;
+            m_error = 7;
             return FALSE;
         }
-        m_PE->dwSectionCount = m_PE->pNtHeader->FileHeader.NumberOfSections;
-        m_PE->pSection = IMAGE_FIRST_SECTION(m_PE->pNtHeader);
-        m_PE->pImport = PIV_PTR_FORWARD(PIMAGE_IMPORT_DESCRIPTOR, m_PE->pPeBase,
+        m_pe->dwSectionCount = m_pe->pNtHeader->FileHeader.NumberOfSections;
+        m_pe->pSection = IMAGE_FIRST_SECTION(m_pe->pNtHeader);
+        m_pe->pImport = PIV_PTR_FORWARD(PIMAGE_IMPORT_DESCRIPTOR, m_pe->pPeBase,
                                         GetRealAddress(GetDataDirectoryRva(IMAGE_DIRECTORY_ENTRY_IMPORT)));
-        m_PE->pExport = PIV_PTR_FORWARD(PIMAGE_EXPORT_DIRECTORY, m_PE->pPeBase,
+        m_pe->pExport = PIV_PTR_FORWARD(PIMAGE_EXPORT_DIRECTORY, m_pe->pPeBase,
                                         GetRealAddress(GetDataDirectoryRva(IMAGE_DIRECTORY_ENTRY_EXPORT)));
-        m_Error = 0;
+        m_error = 0;
         return TRUE;
     }
 }; // PivPeFile
@@ -1286,7 +1287,7 @@ protected:
 class PivMemLoader : public PivPeFile
 {
 private:
-    typedef BOOL(__stdcall *ProcDllMain)(HINSTANCE, DWORD, LPVOID);
+    typedef BOOL(__stdcall* ProcDllMain)(HINSTANCE, DWORD, LPVOID);
 
 public:
     PivMemLoader()
@@ -1302,7 +1303,7 @@ public:
 private:
     BOOL m_bIsLoadOk;
     ProcDllMain m_fnDllMain;
-    std::vector<HMODULE> m_vecHmodule;
+    std::vector<HMODULE> m_hmodule_arr;
 
 public:
     /**
@@ -1313,14 +1314,14 @@ public:
     {
         if (m_bIsLoadOk == TRUE)
         {
-            m_fnDllMain(reinterpret_cast<HINSTANCE>(m_PE->pPeBase), DLL_PROCESS_DETACH, 0);
-            for (size_t i = 0; m_vecHmodule.size(); i++)
+            m_fnDllMain(reinterpret_cast<HINSTANCE>(m_pe->pPeBase), DLL_PROCESS_DETACH, 0);
+            for (size_t i = 0; m_hmodule_arr.size(); i++)
             {
-                Nt.LdrUnloadDll(m_vecHmodule[i]);
+                Nt.LdrUnloadDll(m_hmodule_arr[i]);
             }
-            m_vecHmodule.clear();
-            Nt.NtFreeVirtualMemory(NULL, &m_PE->pPeBase, NULL, MEM_RELEASE);
-            m_PE->pPeBase = nullptr;
+            m_hmodule_arr.clear();
+            Nt.NtFreeVirtualMemory(NULL, &m_pe->pPeBase, NULL, MEM_RELEASE);
+            m_pe->pPeBase = nullptr;
             m_fnDllMain = nullptr;
             m_bIsLoadOk = FALSE;
         }
@@ -1332,65 +1333,65 @@ public:
      * @param dwDataLength
      * @return
      */
-    BOOL MemLoadLibrary(void *lpFileData, DWORD dwDataLength)
+    BOOL MemLoadLibrary(void* lpFileData, DWORD dwDataLength)
     {
         if (m_bIsLoadOk == TRUE)
         {
-            m_Error = 22;
+            m_error = 22;
             return FALSE;
         }
         if (OpenPeData(lpFileData, dwDataLength, FALSE, FALSE) == FALSE)
             return FALSE;
-            // 验证DLL和程序的位数是否一致
+        // 验证DLL和程序的位数是否一致
 #ifdef _WIN64
-        if (m_PE->bIs64Pe == FALSE)
+        if (m_pe->bIs64Pe == FALSE)
         {
-            m_Error = 8;
+            m_error = 8;
             return FALSE;
         }
 #else
-        if (m_PE->bIs64Pe == TRUE)
+        if (m_pe->bIs64Pe == TRUE)
         {
-            m_Error = 8;
+            m_error = 8;
             return FALSE;
         }
 #endif
         if (IsDllData() == FALSE)
             return FALSE;
-        m_vecHmodule.clear();
+        m_hmodule_arr.clear();
         if (AlignPeDatas() == FALSE)
         {
-            Nt.NtFreeVirtualMemory(NULL, &m_PE->pPeBase, NULL, MEM_RELEASE);
-            m_PE->pPeBase = nullptr;
+            Nt.NtFreeVirtualMemory(NULL, &m_pe->pPeBase, NULL, MEM_RELEASE);
+            m_pe->pPeBase = nullptr;
             return FALSE;
         }
         if (GetDataDirectoryRva(IMAGE_DIRECTORY_ENTRY_BASERELOC) > 0 && GetDataDirectorySize(IMAGE_DIRECTORY_ENTRY_BASERELOC) > 0)
         {
             RebuildRelocation();
         }
-        if (RebuildImport(&m_vecHmodule) == FALSE)
+        if (RebuildImport(&m_hmodule_arr) == FALSE)
         {
-            Nt.NtFreeVirtualMemory(NULL, &m_PE->pPeBase, NULL, MEM_RELEASE);
-            m_PE->pPeBase = nullptr;
+            Nt.NtFreeVirtualMemory(NULL, &m_pe->pPeBase, NULL, MEM_RELEASE);
+            m_pe->pPeBase = nullptr;
             return FALSE;
         }
-        m_fnDllMain = PIV_PTR_FORWARD(ProcDllMain, m_PE->pPeBase, GetEntryPoint());
-        BOOL InitResult = m_fnDllMain(reinterpret_cast<HINSTANCE>(m_PE->pPeBase), DLL_PROCESS_ATTACH, 0);
+        m_fnDllMain = PIV_PTR_FORWARD(ProcDllMain, m_pe->pPeBase, GetEntryPoint());
+        BOOL InitResult = m_fnDllMain(reinterpret_cast<HINSTANCE>(m_pe->pPeBase), DLL_PROCESS_ATTACH, 0);
         if (InitResult == FALSE) // 初始化失败
         {
-            m_fnDllMain(reinterpret_cast<HINSTANCE>(m_PE->pPeBase), DLL_PROCESS_DETACH, 0);
-            for (size_t i = 0; m_vecHmodule.size(); i++)
+            m_fnDllMain(reinterpret_cast<HINSTANCE>(m_pe->pPeBase), DLL_PROCESS_DETACH, 0);
+            for (size_t i = 0; m_hmodule_arr.size(); i++)
             {
-                Nt.LdrUnloadDll(m_vecHmodule[i]);
+                Nt.LdrUnloadDll(m_hmodule_arr[i]);
             }
-            m_vecHmodule.clear();
-            Nt.NtFreeVirtualMemory(NULL, &m_PE->pPeBase, NULL, MEM_RELEASE);
+            m_hmodule_arr.clear();
+            Nt.NtFreeVirtualMemory(NULL, &m_pe->pPeBase, NULL, MEM_RELEASE);
             m_fnDllMain = nullptr;
-            m_Error = 23;
+            m_error = 23;
             return FALSE;
         }
         m_bIsLoadOk = TRUE;
-        m_Error = 0;
+        m_error = 0;
         return TRUE;
     }
 
@@ -1403,22 +1404,22 @@ public:
     {
         if (!m_bIsLoadOk)
         {
-            m_Error = 24;
+            m_error = 24;
             return nullptr;
         }
         DWORD dwOffsetStart = GetDataDirectoryRva(IMAGE_DIRECTORY_ENTRY_EXPORT);
         DWORD dwSize = GetDataDirectorySize(IMAGE_DIRECTORY_ENTRY_EXPORT);
         if (dwOffsetStart == 0 || dwSize == 0)
         {
-            m_Error = 15;
+            m_error = 15;
             return nullptr;
         }
-        DWORD dwBase = m_PE->pExport->Base;
-        int nNumberOfFunctions = (int)m_PE->pExport->NumberOfFunctions;
-        int nNumberOfNames = (int)m_PE->pExport->NumberOfNames;
-        LPDWORD pAddressOfFunctions = PIV_PTR_FORWARD(LPDWORD, m_PE->pPeBase, m_PE->pExport->AddressOfFunctions);
-        LPWORD pAddressOfOrdinals = PIV_PTR_FORWARD(LPWORD, m_PE->pPeBase, m_PE->pExport->AddressOfNameOrdinals);
-        LPDWORD pAddressOfNames = PIV_PTR_FORWARD(LPDWORD, m_PE->pPeBase, m_PE->pExport->AddressOfNames);
+        DWORD dwBase = m_pe->pExport->Base;
+        int nNumberOfFunctions = (int)m_pe->pExport->NumberOfFunctions;
+        int nNumberOfNames = (int)m_pe->pExport->NumberOfNames;
+        LPDWORD pAddressOfFunctions = PIV_PTR_FORWARD(LPDWORD, m_pe->pPeBase, m_pe->pExport->AddressOfFunctions);
+        LPWORD pAddressOfOrdinals = PIV_PTR_FORWARD(LPWORD, m_pe->pPeBase, m_pe->pExport->AddressOfNameOrdinals);
+        LPDWORD pAddressOfNames = PIV_PTR_FORWARD(LPDWORD, m_pe->pPeBase, m_pe->pExport->AddressOfNames);
         int nOrdinal = -1;
         if (((DWORD_PTR)lpProcName & 0xFFFF0000) == 0)
         {
@@ -1429,7 +1430,7 @@ public:
             int nFound = -1;
             for (int i = 0; i < nNumberOfNames; i++)
             {
-                char *szName = PIV_PTR_FORWARD(char *, m_PE->pPeBase, pAddressOfNames[i]);
+                char* szName = PIV_PTR_FORWARD(char*, m_pe->pPeBase, pAddressOfNames[i]);
                 if (strcmp(szName, lpProcName) == 0) // 比较函数名称
                 {
                     nFound = i;
@@ -1441,7 +1442,7 @@ public:
         }
         if (nOrdinal < 0 || nOrdinal >= nNumberOfFunctions)
         {
-            m_Error = 25;
+            m_error = 25;
             return nullptr;
         }
         else
@@ -1449,13 +1450,13 @@ public:
             DWORD pFunctionOffset = pAddressOfFunctions[nOrdinal];
             if (pFunctionOffset > dwOffsetStart && pFunctionOffset < (dwOffsetStart + dwSize))
             {
-                m_Error = 26;
+                m_error = 26;
                 return nullptr;
             }
             else
             {
-                m_Error = 0;
-                return PIV_PTR_FORWARD(FARPROC, m_PE->pPeBase, pFunctionOffset);
+                m_error = 0;
+                return PIV_PTR_FORWARD(FARPROC, m_pe->pPeBase, pFunctionOffset);
             }
         }
     }

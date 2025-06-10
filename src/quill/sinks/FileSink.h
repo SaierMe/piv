@@ -355,7 +355,7 @@ protected:
     }
 
 #if defined(_WIN32)
-    _file = _wfopen(filename.c_str(), mode.data()[0] == 'w' ? L"w" : L"a");
+    _wfopen_s(&_file, filename.c_str(), mode.data()[0] == 'w' ? L"w" : L"a");
 #else
     _file = fopen(filename.string().data(), mode.data());
 #endif

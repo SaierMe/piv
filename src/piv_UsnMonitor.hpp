@@ -15,6 +15,7 @@
 #include <functional>
 #include <mutex>
 #include <thread>
+#include <future>
 #include <map>
 #include <set>
 
@@ -31,19 +32,20 @@ private:
     std::unique_ptr<std::map<DWORDLONG, CWString>> m_FRNtoPATH;    // 文件FRN到文本名称排序表
     std::unique_ptr<std::map<DWORDLONG, DWORDLONG>> m_FRNtoParent; // 文件FRN到父目录FRN排序表
     std::unique_ptr<std::set<DWORDLONG>> m_MonitorDir;             // 监视目录的FRN集合
+    std::shared_future<void> m_future;                             // 未来值(用于等待线程结束)
     USN_JOURNAL_DATA m_ujd{0};                                     // USN日志数据
     CWString m_root;                                               // 根路径
     CWString m_RecyclePath;                                        // 回收站路径
 
-    std::function<int32_t(void)> func_Inited;                                                               // 初始化完毕
-    std::function<int32_t(CWString &, CWString &, FILETIME &, int32_t)> func_Created;                       // 文件被创建
-    std::function<int32_t(CWString &, CWString &, FILETIME &, int32_t)> func_Deleted;                       // 文件被删除
-    std::function<int32_t(CWString &, CWString &, int32_t, FILETIME &, int32_t)> func_DataChanged;          // 文件内容改变
-    std::function<int32_t(CWString &, CWString &, CWString &, FILETIME &, int32_t)> func_Renamed;           // 文件被重命名
-    std::function<int32_t(CWString &, CWString &, CWString &, FILETIME &, int32_t)> func_Recycle;           // 被删到回收站
-    std::function<int32_t(CWString &, CWString &, CWString &, CWString &, FILETIME &, int32_t)> func_Moved; // 文件被移动
-    std::function<int32_t(CWString &, CWString &, int32_t, FILETIME &, int32_t)> func_AttributeChange;      // 文件属性改变
-    std::function<int32_t(CWString &, CWString &, int32_t, FILETIME &, int32_t)> func_OtherChange;          // 其他状态改变
+    std::function<int32_t(void)> func_Inited;                                                          // 初始化完毕
+    std::function<int32_t(CWString&, CWString&, FILETIME&, int32_t)> func_Created;                     // 文件被创建
+    std::function<int32_t(CWString&, CWString&, FILETIME&, int32_t)> func_Deleted;                     // 文件被删除
+    std::function<int32_t(CWString&, CWString&, int32_t, FILETIME&, int32_t)> func_DataChanged;        // 文件内容改变
+    std::function<int32_t(CWString&, CWString&, CWString&, FILETIME&, int32_t)> func_Renamed;          // 文件被重命名
+    std::function<int32_t(CWString&, CWString&, CWString&, FILETIME&, int32_t)> func_Recycle;          // 被删到回收站
+    std::function<int32_t(CWString&, CWString&, CWString&, CWString&, FILETIME&, int32_t)> func_Moved; // 文件被移动
+    std::function<int32_t(CWString&, CWString&, int32_t, FILETIME&, int32_t)> func_AttributeChange;    // 文件属性改变
+    std::function<int32_t(CWString&, CWString&, int32_t, FILETIME&, int32_t)> func_OtherChange;        // 其他状态改变
 
     typedef struct _IO_STATUS_BLOCK
     {
@@ -71,9 +73,9 @@ private:
         PVOID SecurityQualityOfService;
     } OBJECT_ATTRIBUTES;
 
-    typedef ULONG(__stdcall *PNtCreateFile)(PHANDLE FileHandle, ULONG DesiredAccess, PVOID ObjectAttributes, PIO_STATUS_BLOCK IoStatusBlock,
+    typedef ULONG(__stdcall* PNtCreateFile)(PHANDLE FileHandle, ULONG DesiredAccess, PVOID ObjectAttributes, PIO_STATUS_BLOCK IoStatusBlock,
                                             PLARGE_INTEGER AllocationSize, ULONG FileAttributes, ULONG ShareAccess, ULONG CreateDisposition, ULONG CreateOptions, PVOID EaBuffer, ULONG EaLength);
-    typedef LONG(__stdcall *PNtQueryInformationFile)(HANDLE FileHandle, PIO_STATUS_BLOCK IoStatusBlock, PVOID FileInformation, DWORD Length, DWORD FileInformationClass);
+    typedef LONG(__stdcall* PNtQueryInformationFile)(HANDLE FileHandle, PIO_STATUS_BLOCK IoStatusBlock, PVOID FileInformation, DWORD Length, DWORD FileInformationClass);
 
     PNtQueryInformationFile fNtQueryInformationFile = (PNtQueryInformationFile)GetProcAddress(::GetModuleHandleW(L"ntdll.dll"), "NtQueryInformationFile");
     PNtCreateFile fNtCreatefile = (PNtCreateFile)GetProcAddress(::GetModuleHandleW(L"ntdll.dll"), "NtCreateFile");
@@ -83,7 +85,7 @@ private:
      * @param frn 文件引用编号
      * @param path 返回路径
      */
-    void PathFromFRN(DWORDLONG frn, CWString &path)
+    void PathFromFRN(DWORDLONG frn, CWString& path)
     {
         if (!m_hasPathMap)
         {
@@ -131,7 +133,7 @@ private:
      * @param path 文件路径
      * @return 文件引用编号
      */
-    DWORDLONG PathToFRN(const WCHAR *path)
+    DWORDLONG PathToFRN(const WCHAR* path)
     {
         DWORDLONG ret = 0;
         HANDLE hDir = ::CreateFileW(path, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
@@ -167,7 +169,7 @@ private:
      * @param sidString 返回SID文本
      * @return 返回SID文本
      */
-    CWString &GetUserSidString(CWString &sidString = CWString{})
+    CWString& GetUserSidString(CWString& sidString = CWString{})
     {
         sidString.Empty();
         HANDLE token = NULL;
@@ -250,11 +252,11 @@ private:
                     m_FRNtoParent->emplace(UsnRecord->FileReferenceNumber, UsnRecord->ParentFileReferenceNumber);
                     if (m_hasPathMap)
                         m_FRNtoPATH->emplace(std::piecewise_construct, std::forward_as_tuple(UsnRecord->FileReferenceNumber),
-                                             std::forward_as_tuple((const WCHAR *)((PBYTE)UsnRecord + UsnRecord->FileNameOffset), UsnRecord->FileNameLength / 2));
+                                             std::forward_as_tuple((const WCHAR*)((PBYTE)UsnRecord + UsnRecord->FileNameOffset), UsnRecord->FileNameLength / 2));
                 }
                 // 获取下一个记录
                 dwRetBytes -= UsnRecord->RecordLength;
-                UsnRecord = (PUSN_RECORD)(((CHAR *)UsnRecord) + UsnRecord->RecordLength);
+                UsnRecord = (PUSN_RECORD)(((CHAR*)UsnRecord) + UsnRecord->RecordLength);
             }
             med.StartFileReferenceNumber = *buffer.Get<USN>();
         }
@@ -304,7 +306,7 @@ private:
                     if (m_IndexPath)
                         PathFromFRN(UsnRecord->ParentFileReferenceNumber, path);
                     // 获取文件或目录名称
-                    filename.SetText((const WCHAR *)((PBYTE)UsnRecord + UsnRecord->FileNameOffset), UsnRecord->FileNameLength / 2);
+                    filename.SetText((const WCHAR*)((PBYTE)UsnRecord + UsnRecord->FileNameOffset), UsnRecord->FileNameLength / 2);
                     // 以下为文件或更改事件
                     if (UsnRecord->Reason & USN_REASON_FILE_CREATE)
                     {
@@ -383,7 +385,7 @@ private:
                     // 检查是否限定了监视目录
                     if (!IsMonitored(UsnRecord->ParentFileReferenceNumber))
                         goto NextRecord;
-                    OldName.SetText((const WCHAR *)((PBYTE)UsnRecord + UsnRecord->FileNameOffset), UsnRecord->FileNameLength / 2);
+                    OldName.SetText((const WCHAR*)((PBYTE)UsnRecord + UsnRecord->FileNameOffset), UsnRecord->FileNameLength / 2);
                     OldPathFRN = UsnRecord->ParentFileReferenceNumber;
                 }
             // 获取下一个记录
@@ -417,7 +419,7 @@ public:
      * @param index_path 索引完整路径
      * @return 是否成功
      */
-    PivUsnMonitor(const wchar_t &drive_letter, CMStringArray &monitor_dirs, int32_t delay = 1000, int32_t index_path = true)
+    PivUsnMonitor(const wchar_t& drive_letter, CMStringArray& monitor_dirs, int32_t delay = 1000, int32_t index_path = true)
     {
         m_Event = ::CreateEvent(NULL, FALSE, FALSE, NULL);
         Start(drive_letter, monitor_dirs, delay, index_path);
@@ -440,7 +442,7 @@ public:
      * @param index_path 索引完整路径
      * @return 是否成功
      */
-    bool Start(const wchar_t &drive_letter, CMStringArray &monitor_dirs, int32_t delay = 1000, int32_t index_path = 1)
+    bool Start(const wchar_t& drive_letter, CMStringArray& monitor_dirs, int32_t delay = 1000, int32_t index_path = 1)
     {
         Stop();
         m_root.Empty();
@@ -503,9 +505,9 @@ public:
         // 初始化成功
         ::ResetEvent(m_Event);
         if (m_hasParentMap || m_hasPathMap)
-            std::thread(&PivUsnMonitor::IndexPath, this).detach();
+            m_future = std::async(std::launch::async, &PivUsnMonitor::IndexPath, this);
         else
-            std::thread(&PivUsnMonitor::MonitorUsn, this).detach();
+            m_future = std::async(std::launch::async, &PivUsnMonitor::MonitorUsn, this);
         return true;
     // 初始化失败后清理句柄
     Init_Failed:
@@ -521,6 +523,8 @@ public:
     void Stop(bool delete_usn = false)
     {
         ::SetEvent(m_Event);
+        if (m_future.valid())
+            m_future.wait();
         if (m_hVol != INVALID_HANDLE_VALUE)
         {
             if (delete_usn)
@@ -549,7 +553,7 @@ public:
      * @return
      */
     template <typename Fun, typename... Args>
-    inline void BindInited(Fun &&fun, Args &&...args)
+    inline void BindInited(Fun&& fun, Args&&... args)
     {
         func_Inited = std::bind(std::forward<Fun>(fun), std::forward<Args>(args)...);
     }
@@ -561,7 +565,7 @@ public:
      * @return
      */
     template <typename Fun, typename... Args>
-    inline void BindCreated(Fun &&fun, Args &&...args)
+    inline void BindCreated(Fun&& fun, Args&&... args)
     {
         func_Created = std::bind(std::forward<Fun>(fun), std::forward<Args>(args)...);
     }
@@ -573,7 +577,7 @@ public:
      * @return
      */
     template <typename Fun, typename... Args>
-    inline void BindDeleted(Fun &&fun, Args &&...args)
+    inline void BindDeleted(Fun&& fun, Args&&... args)
     {
         func_Deleted = std::bind(std::forward<Fun>(fun), std::forward<Args>(args)...);
     }
@@ -585,7 +589,7 @@ public:
      * @return
      */
     template <typename Fun, typename... Args>
-    inline void BindDataChanged(Fun &&fun, Args &&...args)
+    inline void BindDataChanged(Fun&& fun, Args&&... args)
     {
         func_DataChanged = std::bind(std::forward<Fun>(fun), std::forward<Args>(args)...);
     }
@@ -597,7 +601,7 @@ public:
      * @return
      */
     template <typename Fun, typename... Args>
-    inline void BindRenamed(Fun &&fun, Args &&...args)
+    inline void BindRenamed(Fun&& fun, Args&&... args)
     {
         func_Renamed = std::bind(std::forward<Fun>(fun), std::forward<Args>(args)...);
     }
@@ -609,7 +613,7 @@ public:
      * @return
      */
     template <typename Fun, typename... Args>
-    inline void BindMoved(Fun &&fun, Args &&...args)
+    inline void BindMoved(Fun&& fun, Args&&... args)
     {
         func_Moved = std::bind(std::forward<Fun>(fun), std::forward<Args>(args)...);
     }
@@ -621,7 +625,7 @@ public:
      * @return
      */
     template <typename Fun, typename... Args>
-    inline void BindRecycle(Fun &&fun, Args &&...args)
+    inline void BindRecycle(Fun&& fun, Args&&... args)
     {
         func_Recycle = std::bind(std::forward<Fun>(fun), std::forward<Args>(args)...);
     }
@@ -633,7 +637,7 @@ public:
      * @return
      */
     template <typename Fun, typename... Args>
-    inline void BindAttributeChange(Fun &&fun, Args &&...args)
+    inline void BindAttributeChange(Fun&& fun, Args&&... args)
     {
         func_AttributeChange = std::bind(std::forward<Fun>(fun), std::forward<Args>(args)...);
     }
@@ -645,7 +649,7 @@ public:
      * @return
      */
     template <typename Fun, typename... Args>
-    inline void BindOtherChange(Fun &&fun, Args &&...args)
+    inline void BindOtherChange(Fun&& fun, Args&&... args)
     {
         func_OtherChange = std::bind(std::forward<Fun>(fun), std::forward<Args>(args)...);
     }

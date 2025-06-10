@@ -23,10 +23,10 @@ class piv_yyjson_mut_val;
 class piv_yyjson_alc
 {
 private:
-    std::atomic<yyjson_alc *> m_pref_alc = nullptr;
-    std::atomic<yyjson_alc *> m_vol_alc = nullptr;
-    std::atomic<yyjson_alc *> m_def_alc = nullptr;
-    std::atomic<yyjson_alc *> m_mi_alc = nullptr;
+    std::atomic<yyjson_alc*> m_pref_alc = nullptr;
+    std::atomic<yyjson_alc*> m_vol_alc = nullptr;
+    std::atomic<yyjson_alc*> m_def_alc = nullptr;
+    std::atomic<yyjson_alc*> m_mi_alc = nullptr;
     std::mutex m_mutex;
 
     piv_yyjson_alc() {}
@@ -42,13 +42,13 @@ private:
             delete m_mi_alc.load();
     }
 
-    piv_yyjson_alc(const piv_yyjson_alc &) = delete;
-    piv_yyjson_alc(piv_yyjson_alc &&) = delete;
-    piv_yyjson_alc &operator=(const piv_yyjson_alc &) = delete;
-    piv_yyjson_alc &operator=(piv_yyjson_alc &&) = delete;
+    piv_yyjson_alc(const piv_yyjson_alc&) = delete;
+    piv_yyjson_alc(piv_yyjson_alc&&) = delete;
+    piv_yyjson_alc& operator=(const piv_yyjson_alc&) = delete;
+    piv_yyjson_alc& operator=(piv_yyjson_alc&&) = delete;
 
 public:
-    static piv_yyjson_alc &instance()
+    static piv_yyjson_alc& instance()
     {
         static piv_yyjson_alc inst;
 #ifndef MIMALLOC_H
@@ -65,19 +65,19 @@ public:
         return inst;
     }
 
-    inline yyjson_alc *pref()
+    inline yyjson_alc* pref()
     {
         return m_pref_alc.load(std::memory_order_acquire);
     }
 
-    inline void set_pref(yyjson_alc *p)
+    inline void set_pref(yyjson_alc* p)
     {
         return m_pref_alc.store(p, std::memory_order_release);
     }
 
-    yyjson_alc *vol_alc()
+    yyjson_alc* vol_alc()
     {
-        yyjson_alc *p = m_vol_alc.load(std::memory_order_acquire);
+        yyjson_alc* p = m_vol_alc.load(std::memory_order_acquire);
         if (p == nullptr)
         {
             std::lock_guard<std::mutex> lock(m_mutex);
@@ -91,9 +91,9 @@ public:
         return p;
     }
 
-    yyjson_alc *def_alc()
+    yyjson_alc* def_alc()
     {
-        yyjson_alc *p = m_def_alc.load(std::memory_order_acquire);
+        yyjson_alc* p = m_def_alc.load(std::memory_order_acquire);
         if (p == nullptr)
         {
             std::lock_guard<std::mutex> lock(m_mutex);
@@ -107,10 +107,10 @@ public:
         return p;
     }
 
-    yyjson_alc *mi_alc()
+    yyjson_alc* mi_alc()
     {
 #ifdef MIMALLOC_H
-        yyjson_alc *p = m_mi_alc.load(std::memory_order_acquire);
+        yyjson_alc* p = m_mi_alc.load(std::memory_order_acquire);
         if (p == nullptr)
         {
             std::lock_guard<std::mutex> lock(m_mutex);
@@ -127,48 +127,48 @@ public:
 #endif
     }
 
-    static void *vol_malloc(void *ctx, size_t size)
+    static void* vol_malloc(void* ctx, size_t size)
     {
-        return reinterpret_cast<CPoolMem *>(ctx)->Alloc((INT_P)size);
+        return reinterpret_cast<CPoolMem*>(ctx)->Alloc((INT_P)size);
     }
 
-    static void *vol_realloc(void *ctx, void *ptr, size_t old_size, size_t size)
+    static void* vol_realloc(void* ctx, void* ptr, size_t old_size, size_t size)
     {
-        return reinterpret_cast<CPoolMem *>(ctx)->Realloc(ptr, (INT_P)size);
+        return reinterpret_cast<CPoolMem*>(ctx)->Realloc(ptr, (INT_P)size);
     }
 
-    static void vol_free(void *ctx, void *ptr)
+    static void vol_free(void* ctx, void* ptr)
     {
-        reinterpret_cast<CPoolMem *>(ctx)->Free(ptr);
+        reinterpret_cast<CPoolMem*>(ctx)->Free(ptr);
     }
 
-    static void *default_malloc(void *ctx, size_t size)
+    static void* default_malloc(void* ctx, size_t size)
     {
         return malloc(size);
     }
 
-    static void *default_realloc(void *ctx, void *ptr, size_t old_size, size_t size)
+    static void* default_realloc(void* ctx, void* ptr, size_t old_size, size_t size)
     {
         return realloc(ptr, size);
     }
 
-    static void default_free(void *ctx, void *ptr)
+    static void default_free(void* ctx, void* ptr)
     {
         free(ptr);
     }
 
 #ifdef MIMALLOC_H
-    static void *mimalloc_malloc(void *ctx, size_t size)
+    static void* mimalloc_malloc(void* ctx, size_t size)
     {
         return mi_malloc(size);
     }
 
-    static void *mimalloc__realloc(void *ctx, void *ptr, size_t old_size, size_t size)
+    static void* mimalloc__realloc(void* ctx, void* ptr, size_t old_size, size_t size)
     {
         return mi_realloc(ptr, size);
     }
 
-    static void mimalloc__free(void *ctx, void *ptr)
+    static void mimalloc__free(void* ctx, void* ptr)
     {
         mi_free(ptr);
     }
@@ -188,11 +188,11 @@ public:
     class piv_yyjson_doc
     {
     public:
-        yyjson_doc *doc = nullptr;
+        yyjson_doc* doc = nullptr;
 
         piv_yyjson_doc() {}
 
-        piv_yyjson_doc(yyjson_doc *rhs)
+        piv_yyjson_doc(yyjson_doc* rhs)
         {
             doc = rhs;
         }
@@ -216,7 +216,7 @@ public:
             return doc == nullptr;
         }
 
-        inline yyjson_val *root()
+        inline yyjson_val* root()
         {
             return yyjson_doc_get_root(doc);
         }
@@ -228,16 +228,16 @@ public:
     struct iter_cnt
     {
         size_t idx = 0;
-        yyjson_val *key = nullptr;
-        yyjson_val *val = nullptr;
-        piv_yyjson_val *doc = nullptr;
+        yyjson_val* key = nullptr;
+        yyjson_val* val = nullptr;
+        piv_yyjson_val* doc = nullptr;
 
         piv_yyjson_val get_key()
         {
             return doc ? piv_yyjson_val{doc->m_shared_doc ? doc->m_shared_doc : doc->m_weak_doc, key} : piv_yyjson_val{};
         }
 
-        const char *get_key_str()
+        const char* get_key_str()
         {
             return yyjson_get_str(key);
         }
@@ -262,13 +262,13 @@ public:
         };
 
     public:
-        iterator(const iterator &rhs)
+        iterator(const iterator& rhs)
         {
             memmove(&obj_iter, &rhs.obj_iter, sizeof(yyjson_arr_iter));
             memmove(&value, &rhs.value, sizeof(iter_cnt));
         }
 
-        iterator(size_t _max_count, size_t _cursor, piv_yyjson_val *_this)
+        iterator(size_t _max_count, size_t _cursor, piv_yyjson_val* _this)
         {
             value.idx = _cursor;
             if (_max_count > 0 && _cursor != _max_count && _this != nullptr)
@@ -302,22 +302,22 @@ public:
 
         ~iterator() {}
 
-        iter_cnt &operator*()
+        iter_cnt& operator*()
         {
             return value;
         }
 
-        iter_cnt *operator->()
+        iter_cnt* operator->()
         {
             return &value;
         }
 
-        bool operator!=(const iterator &rhs)
+        bool operator!=(const iterator& rhs)
         {
             return (value.idx != rhs.value.idx);
         }
 
-        iterator &operator++()
+        iterator& operator++()
         {
             value.idx++;
             if (value.doc)
@@ -340,7 +340,7 @@ private:
     std::shared_ptr<piv_yyjson_doc> m_shared_doc;
     std::weak_ptr<piv_yyjson_doc> m_weak_doc;
 
-    inline piv_yyjson_doc *_doc()
+    inline piv_yyjson_doc* _doc()
     {
         if (!m_shared_doc)
         {
@@ -351,7 +351,7 @@ private:
         return m_shared_doc.get();
     }
 
-    inline piv_yyjson_doc *_doc() const
+    inline piv_yyjson_doc* _doc() const
     {
         if (m_shared_doc)
             return m_shared_doc.get();
@@ -362,7 +362,7 @@ private:
     }
 
     template <typename T>
-    T to_num(yyjson_val *val)
+    T to_num(yyjson_val* val)
     {
         if (!val)
             return static_cast<T>(0);
@@ -383,7 +383,7 @@ private:
     }
 
 public:
-    yyjson_val *m_val = nullptr;
+    yyjson_val* m_val = nullptr;
 
     piv_yyjson_val()
     {
@@ -391,32 +391,32 @@ public:
         m_val = nullptr;
     }
 
-    piv_yyjson_val(const piv_yyjson_val &rhs)
+    piv_yyjson_val(const piv_yyjson_val& rhs)
     {
         m_shared_doc = rhs.m_shared_doc;
         m_weak_doc = rhs.m_weak_doc;
         m_val = rhs.m_val;
     }
 
-    piv_yyjson_val(const std::shared_ptr<piv_yyjson_doc> &doc, yyjson_val *val)
+    piv_yyjson_val(const std::shared_ptr<piv_yyjson_doc>& doc, yyjson_val* val)
     {
         m_weak_doc = doc;
         m_val = val;
     }
 
-    piv_yyjson_val(const std::weak_ptr<piv_yyjson_doc> &doc, yyjson_val *val)
+    piv_yyjson_val(const std::weak_ptr<piv_yyjson_doc>& doc, yyjson_val* val)
     {
         m_weak_doc = doc;
         m_val = val;
     }
 
-    piv_yyjson_val(yyjson_doc *doc, yyjson_val *val = nullptr)
+    piv_yyjson_val(yyjson_doc* doc, yyjson_val* val = nullptr)
     {
         m_shared_doc = std::make_shared<piv_yyjson_doc>(doc);
         m_val = val ? val : m_shared_doc->root();
     }
 
-    piv_yyjson_val(yyjson_val *val)
+    piv_yyjson_val(yyjson_val* val)
     {
         m_shared_doc = std::make_shared<piv_yyjson_doc>();
         m_val = val;
@@ -424,7 +424,7 @@ public:
 
     ~piv_yyjson_val() {}
 
-    piv_yyjson_val &operator=(const piv_yyjson_val &rhs) noexcept
+    piv_yyjson_val& operator=(const piv_yyjson_val& rhs) noexcept
     {
         m_shared_doc = rhs.m_shared_doc;
         m_weak_doc = rhs.m_weak_doc;
@@ -432,7 +432,7 @@ public:
         return *this;
     }
 
-    piv_yyjson_val &operator=(piv_yyjson_val &&rhs) noexcept
+    piv_yyjson_val& operator=(piv_yyjson_val&& rhs) noexcept
     {
         m_shared_doc = std::move(rhs.m_shared_doc);
         m_weak_doc = std::move(rhs.m_weak_doc);
@@ -440,19 +440,19 @@ public:
         return *this;
     }
 
-    bool operator==(const piv_yyjson_val &rhs) const noexcept
+    bool operator==(const piv_yyjson_val& rhs) const noexcept
     {
         if (!m_shared_doc && m_weak_doc.expired())
             return false;
         return (m_val == rhs.m_val) ? true : yyjson_equals(m_val, rhs.m_val);
     }
 
-    virtual void GetDumpString(CWString &strDump, INT nMaxDumpSize) override
+    virtual void GetDumpString(CWString& strDump, INT nMaxDumpSize) override
     {
         strDump = to_vol_str(0, piv_yyjson_alc::instance().pref());
     }
 
-    virtual void LoadFromStream(CVolBaseInputStream &stream)
+    virtual void LoadFromStream(CVolBaseInputStream& stream)
     {
         clear();
         if (stream.eof())
@@ -464,11 +464,11 @@ public:
             parse_doc(data.get(), len, 0, piv_yyjson_alc::instance().pref(), nullptr);
     }
 
-    virtual void SaveIntoStream(CVolBaseOutputStream &stream)
+    virtual void SaveIntoStream(CVolBaseOutputStream& stream)
     {
-        yyjson_alc *alc = piv_yyjson_alc::instance().pref();
+        yyjson_alc* alc = piv_yyjson_alc::instance().pref();
         size_t len;
-        char *str = yyjson_write_opts(_doc()->doc, 0, alc, &len, nullptr);
+        char* str = yyjson_write_opts(_doc()->doc, 0, alc, &len, nullptr);
         if (str)
         {
             stream.write(&len, 4);
@@ -487,25 +487,26 @@ public:
         m_val = nullptr;
     }
 
-    inline bool parse_doc(const char *dat, size_t len, yyjson_read_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_read_err *err = nullptr)
+    inline bool parse_doc(const char* dat, size_t len, yyjson_read_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_read_err* err = nullptr)
     {
         _doc()->free_doc();
-        _doc()->doc = yyjson_read_opts((char *)dat, len, flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
+        _doc()->doc = yyjson_read_opts((char*)dat, len, flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
         m_val = _doc()->root();
         return !_doc()->empty();
     }
 
     template <typename T>
-    inline bool parse(T &&dat, yyjson_read_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_read_err *err = nullptr)
+    inline bool parse(T&& dat, yyjson_read_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_read_err* err = nullptr)
     {
-        PivS2V sv{dat};
+        PivAny2U<true> sv{dat};
         return parse_doc(sv.data(), sv.size(), flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
     }
 
-    bool parse_file(const wchar_t *filename, yyjson_read_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_read_err *err = nullptr)
+    bool parse_file(const wchar_t* filename, yyjson_read_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_read_err* err = nullptr)
     {
         _doc()->free_doc();
-        FILE *fp = _wfopen(filename, L"rb");
+        FILE* fp = nullptr;
+        _wfopen_s(&fp, filename, L"rb");
         _doc()->doc = yyjson_read_fp(fp, flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
         m_val = _doc()->root();
         if (fp)
@@ -513,21 +514,22 @@ public:
         return !_doc()->empty();
     }
 
-    bool write_file(const wchar_t *filename, yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_write_err *err = nullptr)
+    bool write_file(const wchar_t* filename, yyjson_write_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_write_err* err = nullptr)
     {
-        FILE *fp = _wfopen(filename, L"wb+");
+        FILE* fp = nullptr;
+        _wfopen_s(&fp, filename, L"wb+");
         bool ret = yyjson_write_fp(fp, _doc()->doc, flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
         if (fp)
             fclose(fp);
         return ret;
     }
 
-    CWString write_vol_str(yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_write_err *err = nullptr)
+    CWString write_vol_str(yyjson_write_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_write_err* err = nullptr)
     {
         if (!alc)
             alc = piv_yyjson_alc::instance().pref();
         CWString ret;
-        char *str = yyjson_write_opts(_doc()->doc, flag, alc, nullptr, err);
+        char* str = yyjson_write_opts(_doc()->doc, flag, alc, nullptr, err);
         if (str)
         {
             ret.SetText(str);
@@ -539,12 +541,12 @@ public:
         return ret;
     }
 
-    std::string write_std_str(yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_write_err *err = nullptr)
+    std::string write_std_str(yyjson_write_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_write_err* err = nullptr)
     {
         if (!alc)
             alc = piv_yyjson_alc::instance().pref();
         std::string ret;
-        char *str = yyjson_write_opts(_doc()->doc, flag, alc, nullptr, err);
+        char* str = yyjson_write_opts(_doc()->doc, flag, alc, nullptr, err);
         if (str)
         {
             ret.assign(str);
@@ -556,13 +558,13 @@ public:
         return ret;
     }
 
-    CVolMem write_vol_mem(yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_write_err *err = nullptr)
+    CVolMem write_vol_mem(yyjson_write_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_write_err* err = nullptr)
     {
         if (!alc)
             alc = piv_yyjson_alc::instance().pref();
         size_t len;
         CVolMem ret;
-        char *str = yyjson_write_opts(_doc()->doc, flag, alc, &len, err);
+        char* str = yyjson_write_opts(_doc()->doc, flag, alc, &len, err);
         if (str)
         {
             ret.Append(str, static_cast<INT_P>(len));
@@ -574,12 +576,12 @@ public:
         return ret;
     }
 
-    CWString to_vol_str(yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr)
+    CWString to_vol_str(yyjson_write_flag flag = 0, const yyjson_alc* alc = nullptr)
     {
         if (!alc)
             alc = piv_yyjson_alc::instance().pref();
         CWString ret;
-        char *str = yyjson_val_write_opts(m_val, flag, alc, nullptr, nullptr);
+        char* str = yyjson_val_write_opts(m_val, flag, alc, nullptr, nullptr);
         if (str)
         {
             ret.SetText(str);
@@ -591,12 +593,12 @@ public:
         return ret;
     }
 
-    std::string to_std_str(yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr)
+    std::string to_std_str(yyjson_write_flag flag = 0, const yyjson_alc* alc = nullptr)
     {
         if (!alc)
             alc = piv_yyjson_alc::instance().pref();
         std::string ret;
-        char *str = yyjson_val_write_opts(m_val, flag, alc, nullptr, nullptr);
+        char* str = yyjson_val_write_opts(m_val, flag, alc, nullptr, nullptr);
         if (str)
         {
             ret.assign(str);
@@ -610,12 +612,12 @@ public:
 
     inline piv_yyjson_mut_val to_mut_val();
 
-    inline yyjson_doc *doc()
+    inline yyjson_doc* doc()
     {
         return _doc()->doc;
     }
 
-    inline yyjson_doc *doc() const
+    inline yyjson_doc* doc() const
     {
         return _doc()->doc;
     }
@@ -630,7 +632,7 @@ public:
         return m_val == _doc()->root();
     }
 
-    inline bool is_same_doc(const piv_yyjson_val &rhs) const
+    inline bool is_same_doc(const piv_yyjson_val& rhs) const
     {
         return empty() ? false : (_doc() == rhs._doc());
     }
@@ -665,7 +667,7 @@ public:
         return yyjson_get_tag(m_val);
     }
 
-    inline const char *desc()
+    inline const char* desc()
     {
         return yyjson_get_type_desc(m_val);
     }
@@ -731,29 +733,29 @@ public:
     }
 
     template <typename T>
-    inline yyjson_val *get_val(T idx,
-                               typename std::enable_if<std::is_integral<T>::value, T *>::type = nullptr)
+    inline yyjson_val* get_val(T idx,
+                               typename std::enable_if<std::is_integral<T>::value, T*>::type = nullptr)
     {
         return yyjson_arr_get(m_val, static_cast<size_t>(idx));
     }
 
     template <typename T>
-    yyjson_val *get_val(T &&key,
+    yyjson_val* get_val(T&& key,
                         typename std::enable_if<!std::is_integral<typename std::decay<T>::type>::value,
-                                                typename std::decay<T>::type *>::type = nullptr)
+                                                typename std::decay<T>::type*>::type = nullptr)
     {
-        PivS2V sv{key};
-        return yyjson_obj_getn(m_val, sv.c_str(), sv.size());
+        PivAny2U<true> sv{key};
+        return yyjson_obj_getn(m_val, sv.data(), sv.size());
     }
 
     template <typename T>
-    inline piv_yyjson_val get(T &&idx_or_key)
+    inline piv_yyjson_val get(T&& idx_or_key)
     {
         return piv_yyjson_val{m_shared_doc ? m_shared_doc : m_weak_doc, get_val(std::forward<T>(idx_or_key))};
     }
 
     template <typename T>
-    inline piv_yyjson_val operator[](T &&idx_or_key)
+    inline piv_yyjson_val operator[](T&& idx_or_key)
     {
         return piv_yyjson_val{m_shared_doc ? m_shared_doc : m_weak_doc, get_val(std::forward<T>(idx_or_key))};
     }
@@ -769,22 +771,22 @@ public:
     }
 
     template <typename T>
-    yyjson_val *ptr_val(T &&ptr, yyjson_ptr_err *err = nullptr)
+    yyjson_val* ptr_val(T&& ptr, yyjson_ptr_err* err = nullptr)
     {
-        PivS2V sv{ptr};
+        PivAny2U<true> sv{ptr};
         if (m_val == _doc()->root())
-            return yyjson_doc_ptr_getx(_doc()->doc, sv.c_str(), sv.size(), err);
+            return yyjson_doc_ptr_getx(_doc()->doc, sv.data(), sv.size(), err);
         else
-            return yyjson_ptr_getx(m_val, sv.c_str(), sv.size(), err);
+            return yyjson_ptr_getx(m_val, sv.data(), sv.size(), err);
     }
 
     template <typename T>
-    inline piv_yyjson_val ptr(T &&ptr, yyjson_ptr_err *err = nullptr)
+    inline piv_yyjson_val ptr(T&& ptr, yyjson_ptr_err* err = nullptr)
     {
         return piv_yyjson_val{m_shared_doc ? m_shared_doc : m_weak_doc, ptr_val(std::forward<T>(ptr), err)};
     }
 
-    inline const char *get_str()
+    inline const char* get_str()
     {
         return yyjson_get_str(m_val);
     }
@@ -806,59 +808,59 @@ public:
     }
 
     template <typename T>
-    inline const char *get_str(T &&idx_or_key)
+    inline const char* get_str(T&& idx_or_key)
     {
         return yyjson_get_str(get_val(std::forward<T>(idx_or_key)));
     }
 
     template <typename R, typename T>
-    inline R get_num(T &&idx_or_key)
+    inline R get_num(T&& idx_or_key)
     {
         return to_num<R>(get_val(std::forward<T>(idx_or_key)));
     }
 
     template <typename T>
-    inline double get_real(T &&idx_or_key)
+    inline double get_real(T&& idx_or_key)
     {
         return yyjson_get_num(get_val(std::forward<T>(idx_or_key)));
     }
 
     template <typename T>
-    inline bool get_bool(T &&idx_or_key)
+    inline bool get_bool(T&& idx_or_key)
     {
         return yyjson_get_bool(get_val(std::forward<T>(idx_or_key)));
     }
 
     template <typename T>
-    inline const char *get_ptr_str(T &&ptr, yyjson_ptr_err *err = nullptr)
+    inline const char* get_ptr_str(T&& ptr, yyjson_ptr_err* err = nullptr)
     {
         return yyjson_get_str(ptr_val(std::forward<T>(ptr), err));
     }
 
     template <typename R, typename T>
-    inline R get_ptr_num(T &&ptr, yyjson_ptr_err *err = nullptr)
+    inline R get_ptr_num(T&& ptr, yyjson_ptr_err* err = nullptr)
     {
         return to_num<R>(ptr_val(std::forward<T>(ptr), err));
     }
 
     template <typename T>
-    inline double get_ptr_real(T &&ptr, yyjson_ptr_err *err = nullptr)
+    inline double get_ptr_real(T&& ptr, yyjson_ptr_err* err = nullptr)
     {
         return yyjson_get_num(ptr_val(std::forward<T>(ptr), err));
     }
 
     template <typename T>
-    inline bool get_ptr_bool(T &&ptr, yyjson_ptr_err *err = nullptr)
+    inline bool get_ptr_bool(T&& ptr, yyjson_ptr_err* err = nullptr)
     {
         return yyjson_get_bool(ptr_val(std::forward<T>(ptr), err));
     }
 
-    size_t eume_key(std::vector<std::string> &key_arr)
+    size_t eume_key(std::vector<std::string>& key_arr)
     {
         yyjson_obj_iter iter;
         if (yyjson_obj_iter_init(m_val, &iter))
         {
-            yyjson_val *key = yyjson_obj_iter_next(&iter);
+            yyjson_val* key = yyjson_obj_iter_next(&iter);
             while (key)
             {
                 key_arr.emplace_back(yyjson_get_str(key));
@@ -869,12 +871,12 @@ public:
         return 0;
     }
 
-    INT_P eume_key(CMStringArray &key_arr)
+    INT_P eume_key(CMStringArray& key_arr)
     {
         yyjson_obj_iter iter;
         if (yyjson_obj_iter_init(m_val, &iter))
         {
-            yyjson_val *key = yyjson_obj_iter_next(&iter);
+            yyjson_val* key = yyjson_obj_iter_next(&iter);
             while (key)
             {
                 key_arr.Add(yyjson_get_str(key));
@@ -919,19 +921,19 @@ public:
     class piv_yyjson_mut_doc
     {
     public:
-        yyjson_mut_doc *doc = nullptr;
+        yyjson_mut_doc* doc = nullptr;
 
         piv_yyjson_mut_doc()
         {
             doc = yyjson_mut_doc_new(piv_yyjson_alc::instance().pref());
         }
 
-        piv_yyjson_mut_doc(const yyjson_alc *alc)
+        piv_yyjson_mut_doc(const yyjson_alc* alc)
         {
             doc = yyjson_mut_doc_new(alc ? alc : piv_yyjson_alc::instance().pref());
         }
 
-        piv_yyjson_mut_doc(yyjson_mut_doc *rhs)
+        piv_yyjson_mut_doc(yyjson_mut_doc* rhs)
         {
             doc = rhs;
         }
@@ -950,20 +952,20 @@ public:
             }
         }
 
-        inline yyjson_mut_doc *new_doc(const yyjson_alc *alc = nullptr)
+        inline yyjson_mut_doc* new_doc(const yyjson_alc* alc = nullptr)
         {
             free_doc();
             doc = yyjson_mut_doc_new(alc ? alc : piv_yyjson_alc::instance().pref());
             return doc;
         }
 
-        inline void copy_doc(yyjson_doc *rhs, const yyjson_alc *alc = nullptr)
+        inline void copy_doc(yyjson_doc* rhs, const yyjson_alc* alc = nullptr)
         {
             free_doc();
             doc = yyjson_doc_mut_copy(rhs, alc ? alc : piv_yyjson_alc::instance().pref());
         }
 
-        inline void copy_doc(yyjson_mut_doc *rhs, const yyjson_alc *alc = nullptr)
+        inline void copy_doc(yyjson_mut_doc* rhs, const yyjson_alc* alc = nullptr)
         {
             free_doc();
             doc = yyjson_mut_doc_mut_copy(rhs, alc ? alc : piv_yyjson_alc::instance().pref());
@@ -974,56 +976,56 @@ public:
             return doc == nullptr;
         }
 
-        inline yyjson_mut_val *root()
+        inline yyjson_mut_val* root()
         {
             return yyjson_mut_doc_get_root(doc);
         }
 
-        inline void set_root(yyjson_mut_val *root)
+        inline void set_root(yyjson_mut_val* root)
         {
             return yyjson_mut_doc_set_root(doc, root);
         }
 
-        inline bool set_val(yyjson_mut_val *val, bool num, bool deep_copy = true)
+        inline bool set_val(yyjson_mut_val* val, bool num, bool deep_copy = true)
         {
             return yyjson_mut_set_bool(val, num);
         }
 
-        inline bool set_val(yyjson_mut_val *val, int32_t num, bool deep_copy = true)
+        inline bool set_val(yyjson_mut_val* val, int32_t num, bool deep_copy = true)
         {
             return yyjson_mut_set_int(val, num);
         }
 
-        inline bool set_val(yyjson_mut_val *val, uint32_t num, bool deep_copy = true)
+        inline bool set_val(yyjson_mut_val* val, uint32_t num, bool deep_copy = true)
         {
             return yyjson_mut_set_uint(val, num);
         }
 
-        inline bool set_val(yyjson_mut_val *val, int64_t num, bool deep_copy = true)
+        inline bool set_val(yyjson_mut_val* val, int64_t num, bool deep_copy = true)
         {
             return yyjson_mut_set_sint(val, num);
         }
 
-        inline bool set_val(yyjson_mut_val *val, uint64_t num, bool deep_copy = true)
+        inline bool set_val(yyjson_mut_val* val, uint64_t num, bool deep_copy = true)
         {
             return yyjson_mut_set_uint(val, num);
         }
 
-        inline bool set_val(yyjson_mut_val *val, DWORD num, bool deep_copy = true)
+        inline bool set_val(yyjson_mut_val* val, DWORD num, bool deep_copy = true)
         {
             return yyjson_mut_set_uint(val, num);
         }
 
-        inline bool set_val(yyjson_mut_val *val, double num, bool deep_copy = true)
+        inline bool set_val(yyjson_mut_val* val, double num, bool deep_copy = true)
         {
             return yyjson_mut_set_real(val, num);
         }
 
-        inline bool set_val(yyjson_mut_val *val, const char *str, size_t len, bool deep_copy = true)
+        inline bool set_val(yyjson_mut_val* val, const char* str, size_t len, bool deep_copy = true)
         {
             if (!val)
                 return false;
-            const char *new_str = deep_copy ? unsafe_yyjson_mut_strncpy(doc, str, len) : str;
+            const char* new_str = deep_copy ? unsafe_yyjson_mut_strncpy(doc, str, len) : str;
             if (new_str)
             {
                 val->tag = ((uint64_t)len << YYJSON_TAG_BIT) | YYJSON_TYPE_STR;
@@ -1033,51 +1035,51 @@ public:
             return false;
         }
 
-        inline bool set_val(yyjson_mut_val *val, const char *str, bool deep_copy = true)
+        inline bool set_val(yyjson_mut_val* val, const char* str, bool deep_copy = true)
         {
             return set_val(val, str, strlen(str), deep_copy);
         }
 
-        inline bool set_val(yyjson_mut_val *val, const std::string &str, bool deep_copy = true)
+        inline bool set_val(yyjson_mut_val* val, const std::string& str, bool deep_copy = true)
         {
             return set_val(val, str.c_str(), str.size(), deep_copy);
         }
 
-        inline bool set_val(yyjson_mut_val *val, const piv::string_view &str, bool deep_copy = true)
+        inline bool set_val(yyjson_mut_val* val, const piv::string_view& str, bool deep_copy = true)
         {
             return set_val(val, str.data(), str.size(), deep_copy);
         }
 
-        inline bool set_val(yyjson_mut_val *val, const CVolMem &str, bool deep_copy = true)
+        inline bool set_val(yyjson_mut_val* val, const CVolMem& str, bool deep_copy = true)
         {
-            return set_val(val, (const char *)str.GetPtr(), (size_t)str.GetSize(), deep_copy);
+            return set_val(val, (const char*)str.GetPtr(), (size_t)str.GetSize(), deep_copy);
         }
 
-        inline bool set_val(yyjson_mut_val *val, const wchar_t *str, bool deep_copy = true)
-        {
-            PivW2U u8str{str};
-            return set_val(val, u8str.c_str(), u8str.size(), true);
-        }
-
-        inline bool set_val(yyjson_mut_val *val, const std::wstring &str, bool deep_copy = true)
+        inline bool set_val(yyjson_mut_val* val, const wchar_t* str, bool deep_copy = true)
         {
             PivW2U u8str{str};
             return set_val(val, u8str.c_str(), u8str.size(), true);
         }
 
-        inline bool set_val(yyjson_mut_val *val, const piv::wstring_view &str, bool deep_copy = true)
+        inline bool set_val(yyjson_mut_val* val, const std::wstring& str, bool deep_copy = true)
         {
             PivW2U u8str{str};
             return set_val(val, u8str.c_str(), u8str.size(), true);
         }
 
-        inline bool set_val(yyjson_mut_val *val, const CWString &str, bool deep_copy = true)
+        inline bool set_val(yyjson_mut_val* val, const piv::wstring_view& str, bool deep_copy = true)
         {
             PivW2U u8str{str};
             return set_val(val, u8str.c_str(), u8str.size(), true);
         }
 
-        inline bool set_val(yyjson_mut_val *val, yyjson_val *other_val, bool deep_copy = true)
+        inline bool set_val(yyjson_mut_val* val, const CWString& str, bool deep_copy = true)
+        {
+            PivW2U u8str{str};
+            return set_val(val, u8str.c_str(), u8str.size(), true);
+        }
+
+        inline bool set_val(yyjson_mut_val* val, yyjson_val* other_val, bool deep_copy = true)
         {
             if (!val || !other_val)
                 return false;
@@ -1085,7 +1087,7 @@ public:
             val->tag = other_val->tag;
             if ((deep_copy && (type == YYJSON_TYPE_RAW || type == YYJSON_TYPE_STR || type)) || type == YYJSON_TYPE_ARR || type == YYJSON_TYPE_OBJ)
             {
-                yyjson_mut_val *temp = yyjson_val_mut_copy(doc, other_val);
+                yyjson_mut_val* temp = yyjson_val_mut_copy(doc, other_val);
                 if (!temp)
                     return false;
                 val->uni = temp->uni;
@@ -1095,12 +1097,12 @@ public:
             return true;
         }
 
-        inline bool set_val(yyjson_mut_val *val, const piv_yyjson_val &other_val, bool deep_copy = true)
+        inline bool set_val(yyjson_mut_val* val, const piv_yyjson_val& other_val, bool deep_copy = true)
         {
             return this->set_val(val, other_val.m_val, deep_copy);
         }
 
-        inline bool set_val(yyjson_mut_val *val, yyjson_mut_val *other_val, bool deep_copy = true)
+        inline bool set_val(yyjson_mut_val* val, yyjson_mut_val* other_val, bool deep_copy = true)
         {
             if (!val || !other_val)
                 return false;
@@ -1108,7 +1110,7 @@ public:
             val->tag = other_val->tag;
             if (deep_copy && (type == YYJSON_TYPE_RAW || type == YYJSON_TYPE_STR || type == YYJSON_TYPE_ARR || type == YYJSON_TYPE_OBJ))
             {
-                yyjson_mut_val *temp = yyjson_mut_val_mut_copy(doc, other_val);
+                yyjson_mut_val* temp = yyjson_mut_val_mut_copy(doc, other_val);
                 if (!temp)
                     return false;
                 val->uni = temp->uni;
@@ -1117,180 +1119,180 @@ public:
             return true;
         }
 
-        inline bool set_val(yyjson_mut_val *val, const piv_yyjson_mut_val &other_val, bool deep_copy = true)
+        inline bool set_val(yyjson_mut_val* val, const piv_yyjson_mut_val& other_val, bool deep_copy = true)
         {
             return this->set_val(val, other_val.m_val, other_val.doc() == doc ? false : deep_copy);
         }
 
-        inline yyjson_mut_val *to_val(bool num, bool deep_copy = true)
+        inline yyjson_mut_val* to_val(bool num, bool deep_copy = true)
         {
             return yyjson_mut_bool(doc, num);
         }
 
-        inline yyjson_mut_val *to_val(int32_t num, bool deep_copy = true)
+        inline yyjson_mut_val* to_val(int32_t num, bool deep_copy = true)
         {
             return yyjson_mut_sint(doc, num);
         }
 
-        inline yyjson_mut_val *to_val(uint32_t num, bool deep_copy = true)
+        inline yyjson_mut_val* to_val(uint32_t num, bool deep_copy = true)
         {
             return yyjson_mut_uint(doc, num);
         }
 
-        inline yyjson_mut_val *to_val(int64_t num, bool deep_copy = true)
+        inline yyjson_mut_val* to_val(int64_t num, bool deep_copy = true)
         {
             return yyjson_mut_sint(doc, num);
         }
 
-        inline yyjson_mut_val *to_val(uint64_t num, bool deep_copy = true)
+        inline yyjson_mut_val* to_val(uint64_t num, bool deep_copy = true)
         {
             return yyjson_mut_uint(doc, num);
         }
 
-        inline yyjson_mut_val *to_val(DWORD num, bool deep_copy = true)
+        inline yyjson_mut_val* to_val(DWORD num, bool deep_copy = true)
         {
             return yyjson_mut_uint(doc, num);
         }
 
-        inline yyjson_mut_val *to_val(double num, bool deep_copy = true)
+        inline yyjson_mut_val* to_val(double num, bool deep_copy = true)
         {
             return yyjson_mut_real(doc, num);
         }
 
-        inline yyjson_mut_val *to_val(yyjson_val *val, bool deep_copy = true)
+        inline yyjson_mut_val* to_val(yyjson_val* val, bool deep_copy = true)
         {
             return yyjson_val_mut_copy(doc, val);
         }
 
-        inline yyjson_mut_val *to_val(yyjson_mut_val *val, bool deep_copy = true)
+        inline yyjson_mut_val* to_val(yyjson_mut_val* val, bool deep_copy = true)
         {
             if (deep_copy)
                 return yyjson_mut_val_mut_copy(doc, val);
             if (!doc)
                 return nullptr;
-            yyjson_mut_val *new_val = unsafe_yyjson_mut_val(doc, 1);
+            yyjson_mut_val* new_val = unsafe_yyjson_mut_val(doc, 1);
             new_val->tag = val->tag;
             new_val->uni = val->uni;
             return new_val;
         }
 
-        inline yyjson_mut_val *to_val(const piv_yyjson_val &val, bool deep_copy = true)
+        inline yyjson_mut_val* to_val(const piv_yyjson_val& val, bool deep_copy = true)
         {
             return yyjson_val_mut_copy(doc, val.m_val);
         }
 
-        inline yyjson_mut_val *to_val(const piv_yyjson_mut_val &val, bool deep_copy = true)
+        inline yyjson_mut_val* to_val(const piv_yyjson_mut_val& val, bool deep_copy = true)
         {
             return this->to_val(val.m_val, deep_copy);
         }
 
-        inline yyjson_mut_val *to_val(const char *str, size_t len, bool deep_copy = true)
+        inline yyjson_mut_val* to_val(const char* str, size_t len, bool deep_copy = true)
         {
             return deep_copy ? yyjson_mut_strncpy(doc, str, len) : yyjson_mut_strn(doc, str, len);
         }
 
-        inline yyjson_mut_val *to_val(const char *str, bool deep_copy = true)
+        inline yyjson_mut_val* to_val(const char* str, bool deep_copy = true)
         {
             return deep_copy ? yyjson_mut_strcpy(doc, str) : yyjson_mut_str(doc, str);
         }
 
-        inline yyjson_mut_val *to_val(const std::string &str, bool deep_copy = true)
+        inline yyjson_mut_val* to_val(const std::string& str, bool deep_copy = true)
         {
             return deep_copy ? yyjson_mut_strncpy(doc, str.c_str(), str.size()) : yyjson_mut_strn(doc, str.c_str(), str.size());
         }
 
-        inline yyjson_mut_val *to_val(const piv::string_view &str, bool deep_copy = true)
+        inline yyjson_mut_val* to_val(const piv::string_view& str, bool deep_copy = true)
         {
             return deep_copy ? yyjson_mut_strncpy(doc, str.data(), str.size()) : yyjson_mut_strn(doc, str.data(), str.size());
         }
 
-        inline yyjson_mut_val *to_val(const CVolMem &str, bool deep_copy = true)
+        inline yyjson_mut_val* to_val(const CVolMem& str, bool deep_copy = true)
         {
-            return deep_copy ? yyjson_mut_strncpy(doc, (const char *)str.GetPtr(), (size_t)str.GetSize()) : yyjson_mut_strn(doc, (const char *)str.GetPtr(), (size_t)str.GetSize());
+            return deep_copy ? yyjson_mut_strncpy(doc, (const char*)str.GetPtr(), (size_t)str.GetSize()) : yyjson_mut_strn(doc, (const char*)str.GetPtr(), (size_t)str.GetSize());
         }
 
-        inline yyjson_mut_val *to_val(const wchar_t *str, bool deep_copy = true)
-        {
-            PivW2U u8str{str};
-            return yyjson_mut_strncpy(doc, u8str.c_str(), u8str.size());
-        }
-
-        inline yyjson_mut_val *to_val(const std::wstring &str, bool deep_copy = true)
+        inline yyjson_mut_val* to_val(const wchar_t* str, bool deep_copy = true)
         {
             PivW2U u8str{str};
             return yyjson_mut_strncpy(doc, u8str.c_str(), u8str.size());
         }
 
-        inline yyjson_mut_val *to_val(const piv::wstring_view &str, bool deep_copy = true)
+        inline yyjson_mut_val* to_val(const std::wstring& str, bool deep_copy = true)
         {
             PivW2U u8str{str};
             return yyjson_mut_strncpy(doc, u8str.c_str(), u8str.size());
         }
 
-        inline yyjson_mut_val *to_val(const CWString &str, bool deep_copy = true)
+        inline yyjson_mut_val* to_val(const piv::wstring_view& str, bool deep_copy = true)
         {
             PivW2U u8str{str};
             return yyjson_mut_strncpy(doc, u8str.c_str(), u8str.size());
         }
 
-        inline yyjson_mut_val *to_key(const char *str, size_t len, bool deep_copy = true)
+        inline yyjson_mut_val* to_val(const CWString& str, bool deep_copy = true)
+        {
+            PivW2U u8str{str};
+            return yyjson_mut_strncpy(doc, u8str.c_str(), u8str.size());
+        }
+
+        inline yyjson_mut_val* to_key(const char* str, size_t len, bool deep_copy = true)
         {
             return deep_copy ? yyjson_mut_strncpy(doc, str, len) : yyjson_mut_strn(doc, str, len);
         }
 
-        inline yyjson_mut_val *to_key(const char *str, bool deep_copy = true)
+        inline yyjson_mut_val* to_key(const char* str, bool deep_copy = true)
         {
             return yyjson_mut_str(doc, str); // 改为浅拷贝
             // return deep_copy ? yyjson_mut_strcpy(doc, str) : yyjson_mut_str(doc, str);
         }
 
-        inline yyjson_mut_val *to_key(const std::string &str, bool deep_copy = true)
+        inline yyjson_mut_val* to_key(const std::string& str, bool deep_copy = true)
         {
             return deep_copy ? yyjson_mut_strncpy(doc, str.c_str(), str.size()) : yyjson_mut_strn(doc, str.c_str(), str.size());
         }
 
-        inline yyjson_mut_val *to_key(const piv::string_view &str, bool deep_copy = true)
+        inline yyjson_mut_val* to_key(const piv::string_view& str, bool deep_copy = true)
         {
             return deep_copy ? yyjson_mut_strncpy(doc, str.data(), str.size()) : yyjson_mut_strn(doc, str.data(), str.size());
         }
 
-        inline yyjson_mut_val *to_key(const CVolMem &str, bool deep_copy = true)
+        inline yyjson_mut_val* to_key(const CVolMem& str, bool deep_copy = true)
         {
-            return deep_copy ? yyjson_mut_strncpy(doc, (const char *)str.GetPtr(), (size_t)str.GetSize()) : yyjson_mut_strn(doc, (const char *)str.GetPtr(), (size_t)str.GetSize());
+            return deep_copy ? yyjson_mut_strncpy(doc, (const char*)str.GetPtr(), (size_t)str.GetSize()) : yyjson_mut_strn(doc, (const char*)str.GetPtr(), (size_t)str.GetSize());
         }
 
-        inline yyjson_mut_val *to_key(const wchar_t *str, bool deep_copy = true)
-        {
-            PivW2U u8str{str};
-            return yyjson_mut_strncpy(doc, u8str.c_str(), u8str.size());
-        }
-
-        inline yyjson_mut_val *to_key(const std::wstring &str, bool deep_copy = true)
+        inline yyjson_mut_val* to_key(const wchar_t* str, bool deep_copy = true)
         {
             PivW2U u8str{str};
             return yyjson_mut_strncpy(doc, u8str.c_str(), u8str.size());
         }
 
-        inline yyjson_mut_val *to_key(const piv::wstring_view &str, bool deep_copy = true)
+        inline yyjson_mut_val* to_key(const std::wstring& str, bool deep_copy = true)
         {
             PivW2U u8str{str};
             return yyjson_mut_strncpy(doc, u8str.c_str(), u8str.size());
         }
 
-        inline yyjson_mut_val *to_key(const CWString &str, bool deep_copy = true)
+        inline yyjson_mut_val* to_key(const piv::wstring_view& str, bool deep_copy = true)
+        {
+            PivW2U u8str{str};
+            return yyjson_mut_strncpy(doc, u8str.c_str(), u8str.size());
+        }
+
+        inline yyjson_mut_val* to_key(const CWString& str, bool deep_copy = true)
         {
             PivW2U u8str{str};
             return yyjson_mut_strncpy(doc, u8str.c_str(), u8str.size());
         }
 
         template <typename T>
-        inline bool append(yyjson_mut_val *_arr, bool deep_copy, T &&val)
+        inline bool append(yyjson_mut_val* _arr, bool deep_copy, T&& val)
         {
             return yyjson_mut_arr_append(_arr, to_val(std::forward<T>(val), deep_copy));
         }
 
         template <typename T, typename... Args>
-        inline bool append(yyjson_mut_val *_arr, bool deep_copy, T &&val, Args &&...args)
+        inline bool append(yyjson_mut_val* _arr, bool deep_copy, T&& val, Args&&... args)
         {
             if (!yyjson_mut_arr_append(_arr, to_val(std::forward<T>(val), deep_copy)))
                 return false;
@@ -1298,13 +1300,13 @@ public:
         }
 
         template <typename T>
-        inline bool prepend(yyjson_mut_val *_arr, bool deep_copy, T &&val)
+        inline bool prepend(yyjson_mut_val* _arr, bool deep_copy, T&& val)
         {
             return yyjson_mut_arr_prepend(_arr, to_val(std::forward<T>(val), deep_copy));
         }
 
         template <typename T, typename... Args>
-        inline bool prepend(yyjson_mut_val *_arr, bool deep_copy, T &&val, Args &&...args)
+        inline bool prepend(yyjson_mut_val* _arr, bool deep_copy, T&& val, Args&&... args)
         {
             if (!yyjson_mut_arr_prepend(_arr, to_val(std::forward<T>(val), deep_copy)))
                 return false;
@@ -1312,7 +1314,7 @@ public:
         }
 
         template <typename K>
-        inline bool add(yyjson_mut_val *_obj, bool deep_copy, bool replaced, K &&key)
+        inline bool add(yyjson_mut_val* _obj, bool deep_copy, bool replaced, K&& key)
         {
             if (replaced)
                 return yyjson_mut_obj_put(_obj, to_key(std::forward<K>(key), deep_copy), yyjson_mut_null(doc));
@@ -1321,7 +1323,7 @@ public:
         }
 
         template <typename K, typename V>
-        inline bool add(yyjson_mut_val *_obj, bool deep_copy, bool replaced, K &&key, V &&val)
+        inline bool add(yyjson_mut_val* _obj, bool deep_copy, bool replaced, K&& key, V&& val)
         {
             if (replaced)
                 return yyjson_mut_obj_put(_obj, to_key(std::forward<K>(key), deep_copy), to_val(std::forward<V>(val), deep_copy));
@@ -1330,7 +1332,7 @@ public:
         }
 
         template <typename K, typename V, typename... Args>
-        inline bool add(yyjson_mut_val *_obj, bool deep_copy, bool replaced, K &&key, V &&val, Args &&...args)
+        inline bool add(yyjson_mut_val* _obj, bool deep_copy, bool replaced, K&& key, V&& val, Args&&... args)
         {
             bool ret;
             if (replaced)
@@ -1349,16 +1351,16 @@ public:
     struct iter_cnt
     {
         size_t idx = 0;
-        yyjson_mut_val *key = nullptr;
-        yyjson_mut_val *val = nullptr;
-        piv_yyjson_mut_val *doc = nullptr;
+        yyjson_mut_val* key = nullptr;
+        yyjson_mut_val* val = nullptr;
+        piv_yyjson_mut_val* doc = nullptr;
 
         piv_yyjson_mut_val get_key()
         {
             return doc ? piv_yyjson_mut_val{doc->m_shared_doc ? doc->m_shared_doc : doc->m_weak_doc, key} : piv_yyjson_mut_val{};
         }
 
-        const char *get_key_str()
+        const char* get_key_str()
         {
             return yyjson_mut_get_str(key);
         }
@@ -1383,13 +1385,13 @@ public:
         };
 
     public:
-        iterator(const iterator &rhs)
+        iterator(const iterator& rhs)
         {
             memmove(&arr_iter, &rhs.arr_iter, sizeof(yyjson_mut_arr_iter));
             memmove(&value, &rhs.value, sizeof(iter_cnt));
         }
 
-        iterator(size_t _max_count, size_t _cursor, piv_yyjson_mut_val *_this)
+        iterator(size_t _max_count, size_t _cursor, piv_yyjson_mut_val* _this)
         {
             value.idx = _cursor;
             if (_max_count > 0 && _cursor != _max_count && _this != nullptr)
@@ -1421,22 +1423,22 @@ public:
             }
         }
 
-        iter_cnt &operator*()
+        iter_cnt& operator*()
         {
             return value;
         }
 
-        iter_cnt *operator->()
+        iter_cnt* operator->()
         {
             return &value;
         }
 
-        bool operator!=(const iterator &rhs)
+        bool operator!=(const iterator& rhs)
         {
             return (value.idx != rhs.value.idx);
         }
 
-        iterator &operator++()
+        iterator& operator++()
         {
             value.idx++;
             if (value.doc)
@@ -1469,20 +1471,20 @@ public:
         }
 
         template <typename V>
-        inline bool append(V &&value, bool deep_copy = true)
+        inline bool append(V&& value, bool deep_copy = true)
         {
             return yyjson_ptr_ctx_append(&ctx, nullptr, doc.lock()->to_val(std::forward<V>(value), deep_copy));
         }
 
         template <typename K, typename V>
-        inline bool append(K &&key, V &&value, bool deep_copy = true)
+        inline bool append(K&& key, V&& value, bool deep_copy = true)
         {
             auto _doc = doc.lock();
             return yyjson_ptr_ctx_append(&ctx, _doc->to_key(std::forward<K>(key), deep_copy), _doc->to_val(std::forward<V>(value), deep_copy));
         }
 
         template <typename V>
-        inline bool replace(V &&value)
+        inline bool replace(V&& value)
         {
             return yyjson_ptr_ctx_replace(&ctx, doc.lock()->to_val(std::forward<V>(value)));
         }
@@ -1494,11 +1496,11 @@ public:
     }; // ptr_ctx
 
 private:
-    yyjson_mut_val *m_val = nullptr;
+    yyjson_mut_val* m_val = nullptr;
     std::shared_ptr<piv_yyjson_mut_doc> m_shared_doc;
     std::weak_ptr<piv_yyjson_mut_doc> m_weak_doc;
 
-    inline piv_yyjson_mut_doc *_doc()
+    inline piv_yyjson_mut_doc* _doc()
     {
         if (!m_shared_doc)
         {
@@ -1509,7 +1511,7 @@ private:
         return m_shared_doc.get();
     }
 
-    inline piv_yyjson_mut_doc *_doc() const
+    inline piv_yyjson_mut_doc* _doc() const
     {
         if (m_shared_doc)
             return m_shared_doc.get();
@@ -1520,7 +1522,7 @@ private:
     }
 
     template <typename T>
-    T to_num(yyjson_mut_val *val)
+    T to_num(yyjson_mut_val* val)
     {
         if (!val)
             return static_cast<T>(0);
@@ -1550,33 +1552,33 @@ public:
 
     ~piv_yyjson_mut_val() {}
 
-    piv_yyjson_mut_val(const piv_yyjson_mut_val &rhs)
+    piv_yyjson_mut_val(const piv_yyjson_mut_val& rhs)
     {
         m_shared_doc = rhs.m_shared_doc;
         m_weak_doc = rhs.m_weak_doc;
         m_val = rhs.m_val;
     }
 
-    piv_yyjson_mut_val(const std::shared_ptr<piv_yyjson_mut_doc> &doc, yyjson_mut_val *val)
+    piv_yyjson_mut_val(const std::shared_ptr<piv_yyjson_mut_doc>& doc, yyjson_mut_val* val)
     {
         m_weak_doc = doc;
         m_val = val;
     }
 
-    piv_yyjson_mut_val(const std::weak_ptr<piv_yyjson_mut_doc> &doc, yyjson_mut_val *val)
+    piv_yyjson_mut_val(const std::weak_ptr<piv_yyjson_mut_doc>& doc, yyjson_mut_val* val)
     {
         m_weak_doc = doc;
         m_val = val;
     }
 
-    piv_yyjson_mut_val(yyjson_mut_val *val)
+    piv_yyjson_mut_val(yyjson_mut_val* val)
     {
         m_shared_doc = std::make_shared<piv_yyjson_mut_doc>();
         m_val = yyjson_mut_val_mut_copy(m_shared_doc->doc, val);
         m_shared_doc->set_root(m_val);
     }
 
-    piv_yyjson_mut_val(yyjson_val *val)
+    piv_yyjson_mut_val(yyjson_val* val)
     {
         m_shared_doc = std::make_shared<piv_yyjson_mut_doc>();
         m_val = yyjson_val_mut_copy(m_shared_doc->doc, val);
@@ -1632,35 +1634,35 @@ public:
         m_shared_doc->set_root(m_val);
     }
 
-    piv_yyjson_mut_val(const char *str, size_t len = -1)
+    piv_yyjson_mut_val(const char* str, size_t len = -1)
     {
         m_shared_doc = std::make_shared<piv_yyjson_mut_doc>();
         m_val = yyjson_mut_strncpy(m_shared_doc->doc, str, len == -1 ? strlen(str) : len);
         m_shared_doc->set_root(m_val);
     }
 
-    piv_yyjson_mut_val(const std::string &str)
+    piv_yyjson_mut_val(const std::string& str)
     {
         m_shared_doc = std::make_shared<piv_yyjson_mut_doc>();
         m_val = yyjson_mut_strncpy(m_shared_doc->doc, str.c_str(), str.size());
         m_shared_doc->set_root(m_val);
     }
 
-    piv_yyjson_mut_val(const piv::string_view &str)
+    piv_yyjson_mut_val(const piv::string_view& str)
     {
         m_shared_doc = std::make_shared<piv_yyjson_mut_doc>();
         m_val = yyjson_mut_strncpy(m_shared_doc->doc, str.data(), str.size());
         m_shared_doc->set_root(m_val);
     }
 
-    piv_yyjson_mut_val(const CVolMem &str)
+    piv_yyjson_mut_val(const CVolMem& str)
     {
         m_shared_doc = std::make_shared<piv_yyjson_mut_doc>();
-        m_val = yyjson_mut_strncpy(m_shared_doc->doc, (const char *)str.GetPtr(), (size_t)str.GetSize());
+        m_val = yyjson_mut_strncpy(m_shared_doc->doc, (const char*)str.GetPtr(), (size_t)str.GetSize());
         m_shared_doc->set_root(m_val);
     }
 
-    piv_yyjson_mut_val(const wchar_t *str, size_t len = -1)
+    piv_yyjson_mut_val(const wchar_t* str, size_t len = -1)
     {
         PivW2U u8str{str, len};
         m_shared_doc = std::make_shared<piv_yyjson_mut_doc>();
@@ -1668,7 +1670,7 @@ public:
         m_shared_doc->set_root(m_val);
     }
 
-    piv_yyjson_mut_val(const std::wstring &str)
+    piv_yyjson_mut_val(const std::wstring& str)
     {
         PivW2U u8str{str};
         m_shared_doc = std::make_shared<piv_yyjson_mut_doc>();
@@ -1676,7 +1678,7 @@ public:
         m_shared_doc->set_root(m_val);
     }
 
-    piv_yyjson_mut_val(const piv::wstring_view &str)
+    piv_yyjson_mut_val(const piv::wstring_view& str)
     {
         PivW2U u8str{str};
         m_shared_doc = std::make_shared<piv_yyjson_mut_doc>();
@@ -1684,7 +1686,7 @@ public:
         m_shared_doc->set_root(m_val);
     }
 
-    piv_yyjson_mut_val(const CWString &str)
+    piv_yyjson_mut_val(const CWString& str)
     {
         PivW2U u8str{str};
         m_shared_doc = std::make_shared<piv_yyjson_mut_doc>();
@@ -1692,7 +1694,7 @@ public:
         m_shared_doc->set_root(m_val);
     }
 
-    piv_yyjson_mut_val &operator=(const piv_yyjson_mut_val &rhs)
+    piv_yyjson_mut_val& operator=(const piv_yyjson_mut_val& rhs)
     {
         m_shared_doc = rhs.m_shared_doc;
         m_weak_doc = rhs.m_weak_doc;
@@ -1700,7 +1702,7 @@ public:
         return *this;
     }
 
-    piv_yyjson_mut_val &operator=(piv_yyjson_mut_val &&rhs) noexcept
+    piv_yyjson_mut_val& operator=(piv_yyjson_mut_val&& rhs) noexcept
     {
         m_shared_doc = std::move(rhs.m_shared_doc);
         m_weak_doc = std::move(rhs.m_weak_doc);
@@ -1708,17 +1710,17 @@ public:
         return *this;
     }
 
-    bool operator==(const piv_yyjson_mut_val &rhs) const noexcept
+    bool operator==(const piv_yyjson_mut_val& rhs) const noexcept
     {
         return (m_val == rhs.m_val) ? true : yyjson_mut_equals(m_val, rhs.m_val);
     }
 
-    virtual void GetDumpString(CWString &strDump, INT nMaxDumpSize) override
+    virtual void GetDumpString(CWString& strDump, INT nMaxDumpSize) override
     {
         strDump = to_vol_str(0, piv_yyjson_alc::instance().pref());
     }
 
-    virtual void LoadFromStream(CVolBaseInputStream &stream)
+    virtual void LoadFromStream(CVolBaseInputStream& stream)
     {
         clear();
         if (stream.eof())
@@ -1730,11 +1732,11 @@ public:
             parse_doc(data.get(), len, 0, piv_yyjson_alc::instance().pref(), nullptr);
     }
 
-    virtual void SaveIntoStream(CVolBaseOutputStream &stream)
+    virtual void SaveIntoStream(CVolBaseOutputStream& stream)
     {
-        yyjson_alc *alc = piv_yyjson_alc::instance().pref();
+        yyjson_alc* alc = piv_yyjson_alc::instance().pref();
         size_t len;
-        char *str = yyjson_mut_write_opts(_doc()->doc, 0, alc, &len, nullptr);
+        char* str = yyjson_mut_write_opts(_doc()->doc, 0, alc, &len, nullptr);
         if (str)
         {
             stream.write(&len, 4);
@@ -1781,45 +1783,45 @@ public:
         return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, yyjson_mut_real(_doc()->doc, num)};
     }
 
-    inline piv_yyjson_mut_val make_val(const char *str, size_t len = -1)
+    inline piv_yyjson_mut_val make_val(const char* str, size_t len = -1)
     {
         return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, yyjson_mut_strncpy(_doc()->doc, str, len == -1 ? strlen(str) : len)};
     }
 
-    inline piv_yyjson_mut_val make_val(const std::string &str)
+    inline piv_yyjson_mut_val make_val(const std::string& str)
     {
         return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, yyjson_mut_strncpy(_doc()->doc, str.c_str(), str.size())};
     }
 
-    inline piv_yyjson_mut_val make_val(const piv::string_view &str)
+    inline piv_yyjson_mut_val make_val(const piv::string_view& str)
     {
         return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, yyjson_mut_strncpy(_doc()->doc, str.data(), str.size())};
     }
 
-    inline piv_yyjson_mut_val make_val(const CVolMem &str)
+    inline piv_yyjson_mut_val make_val(const CVolMem& str)
     {
-        return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, yyjson_mut_strncpy(_doc()->doc, (const char *)str.GetPtr(), (size_t)str.GetSize())};
+        return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, yyjson_mut_strncpy(_doc()->doc, (const char*)str.GetPtr(), (size_t)str.GetSize())};
     }
 
-    inline piv_yyjson_mut_val make_val(const wchar_t *str, size_t len = -1)
+    inline piv_yyjson_mut_val make_val(const wchar_t* str, size_t len = -1)
     {
         PivW2U u8str{str, len};
         return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, yyjson_mut_strncpy(_doc()->doc, u8str.c_str(), u8str.size())};
     }
 
-    inline piv_yyjson_mut_val make_val(const std::wstring &str)
+    inline piv_yyjson_mut_val make_val(const std::wstring& str)
     {
         PivW2U u8str{str};
         return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, yyjson_mut_strncpy(_doc()->doc, u8str.c_str(), u8str.size())};
     }
 
-    inline piv_yyjson_mut_val make_val(const piv::wstring_view &str)
+    inline piv_yyjson_mut_val make_val(const piv::wstring_view& str)
     {
         PivW2U u8str{str};
         return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, yyjson_mut_strncpy(_doc()->doc, u8str.c_str(), u8str.size())};
     }
 
-    inline piv_yyjson_mut_val make_val(const CWString &str)
+    inline piv_yyjson_mut_val make_val(const CWString& str)
     {
         PivW2U u8str{str};
         return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, yyjson_mut_strncpy(_doc()->doc, u8str.c_str(), u8str.size())};
@@ -1836,9 +1838,9 @@ public:
     }
 
     template <typename... Args>
-    inline piv_yyjson_mut_val make_obj(bool deep_copy, bool replaced, Args &&...args)
+    inline piv_yyjson_mut_val make_obj(bool deep_copy, bool replaced, Args&&... args)
     {
-        yyjson_mut_val *_obj = yyjson_mut_obj(_doc()->doc);
+        yyjson_mut_val* _obj = yyjson_mut_obj(_doc()->doc);
         _doc()->add(_obj, deep_copy, replaced, std::forward<Args>(args)...);
         return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, _obj};
     }
@@ -1849,14 +1851,14 @@ public:
     }
 
     template <typename... Args>
-    inline piv_yyjson_mut_val make_arr(bool deep_copy, Args &&...args)
+    inline piv_yyjson_mut_val make_arr(bool deep_copy, Args&&... args)
     {
-        yyjson_mut_val *_arr = yyjson_mut_arr(_doc()->doc);
+        yyjson_mut_val* _arr = yyjson_mut_arr(_doc()->doc);
         _doc()->append(_arr, deep_copy, std::forward<Args>(args)...);
         return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, _arr};
     }
 
-    inline piv_yyjson_mut_val &copy(const piv_yyjson_mut_val &rhs)
+    inline piv_yyjson_mut_val& copy(const piv_yyjson_mut_val& rhs)
     {
         m_shared_doc = std::make_shared<piv_yyjson_mut_doc>();
         m_val = yyjson_mut_val_mut_copy(_doc()->doc, rhs.m_val);
@@ -1881,10 +1883,10 @@ public:
         m_val = nullptr;
     }
 
-    inline bool parse_doc(const char *dat, size_t len, yyjson_read_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_read_err *err = nullptr)
+    inline bool parse_doc(const char* dat, size_t len, yyjson_read_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_read_err* err = nullptr)
     {
         _doc()->free_doc();
-        yyjson_doc *imut_doc = yyjson_read_opts((char *)dat, len, flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
+        yyjson_doc* imut_doc = yyjson_read_opts((char*)dat, len, flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
         if (imut_doc)
         {
             _doc()->copy_doc(imut_doc, alc);
@@ -1895,19 +1897,20 @@ public:
     }
 
     template <typename T>
-    inline bool parse(T &&dat, yyjson_read_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_read_err *err = nullptr)
+    inline bool parse(T&& dat, yyjson_read_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_read_err* err = nullptr)
     {
-        PivS2V sv{dat};
+        PivAny2U<true> sv{dat};
         return parse_doc(sv.data(), sv.size(), flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
     }
 
-    bool parse_file(const wchar_t *filename, yyjson_read_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_read_err *err = nullptr)
+    bool parse_file(const wchar_t* filename, yyjson_read_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_read_err* err = nullptr)
     {
         _doc()->free_doc();
         if (!alc)
             alc = piv_yyjson_alc::instance().pref();
-        FILE *fp = _wfopen(filename, L"rb");
-        yyjson_doc *imut_doc = yyjson_read_fp(fp, flag, alc, err);
+        FILE* fp = nullptr;
+        _wfopen_s(&fp, filename, L"rb");
+        yyjson_doc* imut_doc = yyjson_read_fp(fp, flag, alc, err);
         if (imut_doc)
         {
             _doc()->copy_doc(imut_doc, alc);
@@ -1919,21 +1922,22 @@ public:
         return !_doc()->empty();
     }
 
-    bool write_file(const wchar_t *filename, yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_write_err *err = nullptr)
+    bool write_file(const wchar_t* filename, yyjson_write_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_write_err* err = nullptr)
     {
-        FILE *fp = _wfopen(filename, L"wb+");
+        FILE* fp = nullptr;
+        _wfopen_s(&fp, filename, L"wb+");
         bool ret = yyjson_mut_write_fp(fp, _doc()->doc, flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
         if (fp)
             fclose(fp);
         return ret;
     }
 
-    CWString write_vol_str(yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_write_err *err = nullptr)
+    CWString write_vol_str(yyjson_write_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_write_err* err = nullptr)
     {
         if (!alc)
             alc = piv_yyjson_alc::instance().pref();
         CWString ret;
-        char *str = yyjson_mut_write_opts(_doc()->doc, flag, alc, nullptr, err);
+        char* str = yyjson_mut_write_opts(_doc()->doc, flag, alc, nullptr, err);
         if (str)
         {
             ret.SetText(str);
@@ -1945,12 +1949,12 @@ public:
         return ret;
     }
 
-    std::string write_std_str(yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_write_err *err = nullptr)
+    std::string write_std_str(yyjson_write_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_write_err* err = nullptr)
     {
         if (!alc)
             alc = piv_yyjson_alc::instance().pref();
         std::string ret;
-        char *str = yyjson_mut_write_opts(_doc()->doc, flag, alc, nullptr, err);
+        char* str = yyjson_mut_write_opts(_doc()->doc, flag, alc, nullptr, err);
         if (str)
         {
             ret.assign(str);
@@ -1962,13 +1966,13 @@ public:
         return ret;
     }
 
-    CVolMem write_vol_mem(yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr, yyjson_write_err *err = nullptr)
+    CVolMem write_vol_mem(yyjson_write_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_write_err* err = nullptr)
     {
         if (!alc)
             alc = piv_yyjson_alc::instance().pref();
         size_t len;
         CVolMem ret;
-        char *str = yyjson_mut_write_opts(_doc()->doc, flag, alc, &len, err);
+        char* str = yyjson_mut_write_opts(_doc()->doc, flag, alc, &len, err);
         if (str)
         {
             ret.Append(str, static_cast<INT_P>(len));
@@ -1980,12 +1984,12 @@ public:
         return ret;
     }
 
-    CWString to_vol_str(yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr)
+    CWString to_vol_str(yyjson_write_flag flag = 0, const yyjson_alc* alc = nullptr)
     {
         if (!alc)
             alc = piv_yyjson_alc::instance().pref();
         CWString ret;
-        char *str = yyjson_mut_val_write_opts(m_val, flag, alc, nullptr, nullptr);
+        char* str = yyjson_mut_val_write_opts(m_val, flag, alc, nullptr, nullptr);
         if (str)
         {
             ret.SetText(str);
@@ -1997,12 +2001,12 @@ public:
         return ret;
     }
 
-    std::string to_std_str(yyjson_write_flag flag = 0, const yyjson_alc *alc = nullptr)
+    std::string to_std_str(yyjson_write_flag flag = 0, const yyjson_alc* alc = nullptr)
     {
         if (!alc)
             alc = piv_yyjson_alc::instance().pref();
         std::string ret;
-        char *str = yyjson_mut_val_write_opts(m_val, flag, alc, nullptr, nullptr);
+        char* str = yyjson_mut_val_write_opts(m_val, flag, alc, nullptr, nullptr);
         if (str)
         {
             ret.assign(str);
@@ -2014,34 +2018,34 @@ public:
         return ret;
     }
 
-    inline yyjson_mut_doc *doc()
+    inline yyjson_mut_doc* doc()
     {
         return _doc()->doc;
     }
 
-    inline yyjson_mut_doc *doc() const
+    inline yyjson_mut_doc* doc() const
     {
         return _doc()->doc;
     }
 
-    inline piv_yyjson_mut_val &set_obj()
+    inline piv_yyjson_mut_val& set_obj()
     {
         yyjson_mut_set_obj(m_val);
         return *this;
     }
 
-    inline piv_yyjson_mut_val &set_arr()
+    inline piv_yyjson_mut_val& set_arr()
     {
         yyjson_mut_set_arr(m_val);
         return *this;
     }
 
-    inline piv_yyjson_val to_imut_doc(const yyjson_alc *alc = nullptr)
+    inline piv_yyjson_val to_imut_doc(const yyjson_alc* alc = nullptr)
     {
         return piv_yyjson_val{yyjson_mut_doc_imut_copy(_doc()->doc, alc ? alc : piv_yyjson_alc::instance().pref())};
     }
 
-    inline piv_yyjson_val to_imut_val(const yyjson_alc *alc = nullptr)
+    inline piv_yyjson_val to_imut_val(const yyjson_alc* alc = nullptr)
     {
         return piv_yyjson_val{yyjson_mut_val_imut_copy(m_val, alc ? alc : piv_yyjson_alc::instance().pref())};
     }
@@ -2056,7 +2060,7 @@ public:
         return m_val == _doc()->root();
     }
 
-    inline bool is_same_doc(const piv_yyjson_mut_val &rhs) const
+    inline bool is_same_doc(const piv_yyjson_mut_val& rhs) const
     {
         return empty() ? false : (_doc() == rhs._doc());
     }
@@ -2091,7 +2095,7 @@ public:
         return yyjson_mut_get_tag(m_val);
     }
 
-    inline const char *desc()
+    inline const char* desc()
     {
         return yyjson_mut_get_type_desc(m_val);
     }
@@ -2182,29 +2186,26 @@ public:
     }
 
     template <typename T>
-    inline yyjson_mut_val *get_val(T idx,
-                                   typename std::enable_if<std::is_integral<T>::value, T *>::type = nullptr)
+    inline yyjson_mut_val* get_val(T idx, typename std::enable_if<std::is_integral<T>::value, T*>::type = nullptr)
     {
         return yyjson_mut_arr_get(m_val, static_cast<size_t>(idx));
     }
 
     template <typename T>
-    yyjson_mut_val *get_val(T &&key,
-                            typename std::enable_if<!std::is_integral<typename std::decay<T>::type>::value,
-                                                    typename std::decay<T>::type *>::type = nullptr)
+    yyjson_mut_val* get_val(T&& key, typename std::enable_if<!std::is_integral<typename std::decay<T>::type>::value, typename std::decay<T>::type*>::type = nullptr)
     {
-        PivS2V sv{key};
-        return yyjson_mut_obj_getn(m_val, sv.c_str(), sv.size());
+        PivAny2U<true> sv{key};
+        return yyjson_mut_obj_getn(m_val, sv.data(), sv.size());
     }
 
     template <typename T>
-    inline piv_yyjson_mut_val get(T &&idx_or_key)
+    inline piv_yyjson_mut_val get(T&& idx_or_key)
     {
         return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, get_val(std::forward<T>(idx_or_key))};
     }
 
     template <typename T>
-    inline piv_yyjson_mut_val operator[](T &&idx_or_key)
+    inline piv_yyjson_mut_val operator[](T&& idx_or_key)
     {
         return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, get_val(std::forward<T>(idx_or_key))};
     }
@@ -2220,24 +2221,24 @@ public:
     }
 
     template <typename T>
-    yyjson_mut_val *ptr_val(T &&ptr, yyjson_ptr_err *err = nullptr, piv_yyjson_mut_val::ptr_ctx *ctx = nullptr)
+    yyjson_mut_val* ptr_val(T&& ptr, yyjson_ptr_err* err = nullptr, piv_yyjson_mut_val::ptr_ctx* ctx = nullptr)
     {
-        PivS2V sv{ptr};
+        PivAny2U<true> sv{ptr};
         if (ctx)
             ctx->doc = m_shared_doc ? m_shared_doc : m_weak_doc;
         if (m_val == _doc()->root())
-            return yyjson_mut_doc_ptr_getx(_doc()->doc, sv.c_str(), sv.size(), ctx ? &ctx->ctx : nullptr, err);
+            return yyjson_mut_doc_ptr_getx(_doc()->doc, sv.data(), sv.size(), ctx ? &ctx->ctx : nullptr, err);
         else
-            return yyjson_mut_ptr_getx(m_val, sv.c_str(), sv.size(), ctx ? &ctx->ctx : nullptr, err);
+            return yyjson_mut_ptr_getx(m_val, sv.data(), sv.size(), ctx ? &ctx->ctx : nullptr, err);
     }
 
     template <typename T>
-    inline piv_yyjson_mut_val ptr(T &&ptr, yyjson_ptr_err *err = nullptr, piv_yyjson_mut_val::ptr_ctx *ctx = nullptr)
+    inline piv_yyjson_mut_val ptr(T&& ptr, yyjson_ptr_err* err = nullptr, piv_yyjson_mut_val::ptr_ctx* ctx = nullptr)
     {
         return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, ptr_val(std::forward<T>(ptr), err, ctx)};
     }
 
-    inline const char *get_str()
+    inline const char* get_str()
     {
         return yyjson_mut_get_str(m_val);
     }
@@ -2259,59 +2260,59 @@ public:
     }
 
     template <typename T>
-    inline const char *get_str(T &&idx_or_key)
+    inline const char* get_str(T&& idx_or_key)
     {
         return yyjson_mut_get_str(get_val(std::forward<T>(idx_or_key)));
     }
 
     template <typename R, typename T>
-    inline R get_num(T &&idx_or_key)
+    inline R get_num(T&& idx_or_key)
     {
         return to_num<R>(get_val(std::forward<T>(idx_or_key)));
     }
 
     template <typename T>
-    inline double get_real(T &&idx_or_key)
+    inline double get_real(T&& idx_or_key)
     {
         return yyjson_mut_get_num(get_val(std::forward<T>(idx_or_key)));
     }
 
     template <typename T>
-    inline bool get_bool(T &&idx_or_key)
+    inline bool get_bool(T&& idx_or_key)
     {
         return yyjson_mut_get_bool(get_val(std::forward<T>(idx_or_key)));
     }
 
     template <typename T>
-    inline const char *get_ptr_str(T &&ptr, yyjson_ptr_err *err = nullptr, piv_yyjson_mut_val::ptr_ctx *ctx = nullptr)
+    inline const char* get_ptr_str(T&& ptr, yyjson_ptr_err* err = nullptr, piv_yyjson_mut_val::ptr_ctx* ctx = nullptr)
     {
         return yyjson_mut_get_str(ptr_val(std::forward<T>(ptr), err, ctx));
     }
 
     template <typename R, typename T>
-    inline R get_ptr_num(T &&ptr, yyjson_ptr_err *err = nullptr, piv_yyjson_mut_val::ptr_ctx *ctx = nullptr)
+    inline R get_ptr_num(T&& ptr, yyjson_ptr_err* err = nullptr, piv_yyjson_mut_val::ptr_ctx* ctx = nullptr)
     {
         return to_num<R>(ptr_val(std::forward<T>(ptr), err, ctx));
     }
 
     template <typename T>
-    inline double get_ptr_real(T &&ptr, yyjson_ptr_err *err = nullptr, piv_yyjson_mut_val::ptr_ctx *ctx = nullptr)
+    inline double get_ptr_real(T&& ptr, yyjson_ptr_err* err = nullptr, piv_yyjson_mut_val::ptr_ctx* ctx = nullptr)
     {
         return yyjson_mut_get_num(ptr_val(std::forward<T>(ptr), err, ctx));
     }
 
     template <typename T>
-    inline bool get_ptr_bool(T &&ptr, yyjson_ptr_err *err = nullptr, piv_yyjson_mut_val::ptr_ctx *ctx = nullptr)
+    inline bool get_ptr_bool(T&& ptr, yyjson_ptr_err* err = nullptr, piv_yyjson_mut_val::ptr_ctx* ctx = nullptr)
     {
         return yyjson_mut_get_bool(ptr_val(std::forward<T>(ptr), err, ctx));
     }
 
-    size_t eume_key(std::vector<std::string> &key_arr)
+    size_t eume_key(std::vector<std::string>& key_arr)
     {
         yyjson_mut_obj_iter iter;
         if (yyjson_mut_obj_iter_init(m_val, &iter))
         {
-            yyjson_mut_val *key = yyjson_mut_obj_iter_next(&iter);
+            yyjson_mut_val* key = yyjson_mut_obj_iter_next(&iter);
             while (key)
             {
                 key_arr.emplace_back(yyjson_mut_get_str(key));
@@ -2322,12 +2323,12 @@ public:
         return 0;
     }
 
-    INT_P eume_key(CMStringArray &key_arr)
+    INT_P eume_key(CMStringArray& key_arr)
     {
         yyjson_mut_obj_iter iter;
         if (yyjson_mut_obj_iter_init(m_val, &iter))
         {
-            yyjson_mut_val *key = yyjson_mut_obj_iter_next(&iter);
+            yyjson_mut_val* key = yyjson_mut_obj_iter_next(&iter);
             while (key)
             {
                 key_arr.Add(yyjson_mut_get_str(key));
@@ -2359,19 +2360,19 @@ public:
     }
 
     template <typename T>
-    inline bool set_val(T &&val, bool deep_copy = true)
+    inline bool set_val(T&& val, bool deep_copy = true)
     {
         return _doc()->set_val(m_val, std::forward<T>(val), deep_copy);
     }
 
     template <typename T, typename V>
-    inline bool set_val(T &&idx_or_key, V &&val, bool deep_copy = true)
+    inline bool set_val(T&& idx_or_key, V&& val, bool deep_copy = true)
     {
         return _doc()->set_val(get_val(std::forward<T>(idx_or_key)), std::forward<V>(val), deep_copy);
     }
 
     template <typename... Args>
-    inline bool append(bool deep_copy, Args &&...args)
+    inline bool append(bool deep_copy, Args&&... args)
     {
         if (yyjson_mut_is_null(m_val))
             yyjson_mut_set_arr(m_val);
@@ -2379,7 +2380,7 @@ public:
     }
 
     template <typename... Args>
-    inline bool prepend(bool deep_copy, Args &&...args)
+    inline bool prepend(bool deep_copy, Args&&... args)
     {
         if (yyjson_mut_is_null(m_val))
             yyjson_mut_set_arr(m_val);
@@ -2387,7 +2388,7 @@ public:
     }
 
     template <typename V>
-    inline bool arr_insert(size_t idx, V &&val, bool deep_copy = true)
+    inline bool arr_insert(size_t idx, V&& val, bool deep_copy = true)
     {
         return yyjson_mut_arr_insert(m_val, _doc()->to_val(std::forward<V>(val), deep_copy), idx);
     }
@@ -2408,45 +2409,45 @@ public:
     }
 
     template <typename K>
-    inline piv_yyjson_mut_val obj_remove(K &&key)
+    inline piv_yyjson_mut_val obj_remove(K&& key)
     {
-        PivS2V sv{key};
-        return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, yyjson_mut_obj_remove_keyn(m_val, sv.c_str(), sv.size())};
+        PivAny2U<true> sv{key};
+        return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, yyjson_mut_obj_remove_keyn(m_val, sv.data(), sv.size())};
     }
 
     template <typename P>
-    inline piv_yyjson_mut_val ptr_remove(P &&ptr, yyjson_ptr_err *err = nullptr, piv_yyjson_mut_val::ptr_ctx *ctx = nullptr)
+    inline piv_yyjson_mut_val ptr_remove(P&& ptr, yyjson_ptr_err* err = nullptr, piv_yyjson_mut_val::ptr_ctx* ctx = nullptr)
     {
-        PivS2V sv{ptr};
+        PivAny2U<true> sv{ptr};
         if (ctx)
             ctx->doc = m_shared_doc ? m_shared_doc : m_weak_doc;
         if (m_val == _doc()->root())
-            return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, yyjson_mut_doc_ptr_removex(_doc()->doc, sv.c_str(), sv.size(), ctx ? &ctx->ctx : nullptr, err)};
+            return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, yyjson_mut_doc_ptr_removex(_doc()->doc, sv.data(), sv.size(), ctx ? &ctx->ctx : nullptr, err)};
         else
-            return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, yyjson_mut_ptr_removex(m_val, sv.c_str(), sv.size(), ctx ? &ctx->ctx : nullptr, err)};
+            return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, yyjson_mut_ptr_removex(m_val, sv.data(), sv.size(), ctx ? &ctx->ctx : nullptr, err)};
     }
 
     template <typename K, typename N>
-    inline bool obj_rename(K &&key, N &&new_key)
+    inline bool obj_rename(K&& key, N&& new_key)
     {
-        PivS2V sv{key}, new_sv{new_key};
-        return yyjson_mut_obj_rename_keyn(_doc()->doc, m_val, sv.c_str(), sv.size(), new_sv.c_str(), new_sv.size());
+        PivAny2U<true> sv{key}, new_sv{new_key};
+        return yyjson_mut_obj_rename_keyn(_doc()->doc, m_val, sv.data(), sv.size(), new_sv.data(), new_sv.size());
     }
 
     template <typename V>
-    inline piv_yyjson_mut_val arr_replace(size_t idx, V &&val, bool deep_copy = true)
+    inline piv_yyjson_mut_val arr_replace(size_t idx, V&& val, bool deep_copy = true)
     {
         return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, yyjson_mut_arr_replace(m_val, idx, _doc()->to_val(std::forward<V>(val), deep_copy))};
     }
 
     template <typename K, typename V>
-    inline bool obj_replace(K &&key, V &&val, bool deep_copy = true)
+    inline bool obj_replace(K&& key, V&& val, bool deep_copy = true)
     {
         return yyjson_mut_obj_replace(m_val, _doc()->to_key(std::forward<K>(key), deep_copy), _doc()->to_val(std::forward<V>(val), deep_copy));
     }
 
     template <typename K, typename V>
-    inline bool add(K &&key, V &&val, bool deep_copy = true, bool replaced = true)
+    inline bool add(K&& key, V&& val, bool deep_copy = true, bool replaced = true)
     {
         if (yyjson_mut_is_null(m_val))
             yyjson_mut_set_obj(m_val);
@@ -2457,36 +2458,36 @@ public:
     }
 
     template <typename P, typename V>
-    inline bool ptr_add(P &&ptr, V &&val, bool deep_copy = true, bool replaced = true, yyjson_ptr_err *err = nullptr, piv_yyjson_mut_val::ptr_ctx *ctx = nullptr)
+    inline bool ptr_add(P&& ptr, V&& val, bool deep_copy = true, bool replaced = true, yyjson_ptr_err* err = nullptr, piv_yyjson_mut_val::ptr_ctx* ctx = nullptr)
     {
-        PivS2V sv{ptr};
+        PivAny2U<true> sv{ptr};
         if (ctx)
             ctx->doc = m_shared_doc ? m_shared_doc : m_weak_doc;
-        yyjson_mut_val *val_to_add = _doc()->to_val(std::forward<V>(val), deep_copy);
+        yyjson_mut_val* val_to_add = _doc()->to_val(std::forward<V>(val), deep_copy);
         if (yyjson_mut_is_null(m_val))
             yyjson_mut_set_obj(m_val);
         if (m_val == _doc()->root())
         {
             if (replaced)
-                return yyjson_mut_doc_ptr_setx(_doc()->doc, sv.c_str(), sv.size(), val_to_add, true, ctx ? &ctx->ctx : nullptr, err);
+                return yyjson_mut_doc_ptr_setx(_doc()->doc, sv.data(), sv.size(), val_to_add, true, ctx ? &ctx->ctx : nullptr, err);
             else
-                return yyjson_mut_doc_ptr_addx(_doc()->doc, sv.c_str(), sv.size(), val_to_add, true, ctx ? &ctx->ctx : nullptr, err);
+                return yyjson_mut_doc_ptr_addx(_doc()->doc, sv.data(), sv.size(), val_to_add, true, ctx ? &ctx->ctx : nullptr, err);
         }
         else
         {
             if (replaced)
-                return yyjson_mut_ptr_setx(m_val, sv.c_str(), sv.size(), val_to_add, _doc()->doc, true, ctx ? &ctx->ctx : nullptr, err);
+                return yyjson_mut_ptr_setx(m_val, sv.data(), sv.size(), val_to_add, _doc()->doc, true, ctx ? &ctx->ctx : nullptr, err);
             else
-                return yyjson_mut_ptr_addx(m_val, sv.c_str(), sv.size(), val_to_add, _doc()->doc, true, ctx ? &ctx->ctx : nullptr, err);
+                return yyjson_mut_ptr_addx(m_val, sv.data(), sv.size(), val_to_add, _doc()->doc, true, ctx ? &ctx->ctx : nullptr, err);
         }
     }
 
-    inline piv_yyjson_mut_val patch(const piv_yyjson_mut_val &patch, yyjson_patch_err *err)
+    inline piv_yyjson_mut_val patch(const piv_yyjson_mut_val& patch, yyjson_patch_err* err)
     {
         return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, yyjson_mut_patch(_doc()->doc, m_val, patch.m_val, err)};
     }
 
-    inline piv_yyjson_mut_val merge_patch(const piv_yyjson_mut_val &patch)
+    inline piv_yyjson_mut_val merge_patch(const piv_yyjson_mut_val& patch)
     {
         return piv_yyjson_mut_val{m_shared_doc ? m_shared_doc : m_weak_doc, yyjson_mut_merge_patch(_doc()->doc, m_val, patch.m_val)};
     }

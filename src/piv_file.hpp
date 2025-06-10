@@ -1,5 +1,5 @@
 ﻿/*********************************************\
- * 火山视窗PIV模块 - 内存映射文件类          *
+ * 火山视窗PIV模块 - 文件与内存读写          *
  * 作者: Xelloss                             *
  * 网站: https://piv.ink                     *
  * 邮箱: xelloss@vip.qq.com                  *
@@ -13,22 +13,29 @@
 
 class PivFile
 {
-private:
-    bool m_AutoClose = true;
-    HANDLE hFile = INVALID_HANDLE_VALUE;
-
 public:
+    bool m_auto_close = true;
+    HANDLE m_hfile = INVALID_HANDLE_VALUE;
+
     PivFile() {}
     ~PivFile()
     {
-        if (m_AutoClose)
+        if (m_auto_close)
             Close();
     }
 
-    inline PivFile &operator=(PivFile &&rhs)
+    inline PivFile& operator=(const PivFile& rhs)
     {
-        m_AutoClose = rhs.m_AutoClose;
-        hFile = rhs.hFile;
+        m_auto_close = rhs.m_auto_close;
+        m_hfile = rhs.m_hfile;
+        return *this;
+    }
+
+    inline PivFile& operator=(PivFile&& rhs)
+    {
+        m_auto_close = rhs.m_auto_close;
+        m_hfile = rhs.m_hfile;
+        return *this;
     }
 
     /**
@@ -39,12 +46,12 @@ public:
      * @param nCreationDisposition 创建方式
      * @return 是否成功
      */
-    BOOL Open(const wchar_t *lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, DWORD dwCreationDisposition)
+    BOOL Open(const wchar_t* lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, DWORD dwCreationDisposition)
     {
         Close();
-        hFile = ::CreateFileW(lpFileName, dwDesiredAccess, dwShareMode, NULL, dwCreationDisposition, FILE_ATTRIBUTE_NORMAL, NULL);
-        m_AutoClose = true;
-        return (INVALID_HANDLE_VALUE != hFile);
+        m_hfile = ::CreateFileW(lpFileName, dwDesiredAccess, dwShareMode, NULL, dwCreationDisposition, FILE_ATTRIBUTE_NORMAL, NULL);
+        m_auto_close = TRUE;
+        return (INVALID_HANDLE_VALUE != m_hfile);
     }
 
     /**
@@ -57,8 +64,8 @@ public:
         Close();
         if (::GetFileType(file) == FILE_TYPE_DISK)
         {
-            hFile = file;
-            m_AutoClose = false;
+            m_hfile = file;
+            m_auto_close = FALSE;
             return TRUE;
         }
         return FALSE;
@@ -69,10 +76,10 @@ public:
      */
     inline void Close()
     {
-        if (INVALID_HANDLE_VALUE != hFile)
+        if (INVALID_HANDLE_VALUE != m_hfile)
         {
-            ::CloseHandle(hFile);
-            hFile = INVALID_HANDLE_VALUE;
+            ::CloseHandle(m_hfile);
+            m_hfile = INVALID_HANDLE_VALUE;
         }
     }
 
@@ -82,17 +89,17 @@ public:
      */
     inline BOOL IsOpen() const
     {
-        return (INVALID_HANDLE_VALUE != hFile);
+        return (INVALID_HANDLE_VALUE != m_hfile);
     }
 
     /**
      * @brief 交换
      * @param rhs 另一个对象
      */
-    inline void Swap(PivFile &rhs)
+    inline void Swap(PivFile& rhs)
     {
-        std::swap(m_AutoClose, rhs.m_AutoClose);
-        std::swap(hFile, rhs.hFile);
+        std::swap(m_auto_close, rhs.m_auto_close);
+        std::swap(m_hfile, rhs.m_hfile);
     }
 
     /**
@@ -101,7 +108,7 @@ public:
      */
     inline HANDLE GetFileHandle() const
     {
-        return hFile;
+        return m_hfile;
     }
 
     /**
@@ -111,7 +118,7 @@ public:
     inline int64_t GetSize() const
     {
         LARGE_INTEGER fileSize{0};
-        if (INVALID_HANDLE_VALUE != hFile && ::GetFileSizeEx(hFile, &fileSize))
+        if (INVALID_HANDLE_VALUE != m_hfile && ::GetFileSizeEx(m_hfile, &fileSize))
             return fileSize.QuadPart;
         return -1;
     }
@@ -123,11 +130,11 @@ public:
      */
     inline BOOL SetFileSize(int64_t file_size)
     {
-        if (INVALID_HANDLE_VALUE != hFile)
+        if (INVALID_HANDLE_VALUE != m_hfile)
         {
             LARGE_INTEGER pos{0};
             pos.QuadPart = file_size;
-            if (::SetFilePointerEx(hFile, pos, NULL, FILE_BEGIN) && ::SetEndOfFile(hFile))
+            if (::SetFilePointerEx(m_hfile, pos, NULL, FILE_BEGIN) && ::SetEndOfFile(m_hfile))
                 return TRUE;
         }
         return FALSE;
@@ -139,7 +146,7 @@ public:
      */
     inline BOOL Flush()
     {
-        return (INVALID_HANDLE_VALUE == hFile) ? FALSE : ::FlushFileBuffers(hFile);
+        return (INVALID_HANDLE_VALUE == m_hfile) ? FALSE : ::FlushFileBuffers(m_hfile);
     }
 
     /**
@@ -151,12 +158,12 @@ public:
      */
     BOOL Lock(int64_t offset, int64_t lock_size, int32_t try_time)
     {
-        if (INVALID_HANDLE_VALUE == hFile)
+        if (INVALID_HANDLE_VALUE == m_hfile)
             return FALSE;
         const DWORD dwBeginTickCount = ::GetTickCount();
         while (true)
         {
-            if (::LockFile(hFile, (DWORD)offset, (DWORD)(offset >> 32), (DWORD)lock_size, (DWORD)(lock_size >> 32)))
+            if (::LockFile(m_hfile, (DWORD)offset, (DWORD)(offset >> 32), (DWORD)lock_size, (DWORD)(lock_size >> 32)))
                 return TRUE;
             const DWORD dwLastError = ::GetLastError();
             if ((dwLastError != ERROR_SHARING_VIOLATION && dwLastError != ERROR_LOCK_VIOLATION) ||
@@ -175,8 +182,8 @@ public:
      */
     inline BOOL Unlock(int64_t offset, int64_t lock_size)
     {
-        if (INVALID_HANDLE_VALUE != hFile)
-            return ::UnlockFile(hFile, (DWORD)offset, (DWORD)(offset >> 32), (DWORD)lock_size, (DWORD)(lock_size >> 32));
+        if (INVALID_HANDLE_VALUE != m_hfile)
+            return ::UnlockFile(m_hfile, (DWORD)offset, (DWORD)(offset >> 32), (DWORD)lock_size, (DWORD)(lock_size >> 32));
         return FALSE;
     }
 
@@ -188,11 +195,11 @@ public:
      */
     BOOL SetCurrentPos(int64_t n64Offset, DWORD dwMoveMethod = 0)
     {
-        if (INVALID_HANDLE_VALUE == hFile)
+        if (INVALID_HANDLE_VALUE == m_hfile)
             return FALSE;
         LARGE_INTEGER pos{0};
         pos.QuadPart = n64Offset;
-        return ::SetFilePointerEx(hFile, pos, NULL, dwMoveMethod);
+        return ::SetFilePointerEx(m_hfile, pos, NULL, dwMoveMethod);
     }
 
     /**
@@ -201,7 +208,7 @@ public:
      */
     inline int64_t GetCurrentPos()
     {
-        return (hFile == INVALID_HANDLE_VALUE) ? -1 : MoveAndGetFilePos(FILE_CURRENT);
+        return (m_hfile == INVALID_HANDLE_VALUE) ? -1 : MoveAndGetFilePos(FILE_CURRENT);
     }
 
     /**
@@ -210,7 +217,7 @@ public:
      */
     inline BOOL SetEof()
     {
-        return (hFile == INVALID_HANDLE_VALUE) ? FALSE : ::SetEndOfFile(hFile);
+        return (m_hfile == INVALID_HANDLE_VALUE) ? FALSE : ::SetEndOfFile(m_hfile);
     }
 
     /**
@@ -220,7 +227,7 @@ public:
      */
     BOOL IsEof(BOOL isTextFile, BOOL isUnicode)
     {
-        if (hFile == INVALID_HANDLE_VALUE)
+        if (m_hfile == INVALID_HANDLE_VALUE)
             return TRUE;
         const int64_t n64CurrentPosition = this->GetCurrentPos();
         if (n64CurrentPosition < 0)
@@ -245,11 +252,11 @@ public:
      */
     int64_t MoveAndGetFilePos(DWORD dwMoveMethod)
     {
-        if (INVALID_HANDLE_VALUE == hFile)
+        if (INVALID_HANDLE_VALUE == m_hfile)
             return -1;
         LARGE_INTEGER dis, current_pos;
         dis.QuadPart = current_pos.QuadPart = 0;
-        return (::SetFilePointerEx(hFile, dis, &current_pos, dwMoveMethod) ? current_pos.QuadPart : -1);
+        return (::SetFilePointerEx(m_hfile, dis, &current_pos, dwMoveMethod) ? current_pos.QuadPart : -1);
     }
 
     /**
@@ -259,15 +266,15 @@ public:
      * @return
      */
     template <typename T>
-    T Get(const T &default_value)
+    T Get(const T& default_value)
     {
-        if (INVALID_HANDLE_VALUE != hFile)
+        if (INVALID_HANDLE_VALUE != m_hfile)
         {
             T value;
             DWORD dwRead = 0;
-            if (::ReadFile(hFile, &value, (DWORD)sizeof(T), &dwRead, NULL) && dwRead == sizeof(T))
+            if (::ReadFile(m_hfile, &value, (DWORD)sizeof(T), &dwRead, NULL) && dwRead == sizeof(T))
                 return value;
-            ::SetFilePointer(hFile, 0, NULL, FILE_END);
+            ::SetFilePointer(m_hfile, 0, NULL, FILE_END);
         }
         return default_value;
     }
@@ -278,12 +285,12 @@ public:
      */
     int32_t GetChar()
     {
-        if (INVALID_HANDLE_VALUE != hFile)
+        if (INVALID_HANDLE_VALUE != m_hfile)
         {
             char value;
-            if (::ReadFile(hFile, &value, 1, NULL, NULL))
+            if (::ReadFile(m_hfile, &value, 1, NULL, NULL))
                 return static_cast<int32_t>(value);
-            ::SetFilePointer(hFile, 0, NULL, FILE_END);
+            ::SetFilePointer(m_hfile, 0, NULL, FILE_END);
         }
         return -1;
     }
@@ -294,13 +301,13 @@ public:
      */
     int32_t GetWchar()
     {
-        if (INVALID_HANDLE_VALUE != hFile)
+        if (INVALID_HANDLE_VALUE != m_hfile)
         {
             char value;
             DWORD dwRead = 0;
-            if (::ReadFile(hFile, &value, 2, &dwRead, NULL) && dwRead == 2)
+            if (::ReadFile(m_hfile, &value, 2, &dwRead, NULL) && dwRead == 2)
                 return static_cast<int32_t>(value);
-            ::SetFilePointer(hFile, 0, NULL, FILE_END);
+            ::SetFilePointer(m_hfile, 0, NULL, FILE_END);
         }
         return -1;
     }
@@ -312,14 +319,14 @@ public:
      * @return
      */
     template <typename T>
-    int32_t Read(T &value)
+    int32_t Read(T& value)
     {
-        if (INVALID_HANDLE_VALUE != hFile)
+        if (INVALID_HANDLE_VALUE != m_hfile)
         {
             DWORD dwRead = 0;
-            if (::ReadFile(hFile, &value, (DWORD)sizeof(T), &dwRead, NULL) && dwRead == sizeof(T))
+            if (::ReadFile(m_hfile, &value, (DWORD)sizeof(T), &dwRead, NULL) && dwRead == sizeof(T))
                 return static_cast<int32_t>(dwRead);
-            ::SetFilePointer(hFile, 0, NULL, FILE_END);
+            ::SetFilePointer(m_hfile, 0, NULL, FILE_END);
         }
         return 0;
     }
@@ -331,12 +338,12 @@ public:
      * @return
      */
     template <typename T>
-    int32_t Write(const T &value)
+    int32_t Write(const T& value)
     {
-        if (INVALID_HANDLE_VALUE != hFile)
+        if (INVALID_HANDLE_VALUE != m_hfile)
         {
             DWORD dwWritten = 0;
-            if (::WriteFile(hFile, &value, (DWORD)sizeof(T), &dwWritten, NULL))
+            if (::WriteFile(m_hfile, &value, (DWORD)sizeof(T), &dwWritten, NULL))
                 return static_cast<int32_t>(dwWritten);
         }
         return 0;
@@ -348,14 +355,14 @@ public:
      * @param npDataSize 数据尺寸
      * @return
      */
-    int64_t ReadData(void *pData, ptrdiff_t npDataSize)
+    int64_t ReadData(void* pData, DWORD npDataSize)
     {
-        if (INVALID_HANDLE_VALUE != hFile && npDataSize > 0)
+        if (INVALID_HANDLE_VALUE != m_hfile && npDataSize > 0)
         {
             DWORD dwRead = 0;
-            if (::ReadFile(hFile, pData, (DWORD)npDataSize, &dwRead, NULL))
+            if (::ReadFile(m_hfile, pData, npDataSize, &dwRead, NULL))
                 return static_cast<int64_t>(dwRead);
-            ::SetFilePointer(hFile, 0, NULL, FILE_END);
+            ::SetFilePointer(m_hfile, 0, NULL, FILE_END);
         }
         return 0;
     }
@@ -366,12 +373,12 @@ public:
      * @param npDataSize 数据尺寸
      * @return
      */
-    int64_t WriteData(const void *pData, ptrdiff_t npDataSize)
+    int64_t WriteData(const void* pData, DWORD npDataSize)
     {
-        if (INVALID_HANDLE_VALUE != hFile && npDataSize > 0)
+        if (INVALID_HANDLE_VALUE != m_hfile && npDataSize > 0)
         {
             DWORD dwWritten = 0;
-            if (::WriteFile(hFile, pData, (DWORD)npDataSize, &dwWritten, NULL))
+            if (::WriteFile(m_hfile, pData, npDataSize, &dwWritten, NULL))
                 return static_cast<int64_t>(dwWritten);
         }
         return 0;
@@ -383,17 +390,17 @@ public:
      * @param npDataSize 欲读入数据的尺寸
      * @return 实际读取长度
      */
-    int64_t ReadVolMem(CVolMem &data, ptrdiff_t npDataSize)
+    int64_t ReadVolMem(CVolMem& data, DWORD npDataSize)
     {
-        if (INVALID_HANDLE_VALUE != hFile && npDataSize > 0)
+        if (INVALID_HANDLE_VALUE != m_hfile && npDataSize > 0)
         {
             DWORD dwRead = 0;
-            if (::ReadFile(hFile, data.Alloc(npDataSize), (DWORD)npDataSize, &dwRead, NULL))
+            if (::ReadFile(m_hfile, data.Alloc(npDataSize), npDataSize, &dwRead, NULL))
             {
                 data.Realloc(static_cast<INT_P>(dwRead));
                 return static_cast<int64_t>(dwRead);
             }
-            ::SetFilePointer(hFile, 0, NULL, FILE_END);
+            ::SetFilePointer(m_hfile, 0, NULL, FILE_END);
         }
         return 0;
     }
@@ -403,9 +410,9 @@ public:
      * @param data 欲写出的字节集数据
      * @return 实际写出长度
      */
-    inline int64_t WriteVolMem(const CVolMem &data)
+    inline int64_t WriteVolMem(const CVolMem& data)
     {
-        return this->WriteData(data.GetPtr(), data.GetSize());
+        return this->WriteData(data.GetPtr(), static_cast<DWORD>(data.GetSize()));
     }
 
     /**
@@ -415,10 +422,10 @@ public:
      * @param encode 文本编码
      * @return 读入的字节长度
      */
-    int64_t ReadTextWithEncode(CWString &text, int64_t read_words = -1, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
+    int64_t ReadTextWithEncode(CWString& text, int64_t read_words = -1, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
     {
         text.Empty();
-        if (INVALID_HANDLE_VALUE == hFile || read_words == 0)
+        if (INVALID_HANDLE_VALUE == m_hfile || read_words == 0)
             return 0;
         int64_t ret;
         switch (encode)
@@ -447,10 +454,10 @@ public:
     }
 
     template <typename CharT>
-    int64_t ReadText(std::basic_string<CharT> &text, int64_t read_words = -1)
+    int64_t ReadText(std::basic_string<CharT>& text, int64_t read_words = -1)
     {
         text.clear();
-        if (INVALID_HANDLE_VALUE == hFile || read_words == 0)
+        if (INVALID_HANDLE_VALUE == m_hfile || read_words == 0)
             return 0;
 
         int64_t CurrentPos = this->GetCurrentPos();
@@ -459,7 +466,7 @@ public:
             if (sizeof(CharT) == 2)
             {
                 wchar_t bom = 0;
-                if (::ReadFile(hFile, &bom, 2, NULL, NULL) && bom == 0xFEFF)
+                if (::ReadFile(m_hfile, &bom, 2, NULL, NULL) && bom == 0xFEFF)
                     CurrentPos = 2;
                 else
                     return 0;
@@ -467,7 +474,7 @@ public:
             else
             {
                 char bom[3]{0};
-                if (::ReadFile(hFile, bom, 3, NULL, NULL) && bom[0] == (char)0xEF && bom[1] == (char)0xBB && bom[2] == (char)0xBF)
+                if (::ReadFile(m_hfile, bom, 3, NULL, NULL) && bom[0] == (char)0xEF && bom[1] == (char)0xBB && bom[2] == (char)0xBF)
                     CurrentPos = 3;
                 else
                     return 0;
@@ -492,9 +499,9 @@ public:
         PivBuffer<CharT, DWORD> buf{static_cast<DWORD>((ReadSize > 0x10000) ? 0x10000 : (ReadSize / sizeof(CharT))), true};
         for (int32_t i = 0; i < ReadSize / 0x10000; i++)
         {
-            if (::ReadFile(hFile, buf.GetPtr(), buf.GetSize(), &dwRead, NULL))
+            if (::ReadFile(m_hfile, buf.GetPtr(), buf.GetSize(), &dwRead, NULL))
             {
-                const CharT *ps = buf.GetPtr();
+                const CharT* ps = buf.GetPtr();
                 for (DWORD n = 0; n < buf.GetCount(); n++)
                 {
                     if (ps[n] == '\0' || ps[n] == 0x1A)
@@ -510,9 +517,9 @@ public:
         if (ReadSize % 0x10000 != 0)
         {
             buf.Realloc(static_cast<DWORD>((ReadSize % 0x10000) / sizeof(CharT)), true);
-            if (::ReadFile(hFile, buf.GetPtr(), buf.GetSize(), &dwRead, NULL))
+            if (::ReadFile(m_hfile, buf.GetPtr(), buf.GetSize(), &dwRead, NULL))
             {
-                const CharT *ps = buf.GetPtr();
+                const CharT* ps = buf.GetPtr();
                 for (DWORD n = 0; n < buf.GetCount(); n++)
                 {
                     if (ps[n] == '\0' || ps[n] == 0x1A)
@@ -529,17 +536,17 @@ public:
         return static_cast<int64_t>(text.size() * sizeof(CharT));
     }
 
-    int64_t ReadText(CWString &text, int64_t read_words = -1)
+    int64_t ReadText(CWString& text, int64_t read_words = -1)
     {
         text.Empty();
-        if (INVALID_HANDLE_VALUE == hFile || read_words == 0)
+        if (INVALID_HANDLE_VALUE == m_hfile || read_words == 0)
             return 0;
 
         int64_t CurrentPos = this->GetCurrentPos();
         if (CurrentPos == 0) // 判断跳过BOM签名
         {
             wchar_t bom = 0;
-            if (::ReadFile(hFile, &bom, 2, NULL, NULL) && bom == 0xFEFF)
+            if (::ReadFile(m_hfile, &bom, 2, NULL, NULL) && bom == 0xFEFF)
                 CurrentPos = 2;
             else
                 return 0;
@@ -562,9 +569,9 @@ public:
         PivBuffer<wchar_t, DWORD> buf{static_cast<DWORD>((ReadSize > 0x10000) ? 0x10000 : (ReadSize / 2)), true};
         for (int32_t i = 0; i < ReadSize / 0x10000; i++)
         {
-            if (::ReadFile(hFile, buf.GetPtr(), buf.GetSize(), &dwRead, NULL))
+            if (::ReadFile(m_hfile, buf.GetPtr(), buf.GetSize(), &dwRead, NULL))
             {
-                const wchar_t *ps = buf.GetPtr();
+                const wchar_t* ps = buf.GetPtr();
                 for (DWORD i = 0; i < buf.GetCount(); i++)
                 {
                     if (ps[i] == '\0' || ps[i] == 0x1A)
@@ -580,9 +587,9 @@ public:
         if (ReadSize % 0x10000 != 0)
         {
             buf.Realloc(static_cast<DWORD>((ReadSize % 0x10000) / 2), true);
-            if (::ReadFile(hFile, buf.GetPtr(), buf.GetSize(), &dwRead, NULL))
+            if (::ReadFile(m_hfile, buf.GetPtr(), buf.GetSize(), &dwRead, NULL))
             {
-                const wchar_t *ps = buf.GetPtr();
+                const wchar_t* ps = buf.GetPtr();
                 for (DWORD i = 0; i < buf.GetCount(); i++)
                 {
                     if (ps[i] == '\0' || ps[i] == 0x1A)
@@ -605,7 +612,7 @@ public:
      * @param encode 文本编码
      * @return 读入的字节长度
      */
-    int64_t ReadLineWithEncode(CWString &text, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
+    int64_t ReadLineWithEncode(CWString& text, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
     {
         int64_t ret = 0;
         text.Empty();
@@ -635,10 +642,10 @@ public:
     }
 
     template <typename CharT>
-    int64_t ReadLine(std::basic_string<CharT> &text)
+    int64_t ReadLine(std::basic_string<CharT>& text)
     {
         text.clear();
-        if (INVALID_HANDLE_VALUE == hFile)
+        if (INVALID_HANDLE_VALUE == m_hfile)
             return 0;
 
         int64_t CurrentPos = this->GetCurrentPos();
@@ -647,7 +654,7 @@ public:
             if (sizeof(CharT) == 2)
             {
                 wchar_t bom = 0;
-                if (::ReadFile(hFile, &bom, 2, NULL, NULL) && bom == 0xFEFF)
+                if (::ReadFile(m_hfile, &bom, 2, NULL, NULL) && bom == 0xFEFF)
                     CurrentPos = 2;
                 else
                     return 0;
@@ -655,7 +662,7 @@ public:
             else
             {
                 char bom[3]{0};
-                if (::ReadFile(hFile, bom, 3, NULL, NULL) && bom[0] == (char)0xEF && bom[1] == (char)0xBB && bom[2] == (char)0xBF)
+                if (::ReadFile(m_hfile, bom, 3, NULL, NULL) && bom[0] == (char)0xEF && bom[1] == (char)0xBB && bom[2] == (char)0xBF)
                     CurrentPos = 3;
                 else
                     return 0;
@@ -670,9 +677,9 @@ public:
         PivBuffer<CharT, DWORD> buf{static_cast<DWORD>((ReadSize > 0x10000) ? 0x10000 : (ReadSize / 2)), true};
         for (int32_t i = 0; i < ReadSize / 0x10000; i++)
         {
-            if (::ReadFile(hFile, buf.GetPtr(), buf.GetSize(), &dwRead, NULL))
+            if (::ReadFile(m_hfile, buf.GetPtr(), buf.GetSize(), &dwRead, NULL))
             {
-                const CharT *ps = buf.GetPtr();
+                const CharT* ps = buf.GetPtr();
                 bool hasCRLF = false;
                 DWORD n;
                 for (n = 0; n < buf.GetCount(); n++)
@@ -709,9 +716,9 @@ public:
         if (ReadSize % 0x10000 != 0)
         {
             buf.Realloc(static_cast<DWORD>((ReadSize % 0x10000) / 2), true);
-            if (::ReadFile(hFile, buf.GetPtr(), buf.GetSize(), &dwRead, NULL))
+            if (::ReadFile(m_hfile, buf.GetPtr(), buf.GetSize(), &dwRead, NULL))
             {
-                const CharT *ps = buf.GetPtr();
+                const CharT* ps = buf.GetPtr();
                 bool hasCRLF = false;
                 DWORD n;
                 for (n = 0; n < buf.GetCount(); n++)
@@ -749,17 +756,17 @@ public:
         return TotalRead;
     }
 
-    int64_t ReadLine(CWString &text)
+    int64_t ReadLine(CWString& text)
     {
         text.Empty();
-        if (INVALID_HANDLE_VALUE == hFile)
+        if (INVALID_HANDLE_VALUE == m_hfile)
             return 0;
 
         int64_t CurrentPos = this->GetCurrentPos();
         if (CurrentPos == 0) // 判断跳过BOM签名
         {
             wchar_t bom = 0;
-            if (::ReadFile(hFile, &bom, 2, NULL, NULL) && bom == 0xFEFF)
+            if (::ReadFile(m_hfile, &bom, 2, NULL, NULL) && bom == 0xFEFF)
                 CurrentPos = 2;
             else
                 return 0;
@@ -774,9 +781,9 @@ public:
         PivBuffer<wchar_t, DWORD> buf{static_cast<DWORD>((ReadSize > 0x10000) ? 0x10000 : (ReadSize / 2)), true};
         for (int32_t i = 0; i < ReadSize / 0x10000; i++)
         {
-            if (::ReadFile(hFile, buf.GetPtr(), buf.GetSize(), &dwRead, NULL))
+            if (::ReadFile(m_hfile, buf.GetPtr(), buf.GetSize(), &dwRead, NULL))
             {
-                const wchar_t *ps = buf.GetPtr();
+                const wchar_t* ps = buf.GetPtr();
                 bool hasCRLF = false;
                 DWORD n;
                 for (n = 0; n < buf.GetCount(); n++)
@@ -813,9 +820,9 @@ public:
         if (ReadSize % 0x10000 != 0)
         {
             buf.Realloc(static_cast<DWORD>((ReadSize % 0x10000) / 2), true);
-            if (::ReadFile(hFile, buf.GetPtr(), buf.GetSize(), &dwRead, NULL))
+            if (::ReadFile(m_hfile, buf.GetPtr(), buf.GetSize(), &dwRead, NULL))
             {
-                const wchar_t *ps = buf.GetPtr();
+                const wchar_t* ps = buf.GetPtr();
                 bool hasCRLF = false;
                 DWORD n;
                 for (n = 0; n < buf.GetCount(); n++)
@@ -860,27 +867,27 @@ public:
      * @param encode 文本编码类型
      * @return
      */
-    int64_t WriteText(const wchar_t *str, BOOL null_terminated = FALSE, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
+    int64_t WriteText(const wchar_t* str, BOOL null_terminated = FALSE, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
     {
-        if (INVALID_HANDLE_VALUE == hFile)
+        if (INVALID_HANDLE_VALUE == m_hfile)
             return 0;
         switch (encode)
         {
         case VSET_UTF_8:
         {
             PivW2U u8{str};
-            return this->WriteData(u8.c_str(), u8.size() + null_terminated ? 1 : 0);
+            return this->WriteData(u8.c_str(), static_cast<DWORD>(u8.size() + (null_terminated ? 1 : 0)));
             break;
         }
         case VSET_MBCS:
         {
             PivW2A mbcs{str};
-            return this->WriteData(mbcs.c_str(), mbcs.size() + null_terminated ? 1 : 0);
+            return this->WriteData(mbcs.c_str(), static_cast<DWORD>(mbcs.size() + (null_terminated ? 1 : 0)));
             break;
         }
         default:
         {
-            return this->WriteData(str, (wcslen(str) + null_terminated ? 1 : 0) * 2);
+            return this->WriteData(str, static_cast<DWORD>(wcslen(str) + (null_terminated ? 1 : 0)) * 2);
             break;
         }
         }
@@ -893,20 +900,20 @@ public:
      * @param encode 文本编码类型
      * @return
      */
-    int64_t WriteLine(const wchar_t *str, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
+    int64_t WriteLine(const wchar_t* str, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
     {
-        if (INVALID_HANDLE_VALUE == hFile)
+        if (INVALID_HANDLE_VALUE == m_hfile)
             return 0;
         int64_t ret = this->WriteText(str, FALSE, encode);
         if (encode == VSET_UTF_16)
         {
-            ret += this->Write<char>('\r');
-            ret += this->Write<char>('\n');
+            ret += this->Write<wchar_t>('\r');
+            ret += this->Write<wchar_t>('\n');
         }
         else
         {
-            ret += this->Write<wchar_t>('\r');
-            ret += this->Write<wchar_t>('\n');
+            ret += this->Write<char>('\r');
+            ret += this->Write<char>('\n');
         }
         return ret;
     }
@@ -919,7 +926,7 @@ public:
      */
     BOOL RemoveData(int64_t offset, int64_t length)
     {
-        if (INVALID_HANDLE_VALUE == hFile || length <= 0)
+        if (INVALID_HANDLE_VALUE == m_hfile || length <= 0)
             return FALSE;
         int64_t file_size = this->GetSize();
         if (offset < 0)
@@ -949,223 +956,70 @@ public:
                 if (!this->SetCurrentPos(offset + 0x10000 * (data_size / 0x10000), FILE_BEGIN) || this->WriteData(buf.GetPtr(), buf.GetSize()) <= 0)
                     return FALSE;
             }
-            if (::SetEndOfFile(hFile))
+            if (::SetEndOfFile(m_hfile))
                 return TRUE;
         }
         return FALSE;
     }
 }; // PivFile
 
-/**
- * @brief 内存映射文件类
- */
-class PivFileMapping
+class PivMemStream
 {
-private:
-    BYTE *m_pvFile = nullptr; // 映射文件视图地址
-    HANDLE m_hFileMap = NULL; // 内存映射文件对象
-    int64_t m_offset = -1;    // 当前读写偏移位置
-    int64_t m_MapSize = 0;    // 内存映射文件大小
-    int64_t m_ViewSize = 0;   // 映射文件视图大小
-    PivFile m_flie;           // 文件读写类
+protected:
+    BYTE* m_memdata = nullptr; // 映射内存地址
+    int64_t m_offset = -1;     // 读写偏移位置
+    int64_t m_viewsize = 0;    // 内存映射大小
 
 public:
-    PivFileMapping() {}
-    ~PivFileMapping()
+    PivMemStream() {}
+    ~PivMemStream() {}
+
+    PivMemStream(void* adress, int64_t nSize)
     {
-        Close();
+        m_memdata = reinterpret_cast<BYTE*>(adress);
+        m_viewsize = nSize;
+        m_offset = 0;
     }
 
-    inline PivFileMapping &operator=(PivFileMapping &&rhs)
+    inline PivMemStream& operator=(const PivMemStream& rhs)
     {
-        m_pvFile = rhs.m_pvFile;
-        m_hFileMap = rhs.m_hFileMap;
+        m_memdata = rhs.m_memdata;
         m_offset = rhs.m_offset;
-        m_MapSize = rhs.m_MapSize;
-        m_ViewSize = rhs.m_ViewSize;
-        m_flie = std::move(rhs.m_flie);
+        m_viewsize = rhs.m_viewsize;
+        return *this;
     }
 
-    /**
-     * @brief 创建映射内存
-     * @param lpFileName 文件名称
-     * @param dwDesiredAccess 访问权限
-     * @param dwShareMode 共享方式
-     * @param dwCreationDisposition 创建方式
-     * @param n64Size 映射尺寸
-     * @param dwProtect 内存页保护
-     * @param lpName 内存映射名称
-     * @return
-     */
-    BOOL Create(const wchar_t *lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, DWORD dwCreationDisposition, int64_t n64Size, DWORD dwProtect, const wchar_t *lpName)
+    inline PivMemStream& operator=(PivMemStream&& rhs)
     {
-        Close();
-        if (dwCreationDisposition != -1)
-        {
-            if (!m_flie.Open(lpFileName, dwDesiredAccess, dwShareMode, dwCreationDisposition))
-                return FALSE;
-        }
-        m_hFileMap = ::CreateFileMappingW(m_flie.GetFileHandle(), NULL, dwProtect, (DWORD)(n64Size >> 32), (DWORD)n64Size, lpName);
-        if (NULL != m_hFileMap)
-        {
-            m_MapSize = (n64Size != 0) ? n64Size : m_flie.GetSize();
-            return TRUE;
-        }
-        return FALSE;
+        m_memdata = rhs.m_memdata;
+        m_offset = rhs.m_offset;
+        m_viewsize = rhs.m_viewsize;
+        return *this;
     }
 
-    /**
-     * @brief 创建自文件句柄
-     * @param hFile 文件句柄
-     * @param n64Size 映射尺寸
-     * @param dwProtect 内存页保护
-     * @param lpName 内存映射名称
-     * @return
-     */
-    BOOL Create(HANDLE hFile, int64_t n64Size, DWORD dwProtect, const wchar_t *lpName)
+    bool open(void* adress, int64_t nSize)
     {
-        Close();
-        if (m_flie.Open(hFile) == FALSE)
-            return FALSE;
-        m_hFileMap = ::CreateFileMappingW(hFile, NULL, dwProtect, (DWORD)(n64Size >> 32), (DWORD)n64Size, lpName);
-        if (NULL != m_hFileMap)
-        {
-            if (0 == (m_MapSize = n64Size))
-                m_MapSize = m_flie.GetSize();
-            return TRUE;
-        }
-        return FALSE;
+        if (adress == nullptr || nSize <= 0)
+            return false;
+        m_memdata = reinterpret_cast<BYTE*>(adress);
+        m_viewsize = nSize;
+        m_offset = 0;
+        return true;
     }
 
-    /**
-     * @brief 创建映射内存
-     * @param n64Size 映射尺寸
-     * @param dwProtect 内存页保护
-     * @param lpName 内存映射名称
-     * @return
-     */
-    BOOL Create(int64_t n64Size, DWORD dwProtect, const wchar_t *lpName)
+    bool open(WORD ResId)
     {
-        Close();
-        m_hFileMap = ::CreateFileMappingW(INVALID_HANDLE_VALUE, NULL, dwProtect, (DWORD)(n64Size >> 32), (DWORD)n64Size, lpName);
-        if (NULL != m_hFileMap)
-        {
-            m_MapSize = n64Size;
-            return TRUE;
-        }
-        return FALSE;
-    }
-
-    /**
-     * @brief 打开映射文件
-     * @param lpName 内存映射名称
-     * @return
-     */
-    BOOL Open(const wchar_t *lpName, DWORD dwDesiredAccess)
-    {
-        Close();
-        m_hFileMap = ::OpenFileMappingW(dwDesiredAccess, FALSE, lpName);
-        return (NULL != m_hFileMap);
-    }
-
-    /**
-     * @brief 关闭映射文件
-     * @return
-     */
-    void Close()
-    {
-        UnMapToMemory(); // 取消映射
-        if (NULL != m_hFileMap)
-        {
-            ::CloseHandle(m_hFileMap); // 关闭文件映射
-            m_hFileMap = NULL;
-        }
-        m_flie.Close(); // 关闭文件
-        m_offset = -1;
-        m_ViewSize = 0;
-        m_MapSize = 0;
-    }
-
-    /**
-     * @brief 是否已打开
-     * @return
-     */
-    inline BOOL IsOpen() const
-    {
-        return (NULL != m_hFileMap);
-    }
-
-    /**
-     * @brief 交换
-     * @param rhs 另一个对象
-     */
-    inline void Swap(PivFileMapping &rhs)
-    {
-        std::swap(m_pvFile, rhs.m_pvFile);
-        std::swap(m_hFileMap, rhs.m_hFileMap);
-        std::swap(m_offset, rhs.m_offset);
-        std::swap(m_MapSize, rhs.m_MapSize);
-        std::swap(m_ViewSize, rhs.m_ViewSize);
-        m_flie.Swap(rhs.m_flie);
-    }
-
-    /**
-     * @brief 取文件句柄
-     * @return
-     */
-    inline HANDLE GetFileHandle() const
-    {
-        return m_flie.GetFileHandle();
-    }
-
-    /**
-     * @brief 映射到内存
-     * @param n64FileOffset 起始位置
-     * @param n64Size 映射尺寸
-     * @return
-     */
-    BOOL MapToMemory(int64_t n64FileOffset, int64_t n64Size, DWORD dwProtect)
-    {
-        if (NULL == m_hFileMap)
-            return FALSE;
-        UnMapToMemory(); // 取消映射
-        m_pvFile = reinterpret_cast<BYTE *>(::MapViewOfFile(m_hFileMap, dwProtect, (DWORD)(n64FileOffset >> 32), (DWORD)n64FileOffset, (SIZE_T)n64Size));
-        if (m_pvFile)
-        {
-            m_ViewSize = (n64Size != 0) ? (SIZE_T)n64Size : m_MapSize - n64FileOffset;
-            m_offset = 0;
-            return TRUE;
-        }
-        return FALSE;
-    }
-
-    /**
-     * @brief 解除映射
-     * @return
-     */
-    inline BOOL UnMapToMemory()
-    {
-        if (m_pvFile)
-        {
-            ::UnmapViewOfFile(m_pvFile);
-            m_pvFile = nullptr;
-            return TRUE;
-        }
-        return FALSE;
-    }
-
-    /**
-     * @brief 保存映射文件
-     * @param n64Size
-     * @return
-     */
-    inline BOOL FlushView(int64_t n64Size)
-    {
-        if (!m_pvFile)
-            return FALSE;
-        BOOL ret = ::FlushViewOfFile(m_pvFile, (SIZE_T)n64Size);
-        m_flie.Flush();
-        return ret;
+        HMODULE hModule = g_objVolApp.GetInstanceHandle();
+        HRSRC hSrc = ::FindResourceW(hModule, MAKEINTRESOURCEW(ResId), RT_RCDATA);
+        if (hSrc == NULL)
+            return false;
+        HGLOBAL resdata = ::LoadResource(hModule, hSrc);
+        if (resdata == NULL)
+            return false;
+        m_memdata = reinterpret_cast<BYTE*>(::LockResource(resdata));
+        m_viewsize = static_cast<int64_t>(::SizeofResource(hModule, hSrc));
+        m_offset = 0;
+        return true;
     }
 
     /**
@@ -1175,13 +1029,13 @@ public:
      * @return
      */
     template <typename T = BYTE>
-    T *GetPtr(int64_t offset = -1)
+    T* GetPtr(int64_t offset = -1)
     {
-        if (!m_pvFile || offset > m_ViewSize)
+        if (!m_memdata || offset > m_viewsize)
             return nullptr;
         if (offset < 0)
             offset = m_offset;
-        return reinterpret_cast<T *>(m_pvFile + offset);
+        return reinterpret_cast<T*>(m_memdata + offset);
     }
 
     /**
@@ -1191,15 +1045,15 @@ public:
      * @return
      */
     template <typename T>
-    T Get(const T &default_value)
+    T Get(const T& default_value)
     {
         size_t rsize = sizeof(T);
-        if (!m_pvFile || !(m_offset + rsize < m_ViewSize))
+        if (!m_memdata || m_offset + rsize > m_viewsize)
         {
-            m_offset = m_ViewSize;
+            m_offset = m_viewsize;
             return default_value;
         }
-        T ret = *reinterpret_cast<T *>(m_pvFile + m_offset);
+        T ret = *reinterpret_cast<T*>(m_memdata + m_offset);
         m_offset += rsize;
         return ret;
     }
@@ -1211,12 +1065,12 @@ public:
     int32_t GetChar()
     {
         m_offset++;
-        if (!m_pvFile || m_offset >= m_ViewSize || m_offset < 0)
+        if (!m_memdata || m_offset > m_viewsize)
         {
-            m_offset = m_ViewSize;
+            m_offset = m_viewsize;
             return -1;
         }
-        return *reinterpret_cast<char *>(m_pvFile + m_offset);
+        return *reinterpret_cast<char*>(m_memdata + m_offset);
     }
 
     /**
@@ -1226,49 +1080,49 @@ public:
     int32_t GetWchar()
     {
         m_offset += 2;
-        if (!m_pvFile || m_offset >= m_ViewSize || m_offset < 0)
+        if (!m_memdata || m_offset > m_viewsize)
         {
-            m_offset = m_ViewSize;
+            m_offset = m_viewsize;
             return -1;
         }
-        return *reinterpret_cast<wchar_t *>(m_pvFile + m_offset);
+        return *reinterpret_cast<wchar_t*>(m_memdata + m_offset);
     }
 
     /**
-     * @brief 读入数据
+     * @brief 读数据
      * @tparam T 数据类型
      * @param value 值变量
      * @return
      */
     template <typename T>
-    int32_t Read(T &value)
+    int32_t Read(T& value)
     {
         size_t rsize = sizeof(T);
-        if (!m_pvFile || m_offset + rsize >= m_ViewSize)
+        if (!m_memdata || m_offset + rsize > m_viewsize)
         {
-            m_offset = m_ViewSize;
+            m_offset = m_viewsize;
             return 0;
         }
-        value = *reinterpret_cast<T *>(m_pvFile + m_offset);
+        value = *reinterpret_cast<T*>(m_memdata + m_offset);
         m_offset += rsize;
         return static_cast<int32_t>(rsize);
     }
 
     /**
-     * @brief 读指针数据
+     * @brief 读内存
      * @param pvData 数据指针
      * @param n64Size 数据尺寸
      * @return
      */
-    int64_t ReadData(void *pvData, int64_t n64Size)
+    int64_t ReadData(void* pvData, size_t stSize)
     {
-        if (!m_pvFile)
+        if (!m_memdata)
             return 0;
-        if (m_offset + n64Size >= m_ViewSize)
-            n64Size = m_ViewSize - m_offset;
-        memcpy(m_pvFile + m_offset, pvData, static_cast<size_t>(n64Size));
-        m_offset += static_cast<size_t>(n64Size);
-        return n64Size;
+        if (m_offset + (int64_t)stSize > m_viewsize)
+            stSize = static_cast<size_t>(m_viewsize - m_offset);
+        memcpy(m_memdata + m_offset, pvData, stSize);
+        m_offset += stSize;
+        return stSize;
     }
 
     /**
@@ -1277,13 +1131,13 @@ public:
      * @param stSize 读取长度
      * @return
      */
-    ptrdiff_t ReadVolMem(CVolMem &cData, ptrdiff_t stSize)
+    ptrdiff_t ReadVolMem(CVolMem& cData, ptrdiff_t stSize)
     {
-        if (!m_pvFile)
+        if (!m_memdata)
             return 0;
-        if (m_offset + stSize >= m_ViewSize)
-            stSize = static_cast<ptrdiff_t>(m_ViewSize - m_offset);
-        cData.CopyFrom(m_pvFile + m_offset, stSize);
+        if (m_offset + stSize > m_viewsize)
+            stSize = static_cast<ptrdiff_t>(m_viewsize - m_offset);
+        cData.CopyFrom(m_memdata + m_offset, stSize);
         m_offset += stSize;
         return stSize;
     }
@@ -1298,49 +1152,49 @@ public:
     int32_t Write(T value)
     {
         size_t rsize = sizeof(T);
-        if (!m_pvFile || static_cast<int64_t>(m_offset + rsize) >= m_ViewSize)
+        if (!m_memdata || m_offset + (int64_t)rsize > m_viewsize)
             return 0;
-        memcpy(m_pvFile + m_offset, &value, rsize);
+        *reinterpret_cast<T*>(m_memdata + m_offset) = value;
         m_offset += rsize;
         return static_cast<int32_t>(rsize);
     }
 
     /**
-     * @brief 写指针数据
+     * @brief 写内存
      * @param pvData 数据指针
      * @param n64Size 数据尺寸
      * @return
      */
-    int64_t WriteData(const void *pvData, int64_t n64Size)
+    int64_t WriteData(const void* pvData, size_t stSize)
     {
-        if (!m_pvFile)
+        if (!m_memdata)
             return 0;
-        if (m_offset + n64Size >= m_ViewSize)
-            n64Size = m_ViewSize - m_offset;
-        memcpy(m_pvFile + m_offset, pvData, static_cast<size_t>(n64Size));
-        m_offset += static_cast<size_t>(n64Size);
-        return n64Size;
+        if (m_offset + (int64_t)stSize > m_viewsize)
+            stSize = static_cast<size_t>(m_viewsize - m_offset);
+        memcpy(m_memdata + m_offset, pvData, stSize);
+        m_offset += stSize;
+        return stSize;
     }
 
     /**
-     * @brief 写出字节集
+     * @brief 写字节集
      * @param pvData 数据指针
      * @return
      */
-    inline ptrdiff_t WriteVolMem(const CVolMem &Data)
+    inline ptrdiff_t WriteVolMem(const CVolMem& Data)
     {
         return static_cast<ptrdiff_t>(this->WriteData(Data.GetPtr(),
                                                       static_cast<size_t>(Data.GetSize())));
     }
 
     /**
-     * @brief 读入文本
+     * @brief 读文本
      * @param text 存放读入文本的变量
      * @param read_words 欲读入的最多字符数
      * @param encode 文本编码
      * @return 读入的字节长度
      */
-    int64_t ReadTextWithEncode(CWString &text, int64_t read_words = -1, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
+    int64_t ReadTextWithEncode(CWString& text, int64_t read_words = -1, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
     {
         int64_t ret = 0;
         text.Empty();
@@ -1369,18 +1223,18 @@ public:
         return ret;
     }
 
-    int64_t ReadText(CWString &text, int64_t read_words = -1)
+    int64_t ReadText(CWString& text, int64_t read_words = -1)
     {
         text.Empty();
-        if (!m_pvFile || m_offset >= m_ViewSize)
+        if (!m_memdata || m_offset > m_viewsize)
         {
-            m_offset = m_ViewSize;
+            m_offset = m_viewsize;
             return 0;
         }
-        const wchar_t *ps = reinterpret_cast<const wchar_t *>(m_pvFile + m_offset);
+        const wchar_t* ps = reinterpret_cast<const wchar_t*>(m_memdata + m_offset);
         int64_t count = 0;
         if (read_words == -1)
-            read_words = (m_ViewSize - m_offset) / sizeof(wchar_t);
+            read_words = (m_viewsize - m_offset) / sizeof(wchar_t);
         do
         {
             if (count >= read_words)
@@ -1388,24 +1242,26 @@ public:
             ps++;
             count++;
         } while (*ps != '\0' && *ps != 0x1A);
-        text.AddText(reinterpret_cast<const wchar_t *>(m_pvFile + m_offset), static_cast<INT_P>(count));
+        text.AddText(reinterpret_cast<const wchar_t*>(m_memdata + m_offset), static_cast<INT_P>(count));
+        if (*ps == '\0')
+            count++;
         m_offset += sizeof(wchar_t) * count;
         return sizeof(wchar_t) * count;
     }
 
     template <typename CharT>
-    int64_t ReadText(std::basic_string<CharT> &text, int64_t read_words = -1)
+    int64_t ReadText(std::basic_string<CharT>& text, int64_t read_words = -1)
     {
         text.clear();
-        if (!m_pvFile || m_offset >= m_ViewSize)
+        if (!m_memdata || m_offset > m_viewsize)
         {
-            m_offset = m_ViewSize;
+            m_offset = m_viewsize;
             return 0;
         }
-        const CharT *ps = reinterpret_cast<const CharT *>(m_pvFile + m_offset);
+        const CharT* ps = reinterpret_cast<const CharT*>(m_memdata + m_offset);
         int64_t count = 0;
         if (read_words == -1)
-            read_words = (m_ViewSize - m_offset) / sizeof(CharT);
+            read_words = (m_viewsize - m_offset) / sizeof(CharT);
         do
         {
             if (count >= read_words)
@@ -1413,18 +1269,20 @@ public:
             ps++;
             count++;
         } while (*ps != '\0' && *ps != 0x1A);
-        text.assign(reinterpret_cast<const CharT *>(m_pvFile + m_offset), static_cast<size_t>(count));
+        text.assign(reinterpret_cast<const CharT*>(m_memdata + m_offset), static_cast<size_t>(count));
+        if (*ps == '\0')
+            count++;
         m_offset += sizeof(CharT) * count;
         return sizeof(CharT) * count;
     }
 
     /**
-     * @brief 读入一行
+     * @brief 读文本行
      * @param text 存放读入文本的变量
      * @param encode 文本编码
      * @return 读入的字节长度
      */
-    int64_t ReadLineWithEncode(CWString &text, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
+    int64_t ReadLineWithEncode(CWString& text, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
     {
         int64_t ret = 0;
         text.Empty();
@@ -1455,17 +1313,17 @@ public:
         return ret;
     }
 
-    int64_t ReadLine(CWString &text)
+    int64_t ReadLine(CWString& text)
     {
         text.Empty();
-        if (!m_pvFile || m_offset >= m_ViewSize)
+        if (!m_memdata || m_offset > m_viewsize)
         {
-            m_offset = m_ViewSize;
+            m_offset = m_viewsize;
             return 0;
         }
-        const wchar_t *ps = reinterpret_cast<const wchar_t *>(m_pvFile + m_offset);
+        const wchar_t* ps = reinterpret_cast<const wchar_t*>(m_memdata + m_offset);
         int64_t count = 0;
-        int64_t max_count = (m_ViewSize - m_offset) / sizeof(wchar_t);
+        int64_t max_count = (m_viewsize - m_offset) / sizeof(wchar_t);
         do
         {
             wchar_t ch = ps[count++];
@@ -1488,17 +1346,17 @@ public:
     }
 
     template <typename CharT>
-    int64_t ReadLine(std::basic_string<CharT> &text)
+    int64_t ReadLine(std::basic_string<CharT>& text)
     {
         text.clear();
-        if (!m_pvFile || m_offset >= m_ViewSize)
+        if (!m_memdata || m_offset > m_viewsize)
         {
-            m_offset = m_ViewSize;
+            m_offset = m_viewsize;
             return 0;
         }
-        const CharT *ps = reinterpret_cast<const CharT *>(m_pvFile + m_offset);
+        const CharT* ps = reinterpret_cast<const CharT*>(m_memdata + m_offset);
         int64_t count = 0;
-        int64_t max_count = (m_ViewSize - m_offset) / sizeof(CharT);
+        int64_t max_count = (m_viewsize - m_offset) / sizeof(CharT);
         do
         {
             CharT ch = ps[count++];
@@ -1521,31 +1379,31 @@ public:
     }
 
     /**
-     * @brief 写出文本
+     * @brief 写文本
      * @param str 欲写出的文本
      * @param null_terminated 是否包括结束零字符
      * @param encode 文本编码类型
      * @return
      */
-    int64_t WriteText(const wchar_t *str, BOOL null_terminated = FALSE, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
+    int64_t WriteText(const wchar_t* str, BOOL null_terminated = FALSE, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
     {
         switch (encode)
         {
         case VSET_UTF_8:
         {
             PivW2U u8{str};
-            return this->WriteData(u8.c_str(), u8.size() + null_terminated ? 1 : 0);
+            return this->WriteData(u8.c_str(), u8.size() + (null_terminated ? 1 : 0));
             break;
         }
         case VSET_MBCS:
         {
             PivW2A mbcs{str};
-            return this->WriteData(mbcs.c_str(), mbcs.size() + null_terminated ? 1 : 0);
+            return this->WriteData(mbcs.c_str(), mbcs.size() + (null_terminated ? 1 : 0));
             break;
         }
         default:
         {
-            return this->WriteData(str, (wcslen(str) + null_terminated ? 1 : 0) * 2);
+            return this->WriteData(str, (wcslen(str) + (null_terminated ? 1 : 0)) * 2);
             break;
         }
         }
@@ -1553,23 +1411,23 @@ public:
     }
 
     /**
-     * @brief 写出一行
+     * @brief 写文本行
      * @param str 欲写出的文本
      * @param encode 文本编码类型
      * @return
      */
-    int64_t WriteLine(const wchar_t *str, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
+    int64_t WriteLine(const wchar_t* str, VOL_STRING_ENCODE_TYPE encode = VSET_UTF_16)
     {
         int64_t ret = this->WriteText(str, FALSE, encode);
         if (encode == VSET_UTF_16)
         {
-            ret += this->Write<char>('\r');
-            ret += this->Write<char>('\n');
+            ret += this->Write<wchar_t>('\r');
+            ret += this->Write<wchar_t>('\n');
         }
         else
         {
-            ret += this->Write<wchar_t>('\r');
-            ret += this->Write<wchar_t>('\n');
+            ret += this->Write<char>('\r');
+            ret += this->Write<char>('\n');
         }
         return ret;
     }
@@ -1584,20 +1442,11 @@ public:
     {
         if (offset < 0)
             offset = m_offset;
-        if (!m_pvFile || offset >= m_MapSize || length <= 0 || length > m_MapSize - offset)
+        if (!m_memdata || offset >= m_viewsize || length <= 0 || length > m_viewsize - offset)
             return FALSE;
-        memmove(m_pvFile + offset, m_pvFile + offset + length, static_cast<size_t>(m_MapSize - offset - length));
-        memset(m_pvFile + (m_MapSize - length), 0, static_cast<size_t>(length));
+        memmove(m_memdata + offset, m_memdata + offset + length, static_cast<size_t>(m_viewsize - offset - length));
+        memset(m_memdata + (m_viewsize - length), 0, static_cast<size_t>(length));
         return TRUE;
-    }
-
-    /**
-     * @brief 取文件长度
-     * @return 失败返回-1
-     */
-    inline int64_t GetSize() const
-    {
-        return m_flie.GetSize();
     }
 
     /**
@@ -1606,22 +1455,7 @@ public:
      */
     inline int64_t GetViewSize() const
     {
-        return m_ViewSize;
-    }
-
-    /**
-     * @brief 取映射页尺寸
-     * @return
-     */
-    inline int64_t GetMapSize() const
-    {
-        if (m_pvFile)
-        {
-            MEMORY_BASIC_INFORMATION info{0};
-            if (::VirtualQuery(m_pvFile, &info, sizeof(info)))
-                return static_cast<int64_t>(info.RegionSize);
-        }
-        return 0;
+        return m_viewsize;
     }
 
     /**
@@ -1639,13 +1473,13 @@ public:
      * @param dwMoveMethod 基准移动位置
      * @return
      */
-    inline BOOL SetCurrentPos(int64_t offset, int32_t dwMoveMethod = 0)
+    inline BOOL SetCurrentPos(int64_t offset, DWORD dwMoveMethod = 0)
     {
-        if (!m_pvFile || m_ViewSize == 0)
+        if (!m_memdata || m_viewsize == 0)
             return FALSE;
         if (dwMoveMethod == FILE_BEGIN)
         {
-            if (offset >= 0 && offset <= m_ViewSize)
+            if (offset >= 0 && offset <= m_viewsize)
             {
                 m_offset = offset;
                 return TRUE;
@@ -1653,7 +1487,7 @@ public:
         }
         else if (dwMoveMethod == FILE_CURRENT)
         {
-            if (m_offset >= 0 && m_offset + offset <= m_ViewSize)
+            if (m_offset >= 0 && m_offset + offset <= m_viewsize)
             {
                 m_offset += offset;
                 return TRUE;
@@ -1661,9 +1495,9 @@ public:
         }
         else if (dwMoveMethod == FILE_END)
         {
-            if (offset <= 0 && m_ViewSize + offset <= m_ViewSize)
+            if (offset <= 0 && m_viewsize + offset <= m_viewsize)
             {
-                m_offset = m_ViewSize + offset;
+                m_offset = m_viewsize + offset;
                 return TRUE;
             }
         }
@@ -1676,7 +1510,253 @@ public:
      */
     inline BOOL IsEof() const
     {
-        return (m_offset == m_ViewSize);
+        return (m_offset == m_viewsize);
+    }
+}; // PivMemStream
+
+/**
+ * @brief 内存映射文件类
+ */
+class PivFileMapping : public PivMemStream
+{
+private:
+    HANDLE m_hfilemap = NULL; // 内存映射文件对象
+    int64_t m_mapsize = 0;    // 内存映射文件大小
+    PivFile m_flie;           // 文件读写类
+
+public:
+    PivFileMapping() {}
+    ~PivFileMapping()
+    {
+        Close();
+    }
+
+    inline PivFileMapping& operator=(const PivFileMapping& rhs)
+    {
+        m_memdata = rhs.m_memdata;
+        m_hfilemap = rhs.m_hfilemap;
+        m_offset = rhs.m_offset;
+        m_mapsize = rhs.m_mapsize;
+        m_viewsize = rhs.m_viewsize;
+        m_flie = rhs.m_flie;
+        return *this;
+    }
+
+    inline PivFileMapping& operator=(PivFileMapping&& rhs)
+    {
+        m_memdata = rhs.m_memdata;
+        m_hfilemap = rhs.m_hfilemap;
+        m_offset = rhs.m_offset;
+        m_mapsize = rhs.m_mapsize;
+        m_viewsize = rhs.m_viewsize;
+        m_flie = std::move(rhs.m_flie);
+        return *this;
+    }
+
+    /**
+     * @brief 创建映射内存
+     * @param lpFileName 文件名称
+     * @param dwDesiredAccess 访问权限
+     * @param dwShareMode 共享方式
+     * @param dwCreationDisposition 创建方式
+     * @param n64Size 映射尺寸
+     * @param dwProtect 内存页保护
+     * @param lpName 内存映射名称
+     * @return
+     */
+    BOOL Create(const wchar_t* lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, DWORD dwCreationDisposition, int64_t n64Size, DWORD dwProtect, const wchar_t* lpName)
+    {
+        Close();
+        if (dwCreationDisposition != -1)
+        {
+            if (!m_flie.Open(lpFileName, dwDesiredAccess, dwShareMode, dwCreationDisposition))
+                return FALSE;
+        }
+        m_hfilemap = ::CreateFileMappingW(m_flie.GetFileHandle(), NULL, dwProtect, (DWORD)(n64Size >> 32), (DWORD)n64Size, lpName);
+        if (NULL != m_hfilemap)
+        {
+            m_mapsize = (n64Size != 0) ? n64Size : m_flie.GetSize();
+            return TRUE;
+        }
+        return FALSE;
+    }
+
+    /**
+     * @brief 创建自文件句柄
+     * @param m_hfile 文件句柄
+     * @param n64Size 映射尺寸
+     * @param dwProtect 内存页保护
+     * @param lpName 内存映射名称
+     * @return
+     */
+    BOOL Create(HANDLE m_hfile, int64_t n64Size, DWORD dwProtect, const wchar_t* lpName)
+    {
+        Close();
+        if (m_flie.Open(m_hfile) == FALSE)
+            return FALSE;
+        m_hfilemap = ::CreateFileMappingW(m_hfile, NULL, dwProtect, (DWORD)(n64Size >> 32), (DWORD)n64Size, lpName);
+        if (NULL != m_hfilemap)
+        {
+            if (0 == (m_mapsize = n64Size))
+                m_mapsize = m_flie.GetSize();
+            return TRUE;
+        }
+        return FALSE;
+    }
+
+    /**
+     * @brief 创建映射内存
+     * @param n64Size 映射尺寸
+     * @param dwProtect 内存页保护
+     * @param lpName 内存映射名称
+     * @return
+     */
+    BOOL Create(int64_t n64Size, DWORD dwProtect, const wchar_t* lpName)
+    {
+        Close();
+        m_hfilemap = ::CreateFileMappingW(INVALID_HANDLE_VALUE, NULL, dwProtect, (DWORD)(n64Size >> 32), (DWORD)n64Size, lpName);
+        if (NULL != m_hfilemap)
+        {
+            m_mapsize = n64Size;
+            return TRUE;
+        }
+        return FALSE;
+    }
+
+    /**
+     * @brief 打开映射文件
+     * @param lpName 内存映射名称
+     * @return
+     */
+    BOOL Open(const wchar_t* lpName, DWORD dwDesiredAccess)
+    {
+        Close();
+        m_hfilemap = ::OpenFileMappingW(dwDesiredAccess, FALSE, lpName);
+        return (NULL != m_hfilemap);
+    }
+
+    /**
+     * @brief 关闭映射文件
+     * @return
+     */
+    void Close()
+    {
+        UnMapToMemory(); // 取消映射
+        if (NULL != m_hfilemap)
+        {
+            ::CloseHandle(m_hfilemap); // 关闭文件映射
+            m_hfilemap = NULL;
+        }
+        m_flie.Close(); // 关闭文件
+        m_offset = -1;
+        m_viewsize = 0;
+        m_mapsize = 0;
+    }
+
+    /**
+     * @brief 是否已打开
+     * @return
+     */
+    inline BOOL IsOpen() const
+    {
+        return (NULL != m_hfilemap);
+    }
+
+    /**
+     * @brief 交换
+     * @param rhs 另一个对象
+     */
+    inline void Swap(PivFileMapping& rhs)
+    {
+        std::swap(m_memdata, rhs.m_memdata);
+        std::swap(m_hfilemap, rhs.m_hfilemap);
+        std::swap(m_offset, rhs.m_offset);
+        std::swap(m_mapsize, rhs.m_mapsize);
+        std::swap(m_viewsize, rhs.m_viewsize);
+        m_flie.Swap(rhs.m_flie);
+    }
+
+    /**
+     * @brief 取文件句柄
+     * @return
+     */
+    inline HANDLE GetFileHandle() const
+    {
+        return m_flie.m_hfile;
+    }
+
+    /**
+     * @brief 映射到内存
+     * @param n64FileOffset 起始位置
+     * @param n64Size 映射尺寸
+     * @return
+     */
+    BOOL MapToMemory(uint64_t n64FileOffset, SIZE_T stSize, DWORD dwProtect)
+    {
+        if (NULL == m_hfilemap)
+            return FALSE;
+        UnMapToMemory(); // 取消映射
+        m_memdata = reinterpret_cast<BYTE*>(::MapViewOfFile(m_hfilemap, dwProtect, (DWORD)(n64FileOffset >> 32), (DWORD)n64FileOffset, stSize));
+        if (m_memdata)
+        {
+            m_viewsize = (stSize != 0) ? stSize : m_mapsize - n64FileOffset;
+            m_offset = 0;
+            return TRUE;
+        }
+        return FALSE;
+    }
+
+    /**
+     * @brief 解除映射
+     * @return
+     */
+    inline BOOL UnMapToMemory()
+    {
+        if (m_memdata)
+        {
+            ::UnmapViewOfFile(m_memdata);
+            m_memdata = nullptr;
+            return TRUE;
+        }
+        return FALSE;
+    }
+
+    /**
+     * @brief 保存映射文件
+     * @param n64Size
+     * @return
+     */
+    inline BOOL FlushView(int64_t n64Size)
+    {
+        if (!m_memdata)
+            return FALSE;
+        BOOL ret = ::FlushViewOfFile(m_memdata, (SIZE_T)n64Size);
+        m_flie.Flush();
+        return ret;
+    }
+
+    /**
+     * @brief 取文件长度
+     * @return 失败返回-1
+     */
+    inline int64_t GetSize() const
+    {
+        return m_flie.GetSize();
+    }
+
+    /**
+     * @brief 取映射页尺寸
+     * @return
+     */
+    inline int64_t GetMapSize() const
+    {
+        if (m_memdata)
+        {
+            MEMORY_BASIC_INFORMATION info{0};
+            if (::VirtualQuery(m_memdata, &info, sizeof(info)))
+                return static_cast<int64_t>(info.RegionSize);
+        }
+        return 0;
     }
 }; // PivFileMapping
 

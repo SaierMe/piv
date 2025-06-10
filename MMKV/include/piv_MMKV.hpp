@@ -9,7 +9,6 @@
 #define _PIV_MMKV_HPP
 
 #include "../../src/piv_string.hpp"
-
 #include "MMKV.h"
 
 /**
@@ -20,34 +19,34 @@ class PivMMKVEvent
 private:
     PivMMKVEvent() {}
     ~PivMMKVEvent() {}
-    PivMMKVEvent(const PivMMKVEvent &) = delete;
-    PivMMKVEvent(PivMMKVEvent &&) = delete;
-    PivMMKVEvent &operator=(const PivMMKVEvent &) = delete;
-    PivMMKVEvent &operator=(PivMMKVEvent &&) = delete;
+    PivMMKVEvent(const PivMMKVEvent&) = delete;
+    PivMMKVEvent(PivMMKVEvent&&) = delete;
+    PivMMKVEvent& operator=(const PivMMKVEvent&) = delete;
+    PivMMKVEvent& operator=(PivMMKVEvent&&) = delete;
 
-    void *userdate = nullptr;
+    void* m_userdate = nullptr;
 
 public:
-    static PivMMKVEvent &instance()
+    static PivMMKVEvent& instance()
     {
         static PivMMKVEvent inst;
         return inst;
     }
 
-    inline void set(void *event) noexcept
+    inline void set(void* event) noexcept
     {
-        userdate = event;
+        m_userdate = event;
     }
 
     inline bool hasValue() noexcept
     {
-        return !!userdate;
+        return !!m_userdate;
     }
 
-    template <typename T = void *>
+    template <typename T = void*>
     inline T get() noexcept
     {
-        return reinterpret_cast<T>(userdate);
+        return reinterpret_cast<T>(m_userdate);
     }
 }; // class PivMMKVEvent
 
@@ -57,7 +56,7 @@ public:
 class PivMMKV
 {
 private:
-    MMKV *m_MMKV = nullptr;
+    MMKV* m_mmkv = nullptr;
 
 public:
     /**
@@ -65,13 +64,13 @@ public:
      * @param rootDir 根目录
      * @param MMKVLogInfo 日志级别
      */
-    static void initializeMMKV(const wchar_t *rootDir = L"", int32_t MMKVLogInfo = 2)
+    static void initializeMMKV(const wchar_t* rootDir = L"", int32_t MMKVLogInfo = 2)
     {
         std::wstring _rootDir(rootDir);
         if (_rootDir.empty())
         {
             _rootDir.resize(MAX_PATH);
-            ::GetModuleFileNameW(NULL, const_cast<wchar_t *>(reinterpret_cast<const wchar_t *>(_rootDir.data())), MAX_PATH);
+            ::GetModuleFileNameW(NULL, const_cast<wchar_t*>(reinterpret_cast<const wchar_t*>(_rootDir.data())), MAX_PATH);
             _rootDir.resize(_rootDir.rfind(L'\\'));
         }
         else
@@ -96,7 +95,7 @@ public:
      * @brief 取根目录
      * @return
      */
-    static const std::wstring &getRootDir()
+    static const std::wstring& getRootDir()
     {
         return MMKV::getRootDir();
     }
@@ -108,7 +107,7 @@ public:
      * @param srcDir 来源目录
      * @return
      */
-    static bool backupOneToDirectory(const wchar_t *mmapID, const wchar_t *dstDir, const wchar_t *srcDir)
+    static bool backupOneToDirectory(const wchar_t* mmapID, const wchar_t* dstDir, const wchar_t* srcDir)
     {
         std::wstring _srcDir{srcDir};
         return MMKV::backupOneToDirectory(PivW2U{mmapID}, dstDir, _srcDir.empty() ? nullptr : &_srcDir);
@@ -121,7 +120,7 @@ public:
      * @param dstDir 目标目录
      * @return
      */
-    static bool restoreOneFromDirectory(const wchar_t *mmapID, const wchar_t *srcDir, const wchar_t *dstDir)
+    static bool restoreOneFromDirectory(const wchar_t* mmapID, const wchar_t* srcDir, const wchar_t* dstDir)
     {
 
         std::wstring _dstDir{dstDir};
@@ -134,7 +133,7 @@ public:
      * @param srcDir 来源目录
      * @return
      */
-    static size_t backupAllToDirectory(const wchar_t *dstDir, const wchar_t *srcDir)
+    static size_t backupAllToDirectory(const wchar_t* dstDir, const wchar_t* srcDir)
     {
         std::wstring _srcDir{srcDir};
         return MMKV::backupAllToDirectory(dstDir, _srcDir.empty() ? nullptr : &_srcDir);
@@ -146,7 +145,7 @@ public:
      * @param dstDir 目标目录
      * @return
      */
-    static size_t restoreAllFromDirectory(const wchar_t *srcDir, const wchar_t *dstDir)
+    static size_t restoreAllFromDirectory(const wchar_t* srcDir, const wchar_t* dstDir)
     {
         std::wstring _dstDir{dstDir};
         return MMKV::restoreAllFromDirectory(srcDir, _dstDir.empty() ? nullptr : &_dstDir);
@@ -158,7 +157,7 @@ public:
      * @param relatePath 相对路径
      * @return
      */
-    static bool isFileValid(const wchar_t *mmapID, const wchar_t *relatePath)
+    static bool isFileValid(const wchar_t* mmapID, const wchar_t* relatePath)
     {
         std::wstring _relatePath{relatePath};
         return MMKV::isFileValid(PivW2U{mmapID}, _relatePath.empty() ? nullptr : &_relatePath);
@@ -170,7 +169,7 @@ public:
      * @param relatePath 相对路径
      * @return
      */
-    static bool removeStorage(const wchar_t *mmapID, const wchar_t *relatePath)
+    static bool removeStorage(const wchar_t* mmapID, const wchar_t* relatePath)
     {
         std::wstring _relatePath{relatePath};
         return MMKV::removeStorage(PivW2U{mmapID}, _relatePath.empty() ? nullptr : &_relatePath);
@@ -191,7 +190,7 @@ public:
      * @param relatePath 相对路径
      * @return
      */
-    static bool checkExist(const wchar_t *mmapID, const wchar_t *relatePath)
+    static bool checkExist(const wchar_t* mmapID, const wchar_t* relatePath)
     {
         std::wstring _relatePath{relatePath};
         return MMKV::checkExist(PivW2U{mmapID}, _relatePath.empty() ? nullptr : &_relatePath);
@@ -212,7 +211,7 @@ public:
      * @param expectedCapacity 预期容量
      * @return
      */
-    int32_t open(const wchar_t *mmapID, MMKVMode mode, const wchar_t *cryptKey, const wchar_t *rootPath, size_t expectedCapacity = 0)
+    int32_t open(const wchar_t* mmapID, MMKVMode mode, const wchar_t* cryptKey, const wchar_t* rootPath, size_t expectedCapacity = 0)
     {
         close();
         if (MMKV::getRootDir().empty() == true)
@@ -223,12 +222,12 @@ public:
         PivW2U _cryptKey{cryptKey};
         std::wstring _rootPath{rootPath};
         if (_mmapID.empty())
-            m_MMKV = MMKV::defaultMMKV(mode, _cryptKey.empty() ? nullptr : &_cryptKey.str);
+            m_mmkv = MMKV::defaultMMKV(mode, _cryptKey.empty() ? nullptr : &_cryptKey.str);
         else
-            m_MMKV = MMKV::mmkvWithID(_mmapID, mode, _cryptKey.empty() ? nullptr : &_cryptKey.str,
-                                      _rootPath.empty() ? nullptr : &_rootPath, expectedCapacity);
-        if (m_MMKV != nullptr)
-            return (m_MMKV->count(false) > 0) ? 1 : 0;
+            m_mmkv = MMKV::mmkvWithID(_mmapID, mode, _cryptKey.empty() ? nullptr : &_cryptKey.str,
+                                     _rootPath.empty() ? nullptr : &_rootPath, expectedCapacity);
+        if (m_mmkv != nullptr)
+            return (m_mmkv->count(false) > 0) ? 1 : 0;
         else
             return -1;
     }
@@ -238,30 +237,30 @@ public:
      */
     inline void close()
     {
-        if (m_MMKV)
+        if (m_mmkv)
         {
-            m_MMKV->close();
-            m_MMKV = nullptr;
+            m_mmkv->close();
+            m_mmkv = nullptr;
         }
     }
 
     /**
      * @brief 导入
      * @param src 来源
-     * @return 
+     * @return
      */
-    inline size_t importFrom(PivMMKV &src)
+    inline size_t importFrom(PivMMKV& src)
     {
-        return m_MMKV ? m_MMKV->importFrom(src.m_MMKV) : 0;
+        return m_mmkv ? m_mmkv->importFrom(src.m_mmkv) : 0;
     }
 
     /**
      * @brief 取表名称
      * @return
      */
-    inline const std::string &mmapID()
+    inline const std::string& mmapID()
     {
-        return m_MMKV ? m_MMKV->mmapID() : "";
+        return m_mmkv ? m_mmkv->mmapID() : "";
     }
 
     /**
@@ -270,7 +269,7 @@ public:
      */
     inline bool isMultiProcess() const
     {
-        return m_MMKV ? m_MMKV->isMultiProcess() : false;
+        return m_mmkv ? m_mmkv->isMultiProcess() : false;
     }
 
     /**
@@ -279,16 +278,16 @@ public:
      */
     inline bool isReadOnly() const
     {
-        return m_MMKV ? m_MMKV->isReadOnly() : false;
+        return m_mmkv ? m_mmkv->isReadOnly() : false;
     }
 
     /**
      * @brief 取密钥
      * @return
      */
-    inline const std::string &cryptKey()
+    inline const std::string& cryptKey()
     {
-        return m_MMKV ? m_MMKV->cryptKey() : "";
+        return m_mmkv ? m_mmkv->cryptKey() : "";
     }
 
     /**
@@ -296,21 +295,21 @@ public:
      * @param cryptKey 新密钥
      * @return
      */
-    inline bool reKey(const wchar_t *cryptKey)
+    inline bool reKey(const wchar_t* cryptKey)
     {
-        return m_MMKV ? m_MMKV->reKey(PivW2U{cryptKey}) : false;
+        return m_mmkv ? m_mmkv->reKey(PivW2U{cryptKey}) : false;
     }
 
     /**
      * @brief 检查更改密钥
      * @param cryptKey 新密钥
      */
-    inline void checkReSetCryptKey(const wchar_t *cryptKey)
+    inline void checkReSetCryptKey(const wchar_t* cryptKey)
     {
-        if (m_MMKV)
+        if (m_mmkv)
         {
             PivW2U _cryptKey{cryptKey};
-            m_MMKV->checkReSetCryptKey(&_cryptKey.str);
+            m_mmkv->checkReSetCryptKey(&_cryptKey.str);
         }
     }
 
@@ -320,7 +319,7 @@ public:
      */
     inline size_t totalSize()
     {
-        return m_MMKV ? m_MMKV->totalSize() : 0;
+        return m_mmkv ? m_mmkv->totalSize() : 0;
     }
 
     /**
@@ -329,7 +328,7 @@ public:
      */
     inline size_t actualSize()
     {
-        return m_MMKV ? m_MMKV->actualSize() : 0;
+        return m_mmkv ? m_mmkv->actualSize() : 0;
     }
 
     /**
@@ -340,18 +339,18 @@ public:
      * @return
      */
     template <typename T, typename KeyT>
-    inline bool set(T &&value, const KeyT &key, int32_t expireDuration = -1)
+    inline bool set(T&& value, const KeyT& key, int32_t expireDuration = -1)
     {
-        if (!m_MMKV)
+        if (!m_mmkv)
             return false;
-        PivS2V _key{key};
-        return expireDuration == -1 ? m_MMKV->set(value, _key) : m_MMKV->set(value, _key, static_cast<uint32_t>(expireDuration));
+        PivS2UV _key{key};
+        return expireDuration == -1 ? m_mmkv->set(value, _key) : m_mmkv->set(value, _key, static_cast<uint32_t>(expireDuration));
     }
 
     template <typename T, typename KeyT>
-    inline bool setString(T &&value, const KeyT &key, int32_t expireDuration = -1)
+    inline bool setString(T&& value, const KeyT& key, int32_t expireDuration = -1)
     {
-        return set(PivS2V{value}.sv, key, expireDuration);
+        return set(PivS2UV{value}.sv, key, expireDuration);
     }
 
     /**
@@ -362,13 +361,13 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline bool setVolStr(CWString &value, const KeyT &key, int32_t expireDuration = 0)
+    inline bool setVolStr(CWString& value, const KeyT& key, int32_t expireDuration = 0)
     {
-        if (!m_MMKV)
+        if (!m_mmkv)
             return false;
-        mmkv::MMBuffer buffer{const_cast<wchar_t *>(value.GetText()), static_cast<size_t>(value.GetLength() * 2), mmkv::MMBufferNoCopy};
-        PivS2V _key{key};
-        return expireDuration == -1 ? m_MMKV->set(buffer, _key) : m_MMKV->set(buffer, _key, static_cast<uint32_t>(expireDuration));
+        mmkv::MMBuffer buffer{const_cast<wchar_t*>(value.GetText()), static_cast<size_t>(value.GetLength() * 2), mmkv::MMBufferNoCopy};
+        PivS2UV _key{key};
+        return expireDuration == -1 ? m_mmkv->set(buffer, _key) : m_mmkv->set(buffer, _key, static_cast<uint32_t>(expireDuration));
     }
 
     /**
@@ -379,13 +378,13 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline bool setVolMem(CVolMem &value, const KeyT &key, int32_t expireDuration = 0)
+    inline bool setVolMem(CVolMem& value, const KeyT& key, int32_t expireDuration = 0)
     {
-        if (!m_MMKV)
+        if (!m_mmkv)
             return false;
         mmkv::MMBuffer buffer{value.GetPtr(), static_cast<size_t>(value.GetSize()), mmkv::MMBufferNoCopy};
-        PivS2V _key{key};
-        return expireDuration == -1 ? m_MMKV->set(buffer, _key) : m_MMKV->set(buffer, _key, static_cast<uint32_t>(expireDuration));
+        PivS2UV _key{key};
+        return expireDuration == -1 ? m_mmkv->set(buffer, _key) : m_mmkv->set(buffer, _key, static_cast<uint32_t>(expireDuration));
     }
 
     /**
@@ -396,17 +395,17 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline bool setVolObj(const CVolObject &object, const KeyT &key, int32_t expireDuration = 0)
+    inline bool setVolObj(const CVolObject& object, const KeyT& key, int32_t expireDuration = 0)
     {
-        if (!m_MMKV)
+        if (!m_mmkv)
             return false;
         CVolMemoryOutputStream memStream;
         object.VolSaveIntoStream(memStream);
         INT_P pDataSize;
-        const void *data = memStream.GetCurrentData(&pDataSize);
-        mmkv::MMBuffer buffer{(void *)data, static_cast<size_t>(pDataSize), mmkv::MMBufferNoCopy};
-        PivS2V _key{key};
-        return expireDuration == -1 ? m_MMKV->set(buffer, _key) : m_MMKV->set(buffer, _key, static_cast<uint32_t>(expireDuration));
+        const void* data = memStream.GetCurrentData(&pDataSize);
+        mmkv::MMBuffer buffer{(void*)data, static_cast<size_t>(pDataSize), mmkv::MMBufferNoCopy};
+        PivS2UV _key{key};
+        return expireDuration == -1 ? m_mmkv->set(buffer, _key) : m_mmkv->set(buffer, _key, static_cast<uint32_t>(expireDuration));
     }
 
     /**
@@ -417,9 +416,9 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline BOOL getBool(const KeyT &key, BOOL defaultValue, bool *hasValue)
+    inline BOOL getBool(const KeyT& key, BOOL defaultValue, bool* hasValue)
     {
-        return m_MMKV ? m_MMKV->getBool(PivS2V{key}, defaultValue ? true : false, hasValue) : defaultValue;
+        return m_mmkv ? m_mmkv->getBool(PivS2UV{key}, defaultValue ? true : false, hasValue) : defaultValue;
     }
 
     /**
@@ -430,15 +429,15 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline int32_t getInt32(const KeyT &key, int32_t defaultValue, bool *hasValue)
+    inline int32_t getInt32(const KeyT& key, int32_t defaultValue, bool* hasValue)
     {
-        return m_MMKV ? m_MMKV->getInt32(PivS2V{key}, defaultValue, hasValue) : defaultValue;
+        return m_mmkv ? m_mmkv->getInt32(PivS2UV{key}, defaultValue, hasValue) : defaultValue;
     }
 
     template <typename KeyT>
-    inline uint32_t getUInt32(const KeyT &key, uint32_t defaultValue, bool *hasValue)
+    inline uint32_t getUInt32(const KeyT& key, uint32_t defaultValue, bool* hasValue)
     {
-        return m_MMKV ? m_MMKV->getUInt32(PivS2V{key}, defaultValue, hasValue) : defaultValue;
+        return m_mmkv ? m_mmkv->getUInt32(PivS2UV{key}, defaultValue, hasValue) : defaultValue;
     }
 
     /**
@@ -449,15 +448,15 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline int64_t getInt64(const KeyT &key, int64_t defaultValue, bool *hasValue)
+    inline int64_t getInt64(const KeyT& key, int64_t defaultValue, bool* hasValue)
     {
-        return m_MMKV ? m_MMKV->getInt64(PivS2V{key}, defaultValue, hasValue) : defaultValue;
+        return m_mmkv ? m_mmkv->getInt64(PivS2UV{key}, defaultValue, hasValue) : defaultValue;
     }
 
     template <typename KeyT>
-    inline uint64_t getUInt64(const KeyT &key, uint64_t defaultValue, bool *hasValue)
+    inline uint64_t getUInt64(const KeyT& key, uint64_t defaultValue, bool* hasValue)
     {
-        return m_MMKV ? m_MMKV->getUInt64(PivS2V{key}, defaultValue, hasValue) : defaultValue;
+        return m_mmkv ? m_mmkv->getUInt64(PivS2UV{key}, defaultValue, hasValue) : defaultValue;
     }
 
     /**
@@ -468,9 +467,9 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline double getDouble(const KeyT &key, double defaultValue, bool *hasValue)
+    inline double getDouble(const KeyT& key, double defaultValue, bool* hasValue)
     {
-        return m_MMKV ? m_MMKV->getDouble(PivS2V{key}, defaultValue, hasValue) : defaultValue;
+        return m_mmkv ? m_mmkv->getDouble(PivS2UV{key}, defaultValue, hasValue) : defaultValue;
     }
 
     /**
@@ -481,9 +480,9 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline float getFloat(const KeyT &key, float defaultValue, bool *hasValue)
+    inline float getFloat(const KeyT& key, float defaultValue, bool* hasValue)
     {
-        return m_MMKV ? m_MMKV->getFloat(PivS2V{key}, defaultValue, hasValue) : defaultValue;
+        return m_mmkv ? m_mmkv->getFloat(PivS2UV{key}, defaultValue, hasValue) : defaultValue;
     }
 
     /**
@@ -493,15 +492,15 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline bool getVolStr(const KeyT &key, CWString &value)
+    inline bool getVolStr(const KeyT& key, CWString& value)
     {
         value.Empty();
-        if (m_MMKV)
+        if (m_mmkv)
         {
             mmkv::MMBuffer buffer;
-            if (m_MMKV->getBytes(PivS2V{key}, buffer))
+            if (m_mmkv->getBytes(PivS2UV{key}, buffer))
             {
-                value.SetText(reinterpret_cast<const wchar_t *>(buffer.getPtr()), buffer.length() / 2);
+                value.SetText(reinterpret_cast<const wchar_t*>(buffer.getPtr()), buffer.length() / 2);
                 return true;
             }
         }
@@ -509,7 +508,7 @@ public:
     }
 
     template <typename KeyT>
-    inline CWString getVolStr(const KeyT &key)
+    inline CWString getVolStr(const KeyT& key)
     {
         CWString result;
         getVolStr(key, result);
@@ -517,35 +516,27 @@ public:
     }
 
     template <typename KeyT>
-    inline bool getString(const KeyT &key, std::string &value)
+    inline bool getString(const KeyT& key, std::string& value)
     {
         value.clear();
-        if (m_MMKV)
-        {
-            return m_MMKV->getString(PivS2V{key}, value);
-        }
+        if (m_mmkv)
+            return m_mmkv->getString(PivS2UV{key}, value);
         return false;
     }
 
     template <typename KeyT>
-    inline std::string getString(const KeyT &key)
+    inline std::string getString(const KeyT& key)
     {
         std::string value;
-        if (m_MMKV)
-        {
-            m_MMKV->getString(PivS2V{key}, value);
-        }
+        if (m_mmkv)
+            m_mmkv->getString(PivS2UV{key}, value);
         return value;
     }
 
     template <typename KeyT>
-    inline bool getVector(const KeyT &key, std::vector<std::string> &result)
+    inline bool getVector(const KeyT& key, std::vector<std::string>& result)
     {
-        if (m_MMKV)
-        {
-            return m_MMKV->getVector(PivS2V{key}, result);
-        }
-        return false;
+        return m_mmkv ? m_mmkv->getVector(PivS2UV{key}, result) : false;
     }
 
     /**
@@ -555,13 +546,13 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline bool getVolMem(const KeyT &key, CVolMem &value)
+    inline bool getVolMem(const KeyT& key, CVolMem& value)
     {
         value.Empty();
-        if (m_MMKV)
+        if (m_mmkv)
         {
             mmkv::MMBuffer buffer;
-            if (m_MMKV->getBytes(PivS2V{key}, buffer))
+            if (m_mmkv->getBytes(PivS2UV{key}, buffer))
             {
                 value.Append(buffer.getPtr(), buffer.length());
                 return true;
@@ -571,7 +562,7 @@ public:
     }
 
     template <typename KeyT>
-    inline CVolMem getVolMem(const KeyT &key)
+    inline CVolMem getVolMem(const KeyT& key)
     {
         CVolMem result;
         getVolMem(key, result);
@@ -585,13 +576,13 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline bool getVolObj(const KeyT &key, CVolObject &object)
+    inline bool getVolObj(const KeyT& key, CVolObject& object)
     {
         object.ResetToNullObject();
-        if (m_MMKV)
+        if (m_mmkv)
         {
             mmkv::MMBuffer buffer;
-            if (m_MMKV->getBytes(PivS2V{key}, buffer))
+            if (m_mmkv->getBytes(PivS2UV{key}, buffer))
             {
                 CVolMemoryInputStream memStream;
                 memStream.ResetMemory(buffer.getPtr(), buffer.length());
@@ -609,9 +600,9 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline size_t getValueSize(const KeyT &key, bool actualSize)
+    inline size_t getValueSize(const KeyT& key, bool actualSize)
     {
-        return m_MMKV ? m_MMKV->getValueSize(PivS2V{key}, actualSize) : 0;
+        return m_mmkv ? m_mmkv->getValueSize(PivS2UV{key}, actualSize) : 0;
     }
 
     /**
@@ -620,9 +611,9 @@ public:
      * @return
      */
     template <typename KeyT>
-    inline bool containsKey(const KeyT &key)
+    inline bool containsKey(const KeyT& key)
     {
-        return m_MMKV ? m_MMKV->containsKey(PivS2V{key}) : false;
+        return m_mmkv ? m_mmkv->containsKey(PivS2UV{key}) : false;
     }
 
     /**
@@ -632,7 +623,7 @@ public:
      */
     inline size_t count(bool filterExpire = false)
     {
-        return m_MMKV ? m_MMKV->count(filterExpire) : 0;
+        return m_mmkv ? m_mmkv->count(filterExpire) : 0;
     }
 
     /**
@@ -641,12 +632,12 @@ public:
      * @param filterExpire 过滤到期键值
      * @return
      */
-    inline ptrdiff_t allKeys(CMStringArray &keysArray, bool filterExpire = false)
+    inline ptrdiff_t allKeys(CMStringArray& keysArray, bool filterExpire = false)
     {
         keysArray.RemoveAll();
-        if (m_MMKV)
+        if (m_mmkv)
         {
-            std::vector<std::string> keys = m_MMKV->allKeys(filterExpire);
+            std::vector<std::string> keys = m_mmkv->allKeys(filterExpire);
             for (auto iter = keys.cbegin(); iter != keys.cend(); ++iter)
             {
                 keysArray.Add(PivU2W(*iter).c_str());
@@ -658,34 +649,30 @@ public:
 
     inline std::vector<std::string> allKeys(bool filterExpire = false)
     {
-        return m_MMKV ? m_MMKV->allKeys(filterExpire) : std::vector<std::string>{};
+        return m_mmkv ? m_mmkv->allKeys(filterExpire) : std::vector<std::string>{};
     }
 
     /**
      * @brief 批量删除键值对
      * @param keysArray 键名数组
      */
-    inline bool removeValuesForKeys(CMStringArray &keysArray)
+    inline bool removeValuesForKeys(CMStringArray& keysArray)
     {
-        if (m_MMKV)
+        if (m_mmkv)
         {
             std::vector<std::string> keys;
             for (INT_P i = 0; i < keysArray.GetCount(); ++i)
             {
                 keys.push_back(PivW2U{keysArray.GetAt(i)}.str);
             }
-            return m_MMKV->removeValuesForKeys(keys);
+            return m_mmkv->removeValuesForKeys(keys);
         }
         return false;
     }
 
-    inline bool removeValuesForKeys(std::vector<std::string> &keysArray)
+    inline bool removeValuesForKeys(std::vector<std::string>& keysArray)
     {
-        if (m_MMKV)
-        {
-            return m_MMKV->removeValuesForKeys(keysArray);
-        }
-        return false;
+        return m_mmkv ? m_mmkv->removeValuesForKeys(keysArray) : false;
     }
 
     /**
@@ -694,13 +681,9 @@ public:
      * @param key 键名
      */
     template <typename KeyT>
-    inline bool removeValueForKey(const KeyT &key)
+    inline bool removeValueForKey(const KeyT& key)
     {
-        if (m_MMKV)
-        {
-            return m_MMKV->removeValueForKey(PivS2V{key});
-        }
-        return false;
+        return m_mmkv ? m_mmkv->removeValueForKey(PivS2UV{key}) : false;
     }
 
     /**
@@ -708,10 +691,8 @@ public:
      */
     inline void clearAll(bool keepSpace = false)
     {
-        if (m_MMKV)
-        {
-            m_MMKV->clearAll(keepSpace);
-        }
+        if (m_mmkv)
+            m_mmkv->clearAll(keepSpace);
     }
 
     /**
@@ -719,10 +700,8 @@ public:
      */
     inline void trim()
     {
-        if (m_MMKV)
-        {
-            m_MMKV->trim();
-        }
+        if (m_mmkv)
+            m_mmkv->trim();
     }
 
     /**
@@ -730,10 +709,8 @@ public:
      */
     inline void clearMemoryCache(bool keepSpace = false)
     {
-        if (m_MMKV)
-        {
-            m_MMKV->clearMemoryCache(keepSpace);
-        }
+        if (m_mmkv)
+            m_mmkv->clearMemoryCache(keepSpace);
     }
 
     /**
@@ -742,10 +719,8 @@ public:
      */
     inline void sync(bool syncMode)
     {
-        if (m_MMKV)
-        {
-            m_MMKV->sync(static_cast<SyncFlag>(syncMode));
-        }
+        if (m_mmkv)
+            m_mmkv->sync(static_cast<SyncFlag>(syncMode));
     }
 
     /**
@@ -753,10 +728,8 @@ public:
      */
     inline void lock()
     {
-        if (m_MMKV)
-        {
-            m_MMKV->lock();
-        }
+        if (m_mmkv)
+            m_mmkv->lock();
     }
 
     /**
@@ -764,10 +737,8 @@ public:
      */
     inline void unlock()
     {
-        if (m_MMKV)
-        {
-            m_MMKV->unlock();
-        }
+        if (m_mmkv)
+            m_mmkv->unlock();
     }
 
     /**
@@ -776,7 +747,7 @@ public:
      */
     inline bool try_lock()
     {
-        return m_MMKV ? m_MMKV->try_lock() : false;
+        return m_mmkv ? m_mmkv->try_lock() : false;
     }
 
     /**
@@ -784,10 +755,8 @@ public:
      */
     inline void checkContentChanged()
     {
-        if (m_MMKV)
-        {
-            m_MMKV->checkContentChanged();
-        }
+        if (m_mmkv)
+            m_mmkv->checkContentChanged();
     }
 
     /**
@@ -797,7 +766,7 @@ public:
      */
     inline bool enableAutoKeyExpire(uint32_t expiredInSeconds = 0)
     {
-        return m_MMKV ? m_MMKV->enableAutoKeyExpire(expiredInSeconds) : false;
+        return m_mmkv ? m_mmkv->enableAutoKeyExpire(expiredInSeconds) : false;
     }
 
     /**
@@ -806,7 +775,7 @@ public:
      */
     inline bool disableAutoKeyExpire()
     {
-        return m_MMKV ? m_MMKV->disableAutoKeyExpire() : false;
+        return m_mmkv ? m_mmkv->disableAutoKeyExpire() : false;
     }
 
 }; // class PivMMKV

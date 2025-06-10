@@ -1,28 +1,35 @@
 <火山程序 类型 = "通常" 版本 = 1 />
 
-包 火山.PIV基础类 <注释 = "Markdown解析">
-
-类 Markdown解析器 <公开 注释 = "md4c 0.4.8" 注释 = "在CommonMark规范的基础上兼容GitHub Flavored Markdown和LaTeX数学公式"
-        注释 = "源代码 https://github.com/mity/md4c" 注释 = "" 注释 = "CommonMark 规范"
+包 火山.PIV基础类 <注释 = "md4c 0.4.8 https://github.com/mity/md4c"
+        注释 = "在CommonMark规范的基础上兼容GitHub Flavored Markdown和LaTeX数学公式" 注释 = "CommonMark 规范"
         注释 = "https://spec.commonmark.org/" 注释 = "GitHub Flavored Markdown 规范"
-        注释 = "https://github.github.com/gfm/" 编辑时信息 = "4987E, 0, 0, 0" @文档 = "category = \"Markdown\""
-        @视窗.外部头文件 = "src\\md4c\\entity.h\nsrc\\md4c\\md4c.h\nsrc\\md4c\\md4c-html.h"
-        @视窗.外部源文件 = "src\\md4c\\entity.c\nsrc\\md4c\\md4c.c\nsrc\\md4c\\md4c-html.c">
+        注释 = "https://github.github.com/gfm/" 隐藏值属性 = "0, 1"
+        @视窗.外部头文件 = "src/md4c/entity.h\r\nsrc/md4c/md4c.h"
+        @视窗.外部源文件 = "src\\md4c\\entity.c\r\nsrc\\md4c\\md4c.c">
+
+类 Markdown渲染 <公开 注释 = "用于快速将Markdown渲染到HTML" 折叠 折叠2 隐藏值属性 = "1, 2" @文档 = "category = \"Markdown\""
+        @视窗.外部头文件 = "src\\md4c\\md4c-html.h" @视窗.外部源文件 = "src\\md4c\\md4c-html.c" @别名 = "//" @别名类型 = 本地类
+        @类用途 = 禁止创建对象>
 {
+    方法 渲染 <公开 静态 类型 = 整数 注释 = "将Markdown字节集转换到HTML字节集(UTF-8编码)." 返回值注释 = "返回是否成功" 折叠 @禁止流程检查 = 真>
+    参数 Markdown <类型 = 字节集类 注释 = "欲解析的Markdown字节集(UTF8编码)">
+    参数 HTML <类型 = 字节集类 注释 = "保存转换后的HTML字节集(UTF8编码)">
+    参数 解析器标志 <类型 = 整数 注释 = "为\"MD解析器选项\"的组合值(用\"位或\"组合)." @默认值 = MD解析标志.GitHub规范>
+    参数 渲染器标志 <类型 = 整数 注释 = "为\"MD渲染器选项\"的组合值(用\"位或\"组合)." @默认值 = MD渲染标志.跳过UTF8签名>
+    {
+        @ @<HTML>.Empty();
+        @ @<HTML>.SetMemAlignSize(@<Markdown>.GetSize() * 2);
+        @ return md_html(reinterpret_cast<const MD_CHAR*>(@<Markdown>.GetPtr()), static_cast<MD_SIZE>(@<Markdown>.GetSize()),
+        @                &MdRenderProc, (void*)&@<HTML>, (unsigned)@<解析器标志>, (unsigned)@<渲染器标志>);
+    }
 
-    # @begin
-    # void MdRenderProc (const MD_CHAR* data, MD_SIZE size, void* userdata) {
-    #     (*(@an<CVolMem>*)userdata).Append ((void*)data, (INT_P)size);
-    # }
-    # @end
-
-    方法 渲染 <公开 类型 = 文本型 注释 = "将Markdown文本转换到HTML文本." 返回值注释 = "成功返回转换后的HTML文本,失败返回空文本." 折叠>
+    方法 渲染文本 <公开 静态 类型 = 文本型 注释 = "将Markdown文本转换到HTML文本" 返回值注释 = "成功返回转换后的HTML文本,失败返回空文本." 折叠>
     参数 Markdown <类型 = 文本型 注释 = "欲解析的Markdown文本">
-    参数 解析器标志 <类型 = 整数 注释 = "为\"MD解析器选项\"的组合值(用\"位或\"组合)." @默认值 = MD解析器标志.GitHub规范>
-    参数 渲染器标志 <类型 = 整数 注释 = "为\"MD渲染器选项\"的组合值(用\"位或\"组合)." @默认值 = MD渲染器标志.跳过UTF8签名>
+    参数 解析器标志 <类型 = 整数 注释 = "为\"MD解析器选项\"的组合值(用\"位或\"组合)." @默认值 = MD解析标志.GitHub规范>
+    参数 渲染器标志 <类型 = 整数 注释 = "为\"MD渲染器选项\"的组合值(用\"位或\"组合)." @默认值 = MD渲染标志.跳过UTF8签名>
     {
         变量 HTML <类型 = 字节集类>
-        如果 (渲染2 (文本到UTF8 (Markdown, 假), HTML, 解析器标志, 渲染器标志) == 真)
+        如果 (渲染 (文本到UTF8 (Markdown, 假), HTML, 解析器标志, 渲染器标志) == 0)
         {
             返回 (UTF8到文本 (HTML))
         }
@@ -32,26 +39,756 @@
         }
     }
 
-    方法 渲染2 <公开 类型 = 逻辑型 注释 = "将Markdown字节集转换到HTML字节集(UTF8编码)." 返回值注释 = "返回是否成功" @禁止流程检查 = 真>
+    # @begin
+    # <> <include>
+    # static void MdRenderProc(const MD_CHAR* data, MD_SIZE size, void* userdata) {
+    #     reinterpret_cast<@an<CVolMem>*>(userdata)->Append(data, static_cast<INT_P>(size));
+    # }
+    # <> </include>
+    # @end
+}
+
+类 Markdown解析 <公开 注释 = "用于解析Markdown数据,默认的解析结果与\"Markdown渲染\"基本相同." 注释 = "如果要自定义解析过程,可继承本类,然后覆盖虚拟方法来实现."
+        折叠 编辑时信息 = "4987E, 0, 0, 0" @文档 = "category = \"Markdown\"">
+{
+    变量 HTML缓存 <公开 类型 = 标准文本类U 注释 = "用于缓存解析过程中的HTML内容">
+
+    方法 解析 <公开 类型 = 整数 注释 = "解析Markdown字节集(UTF-8编码)" 折叠 @禁止流程检查 = 真>
     参数 Markdown <类型 = 字节集类 注释 = "欲解析的Markdown字节集(UTF8编码)">
-    参数 HTML <类型 = 字节集类 注释 = "保存转换后的HTML字节集(UTF8编码)">
-    参数 解析器标志 <类型 = 整数 注释 = "为\"MD解析器选项\"的组合值(用\"位或\"组合)." @默认值 = MD解析器标志.GitHub规范>
-    参数 渲染器标志 <类型 = 整数 注释 = "为\"MD渲染器选项\"的组合值(用\"位或\"组合)." @默认值 = MD渲染器标志.跳过UTF8签名>
+    参数 HTML <类型 = 字节集类 注释 = "保存转换后的HTML字节集(UTF8编码);" 注释 = "注: 空对象时本参数不返回数据,请用本类的成员变量\"解析结果\"获取结果."
+            @默认值 = 空对象>
+    参数 解析器标志 <类型 = 整数 注释 = "为\"MD解析器选项\"的组合值(用\"位或\"组合)." @默认值 = MD解析标志.GitHub规范>
     {
-        @ @<HTML>.Empty (); // 清空字节集,防止用户传入了非空的字节集参数
-        @ @<HTML>.SetMemAlignSize (@<Markdown>.GetSize () * 2); // 置字节集预分配字尺寸,加快处理速度
-        @ return !md_html ((const MD_CHAR*)@<Markdown>.GetPtr (), (MD_SIZE)@<Markdown>.GetSize (), &MdRenderProc, (void*)&@<HTML>, (unsigned)@<解析器标志>, (unsigned)@<渲染器标志>);
+        HTML缓存.清空文本 ()
+        @ parser.flags = @<解析器标志>;
+        @ INT ret = md_parse(reinterpret_cast<const MD_CHAR*>(@<Markdown>.GetPtr()),
+        @                    static_cast<MD_SIZE>(@<Markdown>.GetSize()), &parser, this);
+        如果 (HTML.是否为空对象 () == 假)
+        {
+            HTML = HTML缓存.到字节集 ()
+        }
+        @ return ret;
     }
 
-    方法 "//解析" <类型 = 整数 折叠>
-    参数 文本 <类型 = 字节集类>
+    方法 解析文本 <公开 类型 = 文本型 注释 = "解析Markdown文本" 折叠>
+    参数 Markdown <类型 = 文本型 注释 = "欲解析的Markdown文本">
+    参数 解析器标志 <类型 = 整数 注释 = "为\"MD解析器选项\"的组合值(用\"位或\"组合)." @默认值 = MD解析标志.GitHub规范>
     {
-        @ (INT)md_parse ((const MD_CHAR*)@<文本>.GetPtr (), (MD_SIZE)@<文本>.GetSize (), const MD_PARSER* parser, void* userdata);
+        变量 MD <类型 = 字节集类>
+        MD = 文本到UTF8 (Markdown, 假)
+        @ parser.flags = @<解析器标志>;
+        @ INT ret = md_parse(reinterpret_cast<const MD_CHAR*>(@<MD>.GetPtr()),
+        @                    static_cast<MD_SIZE>(@<MD>.GetSize()), &parser, this);
+        返回 (HTML缓存.到文本型 ())
+    }
+
+    # 虚拟方法 ---
+
+    方法 块级开始标签 <类型 = 整数 注释 = "块级开始标签的回调函数" 折叠 @虚拟方法 = 可覆盖>
+    参数 元素类型 <类型 = 整数>
+    参数 详细信息 <类型 = 通用指针>
+    {
+        分支判断 (元素类型)
+        {
+            分支 (MD块级类型.文档)
+            {
+                // 不需要处理
+            }
+            分支 (MD块级类型.引用)
+            {
+                HTML缓存.加入字面量 ("<blockquote>")
+                HTML缓存.加入字符 ('\n')
+            }
+            分支 (MD块级类型.无序列表)
+            {
+                HTML缓存.加入字面量 ("<ul>")
+                HTML缓存.加入字符 ('\n')
+            }
+            分支 (MD块级类型.有序列表)
+            {
+                变量 信息 <类型 = MD块级有序列表信息>
+                信息.置指针 (详细信息)
+                如果 (信息.起始索引 == 1)
+                {
+                    HTML缓存.加入字面量 ("<ol>")
+                    HTML缓存.加入字符 ('\n')
+                    返回 (0)
+                }
+                HTML缓存.加入格式文本 (_u8 ("<ol start=\"%u\">\n"), 信息.起始索引)
+            }
+            分支 (MD块级类型.列表项目)
+            {
+                变量 信息 <类型 = MD块级列表项信息>
+                信息.置指针 (详细信息)
+                如果 (信息.是否任务项 != 0)
+                {
+                    HTML缓存.加入字面量 ("<li class=\"task-list-item\">\r\n<input type=\"checkbox\" class=\"task-list-item-checkbox\" disabled")
+                    如果 (信息.任务标记 == 'x' || 信息.任务标记 == 'X')
+                    {
+                        HTML缓存.加入字面量 (" checked")
+                    }
+                    HTML缓存.加入字符 ('>')
+                }
+                否则
+                {
+                    HTML缓存.加入字面量 ("<li>")
+                }
+            }
+            分支 (MD块级类型.水平线)
+            {
+                HTML缓存.加入字面量 ("<hr />")
+                HTML缓存.加入字符 ('\n')
+            }
+            分支 (MD块级类型.标题)
+            {
+                变量 信息 <类型 = MD块级标题信息>
+                信息.置指针 (详细信息)
+                HTML缓存.加入格式文本 (_u8 ("<h%d>"), 信息.级别)
+            }
+            分支 (MD块级类型.代码)
+            {
+                变量 信息 <类型 = MD块级代码信息>
+                信息.置指针 (详细信息)
+                HTML缓存.加入字面量 ("<pre><code")
+                如果 (信息.语言.文本指针.为空指针 () == 假)
+                {
+                    HTML缓存.加入字面量 (" class=\"language-")
+                    HTML缓存.加入文本指针 (信息.语言.文本指针, 信息.语言.文本长度)
+                    HTML缓存.加入字符 ('\"')
+                }
+                HTML缓存.加入字符 ('>')
+            }
+            分支 (MD块级类型.HTML)
+            {
+                // 不需要处理
+            }
+            分支 (MD块级类型.段落)
+            {
+                HTML缓存.加入字面量 ("<p>")
+            }
+            分支 (MD块级类型.表格)
+            {
+                HTML缓存.加入字面量 ("<table>")
+                HTML缓存.加入字符 ('\n')
+            }
+            分支 (MD块级类型.表头)
+            {
+                HTML缓存.加入字面量 ("<thead>")
+                HTML缓存.加入字符 ('\n')
+            }
+            分支 (MD块级类型.表格主体)
+            {
+                HTML缓存.加入字面量 ("<tbody>")
+                HTML缓存.加入字符 ('\n')
+            }
+            分支 (MD块级类型.表格行)
+            {
+                HTML缓存.加入字面量 ("<tr>")
+                HTML缓存.加入字符 ('\n')
+            }
+            分支 (MD块级类型.表头单元格)
+            {
+                变量 信息 <类型 = MD块级单元格信息>
+                信息.置指针 (详细信息)
+                HTML缓存.加入字面量 ("<th")
+                分支判断 (信息.对齐方式)
+                {
+                    分支 (MD对齐方式.靠左)
+                    {
+                        HTML缓存.加入字面量 (" align=\"left\">")
+                    }
+                    分支 (MD对齐方式.居中)
+                    {
+                        HTML缓存.加入字面量 (" align=\"center\">")
+                    }
+                    分支 (MD对齐方式.靠右)
+                    {
+                        HTML缓存.加入字面量 (" align=\"right\">")
+                    }
+                    默认分支 ()
+                    {
+                        HTML缓存.加入字符 ('>')
+                    }
+                }
+            }
+            分支 (MD块级类型.标准单元格)
+            {
+                变量 信息 <类型 = MD块级单元格信息>
+                信息.置指针 (详细信息)
+                HTML缓存.加入字面量 ("<td")
+                分支判断 (信息.对齐方式)
+                {
+                    分支 (MD对齐方式.靠左)
+                    {
+                        HTML缓存.加入字面量 (" align=\"left\">")
+                    }
+                    分支 (MD对齐方式.居中)
+                    {
+                        HTML缓存.加入字面量 (" align=\"center\">")
+                    }
+                    分支 (MD对齐方式.靠右)
+                    {
+                        HTML缓存.加入字面量 (" align=\"right\">")
+                    }
+                    默认分支 ()
+                    {
+                        HTML缓存.加入字符 ('>')
+                    }
+                }
+
+            }
+        }
+        返回 (0)
+    }
+
+    方法 块级结束标签 <类型 = 整数 注释 = "块级结束标签的回调函数" 折叠 @虚拟方法 = 可覆盖>
+    参数 元素类型 <类型 = 整数>
+    参数 详细信息 <类型 = 通用指针>
+    {
+        分支判断 (元素类型)
+        {
+            分支 (MD块级类型.文档)
+            {
+                // 不需要处理
+            }
+            分支 (MD块级类型.引用)
+            {
+                HTML缓存.加入字面量 ("</blockquote>")
+            }
+            分支 (MD块级类型.无序列表)
+            {
+                HTML缓存.加入字面量 ("</ul>")
+            }
+            分支 (MD块级类型.有序列表)
+            {
+                HTML缓存.加入字面量 ("</ol>")
+            }
+            分支 (MD块级类型.列表项目)
+            {
+                HTML缓存.加入字面量 ("</li>")
+            }
+            分支 (MD块级类型.水平线)
+            {
+                // 不需要处理
+            }
+            分支 (MD块级类型.标题)
+            {
+                变量 信息 <类型 = MD块级标题信息>
+                信息.置指针 (详细信息)
+                HTML缓存.加入格式文本 (_u8 ("</h%d>"), 信息.级别)
+            }
+            分支 (MD块级类型.代码)
+            {
+                HTML缓存.加入字面量 ("</code></pre>")
+            }
+            分支 (MD块级类型.HTML)
+            {
+                // 不需要处理
+            }
+            分支 (MD块级类型.段落)
+            {
+                HTML缓存.加入字面量 ("</p>")
+            }
+            分支 (MD块级类型.表格)
+            {
+                HTML缓存.加入字面量 ("</table>")
+            }
+            分支 (MD块级类型.表头)
+            {
+                HTML缓存.加入字面量 ("</thead>")
+            }
+            分支 (MD块级类型.表格主体)
+            {
+                HTML缓存.加入字面量 ("</tbody>")
+            }
+            分支 (MD块级类型.表格行)
+            {
+                HTML缓存.加入字面量 ("</tr>")
+            }
+            分支 (MD块级类型.表头单元格)
+            {
+                HTML缓存.加入字面量 ("</th>")
+            }
+            分支 (MD块级类型.标准单元格)
+            {
+                HTML缓存.加入字面量 ("</td>")
+            }
+        }
+        HTML缓存.加入字符 ('\n')
+        返回 (0)
+    }
+
+    方法 内联开始标签 <类型 = 整数 注释 = "内联开始标签的回调函数" 折叠 @虚拟方法 = 可覆盖>
+    参数 元素类型 <类型 = 整数>
+    参数 详细信息 <类型 = 通用指针>
+    {
+        分支判断 (元素类型)
+        {
+            分支 (MD内联类型.强调)
+            {
+                HTML缓存.加入字面量 ("<em>")
+            }
+            分支 (MD内联类型.重点)
+            {
+                HTML缓存.加入字面量 ("<strong>")
+            }
+            分支 (MD内联类型.超链接)
+            {
+                变量 信息 <类型 = MD内联超链接信息>
+                信息.置指针 (详细信息)
+                HTML缓存.加入字面量 ("<a href=\"")
+                变量 href <类型 = 标准文本类U>
+                href.置文本指针 (信息.链接地址.文本指针, 信息.链接地址.文本长度)
+                HTML缓存.加入文本 (href.URL编码 (真))
+                如果 (信息.标题.文本指针.为空指针 () == 假)
+                {
+                    HTML缓存.加入字面量 ("\" title=\"")
+                    _HTML转义 (HTML缓存, 信息.标题.文本指针, 信息.标题.文本长度)
+                }
+                HTML缓存.加入字面量 ("\">")
+            }
+            分支 (MD内联类型.图像)
+            {
+                变量 信息 <类型 = MD内联图片信息>
+                信息.置指针 (详细信息)
+                HTML缓存.加入字面量 ("<img src=\"")
+                HTML缓存.加入文本指针 (信息.源地址.文本指针, 信息.源地址.文本长度)
+                HTML缓存.加入字面量 ("\" alt=\"")
+            }
+            分支 (MD内联类型.代码)
+            {
+                HTML缓存.加入字面量 ("<code>")
+            }
+            分支 (MD内联类型.删除线)
+            {
+                HTML缓存.加入字面量 ("<del>")
+            }
+            分支 (MD内联类型.LaTeX行内公式)
+            {
+                HTML缓存.加入字面量 ("<x-equation>")
+            }
+            分支 (MD内联类型.LaTeX展示公式)
+            {
+                HTML缓存.加入字面量 ("<x-equation type=\"display\">")
+            }
+            分支 (MD内联类型.维基链接)
+            {
+                变量 信息 <类型 = MD内联维基链接信息>
+                信息.置指针 (详细信息)
+                HTML缓存.加入字面量 ("<x-wikilink data-target=\"")
+                HTML缓存.加入文本指针 (信息.目标.文本指针, 信息.目标.文本长度)
+                HTML缓存.加入字面量 ("\">")
+            }
+            分支 (MD内联类型.下划线)
+            {
+                HTML缓存.加入字面量 ("<u>")
+            }
+        }
+        返回 (0)
+    }
+
+    方法 内联结束标签 <类型 = 整数 注释 = "内联结束标签的回调函数" 折叠 @虚拟方法 = 可覆盖>
+    参数 元素类型 <类型 = 整数>
+    参数 详细信息 <类型 = 通用指针>
+    {
+        分支判断 (元素类型)
+        {
+            分支 (MD内联类型.强调)
+            {
+                HTML缓存.加入字面量 ("</em>")
+            }
+            分支 (MD内联类型.重点)
+            {
+                HTML缓存.加入字面量 ("</strong>")
+            }
+            分支 (MD内联类型.超链接)
+            {
+                HTML缓存.加入字面量 ("</a>")
+            }
+            分支 (MD内联类型.图像)
+            {
+                变量 信息 <类型 = MD内联图片信息>
+                信息.置指针 (详细信息)
+                如果 (信息.标题.文本指针.为空指针 () == 假)
+                {
+                    HTML缓存.加入字面量 ("\" title=\"")
+                    HTML缓存.加入文本指针 (信息.标题.文本指针, 信息.标题.文本长度)
+                }
+                HTML缓存.加入字面量 ("\" />")
+            }
+            分支 (MD内联类型.代码)
+            {
+                HTML缓存.加入字面量 ("</code>")
+            }
+            分支 (MD内联类型.删除线)
+            {
+                HTML缓存.加入字面量 ("</del>")
+            }
+            分支 (MD内联类型.LaTeX行内公式)
+            {
+                HTML缓存.加入字面量 ("</x-equation>")
+            }
+            分支 (MD内联类型.LaTeX展示公式)
+            {
+                HTML缓存.加入字面量 ("</x-equation>")
+            }
+            分支 (MD内联类型.维基链接)
+            {
+                HTML缓存.加入字面量 ("</x-wikilink>")
+            }
+            分支 (MD内联类型.下划线)
+            {
+                HTML缓存.加入字面量 ("</u>")
+            }
+        }
+        返回 (0)
+    }
+
+    方法 文本处理 <类型 = 整数 注释 = "文本处理的回调函数" 折叠 @虚拟方法 = 可覆盖>
+    参数 文本类型 <类型 = 整数>
+    参数 文本指针 <类型 = PIV.类型.字符串指针>
+    参数 文本长度 <类型 = PIV.类型.uint32_t>
+    {
+        分支判断 (文本类型)
+        {
+            分支 (火山.PIV基础类.MD文本类型.常规)
+            {
+                HTML缓存.加入文本指针 (文本指针, 文本长度)
+            }
+            分支 (火山.PIV基础类.MD文本类型.空字符)
+            {
+                HTML缓存.加入字符 (0xEF, 0xBF, 0xBD)  // '\uFFFD'
+            }
+            分支 (火山.PIV基础类.MD文本类型.换行符)
+            {
+                HTML缓存.加入字面量 ("<br />")
+                HTML缓存.加入字符 ('\n')
+            }
+            分支 (火山.PIV基础类.MD文本类型.软换行)
+            {
+                HTML缓存.加入字符 ('\n')
+            }
+            分支 (火山.PIV基础类.MD文本类型.字符实体)
+            {
+                HTML缓存.加入文本指针 (文本指针, 文本长度)
+            }
+            分支 (火山.PIV基础类.MD文本类型.代码)
+            {
+                HTML缓存.加入文本指针 (文本指针, 文本长度)
+            }
+            分支 (火山.PIV基础类.MD文本类型.HTML)
+            {
+                HTML缓存.加入文本指针 (文本指针, 文本长度)
+            }
+            分支 (火山.PIV基础类.MD文本类型.LaTeX公式)
+            {
+                HTML缓存.加入文本指针 (文本指针, 文本长度)
+            }
+        }
+        返回 (0)
+    }
+
+    方法 _是否需要HTML转义 <公开 静态 类型 = 逻辑型 折叠>
+    参数 ch <类型 = 字节>
+    {
+        如果 (ch == '&')
+        {
+            返回 (真)
+        }
+        否则 (ch == '<')
+        {
+            返回 (真)
+        }
+        否则 (ch == '>')
+        {
+            返回 (真)
+        }
+        否则 (ch == '"')
+        {
+            返回 (真)
+        }
+        返回 (假)
+    }
+
+    方法 _HTML转义 <公开 静态 折叠 "">
+    参数 文本 <类型 = 标准文本类U>
+    参数 data <类型 = PIV.类型.字符串指针>
+    参数 size <类型 = PIV.类型.uint32_t>
+    {
+        变量 beg <类型 = PIV.类型.uint32_t 值 = 0>
+        变量 off <类型 = PIV.类型.uint32_t 值 = 0>
+        判断循环 (真)
+        {
+            判断循环 (off + 3 < size && _是否需要HTML转义 (data.取字符 (off)) == 假 && _是否需要HTML转义 (data.取字符 (off + 1)) == 假 && _是否需要HTML转义 (data.取字符 (off + 2)) == 假 && _是否需要HTML转义 (data.取字符 (off + 3)) == 假)
+            {
+                off.加 (4)
+            }
+            判断循环 (off < size && _是否需要HTML转义 (data.取字符 (off)) == 假)
+            {
+                off.自增 ()
+            }
+            如果 (off > beg)
+            {
+                文本.加入文本指针 (data.移动字符串 (beg), off - beg)
+            }
+            如果 (off < size)
+            {
+                如果 (data.取字符 (off) == '&')
+                {
+                    文本.加入字面量 ("&amp;")
+                }
+                否则 (data.取字符 (off) == '<')
+                {
+                    文本.加入字面量 ("&lt;")
+                }
+                否则 (data.取字符 (off) == '>')
+                {
+                    文本.加入字面量 ("&gt;")
+                }
+                否则 (data.取字符 (off) == '"')
+                {
+                    文本.加入字面量 ("&quot;")
+                }
+                off.自增 ()
+            }
+            否则
+            {
+                跳出循环
+            }
+            beg = off
+        }
+    }
+
+    # @begin
+    # <> <include>
+    # MD_PARSER parser = {
+    #     0, 0,
+    #     @sn<current_class>::enter_block, @sn<current_class>::leave_block,
+    #     @sn<current_class>::enter_span, @sn<current_class>::leave_span,
+    #     @sn<current_class>::text, @sn<current_class>::debug_log, NULL
+    # };
+    # static int enter_block(MD_BLOCKTYPE type, void* detail, void* userdata)
+    # {
+    #     return reinterpret_cast<@sn<current_class>*>(userdata)->@n<Markdown解析.块级开始标签>(type, detail);
+    # }
+    # static int leave_block(MD_BLOCKTYPE type, void* detail, void* userdata)
+    # {
+    #     return reinterpret_cast<@sn<current_class>*>(userdata)->@n<Markdown解析.块级结束标签>(type, detail);
+    # }
+    # static int enter_span(MD_SPANTYPE type, void* detail, void* userdata)
+    # {
+    #     return reinterpret_cast<@sn<current_class>*>(userdata)->@n<Markdown解析.内联开始标签>(type, detail);
+    # }
+    # static int leave_span(MD_SPANTYPE type, void* detail, void* userdata)
+    # {
+    #     return reinterpret_cast<@sn<current_class>*>(userdata)->@n<Markdown解析.内联结束标签>(type, detail);
+    # }
+    # static int text(MD_TEXTTYPE type, const MD_CHAR* text, MD_SIZE size, void* userdata)
+    # {
+    #     return reinterpret_cast<@sn<current_class>*>(userdata)->@n<Markdown解析.文本处理>(type, text, size);
+    # }
+    # static void debug_log(const char* msg, void* userdata) { PivDebug(msg); }
+    # <> </include>
+    # @end
+}
+
+类 MD文本属性 <公开 基础类 = PIV结构模板 注释 = "用于处理Markdown中的特殊文本属性,如链接URL,图片地址,标题等." 折叠 折叠2
+        @文档 = "category = \"Markdown.辅助类\"" @模板实现类 = "" @别名 = "MD_ATTRIBUTE">
+{
+    变量 文本指针 <公开 类型 = PIV.类型.字符串指针 注释 = "文本内容的指针,UTF-8编码" @输出名 = "text">
+    变量 文本长度 <公开 类型 = PIV.类型.uint32_t 注释 = "文本内存的字符长度,UTF-8编码" @输出名 = "size">
+
+    方法 取子文本类型 <公开 静态 类型 = 整数 折叠 @嵌入式方法 = "">
+    参数 本结构 <类型 = MD文本属性>
+    参数 索引 <@匹配类型 = 通用整数型>
+    {
+        @ @<本结构>.substr_types[@<索引>]
+    }
+
+    方法 取子文本偏移 <公开 静态 类型 = PIV.类型.uint32_t 折叠 @嵌入式方法 = "">
+    参数 本结构 <类型 = MD文本属性>
+    参数 索引 <@匹配类型 = 通用整数型>
+    {
+        @ @<本结构>.substr_offsets[@<索引>]
+    }
+
+    方法 渲染属性 <公开 静态 折叠>
+    参数 本结构 <类型 = MD文本属性>
+    参数 HTML文本 <类型 = 标准文本类U>
+    {
+        变量 i <类型 = 整数 值 = 0>
+        循环 ((整数)本结构.取子文本偏移 (i), (整数)本结构.文本长度, i, 1)
+        {
+            变量 off <类型 = PIV.类型.uint32_t>
+            变量 size <类型 = PIV.类型.uint32_t>
+            变量 text <类型 = PIV.类型.字符串指针>
+            off = 本结构.取子文本偏移 (i)
+            size = 本结构.取子文本偏移 (i + 1) - off
+            text = 本结构.文本指针.移动字符串 (off)
+            分支判断 (本结构.取子文本类型 (i))
+            {
+                分支 (火山.PIV基础类.MD文本类型.空字符)
+                {
+                    HTML文本.加入字符 (0xEF, 0xBF, 0xBD)  // '\uFFFD'
+                }
+                分支 (火山.PIV基础类.MD文本类型.字符实体)
+                {
+
+
+                }
+                默认分支 ()
+                {
+                    HTML文本.加入文本指针 (text, size)
+
+                }
+
+            }
+        }
     }
 }
 
-类 MD解析器标志 <公开 注释 = "指定一些基于CommonMark规范的扩展语法,或允许一些违背规范的语法."
-        注释 = "默认值(0)时严格遵从CommonMark规范,可以用\"位或\"组合多个标志." 折叠 @文档 = "category = \"Markdown.辅助类\"">
+类 MD块级无序列表信息 <公开 基础类 = PIV指针模板 注释 = "MD块级元素:无序列表<ul>" 折叠 折叠2 @文档 = "category = \"Markdown.辅助类\""
+        @模板实现类 = "" @别名 = "MD_BLOCK_UL_DETAIL*">
+{
+    变量 是否严格模式 <公开 类型 = 整数 注释 = "非标表示为严格列表,0为松散." @输出名 = "is_tight">
+    变量 标记 <公开 类型 = 字节 注释 = "MarkDown源文本中的列表项目符号字符,例如 \'-\'、\'+\'、\'*\'" @输出名 = "mark">
+}
+
+类 MD块级有序列表信息 <公开 基础类 = PIV指针模板 注释 = "MD块级元素:有序列表<ol>" 折叠 折叠2 @文档 = "category = \"Markdown.辅助类\""
+        @模板实现类 = "" @别名 = "MD_BLOCK_OL_DETAIL*">
+{
+    变量 起始索引 <公开 类型 = 无符号字节 注释 = "有序列表的起始索引,默认情况下是1" @输出名 = "start">
+    变量 是否严格模式 <公开 类型 = 整数 注释 = "非标表示为严格列表,0为松散." @输出名 = "is_tight">
+    变量 分隔字符 <公开 类型 = 字节 注释 = "Character delimiting the item marks in MarkDown source, e.g. \'.\' or \')\'"
+            注释 = "MarkDown源文本中的列表项标记后分隔符字符,例如 . 或 ),例如：1. 或 1)" @输出名 = "mark_delimiter">
+}
+
+类 MD块级列表项信息 <公开 基础类 = PIV指针模板 注释 = "MD块级元素:列表项<li>" 折叠 折叠2 @文档 = "category = \"Markdown.辅助类\""
+        @模板实现类 = "" @别名 = "MD_BLOCK_LI_DETAIL*">
+{
+    变量 是否任务项 <公开 类型 = 整数 注释 = "仅在使用\"MD解析标志.任务列表扩展\"后,以非0表示为任务列表." @输出名 = "is_task">
+    变量 任务标记 <公开 类型 = 字节 注释 = "如果是任务项则为 \'x\'、\'X\' 或 \' \' 中的一个,否则为未定义." @输出名 = "task_mark">
+    变量 任务标记偏移 <公开 类型 = PIV.类型.uint32_t 注释 = "如果是任务项,则为输入中\'[\'和\']\'之间字符的偏移量" @输出名 = "task_mark_offset">
+}
+
+类 MD块级标题信息 <公开 基础类 = PIV指针模板 注释 = "MD块级元素:标题<h1>~<h6>" 折叠 折叠2 @文档 = "category = \"Markdown.辅助类\""
+        @模板实现类 = "" @别名 = "MD_BLOCK_H_DETAIL*">
+{
+    变量 级别 <公开 类型 = PIV.类型.uint32_t 注释 = "标题级别(1-6)" @输出名 = "level">
+}
+
+类 MD块级代码信息 <公开 基础类 = PIV指针模板 注释 = "MD块级元素:代码块<code>" 折叠 折叠2 @文档 = "category = \"Markdown.辅助类\""
+        @模板实现类 = "" @别名 = "MD_BLOCK_CODE_DETAIL*">
+{
+    变量 信息 <公开 类型 = MD文本属性 注释 = "代码块的信息文本" @输出名 = "info">
+    变量 语言 <公开 类型 = MD文本属性 注释 = "代码块的语言标识" @输出名 = "lang">
+    变量 围栏字符 <公开 类型 = 字节 注释 = "用作围栏代码块的字符,如果是缩进代码块则为0." @输出名 = "fence_char">
+}
+
+类 MD块级表格信息 <公开 基础类 = PIV指针模板 注释 = "MD块级元素:表格<table>" 折叠 折叠2 @文档 = "category = \"Markdown.辅助类\""
+        @模板实现类 = "" @别名 = "MD_BLOCK_TABLE_DETAIL*">
+{
+    变量 列数 <公开 类型 = PIV.类型.uint32_t 注释 = "表格的列数" @输出名 = "col_count">
+    变量 表头行数 <公开 类型 = PIV.类型.uint32_t 注释 = "表头的行数(当前总是为1)" @输出名 = "head_row_count">
+    变量 表体行数 <公开 类型 = PIV.类型.uint32_t 注释 = "表格主体的行数" @输出名 = "body_row_count">
+}
+
+类 MD块级单元格信息 <公开 基础类 = PIV指针模板 注释 = "MD块级元素:表格单元格<th>、<td>" 折叠 折叠2 @文档 = "category = \"Markdown.辅助类\""
+        @模板实现类 = "" @别名 = "MD_BLOCK_TD_DETAIL*">
+{
+    方法 对齐方式 <公开 静态 属性读 类型 = 整数 注释 = "单元格内容的对齐方式,参考\"MD对齐方式\"常量" 折叠 @禁止流程检查 = 真>
+    参数 本指针 <类型 = MD块级单元格信息>
+    {
+        @ return @<本指针>->align;
+    }
+}
+
+类 MD内联超链接信息 <公开 基础类 = PIV指针模板 注释 = "MD内联元素:超链接<a>" 折叠 折叠2 @文档 = "category = \"Markdown.辅助类\""
+        @模板实现类 = "" @别名 = "MD_SPAN_A_DETAIL*">
+{
+    变量 链接地址 <公开 类型 = MD文本属性 注释 = "超链接的href属性" @输出名 = "href">
+    变量 标题 <公开 类型 = MD文本属性 注释 = "超链接的title属性" @输出名 = "title">
+    变量 是否自动链接 <公开 类型 = 整数 注释 = "非0为自动链接" @输出名 = "is_autolink">
+}
+
+类 MD内联图片信息 <公开 基础类 = PIV指针模板 注释 = "MD内联元素:图片<img>" 折叠 折叠2 @文档 = "category = \"Markdown.辅助类\""
+        @模板实现类 = "" @别名 = "MD_SPAN_IMG_DETAIL*">
+{
+    变量 源地址 <公开 类型 = MD文本属性 注释 = "图片的src属性" @输出名 = "src">
+    变量 标题 <公开 类型 = MD文本属性 注释 = "图片的title属性" @输出名 = "title">
+}
+
+类 MD内联维基链接信息 <公开 基础类 = PIV指针模板 注释 = "MD内联元素:维基链接" 折叠 @文档 = "category = \"Markdown.辅助类\"" @模板实现类 = ""
+        @别名 = "MD_SPAN_WIKILINK_DETAIL*">
+{
+    变量 目标 <公开 类型 = MD文本属性 注释 = "target" @输出名 = "target">
+}
+
+# 常量 ===
+
+类 MD块级类型 <公开 注释 = "MD块级元素类型" 折叠 @文档 = "category = \"Markdown.常量\"">
+{
+    常量 文档 <公开 类型 = 整数 值 = @MD_BLOCK_DOC 注释 = "<body>...</body>">
+    常量 引用 <公开 类型 = 整数 值 = @MD_BLOCK_QUOTE 注释 = "<blockquote>...</blockquote>">
+    常量 无序列表 <公开 类型 = 整数 值 = @MD_BLOCK_UL 注释 = "<ul>...</ul>">
+    常量 有序列表 <公开 类型 = 整数 值 = @MD_BLOCK_OL 注释 = "<ol>...</ol>">
+    常量 列表项目 <公开 类型 = 整数 值 = @MD_BLOCK_LI 注释 = "<li>...</li>">
+    常量 水平线 <公开 类型 = 整数 值 = @MD_BLOCK_HR 注释 = "<hr>">
+    常量 标题 <公开 类型 = 整数 值 = @MD_BLOCK_H 注释 = "<h1>...</h1> (for levels up to 6)">
+    常量 代码 <公开 类型 = 整数 值 = @MD_BLOCK_CODE 注释 = "<pre><code>...</code></pre>">
+    常量 HTML <公开 类型 = 整数 值 = @MD_BLOCK_HTML
+            注释 = "Raw HTML block. This itself does not correspond to any particular HTML tag."
+            注释 = "The contents of it _is_ raw HTML source intended to be put in verbatim form to the HTML output.">
+    常量 段落 <公开 类型 = 整数 值 = @MD_BLOCK_P 注释 = "<p>...</p>">
+    常量 表格 <公开 类型 = 整数 值 = @MD_BLOCK_TABLE 注释 = "<table>...</table> and its contents."
+            注释 = "Detail: Structure MD_BLOCK_TABLE_DETAIL (for MD_BLOCK_TABLE),"
+            注释 = "structure MD_BLOCK_TD_DETAIL (for MD_BLOCK_TH and MD_BLOCK_TD)"
+            注释 = "Note all of these are used only if extension MD_FLAG_TABLES is enabled. */">
+    常量 表头 <公开 类型 = 整数 值 = @MD_BLOCK_THEAD>
+    常量 表格主体 <公开 类型 = 整数 值 = @MD_BLOCK_TBODY>
+    常量 表格行 <公开 类型 = 整数 值 = @MD_BLOCK_TR>
+    常量 表头单元格 <公开 类型 = 整数 值 = @MD_BLOCK_TH>
+    常量 标准单元格 <公开 类型 = 整数 值 = @MD_BLOCK_TD>
+}
+
+类 MD内联类型 <公开 注释 = "MD内联元素类型" 折叠 @文档 = "category = \"Markdown.常量\"">
+{
+    常量 强调 <公开 类型 = 整数 值 = @MD_SPAN_EM 注释 = "<em>...</em>">
+    常量 重点 <公开 类型 = 整数 值 = @MD_SPAN_STRONG 注释 = "<strong>...</strong>">
+    常量 超链接 <公开 类型 = 整数 值 = @MD_SPAN_A 注释 = "<a href=\"xxx\">...</a>">
+    常量 图像 <公开 类型 = 整数 值 = @MD_SPAN_IMG 注释 = "<img src=\"xxx\">...</img>">
+    常量 代码 <公开 类型 = 整数 值 = @MD_SPAN_CODE 注释 = "<code>...</code>">
+    常量 删除线 <公开 类型 = 整数 值 = @MD_SPAN_DEL 注释 = "<del>...</del> MD_FLAG_STRIKETHROUGH">
+    常量 LaTeX行内公式 <公开 类型 = 整数 值 = @MD_SPAN_LATEXMATH
+            注释 = "For recognizing inline ($) and display ($$) equations"
+            注释 = "Note: Recognized only when MD_FLAG_LATEXMATHSPANS is enabled.">
+    常量 LaTeX展示公式 <公开 类型 = 整数 值 = @MD_SPAN_LATEXMATH_DISPLAY>
+    常量 维基链接 <公开 类型 = 整数 值 = @MD_SPAN_WIKILINK 注释 = "Wiki links">
+    常量 下划线 <公开 类型 = 整数 值 = @MD_SPAN_U 注释 = "<u>...</u> MD_FLAG_UNDERLINE">
+}
+
+类 MD文本类型 <公开 注释 = "MD文本类型" 折叠 @文档 = "category = \"Markdown.常量\"">
+{
+    常量 常规 <公开 类型 = 整数 值 = @MD_TEXT_NORMAL 注释 = "普通文本">
+    常量 空字符 <公开 类型 = 整数 值 = @MD_TEXT_NULLCHAR 注释 = "即零字符(\\0),CommonMark要求将空字符替换为替换字符U+FFFD‌">
+    常量 换行符 <公开 类型 = 整数 值 = @MD_TEXT_BR 注释 = "硬换行符">
+    常量 软换行 <公开 类型 = 整数 值 = @MD_TEXT_SOFTBR 注释 = "源文本中的\"\\n\"在语义上没有意义">
+    常量 字符实体 <公开 类型 = 整数 值 = @MD_TEXT_ENTITY 注释 = "HTML的字符实体,例如: &nbsp;">
+    常量 代码 <公开 类型 = 整数 值 = @MD_TEXT_CODE 注释 = "代码标签中的文本">
+    常量 HTML <公开 类型 = 整数 值 = @MD_TEXT_HTML 注释 = "原始的HTML文本">
+    常量 LaTeX公式 <公开 类型 = 整数 值 = @MD_TEXT_LATEXMATH>
+}
+
+类 MD对齐方式 <公开 注释 = "文本的对齐方式" 折叠 @文档 = "category = \"Markdown.常量\"">
+{
+    常量 默认 <公开 类型 = 整数 值 = @MD_ALIGN_DEFAULT>
+    常量 靠左 <公开 类型 = 整数 值 = @MD_ALIGN_LEFT>
+    常量 居中 <公开 类型 = 整数 值 = @MD_ALIGN_CENTER>
+    常量 靠右 <公开 类型 = 整数 值 = @MD_ALIGN_RIGHT>
+}
+
+类 MD解析标志 <公开 注释 = "指定一些基于CommonMark规范的扩展语法,或允许一些违背规范的语法."
+        注释 = "默认值(0)时严格遵从CommonMark规范,可以用\"位或\"组合多个标志." 折叠 @文档 = "category = \"Markdown.常量\"">
 {
     常量 CommonMark规范 <公开 类型 = 整数 值 = @MD_DIALECT_COMMONMARK 注释 = "默认选项,使用CommonMark规范.">
     常量 GitHub规范 <公开 类型 = 整数 值 = @MD_DIALECT_GITHUB
@@ -70,13 +807,13 @@
             注释 = "禁止解析Markdown中原始HTML的块级元素(<h1>,<p>,<ul>,<table>,<div>等),将<和>转译成字符实体.">
     常量 禁止HTML内联元素 <公开 类型 = 整数 值 = @MD_FLAG_NOHTMLSPANS
             注释 = "禁止解析Markdown中原始HTML的内联元素(<b>,<td>,<a>,<img>,<span>等),将<和>转译成字符实体.">
-    常量 表格扩展 <公开 类型 = 整数 值 = @MD_FLAG_TABLES 注释 = "启用GitHub风格的表格扩展.">
-    常量 删除线扩展 <公开 类型 = 整数 值 = @MD_FLAG_STRIKETHROUGH 注释 = "启用GitHub风格的删除线扩展.">
+    常量 表格扩展 <公开 类型 = 整数 值 = @MD_FLAG_TABLES 注释 = "启用GitHub风格的表格扩展">
+    常量 删除线扩展 <公开 类型 = 整数 值 = @MD_FLAG_STRIKETHROUGH 注释 = "启用GitHub风格的删除线扩展">
     常量 宽松WWW自动链接 <公开 类型 = 整数 值 = @MD_FLAG_PERMISSIVEWWWAUTOLINKS
             注释 = "启用WWW自动链接. 即使没有http:等前缀,只要是www开头就识别为自动链接,例如: www.example.com">
-    常量 任务列表扩展 <公开 类型 = 整数 值 = @MD_FLAG_TASKLISTS 注释 = "启用GitHub风格的任务列表扩展.">
-    常量 LaTeX数学公式 <公开 类型 = 整数 值 = @MD_FLAG_LATEXMATHSPANS 注释 = "启用由$和$$包围的LaTeX公式.">
-    常量 维基链接 <公开 类型 = 整数 值 = @MD_FLAG_WIKILINKS 注释 = "启用Wiki风格的链接扩展.">
+    常量 任务列表扩展 <公开 类型 = 整数 值 = @MD_FLAG_TASKLISTS 注释 = "启用GitHub风格的任务列表扩展">
+    常量 LaTeX数学公式 <公开 类型 = 整数 值 = @MD_FLAG_LATEXMATHSPANS 注释 = "启用由$和$$包围的LaTeX公式">
+    常量 维基链接 <公开 类型 = 整数 值 = @MD_FLAG_WIKILINKS 注释 = "启用Wiki风格的链接扩展">
     常量 下划线扩展 <公开 类型 = 整数 值 = @MD_FLAG_UNDERLINE 注释 = "启用 __下划线__ 扩展,将取代原来的 __加粗__ 语法.">
     常量 宽松自动链接 <公开 类型 = 整数 值 = @MD_FLAG_PERMISSIVEAUTOLINKS
             注释 = "组合了\"宽松URL自动链接\"、\"宽松邮箱自动链接\"、\"宽松WWW自动链接\".">
@@ -84,7 +821,7 @@
             注释 = "组合了\"禁止HTML块级元素\"、\"禁止HTML内联元素\",不解析Markdown文本里的任何HTML元素,将<和>转译成字符实体.">
 }
 
-类 MD渲染器标志 <公开 注释 = "可以用\"位或\"组合多个标志." 折叠 @文档 = "category = \"Markdown.辅助类\"">
+类 MD渲染标志 <公开 注释 = "可以用\"位或\"组合多个标志" 折叠 @文档 = "category = \"Markdown.常量\"">
 {
     常量 调试模式 <公开 类型 = 整数 值 = @MD_HTML_FLAG_DEBUG 注释 = "调试模式,使用stderr输出错误日志(对火山而言没什么用).">
     常量 不转译实体 <公开 类型 = 整数 值 = @MD_HTML_FLAG_VERBATIM_ENTITIES 注释 = "不转译字符实体.即禁止将\"&copy;\"等字符实体转译成 ©"

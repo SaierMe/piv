@@ -1,0 +1,84 @@
+doc_format_version = 1
+project_identifier = "wutao.vproject.pc.win.1"
+
+root_filter
+{
+    child_filter
+    {
+        filter1
+        {
+            child_filter
+            {
+                filter1
+                {
+                    collapsed = true
+                    files.num_files = 16
+                    group_file_name = "*plugins\\vprj_win\\classlib\\sys\\base\\base.vgrp"
+                    name = 视窗基本类
+                }
+
+                filter2
+                {
+                    collapsed = true
+                    files.num_files = 4
+                    group_file_name = "*plugins\\vprj_win\\classlib\\sys\\mfc_ui_base\\mfc_ui_base.vgrp"
+                    name = MFC界面基本类
+                }
+
+                filter3
+                {
+                    collapsed = true
+                    files.num_files = 1
+                    group_file_name = "*plugins\\vprj_win\\classlib\\sys\\mfc_ui_grid\\mfc_ui_grid.vgrp"
+                    name = MFC表格组件
+                }
+
+                filter4
+                {
+                    collapsed = true
+                    files.num_files = 1
+                    group_file_name = "*plugins\\vprj_win\\classlib\\sys\\mfc_control_ext1\\mfc_control_ext1.vgrp"
+                    name = MFC扩展界面支持类库1
+                }
+
+                filter5
+                {
+                    collapsed = true
+                    files.num_files = 30
+                    group_file_name = "*plugins\\vprj_win\\classlib\\user\\piv\\piv_base.vgrp"
+                    name = PIV基础类
+                }
+
+                num_child_filters = 5
+            }
+
+            collapsed = true
+            name = 模块
+        }
+
+        num_child_filters = 1
+    }
+
+    collapsed = true
+
+    files
+    {
+        file1.file_name = "src\\main.wsv"
+        num_files = 1
+    }
+
+    name = PE查看器
+    type = project
+}
+
+settings
+{
+    project
+    {
+        app_desc = PE文件解析工具
+        app_name = PE查看器
+        author_name = Xelloss
+        legal_copy_right = "© Piv.Ink All Rights Reserved."
+        version_name = "1.0.0.0"
+    }
+}
