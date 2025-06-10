@@ -854,7 +854,7 @@ public:
         int32_t i = 0;
         for (auto it = params.cbegin(); it != params.cend(); it++, i++)
         {
-            strDump.AddFormatLine(L"%d. %s = %s", i, PivAny2W{it->first}.c_str(), PivAny2W{it->second}.c_str());
+            strDump.AddFormatLine(L"%d. %s = %s", i, PivAny2W<false>{it->first}.c_str(), PivAny2W<false>{it->second}.c_str());
         }
     }
 
@@ -1114,7 +1114,7 @@ private:
     template <typename T>
     inline void AddKey(T&& key, bool utf8 = true)
     {
-        PivAny2W str{key};
+        PivAny2W<true> str{key};
         AddKey(str.c_str(), utf8, str.size());
     }
 
@@ -1143,7 +1143,7 @@ private:
     template <typename T>
     inline void AddValue(T&& value, bool utf8 = true)
     {
-        PivAny2W str{value};
+        PivAny2W<true> str{value};
         AddValue(str.c_str(), utf8, str.size());
     }
 
@@ -1244,7 +1244,7 @@ public:
     template <typename T>
     inline PivUrlCreater& SetHost(T&& path)
     {
-        PivAny2W text{path};
+        PivAny2W<true> text{path};
         return SetHost(text.c_str(), text.size());
     }
 
@@ -1285,7 +1285,7 @@ public:
     template <typename T>
     inline PivUrlCreater& SetPath(T&& path)
     {
-        PivAny2W text{path};
+        PivAny2W<true> text{path};
         return SetPath(text.c_str(), text.size());
     }
 
