@@ -1924,7 +1924,7 @@ public:
     {
         m_weak_doc.reset();
         m_shared_doc = std::make_shared<piv_yyjson_mut_doc>();
-        m_val = nullptr;
+        m_val = m_shared_doc->root();
     }
 
     inline bool parse_doc(const char* dat, size_t len, yyjson_read_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_read_err* err = nullptr)
