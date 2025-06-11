@@ -388,7 +388,6 @@ public:
     piv_yyjson_val()
     {
         m_shared_doc = std::make_shared<piv_yyjson_doc>();
-        m_val = nullptr;
     }
 
     piv_yyjson_val(const piv_yyjson_val& rhs)
@@ -447,6 +446,11 @@ public:
         return (m_val == rhs.m_val) ? true : yyjson_equals(m_val, rhs.m_val);
     }
 
+    virtual void ResetObject() override
+    {
+        clear();
+    }
+
     virtual void GetDumpString(CWString& strDump, INT nMaxDumpSize) override
     {
         strDump = to_vol_str(0, piv_yyjson_alc::instance().pref());
@@ -489,10 +493,19 @@ public:
 
     inline bool parse_doc(const char* dat, size_t len, yyjson_read_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_read_err* err = nullptr)
     {
-        _doc()->free_doc();
-        _doc()->doc = yyjson_read_opts((char*)dat, len, flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
-        m_val = _doc()->root();
-        return !_doc()->empty();
+        yyjson_doc* imut_doc = yyjson_read_opts((char*)dat, len, flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
+        if (imut_doc)
+        {
+            m_shared_doc = std::make_shared<piv_yyjson_doc>(imut_doc);
+            m_val = m_shared_doc->root();
+            return true;
+        }
+        else
+        {
+            m_shared_doc = std::make_shared<piv_yyjson_doc>();
+            m_val = nullptr;
+            return false;
+        }
     }
 
     template <typename T>
@@ -504,14 +517,23 @@ public:
 
     bool parse_file(const wchar_t* filename, yyjson_read_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_read_err* err = nullptr)
     {
-        _doc()->free_doc();
         FILE* fp = nullptr;
         _wfopen_s(&fp, filename, L"rb");
-        _doc()->doc = yyjson_read_fp(fp, flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
-        m_val = _doc()->root();
+        yyjson_doc* imut_doc = yyjson_read_fp(fp, flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
         if (fp)
             fclose(fp);
-        return !_doc()->empty();
+        if (imut_doc)
+        {
+            m_shared_doc = std::make_shared<piv_yyjson_doc>(imut_doc);
+            m_val = m_shared_doc->root();
+            return true;
+        }
+        else
+        {
+            m_shared_doc = std::make_shared<piv_yyjson_doc>();
+            m_val = nullptr;
+            return false;
+        }
     }
 
     bool write_file(const wchar_t* filename, yyjson_write_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_write_err* err = nullptr)
@@ -926,16 +948,28 @@ public:
         piv_yyjson_mut_doc()
         {
             doc = yyjson_mut_doc_new(piv_yyjson_alc::instance().pref());
+            yyjson_mut_doc_set_root(doc, yyjson_mut_null(doc));
         }
 
         piv_yyjson_mut_doc(const yyjson_alc* alc)
         {
             doc = yyjson_mut_doc_new(alc ? alc : piv_yyjson_alc::instance().pref());
+            yyjson_mut_doc_set_root(doc, yyjson_mut_null(doc));
         }
 
         piv_yyjson_mut_doc(yyjson_mut_doc* rhs)
         {
             doc = rhs;
+        }
+
+        piv_yyjson_mut_doc(yyjson_doc* rhs, const yyjson_alc* alc = nullptr)
+        {
+            doc = yyjson_doc_mut_copy(rhs, alc ? alc : piv_yyjson_alc::instance().pref());
+            if (!doc)
+            {
+                doc = yyjson_mut_doc_new(alc ? alc : piv_yyjson_alc::instance().pref());
+                yyjson_mut_doc_set_root(doc, yyjson_mut_null(doc));
+            }
         }
 
         ~piv_yyjson_mut_doc()
@@ -1546,8 +1580,7 @@ public:
     piv_yyjson_mut_val()
     {
         m_shared_doc = std::make_shared<piv_yyjson_mut_doc>();
-        m_val = yyjson_mut_null(m_shared_doc->doc);
-        m_shared_doc->set_root(m_val);
+        m_val = m_shared_doc->root();
     }
 
     ~piv_yyjson_mut_val() {}
@@ -1557,6 +1590,12 @@ public:
         m_shared_doc = rhs.m_shared_doc;
         m_weak_doc = rhs.m_weak_doc;
         m_val = rhs.m_val;
+    }
+
+    piv_yyjson_mut_val(yyjson_doc* rhs)
+    {
+        m_shared_doc = std::make_shared<piv_yyjson_mut_doc>(rhs);
+        m_val = m_shared_doc->root();
     }
 
     piv_yyjson_mut_val(const std::shared_ptr<piv_yyjson_mut_doc>& doc, yyjson_mut_val* val)
@@ -1713,6 +1752,11 @@ public:
     bool operator==(const piv_yyjson_mut_val& rhs) const noexcept
     {
         return (m_val == rhs.m_val) ? true : yyjson_mut_equals(m_val, rhs.m_val);
+    }
+
+    virtual void ResetObject() override
+    {
+        clear();
     }
 
     virtual void GetDumpString(CWString& strDump, INT nMaxDumpSize) override
@@ -1885,15 +1929,22 @@ public:
 
     inline bool parse_doc(const char* dat, size_t len, yyjson_read_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_read_err* err = nullptr)
     {
-        _doc()->free_doc();
-        yyjson_doc* imut_doc = yyjson_read_opts((char*)dat, len, flag, alc ? alc : piv_yyjson_alc::instance().pref(), err);
+        if (!alc)
+            alc = piv_yyjson_alc::instance().pref();
+        yyjson_doc* imut_doc = yyjson_read_opts((char*)dat, len, flag, alc, err);
         if (imut_doc)
         {
-            _doc()->copy_doc(imut_doc, alc);
+            m_shared_doc = std::make_shared<piv_yyjson_mut_doc>(imut_doc, alc);
+            m_val = m_shared_doc->root();
             yyjson_doc_free(imut_doc);
+            return true;
         }
-        m_val = _doc()->root();
-        return !_doc()->empty();
+        else
+        {
+            m_shared_doc = std::make_shared<piv_yyjson_mut_doc>();
+            m_val = m_shared_doc->root();
+            return false;
+        }
     }
 
     template <typename T>
@@ -1905,21 +1956,26 @@ public:
 
     bool parse_file(const wchar_t* filename, yyjson_read_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_read_err* err = nullptr)
     {
-        _doc()->free_doc();
         if (!alc)
             alc = piv_yyjson_alc::instance().pref();
         FILE* fp = nullptr;
         _wfopen_s(&fp, filename, L"rb");
         yyjson_doc* imut_doc = yyjson_read_fp(fp, flag, alc, err);
-        if (imut_doc)
-        {
-            _doc()->copy_doc(imut_doc, alc);
-            yyjson_doc_free(imut_doc);
-        }
-        m_val = _doc()->root();
         if (fp)
             fclose(fp);
-        return !_doc()->empty();
+        if (imut_doc)
+        {
+            m_shared_doc = std::make_shared<piv_yyjson_mut_doc>(imut_doc, alc);
+            m_val = m_shared_doc->root();
+            yyjson_doc_free(imut_doc);
+            return true;
+        }
+        else
+        {
+            m_shared_doc = std::make_shared<piv_yyjson_mut_doc>();
+            m_val = m_shared_doc->root();
+            return false;
+        }
     }
 
     bool write_file(const wchar_t* filename, yyjson_write_flag flag = 0, const yyjson_alc* alc = nullptr, yyjson_write_err* err = nullptr)
@@ -2037,6 +2093,12 @@ public:
     inline piv_yyjson_mut_val& set_arr()
     {
         yyjson_mut_set_arr(m_val);
+        return *this;
+    }
+
+    inline piv_yyjson_mut_val& set_null()
+    {
+        yyjson_mut_set_null(m_val);
         return *this;
     }
 

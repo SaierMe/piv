@@ -147,6 +147,11 @@ public:
         params.clear();
     }
 
+    virtual void ResetObject() override
+    {
+        Clear();
+    }
+
     virtual void GetDumpString(CWString& strDump, INT nMaxDumpSize) override
     {
         strDump.AddFormatText(L"<URL地址解析类> 解析结果:\r\n1. 协议: %s\r\n2. 账户: %s\r\n3. 密码: %s\r\n4. 域名: %s\r\n5. 端口: %s\r\n6. 路径: %s\r\n7. 参数: %s\r\n8. 段落: %s\r\n",
@@ -657,6 +662,11 @@ public:
         return *this;
     }
 
+    virtual void ResetObject() override
+    {
+        Clear();
+    }
+
     /**
      * @brief 取展示内容(调试输出)
      * @param strDump 展示内容
@@ -841,6 +851,11 @@ public:
         form_str = std::move(other.form_str);
         params = std::move(other.params);
         return *this;
+    }
+
+    virtual void ResetObject() override
+    {
+        Clear();
     }
 
     /**
@@ -1304,6 +1319,11 @@ public:
         AddKey(std::forward<K>(key), utf8);
         AddValue(std::forward<V>(value), utf8);
         return *this;
+    }
+
+    virtual void ResetObject() override
+    {
+        Clear();
     }
 
     virtual void GetDumpString(CWString& strDump, INT nMaxDumpSize) override
