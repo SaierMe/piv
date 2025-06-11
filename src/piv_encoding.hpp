@@ -1182,7 +1182,8 @@ static bool is_utf8(const void* input, size_t length)
 }
 
 /**
- * @brief 校验文本是否为UTF16编码
+ * @brief 校验文本是否为UTF-16编码
+ * @note 不能跟UTF-8编码严格区分
  * @param input 欲校验的文本指针
  * @param length 欲校验的数据长度(字节单位)
  * @return
@@ -3117,7 +3118,7 @@ public:
             m_count = static_cast<size_t>(rhs.GetSize());
             m_is_ntbs = m_data[m_count] == '\0';
         }
-        if (piv::encoding::is_utf16(rhs.GetPtr(), static_cast<size_t>(rhs.GetSize())))
+        else if (piv::encoding::is_utf16(rhs.GetPtr(), static_cast<size_t>(rhs.GetSize())))
         {
             convert(reinterpret_cast<const wchar_t*>(rhs.GetPtr()), static_cast<size_t>(rhs.GetSize() / 2));
         }
@@ -3182,7 +3183,10 @@ public:
     inline void convert_with_check(const char* rhs, size_t count = -1)
     {
         if (rhs == nullptr || count == 0)
+        {
             clear();
+            return;
+        }
         if (count == -1)
             count = strlen(rhs);
         if (piv::encoding::is_utf8(rhs, count))
@@ -3338,7 +3342,7 @@ public:
         {
             str.assign(reinterpret_cast<const char*>(rhs.GetPtr()), static_cast<size_t>(rhs.GetSize()));
         }
-        if (piv::encoding::is_utf16(rhs.GetPtr(), static_cast<size_t>(rhs.GetSize())))
+        else if (piv::encoding::is_utf16(rhs.GetPtr(), static_cast<size_t>(rhs.GetSize())))
         {
             piv::encoding::W2Uex(str, reinterpret_cast<const wchar_t*>(rhs.GetPtr()), static_cast<size_t>(rhs.GetSize() / 2));
         }
@@ -3400,7 +3404,10 @@ public:
     inline void convert_with_check(const char* rhs, size_t count = -1)
     {
         if (rhs == nullptr || count == 0)
+        {
             clear();
+            return;
+        }
         if (count == -1)
             count = strlen(rhs);
         if (piv::encoding::is_utf8(rhs, count))
@@ -3547,7 +3554,7 @@ public:
             m_ptr.reset(new std::wstring{});
             piv::encoding::U2Wex(*m_ptr, reinterpret_cast<const char*>(rhs.GetPtr()), static_cast<size_t>(rhs.GetSize()));
         }
-        if (piv::encoding::is_utf16(rhs.GetPtr(), static_cast<size_t>(rhs.GetSize())))
+        else if (piv::encoding::is_utf16(rhs.GetPtr(), static_cast<size_t>(rhs.GetSize())))
         {
             m_data = reinterpret_cast<const wchar_t*>(rhs.GetPtr());
             m_count = static_cast<size_t>(rhs.GetSize()) / 2;
@@ -3764,7 +3771,7 @@ public:
             return;
         if (piv::encoding::is_utf8(rhs.GetPtr(), static_cast<size_t>(rhs.GetSize())))
             piv::encoding::U2Wex(str, reinterpret_cast<const char*>(rhs.GetPtr()), static_cast<size_t>(rhs.GetSize()));
-        if (piv::encoding::is_utf16(rhs.GetPtr(), static_cast<size_t>(rhs.GetSize())))
+        else if (piv::encoding::is_utf16(rhs.GetPtr(), static_cast<size_t>(rhs.GetSize())))
             piv::edit::assign(str, reinterpret_cast<const wchar_t*>(rhs.GetPtr()), static_cast<size_t>(rhs.GetSize()) / 2);
         else
             piv::encoding::A2Wex(str, reinterpret_cast<const char*>(rhs.GetPtr()), static_cast<size_t>(rhs.GetSize()), code_page);
@@ -3820,7 +3827,10 @@ public:
     inline void convert_with_check(const char* rhs, size_t count = -1)
     {
         if (rhs == nullptr || count == 0)
+        {
             clear();
+            return;
+        }
         if (count == -1)
             count = strlen(rhs);
         if (piv::encoding::is_utf8(rhs, count))
@@ -3965,7 +3975,7 @@ public:
             m_ptr.reset(new std::string{});
             piv::encoding::U2Aex(*m_ptr, reinterpret_cast<const char*>(rhs.GetPtr()), static_cast<size_t>(rhs.GetSize()), code_page);
         }
-        if (piv::encoding::is_utf16(rhs.GetPtr(), static_cast<size_t>(rhs.GetSize())))
+        else if (piv::encoding::is_utf16(rhs.GetPtr(), static_cast<size_t>(rhs.GetSize())))
             convert(reinterpret_cast<const wchar_t*>(rhs.GetPtr()), static_cast<size_t>(rhs.GetSize() / 2));
         else
         {
@@ -4182,7 +4192,7 @@ public:
         {
             piv::encoding::U2Aex(str, reinterpret_cast<const char*>(rhs.GetPtr()), static_cast<size_t>(rhs.GetSize()), code_page);
         }
-        if (piv::encoding::is_utf16(rhs.GetPtr(), static_cast<size_t>(rhs.GetSize())))
+        else if (piv::encoding::is_utf16(rhs.GetPtr(), static_cast<size_t>(rhs.GetSize())))
             convert(reinterpret_cast<const wchar_t*>(rhs.GetPtr()), static_cast<size_t>(rhs.GetSize() / 2));
         else
         {
@@ -4242,7 +4252,10 @@ public:
     inline void convert_with_check(const char* rhs, size_t count = -1)
     {
         if (rhs == nullptr || count == 0)
+        {
             clear();
+            return;
+        }
         if (count == -1)
             count = strlen(rhs);
         if (piv::encoding::is_ascii(rhs, count) || !piv::encoding::is_utf8(rhs, count))

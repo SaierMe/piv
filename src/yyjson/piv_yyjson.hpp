@@ -453,7 +453,10 @@ public:
 
     virtual void GetDumpString(CWString& strDump, INT nMaxDumpSize) override
     {
-        strDump = to_vol_str(0, piv_yyjson_alc::instance().pref());
+        if (m_val)
+            strDump = to_vol_str(0, piv_yyjson_alc::instance().pref());
+        else
+            strDump.SetText(L"nullptr");
     }
 
     virtual void LoadFromStream(CVolBaseInputStream& stream)
@@ -1761,7 +1764,10 @@ public:
 
     virtual void GetDumpString(CWString& strDump, INT nMaxDumpSize) override
     {
-        strDump = to_vol_str(0, piv_yyjson_alc::instance().pref());
+        if (m_val)
+            strDump = to_vol_str(0, piv_yyjson_alc::instance().pref());
+        else
+            strDump.SetText(L"nullptr");
     }
 
     virtual void LoadFromStream(CVolBaseInputStream& stream)
